@@ -1,9 +1,9 @@
 from logger_factory import logger
-import utils
+import config, utils
 import pandas as pd
 import os
 import glob
-from psycopg2.errors import DuplicateDatabase
+from psycopg2.errors import DuplicateSchema
 
 
 class DatabaseImporter:
@@ -11,18 +11,35 @@ class DatabaseImporter:
         self.state = state
         self.system_type = system_type
         self.file_location = file_location
-        self.db_name = self.state.upper() + '_' + self.system_type.upper() 
-        self.create_db()
+        # self.db_name = self.state.upper() + '_' + self.system_type.upper() 
+        # self.create_db()
+        self.schema = self.state.upper() + '_' + self.system_type.upper() 
+        self.create_schema()
         
 
-    def create_db(self):
-        conn = utils.connect_db()
+    # def create_db(self):
+    #     conn = utils.connect_db()
+    #     cur = conn.cursor()
+    #     try:
+    #         cur.execute('create database "' + self.db_name + '"')
+    #         logger.info('Created database %s', self.db_name)
+    #     except DuplicateDatabase:
+    #         logger.info('Database %s already exists', self.db_name)
+
+    def create_schema(self):
+        conn = utils.connect_db(config.db_name)
         cur = conn.cursor()
         try:
-            cur.execute('create database "' + self.db_name + '"')
-            logger.info('Created database %s', self.db_name)
-        except DuplicateDatabase:
-            logger.info('Database %s already exists', self.db_name)
+            cur.execute('create schema "' + self.schema + '" AUTHORIZATION postgres')
+            logger.info('Created schema %s', self.schema)
+        except DuplicateSchema:
+            logger.info('Schema %s already exists', self.schema)
+
+        sql = f'grant all on schema "{self.schema}" TO {config.db_user}'
+        cur.execute(sql)
+
+        cur.close()
+        conn.close()
 
         
     def get_table_name_from_file_name(self, file_path):
@@ -47,7 +64,7 @@ class DatabaseImporter:
         logger.debug(f'{file_path} read into dataframe')    
 
         if not engine:
-            engine = utils.get_engine(self.db_name)        
+            engine = utils.get_engine(schema=self.schema)        
         df.to_sql(table_name, engine, index=False, if_exists='replace')
         logger.info('Created table %s', table_name)
 
@@ -63,8 +80,8 @@ class DatabaseImporter:
 
 
     def save_files_to_db(self):
-        engine = utils.get_engine(self.db_name)
+        engine = utils.get_engine(schema=self.schema)
         file_list = self.get_files()
         for file in file_list:
             self.save_file_to_db(file, engine=engine)
-            logger.info('Saved %s to %s', file, self.db_name)
+            logger.info('Saved %s to %s', file, self.schema)
