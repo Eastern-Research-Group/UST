@@ -110,20 +110,22 @@ class Analyzer:
 				  order by 1"""
 		self.cur.execute(sql, (self.db_mapping_id, ))
 		df = pd.DataFrame(self.cur.fetchall(), columns=['state_value'])
+		df['mapping'] = ''
 
-		sheet_name = 'New ' + self.values_table + ' to map'
-		if os.path.exists(self.report_file_path):
-		    with pd.ExcelWriter(self.report_file_path, mode='a', if_sheet_exists='replace') as writer:
-		        df.to_excel(writer, index=False, sheet_name=sheet_name) 
-		else:
-		    with pd.ExcelWriter(self.report_file_path, mode='w') as writer:
-		        df.to_excel(writer, index=False, sheet_name=sheet_name) 
-		logger.info('Wrote data to %s on worksheet %s; %s rows inserted', self.report_file_path, sheet_name, len(df))
+		if len(df) > 0:
+			sheet_name = 'New ' + self.values_table + ' to map'
+			if os.path.exists(self.report_file_path):
+			    with pd.ExcelWriter(self.report_file_path, mode='a', if_sheet_exists='replace') as writer:
+			        df.to_excel(writer, index=False, sheet_name=sheet_name) 
+			else:
+			    with pd.ExcelWriter(self.report_file_path, mode='w') as writer:
+			        df.to_excel(writer, index=False, sheet_name=sheet_name) 
+			logger.info('Wrote data to %s on worksheet %s; %s rows inserted', self.report_file_path, sheet_name, len(df))
 
 
 if __name__ == '__main__':
 	a = Analyzer(state, ust_or_lust)
-	elements_to_check = ['SubstanceReleased1','CauseOfRelease1','SourceOfRelease1','RemediationStrategy1']
+	elements_to_check = ['SubstanceReleased1','CauseOfRelease1','SourceOfRelease1']
 	for e in elements_to_check:
 		a.analyze(e)
 	a.disconnect_db()

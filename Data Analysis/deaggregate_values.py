@@ -52,7 +52,8 @@ class Analyzer:
 	    sql = f"""create table "{self.deagg_table_name}" (
 	                id int generated always as identity not null primary key,
 	                "{self.key_column}" text,
-	                "{self.column_name}" text)"""
+	                "{self.column_name}" text,
+	                epa_value text)"""
 	    self.cur.execute(sql)
 	    logger.info('Table %s created', self.deagg_table_name)
 
@@ -100,7 +101,7 @@ class Analyzer:
 
 if __name__ == '__main__':
 	a = Analyzer(state, ust_or_lust, key_column)
-	elements_to_check = ['SubstanceReleased1','CauseOfRelease1','SourceOfRelease1','RemediationStrategy1']
+	elements_to_check = ['SubstanceReleased1','CauseOfRelease1','SourceOfRelease1']
 	for e in elements_to_check:
 		a.deagg(e)
 	a.disconnect_db()
