@@ -7,24 +7,16 @@ from psycopg2.errors import DuplicateSchema
 
 
 class DatabaseImporter:
-    def __init__(self, state, system_type, file_location):
+    def __init__(self, state, system_type, file_location, overwrite_table=True):
         self.state = state
         self.system_type = system_type
         self.file_location = file_location
-        # self.db_name = self.state.upper() + '_' + self.system_type.upper() 
-        # self.create_db()
+        self.overwrite_table = overwrite_table
         self.schema = self.state.upper() + '_' + self.system_type.upper() 
         self.create_schema()
-        
-
-    # def create_db(self):
-    #     conn = utils.connect_db()
-    #     cur = conn.cursor()
-    #     try:
-    #         cur.execute('create database "' + self.db_name + '"')
-    #         logger.info('Created database %s', self.db_name)
-    #     except DuplicateDatabase:
-    #         logger.info('Database %s already exists', self.db_name)
+        self.existing_tables = []
+        self.bad_file_list = []
+    
 
     def create_schema(self):
         conn = utils.connect_db(config.db_name)
@@ -41,6 +33,21 @@ class DatabaseImporter:
         cur.close()
         conn.close()
 
+
+    def set_existing_tables(self):
+        conn = utils.connect_db(config.db_name)
+        cur = conn.cursor()
+
+        sql = "select table_name from information_schema.tables where upper(table_schema) = upper(%s) order by 1"
+        cur.execute(sql, (self.schema,))
+        rows = cur.fetchall()
+        self.existing_tables = [row[0] for row in rows]
+
+        cur.close()
+        conn.close()
+
+        logger.info('The following tables already exist in schema %s: %s', self.schema, self.existing_tables)
+        
         
     def get_table_name_from_file_name(self, file_path):
         table_name = file_path.rsplit('\\', 1)[1]
@@ -50,10 +57,19 @@ class DatabaseImporter:
         
     def save_file_to_db(self, file_path, engine=None):
         table_name = self.get_table_name_from_file_name(file_path)
+        if table_name in self.existing_tables and not self.overwrite_table:
+            logger.warning('Table %s already exists in the database and will not be imported because the overwrite_table flag is set to False', table_name)
+            return True
+
         logger.info('New table name will be %s', table_name)
 
         if file_path[-4:] == 'xlsx':
-            df = pd.read_excel(file_path)    
+            try:
+                df = pd.read_excel(file_path)   
+            except ValueError as e:
+                logger.error('Error opening %s; skipping: %s', filepath, e) 
+                self.bad_file_list.append(table_name)
+                return False
         elif file_path[-3:] == 'csv':
             df = pd.read_csv(file_path, encoding='ansi', low_memory=False)
         elif file_path[-3:] == 'txt':
@@ -64,13 +80,21 @@ class DatabaseImporter:
         logger.debug(f'{file_path} read into dataframe')    
 
         if not engine:
-            engine = utils.get_engine(schema=self.schema)        
-        df.to_sql(table_name, engine, index=False, if_exists='replace')
-        logger.info('Created table %s', table_name)
+            engine = utils.get_engine(schema=self.schema)    
+        if self.overwrite_table:    
+            df.to_sql(table_name, engine, index=False, if_exists='replace')
+            logger.info('Created table %s', table_name)
+        else:
+            try:
+                df.to_sql(table_name, engine, index=False)
+                logger.info('Created table %s', table_name)       
+            except error as e:
+                self.bad_file_list.append(table_name)
+                logger.error('Unable to load table %s; adding to bad_file_list: %s: %s', table_name, e)
 
+        return True
 
     def get_files(self):
-        print(f'{self.file_location}/*.txt')
         file_list = []
         file_list = glob.glob(f'{self.file_location}/*.csv')
         file_list.extend(glob.glob(f'{self.file_location}/*.xlsx'))
@@ -80,8 +104,14 @@ class DatabaseImporter:
 
 
     def save_files_to_db(self):
+        if not self.overwrite_table:
+            self.set_existing_tables()
+
         engine = utils.get_engine(schema=self.schema)
         file_list = self.get_files()
         for file in file_list:
             self.save_file_to_db(file, engine=engine)
-            logger.info('Saved %s to %s', file, self.schema)
+            # logger.info('Saved %s to %s', file, self.schema)
+            
+        for table in self.bad_file_list:
+            logger.warning('%s not saved to database due to error!!!', table)

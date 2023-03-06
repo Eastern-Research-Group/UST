@@ -1,7 +1,8 @@
 from import_service import ImportService
+import config
 
 state = 'SD' 
-file_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\UST\State Data\\' + state + '\\'
+file_path = config.local_ust_path + state + '\\'
 ust_folder = file_path + 'UST'
 lust_folder = file_path + 'LUST'
 

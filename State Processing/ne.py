@@ -1,56 +1,50 @@
-import pandas as pd
-import os
-import glob
+from import_service import ImportService
 import utils
 
-data_path = r'C:\Users\RMyers\OneDrive - Eastern Research Group\Other Projects\UST\State Data\NE\\'
-db_name = 'NE_UST'
+state = 'NE' 
+file_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\UST\State Data\\' + state + '\\'
+# ust_folder = file_path + 'UST'
+ust_folder = None
+lust_folder =  file_path + 'LUST' 
 
-def get_table_name_from_file_name(file_path):
-    table_name = file_path.rsplit('\\', 1)[1]
-    table_name = table_name.replace(' ','_').replace('.xlsx','').replace('.csv','')
-    return table_name
+
+import_service = ImportService()
+
+def import_files():
+    if lust_folder:
+        import_service.import_lust(state, lust_folder, overwrite_table=False)
+    if ust_folder:
+        import_service.import_ust(state, ust_folder, overwrite_table=False)
+
     
-
-def save_file_to_db(file_path):
-    table_name = get_table_name_from_file_name(file_path)
-    engine = utils.get_engine(db_name)
-    
-    if file_path[-4:] == 'xlsx':
-        df = pd.read_excel(file_path)    
-    elif file_path[-3:] == 'csv':
-        df = pd.read_csv(file_path, encoding='ansi', low_memory=False)
-    else:
-        utils.msg_and_log(f'{file_path} is neither an xlsx or csv so aborting...')
-        sys.exit()
-    
-    df.to_sql(table_name, engine, index=False, if_exists='replace')
-    utils.msg_and_log(f'Created table {table_name}')
-
-
-def get_files(path, extension='xlsx'):
-    file_list = glob.glob(f'{path}/*.{extension}')
-    return file_list
-
-
-def save_files_to_db(file_list):
-    for file in file_list:
-        save_file_to_db(file)
-
-def main():
-    conn = utils.connect_to_db()
+def deagg_substances():    
+    conn = utils.connect_db()
     cur = conn.cursor()
-    
-    
+
+    sql = """create table "NE_LUST".substance_deagg (
+                facility_id varchar(50) not null primary key,
+                state_substance varchar(400), 
+                substance1 varchar(100),
+                substance2 varchar(100), 
+                substance3 varchar(100), 
+                substance4 varchar(100), 
+                substance5 varchar(100))"""
+    cur.execute(sql)
+
+    sql = """insert into "NE_LUST".substance_deagg (facility_id, state_substance)
+             select distinct "FacilityID", "SubstanceReleased1" from "NE_LUST".lust 
+             where "FacilityID" is not null"""
+    cur.execute(sql)
+    conn.commit()
+
     cur.close()
     conn.close()
-    
-
-if __name__ == '__main__':
-    # save_file_to_db(get_files(reg_path, 'xlsx'))
-    save_files_to_db(get_files(data_path, 'csv')) 
-    # print(get_table_name_from_file_name(data_path + 'UST Regulated Facilities 20211217.xlsx'))
 
 
+
+
+if __name__ == '__main__':       
+    # import_files()
+    deagg_substances()
 
 

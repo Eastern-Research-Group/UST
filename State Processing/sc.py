@@ -1,9 +1,12 @@
 from import_service import ImportService
+import config
 
 state = 'SC' 
-file_path = r'C:\Users\RMyers\OneDrive - Eastern Research Group\Other Projects\UST\State Data\\' + state + '\\'
-ust_folder = file_path + 'Regulatory & Compliance\\'
-lust_folder = file_path + 'Technical\\'
+file_path = config.local_ust_path + state + '\\'
+# ust_folder = file_path + 'Regulatory & Compliance\\'
+# lust_folder = file_path + 'Technical\\'
+ust_folder = None
+lust_folder = file_path + 'LUST'
 
 import_service = ImportService()
 
@@ -15,3 +18,4 @@ def import_files():
     
 if __name__ == '__main__':       
     import_files()
+

@@ -3,8 +3,9 @@ import csv
 import utm
 import pyproj
     
-sourcefile      = "../data/_tblGeoSite__202211171348.csv";
-targetfile      = "../data/converted.csv";
+# sourcefile      = "../data/_tblGeoSite__202211171348.csv";
+sourcefile = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\UST\State Data\NY\NY_utm_conversion.csv'
+targetfile      = "../data/NY_converted.csv";
 
 easting_column  = "EASTING";
 northing_column = "NORTHING";
