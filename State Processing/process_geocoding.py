@@ -1,6 +1,8 @@
 from logger_factory import logger
+import config
 import utils
-import psycopg2.errors
+
+import pandas.io.sql as sqlio
 
 
 def get_col_position(ust_or_lust):
@@ -120,11 +122,33 @@ def update_data(state, ust_or_lust, data_table=None):
 	conn.close()
 
 
+def export(state, ust_or_lust):
+	schema = state.upper() + '_' + ust_or_lust.upper()
+
+	conn = utils.connect_db()
+	cur = conn.cursor()
+
+	sql = f'select * from "{schema}".v_{ust_or_lust.lower()}_geocode'
+	if ust_or_lust.lower() == 'ust':
+		sql = sql + ' order by "FacilityID", "TankID", "CompartmentID"'
+	else:
+		sql = sql + ' order by "FacilityID", "LUSTID"'
+
+	df = sqlio.read_sql_query(sql, utils.get_engine())
+	file_path = config.local_ust_path + state.upper() + '/' 
+	file_name = state.upper() + '_' + ust_or_lust.upper() + '_geocoded.xlsx'
+	sheet_name = state.upper() + '_' + ust_or_lust.upper()
+	df.to_excel(file_path + file_name, sheet_name=sheet_name, index=False, freeze_panes=(1,0))
+
+	cur.close()
+	conn.close()
+
 
 def main(state, ust_or_lust, base_table):
-	create_view(state, ust_or_lust)
-	update_data(state, ust_or_lust, base_table)
-	
+	# create_view(state, ust_or_lust)
+	# update_data(state, ust_or_lust, base_table)
+	export(state, ust_or_lust)
+
 
 if __name__ == '__main__':   
 	state = 'TX'

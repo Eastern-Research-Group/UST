@@ -28,7 +28,7 @@ def get_engine(db_name=config.db_name, schema=None):
     # engine = create_engine('postgresql://username:password@localhost:5432/mydatabase')
     try:
         engine = create_engine(config.db_connection_string + db_name, connect_args={'options': f'-csearch_path="{schema}"'})
-        logger.info('Created database engine')
+        # logger.info('Created database engine')
         return engine
     except Exception as e:
         logger.error('Error creating database engine: %s', e)
