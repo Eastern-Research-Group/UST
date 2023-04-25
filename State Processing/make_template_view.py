@@ -142,6 +142,6 @@ def main(state, ust_or_lust, base_view_name=None):
 
 
 if __name__ == '__main__':   
-	state = 'SD'
+	state = 'AL'
 	ust_or_lust = 'lust'
 	main(state, ust_or_lust)

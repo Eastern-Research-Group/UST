@@ -64,7 +64,7 @@ def multiple_states(states, ust_or_lust):
 
 
 if __name__ == '__main__':   
-	state = 'TN'
+	state = 'TX'
 	ust_or_lust = 'ust'
 	main(state, ust_or_lust)
 

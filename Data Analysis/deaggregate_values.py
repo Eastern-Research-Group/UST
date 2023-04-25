@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 import os.path
 
-state = 'CA'
+state = 'TN'
 ust_or_lust = 'LUST'
 key_column = 'GLOBAL_ID'
 

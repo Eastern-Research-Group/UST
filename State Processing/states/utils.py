@@ -6,11 +6,11 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import re
 
 
-def connect_db(db_name=config.db_name, schema='public'):
+def connect_db(db_name='ust', schema='public'):
     try:
         options = f'-csearch_path="{schema}"'
         conn = psycopg2.connect(
-                    host=config.db_ip,
+                    host='localhost',
                     user=config.db_user,
                     password=config.db_password,
                     dbname=db_name,
@@ -48,7 +48,6 @@ def get_view_sql(view_name):
 def process_view_sql(sql):
     i = sql.find('FROM ')
     to_sql = sql[:i].replace('SELECT DISTINCT ','').replace('SELECT ','')
-    to_sql = to_sql.replace('SELECT DISTINCT\n','').replace('SELECT\n','')
     i2 = sql.find('ORDER BY ')
     from_sql = sql[i:i2]
     return (to_sql, from_sql)
