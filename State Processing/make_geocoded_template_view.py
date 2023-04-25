@@ -24,7 +24,7 @@ def get_col_position(ust_or_lust):
 	return col_pos
 
 
-def main(state, ust_or_lust, base_view_name=None):
+def create_view(state, ust_or_lust):
 	schema = state.upper() + '_' + ust_or_lust.upper()
 	new_view_name = '"' + schema + '".v_' + ust_or_lust.lower() + '_geocode'
 
@@ -71,8 +71,6 @@ def main(state, ust_or_lust, base_view_name=None):
 	from_sql = from_sql + '(select max(control_id) from public.' + ust_or_lust.lower() + "_control where state = '" + state.upper() + "')"
 	view_sql = view_sql + from_sql
 
-	print(view_sql)
-
 	try:
 		cur.execute('drop view ' + new_view_name)
 		logger.info('Dropped %s', new_view_name)
@@ -86,7 +84,50 @@ def main(state, ust_or_lust, base_view_name=None):
 	conn.close()
 
 
+def update_data(state, ust_or_lust, data_table=None):
+	schema = state.upper() + '_' + ust_or_lust.upper()
+
+	conn = utils.connect_db()
+	cur = conn.cursor()
+
+
+	if not data_table:
+		sql = """select table_name from information_schema.tables 
+		         where table_schema = %s and table_type = 'BASE TABLE'
+		         and lower(table_name) like '%%geocod%%'"""
+		cur.execute(sql, (schema,))
+		data_table = cur.fetchone()[0]
+
+	sql = f"""update public.{ust_or_lust.lower()} x
+			set gc_latitude = y.gc_latitude::float, 
+			gc_longitude = y.gc_longitude::float, 
+			gc_coordinate_source = y.gc_coordinate_source, 
+			gc_address_type = y.gc_address_type
+		from "{schema}".{data_table} y """
+
+	if ust_or_lust.lower() == 'ust':
+		sql = sql + ' where x."FacilityID" = y.facilityid and x."TankID" = y.tankid and x."CompartmentID" = y.compartmentid \n'
+	else:
+		sql = sql + ' where x."FacilityID" = y.facilityid and x."LUSTID" = y.lustid  \n'
+
+	sql = sql + f" and x.state = %s and x.control_id = (select max(control_id) from public.{ust_or_lust.lower()}_control where state = %s)"
+	# logger.debug(sql)
+
+	cur.execute(sql, (state, state))
+	logger.info('Updated %s rows in public.%s for state %s', cur.rowcount, ust_or_lust.lower(), state)
+
+	cur.close()
+	conn.close()
+
+
+
+def main(state, ust_or_lust, base_table):
+	create_view(state, ust_or_lust)
+	update_data(state, ust_or_lust, base_table)
+	
+
 if __name__ == '__main__':   
 	state = 'TX'
 	ust_or_lust = 'ust'
-	main(state, ust_or_lust)
+	base_table = 'tx_ust'
+	main(state, ust_or_lust, base_table)
