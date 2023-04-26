@@ -101,7 +101,7 @@ def get_view_info(state, ust_or_lust='ust', view_name=None):
 
 
 def get_schema_name(state, ust_or_lust):
-    return state + '_' + ust_or_lust.upper() 
+    return state.upper() + '_' + ust_or_lust.upper() 
 
 
 def get_view_name(state, ust_or_lust, view_name=None):
@@ -113,3 +113,15 @@ def get_view_name(state, ust_or_lust, view_name=None):
     return view
 
 
+def autowidth(worksheet):
+    for col in worksheet.columns:
+         max_length = 0
+         column = col[0].column_letter # Get the column name
+         for cell in col:
+             try: # Necessary to avoid error on empty cells
+                 if len(str(cell.value)) > max_length:
+                     max_length = len(str(cell.value))
+             except:
+                 pass
+         adjusted_width = (max_length + 2) * 1.2
+         worksheet.column_dimensions[column].width = adjusted_width

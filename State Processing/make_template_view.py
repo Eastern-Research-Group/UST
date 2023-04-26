@@ -75,7 +75,7 @@ def new_column_names_all_states(ust_or_lust):
 def main(state, ust_or_lust, base_view_name=None):
 	update_col_names(state, ust_or_lust)
 
-	schema = state.upper() + '_' + ust_or_lust.upper()
+	schema = utils.get_schema_name(state, ust_or_lust)
 	new_view_name = '"' + schema + '".v_' + ust_or_lust.lower() 
 
 	base_cols = utils.get_view_info(state, ust_or_lust, base_view_name)
@@ -142,6 +142,6 @@ def main(state, ust_or_lust, base_view_name=None):
 
 
 if __name__ == '__main__':   
-	state = 'AL'
+	state = 'CA'
 	ust_or_lust = 'lust'
 	main(state, ust_or_lust)

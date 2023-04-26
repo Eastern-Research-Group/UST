@@ -239,11 +239,11 @@ def find_bad_col_names(state, ust_or_lust, view_name):
 
 	
 if __name__ == '__main__':   
-	state = 'AL'
+	state = 'CA'
 	ust_or_lust = 'lust'
 	view_name = 'v_' + ust_or_lust + '_base'
 	# find_empty_cols(state, ust_or_lust, view_name, drop_cols=True)
-	find_too_long_col(30, state, ust_or_lust, view_name)
+	find_too_long_col(50, state, ust_or_lust, view_name)
 	# find_bad_dates(state, ust_or_lust, view_name)
 	# find_bad_floats(state, ust_or_lust, view_name)
 	# find_bad_ints(state, ust_or_lust, view_name)

@@ -57,7 +57,7 @@ class Analyzer:
 	    self.cur.execute(sql)
 	    logger.info('Table %s created', self.deagg_table_name)
 
-	    sql = f'select "{self.key_column}", "{self.column_name}" from sites order by 1'
+sql = f'select "{self.key_column}", "{self.column_name}" from sites order by 1'
 	    self.cur.execute(sql)
 	    rows = self.cur.fetchall()
 	    for row in rows:

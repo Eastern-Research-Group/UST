@@ -9,7 +9,7 @@ def main(state, ust_or_lust, control_id=None):
 
 	make_template_view.main(state, ust_or_lust)
 
-	schema = state.upper() + '_' + ust_or_lust.upper()
+	schema = utils.get_schema_name(state, ust_or_lust)
 	view_name = '"' + schema + '".v_' + ust_or_lust.lower() 
 
 	conn = utils.connect_db()
@@ -64,8 +64,8 @@ def multiple_states(states, ust_or_lust):
 
 
 if __name__ == '__main__':   
-	state = 'TX'
-	ust_or_lust = 'ust'
+	state = 'CA'
+	ust_or_lust = 'lust'
 	main(state, ust_or_lust)
 
 	# states = ['AL','CA','NC','NE','NY','OR','SC','TN','TRUSTD','TX']

@@ -3,6 +3,7 @@ import config
 import utils
 
 import pandas.io.sql as sqlio
+import pandas as pd
 
 
 def get_col_position(ust_or_lust):
@@ -27,7 +28,7 @@ def get_col_position(ust_or_lust):
 
 
 def create_view(state, ust_or_lust):
-	schema = state.upper() + '_' + ust_or_lust.upper()
+	schema = utils.get_schema_name(state, ust_or_lust)
 	new_view_name = '"' + schema + '".v_' + ust_or_lust.lower() + '_geocode'
 
 	col_pos = get_col_position(ust_or_lust)
@@ -87,7 +88,7 @@ def create_view(state, ust_or_lust):
 
 
 def update_data(state, ust_or_lust, data_table=None):
-	schema = state.upper() + '_' + ust_or_lust.upper()
+	schema = utils.get_schema_name(state, ust_or_lust)
 
 	conn = utils.connect_db()
 	cur = conn.cursor()
@@ -123,7 +124,7 @@ def update_data(state, ust_or_lust, data_table=None):
 
 
 def export(state, ust_or_lust):
-	schema = state.upper() + '_' + ust_or_lust.upper()
+	schema = utils.get_schema_name(state, ust_or_lust)
 
 	conn = utils.connect_db()
 	cur = conn.cursor()
@@ -134,14 +135,26 @@ def export(state, ust_or_lust):
 	else:
 		sql = sql + ' order by "FacilityID", "LUSTID"'
 
+	cur.execute(sql)
+	num_rows = cur.rowcount	
+
+	cur.close()
+	conn.close()
+
+
 	df = sqlio.read_sql_query(sql, utils.get_engine())
 	file_path = config.local_ust_path + state.upper() + '/' 
 	file_name = state.upper() + '_' + ust_or_lust.upper() + '_geocoded.xlsx'
 	sheet_name = state.upper() + '_' + ust_or_lust.upper()
-	df.to_excel(file_path + file_name, sheet_name=sheet_name, index=False, freeze_panes=(1,0))
-
-	cur.close()
-	conn.close()
+	try:
+		df.to_excel(file_path + file_name, sheet_name=sheet_name, index=False, freeze_panes=(1,0))
+	except ValueError:
+		with pd.ExcelWriter(file_path) as writer:  
+			df.to_excel(file_path + file_name, sheet_name=sheet_name, index=False, freeze_panes=(1,0))
+		# logger.warning('Unable to write to Excel spreadsheet %s, writing to CSV instead', file_path + file_name)
+		# file_name = file_name.replace('xlsx','csv')
+		# df.to_csv(file_path + file_name, index=False)
+	logger.info('Exported %s rows to file %s', num_rows, file_path + file_name)
 
 
 def main(state, ust_or_lust, base_table):
