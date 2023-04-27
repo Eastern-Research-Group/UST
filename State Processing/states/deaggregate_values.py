@@ -8,7 +8,7 @@ import os.path
 
 state = 'TN'
 ust_or_lust = 'LUST'
-key_column = 'GLOBAL_ID'
+key_column = 'LUSTID'
 
 class Analyzer:
 	def __init__(self, state, ust_or_lust, key_column):
@@ -57,7 +57,7 @@ class Analyzer:
 	    self.cur.execute(sql)
 	    logger.info('Table %s created', self.deagg_table_name)
 
-sql = f'select "{self.key_column}", "{self.column_name}" from sites order by 1'
+sql = f'select "{self.key_column}", "{self.column_name}" from {self.table_name} order by 1'
 	    self.cur.execute(sql)
 	    rows = self.cur.fetchall()
 	    for row in rows:
@@ -100,6 +100,10 @@ sql = f'select "{self.key_column}", "{self.column_name}" from sites order by 1'
 
 
 if __name__ == '__main__':
+	state = 'TN'
+	ust_or_lust = 'LUST'
+	key_column = 'LUSTID'
+	
 	a = Analyzer(state, ust_or_lust, key_column)
 	elements_to_check = ['SubstanceReleased1','CauseOfRelease1','SourceOfRelease1']
 	for e in elements_to_check:

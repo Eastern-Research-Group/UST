@@ -1,6 +1,8 @@
 from logger_factory import logger
 import utils
 import make_template_view
+import export_template
+
 import psycopg2.errors
 
 
@@ -37,7 +39,7 @@ def main(state, ust_or_lust, control_id=None):
 
 	sql = """select column_name from information_schema.columns 
 	         where table_schema = 'public' and table_name = %s
-	         and column_name not in ('id','control_id','state')
+	         and column_name not in ('id', 'control_id', 'state')
 	         order by ordinal_position"""
 	cur.execute(sql, (ust_or_lust,))
 	cols = [r[0] for r in cur.fetchall()]
@@ -53,9 +55,10 @@ def main(state, ust_or_lust, control_id=None):
 	logger.info('Inserted %s rows into table %s', cur.rowcount, ust_or_lust)
 
 	conn.commit()
-
 	cur.close()
 	conn.close()
+
+	export_template.main(state, ust_folder)
 
 
 def multiple_states(states, ust_or_lust):
@@ -63,8 +66,8 @@ def multiple_states(states, ust_or_lust):
 		main(state, ust_or_lust)
 
 
-if __name__ == '__main__':   
-	state = 'CA'
+if __name__ == '__main__':
+	state = 'NE'
 	ust_or_lust = 'lust'
 	main(state, ust_or_lust)
 

@@ -20,7 +20,7 @@ def update_col_names(state, ust_or_lust, view_name=None):
 	else:
 		view_name = utils.get_view_name(state, ust_or_lust)
 
-	logger.info('Updating %s . . .', view_name)
+	logger.info('Updating %s', view_name)
 
 	if ust_or_lust.lower() == 'ust':
 		update_col_name(cur, view_name, ('FacilityOwnerOperatorName','FacilityOperatorCompanyName'))
@@ -81,29 +81,10 @@ def main(state, ust_or_lust, base_view_name=None):
 	base_cols = utils.get_view_info(state, ust_or_lust, base_view_name)
 	from_sql = base_cols[1]
 	base_aliases = base_cols[0].keys()
-	# print(base_cols)
-	# for base_col in base_aliases:
-	# 	print(base_col)
-	# print(from_sql)
 	
 	conn = utils.connect_db()
 	cur = conn.cursor()
 	
-	# null_lustid_cnt = 0
-	# if ust_or_lust.lower() == 'lust': 
-	# 	sql = f'select count(*) from "{schema}".v_lust_base where "LUSTID" is null'
-	# 	cur.execute(sql)
-	# 	null_lustid_cnt = cur.fetchone()[0]
-
-	# if null_lustid_cnt > 0:
-	# 	sql = f"""create view "{schema}".v_lustids as
-	# 	select part1 || part2 as "lustid" from 
-	# 		(select "state" || '_' || "sitename" || '_' as part1, row_number() over (partition by "sitename" order by "sitename") as part2
-	# 		from "{schema}".v_lust_base 
-	# 		where "lustid" is null
-	# 		order by "sitename") a"""
-
-
 	sql = """select column_name, data_type
 	         from information_schema.columns 
 	         where table_schema = 'public' and table_name = %s 
@@ -132,8 +113,6 @@ def main(state, ust_or_lust, base_view_name=None):
 	except psycopg2.errors.UndefinedTable:
 		pass
 
-	# print(view_sql)	
-	# exit()
 	cur.execute(view_sql)
 	logger.info('Created %s', new_view_name)
 

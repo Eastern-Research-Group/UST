@@ -34,8 +34,9 @@ def get_headers(cur, view_name):
 
 def make_data_page(state, ust_or_lust, wb):
 	ws_name = state + ' ' + ust_or_lust.upper()
-	ws = wb.create_sheet(ws_name)
-
+	ws = wb.active
+	ws.title = ws_name
+	
 	conn = utils.connect_db()
 	cur = conn.cursor()
 
@@ -47,12 +48,12 @@ def make_data_page(state, ust_or_lust, wb):
 		cell.value = header
 		cell.font = Font(bold=True)
 
-	sql = "select * from public." + view_name 
+	sql = "select * from public." + view_name + ' where state = %s'
 	if ust_or_lust.lower() == 'ust':
 		sql = sql + ' order by "FacilityID", "TankID", "CompartmentID"'
 	else:
 		sql = sql + ' order by "FacilityID", "SiteName", "LUSTID"'
-	cur.execute(sql)
+	cur.execute(sql, (state, ))
 	data = cur.fetchall()
 
 	for rowno, row in enumerate(data, start=2):
@@ -147,7 +148,6 @@ def make_lookup_page(state, ust_or_lust, wb, lookup):
 	element_name = pretty_name.replace('_','')
 	if pretty_name == 'Cause' or pretty_name == 'Source':
 		pretty_name = pretty_name + 's'
-		# element_name = element_name + 'OfRelease'
 	elif pretty_name == 'Corrective Action Strategy':
 		pretty_name = 'Corrective Action Strategies'
 
@@ -210,7 +210,6 @@ def make_substance_lookup_page(state, ust_or_lust, wb):
 	cell.font = Font(bold=True)
 	cell.alignment = center_align
 
-
 	conn = utils.connect_db()
 	cur = conn.cursor()	
 
@@ -272,10 +271,10 @@ def main(state, ust_or_lust, data_only=False):
 			make_lookup_page(state, ust_or_lust, wb, 'corrective_action_strategy')
 
 	wb.save(path)
-
-
+	
+	logger.info('Exported %s to %s', file_name, file_path)
 
 if __name__ == '__main__':   
-	state = 'CA'
+	state = 'SC'
 	ust_or_lust = 'lust'
 	main(state, ust_or_lust)
