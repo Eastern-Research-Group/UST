@@ -85,13 +85,8 @@ def get_select_cols(sql):
     return cols
 
 
-def get_view_info(state, ust_or_lust='ust', view_name=None):
-    schema = state.upper() + '_' + ust_or_lust.upper()
-    if view_name:
-        view = '"' + schema + '".' + view_name 
-    else:
-        view = '"' + schema + '".v_' + ust_or_lust.lower() + '_base' 
-
+def get_view_info(state, ust_or_lust, view):
+    schema = get_schema_name(state, ust_or_lust)
     view_sql = get_view_sql(view)
     view_sql = process_view_sql(view_sql)
     from_sql = view_sql[1]
