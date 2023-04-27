@@ -15,7 +15,6 @@ def connect_db(db_name=config.db_name, schema='public'):
                     password=config.db_password,
                     dbname=db_name,
                     options=options)
-        # logger.info('Connected to database %s; schema %s', db_name, schema)
     except Exception as e:
         logger.error('Unable to connect to database %s: %s', db_name, e)
         raise
@@ -25,10 +24,8 @@ def connect_db(db_name=config.db_name, schema='public'):
 
 
 def get_engine(db_name=config.db_name, schema=None):
-    # engine = create_engine('postgresql://username:password@localhost:5432/mydatabase')
     try:
         engine = create_engine(config.db_connection_string + db_name, connect_args={'options': f'-csearch_path="{schema}"'})
-        # logger.info('Created database engine')
         return engine
     except Exception as e:
         logger.error('Error creating database engine: %s', e)
@@ -55,7 +52,7 @@ def process_view_sql(sql):
 
 
 def extract_col_alias(col_def):
-    i = col_def.find('.')+1
+    i = col_def.find('.') + 1
     alias = col_def[i:].replace('"','')
     return alias
 
@@ -73,7 +70,6 @@ def process_col_sql(sql):
 
 
 def get_select_cols(sql):
-    # orig_cols = sql.split(',')
     orig_cols = re.split(r',\s*(?![^()]*\))', sql)
     cols = {}
     for col in orig_cols:
@@ -87,11 +83,11 @@ def get_select_cols(sql):
 
 def get_view_info(state, ust_or_lust, view):
     schema = get_schema_name(state, ust_or_lust)
-    view_sql = get_view_sql(view)
+    view_name = '"' + schema + '"."' + view + '"'
+    view_sql = get_view_sql(view_name)
     view_sql = process_view_sql(view_sql)
     from_sql = view_sql[1]
     cols = get_select_cols(view_sql[0])
-    
     return cols, from_sql 
 
 

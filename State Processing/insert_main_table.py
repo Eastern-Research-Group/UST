@@ -58,7 +58,7 @@ def main(state, ust_or_lust, control_id=None):
 	cur.close()
 	conn.close()
 
-	export_template.main(state, ust_folder)
+	export_template.main(state, ust_or_lust)
 
 
 def multiple_states(states, ust_or_lust):
