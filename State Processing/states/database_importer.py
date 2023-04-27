@@ -3,7 +3,7 @@ import config, utils
 import pandas as pd
 import os
 import glob
-from psycopg2.errors import DuplicateSchema
+from psycopg2.errors import DuplicateSchema, UndefinedTable
 
 
 class DatabaseImporter:
@@ -67,7 +67,7 @@ class DatabaseImporter:
             try:
                 df = pd.read_excel(file_path)   
             except ValueError as e:
-                logger.error('Error opening %s; skipping: %s', filepath, e) 
+                logger.error('Error opening %s; skipping: %s', file_path, e) 
                 self.bad_file_list.append(table_name)
                 return False
         elif file_path[-3:] == 'csv':

@@ -74,6 +74,6 @@ def main(state, ust_or_lust, data_only=False):
 
 
 if __name__ == '__main__':   
-	state = 'TN'
+	state = 'NE'
 	ust_or_lust = 'lust'
 	main(state, ust_or_lust)

@@ -1,9 +1,31 @@
 from logger_factory import logger
 import config
 import utils
+import export_template
 
 import pandas.io.sql as sqlio
 import pandas as pd
+from psycopg2.errors import DuplicateSchema, UndefinedTable
+
+
+def upload_geocoded_data(state, ust_or_lust, file_path):
+	conn = utils.connect_db()
+	cur = conn.cursor()		
+
+	try:
+		df = pd.read_excel(file_path)   
+	except ValueError as e:
+		logger.error('Error opening %s; aborting: %s', file_path, e) 
+		exit()
+	
+	schema = utils.get_schema_name(state, ust_or_lust)
+	table_name = state.lower() + '_' + ust_or_lust.lower() + '_geocoded'
+	engine = utils.get_engine(schema=schema)    
+	df.to_sql(table_name, engine, index=False, if_exists='replace')
+	logger.info('Created table %s.%s', schema, table_name)
+
+	cur.close()
+	conn.close()
 
 
 def get_col_position(ust_or_lust):
@@ -38,10 +60,10 @@ def create_view(state, ust_or_lust):
 
 	columns = []
 	sql = """select case when table_name = 'ust' and column_name = 'FacilityLatitude' then 'case when gc_latitude is not null then gc_latitude else "FacilityLatitude" end as "FacilityLatitude"' 
-			             when table_name = 'ust' and column_name = 'FacilityLongitude' then 'case when gc_longitude is not null then gc_longitude else "FacilityLongitude" end as "FacilityLongitude"' 
-			             when table_name = 'lust' and column_name = 'Latitude' then 'case when gc_latitude is not null then gc_latitude else "Latitude" end as "Latitude"' 
-			             when table_name = 'lust' and column_name = 'Longitude' then 'case when gc_longitude is not null then gc_longitude else "Longitude" end as "Longitude"' 
-			        else '"' || column_name || '"' end as column_name, ordinal_position - 3 as ordinal_position
+						 when table_name = 'ust' and column_name = 'FacilityLongitude' then 'case when gc_longitude is not null then gc_longitude else "FacilityLongitude" end as "FacilityLongitude"' 
+						 when table_name = 'lust' and column_name = 'Latitude' then 'case when gc_latitude is not null then gc_latitude else "Latitude" end as "Latitude"' 
+						 when table_name = 'lust' and column_name = 'Longitude' then 'case when gc_longitude is not null then gc_longitude else "Longitude" end as "Longitude"' 
+					else '"' || column_name || '"' end as column_name, ordinal_position - 3 as ordinal_position
 			from information_schema.columns 
 			where table_schema = 'public' and table_name = %s
 			and column_name not in ('id','control_id','state')
@@ -55,7 +77,7 @@ def create_view(state, ust_or_lust):
 	columns.append('gc_address_type')
 
 	sql = """select '"' || column_name || '"' as column_name, ordinal_position 
-		    from information_schema.columns 
+			from information_schema.columns 
 			where table_schema = 'public' and table_name = %s
 			and column_name not like 'gc_%%'
 			and ordinal_position > %s
@@ -77,7 +99,7 @@ def create_view(state, ust_or_lust):
 	try:
 		cur.execute('drop view ' + new_view_name)
 		logger.info('Dropped %s', new_view_name)
-	except psycopg2.errors.UndefinedTable:
+	except UndefinedTable:
 		pass
 
 	cur.execute(view_sql)
@@ -87,31 +109,31 @@ def create_view(state, ust_or_lust):
 	conn.close()
 
 
-def update_data(state, ust_or_lust, data_table=None):
+def update_data(state, ust_or_lust, geo_table=None):
 	schema = utils.get_schema_name(state, ust_or_lust)
 
 	conn = utils.connect_db()
 	cur = conn.cursor()
 
 
-	if not data_table:
+	if not geo_table:
 		sql = """select table_name from information_schema.tables 
-		         where table_schema = %s and table_type = 'BASE TABLE'
-		         and lower(table_name) like '%%geocod%%'"""
+				 where table_schema = %s and table_type = 'BASE TABLE'
+				 and lower(table_name) like '%%geocod%%'"""
 		cur.execute(sql, (schema,))
-		data_table = cur.fetchone()[0]
+		geo_table = cur.fetchone()[0]
 
 	sql = f"""update public.{ust_or_lust.lower()} x
 			set gc_latitude = y.gc_latitude::float, 
 			gc_longitude = y.gc_longitude::float, 
 			gc_coordinate_source = y.gc_coordinate_source, 
 			gc_address_type = y.gc_address_type
-		from "{schema}".{data_table} y """
+		from "{schema}".{geo_table} y """
 
 	if ust_or_lust.lower() == 'ust':
-		sql = sql + ' where x."FacilityID" = y.facilityid and x."TankID" = y.tankid and x."CompartmentID" = y.compartmentid \n'
+		sql = sql + ' where x."FacilityID" = y."FacilityID" and x."TankID" = y."TankID" and x."CompartmentID" = y.CompartmentID" \n'
 	else:
-		sql = sql + ' where x."FacilityID" = y.facilityid and x."LUSTID" = y.lustid  \n'
+		sql = sql + ' where x."FacilityID" = y."FacilityID" and x."LUSTID" = y."LUSTID"  \n'
 
 	sql = sql + f" and x.state = %s and x.control_id = (select max(control_id) from public.{ust_or_lust.lower()}_control where state = %s)"
 	# logger.debug(sql)
@@ -141,7 +163,6 @@ def export(state, ust_or_lust):
 	cur.close()
 	conn.close()
 
-
 	df = sqlio.read_sql_query(sql, utils.get_engine())
 	file_path = config.local_ust_path + state.upper() + '/' 
 	file_name = state.upper() + '_' + ust_or_lust.upper() + '_geocoded.xlsx'
@@ -157,14 +178,21 @@ def export(state, ust_or_lust):
 	logger.info('Exported %s rows to file %s', num_rows, file_path + file_name)
 
 
-def main(state, ust_or_lust, base_table):
-	# create_view(state, ust_or_lust)
-	# update_data(state, ust_or_lust, base_table)
+def main(state, ust_or_lust, file_path=None, geo_table=None):
+	if file_path:
+		upload_geocoded_data(state, ust_or_lust, file_path)
+	create_view(state, ust_or_lust)
+	update_data(state, ust_or_lust, geo_table)
 	export(state, ust_or_lust)
+	export_template.main(state, ust_or_lust)
 
 
 if __name__ == '__main__':   
-	state = 'TX'
-	ust_or_lust = 'ust'
-	base_table = 'tx_ust'
-	main(state, ust_or_lust, base_table)
+	state = 'CA'
+	ust_or_lust = 'lust'
+	geo_table = None # If there are multiple tables in the schema like '%geocod%', specify correct one here
+
+	file_name = 'CA_LUST_for_geoprocessing-2023-04-26_20230427.xlsx'
+	file_path = config.local_ust_path + state.upper() + '/' + file_name
+	
+	main(state, ust_or_lust, file_path=file_path, geo_table=geo_table)
