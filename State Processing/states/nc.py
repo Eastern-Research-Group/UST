@@ -5,8 +5,8 @@ file_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\
 # ust_folder = file_path + 'UST'
 # lust_folder = file_path + 'LUST'
 # lust_folder = file_path  + 'LUST 20230117'
-lust_folder = None 
-ust_folder = file_path + 'UST 20230202'
+lust_folder = file_path + 'LUST-may5' 
+ust_folder = None
 
 
 import_service = ImportService()

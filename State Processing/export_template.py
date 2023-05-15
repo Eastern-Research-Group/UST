@@ -275,6 +275,6 @@ def main(state, ust_or_lust, data_only=False):
 	logger.info('Exported %s to %s', file_name, file_path)
 
 if __name__ == '__main__':   
-	state = 'NE'
-	ust_or_lust = 'lust'
+	state = 'TX'
+	ust_or_lust = 'ust'
 	main(state, ust_or_lust)

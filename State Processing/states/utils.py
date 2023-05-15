@@ -6,16 +6,15 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import re
 
 
-def connect_db(db_name='ust', schema='public'):
+def connect_db(db_name=config.db_name, schema='public'):
     try:
         options = f'-csearch_path="{schema}"'
         conn = psycopg2.connect(
-                    host='localhost',
+                    host=config.db_ip,
                     user=config.db_user,
                     password=config.db_password,
                     dbname=db_name,
                     options=options)
-        # logger.info('Connected to database %s; schema %s', db_name, schema)
     except Exception as e:
         logger.error('Unable to connect to database %s: %s', db_name, e)
         raise
@@ -25,10 +24,8 @@ def connect_db(db_name='ust', schema='public'):
 
 
 def get_engine(db_name=config.db_name, schema=None):
-    # engine = create_engine('postgresql://username:password@localhost:5432/mydatabase')
     try:
         engine = create_engine(config.db_connection_string + db_name, connect_args={'options': f'-csearch_path="{schema}"'})
-        logger.info('Created database engine')
         return engine
     except Exception as e:
         logger.error('Error creating database engine: %s', e)

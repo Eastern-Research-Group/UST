@@ -1,7 +1,7 @@
 from logger_factory import logger
 import utils
 import make_template_view
-import export_template
+import export_template, export_template_for_geoprocessing
 
 import psycopg2.errors
 
@@ -54,11 +54,32 @@ def main(state, ust_or_lust, control_id=None):
 	cur.execute(sql)
 	logger.info('Inserted %s rows into table %s', cur.rowcount, ust_or_lust)
 
+
+	if ust_or_lust.lower() == 'ust':
+		lat_col = '"FacilityLatitude"'
+		long_col = '"FacilityLongitude"'
+	elif ust_or_lust.lower() == 'lust':
+		lat_col = '"Latitude"'
+		long_col = '"Longitude"'
+
+	sql = f"""select count(*) 
+			  from {ust_or_lust.lower()} where control_id = %s and 
+				({lat_col} is null  or {long_col} is null
+			    or length(split_part({lat_col} ::text, '.', 2)::text) < 3
+			    or length(split_part({long_col}::text, '.', 2)::text) < 3)"""
+	cur.execute(sql, (control_id,))
+	cnt = cur.fetchone()[0]
+	logger.info('There are %s rows with insufficient lat/long data.', cnt)
+	if cnt > 0:
+		logger.info('Exporting to spreadsheet for geoprocessing; send it to Paul')
+		export_template_for_geoprocessing.main(state, ust_or_lust)
+
 	conn.commit()
 	cur.close()
 	conn.close()
 
 	export_template.main(state, ust_or_lust)
+	logger.info('Processing for %s %s complete', state, ust_or_lust.upper())
 
 
 def multiple_states(states, ust_or_lust):
@@ -67,7 +88,7 @@ def multiple_states(states, ust_or_lust):
 
 
 if __name__ == '__main__':
-	state = 'NE'
+	state = 'NC'
 	ust_or_lust = 'lust'
 	main(state, ust_or_lust)
 

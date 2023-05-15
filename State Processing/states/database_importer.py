@@ -22,7 +22,7 @@ class DatabaseImporter:
         conn = utils.connect_db(config.db_name)
         cur = conn.cursor()
         try:
-            cur.execute('create schema "' + self.schema + '" AUTHORIZATION postgres')
+            cur.execute('create schema "' + self.schema + '" AUTHORIZATION ' + config.db_user)
             logger.info('Created schema %s', self.schema)
         except DuplicateSchema:
             logger.info('Schema %s already exists', self.schema)

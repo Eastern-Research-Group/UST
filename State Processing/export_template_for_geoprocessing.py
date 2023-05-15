@@ -71,9 +71,10 @@ def main(state, ust_or_lust, data_only=False):
 	make_data_page(state, ust_or_lust, wb)
 
 	wb.save(path)
+	logger.info('Exported %s to %s for geoprocessing.', file_name, file_path)
 
 
 if __name__ == '__main__':   
-	state = 'NE'
-	ust_or_lust = 'lust'
+	state = 'CA'
+	ust_or_lust = 'ust'
 	main(state, ust_or_lust)
