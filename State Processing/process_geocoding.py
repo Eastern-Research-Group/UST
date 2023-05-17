@@ -128,10 +128,10 @@ def update_data(state, ust_or_lust, geo_table=None):
 			gc_longitude = y.gc_longitude::float, 
 			gc_coordinate_source = y.gc_coordinate_source, 
 			gc_address_type = y.gc_address_type
-		from "{schema}".{geo_table} y """
+		from "{schema}".{geo_table} y \n"""
 
 	if ust_or_lust.lower() == 'ust':
-		sql = sql + ' where x."FacilityID" = y."FacilityID" and x."TankID" = y."TankID" and x."CompartmentID" = y.CompartmentID" \n'
+		sql = sql + ' where x."FacilityID" = y."FacilityID" and x."TankID" = y."TankID" and coalesce(x."CompartmentID",''X'') = coalesce(y."CompartmentID"::text,''X'') \n'
 	else:
 		sql = sql + ' where x."FacilityID" = y."FacilityID" and x."LUSTID" = y."LUSTID"  \n'
 
@@ -179,20 +179,20 @@ def export(state, ust_or_lust):
 
 
 def main(state, ust_or_lust, file_path=None, geo_table=None):
-	if file_path:
-		upload_geocoded_data(state, ust_or_lust, file_path)
+	# if file_path:
+	# 	upload_geocoded_data(state, ust_or_lust, file_path)
+	# update_data(state, ust_or_lust, geo_table)
 	create_view(state, ust_or_lust)
-	update_data(state, ust_or_lust, geo_table)
 	export(state, ust_or_lust)
 	export_template.main(state, ust_or_lust)
 
 
 if __name__ == '__main__':   
 	state = 'CA'
-	ust_or_lust = 'lust'
+	ust_or_lust = 'ust'
 	geo_table = None # If there are multiple tables in the schema like '%geocod%', specify correct one here
 
-	file_name = 'CA_LUST_for_geoprocessing-2023-04-26_20230427.xlsx'
+	file_name = 'CA_UST_for_geoprocessing-2023-05-15_20230516.xlsx'
 	file_path = config.local_ust_path + state.upper() + '/' + file_name
 	
 	main(state, ust_or_lust, file_path=file_path, geo_table=geo_table)
