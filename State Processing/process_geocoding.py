@@ -131,12 +131,12 @@ def update_data(state, ust_or_lust, geo_table=None):
 		from "{schema}".{geo_table} y \n"""
 
 	if ust_or_lust.lower() == 'ust':
-		sql = sql + ' where x."FacilityID" = y."FacilityID" and x."TankID" = y."TankID" and coalesce(x."CompartmentID",''X'') = coalesce(y."CompartmentID"::text,''X'') \n'
+		sql = sql + """ where x."FacilityID" = y."FacilityID" and x."TankID" = y."TankID"::text and coalesce(x."CompartmentID",'X') = coalesce(y."CompartmentID"::text,'X') \n"""
 	else:
 		sql = sql + ' where x."FacilityID" = y."FacilityID" and x."LUSTID" = y."LUSTID"  \n'
 
 	sql = sql + f" and x.state = %s and x.control_id = (select max(control_id) from public.{ust_or_lust.lower()}_control where state = %s)"
-	# logger.debug(sql)
+	logger.debug(sql)
 
 	cur.execute(sql, (state, state))
 	logger.info('Updated %s rows in public.%s for state %s', cur.rowcount, ust_or_lust.lower(), state)
@@ -179,20 +179,23 @@ def export(state, ust_or_lust):
 
 
 def main(state, ust_or_lust, file_path=None, geo_table=None):
-	# if file_path:
-	# 	upload_geocoded_data(state, ust_or_lust, file_path)
-	# update_data(state, ust_or_lust, geo_table)
+	logger.info('Starting process...')
+	if file_path:
+		upload_geocoded_data(state, ust_or_lust, file_path)
+	update_data(state, ust_or_lust, geo_table)
 	create_view(state, ust_or_lust)
 	export(state, ust_or_lust)
 	export_template.main(state, ust_or_lust)
+	logger.info('Script complete')
 
 
 if __name__ == '__main__':   
-	state = 'CA'
+	state = 'AL'
 	ust_or_lust = 'ust'
 	geo_table = None # If there are multiple tables in the schema like '%geocod%', specify correct one here
 
-	file_name = 'CA_UST_for_geoprocessing-2023-05-15_20230516.xlsx'
-	file_path = config.local_ust_path + state.upper() + '/' + file_name
+	# Set file_path to None if file is already uploaded
+	file_name = 'AL_UST_template_data_only_20230110.xlsx'
+	file_path = config.local_ust_path + state.upper() + '/AL_UST_template_data_only_20230110/' + file_name
 	
 	main(state, ust_or_lust, file_path=file_path, geo_table=geo_table)
