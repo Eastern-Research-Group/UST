@@ -1,11 +1,10 @@
 from import_service import ImportService
 import config
 
-state = 'TrUSTD' 
+state = 'OR' 
 file_path = config.local_ust_path + state + '\\'
-ust_folder = file_path + 'db_export/db_export'
-# lust_folder = file_path + 'db_export_lust'
-lust_folder = None
+ust_folder = None
+lust_folder = file_path + 'LUST'
 
 import_service = ImportService()
 

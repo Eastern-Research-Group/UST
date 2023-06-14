@@ -88,8 +88,8 @@ def multiple_states(states, ust_or_lust):
 
 
 if __name__ == '__main__':
-	state = 'NC'
-	ust_or_lust = 'lust'
+	state = 'AL'
+	ust_or_lust = 'ust'
 	main(state, ust_or_lust)
 
 	# states = ['AL','CA','NC','NE','NY','OR','SC','TN','TRUSTD','TX']

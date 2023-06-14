@@ -4,6 +4,7 @@ import psycopg2
 from sqlalchemy import create_engine
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import re
+from datetime import datetime
 
 
 def connect_db(db_name=config.db_name, schema='public'):
@@ -116,3 +117,7 @@ def autowidth(worksheet):
                  pass
          adjusted_width = (max_length + 2) * 1.2
          worksheet.column_dimensions[column].width = adjusted_width
+
+
+def get_today_string():
+    return datetime.today().strftime('%Y-%m-%d')
