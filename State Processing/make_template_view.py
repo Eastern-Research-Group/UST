@@ -11,14 +11,14 @@ def update_col_name(cur, view_name, column_names):
 		pass
 
 
-def update_col_names(state, ust_or_lust, view_name=None):
+def update_col_names(organization_id, ust_or_lust, view_name=None):
 	conn = utils.connect_db()
 	cur = conn.cursor()
 
 	if view_name:
-		view_name = '"' + utils.get_schema_name(state, ust_or_lust) + '".' + view_name
+		view_name = '"' + utils.get_schema_name(organization_id, ust_or_lust) + '".' + view_name
 	else:
-		view_name = utils.get_view_name(state, ust_or_lust)
+		view_name = utils.get_view_name(organization_id, ust_or_lust)
 
 	logger.info('Updating %s', view_name)
 
@@ -59,30 +59,30 @@ def new_column_names_view(view_name, ust_or_lust):
 	rows = [r[0] for r in cur.fetchall()]
 	for row in rows:
 		i = row.find('_')
-		state = row[:i]
-		update_col_names(state, ust_or_lust, view_name)
-		logger.info('Updated "%s_%s".%s', state, ust_or_lust.upper(), view_name)
+		organization_id = row[:i]
+		update_col_names(organization_id, ust_or_lust, view_name)
+		logger.info('Updated "%s_%s".%s', organization_id, ust_or_lust.upper(), view_name)
 
 	cur.close()
 	conn.close()
 
 
-def new_column_names_all_states(ust_or_lust):
+def new_column_names_all_organization_ids(ust_or_lust):
 	view_name = 'v_' + ust_or_lust.lower() + '_base'
 	new_column_names_view(view_name, ust_or_lust)
 	view_name = 'v_' + ust_or_lust.lower() 
 	new_column_names_view(view_name, ust_or_lust)
 
 
-def main(state, ust_or_lust):
-	update_col_names(state, ust_or_lust)
+def main(organization_id, ust_or_lust):
+	update_col_names(organization_id, ust_or_lust)
 
-	schema = utils.get_schema_name(state, ust_or_lust)
+	schema = utils.get_schema_name(organization_id, ust_or_lust)
 	new_view_name = '"' + schema + '".v_' + ust_or_lust.lower() 
 
 	base_view_name = 'v_' + ust_or_lust.lower() + '_base' 
 	logger.info('Gathering view information for %s', base_view_name)
-	base_cols = utils.get_view_info(state, ust_or_lust, base_view_name)
+	base_cols = utils.get_view_info(organization_id, ust_or_lust, base_view_name)
 	from_sql = base_cols[1]
 	base_aliases = base_cols[0].keys()
 	
@@ -92,7 +92,7 @@ def main(state, ust_or_lust):
 	sql = """select column_name, data_type
 			 from information_schema.columns 
 			 where table_schema = 'public' and table_name = %s 
-			 and column_name not in ('id','control_id','state')
+			 and column_name not in ('id','control_id','organization_id')
 			 order by ordinal_position"""
 	cur.execute(sql, (ust_or_lust,))
 	rows = cur.fetchall()
@@ -125,6 +125,6 @@ def main(state, ust_or_lust):
 
 
 if __name__ == '__main__':   
-	state = 'CA'
+	organization_id = 'CA'
 	ust_or_lust = 'ust'
-	main(state, ust_or_lust)
+	main(organization_id, ust_or_lust)

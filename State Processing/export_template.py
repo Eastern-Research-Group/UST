@@ -32,8 +32,8 @@ def get_headers(cur, view_name):
 	return [x[0] for x in cur.fetchall()]
 
 
-def make_data_page(state, ust_or_lust, wb):
-	ws_name = state + ' ' + ust_or_lust.upper()
+def make_data_page(organization_id, ust_or_lust, wb):
+	ws_name = organization_id + ' ' + ust_or_lust.upper()
 	ws = wb.active
 	ws.title = ws_name
 	
@@ -48,12 +48,12 @@ def make_data_page(state, ust_or_lust, wb):
 		cell.value = header
 		cell.font = Font(bold=True)
 
-	sql = "select * from public." + view_name + ' where state = %s'
+	sql = "select * from public." + view_name + ' where organization_id = %s'
 	if ust_or_lust.lower() == 'ust':
 		sql = sql + ' order by "FacilityID", "TankID", "CompartmentID"'
 	else:
 		sql = sql + ' order by "FacilityID", "SiteName", "LUSTID"'
-	cur.execute(sql, (state, ))
+	cur.execute(sql, (organization_id, ))
 	data = cur.fetchall()
 
 	for rowno, row in enumerate(data, start=2):
@@ -143,7 +143,7 @@ def make_reference_page(ust_or_lust, wb):
 	ws.freeze_panes = ws['A2']
 
 
-def make_lookup_page(state, ust_or_lust, wb, lookup):
+def make_lookup_page(organization_id, ust_or_lust, wb, lookup):
 	pretty_name = lookup.replace('_',' ').title() 
 	element_name = pretty_name.replace('_','')
 	if pretty_name == 'Cause' or pretty_name == 'Source':
@@ -167,15 +167,15 @@ def make_lookup_page(state, ust_or_lust, wb, lookup):
 		for colno, cell_value in enumerate(row, start=1):
 			ws.cell(row=rowno, column=colno).value = cell_value.replace('"','')
 
-	sql = f"""select distinct state_value, epa_value
+	sql = f"""select distinct organization_id_value, epa_value
 			from public.v_{ust_or_lust.lower()}_element_mapping 
-			where state = %s and element_name like '%%{element_name}%%'
+			where organization_id = %s and element_name like '%%{element_name}%%'
 			order by 1, 2"""
-	cur.execute(sql, (state, ))
+	cur.execute(sql, (organization_id, ))
 
 	if cur.rowcount > 0:
 		cell = ws.cell(row=1, column=3)
-		cell.value = 'State Value'
+		cell.value = 'organization_id Value'
 		cell.font = Font(bold=True)
 
 		cell = ws.cell(row=1, column=4)
@@ -193,7 +193,7 @@ def make_lookup_page(state, ust_or_lust, wb, lookup):
 	utils.autowidth(ws)
 
 
-def make_substance_lookup_page(state, ust_or_lust, wb):
+def make_substance_lookup_page(organization_id, ust_or_lust, wb):
 	ws = wb.create_sheet('Substances')
 	cell = ws.cell(row=1, column=1)
 	cell.value = 'Substance Group'
@@ -226,15 +226,15 @@ def make_substance_lookup_page(state, ust_or_lust, wb):
 			if row[2] == 'N':
 				cell.font = Font(bold=True)
 
-	sql = f"""select distinct state_value, epa_value
+	sql = f"""select distinct organization_id_value, epa_value
 			from public.v_{ust_or_lust.lower()}_element_mapping 
-			where state = %s and element_name like '%%Substance%%'
+			where organization_id = %s and element_name like '%%Substance%%'
 			order by 1, 2"""
-	cur.execute(sql, (state, ))
+	cur.execute(sql, (organization_id, ))
 
 	if cur.rowcount > 0:
 		cell = ws.cell(row=1, column=5)
-		cell.value = 'State Value'
+		cell.value = 'organization_id Value'
 		cell.font = Font(bold=True)
 
 		cell = ws.cell(row=1, column=6)
@@ -252,29 +252,29 @@ def make_substance_lookup_page(state, ust_or_lust, wb):
 	utils.autowidth(ws)
 
 
-def main(state, ust_or_lust, data_only=False):
-	file_path = config.local_ust_path + state.upper() + '/'
-	file_name = state.upper() + '_' + ust_or_lust.upper() + '_template-' + str(date.today()) + '.xlsx'
+def main(organization_id, ust_or_lust, data_only=False):
+	file_path = config.local_ust_path + organization_id.upper() + '/'
+	file_name = organization_id.upper() + '_' + ust_or_lust.upper() + '_template-' + str(date.today()) + '.xlsx'
 	path = file_path + file_name
 	
 	wb = op.Workbook()
-	make_data_page(state, ust_or_lust, wb)
+	make_data_page(organization_id, ust_or_lust, wb)
 	if not data_only:
 		make_reference_page(ust_or_lust, wb)
 
-		make_lookup_page(state, ust_or_lust, wb, 'facility_type')
-		make_lookup_page(state, ust_or_lust, wb, 'states')
-		make_substance_lookup_page(state, ust_or_lust, wb)
+		make_lookup_page(organization_id, ust_or_lust, wb, 'facility_type')
+		make_lookup_page(organization_id, ust_or_lust, wb, 'organization_ids')
+		make_substance_lookup_page(organization_id, ust_or_lust, wb)
 		if ust_or_lust.lower() == 'lust':
-			make_lookup_page(state, ust_or_lust, wb, 'source')
-			make_lookup_page(state, ust_or_lust, wb, 'cause')
-			make_lookup_page(state, ust_or_lust, wb, 'corrective_action_strategy')
+			make_lookup_page(organization_id, ust_or_lust, wb, 'source')
+			make_lookup_page(organization_id, ust_or_lust, wb, 'cause')
+			make_lookup_page(organization_id, ust_or_lust, wb, 'corrective_action_strategy')
 
 	wb.save(path)
 	
 	logger.info('Exported %s to %s', file_name, file_path)
 
 if __name__ == '__main__':   
-	state = 'TX'
+	organization_id = 'TX'
 	ust_or_lust = 'ust'
-	main(state, ust_or_lust)
+	main(organization_id, ust_or_lust)
