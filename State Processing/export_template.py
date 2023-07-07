@@ -66,6 +66,8 @@ def make_data_page(organization_id, ust_or_lust, wb):
 	ws.delete_cols(1)
 	ws.freeze_panes = ws['A2']
 
+	logger.info('Created data page')
+
 
 def get_reference_data(ust_or_lust, ws):
 	conn = utils.connect_db()
@@ -142,6 +144,8 @@ def make_reference_page(ust_or_lust, wb):
 
 	ws.freeze_panes = ws['A2']
 
+	logger.info('Created reference page')
+
 
 def make_lookup_page(organization_id, ust_or_lust, wb, lookup):
 	pretty_name = lookup.replace('_',' ').title() 
@@ -167,7 +171,7 @@ def make_lookup_page(organization_id, ust_or_lust, wb, lookup):
 		for colno, cell_value in enumerate(row, start=1):
 			ws.cell(row=rowno, column=colno).value = cell_value.replace('"','')
 
-	sql = f"""select distinct organization_id_value, epa_value
+	sql = f"""select distinct state_value, epa_value
 			from public.v_{ust_or_lust.lower()}_element_mapping 
 			where organization_id = %s and element_name like '%%{element_name}%%'
 			order by 1, 2"""
@@ -175,7 +179,7 @@ def make_lookup_page(organization_id, ust_or_lust, wb, lookup):
 
 	if cur.rowcount > 0:
 		cell = ws.cell(row=1, column=3)
-		cell.value = 'organization_id Value'
+		cell.value = 'State Value'
 		cell.font = Font(bold=True)
 
 		cell = ws.cell(row=1, column=4)
@@ -191,6 +195,8 @@ def make_lookup_page(organization_id, ust_or_lust, wb, lookup):
 	conn.close()
 
 	utils.autowidth(ws)
+
+	logger.info('Created %s lookup page', lookup)
 
 
 def make_substance_lookup_page(organization_id, ust_or_lust, wb):
@@ -226,7 +232,7 @@ def make_substance_lookup_page(organization_id, ust_or_lust, wb):
 			if row[2] == 'N':
 				cell.font = Font(bold=True)
 
-	sql = f"""select distinct organization_id_value, epa_value
+	sql = f"""select distinct state_value, epa_value
 			from public.v_{ust_or_lust.lower()}_element_mapping 
 			where organization_id = %s and element_name like '%%Substance%%'
 			order by 1, 2"""
@@ -234,7 +240,7 @@ def make_substance_lookup_page(organization_id, ust_or_lust, wb):
 
 	if cur.rowcount > 0:
 		cell = ws.cell(row=1, column=5)
-		cell.value = 'organization_id Value'
+		cell.value = 'State Value'
 		cell.font = Font(bold=True)
 
 		cell = ws.cell(row=1, column=6)
@@ -251,8 +257,12 @@ def make_substance_lookup_page(organization_id, ust_or_lust, wb):
 
 	utils.autowidth(ws)
 
+	logger.info('Created substances lookup page')
+
 
 def main(organization_id, ust_or_lust, data_only=False):
+	logger.info('Exporting %s template for %s', ust_or_lust.upper(), organization_id.upper())
+
 	file_path = config.local_ust_path + organization_id.upper() + '/'
 	file_name = organization_id.upper() + '_' + ust_or_lust.upper() + '_template-' + str(date.today()) + '.xlsx'
 	path = file_path + file_name
@@ -263,7 +273,7 @@ def main(organization_id, ust_or_lust, data_only=False):
 		make_reference_page(ust_or_lust, wb)
 
 		make_lookup_page(organization_id, ust_or_lust, wb, 'facility_type')
-		make_lookup_page(organization_id, ust_or_lust, wb, 'organization_ids')
+		make_lookup_page(organization_id, ust_or_lust, wb, 'states')
 		make_substance_lookup_page(organization_id, ust_or_lust, wb)
 		if ust_or_lust.lower() == 'lust':
 			make_lookup_page(organization_id, ust_or_lust, wb, 'source')
@@ -274,7 +284,8 @@ def main(organization_id, ust_or_lust, data_only=False):
 	
 	logger.info('Exported %s to %s', file_name, file_path)
 
+
 if __name__ == '__main__':   
-	organization_id = 'TX'
+	organization_id = 'MO'
 	ust_or_lust = 'ust'
 	main(organization_id, ust_or_lust)

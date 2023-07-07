@@ -133,13 +133,13 @@ def main(organization_id, ust_or_lust, control_id=None):
 			and coalesce(a."Latitude",0) = coalesce(b."Latitude",0)
 			and coalesce(a."Longitude",0) = coalesce(b."Longitude",0) """
 
-	# delete existing data from main data table, if it exists	
-	delete_old(cur, ust_or_lust.lower(), organization_id, control_id)	
-	# delete existing data from UST Facilities/LUST Locations table, if it exists	
-	delete_old(cur, location_table, organization_id, control_id)	
+	# # delete existing data from main data table, if it exists	
+	# delete_old(cur, ust_or_lust.lower(), organization_id, control_id)	
+	# # delete existing data from UST Facilities/LUST Locations table, if it exists	
+	# delete_old(cur, location_table, organization_id, control_id)	
 
-	# build and execute SQL to insert rows into UST Facilities or LUST Locations table
-	insert_location_table(cur, location_table, control_id, organization_id, view_name)
+	# # build and execute SQL to insert rows into UST Facilities or LUST Locations table
+	# insert_location_table(cur, location_table, control_id, organization_id, view_name)
 	# build and execute SQL to insert rows into main data table
 	insert_main_table(cur, ust_or_lust, control_id, organization_id, location_column, view_name, join_sql)
 	# insert rows with sufficient lat/long data into geocoding table with State as the gc coordinate source
@@ -161,8 +161,8 @@ def multiple_organization_ids(organization_ids, ust_or_lust):
 
 
 if __name__ == '__main__':
-	organization_id = 'MO'
-	ust_or_lust = 'lust'
+	organization_id = 'NC'
+	ust_or_lust = 'ust'
 	main(organization_id, ust_or_lust)
 
 	# organization_ids = ['AL','CA','NC','NE','NY','OR','SC','TN','TRUSTD','TX']
