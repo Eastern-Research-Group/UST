@@ -56,11 +56,11 @@ def insert_location_table(cur, location_table, control_id, organization_id, view
 
 def insert_main_table(cur, ust_or_lust, control_id, organization_id, location_column, view_name, join_sql):
 	col_string =  get_col_string(cur, ust_or_lust.lower(), uninclude_cols=['ust_id', 'lust_id', 'control_id', 'organization_id', 'ust_facilities_id', 'lust_location_id'])
-	sql = f'insert into {ust_or_lust.lower()} (control_id, organization_id, ' + location_column + ',' + col_string + ') '
-	sql = sql + 'select ' + str(control_id) + ", '" + organization_id + "', b." + location_column + ', ' + add_table_prefix_to_cols(col_string).replace("'","") 
-	sql = sql + ' from ' + view_name + join_sql 
-	sql = sql + ' where b.control_id = %s'
-	# print(sql)
+	sql = f'insert into {ust_or_lust.lower()} (control_id, organization_id, ' + location_column + ',' + col_string + ')'
+	sql = sql + '\nselect ' + str(control_id) + ", '" + organization_id + "', b." + location_column + ', ' + add_table_prefix_to_cols(col_string).replace("'","") 
+	sql = sql + '\nfrom ' + view_name + join_sql 
+	sql = sql + '\nwhere b.control_id = %s'
+	print(sql)
 	cur.execute(sql, (control_id,))
 	logger.info('Inserted %s rows into table %s', cur.rowcount, ust_or_lust.lower())
 
@@ -87,7 +87,7 @@ def missing_geo(cur, ust_or_lust, organization_id, control_id, geo_table, locati
 		export_needed_geocode.main(ust_or_lust, organization_id, control_id)
 
 
-def main(organization_id, ust_or_lust, control_id=None):
+def main(organization_id, ust_or_lust, control_id=None, main_table_only=False, export=True):
 	logger.info('Working on %s %s', organization_id, ust_or_lust.upper())
 
 	make_view(organization_id, ust_or_lust)
@@ -114,7 +114,9 @@ def main(organization_id, ust_or_lust, control_id=None):
 		and coalesce(a."FacilityAddress2",'X') = coalesce(b."FacilityAddress2",'X')
 		and coalesce(a."FacilityCity",'X') = coalesce(b."FacilityCity",'X')
 		and coalesce(a."FacilityCounty",'X') = coalesce(b."FacilityCounty",'X')
-		and coalesce(a."FacilityZipCode",'X') = coalesce(b."FacilityZipCode",'X')
+		and coalesce(a."FacilityZipCode",'X') = coalesce(b."FacilityZipCode",'X') """
+	if not main_table_only:
+		join_sql = join_sql + """
 		and coalesce(a."FacilityLatitude",0) = coalesce(b."FacilityLatitude",0)
 		and coalesce(a."FacilityLongitude",0) = coalesce(b."FacilityLongitude",0) """
 	if ust_or_lust.lower() == 'lust':
@@ -129,29 +131,37 @@ def main(organization_id, ust_or_lust, control_id=None):
 			and coalesce(a."SiteCity",'X') = coalesce(b."SiteCity",'X')
 			and coalesce(a."Zipcode",'X') = coalesce(b."Zipcode",'X')
 			and coalesce(a."County",'X') = coalesce(b."County",'X')
-			and coalesce(a."State",'X') = coalesce(b."State",'X')
+			and coalesce(a."State",'X') = coalesce(b."State",'X') """
+		if not main_table_only:
+			join_sql = join_sql + """
 			and coalesce(a."Latitude",0) = coalesce(b."Latitude",0)
 			and coalesce(a."Longitude",0) = coalesce(b."Longitude",0) """
 
-	# # delete existing data from main data table, if it exists	
-	# delete_old(cur, ust_or_lust.lower(), organization_id, control_id)	
-	# # delete existing data from UST Facilities/LUST Locations table, if it exists	
-	# delete_old(cur, location_table, organization_id, control_id)	
+	# delete existing data from main data table, if it exists	
+	delete_old(cur, ust_or_lust.lower(), organization_id, control_id)	
+	if not main_table_only:
+		# delete from geo table, if exists
+		delete_old(cur, ust_or_lust.lower() + '_geocode', organization_id, control_id)
+		# delete existing data from UST Facilities/LUST Locations table, if it exists	
+		delete_old(cur, location_table, organization_id, control_id)	
 
-	# # build and execute SQL to insert rows into UST Facilities or LUST Locations table
-	# insert_location_table(cur, location_table, control_id, organization_id, view_name)
+	if not main_table_only:
+		# build and execute SQL to insert rows into UST Facilities or LUST Locations table
+		insert_location_table(cur, location_table, control_id, organization_id, view_name)
 	# build and execute SQL to insert rows into main data table
 	insert_main_table(cur, ust_or_lust, control_id, organization_id, location_column, view_name, join_sql)
-	# insert rows with sufficient lat/long data into geocoding table with State as the gc coordinate source
-	insert_geo_table(cur, control_id, organization_id, geo_table, location_table, location_column, lat_col, long_col)
-	# determine if state needs additional geocoding and export a CSV file for Paul if so
-	missing_geo(cur, ust_or_lust, organization_id, control_id, geo_table, location_table, location_column)
+	if not main_table_only:
+		# insert rows with sufficient lat/long data into geocoding table with State as the gc coordinate source
+		insert_geo_table(cur, control_id, organization_id, geo_table, location_table, location_column, lat_col, long_col)
+		# determine if state needs additional geocoding and export a CSV file for Paul if so
+		missing_geo(cur, ust_or_lust, organization_id, control_id, geo_table, location_table, location_column)
 
 	conn.commit()
 	cur.close()
 	conn.close()
 
-	export_template.main(organization_id, ust_or_lust)
+	if export:
+		export_template.main(organization_id, ust_or_lust)
 	logger.info('Processing for %s %s complete', organization_id, ust_or_lust.upper())
 
 
@@ -161,9 +171,11 @@ def multiple_organization_ids(organization_ids, ust_or_lust):
 
 
 if __name__ == '__main__':
-	organization_id = 'NC'
+	organization_id = 'OR'
 	ust_or_lust = 'ust'
-	main(organization_id, ust_or_lust)
+	main_table_only = True
+	export = False
+	main(organization_id, ust_or_lust, main_table_only=main_table_only, export=export)
 
 	# organization_ids = ['AL','CA','NC','NE','NY','OR','SC','TN','TRUSTD','TX']
 	# ust_or_lust = 'ust'
