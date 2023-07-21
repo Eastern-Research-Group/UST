@@ -1,0 +1,24 @@
+ut_tank_attribute_type_id,ut_tank_attribute_desc,sequence,active,created_by,created_date,updated_by,updated_date,migrated_from,category
+1,Asphalt Coated Or Bare Steel,10.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Materials
+2,Cathodically Protected Steel (impressed current),20.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Materials
+3,Cathodically Protected Steel (sacrificial anodes),30.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Materials
+4,Coated and Cathodically Protected Steel (impressed current),40.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Materials
+5,Coated and Cathodically Protected Steel (sacrificial anodes),80.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Materials
+6,Composite (steel clad with noncorrodible material),50.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Materials
+7,Concrete,60.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Materials
+8,Fiberglass Reinforced Plastic,70.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Materials
+9,Noncorrodible Tank Jacket,90.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Materials
+10,Lined Interior,100.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:13,,Lined Interior
+11,Excavation Liner,110.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Secondary Containment
+12,Double Walled,120.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Tank Secondary Containment
+13,Manifolded,130.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:12,,Manifolded
+14,Compartmentalized,140.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:13,,Compartmentalized
+15,Field-constructed,150.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:13,,Field-Constructed Tank
+16,Unknown,10000.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:13,,Unknown
+17,Other,10000.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:13,,Other
+18,Cathodically Protected Steel (Legacy),,N,,2017-02-02 10:15:42,,,,
+19,Epoxy Coated Steel (Legacy),,N,,2017-02-02 10:15:42,,,,
+21,Polyethylene Tank Jacket,160.0,Y,,2020-06-27 11:03:57,,2022-11-04 08:32:12,R5,Tank Materials
+41,Triple Walled,170.0,Y,,2021-04-28 12:58:35,,2022-11-04 08:32:12,R1,Tank Secondary Containment
+42,Multiple STP,180.0,Y,,2021-04-28 13:05:54,,2022-11-04 08:32:13,R7,Multiple STP
+43,Single Walled,190.0,Y,,2021-04-28 13:05:54,,2022-11-04 08:32:12,R7,Tank Secondary Containment

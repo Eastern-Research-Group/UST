@@ -1,0 +1,11 @@
+ut_pipe_ld_method_id,pipe_ld_method_desc,created_by,created_date,updated_by,updated_date
+1,Auto Line Leak Detection,,,,
+2,Line Tightness,,,,
+3,Vapor Monitor,,,,
+4,Ground Water Monitoring,,,,
+5,Interstitial Double Walled,,,,
+6,Interstitial Secondary Containment,,,,
+7,Other LD,,,,
+8,LD Deferred,,,,
+9,Not Listed,,,,
+10,Statistical Inventory Reconciliation,,,,

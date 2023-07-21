@@ -1,0 +1,30 @@
+ut_substance_type_id,ut_substance_desc,sequence,active,created_by,created_date,updated_by,updated_date,migrated_from,ust_type
+1,Gasoline (containing <=10% ethanol),10.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Petroleum
+2,Diesel,20.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Petroleum
+3,Biodiesel,30.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Petroleum
+4,Kerosene,40.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Petroleum
+5,Heating Oil,50.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Heating Oil
+6,Used Oil,60.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Petroleum
+7,Gasoline Containing >10% Ethanol,70.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Petroleum
+8,Diesel Containing >20% Biodiesel,80.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Petroleum
+9,Hazardous Substance,90.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Hazardous Substance
+10,Mixture Of Substances,100.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Hazardous Substance
+11,Unknown,10000.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Unknown
+12,Other,10000.0,Y,,2017-02-02 10:15:42,,2021-10-07 13:05:03,,Petroleum
+13,Gasoline/Diesel (Legacy),,N,,2017-02-02 10:15:44,,2021-10-07 13:05:03,,Petroleum
+21,0% ethanol,110.0,Y,,2020-06-27 10:18:23,,,,
+22,Gasohol,120.0,N,,2020-06-27 11:05:18,,2021-10-07 13:05:03,R6,Petroleum
+23,Gasohol 10% or less,130.0,N,,2020-06-27 11:05:18,,2021-10-07 13:05:03,R6,Petroleum
+41,Unknown Petroleum,140.0,Y,,2021-04-28 08:48:26,,2021-12-16 11:14:28,R8,Petroleum
+42,Av Gas,150.0,Y,,2021-04-28 12:58:35,,2021-10-07 13:05:03,R1,Petroleum
+43,Stove Oil,160.0,Y,,2021-04-28 12:58:35,,2021-10-07 13:05:03,R1,Petroleum
+44,Diesel Exhaust Fluid,170.0,Y,,2021-04-28 13:07:49,,2021-10-07 13:05:03,R8,Diesel Exhaust Fluid
+54,Biodiesel (B10),180.0,Y,,2021-04-28 14:55:45,,2021-10-07 13:05:03,R10,Petroleum
+55,Hydraulic Oil,190.0,Y,,2021-04-28 14:55:45,,2021-10-07 13:05:03,R10,Petroleum
+56,JP-4,200.0,Y,,2021-04-28 14:55:45,,2021-10-07 13:05:03,R10,Petroleum
+57,JP-8,210.0,Y,,2021-04-28 14:55:45,,2021-10-07 13:05:03,R10,Petroleum
+58,Jet A,220.0,Y,,2021-04-28 14:55:45,,2021-10-07 13:05:03,R10,Petroleum
+59,Jet B,230.0,Y,,2021-04-28 14:55:45,,2021-10-07 13:05:03,R10,Petroleum
+60,Jet Fuel,240.0,Y,,2021-04-28 14:55:45,,2021-10-07 13:05:03,R10,Petroleum
+61,Mineral Oil (Transformer Oil),250.0,Y,,2021-04-28 14:55:45,,2021-10-07 13:05:03,R10,Petroleum
+62,Motor Oil (New),260.0,Y,,2021-04-28 14:55:45,,2021-10-07 13:05:03,R10,Petroleum

@@ -1,0 +1,14 @@
+release_event_type_id,release_event_desc,active,created_by,created_date,updated_by,updated_date,migrated_from,sequence
+1,Suspected Release,Y,,,,2020-06-27 11:00:12,,20.0
+2,Confirmed Release,Y,,,,2020-06-27 11:00:12,,30.0
+3,Cleanup Initiated,Y,,,,2020-06-27 11:00:12,,50.0
+4,Cleanup Completed (NFA - Confirmed Release),Y,,,,2020-06-27 11:00:12,,90.0
+5,NFA - Suspected Release,Y,,,,2020-06-27 11:00:12,,80.0
+6,Determination of Non-Jurisdiction,Y,,,,2020-06-27 11:00:12,,110.0
+7,Continued GW Monitoring,Y,,2020-06-27 00:00:00,AFONG,2022-07-01 12:33:02,R6,60.0
+8,Pending,N,,2020-06-27 00:00:00,AFONG,2021-05-27 16:25:45,R6,70.0
+9,Site Investigation Completed,Y,,2020-06-27 00:00:00,AFONG,2022-07-01 12:32:00,R6,40.0
+10,Emergency Response Taken with Federal Funds,N,,2021-04-28 13:07:49,,,R8,
+11,Emergency Response Taken with State Funds,N,,2021-04-28 13:07:49,,,R8,
+12,Release Mitigated,N,,2021-04-28 13:07:50,,,R8,
+13,Site Investigation Initiated,Y,MCOSSON,2021-08-06 15:25:23,MCOSSON,2022-11-04 09:11:46,,35.0

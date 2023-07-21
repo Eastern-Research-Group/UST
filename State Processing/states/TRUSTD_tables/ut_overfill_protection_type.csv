@@ -1,0 +1,7 @@
+ut_overfill_protection_type_id,ut_overfill_protection_desc,sequence,active,created_by,created_date,updated_by,updated_date
+1,Automatic Shutoff,10.0,Y,,2017-02-02 10:15:42,,
+2,Flow Restrictor,20.0,Y,,2017-02-02 10:15:42,,
+3,High-level Alarm,30.0,Y,,2017-02-02 10:15:42,,
+4,Other,40.0,Y,,2017-02-02 10:15:42,,
+5,Ball Float (Legacy),,Y,,2017-02-02 10:15:42,,2021-04-28 13:05:54
+6,Flapper Valve (Legacy),,Y,,2017-02-02 10:15:42,,2021-04-28 13:05:54

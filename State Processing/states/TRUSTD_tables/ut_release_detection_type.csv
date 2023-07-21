@@ -1,0 +1,18 @@
+ut_release_detection_type_id,ut_release_detection_desc,sequence,active,tank_flag,pipe_flag,created_by,created_date,updated_by,updated_date
+1,Manual Tank Gauging,10.0,Y,Y,N,,2017-02-02 10:15:42,,
+2,Tank Tightness Testing,20.0,Y,Y,N,,2017-02-02 10:15:42,,
+3,Inventory Control,30.0,Y,Y,N,,2017-02-02 10:15:42,,
+4,Automatic Tank Gauging,40.0,Y,Y,Y,,2017-02-02 10:15:42,,
+5,Vapor Monitoring,50.0,Y,Y,Y,,2017-02-02 10:15:42,,
+6,Groundwater Monitoring,60.0,Y,Y,Y,,2017-02-02 10:15:42,,
+7,Interstitial Monitoring,70.0,Y,Y,Y,,2017-02-02 10:15:42,,
+8,Statistical Inventory Reconciliation,80.0,Y,Y,Y,,2017-02-02 10:15:42,,
+9,Automatic Line Leak Detectors,90.0,N,N,Y,,2017-02-02 10:15:42,,2020-06-27 10:18:25
+10,Line Tightness Testing,100.0,Y,N,Y,,2017-02-02 10:15:42,,
+11,No Release Detection Required,110.0,Y,Y,Y,,2017-02-02 10:15:42,,
+12,Other Method Allowed By Implementing Agency,120.0,Y,Y,Y,,2017-02-02 10:15:42,,
+13,Other,130.0,Y,Y,Y,,2017-02-02 10:15:42,,
+14,Leak Detection Deferred (Legacy),,N,Y,,,2017-02-02 10:15:44,,
+15,LD Deferred (Legacy),,N,,Y,,2017-02-02 10:15:44,,
+21,Automatic Line Leak Detectors - Electronic,30.0,Y,N,Y,,2020-06-27 10:18:25,,
+22,Automatic Line Leak Detectors - Mechanical,30.0,Y,N,Y,,2020-06-27 10:18:25,,

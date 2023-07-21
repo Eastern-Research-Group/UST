@@ -1,0 +1,18 @@
+ut_piping_attribute_type_id,ut_piping_attribute_desc,sequence,active,created_by,created_date,updated_by,updated_date,migrated_from,category
+1,Bare Steel,10.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Materials
+2,Galvanized Steel,20.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Materials
+3,Fiberglass Reinforced Plastic,30.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Materials
+4,Flexible Plastic,40.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Materials
+5,Copper,80.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Materials
+6,Cathodically Protected (impressed current),50.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Materials
+7,Cathodically Protected (sacrificial anodes),60.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Materials
+8,Double Walled,70.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Secondary Containment
+9,Secondary Containment,90.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Secondary Containment
+10,Airport Hydrant Piping,100.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Airport Hydrant Piping
+11,Unknown,10000.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Unknown
+12,Other,10000.0,Y,,2017-02-02 10:15:42,,2022-11-04 08:32:14,,Piping Other
+13,No Piping (Legacy),,N,,2017-02-02 10:15:42,,,,
+14,Cathodically Protected (Legacy),,N,,2017-02-02 10:15:45,,,,
+21,Not Listed,110.0,Y,,2020-06-27 11:03:57,,2022-11-04 08:32:14,R5,Piping Not Listed
+22,Steel-DW - Outer Wall Non-metal,120.0,Y,,2020-06-27 11:03:57,,2022-11-04 08:32:14,R5,Piping Secondary Containment
+41,Jacketed Flex Piping,130.0,Y,,2021-04-28 12:58:35,,2022-11-04 08:32:14,R1,Piping Materials

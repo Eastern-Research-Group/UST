@@ -1,0 +1,12 @@
+region_id,region_name,region_key,active_flag,description,logo,logo_mime_type,created_by,created_on,updated_by,updated_on
+1,Region 9,R9,Y,,,,,2016-02-11 14:14:34,,
+2,OUST,OUST,Y,,,,,2016-02-11 14:14:34,,
+3,Region 1,R1,Y,,,,,2016-02-11 14:14:34,,
+4,Region 2,R2,Y,,,,,2016-02-11 14:14:34,,
+5,Region 3,R3,Y,,,,,2016-02-11 14:14:34,,
+6,Region 4,R4,Y,,,,,2016-02-11 14:14:34,,
+7,Region 5,R5,Y,,,,,2016-02-11 14:14:34,,
+8,Region 6,R6,Y,,,,,2016-02-11 14:14:34,,
+9,Region 7,R7,Y,,,,,2016-02-11 14:14:34,,
+10,Region 8,R8,Y,,,,,2016-02-11 14:14:34,,
+11,Region 10,R10,Y,,,,,2016-02-11 14:14:34,,

@@ -1,0 +1,25 @@
+land_use_type_id,land_use_type_desc,created_by,created_date,updated_by,updated_date,migrated_from
+1,Gas Station,,,,,
+2,Federal Military,,,,,
+3,Aircraft Owner,,,,,
+4,Federal Non-Military,,,,,
+5,Farm,,,,,
+6,Utilities,,,,,
+7,Commercial Airport or Airline,,,,,
+8,Industrial,,,,,
+9,Truck/Transporter,,,,,
+10,Other,,,,,
+11,Railroad,,,,,
+12,Commercial,,,,,
+13,State Government,,,,,
+14,Local Government,,,,,
+15,Petroleum Distributor,,,,,
+16,Not Listed,,,,,
+17,Auto Dealership,,,,,
+18,Residential,,,,,
+19,Casino,,2020-06-27 11:03:57,,,R5
+20,Contractor,,2020-06-27 11:03:57,,,R5
+21,Hospital,,2020-06-27 11:03:57,,,R5
+22,Marina,,2020-06-27 11:03:57,,,R5
+23,Private,,2020-06-27 11:03:57,,,R5
+24,School,,2020-06-27 11:03:57,,,R5
