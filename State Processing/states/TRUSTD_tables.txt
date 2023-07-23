@@ -19,6 +19,7 @@ ut_release_detection_type
 ut_release_event
 ut_release_event_type
 ut_release_priority
+ut_spill_prevention_type
 ut_substance_type
 ut_suspected_cause_type
 ut_tank_attribute_type
