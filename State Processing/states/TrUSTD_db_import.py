@@ -7,11 +7,10 @@ state = 'TRUSTD'
 ust_folder = 'TRUSTD_tables/'
 tables_file = 'TRUSTD_tables.txt'
 
-import_servic
-e = ImportService()
+import_service = ImportService()
 
 def import_files():
-    import_service.import_ust(state, ust_folder)
+    import_service.import_ust(state, ust_folder, overwrite_table=False)
     get_summary()
 
 
@@ -54,5 +53,5 @@ def get_summary():
     print(df)    
     
 if __name__ == '__main__':       
-    # import_files()
-     get_summary()
+    import_files()
+    # get_summary()

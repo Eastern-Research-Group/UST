@@ -44,7 +44,7 @@ def get_view_sql(view_name):
 
  
 def process_view_sql(sql):
-    i = sql.find('FROM ')
+    i = sql.find('FROM')
     to_sql = sql[:i].replace('SELECT DISTINCT ','').replace('SELECT ','')
     to_sql = to_sql.replace('SELECT DISTINCT\n','').replace('SELECT\n','')
     i2 = sql.find('ORDER BY ')

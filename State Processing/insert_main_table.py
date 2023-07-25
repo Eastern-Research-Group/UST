@@ -171,7 +171,7 @@ def multiple_organization_ids(organization_ids, ust_or_lust):
 
 
 if __name__ == '__main__':
-	organization_id = 'OR'
+	organization_id = 'TRUSTD'
 	ust_or_lust = 'ust'
 	main_table_only = True
 	export = False
