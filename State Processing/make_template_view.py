@@ -10,7 +10,6 @@ def update_col_name(cur, view_name, column_names):
 	except psycopg2.errors.UndefinedColumn as e:
 		pass
 
-
 def update_col_names(organization_id, ust_or_lust, view_name=None):
 	conn = utils.connect_db()
 	cur = conn.cursor()
@@ -125,6 +124,6 @@ def main(organization_id, ust_or_lust):
 
 
 if __name__ == '__main__':   
-	organization_id = 'CA'
+	organization_id = 'TRUSTD'
 	ust_or_lust = 'ust'
-	main(organization_id, ust_or_lust)
+	update_col_names(organization_id, ust_or_lust)

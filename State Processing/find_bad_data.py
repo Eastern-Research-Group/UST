@@ -243,7 +243,7 @@ if __name__ == '__main__':
 	ust_or_lust = 'ust'
 	view_name = 'v_' + ust_or_lust + '_base'
 	# find_empty_cols(organization_id, ust_or_lust, view_name, drop_cols=True)
-	find_too_long_col(100, organization_id, ust_or_lust, view_name)
+	find_too_long_col(40, organization_id, ust_or_lust, view_name)
 	# find_bad_dates(organization_id, ust_or_lust, view_name)
 	# find_bad_floats(organization_id, ust_or_lust, view_name)
 	# find_bad_ints(organization_id, ust_or_lust, view_name)
