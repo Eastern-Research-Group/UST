@@ -1,0 +1,7 @@
+ut_impacted_media_type_id,ut_impacted_media_desc,sequence,active,created_by,created_date,updated_by,updated_date
+1,Air,10,Y,,2021-12-16 11:12:46,,
+2,Groundwater,20,Y,,2021-12-16 11:12:46,,
+3,Soil,30,Y,,2021-12-16 11:12:46,,
+4,Surface (no impact to soil),40,Y,,2021-12-16 11:12:46,,2021-12-16 11:14:21
+5,Surface Water,50,Y,,2021-12-16 11:12:46,,
+6,Unknown,1000,Y,,2021-12-16 11:12:46,,
