@@ -6,6 +6,7 @@ ut_facility_oper_hist
 ut_facility_owner
 ut_facility_owner_hist
 ut_financial_responsibility
+ut_impacted_media_type
 ut_land_location
 ut_land_use_hist
 ut_land_use_type
