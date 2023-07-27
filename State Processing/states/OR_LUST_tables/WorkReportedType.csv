@@ -1,0 +1,20 @@
+WorkTypeId,WorkTypeCode,WorkTypeDescription,LastChangeBy,LastChangeDate
+1,20DAY,20 DAY REPORT,BDYER,2005-05-03
+2,45DAY,45 DAY REPORT,BDYER,2005-05-03
+3,AS/VE,Air Sparging / Vapor Extraction,BDYER,2005-05-03
+4,ASSESS,Site Assessment,BDYER,2005-05-03
+5,CAP,Corrective Action Plan,BDYER,2005-05-03
+6,DECOM,Tank Decommissioning,BDYER,2005-05-03
+7,FRPREC,Free Product Recovery,BDYER,2005-05-03
+8,GWINV,Groundwater Investigation,BDYER,2005-05-03
+9,GWMON,Groundwater Monitoring,BDYER,2005-05-03
+10,GWTRT,Groundwater treatment,BDYER,2005-05-03
+11,HOTG,HOT Generic Remedy,BDYER,2005-05-03
+12,INRESP,Initial Response,BDYER,2005-05-03
+13,LIP,Low Impact Evaluation,BDYER,2005-05-03
+14,OTHER,Other,BDYER,2005-05-03
+15,RBCA,Risk Based Evaluation,BDYER,2005-05-03
+16,SLMAT,Soil Matrix Cleanup,BDYER,2005-05-03
+17,SOILEX,Soil Excavation,BDYER,2005-05-03
+18,SOILTR,Soil Treatment,BDYER,2005-03-05
+19,WORKPL,Work Plan,BDYER,2005-05-03

@@ -59,8 +59,8 @@ def main(schema, table_name, key_columns):
 	logger.info('Done dupe search')
 
 if __name__ == '__main__':
-	schema = "TRUSTD_UST"
-	table_name = 'v_ust_base_temp'
-	key_columns = ["FacilityID", "TankID", "CompartmentID"]
+	schema = "TRUSTD_LUST"
+	table_name = 'v_lust_base'
+	key_columns = ["LUSTID"]
 	main(schema, table_name, key_columns)
 	
