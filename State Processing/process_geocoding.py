@@ -29,7 +29,7 @@ def upload_geocoded_data(ust_or_lust, file_path, organization_id=None):
 		table_name = organization_id.lower() + '_' + ust_or_lust.lower() + '_geocoded'
 	else:
 		schema = 'public'
-		table_name = ust_or_lust.upper() + '_geocoded_temp'
+		table_name = ust_or_lust.lower() + '_geocoded_temp'
 
 	engine = utils.get_engine(schema=schema)    
 	df.to_sql(table_name, engine, index=False, if_exists='replace')
@@ -141,19 +141,20 @@ def main(ust_or_lust, file_path=None, organization_id=None):
 	else:
 		table_name = None
 
-	update_geo_table(ust_or_lust, organization_id=None, staging_table_name=table_name)
+	update_geo_table(ust_or_lust, organization_id=organization_id, staging_table_name=table_name)
 
 	logger.info('Script complete')
 
 
 if __name__ == '__main__':   
-	organization_id = 'TN'
+	organization_id = None
 	ust_or_lust = 'lust'
 
 	# Set file_path to None if file is already uploaded
-	file_name = 'TN_LUST_geocoded.xlsx'
+	file_name = 'LUST_for_geoprocessing-2023-07-31_20230731.csv'
 	# file_path = config.local_ust_path + organization_id.upper() + '/AL_UST_template_data_only_20230110/' + file_name
-	file_path = config.local_ust_path + organization_id.upper() + file_name
+	# file_path = config.local_ust_path + organization_id.upper() + file_name
+	file_path = config.local_ust_path + 'Geocoding/' + file_name
 	# file_path = None
 	
 	main(ust_or_lust, file_path=file_path, organization_id=organization_id)
