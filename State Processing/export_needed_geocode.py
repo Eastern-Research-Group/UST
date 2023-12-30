@@ -35,5 +35,5 @@ def main(ust_or_lust, organization_id=None, control_id=None):
 
 if __name__ == '__main__':   
 	organization_id = None
-	ust_or_lust = 'lust'
+	ust_or_lust = 'ust'
 	main(ust_or_lust, organization_id)
