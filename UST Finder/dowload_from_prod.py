@@ -5,10 +5,10 @@ from arcgis.features import FeatureLayer
 
 
 facilities_layer_url = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/0'
-facilities_out_fields = 'Facility_ID,Name,Address,City,State,Zip_Code'
+facilities_out_fields = 'OBJECTID,Facility_ID,Name,Address,City,State,Zip_Code'
 
 usts_layer_url = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/ArcGIS/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/4'
-usts_out_fields = 'Facility_ID,Tank_ID,Tank_Status,Capacity'
+usts_out_fields = 'OBJECTID,Facility_ID,Tank_ID,Tank_Status,Capacity'
 
 
 def get_layer(url):
@@ -40,11 +40,12 @@ def get_facilities():
 	rows = cur.fetchall()
 	existing_ids = [r[0] for r in rows]
 
-	logger.info('There are %s existing rpws that will be ignored', len(existing_ids))
+	logger.info('There are %s existing rows that will be ignored', len(existing_ids))
 
 	layer = get_layer(facilities_layer_url)
 	# results = query_layer(layer, out_fields, query="Facility_ID='AL1'").features
-	results = query_layer(layer, facilities_out_fields).features
+	query = "State='Alaska'"
+	results = query_layer(layer, facilities_out_fields, query=query).features
 	total = len(results)
 	logger.info('There are %s total results', total)
 	logger.info('There are %s results that still need to be downloaded', total - len(existing_ids))
@@ -123,5 +124,5 @@ def get_usts():
 	logger.info('Finished downloading USTs!')
 
 if __name__ == '__main__':   
-	get_usts()
+	get_facilities()
 

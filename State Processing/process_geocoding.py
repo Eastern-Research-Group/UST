@@ -148,13 +148,14 @@ def main(ust_or_lust, file_path=None, organization_id=None):
 
 if __name__ == '__main__':   
 	organization_id = None
-	ust_or_lust = 'lust'
+	ust_or_lust = 'ust'
 
 	# Set file_path to None if file is already uploaded
-	file_name = 'LUST_for_geoprocessing-2023-07-31_20230731.csv'
+	file_name = 'UST_for_geoprocessing-2023-08-09_20230811.csv'
 	# file_path = config.local_ust_path + organization_id.upper() + '/AL_UST_template_data_only_20230110/' + file_name
 	# file_path = config.local_ust_path + organization_id.upper() + file_name
-	file_path = config.local_ust_path + 'Geocoding/' + file_name
+	# file_path = config.local_ust_path + 'Geocoding/' + file_name
+	file_path = r'C:\Users\renae\Downloads\\' + file_name
 	# file_path = None
 	
 	main(ust_or_lust, file_path=file_path, organization_id=organization_id)
