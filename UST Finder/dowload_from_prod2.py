@@ -35,12 +35,12 @@ def get_facilities():
 	conn = utils.connect_db()
 	cur = conn.cursor()
 
-	sql = """select distinct "Facility_ID" from ust_finder_prod.facilities order by 1"""
+	sql = """select distinct "OBJECTID" from ust_finder_prod.facilities order by 1"""
 	cur.execute(sql)
 	rows = cur.fetchall()
 	existing_ids = [r[0] for r in rows]
 
-	logger.info('There are %s existing Facility IDs that will be ignored', len(existing_ids))
+	logger.info('There are %s existing rpws that will be ignored', len(existing_ids))
 
 	layer = get_layer(facilities_layer_url)
 	# results = query_layer(layer, out_fields, query="Facility_ID='AL1'").features
@@ -51,18 +51,18 @@ def get_facilities():
 
 	i = 1
 	for r in results:
-		if r.attributes['Facility_ID'] in existing_ids:
-			print(r.attributes['Facility_ID'] + ' already in database; skipping')
+		if r.attributes['OBJECTID'] in existing_ids:
+			print(r.attributes['OBJECTID'] + ' already in database; skipping')
 			continue
-		logger.info('Working on %s of %s: Facility ID %s', i, total - len(existing_ids), r.attributes['Facility_ID'])
+		logger.info('Working on %s of %s: OBJECTID %s, Facility ID %s', i, total - len(existing_ids), r.attributes['OBJECTID'], r.attributes['Facility_ID'])
 		sql = """insert into ust_finder_prod.facilities values (%s, %s, %s, %s, %s, %s) 
-				on conflict ("Facility_ID") do nothing"""
-		vals = (r.attributes['Facility_ID'], r.attributes['Name'], r.attributes['Address'], r.attributes['City'], r.attributes['State'], r.attributes['Zip_Code'])
+				on conflict ("OBJECTID") do nothing"""
+		vals = (r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Name'], r.attributes['Address'], r.attributes['City'], r.attributes['State'], r.attributes['Zip_Code'])
 		try:
 			cur.execute(sql, vals)
 		except Exception as e:
-			logger.error('Unable to insert row: Facility_ID = %s, Name = %s, Address = %s, City = %s, State = %s, Zip_Code = %s.', 
-				         r.attributes['Facility_ID'], r.attributes['Name'], r.attributes['Address'], r.attributes['City'], r.attributes['State'], r.attributes['Zip_Code'])
+			logger.error('Unable to insert row: OBJECTID = %s, Facility_ID = %s, Name = %s, Address = %s, City = %s, State = %s, Zip_Code = %s.', 
+				         r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Name'], r.attributes['Address'], r.attributes['City'], r.attributes['State'], r.attributes['Zip_Code'])
 		i += 1
 		if i % 100 == 0:
 			conn.commit()
