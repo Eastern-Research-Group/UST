@@ -82,12 +82,12 @@ def get_usts():
 	conn = utils.connect_db()
 	cur = conn.cursor()
 
-	sql = """select distinct "Facility_ID", "Tank_ID" from ust_finder_prod.usts order by 1"""
+	sql = """select distinct "OBJECTID" from ust_finder_prod.usts order by 1"""
 	cur.execute(sql)
 	rows = cur.fetchall()
-	existing_ids = [(r[0], r[1]) for r in rows]
+	existing_ids = [r[0] for r in rows]
 
-	logger.info('There are %s existing Facility ID/Tank ID combinations that will be ignored', len(existing_ids))
+	logger.info('There are %s existing rows that will be ignored', len(existing_ids))
 
 	layer = get_layer(usts_layer_url)
 	# results = query_layer(layer, out_fields, query="Facility_ID='AL1'").features
@@ -98,18 +98,18 @@ def get_usts():
 
 	i = 1
 	for r in results:
-		if (r.attributes['Facility_ID'], r.attributes['Tank_ID']) in existing_ids:
-			print(r.attributes['Facility_ID'] + ', ' + r.attributes['Tank_ID'] + ' already in database; skipping')
+		if r.attributes['OBJECTID'] in existing_ids:
+			print(r.attributes['OBJECTID'] + ' already in database; skipping')
 			continue
-		logger.info('Working on %s of %s: Facility ID %s, Tank ID %s', i, total - len(existing_ids), r.attributes['Facility_ID'], r.attributes['Tank_ID'])
-		sql = """insert into ust_finder_prod.usts values (%s, %s, %s, %s) 
-				on conflict ("Facility_ID") do nothing"""
-		vals = (r.attributes['Facility_ID'], r.attributes['Tank_ID'], r.attributes['Tank_Status'], r.attributes['Capacity'])
+		logger.info('Working on %s of %s: OBJECTID %s, Facility ID %s, Tank ID %s', i, total - len(existing_ids), r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Tank_ID'])
+		sql = """insert into ust_finder_prod.usts values (%s, %s, %s, %s, %s) 
+				on conflict ("OBJECTID") do nothing"""
+		vals = (r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Tank_ID'], r.attributes['Tank_Status'], r.attributes['Capacity'])
 		try:
 			cur.execute(sql, vals)
 		except Exception as e:
-			logger.error('Unable to insert row: Facility_ID = %s, Tank_ID = %s, Tank_Status = %s, Capacity = %s', 
-				         r.attributes['Facility_ID'], r.attributes['Tank_ID'], r.attributes['Tank_Status'], r.attributes['Capacity'])
+			logger.error('Unable to insert row: OBJECTID = %s, Facility_ID = %s, Tank_ID = %s, Tank_Status = %s, Capacity = %s', 
+				         r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Tank_ID'], r.attributes['Tank_Status'], r.attributes['Capacity'])
 		i += 1
 		if i % 100 == 0:
 			conn.commit()
