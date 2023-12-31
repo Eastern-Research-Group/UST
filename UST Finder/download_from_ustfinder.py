@@ -136,10 +136,8 @@ if __name__ == '__main__':
 			'Rhode Island','South Carolina','South Dakota','Tennessee','Texas','U.S. Virgin Islands','Utah','Vermont']
 
 	data_table = 'usts'
-	
+
 	for state in states:
-		get_data(data_table=data_table, state=state)
-		exit()
 		try:
 			get_data(data_table=data_table, state=state)
 		except Exception as e:
