@@ -5,10 +5,10 @@ from arcgis.features import FeatureLayer
 
 
 facilities_layer_url = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/0'
-facilities_out_fields = 'OBJECTID,Facility_ID,Name,Address,City,State,Zip_Code'
+facilities_out_fields = 'Facility_ID,Name,Address,City,State,Zip_Code'
 
 usts_layer_url = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/ArcGIS/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/4'
-usts_out_fields = 'OBJECTID,Facility_ID,Tank_ID,Tank_Status,Capacity'
+usts_out_fields = 'Facility_ID,Tank_ID,Tank_Status,Capacity'
 
 
 def get_layer(url):
@@ -44,7 +44,7 @@ def get_facilities():
 
 	layer = get_layer(facilities_layer_url)
 	# results = query_layer(layer, out_fields, query="Facility_ID='AL1'").features
-	query = "State='Alaska'"
+	query = "State<>'Alaska'"
 	results = query_layer(layer, facilities_out_fields, query=query).features
 	total = len(results)
 	logger.info('There are %s total results', total)
@@ -56,14 +56,14 @@ def get_facilities():
 			print(r.attributes['OBJECTID'] + ' already in database; skipping')
 			continue
 		logger.info('Working on %s of %s: OBJECTID %s, Facility ID %s', i, total - len(existing_ids), r.attributes['OBJECTID'], r.attributes['Facility_ID'])
-		sql = """insert into ust_finder_prod.facilities values (%s, %s, %s, %s, %s, %s) 
+		sql = """insert into ust_finder_prod.facilities values (%s, %s, %s, %s, %s, %s, %s) 
 				on conflict ("OBJECTID") do nothing"""
 		vals = (r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Name'], r.attributes['Address'], r.attributes['City'], r.attributes['State'], r.attributes['Zip_Code'])
 		try:
 			cur.execute(sql, vals)
 		except Exception as e:
-			logger.error('Unable to insert row: OBJECTID = %s, Facility_ID = %s, Name = %s, Address = %s, City = %s, State = %s, Zip_Code = %s.', 
-				         r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Name'], r.attributes['Address'], r.attributes['City'], r.attributes['State'], r.attributes['Zip_Code'])
+			logger.error('Unable to insert row: OBJECTID = %s, Facility_ID = %s, Name = %s, Address = %s, City = %s, State = %s, Zip_Code = %s. Error message: %s' , 
+				         r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Name'], r.attributes['Address'], r.attributes['City'], r.attributes['State'], r.attributes['Zip_Code'], e)
 		i += 1
 		if i % 100 == 0:
 			conn.commit()
@@ -109,8 +109,8 @@ def get_usts():
 		try:
 			cur.execute(sql, vals)
 		except Exception as e:
-			logger.error('Unable to insert row: OBJECTID = %s, Facility_ID = %s, Tank_ID = %s, Tank_Status = %s, Capacity = %s', 
-				         r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Tank_ID'], r.attributes['Tank_Status'], r.attributes['Capacity'])
+			logger.error('Unable to insert row: OBJECTID = %s, Facility_ID = %s, Tank_ID = %s, Tank_Status = %s, Capacity = %s. Error message: %s', 
+				         r.attributes['OBJECTID'], r.attributes['Facility_ID'], r.attributes['Tank_ID'], r.attributes['Tank_Status'], r.attributes['Capacity'], e)
 		i += 1
 		if i % 100 == 0:
 			conn.commit()
