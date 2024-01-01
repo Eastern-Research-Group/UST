@@ -79,10 +79,13 @@ def get_data(data_table, state=None):
 		results = query_layer(layer, out_fields='State', query=query, return_count_only=True)
 
 		if cnt >= results:
-			logger.info('Number of rows in database (%s) >= count from layer (%s) for state %s (%s), no need to continue.', cnt, results, state)
+			logger.info('Number of rows in database (%s) >= count from layer (%s) for state %s, no need to continue.', cnt, results, state)
 			return
 
-	sql = f"""select distinct "OBJECTID" from ust_finder_prod.{data_table} order by 1"""
+	sql = f"""select distinct "OBJECTID" from ust_finder_prod.{data_table} """
+	if state:
+		sql = sql + f" where state = '{state}' "
+	sql = sql + "order by 1"
 	cur.execute(sql)
 	rows = cur.fetchall()
 	existing_ids = [r[0] for r in rows]
