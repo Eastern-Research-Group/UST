@@ -1,5 +1,5 @@
 import utils
-from logger_factory import logger
+from logger_factory import logger, error_logger
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayer
 
@@ -18,16 +18,23 @@ def get_layer(url):
 	return layer
 
 
+def get_states_from_layer(layer):
+	results = layer.query(where='1=1', out_fields='State', order_by_fields='State', return_distinct_values=True, return_geometry=False).features
+	states = [r.attributes['State'] for r in results]
+	return states
+
+
 def query_layer(layer, out_fields=None, query=None, return_count_only=False):
 	if not out_fields:
 		out_fields = '*'
 	if query:
-		results = layer.query(where=query, out_fields=out_fields, return_count_only=return_count_only)
+		results = layer.query(where=query, out_fields=out_fields, return_count_only=return_count_only, return_geometry=False)
 	else:
 		results = layer.query(out_fields=out_fields, return_count_only=return_count_only)
 
 	logger.info('query retrieved from layer for out_fields "%s"', out_fields)
 	return results
+
 
 
 def get_db_cols(data_table, cur=None):
@@ -51,7 +58,7 @@ def get_db_cols(data_table, cur=None):
 	return cols
 
 
-def get_data(data_table, state=None):
+def get_data(data_table, layer=None, state=None):
 	logger.info('Getting started on downloading %s ....', data_table)
 
 	if state:
@@ -62,11 +69,12 @@ def get_data(data_table, state=None):
 	if data_table == 'usts':
 		layer_url = usts_layer_url
 		out_fields = usts_out_fields
-	elif data_table == 'facilties':
+	elif data_table == 'facilities':
 		layer_url = facilities_layer_url
 		out_fields = facilities_out_fields
 
-	layer = get_layer(layer_url)
+	if not layer:
+		layer = get_layer(layer_url)
 
 	conn = utils.connect_db()
 	cur = conn.cursor()
@@ -84,7 +92,7 @@ def get_data(data_table, state=None):
 
 	sql = f"""select distinct "OBJECTID" from ust_finder_prod.{data_table} """
 	if state:
-		sql = sql + f" where state = '{state}' "
+		sql = sql + f""" where "State" = '{state}' """
 	sql = sql + "order by 1"
 	cur.execute(sql)
 	rows = cur.fetchall()
@@ -117,7 +125,7 @@ def get_data(data_table, state=None):
 		try:
 			cur.execute(sql, vals)
 		except Exception as e:
-			logger.error('Unable to insert row for OBJECTID = %s. Error message: %s', r.attributes['OBJECTID'], e)
+			error_logger.error('Unable to insert row for OBJECTID = %s. Error message: %s', r.attributes['OBJECTID'], e)
 		i += 1
 		if i % 100 == 0:
 			conn.commit()
@@ -130,70 +138,28 @@ def get_data(data_table, state=None):
 
 	logger.info('Finished downloading %s!', data_table)
 
-if __name__ == '__main__':   
 
-	states = ['Alabama','Alaska','American Samoa','Arizona','Arkansas','California','Colorado','Commonwealth of the Northern Mariana Islands',
-			'Connecticut','Delaware','Florida','Georgia','Guam','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana',
-			'Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire',
-			'New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Puerto Rico',
-			'Rhode Island','South Carolina','South Dakota','Tennessee','Texas','U.S. Virgin Islands','Utah','Vermont']
+def request_data(data_table, layer, state):
+	try:
+		logger.info('Working on %s for %s', data_table, state)
+		get_data(data_table=data_table, layer=layer, state=state)
+		logger.info('Working on %s for %s', data_table, state)
+	except Exception as e:
+		error_logger.error('Unable to download %s data for %s. Error message: %s', data_table, state, e)
+
+if __name__ == '__main__':   
+	data_table = 'facilities'
+	layer = get_layer(facilities_layer_url)
+	states = get_states_from_layer(layer)
+	for state in states:
+		request_data(data_table, layer, state)
 
 	data_table = 'usts'
-
+	layer = get_layer(usts_layer_url)
+	states = get_states_from_layer(layer)
 	for state in states:
-		try:
-			get_data(data_table=data_table, state=state)
-		except Exception as e:
-			logger.error('Error processing %s for state %s: %s', data_table, state, e)
+		request_data(data_table, layer, state)
 
 
-# Alabama
-# Alaska
-# American Samoa
-# Arizona
-# Arkansas
-# California
-# Colorado
-# Commonwealth of the Northern Mariana Islands
-# Connecticut
-# Delaware
-# Florida
-# Georgia
-# Guam
-# Hawaii
-# Idaho
-# Illinois
-# Indiana
-# Iowa
-# Kansas
-# Kentucky
-# Louisiana
-# Maine
-# Maryland
-# Massachusetts
-# Michigan
-# Minnesota
-# Mississippi
-# Missouri
-# Montana
-# Nebraska
-# Nevada
-# New Hampshire
-# New Jersey
-# New Mexico
-# New York
-# North Carolina
-# North Dakota
-# Ohio
-# Oklahoma
-# Oregon
-# Pennsylvania
-# Puerto Rico
-# Rhode Island
-# South Carolina
-# South Dakota
-# Tennessee
-# Texas
-# U.S. Virgin Islands
-# Utah
-# Vermont
+
+
