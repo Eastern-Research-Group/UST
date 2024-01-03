@@ -59,7 +59,10 @@ def get_db_cols(data_table, cur=None):
 
 
 def get_data(data_table, layer=None, state=None):
-	logger.info('Getting started on downloading %s ....', data_table)
+	msg = 'Getting started on downloading ' + data_table
+	if state:
+		msg = msg + ' for state ' + state
+	logger.info('%s', msg)
 
 	if state:
 		query = "State='" + state + "'"
@@ -102,8 +105,9 @@ def get_data(data_table, layer=None, state=None):
 
 	results = query_layer(layer, out_fields, query=query).features
 	total = len(results)
+	working_set = total = len(existing_ids)
 	logger.info('There are %s total results', total)
-	logger.info('There are %s results that still need to be downloaded', total - len(existing_ids))
+	logger.info('There are %s results that still need to be downloaded', working_set)
 
 	cols = get_db_cols(data_table)
 	placeholders = '('
@@ -116,7 +120,11 @@ def get_data(data_table, layer=None, state=None):
 		if r.attributes['OBJECTID'] in existing_ids:
 			print(r.attributes['OBJECTID'] + ' already in database; skipping')
 			continue
-		logger.info('Working on %s of %s: OBJECTID %s', i, total - len(existing_ids), r.attributes['OBJECTID'])
+		msg = 'Working on ' + str(i) + ' of ' + str(working_set) 
+		if state:
+			msg = msg + ' for state ' + state
+		msg = ': OBJECTID = ' + r.attributes['OBJECTID']
+		logger.info('%s', msg)
 		sql = f"""insert into ust_finder_prod.{data_table} values {placeholders} 
 				on conflict ("OBJECTID") do nothing"""
 		vals = []
@@ -125,7 +133,11 @@ def get_data(data_table, layer=None, state=None):
 		try:
 			cur.execute(sql, vals)
 		except Exception as e:
-			error_logger.error('Unable to insert row for OBJECTID = %s. Error message: %s', r.attributes['OBJECTID'], e)
+			msg = 'Unable to insert row for OBJECTID = ' + r.attributes['OBJECTID']
+			if state:
+				msg = msg + ' in state ' + state 
+			msg = msg + '. Error message: ' + e
+			error_logger.error('%s', msg)
 		i += 1
 		if i % 100 == 0:
 			conn.commit()
@@ -136,7 +148,10 @@ def get_data(data_table, layer=None, state=None):
 	cur.close()
 	conn.close()
 
-	logger.info('Finished downloading %s!', data_table)
+	msg = 'Finished downloading ' + data_table
+	if state:
+		msg = msg + ' for state ' + state 
+	logger.info('%s!', msg)
 
 
 def request_data(data_table, layer, state):
