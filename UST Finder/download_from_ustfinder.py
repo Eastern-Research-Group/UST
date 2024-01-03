@@ -36,7 +36,6 @@ def query_layer(layer, out_fields=None, query=None, return_count_only=False):
 	return results
 
 
-
 def get_db_cols(data_table, cur=None):
 	if not cur:
 		conn = utils.connect_db()
