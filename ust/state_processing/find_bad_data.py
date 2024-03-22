@@ -1,4 +1,7 @@
-import utils
+import sys
+import os
+sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
+from ust.util import utils
 import psycopg2.errors
 
 

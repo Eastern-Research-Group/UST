@@ -1,10 +1,10 @@
-from logger_factory import logger
-import utils
+import sys
+import os
+sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
+from ust.util.logger_factory import logger
+from ust.util import utils
 import find_dupes
-
 import psycopg2.errors
-
-
 
 
 def main():

@@ -1,8 +1,9 @@
-from logger_factory import logger
-import config
-import utils
+import sys
+import os
+sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
+from ust.util.logger_factory import logger
+from ust.util import config, utils
 import export_template
-
 import pandas.io.sql as sqlio
 import pandas as pd
 from psycopg2.errors import DuplicateSchema, UndefinedTable, InvalidTextRepresentation, DatatypeMismatch

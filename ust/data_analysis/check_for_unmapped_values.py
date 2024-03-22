@@ -1,6 +1,9 @@
-from logger_factory import logger
-import config, constants, utils
-
+import sys
+import os
+sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
+from ust.util.logger_factory import logger
+from ust.util import config, utils
+import constants
 from psycopg2.errors import DuplicateTable
 from datetime import datetime
 import pandas as pd
