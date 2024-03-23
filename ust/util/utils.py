@@ -1,5 +1,8 @@
-from ust.util import config
+import sys
+import os
+sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.util.logger_factory import logger
+from ust.util import config
 import psycopg2
 from sqlalchemy import create_engine
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
