@@ -2,6 +2,7 @@ import sys
 import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.util.logger_factory import logger
+<<<<<<< HEAD
 from ust.util import utils, config
 from ust.state_processing import find_dupes
 import psycopg2.errors
@@ -9,6 +10,13 @@ import psycopg2.errors
 
 
 
+=======
+from ust.util import utils
+import find_dupes
+import psycopg2.errors
+
+
+>>>>>>> origin/main
 def main():
 	conn = utils.connect_db()
 	cur = conn.cursor()

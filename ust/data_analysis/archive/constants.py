@@ -1,0 +1,20 @@
+ELEMENT_TO_DB_COL = {'SubstanceReleased1': 'substance',
+                     'SubstanceReleased2': 'substance',
+                     'SubstanceReleased3': 'substance',
+                     'SubstanceReleased4': 'substance',
+                     'SubstanceReleased5': 'substance',
+                     'SubstanceReleased1': 'substance',
+                     'CauseOfRelease1': 'cause',
+                     'CauseOfRelease2': 'cause',
+                     'CauseOfRelease3': 'cause',
+                     'SourceOfRelease1': 'source',
+                     'SourceOfRelease2': 'source',
+                     'SourceOfRelease3': 'source',
+                     'CorrectiveAction1': 'corrective_action',
+                     'CorrectiveAction2': 'corrective_action',
+                     'CorrectiveActiony3': 'corrective_action',
+                     'HowReleaseDetected': 'release_detection',
+                     'TankSubstanceStored': 'substance',
+                     'CompartmentSubstanceStored': 'substance'                     
+                     }
+

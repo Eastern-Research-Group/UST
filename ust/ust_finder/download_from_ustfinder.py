@@ -1,5 +1,8 @@
-import utils
-from logger_factory import logger, error_logger
+import sys
+import os
+sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
+from ust.util import utils
+from ust.util.logger_factory import logger, error_logger
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayer
 

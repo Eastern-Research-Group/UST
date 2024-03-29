@@ -15,11 +15,7 @@ class DatabaseImporter:
         self.system_type = system_type
         self.file_location = file_location
         self.overwrite_table = overwrite_table
-<<<<<<< HEAD
         self.schema = self.state.upper() + '_' + self.system_type.upper() 
-=======
-        self.schema = self.state.lower() + '_' + self.system_type.lower() 
->>>>>>> origin/main
         self.create_schema()
         self.existing_tables = []
         self.bad_file_list = []
@@ -45,11 +41,7 @@ class DatabaseImporter:
         conn = utils.connect_db(config.db_name)
         cur = conn.cursor()
 
-<<<<<<< HEAD
         sql = "select table_name from information_schema.tables where upper(table_schema) = upper(%s) order by 1"
-=======
-        sql = "select table_name from information_schema.tables where lower(table_schema) = lower(%s) order by 1"
->>>>>>> origin/main
         cur.execute(sql, (self.schema,))
         rows = cur.fetchall()
         self.existing_tables = [row[0] for row in rows]
