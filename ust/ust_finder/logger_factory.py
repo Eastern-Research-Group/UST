@@ -6,8 +6,8 @@ import datetime
 class LoggerFactory:
     @staticmethod
     def build_logger(name, log_file_path='../log'):
-        logger_name = f'{name}_{datetime.datetime.now().strftime("%Y-%m-%d")}'
-        logger = logging.getLogger(logger_name)
+        
+        logger = logging.getLogger(name)
     
         def handle_exception(type, value, tb):
             formatted_tb = ''
@@ -26,7 +26,8 @@ class LoggerFactory:
         else:
             formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
-        log_file_path = log_file_path + '/' + name + '.log' 
+        log_file_name = f'{name}_{datetime.datetime.now().strftime("%Y-%m-%d")}.log'   
+        log_file_path = log_file_path + '/' + log_file_name
         hdlr = logging.FileHandler(log_file_path, 'a', 'utf-8')
         hdlr.setFormatter(formatter)
         logger.addHandler(hdlr)

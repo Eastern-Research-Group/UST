@@ -1,5 +1,8 @@
-from logger_factory import logger
-import utils
+import sys
+import os
+sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
+from ust.util.logger_factory import logger
+from ust.util import utils
 
 
 def main(state, ust_or_lust, element_name, data_name, key_column, value_column, delimiter=','):
