@@ -2,13 +2,8 @@ import sys
 import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.util.logger_factory import logger
-<<<<<<<< HEAD:ust/state_processing/insert_main_table.py
 from ust.util import utils, config
 from ust.state_processing import make_template_view, export_template, export_needed_geocode
-========
-from ust.util import utils
-import make_template_view, export_template, export_needed_geocode
->>>>>>>> origin/main:ust/state_processing/archive/insert_main_table.py
 import psycopg2.errors
 
 

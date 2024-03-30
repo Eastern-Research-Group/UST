@@ -2,11 +2,7 @@ import sys
 import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.util.logger_factory import logger
-<<<<<<<< HEAD:ust/state_processing/export_template.py
 from ust.util import utils, config
-========
-from ust.util import config, utils
->>>>>>>> origin/main:ust/state_processing/archive/export_template.py
 from datetime import date
 import openpyxl as op
 from openpyxl.styles import Alignment, Font, PatternFill

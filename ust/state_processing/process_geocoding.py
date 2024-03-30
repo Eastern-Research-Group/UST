@@ -2,13 +2,10 @@ import sys
 import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.util.logger_factory import logger
-<<<<<<<< HEAD:ust/state_processing/process_geocoding.py
 from ust.util import utils, config
 from ust.state_processing import export_template
-========
 from ust.util import config, utils
 import export_template
->>>>>>>> origin/main:ust/state_processing/archive/process_geocoding.py
 import pandas.io.sql as sqlio
 import pandas as pd
 from psycopg2.errors import DuplicateSchema, UndefinedTable, InvalidTextRepresentation, DatatypeMismatch

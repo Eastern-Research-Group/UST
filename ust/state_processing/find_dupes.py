@@ -2,12 +2,7 @@ import sys
 import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.util.logger_factory import logger
-<<<<<<<< HEAD:ust/state_processing/find_dupes.py
 from ust.util import utils, config
-========
-from ust.util import utils
-
->>>>>>>> origin/main:ust/state_processing/archive/find_dupes.py
 import psycopg2.errors
 
 

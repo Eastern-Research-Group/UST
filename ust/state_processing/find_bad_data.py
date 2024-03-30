@@ -1,12 +1,8 @@
 import sys
 import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-<<<<<<<< HEAD:ust/state_processing/find_bad_data.py
 from ust.util.logger_factory import logger
 from ust.util import utils, config
-========
-from ust.util import utils
->>>>>>>> origin/main:ust/state_processing/archive/find_bad_data.py
 import psycopg2.errors
 
 
