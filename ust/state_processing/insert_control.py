@@ -6,10 +6,10 @@ from ust.util import utils
 from datetime import datetime
 
 
-organization_id = 'SC'
+organization_id = 'MO'
 system_type = 'ust' # Accepted values are 'ust' or 'release'
-data_source = None 
-date_received = None # Defaults to datetime.today(). To use a date other tha-- public.ust_control definition
+data_source = 'Access database downloaded from https://dnr.mo.gov/waste-recycling/sites-regulated-facilities/underground-storage-tanks-database' 
+date_received = '2022-09-08' # Defaults to datetime.today(). To use a date other tha-- public.ust_control definition
 date_processed = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 comments = None 
 
