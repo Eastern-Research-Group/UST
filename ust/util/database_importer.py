@@ -10,16 +10,27 @@ from psycopg2.errors import DuplicateSchema, UndefinedTable
 
 
 class DatabaseImporter:
-    def __init__(self, state, system_type, file_location, overwrite_table=True):
+    def __init__(self, state, system_type, file_path, overwrite_table=True):
         self.state = state
         self.system_type = system_type
-        self.file_location = file_location
+        self.file_path = file_path
         self.overwrite_table = overwrite_table
         self.schema = self.state.lower() + '_' + self.system_type.lower() 
         self.create_schema()
         self.existing_tables = []
         self.bad_file_list = []
+        # self.print_self()
     
+
+    def print_self(self):
+        print('state = ' + str(self.state))
+        print('system_type = ' + str(self.system_type))
+        print('file_path = ' + str(self.file_path))
+        print('overwrite_table = ' + str(self.overwrite_table))
+        print('schema = ' + str(self.schema))
+        print('existing_tables = ' + str(self.existing_tables))
+        print('bad_file_list = ' + str(self.bad_file_list))
+
 
     def create_schema(self):
         conn = utils.connect_db(config.db_name)
@@ -99,9 +110,9 @@ class DatabaseImporter:
 
     def get_files(self):
         file_list = []
-        file_list = glob.glob(f'{self.file_location}/*.csv')
-        file_list.extend(glob.glob(f'{self.file_location}/*.xlsx'))
-        file_list.extend(glob.glob(f'{self.file_location}/*.txt'))
+        file_list = glob.glob(f'{self.file_path}/*.csv')
+        file_list.extend(glob.glob(f'{self.file_path}/*.xlsx'))
+        file_list.extend(glob.glob(f'{self.file_path}/*.txt'))
         logger.debug('File list is %s', str(file_list))
         return file_list
 
@@ -115,6 +126,6 @@ class DatabaseImporter:
         for file in file_list:
             self.save_file_to_db(file, engine=engine)
             # logger.info('Saved %s to %s', file, self.schema)
-            
+
         for table in self.bad_file_list:
             logger.warning('%s not saved to database due to error!!!', table)

@@ -3,8 +3,10 @@ import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.util.import_service import ImportService
 
-state = 'SD' 
-ust_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\State Data\SD\UST'
+state = 'PA' 
+# Enter a directory (not path to a specific file) for ust_path and release_path
+# Set to None if not applicable
+ust_path = r'C:\Users\renae\OneDrive\Documents\Work\UST\States\PA'
 release_path = None 
 overwrite_table = False 
 
