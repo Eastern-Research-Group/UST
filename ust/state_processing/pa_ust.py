@@ -3,7 +3,7 @@ import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.util.logger_factory import logger
 from ust.util import config, utils
-# import pandas as pd
+import pandas as pd
 from urllib import error
 from urllib.request import urlopen, Request
 from selenium.webdriver.common.by import By
@@ -66,8 +66,35 @@ def main():
 	conn.close()
 
 
-
+def get_table():
+	pass
 
 
 if __name__ == '__main__':       
-	main()
+	with open('temp.html', 'r', encoding='utf-8') as f:
+		html = f.read()
+
+	soup = BeautifulSoup(html, features='html.parser')
+	for element in soup.find_all(['div','span']):
+		element.unwrap()
+
+	# tags = soup.find_all(['table','td','tr'])
+	# for tag in tags:
+	# 	for attribute in ['class','id','name','style','rowspan','colspan','valign']:
+	# 		del tag[attribute]
+
+	# for table in soup.find_all('table', attrs={'title': ['First Page','Next Page','Last Page','Previous Page','Refresh']}):
+	# 	table.extract()
+	# for element in soup.find_all(['input','option','a','img']):
+	# 	element.extract()
+
+	tables = []
+	for table in soup.find_all('table'):
+		if 'FACILITY ID' in table.find('td').text:
+			tables.append(table)
+	print(tables[1])
+	df = pd.read_html(tables[1].string)
+	print(df)
+
+
+	# print(soup)
