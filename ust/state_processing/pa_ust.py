@@ -13,68 +13,7 @@ import time
 
 tank_component_url = 'http://cedatareporting.pa.gov/ReportServer/Pages/ReportViewer.aspx?/Public/DEP/Tanks/SSRS/Tank_Component_Sub&rs:Command=Render&P_OTHER_ID=XXX'
 
-def get_data(soup):
-	pass
-
-def main():
-	conn = utils.connect_db(config.db_name)
-	cur = conn.cursor()
-
-	sql = """select facility_id from pa_ust.active_tanks 
-			where facility_id not in 
-				(select facility_id from pa_ust.active_tank_components)
-			order by 1"""
-	cur.execute(sql)
-	rows = cur.fetchall()
-	for row in rows:
-		facility_id = row[0]
-		logger.info('Working on facility_id %s', facility_id)
-		url = tank_component_url.replace('XXX',facility_id)
-		driver = utils.get_selenium_driver(url)
-		html = driver.page_source
-		num_pages = int(driver.find_element(By.ID, 'ReportViewerControl_ctl05_ctl00_TotalPages').text)
-		# i = 1
-		# while i < num_pages:
-		# 	print(i)
-		# 	next_page_button = driver.find_element(By.ID, 'ReportViewerControl_ctl05_ctl00_Next_ctl00_ctl00')
-		# 	next_page_button.click()
-		# 	time.sleep(3)
-		# 	i += 1
-
-
-		soup = BeautifulSoup(html, features='html.parser')
-		# num_pages = soup.find_all("span", attrs={'id':'ReportViewerControl_ctl05_ctl00_TotalPages'})
-		div = soup.find('div', attrs={'id':'VisibleReportContentReportViewerControl_ctl09'})
-		table = soup.find_all('table')[2]
-		print(table)
-
-		driver.close()	
-
-		exit()
-
-# facility_id
-# primary_facility_name
-# seq_number
-# tank_code
-# tank_system_component
-# tank_component
-# date_begin
-
-
-
-	cur.close()
-	conn.close()
-
-
-def get_table():
-	pass
-
-
-if __name__ == '__main__':       
-	with open('temp.html', 'r', encoding='utf-8') as f:
-		html = f.read()
-
-	soup = BeautifulSoup(html, features='html.parser')
+def extract_data_table(soup):
 	for element in soup.find_all(['div','span']):
 		element.unwrap()
 
@@ -92,9 +31,83 @@ if __name__ == '__main__':
 	for table in soup.find_all('table'):
 		if 'FACILITY ID' in table.find('td').text:
 			tables.append(table)
-	print(tables[1])
-	df = pd.read_html(tables[1].string)
-	print(df)
+	# print(table)
+	try:
+		table = tables[1]
+	except:
+		return pd.DataFrame()
+	tags = table.find_all(['table','td','tr'])
+	for tag in tags:
+		for attribute in ['class','id','name','style','rowspan','colspan','valign']:
+			del tag[attribute]
+	df = pd.read_html(table.prettify())[0]
+	df.dropna(inplace=True)
+	new_header = df.iloc[0]
+	df = df[1:]
+	df.columns = new_header
+	df.columns = df.columns.str.lower()
+	df.columns = df.columns.str.replace(' ', '_')
+	pd.set_option('display.max_columns', None)
+	pd.set_option('display.max_rows', None)
+	# print(df)
+	return df
 
 
-	# print(soup)
+def main():
+	conn = utils.connect_db(config.db_name)
+	cur = conn.cursor()
+	engine = utils.get_engine(schema='pa_ust')    
+
+	sql = """select facility_id from pa_ust.active_tanks 
+			where facility_id not in 
+				(select facility_id from pa_ust.active_tank_components)
+			and facility_id not in 
+				(select facility_id from pa_ust.facilities_without_tank_info)				
+			order by 1"""
+	cur.execute(sql)
+	rows = cur.fetchall()
+	for row in rows:
+		facility_id = row[0]
+		logger.info('Working on facility_id %s', facility_id)
+		url = tank_component_url.replace('XXX',facility_id)
+		try:
+			driver = utils.get_selenium_driver(url)
+		except selenium.common.exceptions.TimeoutException:    
+			logger.info('Website timed out so sleeping 2 minutes')
+			time.sleep(120)
+			driver = utils.get_selenium_driver(url)
+		html = driver.page_source
+		num_pages = int(driver.find_element(By.ID, 'ReportViewerControl_ctl05_ctl00_TotalPages').text)
+		i = 1
+		while i <= num_pages:
+			logger.info('Working on page %s of %s', i, num_pages)
+			html = driver.page_source
+			soup = BeautifulSoup(html, features='html.parser')
+			df = extract_data_table(soup)
+			if df.empty:
+				logger.info('No tank component data found for %s', facility_id)
+				sql2 = "insert into pa_ust.facilities_without_tank_info values (%s) on conflict do nothing"
+				cur.execute(sql2, (facility_id,))
+				conn.commit()
+				i = num_pages + 1
+				continue
+			else:
+				df.to_sql('active_tank_components', engine, if_exists='append', index=False)
+				logger.info('Wrote page %s to database', i)
+
+			next_page_button = driver.find_element(By.ID, 'ReportViewerControl_ctl05_ctl00_Next_ctl00_ctl00')
+			try:
+				next_page_button.click()
+			except:
+				pass
+			time.sleep(3)
+			i += 1
+
+
+	driver.close()	
+	cur.close()
+	conn.close()
+
+
+if __name__ == '__main__':       
+	main()

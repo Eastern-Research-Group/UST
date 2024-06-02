@@ -161,9 +161,9 @@ def get_selenium_driver(url):
     options = Options()
     service = Service()
     # comment out the line below to show the browser (use only for debugging)
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
     # uncomment the line below to keep the browser window open; use only for debugging
-    options.add_experimental_option('detach', True)
+    # options.add_experimental_option('detach', True)
     driver = webdriver.Chrome(service=service, options=options)
     driver.get(url)
     while driver.execute_script("return document.readyState") != "complete":
