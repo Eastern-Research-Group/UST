@@ -10,7 +10,7 @@ import pandas as pd
 
 state = 'TN'
 system_type = 'UST'
-output_file = f'{state}_{system_type}.csv'
+output_file = f'../data/{state}_{system_type}.csv'
 url = 'https://tdeconline.tn.gov/arcgis/rest/services/UST_EPA_Info_By_Compartment/FeatureServer/0/query'
 result_offset = 0 
 record_count = 1000
