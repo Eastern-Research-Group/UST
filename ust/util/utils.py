@@ -10,6 +10,7 @@ import re
 from datetime import datetime
 
 
+
 def connect_db(db_name=config.db_name, schema='public'):
     try:
         options = f'-csearch_path="{schema}"'
@@ -149,3 +150,23 @@ def get_control_id(ust_or_lust, organization_id):
     conn.close()
 
     return control_id
+
+
+def get_selenium_driver(url):
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
+    import time
+
+    options = Options()
+    service = Service()
+    # comment out the line below to show the browser (use only for debugging)
+    options.add_argument('--headless')
+    # uncomment the line below to keep the browser window open; use only for debugging
+    # options.add_experimental_option('detach', True)
+    driver = webdriver.Chrome(service=service, options=options)
+    driver.get(url)
+    while driver.execute_script("return document.readyState") != "complete":
+        time.sleep(1)
+    time.sleep(5)
+    return driver
