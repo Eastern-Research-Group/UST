@@ -55,6 +55,20 @@ def extract_data_table(soup):
 	return df
 
 
+def save_unfound_facility(facility_id):
+	conn = utils.connect_db(config.db_name)
+	cur = conn.cursor()	
+
+	logger.info('No tank component data found for %s', facility_id)
+	sql2 = "insert into pa_ust.facilities_without_tank_info values (%s) on conflict do nothing"
+	cur.execute(sql2, (facility_id,))
+	conn.commit()
+
+	cur.close()
+	conn.close()
+
+
+
 def main():
 	conn = utils.connect_db(config.db_name)
 	cur = conn.cursor()
@@ -94,10 +108,7 @@ def main():
 			soup = BeautifulSoup(html, features='html.parser')
 			df = extract_data_table(soup)
 			if df.empty:
-				logger.info('No tank component data found for %s', facility_id)
-				sql2 = "insert into pa_ust.facilities_without_tank_info values (%s) on conflict do nothing"
-				cur.execute(sql2, (facility_id,))
-				conn.commit()
+				save_unfound_facility(facility_id)
 				i = num_pages + 1
 				continue
 			else:
@@ -119,7 +130,4 @@ def main():
 
 
 if __name__ == '__main__':       
-	try:
-		main()
-	except:
-		main()
+	main()
