@@ -7,7 +7,9 @@ import pandas as pd
 from urllib import error
 from urllib.request import urlopen, Request
 from selenium.webdriver.common.by import By
+import selenium.common.exceptions
 from bs4 import BeautifulSoup
+from io import StringIO
 import time
 
 
@@ -40,7 +42,7 @@ def extract_data_table(soup):
 	for tag in tags:
 		for attribute in ['class','id','name','style','rowspan','colspan','valign']:
 			del tag[attribute]
-	df = pd.read_html(table.prettify())[0]
+	df = pd.read_html(StringIO(table.prettify()))[0]
 	df.dropna(inplace=True)
 	new_header = df.iloc[0]
 	df = df[1:]
@@ -58,12 +60,19 @@ def main():
 	cur = conn.cursor()
 	engine = utils.get_engine(schema='pa_ust')    
 
-	sql = """select facility_id from pa_ust.active_tanks 
-			where facility_id not in 
+	# sql = """select facility_id from pa_ust.active_tanks 
+	# 		where facility_id not in 
+	# 			(select facility_id from pa_ust.active_tank_components)
+	# 		and facility_id not in 
+	# 			(select facility_id from pa_ust.facilities_without_tank_info)				
+	# 		order by 1"""
+	sql = """select other_id from pa_ust.tanks 
+			where other_id not in 
 				(select facility_id from pa_ust.active_tank_components)
-			and facility_id not in 
+			and other_id not in 
 				(select facility_id from pa_ust.facilities_without_tank_info)				
 			order by 1"""
+
 	cur.execute(sql)
 	rows = cur.fetchall()
 	for row in rows:
@@ -110,4 +119,7 @@ def main():
 
 
 if __name__ == '__main__':       
-	main()
+	try:
+		main()
+	except:
+		main()

@@ -6,7 +6,8 @@ from ust.util.import_service import ImportService
 state = 'PA' 
 # Enter a directory (not path to a specific file) for ust_path and release_path
 # Set to None if not applicable
-ust_path = r'C:\Users\renae\OneDrive\Documents\Work\UST\States\PA'
+# ust_path = r'C:\Users\renae\OneDrive\Documents\Work\UST\States\PA'
+ust_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\State Data\PA'
 release_path = None 
 overwrite_table = False 
 
