@@ -11,10 +11,6 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.borders import Border, Side
 
 
-# file_dir = r'C:\Users\renae\Documents\Work\UST\States\VA/'
-# file_name = 'test.xlsx'
-# file_path = file_dir + file_name
-
 ref_heading_color = 'C9C9C9'
 fill_gen = PatternFill(fill_type='solid',
 					   start_color=ref_heading_color,
