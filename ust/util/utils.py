@@ -170,3 +170,64 @@ def get_selenium_driver(url):
         time.sleep(1)
     time.sleep(5)
     return driver
+
+
+def get_lookup_tabs(ust_or_release='ust'):
+    ust_or_release = ust_or_release.lower()
+    if ust_or_release == 'ust':
+        table_name = 'ust_template_lookup_tables'
+    elif ust_or_release == 'release':
+        table_name = 'ust_release_template_lookup_tables'
+    else:
+        logger.warning('Unknown value passed got get_lookup_tabs(ust_or_release): %s', ust_or_release)
+        return 
+    conn = connect_db()
+    cur = conn.cursor() 
+    sql = """select table_name, desc_column_name  
+            from ust_template_lookup_tables
+            order by sort_order"""
+    cur.execute(sql)
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
+
+def get_data_tabs(ust_or_release='ust'):
+    ust_or_release = ust_or_release.lower()
+    if ust_or_release == 'ust':
+        table_name = 'ust_template_data_tables'
+    elif ust_or_release == 'release':
+        table_name = 'ust_release_template_data_tables'
+    else:
+        logger.warning('Unknown value passed got get_data_tabs(ust_or_release): %s', ust_or_release)
+        return 
+    conn = connect_db()
+    cur = conn.cursor() 
+    sql = """select view_name, template_tab_name  
+            from ust_template_data_tables
+            order by sort_order"""
+    cur.execute(sql)
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
+
+def get_headers(table_name):
+    conn = connect_db()
+    cur = conn.cursor() 
+    sql = """select column_name from information_schema.columns
+             where table_schema = 'public' and table_name = %s
+             order by ordinal_position"""
+    cur.execute(sql, (table_name, ))
+    headers = [x[0] for x in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return headers
+
+
+def get_timestamp_str():
+    from datetime import datetime 
+    now = datetime.now()
+    return now.strftime('%Y%m%d%H%M%S')
