@@ -1,14 +1,16 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util import config
-from ust.python.util.logger_factory import logger
-import psycopg2
-from sqlalchemy import create_engine
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
 import re
-from datetime import datetime
 
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from sqlalchemy import create_engine
+
+from python.util import config
+from python.util.logger_factory import logger
 
 
 def connect_db(db_name=config.db_name, schema='public'):

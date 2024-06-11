@@ -1,8 +1,15 @@
-from logger_factory import logger
-from import_service import ImportService
-import utils
+import os
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
 
 from psycopg2.errors import UndefinedTable
+
+from python.util.logger_factory import logger
+from python.util.import_service import ImportService
+from python.util import utils
+
 
 state = 'CA' 
 file_path = r'C:/Users/erguser/OneDrive - Eastern Research Group/Other Projects/UST/State Data/' 

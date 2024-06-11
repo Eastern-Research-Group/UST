@@ -1,7 +1,13 @@
-from import_service import ImportService
-import config, utils
 import os
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
+
 import pandas as pd
+
+from python.util.import_service import ImportService
+from python.util import config, utils
 
 state = 'OR' 
 ust_folder = 'OR_LUST_tables/'

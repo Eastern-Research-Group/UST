@@ -1,7 +1,15 @@
-from import_service import ImportService
-import config, utils
+import os
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
 import os
 import pandas as pd
+
+from python.util import config, utils
+from python.util.import_service import ImportService
+from import_service import ImportService
+
 
 state = 'TRUSTD' 
 ust_folder = 'TRUSTD_tables/'

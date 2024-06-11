@@ -1,5 +1,11 @@
-from import_service import ImportService
-import config
+import os
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
+
+from python.util.import_service import ImportService
+from python.util import config
 
 state = 'SC' 
 file_path = config.local_ust_path + state + '\\'

@@ -1,10 +1,14 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util import utils
-from ust.python.python.logger_factory import logger, error_logger
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
+
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayer
+
+from python.util import utils
+from python.util.logger_factory import logger
 
 
 facilities_layer_url = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/0'
@@ -162,7 +166,7 @@ def request_data(data_table, layer, state):
 		get_data(data_table=data_table, layer=layer, state=state)
 		logger.info('Working on %s for %s', data_table, state)
 	except Exception as e:
-		error_logger.error('Unable to download %s data for %s. Error message: %s', data_table, state, e)
+		logger.error('Unable to download %s data for %s. Error message: %s', data_table, state, e)
 
 if __name__ == '__main__':   
 	data_table = 'facilities'

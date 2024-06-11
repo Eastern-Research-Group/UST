@@ -1,11 +1,15 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util import utils
-from ust.python.util.logger_factory import logger, error_logger
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
+
 import pandas as pd
 import zipfile
-from pathlib import Path
+
+from python.util import utils
+from python.util.logger_factory import logger
+
 
 
 file_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\UST\UST Finder\Exports\\'

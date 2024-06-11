@@ -1,12 +1,15 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util.logger_factory import logger
-from ust.python.util import config, utils
-import pandas as pd
-import os
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
 import glob
+
+import pandas as pd
 from psycopg2.errors import DuplicateSchema, UndefinedTable
+
+from python.util.logger_factory import logger
+from python.util import config, utils
 
 
 class DatabaseImporter:

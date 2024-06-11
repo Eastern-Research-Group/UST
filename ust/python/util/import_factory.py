@@ -1,7 +1,10 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util.database_importer import DatabaseImporter  
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
+
+from python.util.database_importer import DatabaseImporter  
 
 class ImportFactory:
     

@@ -1,9 +1,12 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util.logger_factory import logger
-from ust.python.util import utils
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
 from datetime import datetime
+
+from python.util.logger_factory import logger
+from python.util import utils
 
 
 organization_id = 'MO'

@@ -1,10 +1,15 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util.logger_factory import logger
-from ust.python.util import utils, config
-from ust.python.state_processing import find_dupes
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
+from datetime import datetime
+
 import psycopg2.errors
+
+from python.util.logger_factory import logger
+from python.util import utils
+
 
 
 def main():

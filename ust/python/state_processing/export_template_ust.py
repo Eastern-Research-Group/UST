@@ -1,14 +1,17 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util.logger_factory import logger
-from ust.python.util import utils, config
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
 from datetime import date
 import ntpath
-from pathlib import Path
+
 import openpyxl as op
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.borders import Border, Side
+
+from python.util.logger_factory import logger
+from python.util import utils, config
 
 
 ust_control_id = 8
@@ -461,8 +464,6 @@ def main(organization_id=None, ust_control_id=None, data_only=False, template_on
 
 
 if __name__ == '__main__':   
-	print('hi')
-	exit()
 	main(organization_id=organization_id, 
 		 ust_control_id=ust_control_id, 
 		 data_only=data_only, 

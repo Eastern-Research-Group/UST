@@ -1,7 +1,8 @@
 import oracledb
-from sqlalchemy import create_engine
+import os 
 import pandas as pd
-import os
+from sqlalchemy import create_engine
+
 
 db_user = 'TRUSTD_UST_FINDER_ETL'
 db_pass = 'ustETL2023qtr3!'

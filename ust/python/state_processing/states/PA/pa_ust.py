@@ -1,16 +1,20 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util.logger_factory import logger
-from ust.python.util import config, utils
-import pandas as pd
-from urllib import error
-from urllib.request import urlopen, Request
-from selenium.webdriver.common.by import By
-import selenium.common.exceptions
-from bs4 import BeautifulSoup
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
 from io import StringIO
 import time
+from urllib import error
+from urllib.request import urlopen, Request
+
+from bs4 import BeautifulSoup
+import pandas as pd
+import selenium.common.exceptions
+from selenium.webdriver.common.by import By
+
+from python.util.logger_factory import logger
+from python.util import config, utils
 
 
 tank_component_url = 'http://cedatareporting.pa.gov/ReportServer/Pages/ReportViewer.aspx?/Public/DEP/Tanks/SSRS/Tank_Component_Sub&rs:Command=Render&P_OTHER_ID=XXX'

@@ -1,9 +1,15 @@
+import os
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
+
+
 import logging
-import sys
 
 class LoggerFactory:
     @staticmethod
-    def build_logger(name, log_location='../log'):
+    def build_logger(name, log_location=str(ROOT_PATH) + '/python/log'):
         logger_name = name + '_logger'
         logger = logging.getLogger(logger_name)
         logger.addHandler(logging.StreamHandler(sys.stdout))
