@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
+ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 from datetime import datetime
 
@@ -9,9 +9,9 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-organization_id = 'MO'
-system_type = 'ust' # Accepted values are 'ust' or 'release'
-data_source = '' # Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
+organization_id = 'PA'
+system_type = 'release' # Accepted values are 'ust' or 'release'
+data_source = 'CSV downloaded from http://cedatareporting.pa.gov/Reportserver/Pages/ReportViewer.aspx?/Public/DEP/Cleanup/SSRS/Tank_Cleanup_Incidents' 
 date_received = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 date_processed = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 comments = None 
