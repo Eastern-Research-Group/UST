@@ -10,23 +10,40 @@ from python.util.logger_factory import logger
 from python.util import utils, config
 
 
+
 ust_or_release = 'release' # valid values are 'ust' or 'release'
 control_id = 2
+delete_existing = False 
 
 
-def main(control_id, ust_or_release):
+def main(control_id, ust_or_release, delete_existing=False):
 	ust_or_release = ust_or_release.lower()
-	schema = utils.get_schema_from_control_id(control_id, ust_or_release)
-
-	if ust_or_release == 'release':
-		utils.delete_all_release_data(control_id)
-	elif ust_or_release == 'ust':
-		utils.delete_all_ust_data(control_id) #TODO! THIS DOESN'T EXIST YET!!
-	else:
+	if ust_or_release not in ['ust','release']:
 		logger.error('Invalid value %s for ust_or_release. Valid values are ust or release. Exiting...', ust_or_release)
+		exit()
+
+	schema = utils.get_schema_from_control_id(control_id, ust_or_release)
 
 	conn = utils.connect_db()
 	cur = conn.cursor()
+
+	if delete_existing:
+		if ust_or_release == 'release':
+			utils.delete_all_release_data(control_id)
+		else:
+			utils.delete_all_ust_data(control_id) #TODO! THIS DOESN'T EXIST YET!!
+	else:
+		if ust_or_release == 'release':
+			table_name = 'ust_release'
+		else:
+			table_name = 'ust_facility'
+
+		sql = f"select count(*) from public.{table_name} where {ust_or_release}_control_id = %s"
+		cur.execute(sql, (control_id,))
+		cnt = cur.fetchone()[0]
+		if cnt > 0:
+			logger.warning('Data found in %s for %s_control_id %s. To proceed, set the delete_existing variable to True.', table_name, ust_or_release, control_id)
+			exit()
 
 	table_name = ust_or_release + '_template_data_tables'
 	sql = f"""select table_name, view_name, sort_order
@@ -68,4 +85,4 @@ def main(control_id, ust_or_release):
 
 
 if __name__ == '__main__':   
-	main(control_id, ust_or_release)
+	main(control_id, ust_or_release, delete_existing)

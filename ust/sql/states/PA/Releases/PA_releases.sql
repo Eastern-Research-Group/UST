@@ -733,45 +733,52 @@ order by table_sort_order;
 select comments from release_control where release_control_id = 2;
 --ignore rows where "INCIDENT_TYPE" = 'AST'
 
+
+select * from v_release_table_population;
+
+
 --Step 4: work through the tables in order, using the information you collected 
 --to write views that can be used to populate the data tables 
-select epa_column_name, '"' || organization_table_name || '"' organization_table_name, 
-	case when database_lookup_table is null then '"' || organization_column_name || '" as ' || epa_column_name || ',' 
-		else '"' || organization_column_name || '"' end organization_column_name, 
-	programmer_comments, 
-	database_lookup_table, database_lookup_column, 
-	--'"' || organization_join_table || '"' organization_join_table, 
-	--'"' || organization_join_column || '"' organization_join_column,  
+--NOTE! The view queried below (v_release_table_population_sql) contains columns that help
+--      construct the select sql for the insertion views, but will require manual 
+--      oversight and manipulation by you! 
+--      In particular, check out the organization_join_table and organization_join_column 
+--      are used!!
+select organization_table_name_qtd, selected_column, programmer_comments, 
+	database_lookup_table, database_lookup_column,
+	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
-from v_release_table_population 
+from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release'
 order by column_sort_order;
-
 
 --Step 5: use the information from the queries above to create the view:
 --!!! NOTE how I'm using the programmer_comments column to adjust the view (e.g. nfa_date)
 --!!! NOTE also sometimes you need to explicitly cast data types. In this example, the two
 --    dates "CONFIRMED_DATE" and "STATUS_DATE" are text fields in the state's data and need 
 --    to be cast as dates to fit into the EPA table  
+--!!! NOTE also you may get errors related to data conversion when trying to compile the view
+--    you are creating here. This is good because it alerts you the data you are trying to
+--    insert is not compatible with the EPA format. Fix these errors before proceeding! 
 create or replace view pa_release.v_ust_release as 
-select 	"FACILITY_ID" as facility_id,
-		"TANK" as tank_id_associated_with_release,
-		"INCIDENT_ID" as release_id,
-		"FACILITY_NAME" as site_name,
-		"ADDRESS1" as site_address,
-		"ADDRESS2" as site_address2,
-		"CITY" as site_city,
-		"ZIP" as zipcode,
-		"LATITUDE" as latitude,
-		"LONGITUDE" as longitude,
-		cs.coordinate_source_id,
-		rs.release_status_id, 
+select 	"FACILITY_ID"::character varying(50) as facility_id,
+		"TANK"::character varying(50) as tank_id_associated_with_release,
+		"INCIDENT_ID"::character varying(50) as release_id,
+		"FACILITY_NAME"::character varying(200) as site_name,
+		"ADDRESS1"::character varying(100) as site_address,
+		"ADDRESS2"::character varying(100) as site_address2,
+		"CITY"::character varying(100) as site_city,
+		"ZIP"::character varying(10) as zipcode,
+		"LATITUDE"::double precision as latitude,
+		"LONGITUDE"::double precision as longitude,
+		coordinate_source_id as coordinate_source_id,
+		release_status_id as release_status_id,
 		"CONFIRMED_DATE"::date as reported_date,
 		case when "STATUS_DESCRIPTION" = 'Cleanup Completed' then "STATUS_DATE"::date end as nfa_date, 
 		case when "IMPACT_DESCRIPTION" = 'Soil' then 'Yes' end as media_impacted_soil,
 		case when "IMPACT_DESCRIPTION" = 'Ground Water' then 'Yes' end as media_impacted_groundwater,
 		case when "IMPACT_DESCRIPTION" = 'Surface Water' then 'Yes' end as media_impacted_surface_water,
-		rd.how_release_detected_id
+		how_release_detected_id
 from "Tank_Cleanup_Incidents" x 
 	left join pa_release.v_coordinate_source_xwalk cs on x."HOR_REF_DATUM" = cs.organization_value 
 	left join pa_release.v_release_status_xwalk	rs on x."STATUS_DESCRIPTION" = rs.organization_value 
@@ -786,15 +793,11 @@ select count(*) from pa_release.v_ust_release;
 --now repeat for each data table:
 
 --ust_release_substance 
-select epa_column_name, '"' || organization_table_name || '"' organization_table_name, 
-	case when database_lookup_table is null then '"' || organization_column_name || '" as ' || epa_column_name || ',' 
-		else '"' || organization_column_name || '"' end organization_column_name, 
-	programmer_comments, 
-	database_lookup_table, database_lookup_column, 
-	--'"' || organization_join_table || '"' organization_join_table, 
-	--'"' || organization_join_column || '"' organization_join_column,  
+select organization_table_name_qtd, selected_column, programmer_comments, 
+	database_lookup_table, database_lookup_column,
+	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
-from v_release_table_population 
+from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release_substance'
 order by column_sort_order;
 
@@ -811,15 +814,11 @@ select count(*) from pa_release.v_ust_release_substance;
 --62868
 --------------------------------------------------------------------------------------------------------------------------
 --ust_release_source 
-select epa_column_name, '"' || organization_table_name || '"' organization_table_name, 
-	case when database_lookup_table is null then '"' || organization_column_name || '" as ' || epa_column_name || ',' 
-		else '"' || organization_column_name || '"' end organization_column_name, 
-	programmer_comments, 
-	database_lookup_table, database_lookup_column, 
-	--'"' || organization_join_table || '"' organization_join_table, 
-	--'"' || organization_join_column || '"' organization_join_column,  
+select organization_table_name_qtd, selected_column, programmer_comments, 
+	database_lookup_table, database_lookup_column,
+	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
-from v_release_table_population 
+from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release_source'
 order by column_sort_order;
 
@@ -839,15 +838,11 @@ select count(*) from pa_release.v_ust_release_source;
 --------------------------------------------------------------------------------------------------------------------------
 --ust_release_cause 
 
-select epa_column_name, '"' || organization_table_name || '"' organization_table_name, 
-	case when database_lookup_table is null then '"' || organization_column_name || '" as ' || epa_column_name || ',' 
-		else '"' || organization_column_name || '"' end organization_column_name, 
-	programmer_comments, 
-	database_lookup_table, database_lookup_column, 
-	--'"' || organization_join_table || '"' organization_join_table, 
-	--'"' || organization_join_column || '"' organization_join_column,  
+select organization_table_name_qtd, selected_column, programmer_comments, 
+	database_lookup_table, database_lookup_column,
+	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
-from v_release_table_population 
+from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release_cause'
 order by column_sort_order;
 
@@ -879,15 +874,26 @@ order by 1, 2;
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-select table_name, view_name
-from release_template_data_tables
+
+select b.column_name, b.data_type, b.character_maximum_length, a.data_type, a.character_maximum_length 
+from information_schema.columns a join information_schema.columns b on a.column_name = b.column_name 
+where a.table_schema = 'pa_release' and a.table_name = 'v_ust_release'
+and b.table_schema = 'public' and b.table_name = 'ust_release'
+and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length )
+order by b.ordinal_position 
+
+
+
+
+
+select release_id::varchar(50) from v_ust_release;
+
+select 
+
+
+select * from pa_release.v_ust_release 
+where length(facility_id) > 50;
+
+select view_name 
+from release_template_data_tables 
 order by sort_order;
-
-select * from ust_release_substance;
-
-
-select column_name from information_schema.columns 
-where table_schema = 'pa_release' and table_name = 'v_ust_release'
-
-
-select * from v_ust_release;
