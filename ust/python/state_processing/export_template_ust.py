@@ -282,7 +282,7 @@ class Template:
 	def get_mapping_tabs(self):
 		conn = utils.connect_db()
 		cur = conn.cursor()	
-		sql = """select epa_table_name, epa_column_name  
+		sql = """select epa_table_name, epa_column_name, database_lookup_table, database_lookup_column   
 				from v_ust_available_mapping
 				where ust_control_id = %s order by 1, 2"""
 		cur.execute(sql, (self.ust_control_id,))
@@ -302,12 +302,15 @@ class Template:
 	def make_mapping_tab(self, mapping):
 		mapping_table_name = mapping[0]
 		mapping_column_name = mapping[1]
-		logger.info('Working on mapping table %s, column %s', mapping_table_name, mapping_column_name)
+		database_lookup_table = mapping[2]
+		database_lookup_column = mapping[3]
+		logger.info('Working on mapping table %s, column %s using lookup table %s, column %s',
+			 mapping_table_name, mapping_column_name, database_lookup_table, database_lookup_column)
 		if mapping_table_name == 'substances':
 			self.make_substance_mapping_tab()
 			logger.info('Created Substances mapping tab')
 			return
-		pretty_name = mapping_table_name.replace('_',' ').title()
+		pretty_name = database_lookup_table.replace('_',' ').title()
 		ws = self.wb.create_sheet(pretty_name + ' mapping')
 
 		cell = ws.cell(row=1, column=1)
@@ -317,7 +320,7 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 
-		sql = f"select {mapping_column_name} from {mapping_table_name} order by 1"
+		sql = f"select {database_lookup_column} from {database_lookup_table} order by 1"
 		cur.execute(sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):

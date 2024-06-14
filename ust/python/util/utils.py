@@ -174,6 +174,73 @@ def get_selenium_driver(url):
     return driver
 
 
+def get_org_from_control_id(control_id, ust_or_release):
+    if ust_or_release.lower() not in ['ust','release']:
+        logger.error('Invalid value %s for ust_or_release. Valid values are ust or release. Exiting...', ust_or_release)
+        exit()
+    conn = connect_db()
+    cur = conn.cursor()    
+    table_name = ust_or_release.lower() + '_control'
+    column_name = table_name + '_id'
+    sql = f"select organization_id from {table_name} where {column_name} = %s"
+    cur.execute(sql, (control_id,))
+    ok = True
+    org = None 
+    try:
+        org = cur.fetchone()[0]
+    except TypeError:
+        logger.warning('No %s with a value of %s found in %s. Exiting', column_name, control_id, table_name)
+        ok = False
+    cur.close()
+    conn.close()
+    if ok:
+        return org  
+    else:
+        exit()
+
+
+def delete_all_release_data(control_id):
+    conn = connect_db()
+    cur = conn.cursor() 
+
+    sql = """delete from public.ust_release_corrective_action_strategy 
+            where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted from public.ust_release_corrective_action_strategy')
+
+    sql = """delete from public.ust_release_cause 
+            where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted from public.ust_release_cause')
+
+    sql = """delete from public.ust_release_source 
+            where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted from public.ust_release_source')
+
+    sql = """delete from public.ust_release_substance 
+            where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted from public.ust_release_substance')
+
+    sql = """delete from public.ust_release where release_control_id = %s"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted from public.ust_release')
+
+    conn.commit()
+    cur.close()    
+    conn.close()
+
+
+def delete_all_ust_data(control_id):
+    pass
+
+
+def get_schema_from_control_id(control_id, ust_or_release):
+    org = get_org_from_control_id(control_id, ust_or_release)
+    return org.lower() + '_' + ust_or_release.lower()
+
+
 def get_lookup_tabs(ust_or_release='ust'):
     ust_or_release = ust_or_release.lower()
     if ust_or_release == 'ust':
