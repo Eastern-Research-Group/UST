@@ -801,8 +801,9 @@ from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release_substance'
 order by column_sort_order;
 
+
 create or replace view pa_release.v_ust_release_substance as 
-select "FACILITY_ID" as facility_id,
+select "INCIDENT_ID"::character varying(50) as release_id,
 		s.substance_id
 from "Tank_Cleanup_Incidents" x 
 	join pa_release.v_substance_xwalk s on x."SUBSTANCE" = s.organization_value 
@@ -823,9 +824,8 @@ where release_control_id = 2 and epa_table_name = 'ust_release_source'
 order by column_sort_order;
 
 --!! this one has a deagg table so we have to alter the join 
-
 create or replace view pa_release.v_ust_release_source as 
-select distinct "FACILITY_ID" as facility_id,
+select distinct "INCIDENT_ID"::character varying(50) as release_id,
 		b.source_id
 from "Tank_Cleanup_Incidents" a join pa_release.v_source_xwalk b on a."SOURCE_CAUSE_OF_RELEASE" like '%' || b.organization_value || '%'
 where epa_value is not null
@@ -847,9 +847,8 @@ where release_control_id = 2 and epa_table_name = 'ust_release_cause'
 order by column_sort_order;
 
 --!! this one has a deagg table so we have to alter the join 
-
 create or replace view pa_release.v_ust_release_cause as 
-select distinct "FACILITY_ID" as facility_id,
+select distinct "INCIDENT_ID"::character varying(50) as release_id,
 		b.cause_id
 from "Tank_Cleanup_Incidents" a join pa_release.v_cause_xwalk b on a."SOURCE_CAUSE_OF_RELEASE" like '%' || b.organization_value || '%'
 where epa_value is not null
@@ -874,26 +873,14 @@ order by 1, 2;
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
+--select b.column_name, b.data_type, b.character_maximum_length, a.data_type, a.character_maximum_length 
+--from information_schema.columns a join information_schema.columns b on a.column_name = b.column_name 
+--where a.table_schema = 'pa_release' and a.table_name = 'v_ust_release'
+--and b.table_schema = 'public' and b.table_name = 'ust_release'
+--and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length )
+--order by b.ordinal_position;
 
-select b.column_name, b.data_type, b.character_maximum_length, a.data_type, a.character_maximum_length 
-from information_schema.columns a join information_schema.columns b on a.column_name = b.column_name 
-where a.table_schema = 'pa_release' and a.table_name = 'v_ust_release'
-and b.table_schema = 'public' and b.table_name = 'ust_release'
-and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length )
-order by b.ordinal_position 
+--run script populate_epa_data_tables.py	
 
-
-
-
-
-select release_id::varchar(50) from v_ust_release;
-
-select 
-
-
-select * from pa_release.v_ust_release 
-where length(facility_id) > 50;
-
-select view_name 
-from release_template_data_tables 
-order by sort_order;
+--NOTE! 6/14/24: populate_epa_data_tables.py is currently under development. 
+--this not will be deleted when it's ready to run. 

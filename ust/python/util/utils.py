@@ -206,26 +206,26 @@ def delete_all_release_data(control_id):
     sql = """delete from public.ust_release_corrective_action_strategy 
             where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
     cur.execute(sql, (control_id,))
-    logger.info('Deleted from public.ust_release_corrective_action_strategy')
+    logger.info('Deleted %s rows from public.ust_release_corrective_action_strategy', cur.rowcount)
 
     sql = """delete from public.ust_release_cause 
             where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
     cur.execute(sql, (control_id,))
-    logger.info('Deleted from public.ust_release_cause')
+    logger.info('Deleted %s rows from public.ust_release_cause', cur.rowcount)
 
     sql = """delete from public.ust_release_source 
             where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
     cur.execute(sql, (control_id,))
-    logger.info('Deleted from public.ust_release_source')
+    logger.info('Deleted %s rows from public.ust_release_source', cur.rowcount)
 
     sql = """delete from public.ust_release_substance 
             where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
     cur.execute(sql, (control_id,))
-    logger.info('Deleted from public.ust_release_substance')
+    logger.info('Deleted %s rows from public.ust_release_substance', cur.rowcount)
 
     sql = """delete from public.ust_release where release_control_id = %s"""
     cur.execute(sql, (control_id,))
-    logger.info('Deleted from public.ust_release')
+    logger.info('Deleted %s rows from public.ust_release', cur.rowcount)
 
     conn.commit()
     cur.close()    
