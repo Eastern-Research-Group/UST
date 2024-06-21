@@ -10,6 +10,7 @@ import logging
 class LoggerFactory:
     @staticmethod
     def build_logger(name, log_location=str(ROOT_PATH) + '/python/log'):
+        Path(log_location).mkdir(parents=True, exist_ok=True)
         logger_name = name + '_logger'
         logger = logging.getLogger(logger_name)
         logger.addHandler(logging.StreamHandler(sys.stdout))

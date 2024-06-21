@@ -21,6 +21,10 @@ def connect_db(db_name=config.db_name, schema='public'):
                     user=config.db_user,
                     password=config.db_password,
                     dbname=db_name,
+                    keepalives=1,
+                    keepalives_idle=30,
+                    keepalives_interval=10,
+                    keepalives_count=5,
                     options=options)
     except Exception as e:
         logger.error('Unable to connect to database %s: %s', db_name, e)
@@ -233,7 +237,40 @@ def delete_all_release_data(control_id):
 
 
 def delete_all_ust_data(control_id):
-    pass
+    conn = connect_db()
+    cur = conn.cursor() 
+
+    sql = """delete from public.ust_piping 
+             where ust_compartment_id in
+                (select ust_compartment_id from ust_compartment 
+                where ust_tank_id in 
+                    (select ust_tank_id from ust_tank 
+                    where ust_facility_id in
+                        (select ust_facility_id from ust_facility where ust_control_id = %s)))"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted %s rows from public.ust_piping', cur.rowcount)
+
+    sql = """delete from ust_compartment 
+             where ust_tank_id in 
+                (select ust_tank_id from ust_tank 
+                where ust_facility_id in
+                     (select ust_facility_id from ust_facility where ust_control_id = %s))"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted %s rows from public.ust_compartment', cur.rowcount)
+
+    sql = """delete from ust_tank 
+             where ust_facility_id in
+                 (select ust_facility_id from ust_facility where ust_control_id = %s)"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted %s rows from public.ust_tank', cur.rowcount)
+
+    sql = """delete from ust_facility where ust_control_id = %s"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted %s rows from public.ust_facility', cur.rowcount)
+
+    conn.commit()
+    cur.close()    
+    conn.close()
 
 
 def get_schema_from_control_id(control_id, ust_or_release):
@@ -243,17 +280,13 @@ def get_schema_from_control_id(control_id, ust_or_release):
 
 def get_lookup_tabs(ust_or_release='ust'):
     ust_or_release = ust_or_release.lower()
-    if ust_or_release == 'ust':
-        table_name = 'ust_template_lookup_tables'
-    elif ust_or_release == 'release':
-        table_name = 'ust_release_template_lookup_tables'
-    else:
+    if ust_or_release not in ['ust','release']:
         logger.warning('Unknown value passed got get_lookup_tabs(ust_or_release): %s', ust_or_release)
         return 
     conn = connect_db()
     cur = conn.cursor() 
-    sql = """select table_name, desc_column_name  
-            from ust_template_lookup_tables
+    sql = f"""select table_name, desc_column_name  
+            from {ust_or_release}_template_lookup_tables
             order by sort_order"""
     cur.execute(sql)
     rows = cur.fetchall()
@@ -264,17 +297,13 @@ def get_lookup_tabs(ust_or_release='ust'):
 
 def get_data_tabs(ust_or_release='ust'):
     ust_or_release = ust_or_release.lower()
-    if ust_or_release == 'ust':
-        table_name = 'ust_template_data_tables'
-    elif ust_or_release == 'release':
-        table_name = 'ust_release_template_data_tables'
-    else:
+    if ust_or_release not in ['ust','release']:
         logger.warning('Unknown value passed got get_data_tabs(ust_or_release): %s', ust_or_release)
         return 
     conn = connect_db()
     cur = conn.cursor() 
-    sql = """select view_name, template_tab_name  
-            from ust_template_data_tables
+    sql = f"""select view_name, template_tab_name  
+            from {ust_or_release}_template_data_tables
             order by sort_order"""
     cur.execute(sql)
     rows = cur.fetchall()
@@ -283,13 +312,13 @@ def get_data_tabs(ust_or_release='ust'):
     return rows
 
 
-def get_headers(table_name):
+def get_headers(table_name, schema='public'):
     conn = connect_db()
     cur = conn.cursor() 
     sql = """select column_name from information_schema.columns
-             where table_schema = 'public' and table_name = %s
+             where table_schema = %s and table_name = %s
              order by ordinal_position"""
-    cur.execute(sql, (table_name, ))
+    cur.execute(sql, (schema, table_name))
     headers = [x[0] for x in cur.fetchall()]
     cur.close()
     conn.close()

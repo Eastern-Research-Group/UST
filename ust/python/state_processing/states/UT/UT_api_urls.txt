@@ -1,0 +1,7 @@
+https://services1.arcgis.com/99lidPhWCzftIe9K/ArcGIS/rest/services/FacilityPST/FeatureServer/0/query?where=1%3D1&outFields=*
+
+https://services1.arcgis.com/99lidPhWCzftIe9K/ArcGIS/rest/services/TankPST/FeatureServer/0/query?where=1%3D1&outFields=*
+
+https://services1.arcgis.com/99lidPhWCzftIe9K/ArcGIS/rest/services/DEQMAP_LUST/FeatureServer/0/query?where=1%3D1&outFields=*
+
+https://services1.arcgis.com/99lidPhWCzftIe9K/ArcGIS/rest/services/DEQMAP_TANKUST/FeatureServer/0/query?where=1%3D1&outFields=*

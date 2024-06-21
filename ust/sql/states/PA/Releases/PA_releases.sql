@@ -11,6 +11,13 @@ order by ordinal_position;
 --(note, other than renaming columns and tables to make queries easier, try not to alter the raw state data)
 alter table "Tank_Cleanup_Incidents" rename column "ï»¿REGION" to "REGION";
 
+--it might be helpful to create some indexes on the state data 
+--(you can also do this as you go along in the processing and find the need to do do)
+create index Tank_Cleanup_Incidents_facid_idx on "Tank_Cleanup_Incidents"("FACILITY_ID");
+create index Tank_Cleanup_Incidents_incid_idx on "Tank_Cleanup_Incidents"("INCIDENT_ID");
+create index Tank_Cleanup_Incidents_sub_idx on "Tank_Cleanup_Incidents"("SUBSTANCE");
+create index Tank_Cleanup_Incidents_hrd_idx on "Tank_Cleanup_Incidents"("RELEASE_DISCOVERED");
+
 --!! used insert_control.py to insert into public.release_control
 
 --the script above returned a new release_control_id of 2 for this dataset:
@@ -733,9 +740,7 @@ order by table_sort_order;
 select comments from release_control where release_control_id = 2;
 --ignore rows where "INCIDENT_TYPE" = 'AST'
 
-
 select * from v_release_table_population;
-
 
 --Step 4: work through the tables in order, using the information you collected 
 --to write views that can be used to populate the data tables 
@@ -760,8 +765,12 @@ order by column_sort_order;
 --!!! NOTE also you may get errors related to data conversion when trying to compile the view
 --    you are creating here. This is good because it alerts you the data you are trying to
 --    insert is not compatible with the EPA format. Fix these errors before proceeding! 
+--!!! NOTE: Remember to do "select distinct" if necessary
+--!!! NOTE: Some states do not include State or EPA Region in their database, but it is generally
+--    safe for you to insert these yourself, so add them! 
 create or replace view pa_release.v_ust_release as 
-select 	"FACILITY_ID"::character varying(50) as facility_id,
+select distinct 
+		"FACILITY_ID"::character varying(50) as facility_id,
 		"TANK"::character varying(50) as tank_id_associated_with_release,
 		"INCIDENT_ID"::character varying(50) as release_id,
 		"FACILITY_NAME"::character varying(200) as site_name,
@@ -769,6 +778,8 @@ select 	"FACILITY_ID"::character varying(50) as facility_id,
 		"ADDRESS2"::character varying(100) as site_address2,
 		"CITY"::character varying(100) as site_city,
 		"ZIP"::character varying(10) as zipcode,
+		'PA' as state, 
+		3 as epa_region, 
 		"LATITUDE"::double precision as latitude,
 		"LONGITUDE"::double precision as longitude,
 		coordinate_source_id as coordinate_source_id,
@@ -801,9 +812,9 @@ from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release_substance'
 order by column_sort_order;
 
-
+--be sure to do select distinct if necessary!
 create or replace view pa_release.v_ust_release_substance as 
-select "INCIDENT_ID"::character varying(50) as release_id,
+select distinct "INCIDENT_ID"::character varying(50) as release_id,
 		s.substance_id
 from "Tank_Cleanup_Incidents" x 
 	join pa_release.v_substance_xwalk s on x."SUBSTANCE" = s.organization_value 
@@ -859,6 +870,7 @@ select count(*) from pa_release.v_ust_release_cause;
 --3120
 
 --------------------------------------------------------------------------------------------------------------------------
+--QA/QC
 
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
@@ -870,9 +882,6 @@ from v_release_missing_view_mapping a
 where release_control_id = 2
 order by 1, 2;
 
---------------------------------------------------------------------------------------------------------------------------
---insert data into the EPA schema 
-
 --select b.column_name, b.data_type, b.character_maximum_length, a.data_type, a.character_maximum_length 
 --from information_schema.columns a join information_schema.columns b on a.column_name = b.column_name 
 --where a.table_schema = 'pa_release' and a.table_name = 'v_ust_release'
@@ -880,7 +889,47 @@ order by 1, 2;
 --and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length )
 --order by b.ordinal_position;
 
---run script populate_epa_data_tables.py	
+--run Python QA/QC script
 
---NOTE! 6/14/24: populate_epa_data_tables.py is currently under development. 
---this not will be deleted when it's ready to run. 
+--run script qa_check.py
+--set variables:
+--ust_or_release = 'release' 
+--control_id = 2
+--export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+--export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+--export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+
+--This script will check for the following:
+--1) Non-unique rows in pa_release.v_ust_release, pa_release.v_ust_release_substance, pa_release.v_ust_release_source,
+--   pa_release.v_ust_release_source, and pa_release.v_ust_release_corrective_action_strategy (if these views exist). 
+--   To resolve any cases where the counts are greater than 0, check that you did a "select distinct" when creating these rows. 
+--2) Failed check constraints. 
+--3) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.release_element_value_mapping 
+--   and ensure the epa_value exists in the associated lookup table. 
+--The script will also provide the counts of rows in pa_release.v_ust_release, pa_release.v_ust_release_substance, pa_release.v_ust_release_source,
+--   pa_release.v_ust_release_source, and pa_release.v_ust_release_corrective_action_strategy (if these views exist) - ensure these counts 
+-- make sense! 
+
+--------------------------------------------------------------------------------------------------------------------------
+--insert data into the EPA schema 
+
+--run script populate_epa_data_tables.py	
+--set variables:
+--ust_or_release = 'release' 
+--control_id = 2
+--delete_existing = False # can set to True if there is existing release data you need to delete before inserting new
+
+--------------------------------------------------------------------------------------------------------------------------
+--export template
+
+--run script export_template.py
+--set variables:
+--control_id = 2
+--ust_or_release = 'release' 
+--organization_id = None  	# Can leave as None if you specify the control_id
+--data_only = False 		# Set to False to export full template including mapping and reference tabs
+--template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
+--export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+--export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+--export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+

@@ -31,7 +31,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 		if ust_or_release == 'release':
 			utils.delete_all_release_data(control_id)
 		else:
-			utils.delete_all_ust_data(control_id) #TODO! THIS DOESN'T EXIST YET!!
+			utils.delete_all_ust_data(control_id) 
 	else:
 		if ust_or_release == 'release':
 			table_name = 'ust_release'
@@ -70,7 +70,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 				column_list = column_list + ust_or_release + '_control_id'
 				insert_sql = 'insert into public.' + table_name + ' (' + column_list + """) 
 				select """ + column_list.replace(ust_or_release + '_control_id', str(control_id)) + " from " + schema + '.' + view_name 
-				# print(insert_sql)
+				print(insert_sql)
 				cur.execute(insert_sql)
 
 			else: #TODO: Currently this only works for releases!!
@@ -79,16 +79,18 @@ def main(control_id, ust_or_release, delete_existing=False):
 					column_list = column_list.replace(', release_id','')
 					parent_table = 'ust_release'
 					join_col = 'release_id'
+					epa_col = 'ust_release_id'
 				else:
 					column_list = 'ust_facility_id, ' + column_list[:-2] # TODO: this won't work!!
 					column_list = column_list.replace(', facility_id','')
 					parent_table = 'ust_facility' # TODO: for ust, this needs to be dynamic!
-					join_col = 'release_id' # TODO: for ust, this needs to be dynamic!
+					join_col = 'facility_id' # TODO: for ust, this needs to be dynamic!
+					epa_col = 'ust_facility_id' # TODO: for ust, this needs to be dynamic!
 				insert_sql = 'insert into public.' + table_name + ' (' + column_list + """) 
 				select """ + column_list + " from " + schema + "." + view_name + """ a join 
-				(select """ + join_col + " from public.""" + parent_table + " where " + ust_or_release + """_control_id = %s) b 
+				(select """ + epa_col + ', ' + join_col + " from public.""" + parent_table + " where " + ust_or_release + """_control_id = %s) b 
 				on a.""" + join_col + " = b." + join_col
-				# print(insert_sql)
+				print(insert_sql)
 				cur.execute(insert_sql, (control_id, ))
 
 			rows_inserted = cur.rowcount
