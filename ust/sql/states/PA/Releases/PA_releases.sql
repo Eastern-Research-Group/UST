@@ -5,7 +5,7 @@
 --use insert_control.py to insert into public.release_control
 --OR:
 --insert into release_control (organization_id, date_received, data_source, comments)
---values ('PA', '2024-06-11', 'CSV downloaded from http://cedatareporting.pa.gov/Reportserver/Pages/ReportViewer.aspx?/Public/DEP/Cleanup/SSRS/Tank_Cleanup_Incidents', null);
+--values ('PA', '2024-06-11', 'CSV downloaded from http://cedatareporting.pa.gov/Reportserver/Pages/ReportViewer.aspx?/Public/DEP/Cleanup/SSRS/Tank_Cleanup_Incidents', null)
 --returning release_control_id;
 
 --the script above returned a new release_control_id of 2 for this dataset:
