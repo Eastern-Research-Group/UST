@@ -80,7 +80,7 @@ class DatabaseImporter:
 
         logger.info('New table name will be %s', table_name)
 
-        if file_path[-4:] == 'xlsx':
+        if file_path[-4:] == 'xlsx' or file_path[-2:] == 'xls' :
             try:
                 df = pd.read_excel(file_path)   
             except ValueError as e:

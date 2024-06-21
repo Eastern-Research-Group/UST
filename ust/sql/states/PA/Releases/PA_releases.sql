@@ -1,5 +1,26 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Update the control table 
+
+--EITHER:
+--use insert_control.py to insert into public.release_control
+--OR:
+--insert into release_control (organization_id, date_received, data_source, comments)
+--values ('PA', '2024-06-11', 'CSV downloaded from http://cedatareporting.pa.gov/Reportserver/Pages/ReportViewer.aspx?/Public/DEP/Cleanup/SSRS/Tank_Cleanup_Incidents', null);
+--returning release_control_id;
+
+--the script above returned a new release_control_id of 2 for this dataset:
+select * from public.release_control where release_control_id = 2;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 --Get an overview of what the state's data looks like. In this case, we only have one table
 select * from "Tank_Cleanup_Incidents" ;
+
+--after viewing the state's data, I observed it includes Aboveground Storage tanks, so I put a 
+--comment in the release_control table about it.  
+--When I write the views that populate the EPA template, I'll exclude these rows 
+--(rather than deleting them from the state's data )
+update release_control set comments = 'ignore rows where "INCIDENT_TYPE" = ''AST''' where release_control_id = 2;
 
 --see what columns exist in the state's data 
 select table_name, column_name, is_nullable, data_type, character_maximum_length 
@@ -17,25 +38,6 @@ create index Tank_Cleanup_Incidents_facid_idx on "Tank_Cleanup_Incidents"("FACIL
 create index Tank_Cleanup_Incidents_incid_idx on "Tank_Cleanup_Incidents"("INCIDENT_ID");
 create index Tank_Cleanup_Incidents_sub_idx on "Tank_Cleanup_Incidents"("SUBSTANCE");
 create index Tank_Cleanup_Incidents_hrd_idx on "Tank_Cleanup_Incidents"("RELEASE_DISCOVERED");
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Update the control table 
-
---EITHER:
---use insert_control.py to insert into public.release_control
---OR:
---insert into release_control (organization_id, date_received, data_source, comments)
---values ('PA', '2024-06-11', 'CSV downloaded from http://cedatareporting.pa.gov/Reportserver/Pages/ReportViewer.aspx?/Public/DEP/Cleanup/SSRS/Tank_Cleanup_Incidents', null);
---returning release_control_id;
-
---the script above returned a new release_control_id of 2 for this dataset:
-select * from public.release_control where release_control_id = 2;
-
---after viewing the state's data, I observed it includes Aboveground Storage tanks, so I put a 
---comment in the release_control table about it.  
---When I write the views that populate the EPA template, I'll exclude these rows 
---(rather than deleting them from the state's data )
-update release_control set comments = 'ignore rows where "INCIDENT_TYPE" = ''AST''' where release_control_id = 2;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
