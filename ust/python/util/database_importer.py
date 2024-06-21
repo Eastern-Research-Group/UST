@@ -13,12 +13,12 @@ from python.util import config, utils
 
 
 class DatabaseImporter:
-    def __init__(self, state, system_type, file_path, overwrite_table=True):
-        self.state = state
+    def __init__(self, organization_id, system_type, file_path, overwrite_table=True):
+        self.organization_id = organization_id
         self.system_type = system_type
         self.file_path = file_path
         self.overwrite_table = overwrite_table
-        self.schema = self.state.lower() + '_' + self.system_type.lower() 
+        self.schema = self.organization_id.lower() + '_' + self.system_type.lower() 
         self.create_schema()
         self.existing_tables = []
         self.bad_file_list = []
@@ -26,7 +26,7 @@ class DatabaseImporter:
     
 
     def print_self(self):
-        print('state = ' + str(self.state))
+        print('organization_id = ' + str(self.organization_id))
         print('system_type = ' + str(self.system_type))
         print('file_path = ' + str(self.file_path))
         print('overwrite_table = ' + str(self.overwrite_table))
@@ -68,7 +68,7 @@ class DatabaseImporter:
         
     def get_table_name_from_file_name(self, file_path):
         table_name = file_path.rsplit('\\', 1)[1]
-        table_name = table_name.replace(' ','_').replace('.xlsx','').replace('.csv','').replace('.txt','')
+        table_name = table_name.replace(' ','_').replace('.xlsx','').replace('.xls','').replace('.csv','').replace('.txt','')
         return table_name
         
         
@@ -80,7 +80,7 @@ class DatabaseImporter:
 
         logger.info('New table name will be %s', table_name)
 
-        if file_path[-4:] == 'xlsx' or file_path[-2:] == 'xls' :
+        if file_path[-4:] == 'xlsx' or file_path[-3:] == 'xls' :
             try:
                 df = pd.read_excel(file_path)   
             except ValueError as e:
@@ -114,7 +114,7 @@ class DatabaseImporter:
     def get_files(self):
         file_list = []
         file_list = glob.glob(f'{self.file_path}/*.csv')
-        file_list.extend(glob.glob(f'{self.file_path}/*.xlsx'))
+        file_list.extend(glob.glob(f'{self.file_path}/*.xls*'))
         file_list.extend(glob.glob(f'{self.file_path}/*.txt'))
         logger.debug('File list is %s', str(file_list))
         return file_list

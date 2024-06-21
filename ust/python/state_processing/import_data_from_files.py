@@ -6,25 +6,25 @@ sys.path.append(os.path.join(ROOT_PATH, ''))
 
 from python.util.import_service import ImportService
 
-state = 'PA' 
-# Enter a directory (not path to a specific file) for ust_path and release_path
+organization_id = 'WV' 
+# Enter a directory (NOT a path to a specific file) for ust_path and release_path
 # Set to None if not applicable
-# ust_path = r'C:\Users\renae\OneDrive\Documents\Work\UST\States\PA'
-ust_path = None
-release_path = r'C:\Users\renae\Documents\Work\repos\ERG\UST\ust\sql\states\PA\Releases' 
+ust_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\State Data\WV\UST'
+# ust_path = None
+release_path = None #r'C:\Users\renae\Documents\Work\repos\ERG\UST\ust\sql\states\PA\Releases' 
 overwrite_table = False 
 
 import_service = ImportService()
 
-def import_files(state, ust_path=None, release_path=None, overwrite_table=False):
+def import_files(organization_id, ust_path=None, release_path=None, overwrite_table=False):
     if ust_path:
-        import_service.import_data(state, 'ust', ust_path,  overwrite_table=overwrite_table)
+        import_service.import_data(organization_id, 'ust', ust_path,  overwrite_table=overwrite_table)
     if release_path:
-        import_service.import_data(state, 'release', release_path, overwrite_table=overwrite_table)
+        import_service.import_data(organization_id, 'release', release_path, overwrite_table=overwrite_table)
 
     
 if __name__ == '__main__':       
-    import_files(state, ust_path, release_path, overwrite_table=False)
+    import_files(organization_id, ust_path, release_path, overwrite_table=False)
 
 
 
