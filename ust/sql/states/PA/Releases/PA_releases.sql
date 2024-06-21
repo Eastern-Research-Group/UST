@@ -18,7 +18,15 @@ create index Tank_Cleanup_Incidents_incid_idx on "Tank_Cleanup_Incidents"("INCID
 create index Tank_Cleanup_Incidents_sub_idx on "Tank_Cleanup_Incidents"("SUBSTANCE");
 create index Tank_Cleanup_Incidents_hrd_idx on "Tank_Cleanup_Incidents"("RELEASE_DISCOVERED");
 
---!! used insert_control.py to insert into public.release_control
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Update the control table 
+
+--EITHER:
+--use insert_control.py to insert into public.release_control
+--OR:
+--insert into release_control (organization_id, date_received, data_source, comments)
+--values ('PA', '2024-06-11', 'CSV downloaded from http://cedatareporting.pa.gov/Reportserver/Pages/ReportViewer.aspx?/Public/DEP/Cleanup/SSRS/Tank_Cleanup_Incidents', null);
+--returning release_control_id;
 
 --the script above returned a new release_control_id of 2 for this dataset:
 select * from public.release_control where release_control_id = 2;
@@ -933,3 +941,5 @@ order by 1, 2;
 --export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 --export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
+
+--------------------------------------------------------------------------------------------------------------------------

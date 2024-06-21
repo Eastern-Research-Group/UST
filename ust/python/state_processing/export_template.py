@@ -423,7 +423,7 @@ class Template:
 		cur = conn.cursor()	
 		sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
 				from public.v_{self.ust_or_release}_element_mapping 
-				where {self.ust_or_release}_control_id = %s and epa_column_name = 'substance'
+				where {self.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'
 				order by 1, 2"""
 		cur.execute(sql, (self.control_id,))
 
@@ -491,7 +491,6 @@ class Template:
 				cell.fill = utils.get_fill_gen(green_cell_fill)
 			if cell.value in orange_cells:
 				cell.fill = utils.get_fill_gen(orange_cell_fill)
-		utils.autowidth(ws)
 		if not self.template_only:
 			conn = utils.connect_db()
 			cur = conn.cursor()
@@ -504,6 +503,7 @@ class Template:
 			cur.close()
 			conn.close()
 		ws.delete_cols(1)
+		utils.autowidth(ws)
 		ws.freeze_panes = ws['A2']
 		logger.info('Created %s tab', tab_name)
 
@@ -526,6 +526,6 @@ if __name__ == '__main__':
 		 control_id=control_id, 
 		 data_only=data_only, 
 		 template_only=template_only,
-						export_file_name=export_file_name,
-						export_file_dir=export_file_dir,
-						export_file_path=export_file_path)
+		 export_file_name=export_file_name,
+		 export_file_dir=export_file_dir,
+		 export_file_path=export_file_path)
