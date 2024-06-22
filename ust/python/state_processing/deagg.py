@@ -10,11 +10,11 @@ from python.util.logger_factory import logger
 from python.util import utils, config
 
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 2
-table_name = 'Tank_Cleanup_Incidents'
-column_name = 'SOURCE_CAUSE_OF_RELEASE'
-delimiter = ',' # defaults to ','; delimiter from the column beging deaggregated in the state table 
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 11
+table_name = 'tanks'
+column_name = 'Substance'
+delimiter = '\n' # defaults to ','; delimiter from the column beging deaggregated in the state table. Use \n for hard returns.
 drop_existing = True # defaults to False; if True will drop existing deagg table with the same name
 
 
@@ -67,7 +67,7 @@ def main(control_id, ust_or_release, table_name, column_name, delimiter=',', dro
 	for row in rows:
 		col_text = row[0]
 		logger.info('Working on %s', col_text)
-		col_text = col_text.replace(' ','').strip()
+		col_text = col_text.strip()
 		parts = col_text.split(delimiter)
 		for part in parts:
 			sql2 = f"""insert into {schema}.{deagg_table_name} ("{column_name}") 

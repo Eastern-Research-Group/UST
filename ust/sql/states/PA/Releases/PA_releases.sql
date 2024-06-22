@@ -286,7 +286,19 @@ insert into release_element_value_mapping (release_element_mapping_id, organizat
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (22, 'UNK', 'Unknown', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (22, 'WGS84', 'Map interpolation', null);
 
+--list valid EPA values to paste into sql above 
+select * from public.coordinate_sources order by 1;
+/*
+Map interpolation
+GPS
+PLSS
+Geocoded address
+Other
+Unknown
+*/
+
 --to assist with the mapping above, check the archived mapping table for old examples of mapping 
+--NOTE! As we continue to map more states, we can check the current mapping table instead of the archive table!
 select distinct state_value, epa_value
 from archive.v_lust_element_mapping 
 where lower(element_name) like lower('%coord%')
@@ -306,16 +318,7 @@ Trimble, collected 5/4/2010				Other
 Trimble, collected 5/5/2010				Other
 */
 
---list valid EPA values to paste into sql above 
-select * from public.coordinate_sources order by 1;
-/*
-Map interpolation
-GPS
-PLSS
-Geocoded address
-Other
-Unknown
-*/
+
 
 /*!!! WARNING! Some of the lookups have changed for the new template format, so if you used the 
 archive.v_ust_element_mapping and/or archive.v_lust_element_mapping views and copied values 
@@ -442,17 +445,7 @@ Suspected Release - Invest. Complete, No Release Confirmed
 Suspected Release - Investigation Pending or Initiated
 Unverified Incident*/
 
---see what the EPA values we need to map to are
-select * from release_statuses order by 2;
-/*
-Active: Corrective Action
-Active: general
-Active: post Corrective Action monitoring
-Active: site investigation
-Active: stalled
-No further action
-Other
-Unknown*/
+
 
 /*generate generic sql to insert value mapping rows into release_element_value_mapping, 
 then modify the generated sql with the mapped EPA values 
@@ -479,6 +472,19 @@ insert into release_element_value_mapping (release_element_mapping_id, organizat
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (23, 'Suspected Release - Invest. Complete, No Release Confirmed', 'Other', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (23, 'Suspected Release - Investigation Pending or Initiated', 'Other', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (23, 'Unverified Incident', 'Other', null);
+
+--see what the EPA values we need to map to are
+select * from release_statuses order by 2;
+/*
+Active: Corrective Action
+Active: general
+Active: post Corrective Action monitoring
+Active: site investigation
+Active: stalled
+No further action
+Other
+Unknown*/
+
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --substance_id
 
@@ -569,6 +575,7 @@ where lower(substance) like lower('%used%')
 order by 1;
 
 --to assist with the mapping above, check the archived mapping table for old examples of mapping 
+--NOTE! As we continue to map more states, we can check the current mapping table instead of the archive table!
 --in the case of Substances, you can check both v_lust_element_mapping and v_ust_element_mapping!
 select distinct state_value, epa_value from 
 	(select state_value, epa_value
