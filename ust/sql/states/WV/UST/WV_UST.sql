@@ -728,41 +728,44 @@ select distinct
 from wv_ust."erg_substance_deagg" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
-if necessary, replace the "null" with any questions or comments you have about the specific mapping */
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'AV Gas', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Biodiesel', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Crude Oil', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'DEF', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Diesel', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Diesel-offroad', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Diesel-onroad', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Diesel-ultra low sulfur', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'E85', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Empty', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Ethanol', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Ethanol Free', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'ETHYLENE GLYCOL', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Gasohol', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Gasoline', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Hazardous Substance', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Heating Oil', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Hydraulic Oil', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Jet Fuel', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Kerosene', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Midgrade Unleaded', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Mixture', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Motor Oil', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'New Oil', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Not Listed', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Other', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Premium Unleaded', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Regular Unleaded', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Unknown', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Used Oil', '', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Waste Oil', '', null);
+if necessary, replace the "null" with any questions or comments you have about the specific mapping 
+NOTE! Some substances, such as DEF, are not federally regulated. 
+      In those cases, set the exclude_from_query flag to 'Y' and remember to exclude these rows 
+      when construction the view v_ust_substances later. */
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'AV Gas', 'Aviation gasoline', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Biodiesel', 'Diesel fuel (b-unknown)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Crude Oil', 'Petroleum product', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments, exclude_from_query) values (99, 'DEF', null, 'Not federally requlated, excluding from template','Y');
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Diesel', 'Diesel fuel (b-unknown)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Diesel-offroad', 'Off-road diesel/dyed diesel', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Diesel-onroad', 'Diesel fuel (b-unknown)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Diesel-ultra low sulfur', 'Diesel fuel (b-unknown)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'E85', 'E-85/Flex Fuel (E51-E83)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Empty', 'Unknown', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Ethanol', 'Ethanol blend gasoline (e-unknown)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Ethanol Free', 'Gasoline (non-ethanol)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'ETHYLENE GLYCOL', 'Antifreeze', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Gasohol', 'Ethanol blend gasoline (e-unknown)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Gasoline', 'Gasoline (unknown type)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Hazardous Substance', 'Hazardous substance', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Heating Oil', 'Heating/fuel oil # unknown', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Hydraulic Oil', 'Lube/motor oil (new)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Jet Fuel', 'Jet fuel A', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Kerosene', 'Kerosene', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Midgrade Unleaded', 'Gasoline (unknown type)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Mixture', 'Other or mixture', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Motor Oil', 'Lube/motor oil (new)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'New Oil', 'Lube/motor oil (new)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Not Listed', 'Other or mixture', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Other', 'Other or mixture', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Premium Unleaded', 'Gasoline (unknown type)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Regular Unleaded', 'Gasoline (unknown type)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Unknown', 'Unknown', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Used Oil', 'Used oil/waste oil', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Waste Oil', 'Used oil/waste oil', null);
 
 --list valid EPA values to paste into sql above 
-select * from public.substances order by 1;
+select * from public.substances order by 2;
 /*
 Aviation biofuel
 Aviation gasoline
@@ -818,6 +821,7 @@ Unknown
 select distinct state_value, epa_value
 from archive.v_ust_element_mapping 
 where lower(element_name) like lower('%substance%')
+and lower(state_value) like lower('%biod%')
 order by 1, 2;
 
 /*!!! WARNING! Some of the lookups have changed for the new template format, so if you used the 
@@ -828,6 +832,11 @@ from ust_element_value_mapping a join ust_element_mapping b on a.ust_element_map
 where ust_control_id = 11 and epa_column_name = 'substance_id'
 and epa_value not in (select substance from substances)
 order by 1;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+select distinct "Material"
+from wv_ust.tanks 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -847,7 +856,6 @@ where ust_control_id = 11 order by 1, 2;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 /*Step 1: create crosswalk views for columns that use a lookup table
 run script org_mapping_xwalks.py to create crosswalk views for all lookup tables 
 see new views:*/
@@ -856,14 +864,12 @@ from information_schema.tables
 where table_schema = 'wv_ust' and table_type = 'VIEW'
 and table_name like '%_xwalk' order by 1;
 /*
-v_cause_xwalk
-v_coordinate_source_xwalk
-v_how_ust_detected_xwalk
-v_ust_status_xwalk
-v_source_xwalk
+v_facility_type_xwalk
+v_owner_type_xwalk
 v_substance_xwalk
+v_tank_material_description_xwalk
+v_tank_status_xwalk
 */
-
 
 --Step 2: see the EPA tables we need to populate, and in what order
 select distinct epa_table_name, table_sort_order
@@ -871,17 +877,16 @@ from v_ust_table_population
 where ust_control_id = 11
 order by table_sort_order;
 /*
-ust_release
-ust_substance
-ust_source
-ust_cause
+ust_facility
+ust_tank
+ust_compartment
+ust_piping
 */
 
 /*Step 3: check if there where any dataset-level comments you need to incorporate:
 in this case we need to ignore the aboveground storage tanks,
 so add this to the where clause of the ust_release view */
 select comments from ust_control where ust_control_id = 11;
---ignore rows where "INCIDENT_TYPE" = 'AST'
 
 select * from v_ust_table_population;
 
@@ -892,127 +897,133 @@ NOTE! The view queried below (v_ust_table_population_sql) contains columns that 
       oversight and manipulation by you! 
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
-select organization_table_name_qtd, selected_column, programmer_comments, 
+select organization_table_name_qtd, organization_column_name_qtd,
+	selected_column, programmer_comments, 
 	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
+	organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
-where ust_control_id = 11 and epa_table_name = 'ust_release'
+where ust_control_id = 11 and epa_table_name = 'ust_facility'
 order by column_sort_order;
 
 /*Step 5: use the information from the queries above to create the view:
-!!! NOTE how I'm using the programmer_comments column to adjust the view (e.g. nfa_date)
-!!! NOTE also sometimes you need to explicitly cast data types. In this example, the two
-    dates "CONFIRMED_DATE" and "STATUS_DATE" are text fields in the state's data and need 
-    to be cast as dates to fit into the EPA table  
+!!! NOTE look at the programmer_comments column to adjust the view if necessary
+!!! NOTE also sometimes you need to explicitly cast data types so they match the EPA data tables
 !!! NOTE also you may get errors related to data conversion when trying to compile the view
     you are creating here. This is good because it alerts you the data you are trying to
     insert is not compatible with the EPA format. Fix these errors before proceeding! 
 !!! NOTE: Remember to do "select distinct" if necessary
 !!! NOTE: Some states do not include State or EPA Region in their database, but it is generally
     safe for you to insert these yourself, so add them! */
-create or replace view wv_ust.v_ust_release as 
+create or replace view wv_ust.v_ust_facility as 
 select distinct 
-		"FACILITY_ID"::character varying(50) as facility_id,
-		"TANK"::character varying(50) as tank_id_associated_with_release,
-		"INCIDENT_ID"::character varying(50) as ust_id,
-		"FACILITY_NAME"::character varying(200) as site_name,
-		"ADDRESS1"::character varying(100) as site_address,
-		"ADDRESS2"::character varying(100) as site_address2,
-		"CITY"::character varying(100) as site_city,
-		"ZIP"::character varying(10) as zipcode,
-		'WV' as state, 
-		3 as epa_region, 
-		"LATITUDE"::double precision as latitude,
-		"LONGITUDE"::double precision as longitude,
-		coordinate_source_id as coordinate_source_id,
-		ust_status_id as ust_status_id,
-		"CONFIRMED_DATE"::date as reported_date,
-		case when "STATUS_DESCRIPTION" = 'Cleanup Completed' then "STATUS_DATE"::date end as nfa_date, 
-		case when "IMWVCT_DESCRIPTION" = 'Soil' then 'Yes' end as media_impacted_soil,
-		case when "IMWVCT_DESCRIPTION" = 'Ground Water' then 'Yes' end as media_impacted_groundwater,
-		case when "IMWVCT_DESCRIPTION" = 'Surface Water' then 'Yes' end as media_impacted_surface_water,
-		how_ust_detected_id
-from "Tank_Cleanup_Incidents" x 
-	left join wv_ust.v_coordinate_source_xwalk cs on x."HOR_REF_DATUM" = cs.organization_value 
-	left join wv_ust.v_ust_status_xwalk	rs on x."STATUS_DESCRIPTION" = rs.organization_value 
-	left join wv_ust.v_how_ust_detected_xwalk rd on x."RELEASE_DISCOVERED" = rd.organization_value 
-where "INCIDENT_TYPE" <> 'AST';
+		"Facility Id"::character varying(50) as facility_id,
+		"Facility Name"::character varying(100) as facility_name,
+		owner_type_id as owner_type_id,
+		facility_type_id as facility_type1,
+		"Address"::character varying(100) as facility_address1,
+		"City"::character varying(100) as facility_city,
+		"County"::character varying(100) as facility_county,
+		"Zip"::character varying(10) as facility_zip_code,
+		'WV' as facility_state,
+		3 as facility_epa_region,
+		"Owner Name"::character varying(100) as facility_owner_company_name
+from wv_ust.facilities x 
+	left join wv_ust.v_owner_type_xwalk ot on x."Owner Type" = ot.organization_value 
+	left join wv_ust.v_facility_type_xwalk ft on x."Facility Type" = ft.organization_value;
+
 
 --review: 
-select * from wv_ust.v_ust_release;
-select count(*) from wv_ust.v_ust_release;
---69865
+select * from wv_ust.v_ust_facility;
+select count(*) from wv_ust.v_ust_facility;
+--8834
 --------------------------------------------------------------------------------------------------------------------------
 --now repeat for each data table:
 
---ust_substance 
-select organization_table_name_qtd, selected_column, programmer_comments, 
+--ust_tank 
+select organization_table_name_qtd, organization_column_name_qtd,
+	selected_column, programmer_comments, 
 	database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
-where ust_control_id = 11 and epa_table_name = 'ust_substance'
+where ust_control_id = 11 and epa_table_name = 'ust_tank'
 order by column_sort_order;
 
 --be sure to do select distinct if necessary!
-create or replace view wv_ust.v_ust_substance as 
-select distinct "INCIDENT_ID"::character varying(50) as ust_id,
-		s.substance_id
-from "Tank_Cleanup_Incidents" x 
-	join wv_ust.v_substance_xwalk s on x."SUBSTANCE" = s.organization_value 
-where s.substance_id is not null 
-and "INCIDENT_TYPE" <> 'AST'; 
+--NOTE: ADD facility_id!!!!
+create or replace view wv_ust.v_ust_tank as 
+select distinct 
+	"Facility ID" as facility_id, 
+	"Tank Id"::varchar(100) as tank_id,
+	tank_status_id as tank_status_id,
+	"Regulated"::character varying(7) as federally_regulated,
+	"Closed"::date as tank_closure_date,
+	"Installed"::date as tank_installation_date,
+	"Compartments"::character varying(7) as compartmentalized_ust,
+	"Compartments"::integer as number_of_compartments,
+	tank_material_description_id as tank_material_description_id
+from wv_ust.tanks x 
+	join wv_ust.v_tank_status_xwalk ts on x."Tank Status" = ts.organization_value 
+	join wv_ust.v_tank_material_description_xwalk md on x."Material" = md.organization_value;
 
-select * from wv_ust.v_ust_substance;
-select count(*) from wv_ust.v_ust_substance;
---62868
+select * from wv_ust.v_ust_tank;
+select count(*) from wv_ust.v_ust_tank;
+--26231
+
 --------------------------------------------------------------------------------------------------------------------------
---ust_source 
-select organization_table_name_qtd, selected_column, programmer_comments, 
+--ust_compartment
+select organization_table_name_qtd, organization_column_name_qtd,
+	selected_column, programmer_comments, 
 	database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
-where ust_control_id = 11 and epa_table_name = 'ust_source'
+where ust_control_id = 11 and epa_table_name = 'ust_compartment'
 order by column_sort_order;
 
---!! this one has a deagg table so we have to alter the join 
-create or replace view wv_ust.v_ust_source as 
-select distinct "INCIDENT_ID"::character varying(50) as ust_id,
-		b.source_id
-from "Tank_Cleanup_Incidents" a join wv_ust.v_source_xwalk b on a."SOURCE_CAUSE_OF_RELEASE" like '%' || b.organization_value || '%'
-where epa_value is not null
-and "INCIDENT_TYPE" <> 'AST';
-	
-select * from wv_ust.v_ust_source;
-select count(*) from wv_ust.v_ust_source;
---5138
+--be sure to do select distinct if necessary!
+--NOTE: ADD facility_id and tank_id!!!!
+create or replace view wv_ust.v_ust_compartment as 
+select distinct 
+	"Facility ID" as facility_id, 
+	"Tank Id"::varchar(100) as tank_id,
+	substance_id as substance_id,
+	"Capacity"::integer as compartment_capacity_gallons
+from wv_ust.tanks x 
+	join wv_ust.v_substance_xwalk s on x."Substance" = s.organization_value;
+
+select * from wv_ust.v_ust_compartment;
+select count(*) from wv_ust.v_ust_compartment;
+--25689
 
 --------------------------------------------------------------------------------------------------------------------------
---ust_cause 
-
-select organization_table_name_qtd, selected_column, programmer_comments, 
+--ust_piping
+select organization_table_name_qtd, organization_column_name_qtd,
+	selected_column, programmer_comments, 
 	database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
-where ust_control_id = 11 and epa_table_name = 'ust_cause'
+where ust_control_id = 11 and epa_table_name = 'ust_piping'
 order by column_sort_order;
 
---!! this one has a deagg table so we have to alter the join 
-create or replace view wv_ust.v_ust_cause as 
-select distinct "INCIDENT_ID"::character varying(50) as ust_id,
-		b.cause_id
-from "Tank_Cleanup_Incidents" a join wv_ust.v_cause_xwalk b on a."SOURCE_CAUSE_OF_RELEASE" like '%' || b.organization_value || '%'
-where epa_value is not null
-and "INCIDENT_TYPE" <> 'AST';
-	
-select * from wv_ust.v_ust_cause;
-select count(*) from wv_ust.v_ust_cause;
---3120
+--be sure to do select distinct if necessary!
+--NOTE: ADD facility_id and tank_id (and compartment_id if it exists in state data)!!!!
+create or replace view wv_ust.v_ust_piping as 
+select distinct 
+	"Facility ID" as facility_id, 
+	"Tank Id"::varchar(100) as tank_id,
+from wv_ust.tanks x 
+	join wv_ust.v_substance_xwalk s on x."Substance" = s.organization_value;
+
+select * from wv_ust.v_ust_piping;
+select count(*) from wv_ust.v_ust_piping;
+--25689
+
 
 --------------------------------------------------------------------------------------------------------------------------
+
 --QA/QC
 
 --check that you didn't miss any columns when creating the data population views:

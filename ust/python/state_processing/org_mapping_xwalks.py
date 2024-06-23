@@ -9,8 +9,8 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 2
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 11
 
 
 def main(control_id, ust_or_release):
@@ -34,15 +34,21 @@ def main(control_id, ust_or_release):
 		database_lookup_table = row[3]
 		database_lookup_column = row[4]
 		view_name = schema + '.v_' + database_lookup_column + '_xwalk'
+		if epa_column_name == 'facility_type1' or epa_column_name == 'facility_type2':
+			epa_column_name2 = 'facility_type_id'
+		else:
+			epa_column_name2 = epa_column_name
 
 		# print('epa_column_name = ' + epa_column_name)
 		# print('database_lookup_table = ' + database_lookup_table)
 		# print('database_lookup_column = ' + database_lookup_column)
 		# print('view_name = ' + view_name)
+		sql = f'drop view {view_name}'
+		cur.execute(sql)
 
 		sql = f"""create or replace view {view_name} as 
-				select a.organization_value, a.epa_value, b.{epa_column_name}
-				from v_release_element_mapping a left join {database_lookup_table} b on a.epa_value = b.{database_lookup_column}
+				select a.organization_value, a.epa_value, b.{epa_column_name2}
+				from v_{ust_or_release}_element_mapping a left join {database_lookup_table} b on a.epa_value = b.{database_lookup_column}
 				where a.{control_id_col} = %s and a.epa_column_name = %s"""
 		# print(sql)
 		cur.execute(sql, (control_id, epa_column_name))

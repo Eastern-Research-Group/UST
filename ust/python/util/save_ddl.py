@@ -36,6 +36,7 @@ def main(schema, object_name=None):
 		ddl_sql = ddl_sql + cur.fetchone()[0]
 		with open(file_path, 'w') as f:
 			f.write(ddl_sql)
+		logger.info('Saved view %s DDL to %s', view_name, file_path)
 
 	# tables
 	sql = """select table_name from information_schema.tables
@@ -81,6 +82,7 @@ def main(schema, object_name=None):
 
 		with open(file_path, 'w') as f:
 			f.write(ddl_sql)
+		logger.info('Saved table %s DDL to %s', table_name, file_path)
 
 	# functions
 	sql = """select p.proname, p.oid
@@ -100,6 +102,7 @@ def main(schema, object_name=None):
 		ddl_sql = ddl_sql + cur.fetchone()[0]
 		with open(file_path, 'w') as f:
 			f.write(ddl_sql)
+		logger.info('Saved function %s DDL to %s', function_name, file_path)
 
 	cur.close()
 	conn.close()

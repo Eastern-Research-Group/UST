@@ -1,5 +1,5 @@
-create or replace view "public"."v_release_table_population" as
- SELECT x.release_control_id,
+create or replace view "public"."v_ust_table_population" as
+ SELECT x.ust_control_id,
     x.epa_table_name,
     x.epa_column_name,
     x.data_type,
@@ -16,7 +16,7 @@ create or replace view "public"."v_release_table_population" as
     x.deagg_column_name,
     x.table_sort_order,
     x.column_sort_order
-   FROM ( SELECT a.release_control_id,
+   FROM ( SELECT a.ust_control_id,
             a.epa_table_name,
             a.epa_column_name,
             e.data_type,
@@ -36,13 +36,13 @@ create or replace view "public"."v_release_table_population" as
             a.deagg_column_name,
             d.sort_order AS table_sort_order,
             c.sort_order AS column_sort_order
-           FROM ((((release_element_mapping a
-             JOIN release_elements b ON (((a.epa_column_name)::text = (b.database_column_name)::text)))
-             JOIN release_elements_tables c ON (((b.element_id = c.element_id) AND ((a.epa_table_name)::text = (c.table_name)::text))))
-             JOIN release_template_data_tables d ON (((c.table_name)::text = (d.table_name)::text)))
+           FROM ((((ust_element_mapping a
+             JOIN ust_elements b ON (((a.epa_column_name)::text = (b.database_column_name)::text)))
+             JOIN ust_elements_tables c ON (((b.element_id = c.element_id) AND ((a.epa_table_name)::text = (c.table_name)::text))))
+             JOIN ust_template_data_tables d ON (((c.table_name)::text = (d.table_name)::text)))
              JOIN information_schema.columns e ON ((((a.epa_table_name)::text = (e.table_name)::name) AND ((a.epa_column_name)::text = (e.column_name)::name) AND ((e.table_schema)::name = 'public'::name))))
         UNION ALL
-         SELECT a.release_control_id,
+         SELECT a.ust_control_id,
             z.epa_table_name,
             a.epa_column_name,
             e.data_type,
@@ -62,17 +62,15 @@ create or replace view "public"."v_release_table_population" as
             a.deagg_column_name,
             d.sort_order AS table_sort_order,
             c.sort_order AS column_sort_order
-           FROM ((((release_element_mapping a
-             JOIN release_elements b ON (((a.epa_column_name)::text = (b.database_column_name)::text)))
-             JOIN release_elements_tables c ON (((b.element_id = c.element_id) AND ((a.epa_table_name)::text = (c.table_name)::text))))
-             JOIN release_template_data_tables d ON (((c.table_name)::text = (d.table_name)::text)))
+           FROM ((((ust_element_mapping a
+             JOIN ust_elements b ON (((a.epa_column_name)::text = (b.database_column_name)::text)))
+             JOIN ust_elements_tables c ON (((b.element_id = c.element_id) AND ((a.epa_table_name)::text = (c.table_name)::text))))
+             JOIN ust_template_data_tables d ON (((c.table_name)::text = (d.table_name)::text)))
              JOIN information_schema.columns e ON ((((a.epa_table_name)::text = (e.table_name)::name) AND ((a.epa_column_name)::text = (e.column_name)::name) AND ((e.table_schema)::name = 'public'::name)))),
-            ( SELECT 'ust_release_substance'::character varying(100) AS epa_table_name
+            ( SELECT 'ust_tank'::character varying(100) AS epa_table_name
                 UNION ALL
-                 SELECT 'ust_release_source'::character varying(100) AS "varchar"
+                 SELECT 'ust_compartment'::character varying(100) AS "varchar"
                 UNION ALL
-                 SELECT 'ust_release_cause'::character varying(100) AS "varchar"
-                UNION ALL
-                 SELECT 'ust_release_corrective_action_strategy'::character varying(100) AS "varchar") z
-          WHERE ((a.epa_column_name)::text = 'release_id'::text)) x
-  ORDER BY x.release_control_id, x.epa_table_name, x.table_sort_order, x.column_sort_order;
+                 SELECT 'ust_piping'::character varying(100) AS "varchar") z
+          WHERE ((a.epa_column_name)::text = 'ust_id'::text)) x
+  ORDER BY x.ust_control_id, x.epa_table_name, x.table_sort_order, x.column_sort_order;
