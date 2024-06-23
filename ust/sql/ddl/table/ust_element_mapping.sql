@@ -12,3 +12,19 @@ CREATE TABLE public.ust_element_mapping (
     organization_comments text  NULL ,
     deagg_table_name character varying(100)  NULL ,
     deagg_column_name character varying(100)  NULL );
+
+ALTER TABLE public.ust_element_mapping ADD CONSTRAINT ust_element_mapping_pkey PRIMARY KEY (ust_element_mapping_id);
+
+CREATE UNIQUE INDEX ust_element_mapping_pkey ON public.ust_element_mapping USING btree (ust_element_mapping_id)
+
+CREATE INDEX ust_element_mapping_table_name ON public.ust_element_mapping USING btree (epa_table_name)
+
+CREATE INDEX ust_element_mapping_column_name ON public.ust_element_mapping USING btree (epa_column_name)
+
+CREATE INDEX ust_element_mapping_tabcol ON public.ust_element_mapping USING btree (epa_table_name, epa_column_name)
+
+CREATE INDEX ust_element_mapping_id ON public.ust_element_mapping USING btree (ust_element_mapping_id)
+
+CREATE INDEX ust_element_mapping_ust_control_id_idx ON public.ust_element_mapping USING btree (ust_control_id)
+
+CREATE INDEX ust_element_mapping_ust_element_mapping_id_idx ON public.ust_element_mapping USING btree (ust_element_mapping_id)

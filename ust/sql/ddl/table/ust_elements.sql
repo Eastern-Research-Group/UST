@@ -13,3 +13,15 @@ CREATE TABLE public.ust_elements (
     database_column_name character varying(100)  NULL ,
     database_lookup_table character varying(100)  NULL ,
     database_lookup_column character varying(100)  NULL );
+
+ALTER TABLE public.ust_elements ADD CONSTRAINT ust_elements_pkey1 PRIMARY KEY (element_id);
+
+CREATE UNIQUE INDEX ust_elements_pkey1 ON public.ust_elements USING btree (element_id)
+
+CREATE INDEX ust_elements_dbcn_idx ON public.ust_elements USING btree (database_column_name)
+
+CREATE INDEX ust_elements_lut_idx ON public.ust_elements USING btree (database_lookup_table)
+
+CREATE INDEX ust_elements_dblcn_idx ON public.ust_elements USING btree (database_lookup_column)
+
+CREATE INDEX ust_elements_element_id_idx ON public.ust_elements USING btree (element_id)

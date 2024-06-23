@@ -20,3 +20,13 @@ CREATE TABLE public.tx_analysis_chemical (
     confidentialstoragelocs character varying(4000)  NULL ,
     tradesecret character varying(4000)  NULL ,
     file_no character varying  NULL );
+
+CREATE INDEX tac_idx ON public.tx_analysis_chemical USING btree (facility_id)
+
+CREATE INDEX tac_idx2 ON public.tx_analysis_chemical USING btree (chemical_id)
+
+CREATE INDEX tac_idx3 ON public.tx_analysis_chemical USING btree (chemical_name)
+
+CREATE INDEX tac_idx4 ON public.tx_analysis_chemical USING btree (casnumber)
+
+CREATE INDEX tx_analysis_chemical_idx ON public.tx_analysis_chemical USING btree (chemical_id)

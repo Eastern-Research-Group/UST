@@ -13,3 +13,15 @@ CREATE TABLE public.release_elements (
     database_column_name character varying(100)  NULL ,
     database_lookup_table character varying(100)  NULL ,
     database_lookup_column character varying(100)  NULL );
+
+ALTER TABLE public.release_elements ADD CONSTRAINT release_elements_pkey PRIMARY KEY (element_id);
+
+CREATE UNIQUE INDEX release_elements_pkey ON public.release_elements USING btree (element_id)
+
+CREATE INDEX release_elements_dbcn_idx ON public.release_elements USING btree (database_column_name)
+
+CREATE INDEX release_elements_lut_idx ON public.release_elements USING btree (database_lookup_table)
+
+CREATE INDEX release_elements_dblcn_idx ON public.release_elements USING btree (database_lookup_column)
+
+CREATE INDEX release_elements_element_id_idx ON public.release_elements USING btree (element_id)

@@ -15,8 +15,6 @@ object_name = None # If None, will export all tables, views, and functions
 # TODO: passing an object_name is not yet supported
 export_path = '../../sql/ddl/'
 
-#TODO: add constraints and indexes to table DDL
-
 
 def main(schema, object_name=None):
 	conn = utils.connect_db()
@@ -50,11 +48,36 @@ def main(schema, object_name=None):
 		file_name = table_name + '.sql'
 		file_path = export_path + 'table/' + file_name
 		sql2 = f"""select generate_create_table_statement('{schema}','{table_name}')"""
-		print(sql2)
 		cur.execute(sql2)
 		ddl_sql = cur.fetchone()[0]
 
-		#TODO: add constraints and indexes
+		# constraints
+		sql2 = """select con.conname from pg_catalog.pg_constraint con
+					join pg_catalog.pg_class rel on rel.oid = con.conrelid
+					join pg_catalog.pg_namespace nsp on nsp.oid = connamespace
+				where nsp.nspname = 'public' and rel.relname = %s"""
+		cur.execute(sql2, (table_name,))
+		rows2 = cur.fetchall()
+		for row2 in rows2:
+			constraint_name = row2[0]
+			sql3 = """select format('ALTER TABLE %%I.%%I ADD CONSTRAINT %%I %%s;', 
+							connamespace::regnamespace,
+							conrelid::regclass,
+							conname,
+							pg_get_constraintdef(oid))
+					from pg_constraint where conname = %s"""
+			cur.execute(sql3, (constraint_name,))
+			rows3 = cur.fetchall()
+			for row3 in rows3:
+				ddl_sql = ddl_sql + '\n\n' + row3[0]
+
+		# indexes 
+		sql3 = """select indexdef from pg_indexes
+				where schemaname = 'public' and tablename = %s"""
+		cur.execute(sql3, (table_name,))
+		rows2 = cur.fetchall()
+		for row2 in rows2:
+			ddl_sql = ddl_sql + '\n\n' + row2[0]
 
 		with open(file_path, 'w') as f:
 			f.write(ddl_sql)
@@ -77,9 +100,6 @@ def main(schema, object_name=None):
 		ddl_sql = ddl_sql + cur.fetchone()[0]
 		with open(file_path, 'w') as f:
 			f.write(ddl_sql)
-
-	# generate_create_table_statement
-
 
 	cur.close()
 	conn.close()
