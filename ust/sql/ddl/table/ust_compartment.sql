@@ -1,7 +1,7 @@
 CREATE TABLE public.ust_compartment (
     ust_compartment_id integer  NOT NULL generated always as identity,
-    ust_tank_id integer  NULL ,
-    compartment_id integer  NULL ,
+    ust_tank_id integer  NOT NULL ,
+    compartment_id integer  NOT NULL ,
     compartment_name character varying(50)  NULL ,
     compartment_status_id integer  NOT NULL ,
     substance_id integer  NULL ,

@@ -12,7 +12,9 @@ create or replace view "public"."v_ust_element_mapping" as
     b.programmer_comments,
     b.epa_comments,
     b.organization_comments,
-    c.ust_control_id
+    c.ust_control_id,
+    a.ust_element_mapping_id,
+    b.ust_element_value_mapping_id
    FROM ((ust_element_mapping a
      LEFT JOIN ust_element_value_mapping b ON ((a.ust_element_mapping_id = b.ust_element_mapping_id)))
      JOIN ust_control c ON ((a.ust_control_id = c.ust_control_id)));

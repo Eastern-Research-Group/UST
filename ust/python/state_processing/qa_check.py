@@ -31,6 +31,8 @@ join_cols['v_ust_release_cause'] = ['release_id']
 join_cols['v_ust_release_substance'] = ['release_id']
 join_cols['v_ust_release_corrective_action_strategy'] = ['release_id']
 
+yellow_cell_fill = 'FFFF00' # yellow
+
 
 class QualityCheck:
 	views_to_review = []
@@ -227,7 +229,7 @@ class QualityCheck:
 		existing_cols = [r[0] for r in rows]
 		for rcol in req_cols:
 			if rcol not in existing_cols:
-				self.error_dict['missing join column'] = self.schema + '.' + self.view_name + '.' + rcol 
+				self.error_dict['Missing join column'] = self.schema + '.' + self.view_name + '.' + rcol 
 				logger.warning('Missing join column %s in view %s.%s', rcol, self.schema, self.view_name)
 
 
@@ -248,8 +250,16 @@ class QualityCheck:
 			self.cur.execute(sql2, (self.schema, self.view_name, col_name))
 			cnt = self.cur.fetchone()[0]
 			if cnt < 1:
-				self.error_dict['missing required column'] = self.schema + '.' + self.view_name + '.' + col_name 
+				self.error_dict['Missing required column'] = self.schema + '.' + self.view_name + '.' + col_name 
 				logger.warning('Missing required column %s in view %s.%s', col_name, self.schema, self.view_name)
+			else:
+				sql3 = f"select * from {self.schema}.{self.view_name} where {col_name} is null"
+				self.cur.execute(sql3)
+				data = self.cur.fetchall()
+				num_rows = self.cur.rowcount 
+				self.error_cnt_dict['Number of null rows for required column ' + self.table_name + '.' + col_name] = num_rows
+				logger.warning('Number of null rows for required column %s.%s = %s', self.table_name, col_name, num_rows)
+				self.write_to_ws(data, col_name + ' null')
 
 
 	def get_bad_datatypes(self, data):
@@ -415,6 +425,8 @@ class QualityCheck:
 			print(k + ' = ' + str(v))
 			ws.cell(row=rowno, column=1).value = k
 			ws.cell(row=rowno, column=2).value = v  
+			if v > 0:
+				ws.cell(row=rowno, column=2).fill = utils.get_fill_gen(yellow_cell_fill)
 			rowno += 1
 	
 		utils.autowidth(ws)		
@@ -440,6 +452,7 @@ class QualityCheck:
 	def cleanup_wb(self):
 		try:
 			self.wb.remove(self.wb['Sheet'])
+			self.wb.active = self.wb['Overview']
 		except:
 			pass
 		self.wb.save(self.export_file_path)

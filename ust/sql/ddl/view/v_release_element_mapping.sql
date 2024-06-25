@@ -12,7 +12,9 @@ create or replace view "public"."v_release_element_mapping" as
     b.programmer_comments,
     b.epa_comments,
     b.organization_comments,
-    c.release_control_id
+    c.release_control_id,
+    a.release_element_mapping_id,
+    b.release_element_value_mapping_id
    FROM ((release_element_mapping a
      LEFT JOIN release_element_value_mapping b ON ((a.release_element_mapping_id = b.release_element_mapping_id)))
      JOIN release_control c ON ((a.release_control_id = c.release_control_id)));

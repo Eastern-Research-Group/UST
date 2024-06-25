@@ -1,7 +1,7 @@
 CREATE TABLE public.ust_piping (
     ust_piping_id integer  NOT NULL generated always as identity,
-    ust_compartment_id integer  NULL ,
-    piping_id character varying(50)  NULL ,
+    ust_compartment_id integer  NOT NULL ,
+    piping_id character varying(50)  NOT NULL ,
     piping_style_id integer  NULL ,
     safe_suction character varying(7)  NULL ,
     american_suction character varying(7)  NULL ,

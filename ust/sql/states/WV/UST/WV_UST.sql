@@ -163,11 +163,11 @@ select distinct "Material" from wv_ust.tanks;
 select distinct "Installed" from wv_ust.tanks;
 
 select distinct "Tank Status" from wv_ust.tanks;
---looking at the tank statuses, I see some rows appear to have multiple values separated by a hard return 
+--looking at the tank statuses, I see some rows appear to have multiple values separated by a newline 
 --we'll need to remember to deaggregate these values later
 
 select distinct "Substance" from wv_ust.tanks;
---looking at the substances, I see some rows appear to have multiple values separated by a hard return 
+--looking at the substances, I see some rows appear to have multiple values separated by a newline 
 --we'll need to remember to deaggregate these values later
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -504,7 +504,7 @@ Temporarily Out of Service
 Permanently Out of Service
 Temporarily Out of Service
 */
---in this case there appears to be some rows where there are multiple statuses separated by a hard return 
+--in this case there appears to be some rows where there are multiple statuses separated by a newline 
 --let's examine the rows where that is the case 
 select * from wv_ust."tanks" where "Tank Status" like 'Currently In Use%Temporarily Out of Service'
 --this query returns 9 rows. For now I am going to assume these tanks are Currently In Use, but I will make a note 
@@ -532,8 +532,8 @@ if necessary, replace the "null" with any questions or comments you have about t
 
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Abandoned', 'Abandoned', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Currently In Use', 'Currently in use', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Currently In Use
-Temporarily Out of Service', 'Currently in use', null);
+--deal with newline character in organization value!
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Currently In Use' || chr(10) || 'Temporarily Out of Service', 'Currently in use', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Permanently Out of Service', 'Closed (general)', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Temporarily Out of Service', 'Temporarily out of service', null);
 
@@ -684,7 +684,7 @@ Temporarily Out of Service
 Permanently Out of Service
 Temporarily Out of Service
 */
---in this case there appears to be some rows where there are multiple statuses separated by a hard return 
+--in this case there appears to be some rows where there are multiple statuses separated by a newline 
 --let's examine the rows where that is the case 
 select * from wv_ust."tanks" where "Tank Status" like 'Currently In Use%Temporarily Out of Service'
 --this query returns 9 rows. For now I am going to assume these tanks are Currently In Use, but I will make a note 
@@ -712,8 +712,7 @@ if necessary, replace the "null" with any questions or comments you have about t
 
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Abandoned', 'Abandoned', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Currently In Use', 'Currently in use', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Currently In Use
-Temporarily Out of Service', 'Currently in use', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Currently In Use' || chr(10) || 'Temporarily Out of Service', 'Currently in use', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Permanently Out of Service', 'Closed (general)', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Temporarily Out of Service', 'Temporarily out of service', null);
 
@@ -747,7 +746,7 @@ Next, see if the state values need to be deaggregated
 */
 select distinct "Substance" from wv_ust."tanks" order by 1;
 /*
-This returns rows that have more than one value, separated by a hard return. We are going to have to deaggregate.
+This returns rows that have more than one value, separated by a newline. We are going to have to deaggregate.
 Run deagg.py, setting the state table name, state column name, and delimiter 
 The script will create a deagg table and return the name of the new table; in this case: erg_substance_deagg
 check the contents of the deagg table:*/
@@ -995,8 +994,11 @@ from v_ust_table_population_sql
 where ust_control_id = 11 and epa_table_name = 'ust_tank'
 order by column_sort_order;
 
---be sure to do select distinct if necessary!
---NOTE: ADD facility_id::character varying(50)!!!!
+/*be sure to do select distinct if necessary!
+NOTE: ADD facility_id::character varying(50)!!!!
+NOTE: tank_id (integer) is a required field - if the state data does not contain an integer field
+      that uniquely identifies the tank, you must generate one (see Compartments below for how to do this).
+*/
 create or replace view wv_ust.v_ust_tank as 
 select distinct 
 	"Facility ID"::character varying(50) as facility_id, 
@@ -1009,12 +1011,13 @@ select distinct
 	"Compartments"::integer as number_of_compartments,
 	tank_material_description_id as tank_material_description_id
 from wv_ust.tanks x 
-	left join wv_ust.v_tank_status_xwalk ts on x."Tank Status" = ts.organization_value 
+	left join wv_ust.v_tank_status_xwalk ts on x."Tank Status" = ts.organization_value
 	left join wv_ust.v_tank_material_description_xwalk md on x."Material" = md.organization_value;
 
 select * from wv_ust.v_ust_tank;
 select count(*) from wv_ust.v_ust_tank;
 --26302
+
 
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
@@ -1027,23 +1030,32 @@ from v_ust_table_population_sql
 where ust_control_id = 11 and epa_table_name = 'ust_compartment'
 order by column_sort_order;
 
---be sure to do select distinct if necessary!
---NOTE: ADD facility_id::character varying(50) and tank_id::int OR tank_name::varchar(100)!!!!
+/* be sure to do select distinct if necessary!
+NOTE: ADD facility_id::character varying(50) and tank_id::int!!!!
+NOTE: compartment_id (integer) is a required field - if the state data does not contain an integer field
+      that uniquely identifies the compartment, you must generate one. 
+      In this case, the state does not store compartment data, so we will generate the compartment ID
+      Prefix any tables you create in the state schema that did not come from the source data with "erg_"! */
+create table wv_ust.erg_compartment (facility_id int, tank_id int, compartment_id int generated always as identity);
+insert into wv_ust.erg_compartment (facility_id, tank_id)
+select distinct "Facility ID", "Tank Id" from wv_ust.tanks;
+
 create or replace view wv_ust.v_ust_compartment as 
 select distinct 
 	"Facility ID"::character varying(50) as facility_id, 
 	"Tank Id"::int as tank_id,
+	c.compartment_id,
 	compartment_status_id as compartment_status_id,
 	substance_id as substance_id,
 	"Capacity"::integer as compartment_capacity_gallons
 from wv_ust.tanks x 
+	 join wv_ust.erg_compartment c on x."Facility ID" = c.facility_id and x."Tank Id" = c.tank_id
 	 left join wv_ust.v_compartment_status_xwalk cs on x."Tank Status" = cs.organization_value
 	 left join wv_ust.v_substance_xwalk s on x."Substance" = s.organization_value;
 
 select * from wv_ust.v_ust_compartment;
 select count(*) from wv_ust.v_ust_compartment;
 --26302
-
 
 --------------------------------------------------------------------------------------------------------------------------
 --ust_piping
