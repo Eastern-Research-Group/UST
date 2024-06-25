@@ -228,33 +228,11 @@ values (11,'ust_compartment','facility_id','tanks','Facility ID',null);
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (11,'ust_compartment','tank_id','tanks','Tank Id',null);
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (11,'ust_compartment','compartment_status_id','tanks','Tank Status',null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (11,'ust_compartment','substance_id','tanks','Substance',null);
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (11,'ust_compartment','compartment_capacity_gallons','tanks','Capacity',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','facility_id','tanks','Facility ID',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','tank_id','tanks','Tank Id',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_material_frp','tanks','Material',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_material_gal_steel','tanks','Material',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_material_stainless_steel','tanks','Material',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_material_steel','tanks','Material',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_material_copper','tanks','Material',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_material_flex','tanks','Material',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_material_no_piping','tanks','Material',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_material_other','tanks','Material',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_material_unknown','tanks','Material',null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (11,'ust_piping','piping_flex_connector','tanks','Material',null);
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -683,6 +661,76 @@ and epa_value not in (select tank_material_description from tank_material_descri
 order by 1;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--compartment_status_id
+
+--check the state's data 
+select distinct 'select distinct "' || organization_column_name || '" from wv_ust."' || organization_table_name || '" order by 1;'
+from v_ust_needed_mapping 
+where ust_control_id = 11 and epa_column_name = 'compartment_status_id';
+
+/*
+run the query from the generated sql above to see what the state's data looks like
+you are checking to make sure their values line up with what we are looking for on the EPA side
+(this should have been done during the element mapping above but you can review it now)
+Next, see if the state values need to be deaggregated 
+(that is, is there only one value per row in the state data? If not, we need to deaggregate them)
+*/
+select distinct "Tank Status" from wv_ust."tanks" order by 1;
+/*
+Abandoned
+Currently In Use
+Currently In Use
+Temporarily Out of Service
+Permanently Out of Service
+Temporarily Out of Service
+*/
+--in this case there appears to be some rows where there are multiple statuses separated by a hard return 
+--let's examine the rows where that is the case 
+select * from wv_ust."tanks" where "Tank Status" like 'Currently In Use%Temporarily Out of Service'
+--this query returns 9 rows. For now I am going to assume these tanks are Currently In Use, but I will make a note 
+--to ask the state about this. 
+
+/*
+ * generate generic sql to insert value mapping rows into ust_element_value_mapping, 
+then modify the generated sql with the mapped EPA values 
+NOTE: insert a NULL for epa_value if you don't have a good guess 
+NOTE: if the organization_value is one that should exclude the facility/tank from UST Finder
+      (e.g. a non-federally regulated substance), manually modify the generated sql to 
+       include column exclude_from_query and set the value to 'Y'
+*/
+select insert_sql 
+from v_ust_needed_mapping_insert_sql 
+where ust_control_id = 11 and epa_column_name = 'compartment_status_id';
+
+--paste the insert_sql from the first row below, then run the query:
+select distinct 
+	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 113 || ', ''' || "Tank Status" || ''', '''', null);'
+from wv_ust."tanks" order by 1;
+
+/*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
+if necessary, replace the "null" with any questions or comments you have about the specific mapping */
+
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Abandoned', 'Abandoned', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Currently In Use', 'Currently in use', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Currently In Use
+Temporarily Out of Service', 'Currently in use', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Permanently Out of Service', 'Closed (general)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Temporarily Out of Service', 'Temporarily out of service', null);
+
+--list valid EPA values to paste into sql above 
+select * from public.compartment_statuses order by 1;
+/*
+Currently in use
+Temporarily out of service
+Closed (removed from ground)
+Closed (in place)
+Closed (general)
+Abandoned
+Other
+Unknown
+*/
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --substance_id
 
 --check the state's data 
@@ -835,11 +883,6 @@ order by 1;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-select distinct "Material"
-from wv_ust.tanks 
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 --check if there is any more mapping to do
 select distinct epa_table_name, epa_column_name
 from v_ust_needed_mapping 
@@ -853,6 +896,8 @@ where ust_control_id = 11 order by 1, 2;
 --!!!if there are results from this query, fix them!!!
 
 --if not, it's time to write the queries that manipulate the state's data into EPA's tables 
+
+
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -898,8 +943,8 @@ NOTE! The view queried below (v_ust_table_population_sql) contains columns that 
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
+	selected_column, data_type, character_maximum_length,
+	programmer_comments, database_lookup_table, database_lookup_column,
 	organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
@@ -942,8 +987,8 @@ select count(*) from wv_ust.v_ust_facility;
 
 --ust_tank 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
+	selected_column, data_type, character_maximum_length,
+	programmer_comments, database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
@@ -951,31 +996,31 @@ where ust_control_id = 11 and epa_table_name = 'ust_tank'
 order by column_sort_order;
 
 --be sure to do select distinct if necessary!
---NOTE: ADD facility_id!!!!
+--NOTE: ADD facility_id::character varying(50)!!!!
 create or replace view wv_ust.v_ust_tank as 
 select distinct 
-	"Facility ID" as facility_id, 
-	"Tank Id"::varchar(100) as tank_id,
+	"Facility ID"::character varying(50) as facility_id, 
+	"Tank Id"::int as tank_id,
 	tank_status_id as tank_status_id,
 	"Regulated"::character varying(7) as federally_regulated,
 	"Closed"::date as tank_closure_date,
 	"Installed"::date as tank_installation_date,
-	"Compartments"::character varying(7) as compartmentalized_ust,
+	case when "Compartments" = 1 then 'No' when "Compartments" > 1 then 'Yes' end as compartmentalized_ust,
 	"Compartments"::integer as number_of_compartments,
 	tank_material_description_id as tank_material_description_id
 from wv_ust.tanks x 
-	join wv_ust.v_tank_status_xwalk ts on x."Tank Status" = ts.organization_value 
-	join wv_ust.v_tank_material_description_xwalk md on x."Material" = md.organization_value;
+	left join wv_ust.v_tank_status_xwalk ts on x."Tank Status" = ts.organization_value 
+	left join wv_ust.v_tank_material_description_xwalk md on x."Material" = md.organization_value;
 
 select * from wv_ust.v_ust_tank;
 select count(*) from wv_ust.v_ust_tank;
---26231
+--26302
 
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
+	selected_column, data_type, character_maximum_length,
+	programmer_comments, database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
@@ -983,19 +1028,22 @@ where ust_control_id = 11 and epa_table_name = 'ust_compartment'
 order by column_sort_order;
 
 --be sure to do select distinct if necessary!
---NOTE: ADD facility_id and tank_id!!!!
+--NOTE: ADD facility_id::character varying(50) and tank_id::int OR tank_name::varchar(100)!!!!
 create or replace view wv_ust.v_ust_compartment as 
 select distinct 
-	"Facility ID" as facility_id, 
-	"Tank Id"::varchar(100) as tank_id,
+	"Facility ID"::character varying(50) as facility_id, 
+	"Tank Id"::int as tank_id,
+	compartment_status_id as compartment_status_id,
 	substance_id as substance_id,
 	"Capacity"::integer as compartment_capacity_gallons
 from wv_ust.tanks x 
-	join wv_ust.v_substance_xwalk s on x."Substance" = s.organization_value;
+	 left join wv_ust.v_compartment_status_xwalk cs on x."Tank Status" = cs.organization_value
+	 left join wv_ust.v_substance_xwalk s on x."Substance" = s.organization_value;
 
 select * from wv_ust.v_ust_compartment;
 select count(*) from wv_ust.v_ust_compartment;
---25689
+--26302
+
 
 --------------------------------------------------------------------------------------------------------------------------
 --ust_piping
@@ -1008,19 +1056,8 @@ from v_ust_table_population_sql
 where ust_control_id = 11 and epa_table_name = 'ust_piping'
 order by column_sort_order;
 
---be sure to do select distinct if necessary!
---NOTE: ADD facility_id and tank_id (and compartment_id if it exists in state data)!!!!
-create or replace view wv_ust.v_ust_piping as 
-select distinct 
-	"Facility ID" as facility_id, 
-	"Tank Id"::varchar(100) as tank_id,
-from wv_ust.tanks x 
-	join wv_ust.v_substance_xwalk s on x."Substance" = s.organization_value;
-
-select * from wv_ust.v_ust_piping;
-select count(*) from wv_ust.v_ust_piping;
---25689
-
+--there is no pipping data for this state, so we will skip this view 
+--if we had data, we would have to add facility_id, tank_id AND/OR tank_name, and compartment_id AND/OR compartment_name
 
 --------------------------------------------------------------------------------------------------------------------------
 
@@ -1036,15 +1073,6 @@ from v_ust_missing_view_mapping a
 where ust_control_id = 11
 order by 1, 2;
 
-/*
-select b.column_name, b.data_type, b.character_maximum_length, a.data_type, a.character_maximum_length 
-from information_schema.columns a join information_schema.columns b on a.column_name = b.column_name 
-where a.table_schema = 'wv_ust' and a.table_name = 'v_ust_release'
-and b.table_schema = 'public' and b.table_name = 'ust_release'
-and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length )
-order by b.ordinal_position;
-*/
-
 --run Python QA/QC script
 
 /*run script qa_check.py
@@ -1055,25 +1083,38 @@ export_file_path = None # If export_file_path and export_file_dir/export_file_na
 export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
-This script will check for the following:
-1) Non-unique rows in wv_ust.v_ust_release, wv_ust.v_ust_substance, wv_ust.v_ust_source,
-   wv_ust.v_ust_source, and wv_ust.v_ust_corrective_action_strategy (if these views exist). 
-   To resolve any cases where the counts are greater than 0, check that you did a "select distinct" when creating these rows. 
-2) Failed check constraints. 
-3) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
+This script will check the views you just created in the state schema for the following:
+1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
+   exit. 
+2) Counts of child tables that have too few rows (for example, v_ust_compartment should have at least as many rows as v_ust_tank because
+   every tank should have at least one compartment). 
+3) Missing join columns to parent tables. For example, v_ust_compartment must contain facility_id and tank_id in order to be able to join it
+   to its parent tables. 
+4) Missing required columns. 
+5) Extraneous columns - will check for any columns in the views that don't match a column in the equivalent EPA table. This will help identify
+   typos or other errors. 
+6) Non-unique rows. To resolve any cases where the counts are greater than 0, check that you did a "select distinct" when creating these views. 
+7) Bad data types - will check for columns in the view where either the data type is different than the EPA column, or (for character columns) 
+   if the length of the state value is too long to fit into the EPA column. If the data is too long to fit in the EPA column, this may indicate 
+   an error in your code or mapping, OR it may mean you need to truncate the state's value to fit the EPA format. 
+8) Failed check constraints. 
+9) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
    and ensure the epa_value exists in the associated lookup table. 
-The script will also provide the counts of rows in wv_ust.v_ust_release, wv_ust.v_ust_substance, wv_ust.v_ust_source,
-   wv_ust.v_ust_source, and wv_ust.v_ust_corrective_action_strategy (if these views exist) - ensure these counts 
- make sense! */
+
+The script will also provide the counts of rows in wv_ust.v_ust_facility, wv_ust.v_ust_tank, wv_ust.v_ust_compartment, and
+   wv_ust.v_ust_piping (if these views exist) - ensure these counts make sense! 
+   
+The script will export a QAQC spreadsheet (in additional to printing to the screen and logs). If there are errors, re-write the views above, 
+then re-run the qa script, and proceed when all errors have been resolved. */
 
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
 /*run script populate_epa_data_tables.py	
 set variables:
-ust_or_release = 'release' 
+ust_or_release = 'ust' 
 control_id = 11
-delete_existing = False # can set to True if there is existing release data you need to delete before inserting new*/
+delete_existing = False # can set to True if there is existing UST data you need to delete before inserting new*/
 
 --------------------------------------------------------------------------------------------------------------------------
 --export template
@@ -1081,13 +1122,13 @@ delete_existing = False # can set to True if there is existing release data you 
 /*run script export_template.py
 set variables:
 control_id = 11
-ust_or_release = 'release' 
+ust_or_release = 'ust' 
 organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 		# Set to False to export full template including mapping and reference tabs
-template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
-export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+data_only = False 			# Set to False to export full template including mapping and reference tabs
+template_only = False 		# Set to False to export data and mapping tabs as well as reference tab
+export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------

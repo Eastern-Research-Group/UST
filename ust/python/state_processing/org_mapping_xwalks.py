@@ -43,15 +43,19 @@ def main(control_id, ust_or_release):
 		# print('database_lookup_table = ' + database_lookup_table)
 		# print('database_lookup_column = ' + database_lookup_column)
 		# print('view_name = ' + view_name)
-		sql = f'drop view {view_name}'
-		cur.execute(sql)
 
 		sql = f"""create or replace view {view_name} as 
 				select a.organization_value, a.epa_value, b.{epa_column_name2}
 				from v_{ust_or_release}_element_mapping a left join {database_lookup_table} b on a.epa_value = b.{database_lookup_column}
 				where a.{control_id_col} = %s and a.epa_column_name = %s"""
 		# print(sql)
-		cur.execute(sql, (control_id, epa_column_name))
+		try:
+			cur.execute(sql, (control_id, epa_column_name))
+		except:
+			sql2 = f"drop view {view_name}"
+			cur.execute(sql2)
+			cur.execute(sql, (control_id, epa_column_name))
+
 		logger.info('Created view %s', view_name)
 
 	cur.close()
