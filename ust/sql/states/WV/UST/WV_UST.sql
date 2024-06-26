@@ -1038,11 +1038,20 @@ select count(*) from wv_ust.v_ust_tank;
 --26222
 
 
-select distinct "Facility ID", "Tank Id", cast(null as varchar(400)) as "Substance" into erg_substance_datarow_deagg from wv_ust.tanks
+select count(*) from wv_ust.erg_substance_datarows_deagg;
 
-select * from erg_substance_datarow_deagg
 
-drop table erg_substance_datarow_deagg;
+select * from wv_ust.tanks where "Substance" like '%\n%'
+order by 1;
+
+select "Facility ID", "Tank Id", "Compartments", "Substance"
+from wv_ust.tanks
+where "Substance" like '%' || chr(10) || '%'
+order by 1, 2;
+
+
+200141
+
 
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
