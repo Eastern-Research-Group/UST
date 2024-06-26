@@ -984,16 +984,31 @@ export_file_path = None # If export_file_path and export_file_dir/export_file_na
 export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
-This script will check for the following:
-1) Non-unique rows in pa_release.v_ust_release, pa_release.v_ust_release_substance, pa_release.v_ust_release_source,
-   pa_release.v_ust_release_source, and pa_release.v_ust_release_corrective_action_strategy (if these views exist). 
-   To resolve any cases where the counts are greater than 0, check that you did a "select distinct" when creating these rows. 
-2) Failed check constraints. 
-3) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.release_element_value_mapping 
+This script will check the views you just created in the state schema for the following:
+1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
+   exist. 
+2) Counts of child tables that have too few rows (for example, v_ust_compartment should have at least as many rows as v_ust_tank because
+   every tank should have at least one compartment). 
+3) Missing join columns to parent tables. For example, v_ust_compartment must contain facility_id and tank_id in order to be able to join it
+   to its parent tables. 
+4) Missing required columns. 
+5) Required columns that exist but contain null values. 
+6) Extraneous columns - will check for any columns in the views that don't match a column in the equivalent EPA table. This will help identify
+   typos or other errors. 
+7) Non-unique rows. To resolve any cases where the counts are greater than 0, check that you did a "select distinct" when creating these views.
+   Then check for bad joins.  
+8) Bad data types - will check for columns in the view where either the data type is different than the EPA column, or (for character columns) 
+   if the length of the state value is too long to fit into the EPA column. If the data is too long to fit in the EPA column, this may indicate 
+   an error in your code or mapping, OR it may mean you need to truncate the state's value to fit the EPA format. 
+9) Failed check constraints. 
+10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
    and ensure the epa_value exists in the associated lookup table. 
-The script will also provide the counts of rows in pa_release.v_ust_release, pa_release.v_ust_release_substance, pa_release.v_ust_release_source,
-   pa_release.v_ust_release_source, and pa_release.v_ust_release_corrective_action_strategy (if these views exist) - ensure these counts 
- make sense! */
+
+The script will also provide the counts of rows in wv_ust.v_ust_release, wv_ust.v_ust_release_substance, wv_ust.v_ust_release_source, 
+   wv_ust.v_ust_release_cause, and wv_ust.v_ust_release_corrective_action_strategy (if these views exist) - ensure these counts make sense! 
+   
+The script will export a QAQC spreadsheet (in additional to printing to the screen and logs). If there are errors, re-write the views above, 
+then re-run the qa script, and proceed when all errors have been resolved. */
 
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
@@ -1002,7 +1017,13 @@ The script will also provide the counts of rows in pa_release.v_ust_release, pa_
 set variables:
 ust_or_release = 'release' 
 control_id = 2
-delete_existing = False # can set to True if there is existing release data you need to delete before inserting new*/
+delete_existing = False # can set to True if there is existing release data you need to delete before inserting new
+*/
+
+--------------------------------------------------------------------------------------------------------------------------
+--Quick sanity check of number of rows inserted:
+select table_name, num_rows from v_ust_table_row_count
+where ust_control_id = 11 order by sort_order;
 
 --------------------------------------------------------------------------------------------------------------------------
 --export template

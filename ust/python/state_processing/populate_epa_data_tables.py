@@ -9,7 +9,6 @@ import ntpath
 from python.util.logger_factory import logger
 from python.util import utils, config
 
-### WARNING! THIS SCRIPT CURRENTLY ONLY WORKS FOR RELEASES. DO NOT USE FOR UST. 
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'
 control_id = 11
@@ -52,7 +51,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 	cur.execute(sql)
 	rows = cur.fetchall()
 	for row in rows:
-		column_list = ''
+		org_column_list = ''
 		table_name = row[0]
 		view_name = row[1]
 		sort_order = row[2]
@@ -64,44 +63,54 @@ def main(control_id, ust_or_release, delete_existing=False):
 		cur.execute(sql2, (schema, view_name))
 		rows2 = cur.fetchall()
 		for row2 in rows2:
-			column_list = column_list + row2[0] + ', '
-		if column_list:
+			org_column_list = org_column_list + row2[0] + ', '
+		if org_column_list:
 			if sort_order == 1:
-				column_list = column_list + ust_or_release + '_control_id'
-				insert_sql = 'insert into public.' + table_name + ' (' + column_list + """) 
-				select """ + column_list.replace(ust_or_release + '_control_id', str(control_id)) + " from " + schema + '.' + view_name 
-				print(insert_sql)
+				org_column_list = org_column_list + ust_or_release + '_control_id'
+				select_column_list = org_column_list.replace(ust_or_release + '_control_id', str(control_id))
+				insert_sql = f"""insert into public.{table_name} ({org_column_list}) 
+								select {select_column_list} from {schema}.{view_name}"""
+				# insert_sql = 'insert into public.' + table_name + ' (' + org_column_list + """) 
+				# select """ + column_list.replace(ust_or_release + '_control_id', str(control_id)) + " from " + schema + '.' + view_name 
+				# print(insert_sql)
 				cur.execute(insert_sql)
 
-			else: #TODO: Currently this only works for releases!!
+			else: 
 				if ust_or_release == 'release':
-					column_list = 'ust_release_id, ' + column_list[:-2]
+					column_list = 'ust_release_id, ' + org_column_list[:-2]
 					column_list = column_list.replace(', release_id','')
 					parent_table = 'ust_release'
 					join_col = 'release_id'
 					epa_col = 'ust_release_id'
 				else:
-					column_list = 'ust_facility_id, ' + column_list[:-2] # TODO: this won't work!!
+					column_list = 'ust_facility_id, ' + org_column_list[:-2] 
 					column_list = column_list.replace(', facility_id','')
 					parent_table = 'ust_facility' 
 					join_col = 'facility_id' 
 					epa_col = 'ust_facility_id' 
 				if ust_or_release == 'release' or view_name in ('v_ust_facility','v_ust_tank'):
-					insert_sql = 'insert into public.' + table_name + ' (' + column_list + """) 
-					select """ + column_list + " from " + schema + "." + view_name + """ a join 
-					(select """ + epa_col + ', ' + join_col + " from public.""" + parent_table + " where " + ust_or_release + """_control_id = %s) b 
-					on a.""" + join_col + " = b." + join_col
+					insert_sql = f"""insert into public.{table_name} ({column_list})
+									select {column_list} from {schema}.{view_name} a 
+										join (select {epa_col}, {join_col} from public.{parent_table} where {ust_or_release}_control_id = %s) b
+											on a.{join_col} = b.{join_col}"""
 				elif view_name == 'v_ust_compartment':
-					column_list = 'ust_tank_id, ' + column_list[:-2] # TODO: this won't work!!
-					column_list = column_list.replace(', tank_id','')
-					parent_table = 'ust_facility' 
-					join_col = 'facility_id' 
-					epa_col = 'ust_facility_id' 
-					insert_sql = 'insert into public.' + table_name + ' (' + column_list + """) 
-					select """ + column_list + " from " + schema + "." + view_name + """ a join 
-					(select """ + epa_col + ', ' + join_col + " from public.""" + parent_table + " where " + ust_or_release + """_control_id = %s) b 
-					on a.""" + join_col + " = b." + join_col + 
-				print(insert_sql)
+					column_list = 'ust_tank_id, ' + org_column_list[:-2] 
+					column_list = column_list.replace(', facility_id','').replace(', tank_id','')
+					insert_sql = f"""insert into public.ust_compartment ({column_list})
+									select {column_list} from {schema}.v_ust_compartment a 
+										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
+											on a.facility_id = b.facility_id
+										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id"""
+				elif view_name == 'v_ust_piping':
+					column_list = 'ust_compartment_id, ' + org_column_list[:-2] 
+					column_list = column_list.replace(', facility_id','').replace(', tank_id','').replace(', compartment_id','')
+					insert_sql = f"""insert into public.ust_piping ({column_list})
+									select {column_list} from {schema}.v_ust_piping a 
+										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
+											on a.facility_id = b.facility_id
+										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
+										join ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id"""
+				# print(insert_sql)
 				cur.execute(insert_sql, (control_id, ))
 
 			rows_inserted = cur.rowcount

@@ -14,8 +14,8 @@ from python.util.logger_factory import logger
 from python.util import utils, config
 
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 2
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 11
 organization_id = None
 data_only = False
 template_only = False
@@ -363,6 +363,16 @@ class Template:
 			logger.info('Created Substances mapping tab')
 			return
 		pretty_name = database_lookup_table.replace('_',' ').title()
+		# avoid tab names longer than 31 characters
+		if pretty_name == 'Tank Material Descriptions':
+			pretty_name = 'Tank Material Desc'
+		elif pretty_name == 'Tank Secondary Containments':
+			pretty_name = 'Secondary Containment'
+		elif pretty_name == 
+			pretty_name = 'Pipe Tank Top Sump Wall Types'
+		elif pretty_name == 'Corrective Action Strategies':
+			pretty_name = 'Corrective Actions'
+
 		ws = self.wb.create_sheet(pretty_name + ' mapping')
 
 		cell = ws.cell(row=1, column=1)
