@@ -88,7 +88,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 					parent_table = 'ust_facility' 
 					join_col = 'facility_id' 
 					epa_col = 'ust_facility_id' 
-				if ust_or_release == 'release' or view_name in ('v_ust_facility','v_ust_tank'):
+				if ust_or_release == 'release' or view_name in ('v_ust_facility','v_ust_tank','v_ust_tank_substance'):
 					insert_sql = f"""insert into public.{table_name} ({column_list})
 									select {column_list} from {schema}.{view_name} a 
 										join (select {epa_col}, {join_col} from public.{parent_table} where {ust_or_release}_control_id = %s) b
