@@ -264,7 +264,7 @@ select epa_table_name, epa_column_name
 from 
 	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
 	from v_ust_needed_mapping 
-	where ust_control_id = 11 --and mapping_complete = 'N'
+	where ust_control_id = 11 and mapping_complete = 'N'
 	order by table_sort_order, column_sort_order) x;
 /*
 ust_facility		owner_type_id
@@ -676,75 +676,6 @@ and epa_value not in (select tank_material_description from tank_material_descri
 order by 1;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---compartment_status_id
-
---check the state's data 
-select distinct 'select distinct "' || organization_column_name || '" from wv_ust."' || organization_table_name || '" order by 1;'
-from v_ust_needed_mapping 
-where ust_control_id = 11 and epa_column_name = 'compartment_status_id';
-
-/*
-run the query from the generated sql above to see what the state's data looks like
-you are checking to make sure their values line up with what we are looking for on the EPA side
-(this should have been done during the element mapping above but you can review it now)
-Next, see if the state values need to be deaggregated 
-(that is, is there only one value per row in the state data? If not, we need to deaggregate them)
-*/
-select distinct "Tank Status" from wv_ust."tanks" order by 1;
-/*
-Abandoned
-Currently In Use
-Currently In Use
-Temporarily Out of Service
-Permanently Out of Service
-Temporarily Out of Service
-*/
---in this case there appears to be some rows where there are multiple statuses separated by a newline 
---let's examine the rows where that is the case 
-select * from wv_ust."tanks" where "Tank Status" like 'Currently In Use%Temporarily Out of Service'
---this query returns 9 rows. For now I am going to assume these tanks are Currently In Use, but I will make a note 
---to ask the state about this. 
-
-/*
- * generate generic sql to insert value mapping rows into ust_element_value_mapping, 
-then modify the generated sql with the mapped EPA values 
-NOTE: insert a NULL for epa_value if you don't have a good guess 
-NOTE: if the organization_value is one that should exclude the facility/tank from UST Finder
-      (e.g. a non-federally regulated substance), manually modify the generated sql to 
-       include column exclude_from_query and set the value to 'Y'
-*/
-select insert_sql 
-from v_ust_needed_mapping_insert_sql 
-where ust_control_id = 11 and epa_column_name = 'compartment_status_id';
-
---paste the insert_sql from the first row below, then run the query:
-select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 113 || ', ''' || "Tank Status" || ''', '''', null);'
-from wv_ust."tanks" order by 1;
-
-/*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
-if necessary, replace the "null" with any questions or comments you have about the specific mapping */
-
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Abandoned', 'Abandoned', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Currently In Use', 'Currently in use', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Currently In Use' || chr(10) || 'Temporarily Out of Service', 'Currently in use', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Permanently Out of Service', 'Closed (general)', null);
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (113, 'Temporarily Out of Service', 'Temporarily out of service', null);
-
---list valid EPA values to paste into sql above 
-select * from public.compartment_statuses order by 1;
-/*
-Currently in use
-Temporarily out of service
-Closed (removed from ground)
-Closed (in place)
-Closed (general)
-Abandoned
-Other
-Unknown
-*/
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --substance_id
 
 --check the state's data 
@@ -910,6 +841,85 @@ and epa_value not in (select substance from substances)
 order by 1;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--compartment_status_id
+
+--check the state's data 
+select distinct 'select distinct "' || organization_column_name || '" from wv_ust."' || organization_table_name || '" order by 1;'
+from v_ust_needed_mapping 
+where ust_control_id = 11 and epa_column_name = 'compartment_status_id';
+
+/*
+run the query from the generated sql above to see what the state's data looks like
+you are checking to make sure their values line up with what we are looking for on the EPA side
+(this should have been done during the element mapping above but you can review it now)
+Next, see if the state values need to be deaggregated 
+(that is, is there only one value per row in the state data? If not, we need to deaggregate them)
+*/
+select distinct "Tank Status" from wv_ust."tanks" order by 1;
+/*
+Abandoned
+Currently In Use
+Currently In Use
+Temporarily Out of Service
+Permanently Out of Service
+Temporarily Out of Service
+*/
+--in this case there appears to be some rows where there are multiple statuses separated by a newline 
+--let's examine the rows where that is the case 
+select * from wv_ust."tanks" where "Tank Status" like 'Currently In Use%Temporarily Out of Service'
+--this query returns 9 rows. For now I am going to assume these tanks are Currently In Use, but I will make a note 
+--to ask the state about this. 
+
+/*
+ * generate generic sql to insert value mapping rows into ust_element_value_mapping, 
+then modify the generated sql with the mapped EPA values 
+NOTE: insert a NULL for epa_value if you don't have a good guess 
+NOTE: if the organization_value is one that should exclude the facility/tank from UST Finder
+      (e.g. a non-federally regulated substance), manually modify the generated sql to 
+       include column exclude_from_query and set the value to 'Y'
+*/
+select insert_sql 
+from v_ust_needed_mapping_insert_sql 
+where ust_control_id = 11 and epa_column_name = 'compartment_status_id';
+
+--paste the insert_sql from the first row below, then run the query:
+select distinct 
+	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 90 || ', ''' || "Tank Status" || ''', '''', null);'
+from wv_ust."tanks" order by 1;
+
+/*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
+if necessary, replace the "null" with any questions or comments you have about the specific mapping */
+
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Abandoned', 'Abandoned', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Currently In Use', 'Currently in use', null);
+--deal with newline character in organization value!
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Currently In Use' || chr(10) || 'Temporarily Out of Service', 'Currently in use', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Permanently Out of Service', 'Closed (general)', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Temporarily Out of Service', 'Temporarily out of service', null);
+
+--list valid EPA values to paste into sql above 
+select * from public.compartment_statuses order by 1;
+/*
+Currently in use
+Temporarily out of service
+Closed (removed from ground)
+Closed (in place)
+Closed (general)
+Abandoned
+Other
+Unknown
+*/
+
+/*!!! WARNING! Some of the lookups have changed for the new template format, so if you used the 
+archive.v_ust_element_mapping and/or archive.v_lust_element_mapping views and copied values 
+directly from them, you may have to update them:*/
+select distinct epa_value
+from ust_element_value_mapping a join ust_element_mapping b on a.ust_element_mapping_id = b.ust_element_mapping_id
+where ust_control_id = 11 and epa_column_name = 'compartment_status_id'
+and epa_value not in (select tank_status from tank_statuses)
+order by 1;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --check if there is any more mapping to do
 select distinct epa_table_name, epa_column_name
@@ -937,6 +947,7 @@ from information_schema.tables
 where table_schema = 'wv_ust' and table_type = 'VIEW'
 and table_name like '%_xwalk' order by 1;
 /*
+v_compartment_status_xwalk
 v_facility_type_xwalk
 v_owner_type_xwalk
 v_substance_xwalk
@@ -1076,11 +1087,12 @@ select distinct
 	"Tank Id"::int as tank_id,
 	sx.substance_id as substance_id
 from wv_ust.erg_substance_datarows_deagg x 
-	left join wv_ust.v_substance_xwalk sx on x."Substance" = sx.organization_value; 
+	left join wv_ust.v_substance_xwalk sx on x."Substance" = sx.organization_value
+where x."Substance" is not null; 
 
 select * from wv_ust.v_ust_tank_substance;
 select count(*) from wv_ust.v_ust_tank_substance;
---26849
+--26776
 
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
@@ -1108,12 +1120,12 @@ select distinct
 	"Facility ID"::character varying(50) as facility_id, 
 	"Tank Id"::int as tank_id,
 	c.compartment_id,
-	compartment_status_id as compartment_status_id,
+	cx."Tank Satus" as compartment_status_id, 
 	"Capacity"::integer as compartment_capacity_gallons
 from wv_ust.tanks x 
 	 join wv_ust.erg_compartment c on x."Facility ID" = c.facility_id and x."Tank Id" = c.tank_id
-	 left join wv_ust.v_compartment_status_xwalk cs on x."Tank Status" = cs.organization_value;
-
+	 left join wv_ust.v_compartment_status_xwalk cx on x."Tank Status" = cx.organization_value;
+	
 select * from wv_ust.v_ust_compartment order by 1, 2, 3;
 select count(*) from wv_ust.v_ust_compartment;
 --26302
@@ -1130,6 +1142,14 @@ ust_compartment_substance.
 In the case of WV, they don't report at the compartment level and have
 a one-to-many relationship between tanks and substances. 
 */
+select organization_table_name_qtd, organization_column_name_qtd,
+	selected_column, programmer_comments, 
+	database_lookup_table, database_lookup_column,
+	--organization_join_table_qtd, organization_join_column_qtd,
+	deagg_table_name, deagg_column_name 
+from v_ust_table_population_sql
+where ust_control_id = 11 and epa_table_name = 'ust_compartment_substance'
+order by column_sort_order;
 
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -1208,8 +1228,16 @@ delete_existing = False # can set to True if there is existing UST data you need
 
 --------------------------------------------------------------------------------------------------------------------------
 --Quick sanity check of number of rows inserted:
-select table_name, num_rows from v_ust_table_row_count
-where ust_control_id = 11 order by sort_order;
+select table_name, num_rows 
+from v_ust_table_row_count
+where ust_control_id = 11 
+order by sort_order;
+/*
+ust_facility			8834
+ust_tank				26226
+ust_tank_substance		26771
+ust_compartment			26226
+*/
 
 
 --------------------------------------------------------------------------------------------------------------------------

@@ -13,15 +13,29 @@ UNION ALL
    FROM v_ust_tank
   GROUP BY v_ust_tank.ust_control_id
 UNION ALL
- SELECT v_ust_compartment.ust_control_id,
+ SELECT v_ust_tank_substance.ust_control_id,
     3 AS sort_order,
+    'ust_tank_substance'::text AS table_name,
+    count(*) AS num_rows
+   FROM v_ust_tank_substance
+  GROUP BY v_ust_tank_substance.ust_control_id
+UNION ALL
+ SELECT v_ust_compartment.ust_control_id,
+    4 AS sort_order,
     'ust_compartment'::text AS table_name,
     count(*) AS num_rows
    FROM v_ust_compartment
   GROUP BY v_ust_compartment.ust_control_id
 UNION ALL
+ SELECT v_ust_compartment_substance.ust_control_id,
+    5 AS sort_order,
+    'ust_compartment_substance'::text AS table_name,
+    count(*) AS num_rows
+   FROM v_ust_compartment_substance
+  GROUP BY v_ust_compartment_substance.ust_control_id
+UNION ALL
  SELECT v_ust_piping.ust_control_id,
-    4 AS sort_order,
+    6 AS sort_order,
     'ust_piping'::text AS table_name,
     count(*) AS num_rows
    FROM v_ust_piping

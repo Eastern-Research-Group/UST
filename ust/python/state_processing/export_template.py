@@ -318,10 +318,15 @@ class Template:
 		cell.font = Font(bold=True)
 		cell.alignment = center_align
 
+		cell = ws.cell(row=1, column=3)
+		cell.value = 'Federally Regulated'
+		cell.font = Font(bold=True)
+		cell.alignment = center_align
+
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 
-		sql = f"select substance_group, substance from substances order by 1, 2"
+		sql = f"select substance_group, substance, federally_regulated from substances order by 1, 2"
 		cur.execute(sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
@@ -368,8 +373,6 @@ class Template:
 			pretty_name = 'Tank Material Desc'
 		elif pretty_name == 'Tank Secondary Containments':
 			pretty_name = 'Secondary Containment'
-		elif pretty_name == 
-			pretty_name = 'Pipe Tank Top Sump Wall Types'
 		elif pretty_name == 'Corrective Action Strategies':
 			pretty_name = 'Corrective Actions'
 
@@ -438,19 +441,19 @@ class Template:
 		cur.execute(sql, (self.control_id,))
 
 		if cur.rowcount > 0:
-			cell = ws.cell(row=1, column=5)
+			cell = ws.cell(row=1, column=6)
 			cell.value = 'Organization Value'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=6)
+			cell = ws.cell(row=1, column=7)
 			cell.value = 'EPA Value'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=7)
+			cell = ws.cell(row=1, column=8)
 			cell.value = 'Programmer Comments'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=8)
+			cell = ws.cell(row=1, column=9)
 			cell.value = 'EPA Comments'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=9)
+			cell = ws.cell(row=1, column=10)
 			cell.value = 'Organization Comments'
 			cell.font = Font(bold=True)
 			data = cur.fetchall()
@@ -487,10 +490,16 @@ class Template:
 			elif tab_name == 'Tank':
 				green_cells = ['TankID']
 				orange_cells = ['FacilityID']
+			elif tab_name == 'Tank Substance':
+				green_cells = ['Substance']
+				orange_cells = ['FacilityID','TankID','TankName']
 			elif tab_name == 'Compartment':
 				green_cells = ['CompartmentID']
 				orange_cells = ['FacilityID','TankID','TankName']
-			elif tab_name == 'Piping':
+			elif tab_name == 'Compartment Substance':
+				green_cells = ['Substance']
+				orange_cells = ['FacilityID','TankID','TankName','CompartmentID','CompartmentName']
+			elif tab_name == 'Piping' or tab_name == 'Compartment Substance':
 				green_cells = ['PipingID']
 				orange_cells = ['FacilityID','TankID','TankName','CompartmentID','CompartmentName']
 		for colno, header in enumerate(headers, start=1):
