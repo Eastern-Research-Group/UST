@@ -751,7 +751,8 @@ check the contents of the deagg table:*/
 select * from wv_ust.erg_substance_deagg order by 2;
 
 /* Next, run script deagg_rows.py, which will map the facilities/tanks to the deaggrated substances. 
-deagg_rows.py will produce a table called erg_substance_datarows_deagg.*/
+deagg_rows.py will produce a table called erg_substance_datarows_deagg.
+NOTE: For large tables, this script may take a while to run!! */
 select * from wv_ust.erg_substance_datarows_deagg order by 1, 2, 3;
 
 select * from wv_ust.tanks where "Facility ID" = 100005
