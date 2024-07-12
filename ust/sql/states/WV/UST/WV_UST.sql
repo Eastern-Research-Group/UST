@@ -4,8 +4,8 @@
 --EITHER:
 --use insert_control.py to insert into public.ust_control
 --OR:
-insert into ust_control (organization_id, date_received, data_source, comments)
-values ('WV', '2024-06-21', 'Two xls files downloaded from https://apps.dep.wv.gov/tanks/public/Pages/USTReports.aspx', null)
+insert into ust_control (organization_id, date_received, data_processed, data_source, comments)
+values ('WV', '2024-06-21', current_date, 'Two xls files downloaded from https://apps.dep.wv.gov/tanks/public/Pages/USTReports.aspx', null)
 returning ust_control_id;
 11
 
@@ -23,7 +23,6 @@ To run, set these variables:
 organization_id = 'WV' 
 # Enter a directory (not a path to a specific file) for ust_path and ust_path
 # Set to None if not applicable
-# ust_path = None # r'C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\State Data\WV\UST'
 ust_path = 'C:\Users\renae\Documents\Work\repos\ERG\UST\ust\sql\states\WV\Releases' 
 overwrite_table = False 
 
@@ -41,17 +40,18 @@ WVDEP.USTLUSTReports_AllFacilitiesDetailsPublic
 WVDEP.USTLUSTReports_FOIA-USTTanksPublic
 */
 
-/*these are bad table names, so let's rename them - remember that the only things we want to alter
-in the state data are bad table and column names that will make it hard for us to write our SQL */
+/* These table names are hard to type, so let's rename them - remember that the only things we want 
+   to alter in the state data are table and column names that will make it hard for us to write our SQL */
 alter table wv_ust."WVDEP.USTLUSTReports_AllFacilitiesDetailsPublic" rename to facilities;
 alter table wv_ust."WVDEP.USTLUSTReports_FOIA-USTTanksPublic" rename to tanks;
 
---now let's look at the data:
+--now let's look at the data in each table to get an overview:
 select * from wv_ust.facilities;
 
 select * from wv_ust.tanks;
 
---The facilities table looks OK, but the tanks table has a bad column name, so let's rename it:
+/* The facilities table looks OK, but the tanks table has a column name that's hard to type,
+   so let's rename it. */
 alter table wv_ust.tanks rename column "Facility#" to "Facility ID";
 
 --see what columns exist in the state's data 
@@ -147,17 +147,12 @@ select distinct "Facility Type" from wv_ust.facilities;
 
 select distinct "Active Tanks Construction" from wv_ust.facilities;
 --looking at the "active tanks construction", it looks like there are multiple values for some rows,
---somewhat challengingly not separated by a delimiter - we'll have to figure out how to deal with this later 
-
-select distinct "Active Pipes Construction" from wv_ust.facilities;
---looking at the "active tanks construction", it looks like there are multiple values for some rows,
---somewhat challengingly not separated by a delimiter - we'll have to figure out how to deal with this later 
+--delimited by a newline character 
 
 select distinct "Facility Status" from wv_ust.facilities;
 
 --review state tank data
---WV does not store data at the compartment level, 
---so some of this data will go into EPA's compartment table 
+--WV does not store data at the compartment level, so some of this data will go into EPA's compartment table 
 select * from wv_ust.tanks;
 
 --run queries looking for lookup table values 
@@ -166,12 +161,17 @@ select distinct "Material" from wv_ust.tanks;
 select distinct "Installed" from wv_ust.tanks;
 
 select distinct "Tank Status" from wv_ust.tanks;
---looking at the tank statuses, I see some rows appear to have multiple values separated by a newline 
+--looking at the tank statuses, some rows appear to have multiple values separated by a newline 
 --we'll need to remember to deaggregate these values later
 
 select distinct "Substance" from wv_ust.tanks;
---looking at the substances, I see some rows appear to have multiple values separated by a newline 
+--looking at the substances, some rows appear to have multiple values separated by a newline 
 --we'll need to remember to deaggregate these values later
+
+--!!! update the control table to note that WV doesn't have compartment-level data
+update public.ust_control 
+set comments = 'State reports number of compartments per tank but only reports at tank level. Some tanks have multiple statuses, substances, etc. which we assume are due to multiple tanks. Multiple values are delimited by a newline.'
+where ust_control_id = 11;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -301,13 +301,9 @@ State
 
 --in this case there is only one value per row so we can begin mapping 
 
-/*
- * generate generic sql to insert value mapping rows into ust_element_value_mapping, 
+/* generate generic sql to insert value mapping rows into ust_element_value_mapping, 
 then modify the generated sql with the mapped EPA values 
 NOTE: insert a NULL for epa_value if you don't have a good guess 
-NOTE: if the organization_value is one that should exclude the facility/tank from UST Finder
-      (e.g. a non-federally regulated substance), manually modify the generated sql to 
-       include column exclude_from_query and set the value to 'Y'
 */
 select insert_sql 
 from v_ust_needed_mapping_insert_sql 
@@ -408,9 +404,6 @@ UTILITIES
  * generate generic sql to insert value mapping rows into ust_element_value_mapping, 
 then modify the generated sql with the mapped EPA values 
 NOTE: insert a NULL for epa_value if you don't have a good guess 
-NOTE: if the organization_value is one that should exclude the facility/tank from UST Finder
-      (e.g. a non-federally regulated substance), manually modify the generated sql to 
-       include column exclude_from_query and set the value to 'Y'
 */
 select insert_sql 
 from v_ust_needed_mapping_insert_sql 
@@ -522,16 +515,16 @@ Temporarily Out of Service
 --in this case there appears to be some rows where there are multiple statuses separated by a newline 
 --let's examine the rows where that is the case 
 select * from wv_ust."tanks" where "Tank Status" like 'Currently In Use%Temporarily Out of Service'
---this query returns 9 rows. For now I am going to assume these tanks are Currently In Use, but I will make a note 
---to ask the state about this. 
+/* This query returns 9 rows. In this case it is likely because the tank has different 
+compartments with different statuses. Because we are only inserting one compartment 
+per tank, we will have to map these "multiple" statuses to the one highest in the 
+"hierarchy"; in this case "currently in use" trumps "temporariy out of service" so
+we'll map those rows that have both statuses to "Currently in use".
+*/
 
-/*
- * generate generic sql to insert value mapping rows into ust_element_value_mapping, 
+/* generate generic sql to insert value mapping rows into ust_element_value_mapping, 
 then modify the generated sql with the mapped EPA values 
 NOTE: insert a NULL for epa_value if you don't have a good guess 
-NOTE: if the organization_value is one that should exclude the facility/tank from UST Finder
-      (e.g. a non-federally regulated substance), manually modify the generated sql to 
-       include column exclude_from_query and set the value to 'Y'
 */
 select insert_sql 
 from v_ust_needed_mapping_insert_sql 
@@ -547,7 +540,7 @@ if necessary, replace the "null" with any questions or comments you have about t
 
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Abandoned', 'Abandoned', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Currently In Use', 'Currently in use', null);
---deal with newline character in organization value!
+--how to deal with newline character in organization value!
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Currently In Use' || chr(10) || 'Temporarily Out of Service', 'Currently in use', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Permanently Out of Service', 'Closed (general)', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (90, 'Temporarily Out of Service', 'Temporarily out of service', null);
@@ -700,32 +693,15 @@ select * from wv_ust.erg_substance_deagg order by 2;
 deagg_rows.py will produce a table called erg_substance_datarows_deagg.*/
 select * from wv_ust.erg_substance_datarows_deagg order by 1, 2, 3;
 
-select * from wv_ust.tanks where "Facility ID" = 100005
-
-select * from wv_ust.tanks where "Substance" like '%\n%'
-"Facility ID" 3903008
-"Tank Id" 1 
-Diesel
-Gasoline
-Premium Unleaded
-
 select count(*) from  wv_ust.erg_substance_datarows_deagg
-
-select * from wv_ust.erg_substance_datarows_deagg  
-where "Facility ID" = 3903008
 
 --!! update ust_element_mapping with the new deagg_table_name and deagg_column_name, generated by deagg.py
 update ust_element_mapping set deagg_table_name = 'erg_substance_deagg', deagg_column_name = 'Substance' 
 where ust_control_id = 11 and epa_column_name = 'substance_id';
 
-
-/*
-generate generic sql to insert value mapping rows into ust_element_value_mapping, 
+/* generate generic sql to insert value mapping rows into ust_element_value_mapping, 
 then modify the generated sql with the mapped EPA values 
 NOTE: insert a NULL for epa_value if you don't have a good guess 
-NOTE: if the organization_value is one that should exclude the facility/tank from UST Finder
-      (e.g. a non-federally regulated substance), manually modify the generated sql to 
-       include column exclude_from_query and set the value to 'Y'
 */
 select insert_sql 
 from v_ust_needed_mapping_insert_sql 
@@ -843,6 +819,11 @@ order by 1;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --compartment_status_id
 
+/* WV doesn't report at the compartment level but we need to insert a row into the compartment
+table for each tank and since compartment_status is a required field, we'll copy and paste
+the tank status SQL from into this section. 
+ */
+
 --check the state's data 
 select distinct 'select distinct "' || organization_column_name || '" from wv_ust."' || organization_table_name || '" order by 1;'
 from v_ust_needed_mapping 
@@ -867,8 +848,12 @@ Temporarily Out of Service
 --in this case there appears to be some rows where there are multiple statuses separated by a newline 
 --let's examine the rows where that is the case 
 select * from wv_ust."tanks" where "Tank Status" like 'Currently In Use%Temporarily Out of Service'
---this query returns 9 rows. For now I am going to assume these tanks are Currently In Use, but I will make a note 
---to ask the state about this. 
+/* This query returns 9 rows. In this case it is likely because the tank has different 
+compartments with different statuses. Because we are only inserting one compartment 
+per tank, we will have to map these "multiple" statuses to the one highest in the 
+"hierarchy"; in this case "currently in use" trumps "temporariy out of service" so
+we'll map those rows that have both statuses to "Currently in use".
+*/
 
 /*
  * generate generic sql to insert value mapping rows into ust_element_value_mapping, 
@@ -887,12 +872,12 @@ select distinct
 	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 90 || ', ''' || "Tank Status" || ''', '''', null);'
 from wv_ust."tanks" order by 1;
 
-/*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
+/* paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
 if necessary, replace the "null" with any questions or comments you have about the specific mapping */
 
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Abandoned', 'Abandoned', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Currently In Use', 'Currently in use', null);
---deal with newline character in organization value!
+--how to deal with newline character in organization value!
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Currently In Use' || chr(10) || 'Temporarily Out of Service', 'Currently in use', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Permanently Out of Service', 'Closed (general)', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (227, 'Temporarily Out of Service', 'Temporarily out of service', null);
@@ -996,7 +981,7 @@ order by column_sort_order;
     insert is not compatible with the EPA format. Fix these errors before proceeding! 
 !!! NOTE: Remember to do "select distinct" if necessary
 !!! NOTE: Some states do not include State or EPA Region in their database, but it is generally
-    safe for you to insert these yourself, so add them! */
+    safe for you to insert these yourself, so add them! (facility_state is a required field! */
 create or replace view wv_ust.v_ust_facility as 
 select distinct 
 		"Facility Id"::character varying(50) as facility_id,
