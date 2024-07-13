@@ -120,8 +120,12 @@ class Template:
 
 
 	def populate_export_vars(self):
+		if self.ust_or_release == 'ust':
+			uor = 'UST'
+		elif self.ust_or_release == 'release':
+			uor = 'Releases'		
 		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
-			self.export_file_name = self.organization_id.upper() + '_UST_template_' + utils.get_timestamp_str() + '.xlsx'
+			self.export_file_name = self.organization_id.upper() + '_' + uor + '_template_' + utils.get_timestamp_str() + '.xlsx'
 			self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
 			self.export_file_path = self.export_file_dir + self.export_file_name
 			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)

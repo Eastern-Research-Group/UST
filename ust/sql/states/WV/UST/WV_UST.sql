@@ -1241,3 +1241,15 @@ export_file_name = None		# If export_file_path and export_file_dir/export_file_n
 
 
 --------------------------------------------------------------------------------------------------------------------------
+--export control table  summary
+
+/*run script control_table_summary.py
+set variables:
+control_id = 11
+ust_or_release = 'ust' 
+organization_id = None  	# Can leave as None if you specify the control_id
+export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+
+--------------------------------------------------------------------------------------------------------------------------
