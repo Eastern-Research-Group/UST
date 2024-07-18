@@ -69,7 +69,11 @@ create or replace view "public"."v_ust_table_population" as
              JOIN information_schema.columns e ON ((((a.epa_table_name)::text = (e.table_name)::name) AND ((a.epa_column_name)::text = (e.column_name)::name) AND ((e.table_schema)::name = 'public'::name)))),
             ( SELECT 'ust_tank'::character varying(100) AS epa_table_name
                 UNION ALL
+                 SELECT 'ust_tank_substance'::character varying(100) AS "varchar"
+                UNION ALL
                  SELECT 'ust_compartment'::character varying(100) AS "varchar"
+                UNION ALL
+                 SELECT 'ust_compartment_substance'::character varying(100) AS "varchar"
                 UNION ALL
                  SELECT 'ust_piping'::character varying(100) AS "varchar") z
           WHERE ((a.epa_column_name)::text = 'ust_id'::text)) x

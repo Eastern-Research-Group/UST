@@ -12,7 +12,8 @@ CREATE TABLE public.ust_elements (
     notes character varying(4000)  NULL ,
     database_column_name character varying(100)  NULL ,
     database_lookup_table character varying(100)  NULL ,
-    database_lookup_column character varying(100)  NULL );
+    database_lookup_column character varying(100)  NULL ,
+    generic_template character varying(1)  NULL );
 
 ALTER TABLE public.ust_elements ADD CONSTRAINT ust_elements_pkey1 PRIMARY KEY (element_id);
 

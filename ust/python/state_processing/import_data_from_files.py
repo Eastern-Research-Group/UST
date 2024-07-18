@@ -6,12 +6,12 @@ sys.path.append(os.path.join(ROOT_PATH, ''))
 
 from python.util.import_service import ImportService
 
-organization_id = 'WV' 
+organization_id = 'KS' 
 # Enter a directory (NOT a path to a specific file) for ust_path and release_path
 # Set to None if not applicable
-ust_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\State Data\WV\UST'
+ust_path = r'C:\Users\renae\Downloads\KS\UST'
 # ust_path = None
-release_path = None #r'C:\Users\renae\Documents\Work\repos\ERG\UST\ust\sql\states\PA\Releases' 
+release_path = r'C:\Users\renae\Downloads\KS\Releases' 
 overwrite_table = False 
 
 import_service = ImportService()

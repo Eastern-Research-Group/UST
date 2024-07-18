@@ -250,13 +250,31 @@ def delete_all_ust_data(control_id):
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_piping', cur.rowcount)
 
-    sql = """delete from ust_compartment 
+    sql = """delete from public.ust_compartment_substance
+             where ust_compartment_id in
+                (select ust_compartment_id from ust_compartment 
+                where ust_tank_id in 
+                    (select ust_tank_id from ust_tank 
+                    where ust_facility_id in
+                        (select ust_facility_id from ust_facility where ust_control_id = %s)))"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted %s rows from public.ust_compartment_status', cur.rowcount)
+
+    sql = """delete from ust_compartment
              where ust_tank_id in 
                 (select ust_tank_id from ust_tank 
                 where ust_facility_id in
                      (select ust_facility_id from ust_facility where ust_control_id = %s))"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_compartment', cur.rowcount)
+
+    sql = """delete from ust_tank_substance 
+             where ust_tank_id in 
+                (select ust_tank_id from ust_tank 
+                where ust_facility_id in
+                     (select ust_facility_id from ust_facility where ust_control_id = %s))"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted %s rows from public.ust_tank_substance', cur.rowcount)
 
     sql = """delete from ust_tank 
              where ust_facility_id in

@@ -10,6 +10,8 @@ from python.util.logger_factory import logger
 from python.util import utils, config
 
 
+#TODO: this script has not yet been tested for states where ust_compartment_status is populatedd
+
 ust_or_release = 'ust' # valid values are 'ust' or 'release'
 control_id = 11
 delete_existing = True 
@@ -55,7 +57,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 		table_name = row[0]
 		view_name = row[1]
 		sort_order = row[2]
-		logger.info('Working on %s', table_name)
+		logger.info('Working on #%s: %s, %s', sort_order, table_name, view_name)
 
 		sql2 = f"""select column_name from information_schema.columns 
 				where table_schema = %s and table_name = %s 
@@ -70,11 +72,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 				select_column_list = org_column_list.replace(ust_or_release + '_control_id', str(control_id))
 				insert_sql = f"""insert into public.{table_name} ({org_column_list}) 
 								select {select_column_list} from {schema}.{view_name}"""
-				# insert_sql = 'insert into public.' + table_name + ' (' + org_column_list + """) 
-				# select """ + column_list.replace(ust_or_release + '_control_id', str(control_id)) + " from " + schema + '.' + view_name 
-				# print(insert_sql)
 				cur.execute(insert_sql)
-
 			else: 
 				if ust_or_release == 'release':
 					column_list = 'ust_release_id, ' + org_column_list[:-2]
@@ -93,6 +91,14 @@ def main(control_id, ust_or_release, delete_existing=False):
 									select {column_list} from {schema}.{view_name} a 
 										join (select {epa_col}, {join_col} from public.{parent_table} where {ust_or_release}_control_id = %s) b
 											on a.{join_col} = b.{join_col}"""
+				elif view_name == 'v_ust_tank_substance':
+					column_list = 'ust_tank_id, ' + org_column_list[:-2] 
+					column_list = column_list.replace(', facility_id','').replace(', tank_id','')
+					insert_sql = f"""insert into public.ust_tank_substance ({column_list})
+									select {column_list} from {schema}.v_ust_tank_substance a 
+										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
+											on a.facility_id = b.facility_id
+										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id"""
 				elif view_name == 'v_ust_compartment':
 					column_list = 'ust_tank_id, ' + org_column_list[:-2] 
 					column_list = column_list.replace(', facility_id','').replace(', tank_id','')
@@ -101,6 +107,15 @@ def main(control_id, ust_or_release, delete_existing=False):
 										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
 											on a.facility_id = b.facility_id
 										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id"""
+				elif view_name == 'v_ust_compartment_substance':
+					column_list = 'ust_compartment_id, ' + org_column_list[:-2] 
+					column_list = column_list.replace(', facility_id','').replace(', tank_id','').replace(', compartment_id','')
+					insert_sql = f"""insert into public.ust_compartment_substance ({column_list})
+									select {column_list} from {schema}.v_ust_compartment_substance a 
+										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
+											on a.facility_id = b.facility_id
+										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
+										join ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id"""
 				elif view_name == 'v_ust_piping':
 					column_list = 'ust_compartment_id, ' + org_column_list[:-2] 
 					column_list = column_list.replace(', facility_id','').replace(', tank_id','').replace(', compartment_id','')

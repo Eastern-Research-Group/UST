@@ -205,9 +205,21 @@ values (2, 'ust_release_source', 'source_id', 'Tank_Cleanup_Incidents', 'SOURCE_
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --see what columns in which table we need to map
-select epa_table_name, epa_column_name
-from v_release_available_mapping 
-where release_control_id = 2;
+select epa_table_name, epa_column_name 
+from 
+	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+	from v_release_needed_mapping 
+	where release_control_id = 2 and mapping_complete = 'N'
+	order by table_sort_order, column_sort_order) x;
+/*
+ust_release				coordinate_source_id
+ust_release				release_status_id
+ust_release				how_release_detected_id
+ust_release_substance	substance_id
+ust_release_source		source_id
+ust_release_cause		cause_id
+*/
+
 
 /*
 see what mapping hasn't yet been done for this dataset 
