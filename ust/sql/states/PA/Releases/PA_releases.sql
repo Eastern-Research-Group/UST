@@ -372,7 +372,7 @@ CLOS, CONST, SAMPL
 
 /*in this case we have comma-separated values in single rows, which means we need to deaggregate them in order to map them. 
 Run deagg.py, setting the state table name and state column name 
-the script will create a deagg table and return the name of the new table; in this case: erg_source_cause_of_release_deagg
+the script will create a deagg table and return the name of the new table; in this case: erg_release_discovered_deagg
 check the contents of the deagg table:*/
 select * from erg_release_discovered_deagg order by 2;
 
