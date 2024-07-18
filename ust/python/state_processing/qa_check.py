@@ -14,8 +14,8 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 11
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 5
 export_file_path = None
 export_file_dir = None
 export_file_name = None
@@ -238,7 +238,7 @@ class QualityCheck:
 		sql = """select column_name from information_schema.columns 
 				where table_schema = 'public' and table_name = %s 
 				and is_nullable = 'NO' and ordinal_position > 1
-				and column_name not like 'ust%%id'
+				and column_name not like 'ust%%id' and column_name not like 'release%%id'
 				order by ordinal_position"""
 		self.cur.execute(sql, (self.table_name,))
 		rows = self.cur.fetchall()

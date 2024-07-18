@@ -52,7 +52,7 @@ def main(control_id, ust_or_release, data_table_name, data_table_pk_cols, data_d
 		col_str = col_str + '"' + col + '",' 
 	
 	# create _datarows_deagg table with empty column for deagged values 
-	sql = f"""select distinct {col_str} cast(null as varchar(400)) as "{data_deagg_column_name}" 
+	sql = f"""select {col_str} cast(null as varchar(400)) as "{data_deagg_column_name}" 
 	          into {schema}.{data_deagg_table_name} 
 	          from {schema}.{data_table_name} where 1=2""" 
 	cur.execute(sql)
