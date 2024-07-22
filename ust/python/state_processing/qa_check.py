@@ -110,7 +110,8 @@ class QualityCheck:
 	def set_export_path(self):
 		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
 			self.export_file_name = self.organization_id.upper() + '_' + self.ust_or_release + '_QAQC_' + utils.get_timestamp_str() + '.xlsx'
-			self.export_file_dir = '../exports/QAQC/' + self.organization_id.upper() + '/'
+		#    self.export_file_dir = '../exports/QAQC/' + self.organization_id.upper() + '/'
+			self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/QAQC/' + self.organization_id.upper() + '/'
 			self.export_file_path = self.export_file_dir + self.export_file_name
 			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
 		elif self.export_file_path:

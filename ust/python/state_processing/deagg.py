@@ -14,11 +14,11 @@ from python.util import utils, config
 # USE deagg_rows.py TO CREATE DEAGG TABLES AT THE FACILITY/TANK/COMPARTMENT LEVEL
 # THAT USE THE TABLES THIS SCRIPT CREATES
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 11
-table_name = 'tanks'
-column_name = 'Substance'
-delimiter = '\n' # defaults to ','; delimiter from the column beging deaggregated in the state table. Use \n for hard returns.
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 5
+table_name = 'ust_all-tn-environmental-sites'
+column_name = 'Productreleased'
+delimiter = ', ' # defaults to ','; delimiter from the column beging deaggregated in the state table. Use \n for hard returns.
 drop_existing = True # defaults to False; if True will drop existing deagg table with the same name
 
 
