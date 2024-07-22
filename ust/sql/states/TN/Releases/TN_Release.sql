@@ -169,25 +169,6 @@ ust_release_substance		substance_id
 */
 
 
-/*
-see what mapping hasn't yet been done for this dataset 
-we'll be going through each of the results of this query below
-so for each value of epa_column_name from this query result, there will be a 
-section below where we generate SQL to perform the mapping 
-*/
-select distinct epa_table_name, epa_column_name
-from v_release_needed_mapping 
-where release_control_id = 2 and mapping_complete = 'N'
-order by 1, 2;
-/*
-ust_release				coordinate_source_id
-ust_release				how_release_detected_id
-ust_release				release_status
-ust_release_cause		cause_id
-ust_release_source		source_id
-ust_release_substance	substance_id
-*/
-
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------ust_release.how_release_detected_id
 /*run the query from the generated sql above to see what the state's data looks like
@@ -200,52 +181,32 @@ select distinct 'select distinct "' || organization_column_name || '" from "' ||
 from v_release_needed_mapping 
 where release_control_id = 5 and epa_column_name = 'how_release_detected_id';
 
-/* Query result
+-- got SQL as 
  select distinct "Howdiscovered" from "ust_all-tn-environmental-sites" order by 1;
 
-*/
-----these are the valid EPA values to map to the state values above 
+-- Data showed no need to deagg.
+-- for valid EPA values to map to the state values above 
 select * from public.how_release_detected order by 2;
 
-/*
-Match the content for state data and EPA values
-
+/* generate generic sql to insert value mapping rows into release_element_value_mapping, 
+then modify the generated sql with the mapped EPA values 
+NOTE: insert a NULL for epa_value if you don't have a good guess 
+*/
 select insert_sql 
 from v_release_needed_mapping_insert_sql 
 where release_control_id = 5 and epa_column_name = 'how_release_detected_id';
 
-/* Query results
+
 select distinct 
 	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 74 || ', ''' || "Howdiscovered" || ''', '''', null);'
 from tn_release."ust_all-tn-environmental-sites" order by 1;
-
-Query results
+/*
+Query results like
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
 values (74, '1 At Closure', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '2 Release Detection', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '3 On-site Impact', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '3 On-Site Impact', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '4 Off-site Impact', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '4 Off-Site Impact', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '5 Site Check', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '6 Tightness Test', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '6 Tightness Testing', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '7 Environmental Audit', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '8 Other', '', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
-values (74, '9 Unknown', '', null);
+...
 
-Edit the SQL to 
+Edit the SQL 
 */
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
 values (74, '1 At Closure', 'Other', null);
@@ -272,38 +233,277 @@ values (74, '8 Other', 'Other', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
 values (74, '9 Unknown', 'Unknown', null);
 
---check
+--check---
 SELECT * FROM release_element_value_mapping where release_element_mapping_id=74;
 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ust_release.release_status_id
 
+--check the state's data 
+select distinct 'select distinct "' || organization_column_name || '" from "' || organization_table_name || '" order by 1;'
+from v_release_needed_mapping 
+where release_control_id = 5 and epa_column_name = 'release_status_id';
 
+/* query result
+"select distinct ""Currentstatus"" from ""ust_all-tn-environmental-sites"" order by 1;"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
------======= Step 3: create crosswalk views for columns that use a lookup table==============
-/*
-run script org_mapping_xwalks.py to create crosswalk views for all lookup tables 
-update the control_id first
-see new views:
+ run the query from the generated sql above to see what the state's data looks like
+you are checking to make sure their values line up with what we are looking for on the EPA side
+Next, see if the state values need to be deaggregated 
+(that is, is there only one value per row in the state data? If not, we need to deaggregate them)
+ No need deagg!
 */
+--see what the EPA values we need to map to are
+select * from release_statuses order by 2;
+/*
+Active: Corrective Action
+Active: general
+Active: post Corrective Action monitoring
+Active: site investigation
+Active: stalled
+No further action
+Other
+Unknown
+*/
+
+/*generate generic sql to insert value mapping rows into release_element_value_mapping, 
+then modify the generated sql with the mapped EPA values 
+NOTE: insert a NULL for epa_value if you don't have a good guess 
+NOTE: if the organization_value is one that should exclude the facility/tank from UST Finder
+      (e.g. a non-federally regulated substance), manually modify the generated sql to 
+       include column exclude_from_query and set the value to 'Y'*/
+
+select insert_sql 
+from v_release_needed_mapping_insert_sql 
+where release_control_id = 5 and epa_column_name = 'release_status_id';
+
+select distinct 
+	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 71 || ', ''' || "Currentstatus" || ''', '''', null);'
+from tn_release."ust_all-tn-environmental-sites" order by 1;
+
+/* Query results and edit
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '1 Tank Closure', 'No further action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '13 Abandoned Facility Project', 'No further action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '1a Completed Tank Closure', 'No further action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '1b Closure Application Expired', 'Unknown', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '1c Line Closure', 'No further action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '1d Completed Line Closure', 'No further action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '2 Site Check', 'Active: site investigation', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '6 Corrective Action', 'Active: Corrective Action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '7 Closure Monitoring', 'No further action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '8 Case Closed', 'No further action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (71, '9 Other', 'Other', null);
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----- ust_release_substance.substance_id
+
+--check the state's data 
+select distinct 'select distinct "' || organization_column_name || '" from "' || organization_table_name || '" order by 1;'
+from v_release_needed_mapping 
+where release_control_id = 5 and epa_column_name = 'substance_id';
+
+/*run the query from the generated sql above to see what the state's data looks like
+you are checking to make sure their values line up with what we are looking for on the EPA side
+Next, see if the state values need to be deaggregated 
+(that is, is there only one value per row in the state data? If not, we need to deaggregate them)
+*/
+
+select distinct "Productreleased" from "ust_all-tn-environmental-sites" order by 1;
+  /* Need deagg
+    Diesel, Jet Fuel, Kerosene
+    Diesel, Jet Fuel, Kerosene, Waste Oil, Used Oil
+    Gasoline
+    Gasoline, Diesel, Jet Fuel, Kerosene
+    Gasoline, Diesel, Jet Fuel, Kerosene, Waste Oil, Used Oil
+.....
+*/
+----=====deaggregate===========----------------
+/*
+in this case we have comma-separated values in single rows, which means we need to deaggregate them in order to map them. 
+Run deagg.py after update related parameters:
+----
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 5
+table_name = 'ust_all-tn-environmental-sites'
+column_name = 'Productreleased'
+delimiter = ', '     /* Pay attention to the space part */
+----
+the script will create a deagg table and return the name of the new table; in this case: erg_productreleased_deagg
+check the contents of the deagg table:
+*/
+select * from erg_productreleased_deagg order by 2;
+
+--!! update release_element_mapping with the new deagg_table_name and deagg_column_name, generated by deagg.py
+update release_element_mapping set deagg_table_name = 'erg_productreleased_deagg', 
+ deagg_column_name = '"Productreleased"' 
+where release_control_id = 5 and epa_column_name = 'substance_id';
+
+/*generate generic sql to insert value mapping rows into release_element_value_mapping, 
+then modify the generated sql with the mapped EPA values 
+NOTE: insert a NULL for epa_value if you don't have a good guess 
+NOTE: if the organization_value is one that should exclude the facility/tank from UST Finder
+      (e.g. a non-federally regulated substance), manually modify the generated sql to 
+       include column exclude_from_query and set the value to 'Y'*/
+
+select insert_sql 
+from v_release_needed_mapping_insert_sql 
+where release_control_id = 5 and epa_column_name = 'substance_id';
+----Query result---------------------
+select distinct 
+	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 75 || ', ''' || "Productreleased"|| ''', '''', null);'
+from tn_release."erg_productreleased_deagg" order by 1;
+
+----Query for insert statement---------------------
+"insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (75, ' Diesel', '', null);"
+
+------list valid EPA values to match 
+select * from public.substances order by 1;
+
+-------Insert statement---------------------
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (75, ' Diesel', 'Diesel fuel (b-unknown)', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (75, ' Jet Fuel', 'Unknown aviation gas or jet fuel', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (75, ' Kerosene', 'Kerosene', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (75, ' Used Oil', 'Used oil/waste oil', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (75, ' Waste Oil', 'Used oil/waste oil', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (75, 'Gasoline', 'Gasoline (unknown type)', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (75, 'Unknown', 'Unknown', null);
+
+  -----check ------------------------------
+select * from release_element_value_mapping
+where release_element_mapping_id=75;
+
+select distinct epa_value
+from release_element_value_mapping a join release_element_mapping b on a.release_element_mapping_id = b.release_element_mapping_id
+where release_control_id = 5 and epa_column_name = 'substance_id'
+and epa_value not in (select substance from substances)
+order by 1;
+
+
+--------------------------------------------------------------------------------------------
+---------------------------------
+---- ust_release_cause.cause_id
+
+--check the state's data 
+select distinct 'select distinct "' || organization_column_name || '" from "' || organization_table_name || '" order by 1;'
+from v_release_needed_mapping 
+where release_control_id = 5 and epa_column_name = 'cause_id';
+------Query Result---------
+select distinct "Cause" from "ust_all-tn-environmental-sites" order by 1;
+
+/*run the query from the generated sql above to see what the state's data looks like
+you are checking to make sure their values line up with what we are looking for on the EPA side
+Next, see if the state values need to be deaggregated 
+(that is, is there only one value per row in the state data? If not, we need to deaggregate them)
+*/
+
+------list valid EPA values to match 
+select * from public.causes order by 1;
+/*
+"Corrosion"
+"Damage to dispenser"
+"Damage to dispenser hose"
+"Delivery overfill"
+"Delivery problem"
+"Dispenser spill"
+"Dope/sealant"
+"Flex connector failure"
+"Human error"
+"Motor vehicle accident"
+"Overfill (general)"
+"Piping failure"
+"Shear valve failure"
+"Spill bucket failure"
+"Tank corrosion"
+"Tank damage"
+"Tank removal"
+"Weather/natural disaster (i.e., hurricane, flooding, fire, earthquake)"
+"Other"
+"Unknown"
+*/
+
+select insert_sql 
+from v_release_needed_mapping_insert_sql 
+where release_control_id = 5 and epa_column_name = 'cause_id';
+----Query result---------------------
+select distinct 
+	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+     values (' || 76 || ', ''' || "Cause" || ''', '''', null);'
+from tn_release."ust_all-tn-environmental-sites" order by 1;
+
+---------------Insert Statement---------------
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, '1 Spill', 'Overfill (general)', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, '2 Overfill', 'Overfill (general)', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, '3 Human Error', 'Human error', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, '4 Corrosion', 'Corrosion', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, '5 Pipe Failure', 'Piping failure', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, '6 Mechanical Failure', 'Other', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, '7 Unknown', 'Unknown', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, '8 Other', 'Other', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, 'Corrosion', 'Corrosion', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, 'Human Error', 'Human error', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, 'Mechanical Failure', 'Other', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, 'Other', 'Other', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, 'Pipe Failure', 'Piping failure', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (76, 'Unknown', 'Unknown', null);
+
+----Check---------------
+select * from release_element_value_mapping 
+where release_element_mapping_id=76;
+
+==========================================
+--check if there is any more mapping to do
+select distinct epa_table_name, epa_column_name
+from v_release_needed_mapping 
+where release_control_id = 5 and mapping_complete = 'N'
+order by 1, 2;
+
+--check if any of the mapping is bad:
+select database_lookup_table, epa_value 
+from v_release_bad_mapping 
+where release_control_id = 5 order by 1, 2;
+--!!!if there are results from this query, fix them!!!
+
+--if not, it's time to write the queries that manipulate the state's data into EPA's tables 
+SET search_path TO "tn_release";
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----=====EPA Data Tables =============---------------
+ -----------Step 1--------------
+/* create crosswalk views for columns that use a lookup table
+run script org_mapping_xwalks.py to create crosswalk views for all lookup tables 
+see new views:*/
 select table_name 
 from information_schema.tables 
 where table_schema = 'tn_release' and table_type = 'VIEW'
@@ -315,7 +515,8 @@ v_release_status_xwalk
 v_substance_xwalk
 */
 
------======= Step 2: see the EPA tables we need to populate and in what order===============
+  -----------Step 2--------------
+-- see the EPA tables we need to populate, and in what order
 select distinct epa_table_name, table_sort_order
 from v_release_table_population 
 where release_control_id = 5
@@ -326,29 +527,25 @@ ust_release_substance
 ust_release_cause
 */
 
------======= Step 3: check if there where any dataset-level comments you need to incorporate
-/*:
+  -----------Step 3--------------
+/* check if there where any dataset-level comments you need to incorporate:
 in this case we need to ignore the aboveground storage tanks,
 so add this to the where clause of the ust_release view */
 select comments from release_control where release_control_id = 5;
---For currentstatus, already deleted from this table
-
------======= Step 4: work through the tables in order ==============================
-select * from v_release_table_population;
+--"for records with currentstatus in (0a Suspected Release - Closed,0 Suspected Release - RD records,3 Release Investigation) were excluded per the state's direction during the pilot."
+--ignore those rows where "Currentstatus" in ('0a Suspected Release - Closed','0 Suspected Release - RD records','3 Release Investigation')
+*/
+select * from v_release_table_population
 where release_control_id=5;
-/*
-ust_release
-ust_release_cause
-ust_release_substance
 
-using the information you collected to write views that can be used to populate the data tables 
+  -----------Step 4--------------
+/* work through the tables in order, using the information you collected 
+to write views that can be used to populate the data tables 
 NOTE! The view queried below (v_release_table_population_sql) contains columns that help
       construct the select sql for the insertion views, but will require manual 
       oversight and manipulation by you! 
       In particular, check out the organization_join_table and organization_join_column 
-      are used!!
-*/
-
+      are used!!*/
 select organization_table_name_qtd, selected_column, programmer_comments, 
 	database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
@@ -356,6 +553,7 @@ select organization_table_name_qtd, selected_column, programmer_comments,
 from v_release_table_population_sql
 where release_control_id = 5 and epa_table_name = 'ust_release'
 order by column_sort_order;
+
 /*
 -- 10 rows
 """Facilityid""::character varying(50) as facility_id,"
@@ -370,8 +568,8 @@ order by column_sort_order;
 "how_release_detected_id as how_release_detected_id,"
 */
 
------======= Step 5: use the information from the queries above to create the view============
-/*
+  -----------Step 5-------------------
+/* use the information from the queries above to create the view:
 !!! NOTE how I'm using the programmer_comments column to adjust the view (e.g. nfa_date)
 !!! NOTE also sometimes you need to explicitly cast data types. In this example, the two
     dates "CONFIRMED_DATE" and "STATUS_DATE" are text fields in the state's data and need 
@@ -382,29 +580,71 @@ order by column_sort_order;
 !!! NOTE: Remember to do "select distinct" if necessary
 !!! NOTE: Some states do not include State or EPA Region in their database, but it is generally
     safe for you to insert these yourself, so add them! */
-create or replace view tn_release.v_ust_release as 
-select distinct 
-"Facilityid"::character varying(50) as facility_id,
-"Facilityname"::character varying(200) as site_name,
-"Facilityaddress1"::character varying(100) as site_address,
-"Facilityaddress2"::character varying(100) as site_address2,
-"Facilitycity"::character varying(100) as site_city,
-"Facilityzip"::character varying(10) as zipcode,
-"Facilitycounty"::character varying(100) as county,
-"release_status_id" as release_status_id,
-"Discoverydate"::date as reported_date,
-"how_release_detected_id" as how_release_detected_id
- from tn_release."ust_all-tn-environmental-sites" x
-  left join tn_release.v_release_status_xwalk rs on x."Currentstatus" = rs.organization_value 
-  left join tn_release.v_how_release_detected_xwalk rd on x."Howdiscovered" = rd.organization_value;
+CREATE OR REPLACE VIEW tn_release.v_ust_release
+ AS
+ SELECT DISTINCT (((x."Facilityid" || '-'::text) || x."Sitenumber"))::character varying(50) AS release_id,
+    x."Facilityid"::character varying(50) AS facility_id,
+    x."Facilityname"::character varying(200) AS site_name,
+    x."Facilityaddress1"::character varying(100) AS site_address,
+    x."Facilityaddress2"::character varying(100) AS site_address2,
+    x."Facilitycity"::character varying(100) AS site_city,
+    x."Facilityzip"::character varying(10) AS zipcode,
+    x."Facilitycounty"::character varying(100) AS county,
+    'TN' as state, 
+    4 as epa_region, 
+    rs.release_status_id,
+    x."Discoverydate"::date AS reported_date,
+    rd.how_release_detected_id
+   FROM tn_release."ust_all-tn-environmental-sites" x
+     LEFT JOIN tn_release.v_release_status_xwalk rs ON x."Currentstatus" = rs.organization_value::text
+     LEFT JOIN tn_release.v_how_release_detected_xwalk rd ON x."Howdiscovered" = rd.organization_value::text
+  WHERE rs.organization_value IS NOT NULL and 
+  "Currentstatus" not in ('0a Suspected Release - Closed','0 Suspected Release - RD records','3 Release Investigation');
+--Note: With  "WHERE rs.organization_value IS NOT NULL" is actually good enough to exclude those status.
 
 --review: 
 select * from tn_release.v_ust_release;
 select count(*) from tn_release.v_ust_release;
---14609
+--14691
+--------
 
 --------------------------------------------------------------------------------------------------------------------------
---ust_release_cause 
+---------------------------------------------------------------------------------
+----  now repeat for each data table:
+------ ust_release_substance --------------
+select organization_table_name_qtd, selected_column, programmer_comments, 
+	database_lookup_table, database_lookup_column,
+	--organization_join_table_qtd, organization_join_column_qtd,
+	deagg_table_name, deagg_column_name 
+from v_release_table_population_sql
+where release_control_id = 5 and epa_table_name = 'ust_release_substance'
+order by column_sort_order;
+/*
+"ust_all-tn-environmental-sites"	
+"substance_id as substance_id,"
+"Column is comma-separated",		
+"substances"	
+"substance"	
+"erg_productreleased_deagg"	
+"Productreleased"
+*/
+--!! this one has a deagg table so we have to alter the join 
+--be sure to do select distinct if necessary!
+
+create or replace view tn_release.v_ust_release_substance as 
+select distinct  ("Facilityid"||'-'||"Sitenumber")::character varying(50) as release_id,b.substance_id
+from tn_release."ust_all-tn-environmental-sites" a 
+join tn_release.v_substance_xwalk b on a."Productreleased" like '%' || b.organization_value || '%'
+where epa_value is not null and 
+  "Currentstatus" not in ('0a Suspected Release - Closed','0 Suspected Release - RD records','3 Release Investigation');
+--This time the status condition in where is needed!
+
+select * from tn_release.v_ust_release_substance;
+select count(*) from tn_release.v_ust_release_substance;
+--873
+
+--------------------------------------------------------------------------------------------------------------------------
+------ ust_release_cause ----------------------
 select organization_table_name_qtd, selected_column, programmer_comments, 
 	database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
@@ -414,52 +654,28 @@ where release_control_id = 5 and epa_table_name = 'ust_release_cause'
 order by column_sort_order;
 
 create or replace view tn_release.v_ust_release_cause as 
-select distinct "cause_id" as cause_id
+create or replace view tn_release.v_ust_release_cause as 
+select distinct  ("Facilityid"||'-'||"Sitenumber")::character varying(50) as release_id, "cause_id" as cause_id
  from tn_release."ust_all-tn-environmental-sites" x
-  left join tn_release."v_cause_xwalk" rc on x."Cause" = rc.organization_value 
-where epa_value is not null;
+   left join tn_release."v_cause_xwalk" rc on x."Cause" = rc.organization_value 
+where epa_value is not null and
+"Currentstatus" not in ('0a Suspected Release - Closed','0 Suspected Release - RD records','3 Release Investigation');
 
 select * from  tn_release.v_ust_release_cause; 
-
 select count(*) from tn_release.v_ust_release_cause;
---6
+--5883
 
 --------------------------------------------------------------------------------------------------------------------------
 ----------------
---ust_release_substance 
-select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
-from v_release_table_population_sql
-where release_control_id = 5 and epa_table_name = 'ust_release_substance'
-order by column_sort_order;
 
-"""ust_all-tn-environmental-sites"""	
-"substance_id as substance_id,"		
-"substances"	
-"substance"	
-"erg_productreleased_deagg"	
-"""Productreleased"""
-
---!! this one has a deagg table so we have to alter the join 
-create or replace view tn_release.v_ust_release_substance as 
-select distinct  ("Facilityid"||'-'||"Sitenumber")::character varying(100) as release_id,b.substance_id
-from tn_release."ust_all-tn-environmental-sites" a 
-join tn_release.v_substance_xwalk b on a."Productreleased" like '%' || b.organization_value || '%'
-where epa_value is not null;
-
-
-select * from tn_release.v_ust_release_substance;
-select count(*) from tn_release.v_ust_release_substance;
---873
 
 =====================================================================================
 --------------------------------------------------------------------------------------------------------------------------
---QA/QC
+---- ===== QAQC ==========-------
 
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
+
 select epa_table_name, epa_column_name, 
 	organization_table_name, organization_column_name, 
 	organization_join_table, organization_join_column, 
@@ -480,46 +696,81 @@ order by b.ordinal_position;
 --run Python QA/QC script
 
 /*run script qa_check.py
-set variables:
+
+set variables 
 ust_or_release = 'release' 
-control_id = 2
+control_id = 5
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+#    self.export_file_dir = '../exports/QAQC/' + self.organization_id.upper() + '/'
+     self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/QAQC/' + self.organization_id.upper() + '/'
 
-This script will check for the following:
-1) Non-unique rows in pa_release.v_ust_release, pa_release.v_ust_release_substance, pa_release.v_ust_release_source,
-   pa_release.v_ust_release_source, and pa_release.v_ust_release_corrective_action_strategy (if these views exist). 
-   To resolve any cases where the counts are greater than 0, check that you did a "select distinct" when creating these rows. 
-2) Failed check constraints. 
-3) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.release_element_value_mapping 
-   and ensure the epa_value exists in the associated lookup table. 
-The script will also provide the counts of rows in pa_release.v_ust_release, pa_release.v_ust_release_substance, pa_release.v_ust_release_source,
-   pa_release.v_ust_release_source, and pa_release.v_ust_release_corrective_action_strategy (if these views exist) - ensure these counts 
- make sense! */
+(due to error for mine at local setting
+add physical path due to access:
+FileNotFoundError: [WinError 3] The system cannot find the path specified: '..\\exports\\QAQC\\TN')
 
+
+This script will check the views you just created in the state schema for the following:
+1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)  exist. 
+2) Counts of child tables that have too few rows (for example, v_ust_compartment should have at least as many rows as v_ust_tank because
+   every tank should have at least one compartment). 
+3) Missing join columns to parent tables. For example, v_ust_compartment must contain facility_id and tank_id in order to be able to join it  to its parent tables. 
+4) Missing required columns. 
+5) Required columns that exist but contain null values. 
+6) Extraneous columns - will check for any columns in the views that don't match a column in the equivalent EPA table. This will help identify typos or other errors. 
+7) Non-unique rows. To resolve any cases where the counts are greater than 0, check that you did a "select distinct" when creating these views. Then check for bad joins.  
+8) Bad data types - will check for columns in the view where either the data type is different than the EPA column, or (for character columns) 
+   if the length of the state value is too long to fit into the EPA column. If the data is too long to fit in the EPA column, this may indicate an error in your code or mapping, OR it may mean you need to truncate the state's value to fit the EPA format. 
+9) Failed check constraints. 
+10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping and ensure the epa_value exists in the associated lookup table. 
+
+The script will also provide the counts of rows in wv_ust.v_ust_release, wv_ust.v_ust_release_substance, wv_ust.v_ust_release_source, 
+   wv_ust.v_ust_release_cause, and wv_ust.v_ust_release_corrective_action_strategy (if these views exist) - ensure these counts make sense! 
+   
+The script will export a QAQC spreadsheet (in additional to printing to the screen and logs). If there are errors, re-write the views above, 
+then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
 /*run script populate_epa_data_tables.py	
 set variables:
 ust_or_release = 'release' 
-control_id = 2
-delete_existing = False # can set to True if there is existing release data you need to delete before inserting new*/
+control_id = 5
+delete_existing = False # can set to True if there is existing release data you need to delete before inserting new
+*/--insert data into the EPA schema 
 
+/*run script populate_epa_data_tables.py	
+set variables:
+ust_or_release = 'release' 
+control_id = 5
+delete_existing = True # False or set to True if there is existing release data you need to delete before inserting new*/
+
+--------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
+--Quick sanity check of number of rows inserted:
+select table_name, num_rows from v_ust_table_row_count
+where ust_control_id = 5 order by sort_order;
+--NONE (release data not in any of the tables, such as Facility, tanks...)
 --------------------------------------------------------------------------------------------------------------------------
 --export template
 
 /*run script export_template.py
 set variables:
-control_id = 2
+control_id = 5
 ust_or_release = 'release' 
 organization_id = None  	# Can leave as None if you specify the control_id
 data_only = False 		# Set to False to export full template including mapping and reference tabs
 template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+
+----Similar error for folder exports, had to set physical path
+    self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/epa_templates/' + self.organization_id.upper() + '/'
+  # self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
+*/
 
 
 --------------------------------------------------------------------------------------------------------------------------
