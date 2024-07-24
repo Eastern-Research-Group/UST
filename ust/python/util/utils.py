@@ -357,3 +357,14 @@ def get_fill_gen(color, color2=None):
                        start_color=color,
                        end_color=color2)
     return fill_gen
+
+
+def get_table_values(table_name, column_name, schema='public'):
+    conn = connect_db()
+    cur = conn.cursor() 
+    sql = f'select distinct "{column_name}" from "{schema}"."{table_name}" order by 1' 
+    cur.execute(sql)
+    values = [r[0] for r in cur.fetchall()]
+    cur.close()
+    conn.close()    
+    return values 

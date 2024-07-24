@@ -9,12 +9,12 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-organization_id = 'MO'
-system_type = 'ust' # Accepted values are 'ust' or 'release'
-data_source = '' # Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
-date_received = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
+organization_id = 'AZ'
+system_type = 'release' # Accepted values are 'ust' or 'release'
+data_source = 'State sent a spreadsheet in EPA template format by email' # Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
+date_received = '2024-06-25' # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 date_processed = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
-comments = None 
+comments = 'State asked for help mapping Substances and Causes' 
 
 
 class ControlTable:

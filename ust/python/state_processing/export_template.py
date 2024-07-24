@@ -19,9 +19,6 @@ control_id = 11
 organization_id = None
 data_only = False
 template_only = False
-export_file_path = None
-export_file_dir = None
-export_file_name = None
 
 
 gray_cell_fill = 'C9C9C9' # gray
@@ -329,7 +326,6 @@ class Template:
 
 		conn = utils.connect_db()
 		cur = conn.cursor()	
-
 		sql = f"select substance_group, substance, federally_regulated from substances order by 1, 2"
 		cur.execute(sql)
 		data = cur.fetchall()
@@ -338,6 +334,8 @@ class Template:
 				cell = ws.cell(row=rowno, column=colno)
 				cell.value = cell_value.replace('"','')
 		utils.autowidth(ws)
+		cur.close()
+		conn.close()
 
 
 	def get_mapping_tabs(self):
