@@ -5,6 +5,11 @@
 --the script above returned a new ust_control_id of 14 for this dataset:
 select * from public.ust_control where ust_control_id = 14;
 
+-- Update the control table 
+
+--use insert_control.py to insert into public.ust_control
+--the script above returned a new ust_control_id of 14 for this dataset:
+select * from public.ust_control where ust_control_id = 14;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --Upload the state data 
@@ -131,6 +136,12 @@ where table_schema = 'az_ust' and not exists
 	and a.table_name = b.organization_table_name
 	and a.column_name = b.organization_column_name)
 	
+	select * from ust_elements where element_name like 'Associa%'
+	
+	select * from ust_element_value_mapping 
+	
+alter table ust_element_value_mapping add constraint ust_element_value_mapping_unique unique (ust_element_mapping_id, organization_value, epa_value);
+alter table release_element_value_mapping add constraint release_element_value_mapping_unique unique (release_element_mapping_id, organization_value, epa_value);
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -144,12 +155,19 @@ we'll be going through each of the results of this query below
 so for each value of epa_column_name from this query result, there will be a 
 section below where we generate SQL to perform the mapping 
 */
-select epa_table_name, epa_column_name 
+
+select organization_table_name, organization_column_name
 from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+	(select distinct organization_table_name, organization_column_name, epa_table_name, epa_column_name, table_sort_order, column_sort_order
 	from v_ust_needed_mapping 
 	where ust_control_id = 14 and mapping_complete = 'N'
 	order by table_sort_order, column_sort_order) x;
+
+select distinct "FacilityCoordinateSource" from az_ust.ust_facility ;
+select distinct "SpillBucketWallType" from az_ust.ust_compartment ;
+select distinct "PipeTankTopSumpWallType" from az_ust.ust_piping ;
+select distinct coordinate_source_id from az_ust.ust_facility ;
+select distinct coordinate_source_id from az_ust.ust_facility ;
 /*
 ust_facility		owner_type_id
 ust_facility		facility_type1
@@ -158,6 +176,14 @@ ust_tank			tank_material_description_id
 ust_tank_substance	substance_id
 ust_compartment		compartment_status_id
 */
+
+
+select 
+from ust_element_mapping 
+where ust_control_id = 14;
+
+
+
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --owner_type_id
 

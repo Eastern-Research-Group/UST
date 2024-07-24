@@ -70,6 +70,140 @@ class PopulatedTemplate():
 			i += 1
 		conn.commit()
 
+		if self.ust_or_release == 'release':
+			sql = f"""select 'select distinct "' || column_name || '"::text as cause from {self.schema}."' || table_name || '"  where "' || column_name || '" is not null union all '
+					from information_schema.columns 
+					where table_schema = %s
+					and column_name like 'CauseOfRelease%%'
+					order by 1"""
+			cur.execute(sql, (self.schema,))
+			rows = cur.fetchall()
+			if rows:
+				sql = f"create or replace view {self.schema}.v_unique_causes as select distinct cause from ("
+				subquery = ''
+				for row in rows:
+					subquery = subquery + row[0] 
+				subquery = subquery[:-10]
+				sql = sql + subquery + ') x'
+				cur.execute(sql)
+				logger.info('Created view %s.v_unique_causes', self.schema)
+				self.insert_column_mapping('v_unique_causes', 'cause', 'ust_release_cause','cause_id');
+				i += 1
+
+			sql = f"""select 'select distinct "' || column_name || '"::text as source from {self.schema}."' || table_name || '"  where "' || column_name || '" is not null union all '
+					from information_schema.columns 
+					where table_schema = %s
+					and column_name like 'SourceOfRelease%%'
+					order by 1"""
+			cur.execute(sql, (self.schema,))
+			rows = cur.fetchall()
+			if rows:
+				sql = f"create or replace view {self.schema}.v_unique_sources as select distinct source from ("
+				subquery = ''
+				for row in rows:
+					subquery = subquery + row[0] 
+				subquery = subquery[:-10]
+				sql = sql + subquery + ') x'
+				cur.execute(sql)
+				logger.info('Created view %s.v_unique_sources', self.schema)
+				self.insert_column_mapping('v_unique_sources', 'source', 'ust_release_source','source_id');
+				i += 1
+
+			sql = f"""select 'select distinct "' || column_name || '"::text as substance from {self.schema}."' || table_name || '"  where "' || column_name || '" is not null union all '
+					from information_schema.columns 
+					where table_schema = %s
+					and column_name like 'SubstanceReleased%%'
+					order by 1"""
+			cur.execute(sql, (self.schema,))
+			rows = cur.fetchall()
+			if rows:
+				sql = f"create or replace view {self.schema}.v_unique_substances as select distinct substance from ("
+				subquery = ''
+				for row in rows:
+					subquery = subquery + row[0] 
+				subquery = subquery[:-10]
+				sql = sql + subquery + ') x'
+				cur.execute(sql)
+				logger.info('Created view %s.v_unique_substances', self.schema)
+				self.insert_column_mapping('v_unique_substances', 'substance', 'ust_release_substance','substance_id');
+				i += 1
+
+			sql = f"""select 'select distinct "' || column_name || '"::text as corrective_action_strategy from {self.schema}."' || table_name || '"  where "' || column_name || '" is not null union all '
+					from information_schema.columns 
+					where table_schema = %s
+					and column_name like 'CorrectiveActionStrategy%%' and column_name not like '%%StartDate'
+					order by 1"""
+			cur.execute(sql, (self.schema,))
+			rows = cur.fetchall()
+			if rows:
+				sql = f"create or replace view {self.schema}.v_unique_corrective_action_strategies as select distinct corrective_action_strategy from ("
+				subquery = ''
+				for row in rows:
+					subquery = subquery + row[0] 
+				subquery = subquery[:-10]
+				sql = sql + subquery + ') x'
+				cur.execute(sql)
+				logger.info('Created view %s.v_unique_corrective_action_strategies', self.schema)
+				self.insert_column_mapping('v_unique_corrective_action_strategies', 'corrective_action_strategy', 'ust_release_corrective_action_strategy','corrective_action_strategy_id');
+				i += 1
+
+			sql = f"""select table_name, column_name from information_schema.columns a
+			          where table_schema = %s and column_name = 'LUSTID'
+			          and not exists 
+			          	(select 1 from release_element_mapping b 
+			          	where release_control_id = %s
+			          	and a.table_name = b.organization_table_name and a.column_name = b.organization_column_name)"""
+			cur.execute(sql, (self.schema, self.control_id))
+			rows = cur.fetchall()
+			for row in rows:
+				self.insert_column_mapping(row[0], row[1],'ust_release','release_id');
+				i += 1
+
+			sql = f"""select table_name, column_name from information_schema.columns a
+			          where table_schema = %s and column_name = 'LUSTStatus'
+			          and not exists 
+			          	(select 1 from release_element_mapping b 
+			          	where release_control_id = %s
+			          	and a.table_name = b.organization_table_name and a.column_name = b.organization_column_name)"""
+			cur.execute(sql, (self.schema, self.control_id))
+			rows = cur.fetchall()
+			for row in rows:
+				self.insert_column_mapping(row[0], row[1],'ust_release','release_status_id');
+				i += 1
+
+			sql = f"""select table_name, column_name from information_schema.columns a
+			          where table_schema = %s and 
+			          (column_name like 'Unit%%' or column_name like 'QuantityReleased%%')
+			          and not exists 
+			          	(select 1 from release_element_mapping b 
+			          	where release_control_id = %s
+			          	and a.table_name = b.organization_table_name and a.column_name = b.organization_column_name)"""
+			cur.execute(sql, (self.schema, self.control_id))
+			rows = cur.fetchall()
+			for row in rows:
+				table_name = row[0]
+				column_name = row[1]
+				if 'Substance' in column_name:
+					epa_column_name = 'substance_id'
+				elif 'QuantityReleased' in column_name:
+					epa_column_name = 'quantity_release'
+				elif 'Unit' in column_name:
+					epa_column_name = 'unit'
+				self.insert_column_mapping(table_name, column_name, 'ust_release_substance', epa_column_name);
+				i += 1
+
+			sql = f"""select table_name, column_name from information_schema.columns a
+			          where table_schema = %s and column_name like 'CorrectiveActionStartDate%%' 
+			          and not exists 
+			          	(select 1 from release_element_mapping b 
+			          	where release_control_id = %s
+			          	and a.table_name = b.organization_table_name and a.column_name = b.organization_column_name)"""
+			cur.execute(sql, (self.schema, self.control_id))
+			rows = cur.fetchall()
+			for row in rows:
+				self.insert_column_mapping(row[0], row[1], 'ust_release_corrective_action_strategy', 'corrective_action_strategy_start_date');
+				i += 1
+
 		logger.info('Inserted %s rows into %s_element_mapping', i, self.ust_or_release)
 		cur.close()
 		conn.close()	
@@ -79,15 +213,18 @@ class PopulatedTemplate():
 	def check_for_unmapped_elements(self):
 		conn = utils.connect_db()
 		cur = conn.cursor()
-		sql = f"""select table_name, column_name 
-				from information_schema.columns a
-				where table_schema = %s and not exists 	
-					(select 1 from {self.ust_or_release}_element_mapping b 
-					where {self.ust_or_release}_control_id = %s
-					and a.table_name = b.organization_table_name
-					and a.column_name = b.organization_column_name)
+		sql = f"""select b.table_name, a.database_column_name 
+				from release_elements a join release_elements_tables b on a.element_id = b.element_id 
+				where not exists 
+					(select 1 from release_element_mapping c
+					where release_control_id = %s
+					and c.epa_table_name = b.table_name and c.epa_column_name = a.database_column_name)
+				and exists 
+					(select 1 from information_schema.columns d
+					where table_schema = %s
+					and a.element_name = d.column_name)
 				order by 1, 2"""
-		cur.execute(sql, (self.schema, self.control_id))
+		cur.execute(sql, (self.control_id, self.schema))
 		rows = cur.fetchall()
 		all_mapped = True
 		for row in rows:
@@ -103,16 +240,21 @@ class PopulatedTemplate():
 	def insert_column_mapping(self, org_table_name, org_column_name, epa_table_name, epa_column_name, programmer_comments=None):
 		conn = utils.connect_db()
 		cur = conn.cursor()
-		if programmer_comments:
-			sql = f"""insert into {self.ust_or_release}_element_mapping ({self.ust_or_release}_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-					  values (%s, %s, %s, %s, %s, %s)"""
-			cur.execute(sql, (self.control_id, epa_table_name, epa_column_name, org_table_name, org_column_name, programmer_comments))
-		else:
-			sql = f"""insert into {self.ust_or_release}_element_mapping ({self.ust_or_release}_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name) 
-					  values (%s, %s, %s, %s, %s)"""
-			cur.execute(sql, (self.control_id, epa_table_name, epa_column_name, org_table_name, org_column_name))
-		conn.commit()
-		logger.info('Inserted mapping from %s.%s to %s.%s', org_table_name, org_column_name, epa_table_name, epa_column_name)
+		sql = f"""select count(*) from {self.ust_or_release}_element_mapping 
+				where {self.ust_or_release}_control_id = %s 
+				and epa_table_name = %s and epa_column_name = %s and organization_table_name = %s and organization_column_name = %s"""
+		cur.execute(sql, (self.control_id, epa_table_name, epa_column_name, org_table_name, org_column_name))
+		if cur.fetchone()[0] == 0:
+			if programmer_comments:
+				sql = f"""insert into {self.ust_or_release}_element_mapping ({self.ust_or_release}_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+						  values (%s, %s, %s, %s, %s, %s)"""
+				cur.execute(sql, (self.control_id, epa_table_name, epa_column_name, org_table_name, org_column_name, programmer_comments))
+			else:
+				sql = f"""insert into {self.ust_or_release}_element_mapping ({self.ust_or_release}_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name) 
+						  values (%s, %s, %s, %s, %s)"""
+				cur.execute(sql, (self.control_id, epa_table_name, epa_column_name, org_table_name, org_column_name))
+			conn.commit()
+			logger.info('Inserted mapping from %s.%s to %s.%s', org_table_name, org_column_name, epa_table_name, epa_column_name)
 		cur.close()
 		conn.close()	
 
@@ -312,28 +454,16 @@ if __name__ == '__main__':
 	pop_temp = PopulatedTemplate(ust_or_release, control_id)
 
 	# # Step 1: populate mapping
-	# pop_temp.populate_element_mapping()
+	pop_temp.populate_element_mapping()
 	# # If necessary, manually insert missing mapping (the function above will print a list of unmapped elements)
 	# pop_temp.insert_column_mapping('ust_facility', 'AssociatedLUSTID', 'ust_facility', 'AssociatedUSTReleaseID')
 
-	# pop_temp.insert_column_mapping('ust_release','CauseOfRelease1','ust_release_cause','cause_id');
-	# pop_temp.insert_column_mapping('ust_release','CauseOfRelease2','ust_release_cause','cause_id');
-	# pop_temp.insert_column_mapping('ust_release','CauseOfRelease3','ust_release_cause','cause_id');
-	# pop_temp.insert_column_mapping('ust_release','CauseOfRelease4','ust_release_cause','cause_id');
-	# pop_temp.insert_column_mapping('ust_release','CauseOfRelease5','ust_release_cause','cause_id');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy1','ust_release_corrective_action_strategy','corrective_action_strategy_id');
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy1StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy2','ust_release_corrective_action_strategy','corrective_action_strategy_id');
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy2StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy3','ust_release_corrective_action_strategy','corrective_action_strategy_id');
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy3StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy4','ust_release_corrective_action_strategy','corrective_action_strategy_id');
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy4StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy5','ust_release_corrective_action_strategy','corrective_action_strategy_id');
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy5StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy6','ust_release_corrective_action_strategy','corrective_action_strategy_id');
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy6StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy7','ust_release_corrective_action_strategy','corrective_action_strategy_id');
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy7StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
 	# pop_temp.insert_column_mapping('ust_release','LUSTID','ust_release','release_id');
 	# pop_temp.insert_column_mapping('ust_release','LUSTStatus','ust_release','release_status_id');
@@ -342,16 +472,6 @@ if __name__ == '__main__':
 	# pop_temp.insert_column_mapping('ust_release','QuantityReleased3','ust_release_substance','quantity_released');
 	# pop_temp.insert_column_mapping('ust_release','QuantityReleased4','ust_release_substance','quantity_released');
 	# pop_temp.insert_column_mapping('ust_release','QuantityReleased5','ust_release_substance','quantity_released');
-	# pop_temp.insert_column_mapping('ust_release','SourceOfRelease1','ust_release_source','source_id');
-	# pop_temp.insert_column_mapping('ust_release','SourceOfRelease2','ust_release_source','source_id');
-	# pop_temp.insert_column_mapping('ust_release','SourceOfRelease3','ust_release_source','source_id');
-	# pop_temp.insert_column_mapping('ust_release','SourceOfRelease4','ust_release_source','source_id');
-	# pop_temp.insert_column_mapping('ust_release','SourceOfRelease5','ust_release_source','source_id');
-	# pop_temp.insert_column_mapping('ust_release','SubstanceReleased1','ust_release_substance','substance_id');
-	# pop_temp.insert_column_mapping('ust_release','SubstanceReleased2','ust_release_substance','substance_id');
-	# pop_temp.insert_column_mapping('ust_release','SubstanceReleased3','ust_release_substance','substance_id');
-	# pop_temp.insert_column_mapping('ust_release','SubstanceReleased4','ust_release_substance','substance_id');
-	# pop_temp.insert_column_mapping('ust_release','SubstanceReleased5','ust_release_substance','substance_id');
 	# pop_temp.insert_column_mapping('ust_release','Unit1','ust_release_substance','unit');
 	# pop_temp.insert_column_mapping('ust_release','Unit2','ust_release_substance','unit');
 	# pop_temp.insert_column_mapping('ust_release','Unit3','ust_release_substance','unit');

@@ -38,6 +38,23 @@ where table_schema = 'az_release' order by 1;
 alter table az_release."2024.06.28.draft_AZ_LUST_data_v1" rename to "ust_release"
 
 
+select distinct table_name, 
+	replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(column_name,'LUST','Release'),'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9',''),'0','')
+from information_schema.columns 
+where table_schema = 'az_release' 
+and column_name not in (select element_name from release_elements)
+order by 1, 2;
+
+select distinct table_name, column_name 
+	--replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(column_name,'LUST','Release'),'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9',''),'0','')
+from information_schema.columns 
+where table_schema = 'az_release' 
+and column_name not in (select element_name from release_elements)
+order by 1, 2;
+
+select * from release_elements where element_name like 'CauseOfRelease%'
+
+
 pop_temp.insert_column_mapping('ust_release','CauseOfRelease1','ust_release_cause','cause_id');
 pop_temp.insert_column_mapping('ust_release','CauseOfRelease2','ust_release_cause','cause_id');
 pop_temp.insert_column_mapping('ust_release','CauseOfRelease3','ust_release_cause','cause_id');
@@ -81,9 +98,157 @@ pop_temp.insert_column_mapping('ust_release','Unit4','ust_release_substance','un
 pop_temp.insert_column_mapping('ust_release','Unit5','ust_release_substance','unit');
 
 
+
+select * from v_release_needed_mapping
+where release_control_id = 6;
+ 
+select * 
+from v_release_element_mapping a
+JOIN release_element_mapping b ON a.release_control_id = b.release_control_id AND a.epa_table_name::text = b.epa_table_name::text AND a.epa_column_name::text = b.epa_column_name::text
+where  a.release_control_id = 6;
+
+
+select * 
+from v_ust_element_mapping a
+JOIN ust_element_mapping b ON a.ust_control_id = b.ust_control_id AND a.epa_table_name::text = b.epa_table_name::text AND a.epa_column_name::text = b.epa_column_name::text
+where  a.ust_control_id = 14
+and a.epa_column_name like 'facility_type%'
+
+
 select * From ust_release ;
 
+select * from release_element_mapping where release_control_id = 6 order by 1 desc;
+
+delete from release_element_mapping
+where release_element_mapping_id between 128 and 137;
+delete from release_element_mapping
+where release_element_mapping_id between 102 and 106;
+delete from release_element_mapping
+where release_control_id = 6 and epa_column_name = 'corrective_action_strategy_id' 
+
+delete from release_element_mapping where  release_control_id = 6 and release_element_mapping_id > 146;
+
+select 'insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+	values (6, ''' ||
+	epa_table_name || ''',''' || epa_column_name || ''',''' || org_table_name || ''',''' || org_column_name || ''',''Direct mapping to EPA template per state'')'
+from 
+	(select distinct c.table_name as epa_table_name, b.database_column_name as epa_column_name, 
+		a.table_name as org_table_name, a.column_name as org_column_name, a.ordinal_position
+	from information_schema.columns a join release_elements b on a.column_name = b.element_name 
+		join release_elements_tables c on b.element_id = c.element_id 
+	where table_schema = 'az_release') x 
+
+
+select distinct c.table_name as epa_table_name, b.database_column_name as epa_column_name, 
+	a.table_name as org_table_name, a.column_name as org_column_name, a.ordinal_position
+from information_schema.columns a join release_elements b on a.column_name = b.element_name 
+	join release_elements_tables c on b.element_id = c.element_id 
+where table_schema = 'az_release'	
+	
+select * 
+from release_elements b join  release_elements_tables c on b.element_id = c.element_id 
+	
+
+CREATE OR REPLACE VIEW public.v_release_elements
+AS SELECT a.element_name AS "Element Name",
+    a.element_description AS "Element Description",
+    a.element_type AS "Element Type",
+    a.element_size AS "Size",
+    a.required AS "Required",
+    a.allowed_values AS "Allowed Values",
+        CASE
+            WHEN a.database_lookup_table::text = ANY (ARRAY['states'::character varying::text, 'facility_types'::character varying::text, 'substances'::character varying::text,'sources'::character varying::text, 'causes'::character varying::text, 'corrective_action_strategies'::character varying::text]) THEN ('[See '::text || initcap(replace(a.database_lookup_table::text, '_'::text, ' '::text))) || ' lookup tab]'::text
+            WHEN a.database_lookup_table IS NOT NULL THEN get_lookup_table_contents(a.database_lookup_table::text, a.database_lookup_column::text)
+            ELSE NULL::text
+        END AS "Business Rule",
+    a.notes AS "Notes"
+   FROM release_elements a
+     JOIN release_elements_tables b ON a.element_id = b.element_id
+     JOIN release_element_table_sort_order c ON b.table_name::text = b.table_name::text
+  GROUP BY a.element_id, a.element_name, a.element_description, a.element_size, a.required, a.allowed_values, a.notes
+  ORDER BY a.element_id;
+
+
+select distinct epa_table_name, epa_column_name, release_element_mapping_id, organization_table_name, organization_column_name, 
+		database_lookup_table, database_lookup_column, table_sort_order, column_sort_order
+from v_release_needed_mapping 
+where release_control_id = 6 order by table_sort_order, column_sort_order
+ 
+ 
+select distinct a."SubstanceReleased1", b.substance
+from az_release."ust_release" a left join public.substances b 
+on a."SubstanceReleased1"::text  = b.substance
+where a."SubstanceReleased1" is not null 
+order by 1
+
+select table_name, column_name
+from information_schema.columns 
+where table_schema = 'az_release'
+and column_name like 'CauseOfRelease%'
+order by 2;
+
+and (column_name like 'CauseOfRelease%' or column_name like 'SourceOfRelease%'
+     or column_name like 'SubstanceReleased%' or column_name like 'CorrectiveActionStrategy%') 
+and column_name not like '%StartDate%'
+order by 1;
+
+select distinct 'CauseOfRelease1' from ust_release union all
+
+select 'select distinct "' || column_name || '"::text as cause from az_release."' || table_name || '"  where "' || column_name || '" is not null union all '
+from information_schema.columns 
+where table_schema = 'az_release'
+and column_name like 'CauseOfRelease%'
+order by 1;
+
+select distinct cause from 
+(select distinct "CauseOfRelease1"::text as cause from az_release."ust_release" where "CauseOfRelease1" is not null union all 
+select distinct "CauseOfRelease2"::text as cause from az_release."ust_release" where "CauseOfRelease2" is not null union all 
+select distinct "CauseOfRelease3"::text as cause from az_release."ust_release" where "CauseOfRelease3" is not null union all 
+select distinct "CauseOfRelease4"::text as cause from az_release."ust_release" where "CauseOfRelease4" is not null union all 
+select distinct "CauseOfRelease5"::text as cause from az_release."ust_release" where "CauseOfRelease5" is not null ) x
+
+select count(*) from  az_release."ust_release"  where "CauseOfRelease5" is not null
+
+
+
+
+select table_name, column_name 
+from information_schema.columns a
+where table_schema = 'az_release' and not exists 	
+	(select 1 from release_element_mapping b 
+	where release_control_id = 6
+	and a.table_name = b.organization_table_name
+	and a.column_name = b.organization_column_name)
+order by 1, 2
+
+select * from release_element_mapping order by 1 desc;
+
+select b.table_name, a.database_column_name 
+from release_elements a join release_elements_tables b on a.element_id = b.element_id 
+where not exists 
+	(select 1 from release_element_mapping c
+	where release_control_id = 6 
+	and c.epa_table_name = b.table_name and c.epa_column_name = a.database_column_name)
+and exists 
+	(select 1 from information_schema.columns d
+	where table_schema = 'az_release'
+	and a.element_name = d.column_name)
+
+select * from information_schema.columns 
+where table_schema = 'az_release'
+and column_name like '%etected%'
+
+select * from release_elements order by 1; 
+	
+	
 select * from release_element_mapping 
+
+
+select state_value, epa_value 
+from archive.v_lust_element_mapping 
+where element_name like '%Cause%'
+and lower(state_value) like lower('%deliv%')
+order by 1, 2;
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
