@@ -7,5 +7,5 @@ create or replace view "public"."v_ust_tank_substance" as
     ts.substance_casno AS "SubstanceCASNO"
    FROM (((ust_tank t
      JOIN ust_facility f ON ((t.ust_facility_id = f.ust_facility_id)))
-     LEFT JOIN ust_tank_substance ts ON ((t.ust_tank_id = ts.ust_tank_id)))
+     JOIN ust_tank_substance ts ON ((t.ust_tank_id = ts.ust_tank_id)))
      LEFT JOIN substances s ON ((ts.substance_id = s.substance_id)));
