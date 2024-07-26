@@ -1,5 +1,6 @@
 CREATE TABLE public.states (
-    state character varying(2)  NOT NULL );
+    state character varying(2)  NOT NULL,
+     facility_state character varying(2)  );
 
 ALTER TABLE public.states ADD CONSTRAINT states_pkey PRIMARY KEY (state);
 
