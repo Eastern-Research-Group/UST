@@ -246,10 +246,16 @@ select * from release_element_mapping
 
 select state_value, epa_value 
 from archive.v_lust_element_mapping 
-where element_name like '%Cause%'
+where element_name like '%Source%'
 and lower(state_value) like lower('%deliv%')
 order by 1, 2;
 
+
+select * from ust_elements order by 1;
+
+select * from sources;
+
+select * from release_elements order by 1;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

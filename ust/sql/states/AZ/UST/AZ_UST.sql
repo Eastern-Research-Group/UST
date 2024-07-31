@@ -124,7 +124,7 @@ where element_name like '%Substance%'
 select state_value, epa_value 
 from archive.v_ust_element_mapping 
 where element_name like '%Substance%'
-and lower(state_value) like lower('%100%')
+and lower(state_value) like lower('%transformer%')
 order by 1, 2;
 
 
