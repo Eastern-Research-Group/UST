@@ -19,6 +19,9 @@ control_id = 5
 organization_id = None
 data_only = False
 template_only = False
+export_file_name = None 
+export_file_dir = None 
+export_file_path = None 
 
 
 gray_cell_fill = 'C9C9C9' # gray
@@ -123,7 +126,7 @@ class Template:
 			uor = 'Releases'		
 		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
 			self.export_file_name = self.organization_id.upper() + '_' + uor + '_template_' + utils.get_timestamp_str() + '.xlsx'
-			self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/epa_templates/' + self.organization_id.upper() + '/'
+			self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
 	 # self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
 			self.export_file_path = self.export_file_dir + self.export_file_name
 			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
@@ -320,14 +323,9 @@ class Template:
 		cell.font = Font(bold=True)
 		cell.alignment = center_align
 
-		cell = ws.cell(row=1, column=3)
-		cell.value = 'Federally Regulated'
-		cell.font = Font(bold=True)
-		cell.alignment = center_align
-
 		conn = utils.connect_db()
 		cur = conn.cursor()	
-		sql = f"select substance_group, substance, federally_regulated from substances order by 1, 2"
+		sql = f"select substance_group, substance from substances order by 1, 2"
 		cur.execute(sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
@@ -444,24 +442,24 @@ class Template:
 		cur.execute(sql, (self.control_id,))
 
 		if cur.rowcount > 0:
-			cell = ws.cell(row=1, column=6)
+			cell = ws.cell(row=1, column=4)
 			cell.value = 'Organization Value'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=7)
+			cell = ws.cell(row=1, column=5)
 			cell.value = 'EPA Value'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=8)
+			cell = ws.cell(row=1, column=6)
 			cell.value = 'Programmer Comments'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=9)
+			cell = ws.cell(row=1, column=7)
 			cell.value = 'EPA Comments'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=10)
+			cell = ws.cell(row=1, column=8)
 			cell.value = 'Organization Comments'
 			cell.font = Font(bold=True)
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
-				for colno, cell_value in enumerate(row, start=5):
+				for colno, cell_value in enumerate(row, start=4):
 					ws.cell(row=rowno, column=colno).value = cell_value		
 
 		utils.autowidth(ws)

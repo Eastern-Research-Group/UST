@@ -275,40 +275,37 @@ class PopulatedTemplate():
 			cell = ws.cell(row=1, column=2)
 			cell.value = 'Substance'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=3)
-			cell.value = 'Fed. Reg.'
-			cell.font = Font(bold=True)
 		else:
 			cell = ws.cell(row=1, column=1)
 			cell.value = db_lookup_column
 		
 		cell.font = Font(bold=True)
-		cell = ws.cell(row=1, column=5)
+		cell = ws.cell(row=1, column=4)
 		cell.value = 'Organization Value'
 		cell.font = Font(bold=True)
-		cell = ws.cell(row=1, column=6)
+		cell = ws.cell(row=1, column=5)
 		cell.value = 'EPA Value'
 		cell.font = Font(bold=True)
-		cell = ws.cell(row=1, column=7)
+		cell = ws.cell(row=1, column=6)
 		cell.value = 'Programmer Comments'
 		cell.font = Font(bold=True)
-		cell = ws.cell(row=1, column=8)
+		cell = ws.cell(row=1, column=7)
 		cell.value = 'EPA Comments'
 		cell.font = Font(bold=True)
-		cell = ws.cell(row=1, column=9)
+		cell = ws.cell(row=1, column=8)
 		cell.value = 'Organization Comments'
 		cell.font = Font(bold=True)
-		cell = ws.cell(row=1, column=10)
+		cell = ws.cell(row=1, column=9)
 		cell.value = 'EPA Approved'
 		cell.font = Font(bold=True)
-		cell = ws.cell(row=1, column=11)
+		cell = ws.cell(row=1, column=10)
 		cell.value = 'Exclude from query'
 		cell.font = Font(bold=True)
 
 		if db_lookup_column == 'substance':
 			conn = utils.connect_db()
 			cur = conn.cursor()	
-			sql = f"select substance_group, substance, federally_regulated from public.substances order by 1, 2"
+			sql = f"select substance_group, substance from public.substances order by 1, 2"
 			cur.execute(sql)
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
@@ -363,14 +360,14 @@ class PopulatedTemplate():
 				self.populate_lookup_values(ws, db_lookup_table, db_lookup_column)
 				data = cur.fetchall()
 				for rowno, row in enumerate(data, start=2):
-					for colno, cell_value in enumerate(row, start=5):
+					for colno, cell_value in enumerate(row, start=4):
 						cell = ws.cell(row=rowno, column=colno)
 						cell.value = cell_value		
 						if not cell_value:
 							cell.fill = utils.get_fill_gen(yellow_cell_fill)
 				utils.autowidth(ws)
-				ws.cell(row=1, column=14).value = self.ust_or_release + '_element_mapping_id'
-				ws.cell(row=2, column=14).value = element_mapping_id
+				ws.cell(row=1, column=13).value = self.ust_or_release + '_element_mapping_id'
+				ws.cell(row=2, column=13).value = element_mapping_id
 
 			self.cleanup_wb()
 			self.wb.save(self.export_file_path)
@@ -388,8 +385,8 @@ class PopulatedTemplate():
 			logger.info('Working on %s', sheetname)
 			ws = wb[sheetname]
 			# check if this sheet is a mapping page
-			if ws['E1'].value == 'Organization Value':
-				element_mapping_id = ws['N2'].value
+			if ws['D1'].value == 'Organization Value':
+				element_mapping_id = ws['M2'].value
 				r = 1
 				mapping_found = True
 				while mapping_found:
@@ -454,7 +451,7 @@ if __name__ == '__main__':
 	pop_temp = PopulatedTemplate(ust_or_release, control_id)
 
 	# # Step 1: populate mapping
-	pop_temp.populate_element_mapping()
+	# pop_temp.populate_element_mapping()
 	# # If necessary, manually insert missing mapping (the function above will print a list of unmapped elements)
 	# pop_temp.insert_column_mapping('ust_facility', 'AssociatedLUSTID', 'ust_facility', 'AssociatedUSTReleaseID')
 
