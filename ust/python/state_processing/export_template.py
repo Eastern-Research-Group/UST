@@ -14,8 +14,8 @@ from python.util.logger_factory import logger
 from python.util import utils, config
 
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 11
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 5
 organization_id = None
 data_only = False
 template_only = False
@@ -123,7 +123,8 @@ class Template:
 			uor = 'Releases'		
 		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
 			self.export_file_name = self.organization_id.upper() + '_' + uor + '_template_' + utils.get_timestamp_str() + '.xlsx'
-			self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
+			self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/epa_templates/' + self.organization_id.upper() + '/'
+	 # self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
 			self.export_file_path = self.export_file_dir + self.export_file_name
 			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
 		elif self.export_file_path:
