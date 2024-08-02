@@ -6,7 +6,7 @@ create or replace view "public"."v_release_elements" as
     a.required AS "Required",
     a.allowed_values AS "Allowed Values",
         CASE
-            WHEN ((a.database_lookup_table)::text = ANY (ARRAY[('states'::character varying)::text, ('facility_types'::character varying)::text, ('substances'::character varying)::text])) THEN (('[See '::text || initcap(replace((a.database_lookup_table)::text, '_'::text, ' '::text))) || ' lookup tab]'::text)
+            WHEN ((a.database_lookup_table)::text = ANY (ARRAY[('states'::character varying)::text, ('facility_types'::character varying)::text, ('substances'::character varying)::text, ('sources'::character varying)::text, ('causes'::character varying)::text, ('corrective_action_strategies'::character varying)::text])) THEN (('[See '::text || initcap(replace((a.database_lookup_table)::text, '_'::text, ' '::text))) || ' lookup tab]'::text)
             WHEN (a.database_lookup_table IS NOT NULL) THEN get_lookup_table_contents((a.database_lookup_table)::text, (a.database_lookup_column)::text)
             ELSE NULL::text
         END AS "Business Rule",

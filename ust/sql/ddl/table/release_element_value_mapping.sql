@@ -11,6 +11,8 @@ CREATE TABLE public.release_element_value_mapping (
 
 ALTER TABLE public.release_element_value_mapping ADD CONSTRAINT release_element_value_mapping_pkey PRIMARY KEY (release_element_value_mapping_id);
 
+ALTER TABLE public.release_element_value_mapping ADD CONSTRAINT release_element_value_mapping_unique UNIQUE (release_element_mapping_id, organization_value, epa_value);
+
 CREATE UNIQUE INDEX release_element_value_mapping_pkey ON public.release_element_value_mapping USING btree (release_element_value_mapping_id)
 
 CREATE INDEX release_element_value_mapping_db_id ON public.release_element_value_mapping USING btree (release_element_mapping_id)
@@ -24,3 +26,5 @@ CREATE INDEX release_element_value_mapping_org_value ON public.release_element_v
 CREATE INDEX release_element_value_mapping_release_element_mapping_id_idx ON public.release_element_value_mapping USING btree (release_element_mapping_id)
 
 CREATE INDEX release_element_value_mapping_release_element_value_mapping_id_ ON public.release_element_value_mapping USING btree (release_element_value_mapping_id)
+
+CREATE UNIQUE INDEX release_element_value_mapping_unique ON public.release_element_value_mapping USING btree (release_element_mapping_id, organization_value, epa_value)
