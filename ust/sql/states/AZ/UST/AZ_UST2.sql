@@ -33,6 +33,7 @@ into az_ust.erg_ower_type_military_mapping
 from az_ust.ust_facility 
 where "OwnerType" is not null and "OwnerType" in ('Federal Government','State Government')
 order by 1, 2;
+
 create view az_ust.v_owner_type_mapping as
 select distinct "FacilityID", a."FacilityOwnerCompanyName", 
 	case when b."MilitaryFlag" = 'Y' then 'Military' 
