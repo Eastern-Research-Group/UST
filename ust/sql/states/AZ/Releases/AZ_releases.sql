@@ -28,7 +28,7 @@ release_path = 'C:\Users\renae\Documents\Work\repos\ERG\UST\ust\sql\states\PA\Re
 overwrite_table = False 
 
 OR:
-manually in the database, create schema pa_release if it does not exist, then manually upload the state data
+manually in the database, create schema az_release if it does not exist, then manually upload the state data
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1001,7 +1001,7 @@ run script org_mapping_xwalks.py to create crosswalk views for all lookup tables
 see new views:*/
 select table_name 
 from information_schema.tables 
-where table_schema = 'pa_release' and table_type = 'VIEW'
+where table_schema = 'az_release' and table_type = 'VIEW'
 and table_name like '%_xwalk' order by 1;
 /*
 v_cause_xwalk
@@ -1014,15 +1014,15 @@ v_substance_xwalk
 
 
 --Step 2: see the EPA tables we need to populate, and in what order
-select distinct epa_table_name, table_sort_order
+select distinct epa_table_name
 from v_release_table_population 
-where release_control_id = 6
-order by table_sort_order;
+where release_control_id = 6;
 /*
 ust_release
-ust_release_substance
-ust_release_source
 ust_release_cause
+ust_release_corrective_action_strategy
+ust_release_source
+ust_release_substance
 */
 
 /*Step 3: check if there where any dataset-level comments you need to incorporate:
@@ -1059,62 +1059,88 @@ order by column_sort_order;
 !!! NOTE: Remember to do "select distinct" if necessary
 !!! NOTE: Some states do not include State or EPA Region in their database, but it is generally
     safe for you to insert these yourself, so add them! */
-create or replace view pa_release.v_ust_release as 
+create or replace view az_release.v_ust_release as 
 select distinct 
-		"FACILITY_ID"::character varying(50) as facility_id,
-		"TANK"::character varying(50) as tank_id_associated_with_release,
-		"INCIDENT_ID"::character varying(50) as release_id,
-		"FACILITY_NAME"::character varying(200) as site_name,
-		"ADDRESS1"::character varying(100) as site_address,
-		"ADDRESS2"::character varying(100) as site_address2,
-		"CITY"::character varying(100) as site_city,
-		"ZIP"::character varying(10) as zipcode,
-		'AZ' as state, 
-		3 as epa_region, 
-		"LATITUDE"::double precision as latitude,
-		"LONGITUDE"::double precision as longitude,
-		coordinate_source_id as coordinate_source_id,
-		release_status_id as release_status_id,
-		"CONFIRMED_DATE"::date as reported_date,
-		case when "STATUS_DESCRIPTION" = 'Cleanup Completed' then "STATUS_DATE"::date end as nfa_date, 
-		case when "IMPACT_DESCRIPTION" = 'Soil' then 'Yes' end as media_impacted_soil,
-		case when "IMPACT_DESCRIPTION" = 'Ground Water' then 'Yes' end as media_impacted_groundwater,
-		case when "IMPACT_DESCRIPTION" = 'Surface Water' then 'Yes' end as media_impacted_surface_water,
-		how_release_detected_id
-from "Tank_Cleanup_Incidents" x 
-	left join pa_release.v_coordinate_source_xwalk cs on x."HOR_REF_DATUM" = cs.organization_value 
-	left join pa_release.v_release_status_xwalk	rs on x."STATUS_DESCRIPTION" = rs.organization_value 
-	left join pa_release.v_how_release_detected_xwalk rd on x."RELEASE_DISCOVERED" = rd.organization_value 
-where "INCIDENT_TYPE" <> 'AST';
+	"FacilityID"::character varying(50) as facility_id,
+	"TankIDAssociatedwithRelease"::character varying(50) as tank_id_associated_with_release,
+	"LUSTID"::character varying(50) as release_id,
+	"FederallyReportableRelease"::character varying(7) as federally_reportable_release,
+	"SiteName"::character varying(200) as site_name,
+	"SiteAddress"::character varying(100) as site_address,
+	"SiteAddress2"::character varying(100) as site_address2,
+	"SiteCity"::character varying(100) as site_city,
+	"Zipcode"::character varying(10) as zipcode,
+	"County"::character varying(100) as county,
+	"State" as state,
+	"EPARegion"::integer as epa_region,
+	"TribalSite"::character varying(7) as tribal_site,
+	"Tribe"::character varying(50) as tribe,
+	"Latitude"::double precision as latitude,
+	"Longitude"::double precision as longitude,
+	release_status_id as release_status_id,
+	"ReportedDate"::date as reported_date,
+	"NFADate"::date as nfa_date,
+	"MediaImpactedSoil"::character varying(3) as media_impacted_soil,
+	"MediaImpactedGroundwater"::character varying(3) as media_impacted_groundwater,
+	"MediaImpactedSurfaceWater"::character varying(3) as media_impacted_surface_water,
+	"ClosedWithContamination"::character varying(7) as closed_with_contamination,
+	"NoFurtherActionLetterURL"::character varying(2000) as no_further_action_letter_url,
+	"MilitaryDoDSite"::character varying(7) as military_dod_site
+from az_release.ust_release x 
+	left join az_release.v_release_status_xwalk	rs on x."LUSTStatus" = rs.organization_value ;
+
+select distinct "CoordinateSource" from az_release.ust_release;
 
 --review: 
-select * from pa_release.v_ust_release;
-select count(*) from pa_release.v_ust_release;
---69865
+select * from az_release.v_ust_release;
+select count(*) from az_release.v_ust_release;
+--9535
+
+select count(*) from az_release.ust_release
+
 --------------------------------------------------------------------------------------------------------------------------
 --now repeat for each data table:
 
---ust_release_substance 
-select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
-from v_release_table_population_sql
-where release_control_id = 6 and epa_table_name = 'ust_release_substance'
-order by column_sort_order;
+create view az_release.v_substances as 
+select distinct release_id, substance, quantity_released, unit
+from (
+	select distinct "LUSTID" as release_id, 
+		"SubstanceReleased1" as substance, 
+		"QuantityReleased1" as quantity_released, 
+		"Unit1" as unit
+	from az_release.ust_release where "SubstanceReleased1" is not null union all 
+	select distinct "LUSTID" as release_id, 
+		"SubstanceReleased2" as substance, 
+		"QuantityReleased2" as quantity_released, 
+		"Unit2" as unit
+	from az_release.ust_release where "SubstanceReleased2" is not null union all 
+	select distinct "LUSTID" as release_id, 
+		"SubstanceReleased3" as substance, 
+		"QuantityReleased3" as quantity_released, 
+		"Unit3" as unit
+	from az_release.ust_release where "SubstanceReleased3" is not null union all 
+	select distinct "LUSTID" as release_id, 
+		"SubstanceReleased4" as substance, 
+		"QuantityReleased4" as quantity_released, 
+		"Unit4" as unit
+	from az_release.ust_release where "SubstanceReleased4" is not null ) x;
 
+	
 --be sure to do select distinct if necessary!
-create or replace view pa_release.v_ust_release_substance as 
-select distinct "INCIDENT_ID"::character varying(50) as release_id,
-		s.substance_id
-from "Tank_Cleanup_Incidents" x 
-	join pa_release.v_substance_xwalk s on x."SUBSTANCE" = s.organization_value 
-where s.substance_id is not null 
-and "INCIDENT_TYPE" <> 'AST'; 
+drop view  az_release.v_ust_release_substance;
+create or replace view az_release.v_ust_release_substance as 
+select distinct release_id::character varying(50) as release_id,
+		s.substance_id,
+		organization_value as substance_comment
+from az_release.v_substances x 
+	join az_release.v_substance_xwalk s on x.substance = s.organization_value 
+where s.substance_id is not null ; 
 
-select * from pa_release.v_ust_release_substance;
-select count(*) from pa_release.v_ust_release_substance;
---62868
+select * from  az_release.v_substance_xwalk
+
+select * from az_release.v_ust_release_substance;
+select count(*) from az_release.v_ust_release_substance;
+--9685
 --------------------------------------------------------------------------------------------------------------------------
 --ust_release_source 
 select organization_table_name_qtd, selected_column, programmer_comments, 
@@ -1125,17 +1151,27 @@ from v_release_table_population_sql
 where release_control_id = 6 and epa_table_name = 'ust_release_source'
 order by column_sort_order;
 
---!! this one has a deagg table so we have to alter the join 
-create or replace view pa_release.v_ust_release_source as 
-select distinct "INCIDENT_ID"::character varying(50) as release_id,
-		b.source_id
-from "Tank_Cleanup_Incidents" a join pa_release.v_source_xwalk b on a."SOURCE_CAUSE_OF_RELEASE" like '%' || b.organization_value || '%'
-where epa_value is not null
-and "INCIDENT_TYPE" <> 'AST';
+create view az_release.v_source as 
+select distinct release_id, "source"
+from (
+	select distinct "LUSTID" as release_id, "SourceOfRelease1" as "source" from az_release.ust_release where "SourceOfRelease1" is not null union all 
+	select distinct "LUSTID" as release_id, "SourceOfRelease2" as "source" from az_release.ust_release where "SourceOfRelease2" is not null union all 
+	select distinct "LUSTID" as release_id, "SourceOfRelease3" as "source" from az_release.ust_release where "SourceOfRelease3" is not null union all 
+	select distinct "LUSTID" as release_id, "SourceOfRelease4" as "source" from az_release.ust_release where "SourceOfRelease4" is not null  ) x;
+
+drop view az_release.v_ust_release_source;
+create or replace view az_release.v_ust_release_source as 
+select distinct release_id::character varying(50) as release_id,
+		b.source_id,
+		b.organization_value as source_comment 
+from az_release.v_source a 
+	join az_release.v_source_xwalk b on a."source" = b.organization_value;
 	
-select * from pa_release.v_ust_release_source;
-select count(*) from pa_release.v_ust_release_source;
---5138
+select * from az_release.v_ust_release_source;
+select count(*) from az_release.v_ust_release_source;
+--583
+
+select * from az_release.ust_release;
 
 --------------------------------------------------------------------------------------------------------------------------
 --ust_release_cause 
@@ -1148,19 +1184,66 @@ from v_release_table_population_sql
 where release_control_id = 6 and epa_table_name = 'ust_release_cause'
 order by column_sort_order;
 
---!! this one has a deagg table so we have to alter the join 
-create or replace view pa_release.v_ust_release_cause as 
-select distinct "INCIDENT_ID"::character varying(50) as release_id,
-		b.cause_id
-from "Tank_Cleanup_Incidents" a join pa_release.v_cause_xwalk b on a."SOURCE_CAUSE_OF_RELEASE" like '%' || b.organization_value || '%'
-where epa_value is not null
-and "INCIDENT_TYPE" <> 'AST';
+select * from az_release.v_cause_mapping 
+
+create or replace view az_release.v_ust_release_cause as 
+select distinct "LUSTID"::character varying(50) as release_id,
+		b.cause_id,
+		a.cause_comment
+from az_release.v_cause_mapping  a
+	join causes b on a.epa_cause = b.cause ;
 	
-select * from pa_release.v_ust_release_cause;
-select count(*) from pa_release.v_ust_release_cause;
---3120
+
+
+select * from az_release.v_ust_release_cause;
+select count(*) from az_release.v_ust_release_cause;
+--504
 
 --------------------------------------------------------------------------------------------------------------------------
+--corrective_action_strategies
+
+select * from  az_release.ust_release where "CorrectiveActionStrategy1StartDate" is not null;
+
+
+create view az_release.v_corrective_action_strategy as 
+select distinct release_id, corrective_action_strategy, corrective_action_strategy_start_date from 
+(
+select "LUSTID" as release_id, "CorrectiveActionStrategy1" as corrective_action_strategy, "CorrectiveActionStrategy1StartDate" as corrective_action_strategy_start_date
+from az_release.ust_release union all 
+select "LUSTID" as release_id, "CorrectiveActionStrategy2" as corrective_action_strategy, "CorrectiveActionStrategy2StartDate" as corrective_action_strategy_start_date
+from az_release.ust_release union all 
+select "LUSTID" as release_id, "CorrectiveActionStrategy3" as corrective_action_strategy, "CorrectiveActionStrategy3StartDate" as corrective_action_strategy_start_date
+from az_release.ust_release union all 
+select "LUSTID" as release_id, "CorrectiveActionStrategy4" as corrective_action_strategy, "CorrectiveActionStrategy4StartDate" as corrective_action_strategy_start_date
+from az_release.ust_release union all 
+select "LUSTID" as release_id, "CorrectiveActionStrategy5" as corrective_action_strategy, "CorrectiveActionStrategy5StartDate" as corrective_action_strategy_start_date
+from az_release.ust_release union all 
+select "LUSTID" as release_id, "CorrectiveActionStrategy6" as corrective_action_strategy, "CorrectiveActionStrategy6StartDate" as corrective_action_strategy_start_date
+from az_release.ust_release
+)x where corrective_action_strategy is not null ;
+ 
+select * from az_release.v_corrective_action_strategy
+
+
+select * from information_schema.columns where table_schema = 'public' and table_name = 'ust_release_corrective_action_strategy'
+
+--be sure to do select distinct if necessary!
+
+drop view az_release.v_ust_release_corrective_action_strategy;
+create or replace view az_release.v_ust_release_corrective_action_strategy as 
+select distinct release_id::character varying(50) as release_id,
+		s.corrective_action_strategy_id,
+		corrective_action_strategy_start_date::date as corrective_action_strategy_start_date 
+from az_release.v_corrective_action_strategy x 
+	join az_release.v_corrective_action_strategy_xwalk  s on x.corrective_action_strategy = s.organization_value  ; 
+
+select * from  az_release.v_corrective_action_strategy_xwalk
+
+select * from az_release.v_ust_release_corrective_action_strategy;
+select count(*) from az_release.v_ust_release_corrective_action_strategy;
+6305
+
+-------------------------------------------------------------------------------------------------------------------
 --QA/QC
 
 --check that you didn't miss any columns when creating the data population views:
@@ -1169,14 +1252,17 @@ select epa_table_name, epa_column_name,
 	organization_table_name, organization_column_name, 
 	organization_join_table, organization_join_column, 
 	deagg_table_name, deagg_column_name
+	
 from v_release_missing_view_mapping a
 where release_control_id = 6
 order by 1, 2;
 
+delete from release_element_mapping where release_element_mapping_id in (88,123,124,125,126,127,138,139,140,141,142)
+
 /*
 select b.column_name, b.data_type, b.character_maximum_length, a.data_type, a.character_maximum_length 
 from information_schema.columns a join information_schema.columns b on a.column_name = b.column_name 
-where a.table_schema = 'pa_release' and a.table_name = 'v_ust_release'
+where a.table_schema = 'az_release' and a.table_name = 'v_ust_release'
 and b.table_schema = 'public' and b.table_name = 'ust_release'
 and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length )
 order by b.ordinal_position;
@@ -1230,8 +1316,15 @@ delete_existing = False # can set to True if there is existing release data you 
 
 --------------------------------------------------------------------------------------------------------------------------
 --Quick sanity check of number of rows inserted:
-select table_name, num_rows from v_ust_table_row_count
-where ust_control_id = 11 order by sort_order;
+select table_name, num_rows from v_release_table_row_count
+where release_control_id = 6 order by sort_order;
+/* 
+ust_release	9535
+ust_release_substance	9685
+ust_release_source	583
+ust_release_cause	504
+ust_release_corrective_action_strategy	6305
+ */
 
 --------------------------------------------------------------------------------------------------------------------------
 --export template
@@ -1249,3 +1342,6 @@ export_file_name = None	# If export_file_path and export_file_dir/export_file_na
 
 
 --------------------------------------------------------------------------------------------------------------------------
+
+
+select * from az_release.erg_cause_mapping 
