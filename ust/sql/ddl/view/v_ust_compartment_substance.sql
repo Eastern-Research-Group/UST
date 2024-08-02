@@ -5,7 +5,8 @@ create or replace view "public"."v_ust_compartment_substance" as
     c.tank_name AS "TankName",
     b.compartment_id AS "CompartmentID",
     b.compartment_name AS "CompartmentName",
-    s.substance AS "Substance"
+    s.substance AS "Substance",
+    ts.substance_comment AS "SubstanceComment"
    FROM (((((ust_compartment_substance a
      JOIN ust_compartment b ON ((a.ust_compartment_id = b.ust_compartment_id)))
      JOIN ust_tank c ON ((b.ust_tank_id = c.ust_tank_id)))
