@@ -2,7 +2,8 @@ CREATE TABLE public.ust_tank_substance (
     ust_tank_substance_id integer  NOT NULL generated always as identity,
     ust_tank_id integer  NOT NULL ,
     substance_id integer  NOT NULL ,
-    substance_casno character varying(12)  NULL );
+    substance_casno character varying(12)  NULL ,
+    substance_comment character varying(4000)  NULL );
 
 ALTER TABLE public.ust_tank_substance ADD CONSTRAINT ust_tank_substance_pkey PRIMARY KEY (ust_tank_substance_id);
 

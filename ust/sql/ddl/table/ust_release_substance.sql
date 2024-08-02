@@ -3,7 +3,8 @@ CREATE TABLE public.ust_release_substance (
     ust_release_id integer  NOT NULL ,
     substance_id integer  NOT NULL ,
     quantity_released double precision  NULL ,
-    unit character varying(20)  NULL );
+    unit character varying(20)  NULL ,
+    substance_comment character varying(4000)  NULL );
 
 ALTER TABLE public.ust_release_substance ADD CONSTRAINT release_release_fk FOREIGN KEY (ust_release_id) REFERENCES ust_release(ust_release_id);
 

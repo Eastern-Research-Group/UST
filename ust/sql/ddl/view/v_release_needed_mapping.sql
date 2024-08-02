@@ -17,7 +17,7 @@ create or replace view "public"."v_release_needed_mapping" as
     tso.sort_order AS table_sort_order,
     eso.sort_order AS column_sort_order
    FROM ((((((v_release_element_mapping a
-     JOIN release_element_mapping b ON (((a.release_control_id = b.release_control_id) AND ((a.epa_table_name)::text = (b.epa_table_name)::text) AND ((a.epa_column_name)::text = (b.epa_column_name)::text))))
+     JOIN release_element_mapping b ON (((a.release_control_id = b.release_control_id) AND ((a.epa_table_name)::text = (b.epa_table_name)::text) AND ((a.epa_column_name)::text = (b.epa_column_name)::text) AND ((a.organization_table_name)::text = (b.organization_table_name)::text) AND ((a.organization_column_name)::text = (b.organization_column_name)::text))))
      LEFT JOIN release_elements c ON (((a.epa_column_name)::text = (c.database_column_name)::text)))
      LEFT JOIN ( SELECT DISTINCT release_element_value_mapping.release_element_mapping_id
            FROM release_element_value_mapping) d ON ((b.release_element_mapping_id = d.release_element_mapping_id)))

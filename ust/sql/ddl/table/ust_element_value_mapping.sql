@@ -11,6 +11,8 @@ CREATE TABLE public.ust_element_value_mapping (
 
 ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_value_mapping_pkey PRIMARY KEY (ust_element_value_mapping_id);
 
+ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_value_mapping_unique UNIQUE (ust_element_mapping_id, organization_value, epa_value);
+
 CREATE UNIQUE INDEX ust_element_value_mapping_pkey ON public.ust_element_value_mapping USING btree (ust_element_value_mapping_id)
 
 CREATE INDEX ust_element_value_mapping_dbid ON public.ust_element_value_mapping USING btree (ust_element_mapping_id)
@@ -24,3 +26,5 @@ CREATE INDEX ust_element_value_mapping_id ON public.ust_element_value_mapping US
 CREATE INDEX ust_element_value_mapping_ust_element_mapping_id_idx ON public.ust_element_value_mapping USING btree (ust_element_mapping_id)
 
 CREATE INDEX ust_element_value_mapping_ust_element_value_mapping_id_idx ON public.ust_element_value_mapping USING btree (ust_element_value_mapping_id)
+
+CREATE UNIQUE INDEX ust_element_value_mapping_unique ON public.ust_element_value_mapping USING btree (ust_element_mapping_id, organization_value, epa_value)

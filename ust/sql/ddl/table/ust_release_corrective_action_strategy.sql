@@ -2,7 +2,8 @@ CREATE TABLE public.ust_release_corrective_action_strategy (
     ust_release_corrective_action_strategy_id integer  NOT NULL generated always as identity,
     ust_release_id integer  NOT NULL ,
     corrective_action_strategy_id integer  NOT NULL ,
-    corrective_action_strategy_start_date date  NULL );
+    corrective_action_strategy_start_date date  NULL ,
+    corrective_action_strategy_comment character varying(4000)  NULL );
 
 ALTER TABLE public.ust_release_corrective_action_strategy ADD CONSTRAINT release_corrective_action_fk FOREIGN KEY (corrective_action_strategy_id) REFERENCES corrective_action_strategies(corrective_action_strategy_id);
 
