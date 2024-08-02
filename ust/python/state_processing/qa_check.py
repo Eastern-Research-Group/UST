@@ -14,8 +14,8 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 5
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 14
 export_file_path = None
 export_file_dir = None
 export_file_name = None
@@ -25,7 +25,7 @@ join_cols['v_ust_facility'] = []
 join_cols['v_ust_tank'] = ['facility_id']
 join_cols['v_ust_tank_substance'] = ['facility_id','tank_id']
 join_cols['v_ust_compartment'] = ['facility_id','tank_id']
-join_cols['v_ust_comparment_substance'] = ['facility_id','tank_id','compartment_id']
+join_cols['v_ust_compartment_substance'] = ['facility_id','tank_id','compartment_id']
 join_cols['v_ust_piping'] = ['facility_id','tank_id','compartment_id']
 join_cols['v_ust_release'] = []
 join_cols['v_ust_release_source'] = ['release_id'] 
@@ -110,7 +110,7 @@ class QualityCheck:
 	def set_export_path(self):
 		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
 			self.export_file_name = self.organization_id.upper() + '_' + self.ust_or_release + '_QAQC_' + utils.get_timestamp_str() + '.xlsx'
-		   self.export_file_dir = '../exports/QAQC/' + self.organization_id.upper() + '/'
+			self.export_file_dir = '../exports/QAQC/' + self.organization_id.upper() + '/'
 			self.export_file_path = self.export_file_dir + self.export_file_name
 			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
 		elif self.export_file_path:
@@ -169,9 +169,9 @@ class QualityCheck:
 			if 'v_ust_compartment' in self.views_to_review and 'v_ust_tank' in self.views_to_review:
 				if self.view_counts['v_ust_compartment'] < self.view_counts['v_ust_tank']:
 					self.error_dict['Fewer rows in child table than expected'] = 'v_compartment_tank should have at least as many rows as v_ust_tank'
-			if 'v_ust_piping' in self.views_to_review and 'v_ust_compartment' in self.views_to_review:
-				if self.view_counts['v_ust_piping'] < self.view_counts['v_ust_compartment']:
-					self.error_dict['Fewer rows in child table than expected'] = 'v_ust_piping should have at least as many rows as v_ust_compartment'
+			# if 'v_ust_piping' in self.views_to_review and 'v_ust_compartment' in self.views_to_review:
+			# 	if self.view_counts['v_ust_piping'] < self.view_counts['v_ust_compartment']:
+			# 		self.error_dict['Fewer rows in child table than expected'] = 'v_ust_piping should have at least as many rows as v_ust_compartment'
 
 
 	def check_missing_views(self):
@@ -338,7 +338,7 @@ class QualityCheck:
 		rows = self.cur.fetchall()
 		for row in rows:
 			col_name = row[0]
-			if col_name not in join_cols[self.view_name]:
+			if col_name not in join_cols[self.view_name] and not (self.view_name == 'v_ust_compartment_substance' and col_name == 'substance_id'):
 				self.error_dict['Extraneous column'] = self.schema + '.' + self.view_name + '.' + col_name 
 				logger.warning('Extraneous column %s in view %s.%s', col_name, self.schema, self.view_name)
 

@@ -14,8 +14,8 @@ from python.util.logger_factory import logger
 from python.util import utils, config
 
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 5
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 14
 organization_id = None
 data_only = False
 template_only = False

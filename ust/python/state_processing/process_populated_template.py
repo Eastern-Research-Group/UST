@@ -12,8 +12,8 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 6
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 14
 
 
 yellow_cell_fill = 'FFFF00' # yellow
@@ -376,44 +376,55 @@ class PopulatedTemplate():
 		conn.close()	
 
 
-	def insert_element_value_mapping(self, mapping_file_path):
+	def upload_mapping(self, ws):
 		conn = utils.connect_db()
 		cur = conn.cursor()
+		element_mapping_id = ws['L2'].value
+		logger.info('element_mapping_id = %s', element_mapping_id)
+		r = 1
+		mapping_found = True
+		while mapping_found:
+			r += 1
+			organization_value = ws.cell(row=r, column=4).value 
+			if not organization_value:
+				mapping_found = False 
+				continue
+			epa_value = ws.cell(row=r, column=5).value
+			programmer_comments = ws.cell(row=r, column=6).value
+			epa_comments = ws.cell(row=r, column=7).value
+			organization_comments = ws.cell(row=r, column=8).value
+			epa_approved = ws.cell(row=r, column=9).value
+			exclude_from_query = ws.cell(row=r, column=10).value
 
+			sql = f"""insert into {self.ust_or_release}_element_value_mapping ({self.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments, epa_comments, organization_comments, epa_approved, exclude_from_query)
+			          values(%s, %s, %s, %s, %s, %s, %s, %s) 
+			          on conflict ({self.ust_or_release}_element_mapping_id, organization_value, epa_value)
+			          do update set (organization_value, epa_value, programmer_comments, epa_comments, organization_comments, epa_approved, exclude_from_query) = 
+			           (excluded.organization_value, excluded.epa_value, excluded.programmer_comments, excluded.epa_comments, excluded.organization_comments, excluded.epa_approved, excluded.exclude_from_query)"""
+			cur.execute(sql, (element_mapping_id, organization_value, epa_value, programmer_comments, epa_comments, organization_comments, epa_approved, exclude_from_query))
+			conn.commit()
+			logger.info("Inserted organization value '%s' = EPA value '%s'", organization_value, epa_value)
+		cur.close()
+		conn.close()
+
+
+	def insert_element_value_mapping(self, mapping_file_path, sheetname=None):
 		wb = op.load_workbook(mapping_file_path)
-		for sheetname in wb.sheetnames:
+		if sheetname:
 			logger.info('Working on %s', sheetname)
 			ws = wb[sheetname]
 			# check if this sheet is a mapping page
 			if ws['D1'].value == 'Organization Value':
-				element_mapping_id = ws['M2'].value
-				r = 1
-				mapping_found = True
-				while mapping_found:
-					r += 1
-					organization_value = ws.cell(row=r, column=5).value 
-					if not organization_value:
-						mapping_found = False 
-						continue
-					epa_value = ws.cell(row=r, column=6).value
-					programmer_comments = ws.cell(row=r, column=7).value
-					epa_comments = ws.cell(row=r, column=8).value
-					organization_comments = ws.cell(row=r, column=9).value
-					epa_approved = ws.cell(row=r, column=10).value
-					exclude_from_query = ws.cell(row=r, column=11).value
-
-					sql = f"""insert into {self.ust_or_release}_element_value_mapping ({self.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments, epa_comments, organization_comments, epa_approved, exclude_from_query)
-					          values(%s, %s, %s, %s, %s, %s, %s, %s) 
-					          on conflict ({self.ust_or_release}_element_mapping_id, organization_value, epa_value)
-					          do update set (organization_value, epa_value, programmer_comments, epa_comments, organization_comments, epa_approved, exclude_from_query) = 
-					           (excluded.organization_value, excluded.epa_value, excluded.programmer_comments, excluded.epa_comments, excluded.organization_comments, excluded.epa_approved, excluded.exclude_from_query)"""
-					cur.execute(sql, (element_mapping_id, organization_value, epa_value, programmer_comments, epa_comments, organization_comments, epa_approved, exclude_from_query))
-					conn.commit()
-					logger.info("Inserted organization value '%s' = EPA value '%s'", organization_value, epa_value)
-		conn.commit()
-		cur.close()
-		conn.close()
-
+				self.upload_mapping(ws)
+			else:
+				logger.info('Worksheet %s does not appear to be a mapping tab; ignoring', sheetname)
+		else: # go through all worksheets in workbook
+			for sheetname in wb.sheetnames:
+				logger.info('Working on %s', sheetname)
+				ws = wb[sheetname]
+				if ws['D1'].value == 'Organization Value':
+					self.upload_mapping(ws)
+			
 
 	def check_missing_mapping(self):
 		conn = utils.connect_db()
@@ -477,12 +488,15 @@ if __name__ == '__main__':
 
 
 	# # Export a workbork pre-populated with exact value mapping matches 
-	pop_temp.check_state_mapping()
+	# pop_temp.check_state_mapping()
 
 	# # Step 2: Complete any missing mapping in workbook exported above and insert all mappings into database 
-	# mapping_file_path = fr'C:\Users\erguser\repos\ERG\UST\ust\python\exports\mapping\AZ\AZ_UST_mapping_20240723233603.xlsx'
+	mapping_file_path = fr'C:\Users\erguser\repos\ERG\UST\ust\python\exports\mapping\AZ\AZ_UST_mapping_20240723215305.xlsx'
 	# pop_temp.insert_element_value_mapping(mapping_file_path)
 	
 	# # Step 3: Check that all mapping is complete 
 	# pop_temp.check_missing_mapping()
 	# pop_temp.check_incomplete_mapping()
+
+	# # Step 4: After receiving state/EPA feedback, you can either re-run Step 2 to re-insert the entire workbook into the database, or process individual mapping tabs:
+	pop_temp.insert_element_value_mapping(mapping_file_path, sheetname='CompartmentSubstanceStored')
