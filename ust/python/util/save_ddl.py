@@ -10,7 +10,7 @@ from python.util.logger_factory import logger
 from python.util import utils, config
 
 
-schema = 'public'd
+schema = 'public'
 object_name = None # If None, will export all tables, views, and functions 
 # TODO: passing an object_name is not yet supported
 export_path = '../../sql/ddl/'
