@@ -6,12 +6,12 @@ sys.path.append(os.path.join(ROOT_PATH, ''))
 
 from python.util.import_service import ImportService
 
-organization_id = 'KS' 
+organization_id = 'WV' 
 # Enter a directory (NOT a path to a specific file) for ust_path and release_path
 # Set to None if not applicable
-ust_path = r'C:\Users\renae\Downloads\KS\UST'
-# ust_path = None
-release_path = r'C:\Users\renae\Downloads\KS\Releases' 
+# ust_path = r'C:\Users\renae\Downloads\KS\UST'
+ust_path = None
+release_path = r'C:\AnnaWork2023\USTank-WV_release\StateFile' 
 overwrite_table = False 
 
 import_service = ImportService()

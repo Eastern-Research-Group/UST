@@ -9,9 +9,9 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-organization_id = 'MO'
-system_type = 'ust' # Accepted values are 'ust' or 'release'
-data_source = '' # Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
+organization_id = 'WV'
+system_type = 'release' # Accepted values are 'ust' or 'release'
+data_source = 'https://apps.dep.wv.gov/tanks/public/Pages/USTReports.aspx' # Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
 date_received = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 date_processed = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 comments = None 

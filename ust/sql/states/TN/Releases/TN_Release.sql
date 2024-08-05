@@ -236,6 +236,21 @@ values (74, '9 Unknown', 'Unknown', null);
 --check---
 SELECT * FROM release_element_value_mapping where release_element_mapping_id=74;
 
+--8/5/2024 some update after review
+select * from release_element_value_mapping 
+where release_element_mapping_id=74 ;
+----update --------
+update release_element_value_mapping
+set epa_value='Inspection',
+programmer_comments='This mapping was used during the pilot.' 
+where release_element_value_mapping_id=121;
+--or where release_element_mapping_id=74 and organization_value='1 At Closure'
+
+
+update release_element_value_mapping
+set epa_value='Third party (well water, vapor intrusion, etc.)',
+programmer_comments='This mapping was used during the pilot.' 
+where release_element_value_mapping_id in (125,126);
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ust_release.release_status_id
 
 --check the state's data 
@@ -304,6 +319,20 @@ values (71, '8 Case Closed', 'No further action', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
 values (71, '9 Other', 'Other', null);
 
+
+-- update after review, 8/5/2024
+select * from release_element_value_mapping 
+where release_element_mapping_id=71 ;
+----update --------
+update release_element_value_mapping  	
+set epa_value='No further action',
+programmer_comments='This mapping was used during the pilot.' 
+where release_element_mapping_id=71 and organization_value='1b Closure Application Expired';
+
+update release_element_value_mapping  	
+set epa_value='No further action',
+programmer_comments='originally mapped to "Other", but in pilot it is "No further action". It must be requested by state.' 
+where release_element_mapping_id=71 and organization_value='9 Other';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----- ust_release_substance.substance_id
 
@@ -385,6 +414,20 @@ insert into release_element_value_mapping (release_element_mapping_id, organizat
 values (75, 'Gasoline', 'Gasoline (unknown type)', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
 values (75, 'Unknown', 'Unknown', null);
+
+-- update after reviw, 8/5/2024
+select * from release_element_value_mapping 
+where release_element_mapping_id=71 ;
+----update --------
+update release_element_value_mapping  	
+set epa_value='No further action',
+programmer_comments='This mapping was used during the pilot.' 
+where release_element_mapping_id=71 and organization_value='1b Closure Application Expired';
+
+update release_element_value_mapping  	
+set epa_value='No further action',
+programmer_comments='originally mapped to "Other", but in pilot it is "No further action". It must be requested by state.' 
+where release_element_mapping_id=71 and organization_value='9 Other';
 
   -----check ------------------------------
 select * from release_element_value_mapping
