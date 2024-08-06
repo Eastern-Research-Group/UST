@@ -11,8 +11,8 @@ import openpyxl as op
 from python.util.logger_factory import logger
 from python.util import utils
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 11
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 5
 organization_id = None
 
 export_file_path = None
@@ -88,7 +88,7 @@ class Summary:
 			elif self.ust_or_release == 'release':
 				uor = 'Releases'
 			self.export_file_name = self.organization_id.upper() + '_' + uor + '_control_summary_' + utils.get_timestamp_str() + '.xlsx'
-			self.export_file_dir = '../exports/control_table_summaries/' + self.organization_id.upper() + '/'
+			self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/control_table_summaries/' + self.organization_id.upper() + '/'
 			self.export_file_path = self.export_file_dir + self.export_file_name
 			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
 		elif self.export_file_path:

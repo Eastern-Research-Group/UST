@@ -817,3 +817,14 @@ export_file_name = None	# If export_file_path and export_file_dir/export_file_na
 
 
 --------------------------------------------------------------------------------------------------------------------------
+-- Control table summary----------
+--------------------------------------------------------------------------------------------------------------------------
+/*run script control_table_summary.py
+set variables:
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 5
+organization_id = None
+
+self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/control_table_summaries/' + self.organization_id.upper() + '/'
+
+----Finished!--------------------------*/			
