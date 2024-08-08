@@ -368,3 +368,10 @@ def get_table_values(table_name, column_name, schema='public'):
     cur.close()
     conn.close()    
     return values 
+
+
+def is_excel(file_path):
+    if file_path.lower()[-4:] == 'xlsx' or file_path.lower()[-3:] == 'xls':
+        return True 
+    else:
+        return False
