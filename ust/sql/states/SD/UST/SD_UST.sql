@@ -1,27 +1,16 @@
-
-
-select * from public.ust_control where ust_control_id = 9;
-
---load data from state into tanks table
-
---remove a few reocrds where their columns aren't lined up properly so removed them for now, I put a comment to the state about these records to see how to handle
-
-delete from sd_ust."tanks" where "Unnamed: 42" is not null;
-
-delete  from tanks where "FacilityNumber" = '62-00010';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Upload the state data 
-/* 
+--Upload the state data
+/*
 EITHER:
-script import_data_file_files.py will create the correct schema (if it doesn't yet exist), 
-then upload all .xlsx, .xls, .csv, and .txt in the specified directory to this schema. 
+script import_data_file_files.py will create the correct schema (if it doesn't yet exist),
+then upload all .xlsx, .xls, .csv, and .txt in the specified directory to this schema.
 To run, set these variables:
 
-organization_id = 'SD' 
+organization_id = 'SD'
 # Enter a directory (not a path to a specific file) for ust_path and ust_path
 # Set to None if not applicable
-ust_path = 'C:\Users\JChilton\repo\UST\ust\sql\states\SD\UST' 
-overwrite_table = False 
+ust_path = 'C:\Users\JChilton\repo\UST\ust\sql\states\SD\UST'
+overwrite_table = False
 
 OR:
 manually in the database, create schema sd_ust if it does not exist, then manually upload the state data
@@ -29,15 +18,51 @@ manually in the database, create schema sd_ust if it does not exist, then manual
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
---Get an overview of what the state's data looks like. In this case, we have two tables 
-select table_name from information_schema.tables 
+
+
+select * from public.ust_control where ust_control_id = 9;
+
+drop table tanks cascade;
+
+ALTER TABLE "Tanks-6_27_2024" RENAME TO sd_ust.tanks;
+
+create index tanks_idx on sd_ust.tanks ( "FacilityNumber" );
+create index tanks_idx1 on sd_ust.tanks ( "FacilityNumber", "TankNumber" );
+create index tanks_idx2 on sd_ust.tanks ( "TankConstructionName" );
+create index tanks_idx3 on sd_ust.tanks ( "StatusName" );
+
+analyze tanks;
+
+--remove a few records where their columns aren't lined up properly so removed them for now, I put a comment to the state about these records to see how to handle
+delete from sd_ust."tanks" where "Unnamed: 42" is not null;
+
+--clean up some duplicates causing problems
+delete  from tanks where "FacilityNumber" in ('27-00027','30-00030') and "FacilityLatitudeValue" is null;
+delete from tanks where "FacilityNumber" in ('34-00004','37-00014') and "FacilityLatitudeValue" ='42';
+
+--remove some bad date data
+update tanks
+set "TankInstalledYear" = null
+where "TankInstalledYear"  in ('0','8','9','10','64','11');
+
+--remove padding on IDs
+update tanks
+set "FacilityNumber" = trim("FacilityNumber");
+
+--remove some bad tank data
+delete from tanks where tanks."TankNumber" is null and "FacilityType" ='UST';
+
+--Get an overview of what the state's data looks like. In this case, we have two tables
+select table_name from information_schema.tables
 where table_schema = 'sd_ust' order by 1;
 /*
 tanks
 */
 
 
---it might be helpful to create some indexes on the state data 
+select count(*) from tanks;
+
+--it might be helpful to create some indexes on the state data
 --(you can also do this as you go along in the processing and find the need to do do)
 create index facilities_facid_idx on sd_ust.tanks("FacilityNumber");
 
@@ -57,11 +82,11 @@ ust_piping
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Start with the first table, ust_facility 
---get the EPA columns we need to look for in the state data 
-select database_column_name 
+--Start with the first table, ust_facility
+--get the EPA columns we need to look for in the state data
+select database_column_name
 from ust_elements a join ust_elements_tables b on a.element_id = b.element_id
-where table_name = 'ust_facility' 
+where table_name = 'ust_facility'
 order by sort_order;
 /*
 facility_id
@@ -106,7 +131,7 @@ dispenser_udc_wall_type
 --review state fac and tank data
 select * from SD_ust.tanks;
 
---run queries looking for lookup table values 
+--run queries looking for lookup table values
 select distinct "StatusName" from SD_ust.tanks;
 select distinct "TankProduct" from SD_ust.tanks;
 
@@ -115,22 +140,20 @@ select distinct "TankProduct" from SD_ust.tanks;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
-Generate SQL statements to do the inserts into ust_element_mapping. 
-Run the query below, paste the results into your console, then do a global replace of 9 for the ust_control_id 
+Generate SQL statements to do the inserts into ust_element_mapping.
+Run the query below, paste the results into your console, then do a global replace of 9 for the ust_control_id
 Next, go through each generated SQL statement and do the following:
-If there is no matching column in the state's data, delete the SQL statement 
-If there is a matching column in the state's data, update the tanks and ORG_COL_NAME variables to match the state's data 
-If you have questions or comments, replace the "null" with your comment. 
-After you have updated all the SQL statements, run them to update the database. 
+If there is no matching column in the state's data, delete the SQL statement
+If there is a matching column in the state's data, update the tanks and ORG_COL_NAME variables to match the state's data
+If you have questions or comments, replace the "null" with your comment.
+After you have updated all the SQL statements, run them to update the database.
 */
 select * from public.v_ust_element_summary_sql;
 
 /*you can run this SQL so you can copy and paste table and column names into the SQL statements generated by the query above
-select table_name, column_name from information_schema.columns 
+select table_name, column_name from information_schema.columns
 where table_schema = 'sd_ust' order by table_name, ordinal_position;
 */
-
-
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (9,'ust_facility','facility_id','tanks','FacilityNumber',null);
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (9,'ust_facility','facility_name','tanks','FacilityName',null);
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (9,'ust_facility','facility_address1','tanks','FacilityAddress1Text',null);
@@ -146,6 +169,7 @@ insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (9,'ust_facility','facility_owner_company_name','tanks','OwnerName',null);
 
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (9,'ust_tank','facility_id','tanks','FacilityNumber',null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (9,'ust_tank','tank_id','tanks','TankNumber',null);
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (9,'ust_tank','tank_name','tanks','TankNumber',null);
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (9,'ust_tank','tank_location_id','tanks','TankPipingType',null);
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (9,'ust_tank','tank_status_id','tanks','StatusName',null);
@@ -204,7 +228,7 @@ insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name
 
 --see what columns in which table we need to map
 select epa_table_name, epa_column_name
-from v_ust_available_mapping 
+from v_ust_available_mapping
 where ust_control_id = 9
 order by table_sort_order, column_sort_order;
 /*
@@ -218,15 +242,15 @@ ust_piping	piping_wall_type_id
 */
 
 /*
-see what mapping hasn't yet been done for this dataset 
+see what mapping hasn't yet been done for this dataset
 we'll be going through each of the results of this query below
-so for each value of epa_column_name from this query result, there will be a 
-section below where we generate SQL to perform the mapping 
+so for each value of epa_column_name from this query result, there will be a
+section below where we generate SQL to perform the mapping
 */
-select epa_table_name, epa_column_name 
-from 
+select epa_table_name, epa_column_name
+from
 	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from v_ust_needed_mapping 
+	from v_ust_needed_mapping
 	where ust_control_id = 9 and mapping_complete = 'N'
 	order by table_sort_order, column_sort_order) x;
 /*
@@ -241,16 +265,16 @@ ust_piping	piping_wall_type_id
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --owner_type_id
 
---check the state's data 
+--check the state's data
 select distinct 'select distinct "' || organization_column_name || '" from sd_ust."' || organization_table_name || '" order by 1;'
-from v_ust_needed_mapping 
+from v_ust_needed_mapping
 where ust_control_id = 9 and epa_column_name = 'facility_state';
 
 /*
 run the query from the generated sql above to see what the state's data looks like
 you are checking to make sure their values line up with what we are looking for on the EPA side
 (this should have been done during the element mapping above but you can review it now)
-Next, see if the state values need to be deaggregated 
+Next, see if the state values need to be deaggregated
 (that is, is there only one value per row in the state data? If not, we need to deaggregate them)
 */
 select distinct "FacilityState" from sd_ust."tanks" order by 1;
@@ -258,18 +282,18 @@ select distinct "FacilityState" from sd_ust."tanks" order by 1;
 SOUTH DAKOTA
 */
 
---in this case there is only one value per row so we can begin mapping 
+--in this case there is only one value per row so we can begin mapping
 
-/* generate generic sql to insert value mapping rows into ust_element_value_mapping, 
-then modify the generated sql with the mapped EPA values 
-NOTE: insert a NULL for epa_value if you don't have a good guess 
+/* generate generic sql to insert value mapping rows into ust_element_value_mapping,
+then modify the generated sql with the mapped EPA values
+NOTE: insert a NULL for epa_value if you don't have a good guess
 */
-select insert_sql 
-from v_ust_needed_mapping_insert_sql 
+select insert_sql
+from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'facility_state';
 
 --paste the insert_sql from the first row below, then run the query:
-select distinct 
+select distinct
 	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 714 || ', ''' || "FacilityState" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
@@ -283,22 +307,22 @@ select * from ust_element_value_mapping where ust_element_mapping_id= 714;
 
 --coordinate source
 select distinct 'select distinct "' || organization_column_name || '" from sd_ust."' || organization_table_name || '" order by 1;'
-from v_ust_needed_mapping 
+from v_ust_needed_mapping
 where ust_control_id = 9 and epa_column_name = 'coordinate_source_id';
 
---to assist with the mapping above, check the archived mapping table for old examples of mapping 
+--to assist with the mapping above, check the archived mapping table for old examples of mapping
 --NOTE! As we continue to map more states, we can check the current mapping table instead of the archive table!
 
-select * from archive.v_ust_element_mapping 
+select * from archive.v_ust_element_mapping
 where lower(element_name) like lower('%coordinate%');
 
 
-select insert_sql 
-from v_ust_needed_mapping_insert_sql 
+select insert_sql
+from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'coordinate_source_id';
 
 --paste the insert_sql from the first row below, then run the query:
-select distinct 
+select distinct
 	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 717 || ', ''' || "FacilityMethodDescription" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
@@ -355,24 +379,24 @@ insert into ust_element_value_mapping (ust_element_mapping_id, organization_valu
 --substance id
 
 select distinct 'select distinct "' || organization_column_name || '" from sd_ust."' || organization_table_name || '" order by 1;'
-from v_ust_needed_mapping 
+from v_ust_needed_mapping
 where ust_control_id = 9 and epa_column_name = 'substance_id';
 
 select distinct "TankProduct" from sd_ust."tanks" order by 1;
 
 select distinct state_value, epa_value
-from archive.v_ust_element_mapping 
+from archive.v_ust_element_mapping
 where lower(element_name) like lower('%substance_id%')
 order by 1, 2;
 
-select * from archive.v_ust_element_mapping 
+select * from archive.v_ust_element_mapping
 where lower(element_name) like lower('%substance_id%');
 
-select insert_sql 
-from v_ust_needed_mapping_insert_sql 
+select insert_sql
+from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'substance_id';
 
-select distinct 
+select distinct
 	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 729 || ', ''' || "TankProduct" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
@@ -382,8 +406,15 @@ select * from substances order by 2;
 
 select * from substances where lower(substance) like '%water%';
 
-select state_value,epa_value 
-from archive.v_ust_element_mapping 
+
+select * From ust_element_value_mapping where ust_element_mapping_id = '729' and organization_value ='Soy Biodiesel';
+
+update ust_element_value_mapping
+set epa_value = 'Diesel fuel (b-unknown)',programmer_comments=null
+where ust_element_value_mapping_id = 504;
+
+select state_value,epa_value
+from archive.v_ust_element_mapping
 where lower(element_name) like lower('%substance%')
 and lower(state_value) like '%water%';
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (729, '10% Ethanol', 'Gasoline E-10 (E1-E10)', null);
@@ -451,11 +482,11 @@ insert into ust_element_value_mapping (ust_element_mapping_id, organization_valu
 
 --piping_style_id
 
-select insert_sql 
-from v_ust_needed_mapping_insert_sql 
+select insert_sql
+from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'piping_style_id';
 
-select distinct 
+select distinct
 	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 749 || ', ''' || "TankPipingType" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
@@ -463,7 +494,7 @@ select * from piping_styles;
 
 
 select distinct state_value, epa_value
-from archive.v_ust_element_mapping 
+from archive.v_ust_element_mapping
 where lower(element_name) like lower('%pip%style%')
 and lower(state_Value) like '%siphon%'
 order by 1, 2;
@@ -484,11 +515,11 @@ insert into ust_element_value_mapping (ust_element_mapping_id, organization_valu
 --piping_wall_type_id
 
 
-select insert_sql 
-from v_ust_needed_mapping_insert_sql 
+select insert_sql
+from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'piping_wall_type_id';
 
-select distinct 
+select distinct
 	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 767 || ', ''' || "TankPipingReleaseDetection" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
@@ -496,7 +527,7 @@ select * from piping_wall_types;
 
 
 select distinct state_value, epa_value
-from archive.v_ust_element_mapping 
+from archive.v_ust_element_mapping
 where lower(element_name) like lower('%pip%wall%')
 and lower(state_Value) like '%miller%'
 order by 1, 2;
@@ -506,11 +537,11 @@ insert into ust_element_value_mapping (ust_element_mapping_id, organization_valu
 
 --tank_material_description_id
 
-select insert_sql 
-from v_ust_needed_mapping_insert_sql 
+select insert_sql
+from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'tank_material_description_id';
 
-select distinct 
+select distinct
 	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 727 || ', ''' || "TankConstructionName" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
@@ -518,16 +549,24 @@ from sd_ust."tanks" order by 1;
 select * from tank_material_descriptions  ;
 
 select distinct state_value, epa_value,element_name
-from archive.v_ust_element_mapping 
+from archive.v_ust_element_mapping
 where lower(element_name) like lower('%mat%')
 and lower(state_Value) like '%miller%'
 order by 1, 2;
 
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'ACT-100-U', 'Other', 'Please verify.');
+select * From ust_element_value_mapping where ust_element_mapping_id = '727' and organization_value ='Total Containment/Compart';
+
+update ust_element_value_mapping
+set epa_value = 'Jacketed steel',programmer_comments=null
+where ust_element_value_mapping_id = 575;
+
+
+
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'ACT-100-U', 'Composite/clad (steel w/fiberglass reinforced plastic)',null;
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'Cath.Steel/DW/AST', 'Cathodically protected steel (without coating)', 'Please verify.');
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'Coated Steel', 'Coated and cathodically protected steel', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'Compart/DW/Steel/Above', 'Other', 'Please verify.');
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'Composite', 'Other', 'Please verify.');
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'Composite', 'Composite/clad (steel w/fiberglass reinforced plastic)', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'ConVault/Compart/DW', 'Other', 'Please verify.');
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'DW/Composite', 'Other', 'Please verify.');
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (727, 'DW/Composite/Compart', 'Other', 'Please verify.');
@@ -564,10 +603,10 @@ insert into ust_element_value_mapping (ust_element_mapping_id, organization_valu
 
 --tank_status_id
 
-select insert_sql 
-from v_ust_needed_mapping_insert_sql 
+select insert_sql
+from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'tank_status_id';
-select distinct 
+select distinct
 	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 722 || ', ''' || "StatusName" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
@@ -602,17 +641,17 @@ substances	Petroleum products
 
 --check if there is any more mapping to do
 select distinct epa_table_name, epa_column_name
-from v_ust_needed_mapping 
+from v_ust_needed_mapping
 where ust_control_id = 9 and mapping_complete = 'N'
 order by 1, 2;
 
 --check if any of the mapping is bad:
-select database_lookup_table, epa_value 
-from v_ust_bad_mapping 
+select database_lookup_table, epa_value
+from v_ust_bad_mapping
 where ust_control_id = 9 order by 1, 2;
 --!!!if there are results from this query, fix them!!!
 
---if not, it's time to write the queries that manipulate the state's data into EPA's tables 
+--if not, it's time to write the queries that manipulate the state's data into EPA's tables
 
 
 facility_state
@@ -621,19 +660,19 @@ database_lookup_column = state
 view_name = sd_ust.v_state_xwalk
 
 select epa_column_name, organization_table_name, organization_column_name,
-					database_lookup_table, database_lookup_column 
-			from {pop_view_name} 
+					database_lookup_table, database_lookup_column
+			from {pop_view_name}
 			where {control_id_col} = %s and database_lookup_table is not null
 			order by table_sort_order, column_sort_order
-			
+
 select * from states;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 /*Step 1: create crosswalk views for columns that use a lookup table
-run script org_mapping_xwalks.py to create crosswalk views for all lookup tables 
+run script org_mapping_xwalks.py to create crosswalk views for all lookup tables
 see new views:*/
-select table_name 
-from information_schema.tables 
+select table_name
+from information_schema.tables
 where table_schema = 'sd_ust' and table_type = 'VIEW'
 and table_name like '%_xwalk' order by 1;
 /*
@@ -648,7 +687,7 @@ v_tank_status_xwalk
 
 --Step 2: see the EPA tables we need to populate, and in what order
 select distinct epa_table_name, table_sort_order
-from v_ust_table_population 
+from v_ust_table_population
 where ust_control_id = 9
 order by table_sort_order;
 /*
@@ -663,18 +702,18 @@ in this case we need to ignore the aboveground storage tanks,
 so add this to the where clause of the ust_release view */
 select comments from ust_control where ust_control_id = 9;
 
-/*Step 4: work through the tables in order, using the information you collected 
-to write views that can be used to populate the data tables 
+/*Step 4: work through the tables in order, using the information you collected
+to write views that can be used to populate the data tables
 NOTE! The view queried below (v_ust_table_population_sql) contains columns that help
-      construct the select sql for the insertion views, but will require manual 
-      oversight and manipulation by you! 
-      In particular, check out the organization_join_table and organization_join_column 
+      construct the select sql for the insertion views, but will require manual
+      oversight and manipulation by you!
+      In particular, check out the organization_join_table and organization_join_column
       are used!!*/
 select organization_table_name_qtd, organization_column_name_qtd,
 	selected_column, data_type, character_maximum_length,
 	programmer_comments, database_lookup_table, database_lookup_column,
 	organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+	deagg_table_name, deagg_column_name
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_facility'
 order by column_sort_order;
@@ -684,13 +723,13 @@ order by column_sort_order;
 !!! NOTE also sometimes you need to explicitly cast data types so they match the EPA data tables
 !!! NOTE also you may get errors related to data conversion when trying to compile the view
     you are creating here. This is good because it alerts you the data you are trying to
-    insert is not compatible with the EPA format. Fix these errors before proceeding! 
+    insert is not compatible with the EPA format. Fix these errors before proceeding!
 !!! NOTE: Remember to do "select distinct" if necessary
 !!! NOTE: Some states do not include State or EPA Region in their database, but it is generally
     safe for you to insert these yourself, so add them! (facility_state is a required field! */
 
-create or replace view sd_ust.v_ust_facility as 
-select distinct 
+create or replace view sd_ust.v_ust_facility as
+select distinct
 		"FacilityNumber"::character varying(50) as facility_id,
 "FacilityName"::character varying(100) as facility_name,
 "FacilityAddress1Text"::character varying(100) as facility_address1,
@@ -703,40 +742,29 @@ select distinct
 "FacilityLongitudeValue"::double precision as facility_longitude,
 "OwnerName"::character varying(100) as facility_owner_company_name,
 8 as facility_epa_region,
-coordinate_source_id 
-from sd_ust.tanks x 
-left join sd_ust.v_coordinate_source_xwalk cs on x."FacilityMethodDescription" = cs.organization_value 
+coordinate_source_id
+from sd_ust.tanks x
+left join sd_ust.v_coordinate_source_xwalk cs on x."FacilityMethodDescription" = cs.organization_value
 where "FacilityType" = 'UST';
 
 
-
---clean up some duplicates
-delete from tanks where "FacilityNumber" in ('27-00027','30-00030') and "FacilityLatitudeValue" is null;
-
-delete from tanks where "FacilityNumber" in ('34-00004') and "FacilityLatitudeValue" ='42';
-
-delete from tanks where "FacilityNumber" in ('37-00014') and "FacilityLatitudeValue" ='42';
-
-delete from tanks where "FacilityNumber" = '3300017'; 
-
 select facility_id from v_ust_facility group by facility_id having count(*) > 1;
 
-select * from tanks where "FacilityNumber" = '3300017';
 select * from v_coordinate_source_xwalk;
 
---review: 
+--review:
 select * from sd_ust.v_ust_facility;
 select count(*) from sd_ust.v_ust_facility;
---4981
+--3274
 --------------------------------------------------------------------------------------------------------------------------
 --now repeat for each data table:
 
---ust_tank 
+--ust_tank
 select organization_table_name_qtd, organization_column_name_qtd,
 	selected_column, data_type, character_maximum_length,
 	programmer_comments, database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+	deagg_table_name, deagg_column_name
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_tank'
 order by column_sort_order;
@@ -746,127 +774,28 @@ NOTE: ADD facility_id::character varying(50)!!!!
 NOTE: tank_id (integer) is a required field - if the state data does not contain an integer field
       that uniquely identifies the tank, you must generate one (see Compartments below for how to do this).
 */
-delete from sd_ust.erg_tank;
-
-create table sd_ust.erg_tank (facility_id character varying(50), tank_id int generated always as identity);
-insert into sd_ust.erg_tank (facility_id)
-select  "FacilityNumber" from sd_ust.tanks;
 
 
-select "FacilityNumber", "TankNumber" from sd_ust.tanks
-group by  "FacilityNumber", "TankNumber"
-having count(*) > 1;
 
-select * from  sd_ust.tanks where "FacilityNumber"='01-00006';
-
-
-/*
-create or replace view sd_ust.v_ust_tank as 
-select distinct 
+create or replace view sd_ust.v_ust_tank as
+select distinct
 "FacilityNumber"::character varying(50) as facility_id,
-c.tank_id as tank_id,
+"TankNumber"::integer as tank_id,
 "TankNumber"::character varying(50) as tank_name,
-COALESCE (ts.tank_status_id,8) tank_status_id , 
-to_date("TankRemovedYear"::varchar, 'yyyy') as tank_closure_date,
+COALESCE (ts.tank_status_id,8) tank_status_id ,
+case   when  "TankRemovedYear"  in ('04/10/1991','11/15/1989') then to_date("TankRemovedYear",'mm/dd/yyyy')   else to_date("TankRemovedYear"::varchar, 'yyyy') end as tank_closure_date,
 to_date("TankInstalledYear"::varchar, 'yyyy') as tank_installation_date,
 case when "TankCompartmentNumber" > 1 then 'Yes' else 'No' end as compartmentalized_ust,
 getmaxcompartment("FacilityNumber","TankNumber") as number_of_compartments,
-md.tank_material_description_id 
-from sd_ust.tanks x 
-join sd_ust.erg_tank c on x."FacilityNumber" = c.facility_id 
-left join sd_ust.v_tank_status_xwalk ts on x."StatusName" = ts.organization_value
-left join sd_ust.v_tank_material_description_xwalk md on x."TankConstructionName" = md.organization_value;
-*/
-
-
-create table  sd_ust.v_ust_tank
-(
-tank_id int generated always as identity,
-facility_id varchar(50),
-tank_name varchar(50),
-tank_status_id int4,
-tank_closure_date date,
-tank_installation_date date,
-compartmentalized_ust text,
-number_of_compartments int4,
-tank_material_description_id int4)
-
-
-delete from v_ust_tank;
-
-insert into sd_ust.v_ust_tank (facility_id,tank_name,tank_status_id,tank_closure_date,tank_installation_date,compartmentalized_ust,number_of_compartments,tank_material_description_id)
-select distinct 
-"FacilityNumber"::character varying(50) as facility_id,
-"TankNumber"::character varying(50) as tank_name,
-COALESCE (ts.tank_status_id,8) tank_status_id , 
-to_date("TankRemovedYear"::varchar, 'yyyy') as tank_closure_date,
-to_date("TankInstalledYear"::varchar, 'yyyy') as tank_installation_date,
-case when "TankCompartmentNumber" > 1 then 'Yes' else 'No' end as compartmentalized_ust,
-getmaxcompartment("FacilityNumber","TankNumber") as number_of_compartments,
-md.tank_material_description_id 
-from sd_ust.tanks x 
+md.tank_material_description_id
+from sd_ust.tanks x
 left join sd_ust.v_tank_status_xwalk ts on x."StatusName" = ts.organization_value
 left join sd_ust.v_tank_material_description_xwalk md on x."TankConstructionName" = md.organization_value
 where "FacilityType" = 'UST';
 
-11/15/1989
-0
-
---cleanup some date data breaking excel constraints
-
-update v_ust_tank
-set tank_closure_date = '11/15/1989'
-where facility_id = '09-00099  ';
-
-update v_ust_tank
-set tank_closure_date = '04/10/1991'
-where facility_id = '32-00009';
-
-update v_ust_tank
-set tank_installation_date = null
-where facility_id = '32-00009';
-
-
-update v_ust_tank
-set tank_installation_date = null
-where  date_part('year', tank_installation_date) = -1;
-
-select date_part('year', tank_installation_date) from v_ust_tank where facility_id ='01-00084';
-
-09-00099  
-32-00009
-
-select * from sd_ust.tanks where "FacilityNumber" = '01-00351  ';
-
-
-
-where to_date("TankRemovedYear"::varchar, 'yyyy')  < current_date - (365*200);
-
-TankInstalledYear
-
-
-select * from v_ust_tank where (facility_id,tank_name::int) not in (select "FacilityNumber","TankNumber" from sd_ust.tanks where "FacilityType" = 'UST');
-
-select * from  sd_ust.tanks where "FacilityType" = 'UST' and ("FacilityNumber","TankNumber") not in ();
-
-select count(*) from sd_ust.v_ust_tank where tank_status_id is null;
-
-
-
-create index tanks_idx1 on sd_ust.tanks ( "FacilityNumber", "TankNumber" );
-
-create index tanks_idx2 on sd_ust.tanks ( "TankConstructionName" );
-
-create index tanks_idx3 on sd_ust.tanks ( "StatusName" );
-
-analyze tanks;
-
-select * from v_tank_material_description_xwalk;
-select * from ust_tank;
-
-
 select count(*) from sd_ust.v_ust_tank;
---17391
+--10649
+
 --------------------------------------------------------------------------------------------------------------------------
 --ust_tank_substance
 
@@ -874,49 +803,47 @@ select organization_table_name_qtd, organization_column_name_qtd,
 	selected_column, data_type, character_maximum_length,
 	programmer_comments, database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+	deagg_table_name, deagg_column_name
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_tank_substance'
 order by column_sort_order;
 /*
-"tanks"	
-"Substance"	
-substance_id as substance_id,	
-integer			
-substances	
-substance	
-erg_substance_deagg	
+"tanks"
+"Substance"
+substance_id as substance_id,
+integer
+substances
+substance
+erg_substance_deagg
 Substance
 */
 
 /*be sure to do select distinct if necessary!
 NOTE: ADD facility_id::character varying(50) and tank_id::int!!!!
 */
-create or replace view sd_ust.v_ust_tank_substance as 
-select distinct 
+create or replace view sd_ust.v_ust_tank_substance as
+select distinct
 	"FacilityNumber"::character varying(50) as facility_id,
 	c.tank_id as tank_id,
 	1  as substance_id--sx.substance_id as substance_id
-from sd_ust.tanks x 
+from sd_ust.tanks x
 join sd_ust.v_ust_tank c on x."FacilityNumber" = c.facility_id  and x."TankNumber" = c.tank_name::int
 left join sd_ust.v_substance_xwalk sx on x."TankProduct" = sx.organization_value
 where x."TankProduct" is not null
 and "FacilityType" = 'UST';
- 
 
-select * from sd_ust.v_ust_tank;
-select * from sd_ust.v_ust_tank_substance where facility_id='01-00098';
+
 select count(*) from sd_ust.v_ust_tank_substance;
---8169
+--10395
 
-select * from v_ust_tank_substance;
+
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
 select organization_table_name_qtd, organization_column_name_qtd,
 	selected_column, data_type, character_maximum_length,
 	programmer_comments, database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+	deagg_table_name, deagg_column_name
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_compartment'
 order by column_sort_order;
@@ -924,32 +851,17 @@ order by column_sort_order;
 /* be sure to do select distinct if necessary!
 NOTE: ADD facility_id::character varying(50) and tank_id::int!!!!
 NOTE: compartment_id (integer) is a required field - if the state data does not contain an integer field
-      that uniquely identifies the compartment, you must generate one. 
+      that uniquely identifies the compartment, you must generate one.
       In this case, the state does not store compartment data, so we will generate the compartment ID
       Prefix any tables you create in the state schema that did not come from the source data with "erg_"! */
 
-delete from erg_compartment;
-
+drop table sd_ust.erg_compartment;
 create table sd_ust.erg_compartment (facility_id character varying(50), tank_id int, compartment_id int generated always as identity);
 insert into sd_ust.erg_compartment (facility_id, tank_id)
 select  facility_id,tank_id from sd_ust.v_ust_tank;
 
-select * from ust_element_mapping where ust_control_id=9 and epa_column_name = 'overfill_prevention_ball_float_valve';
-
-update ust_element_mapping 
-set programmer_comments = 'where TankReleaseDetection = Other'
-where ust_control_id=9 and epa_column_name = 'tank_other_release_detection';
-
-select distinct "TankReleaseDetection" from sd_ust.tanks order by 1;
-
-select distinct compartment_status_id from sd_ust.v_ust_compartment;
-
-select count(*) from v_ust_compartment
-ALTER VIEW sd_ust.v_ust_compartment  RENAME column tank_status_id to compartment_status_id
-
-/*
-create or replace view sd_ust.v_ust_compartment as 
-select distinct 
+create or replace view sd_ust.v_ust_compartment as
+select distinct
 c.facility_id as facility_id,
 c.tank_id,
 c.compartment_id,
@@ -970,227 +882,22 @@ case "TankReleaseDetection" when 'Inventory Control' then 'Yes' end tank_invento
 case "TankReleaseDetection" when 'Groundwater Monitoring' then 'Yes' end tank_groundwater_monitoring,
 case "TankReleaseDetection" when 'Other' then 'Yes' end tank_other_release_detection,
 case "TankReleaseDetection" when 'Vapor' then 'Yes' end tank_vapor_monitoring,
-COALESCE (ts.tank_status_id,8) tank_status_id 
-from sd_ust.tanks x 
-join sd_ust.erg_compartment c on x."FacilityNumber" = c.facility_id
-left join sd_ust.v_tank_status_xwalk ts on x."StatusName" = ts.organization_value;*/
-
-drop table v_ust_compartment2;
-drop table v_ust_compartment;
-
-create table sd_ust.v_ust_compartment (
-compartment_id int generated always as identity,
-facility_id varchar(50),
-tank_id int4,
-compartment_name varchar(50),
-compartment_capacity_gallons int4,
-overfill_prevention_ball_float_valve text,
-overfill_prevention_flow_shutoff_device text,
-overfill_prevention_high_level_alarm text,
-overfill_prevention_other text,
-spill_bucket_installed text,
-tank_interstitial_monitoring text,
-tank_automatic_tank_gauging_release_detection text,
-automatic_tank_gauging_continuous_leak_detection text,
-tank_manual_tank_gauging text,
-tank_statistical_inventory_reconciliation text,
-tank_tightness_testing text,
-tank_inventory_control text,
-tank_groundwater_monitoring text,
-tank_other_release_detection text,
-tank_vapor_monitoring text,
-compartment_status_id int4);
-
-delete from v_ust_compartment;
-
-alter table v_ust_compartment drop column tank_name  varchar(50)
-
-
-insert into sd_ust.v_ust_compartment ( 
-facility_id,
-tank_id,
-compartment_name,
-compartment_capacity_gallons,
-overfill_prevention_ball_float_valve,
-overfill_prevention_flow_shutoff_device,
-overfill_prevention_high_level_alarm,
-overfill_prevention_other,
-spill_bucket_installed,
-tank_interstitial_monitoring,
-tank_automatic_tank_gauging_release_detection,
-automatic_tank_gauging_continuous_leak_detection,
-tank_manual_tank_gauging,
-tank_statistical_inventory_reconciliation,
-tank_tightness_testing,
-tank_inventory_control,
-tank_groundwater_monitoring,
-tank_other_release_detection,
-tank_vapor_monitoring,
-compartment_status_id) 
-select  
-c.facility_id as facility_id,
-c.tank_id,
-"TankCompartmentNumber"::character varying(50) as compartment_name,
-"TankCapacityAmount"::integer as compartment_capacity_gallons,
-case "TankOverfillProtection" when 'Ball Float Valves' then 'Yes' end overfill_prevention_ball_float_valve,
-case "TankOverfillProtection" when 'Automatic Shutoff Device' then 'Yes' end overfill_prevention_flow_shutoff_device,
-case "TankOverfillProtection" when 'Overfill Alarm' then 'Yes' end overfill_prevention_high_level_alarm,
-case "TankOverfillProtection" when 'Other' then 'Yes' end overfill_prevention_other,
-case "TankSpillProtection" when 'Spill Bucket' then 'Yes' end spill_bucket_installed,
-case "TankReleaseDetection" when 'Interstitial Monitoring' then 'Yes' end tank_interstitial_monitoring,
-case "TankReleaseDetection" when 'Automatic Tank Gauging' then 'Yes' end tank_automatic_tank_gauging_release_detection,
-case "TankReleaseDetection" when 'Automatic Tank Gauging' then 'Yes' end automatic_tank_gauging_continuous_leak_detection,
-case "TankReleaseDetection" when 'Manual Gauging' then 'Yes' end tank_manual_tank_gauging,
-case "TankReleaseDetection" when 'S.I.R.' then 'Yes' end tank_statistical_inventory_reconciliation,
-case "TankReleaseDetection" when 'Tightness Testing' then 'Yes' end tank_tightness_testing,
-case "TankReleaseDetection" when 'Inventory Control' then 'Yes' end tank_inventory_control,
-case "TankReleaseDetection" when 'Groundwater Monitoring' then 'Yes' end tank_groundwater_monitoring,
-case "TankReleaseDetection" when 'Other' then 'Yes' end tank_other_release_detection,
-case "TankReleaseDetection" when 'Vapor' then 'Yes' end tank_vapor_monitoring,
-COALESCE (ts.tank_status_id,8) tank_status_id 
-from sd_ust.tanks x 
-join sd_ust.v_ust_tank c on x."FacilityNumber" = c.facility_id  and x."TankNumber" = c.tank_name::int
-left join sd_ust.v_tank_status_xwalk ts on x."StatusName" = ts.organization_value
-where "FacilityType" = 'UST';
-
-create table sd_ust.v_ust_compartment2 (
-compartment_id int generated always as identity,
-facility_id varchar(50),
-tank_id int4,
-compartment_name varchar(50),
-compartment_capacity_gallons int4,
-overfill_prevention_ball_float_valve text,
-overfill_prevention_flow_shutoff_device text,
-overfill_prevention_high_level_alarm text,
-overfill_prevention_other text,
-spill_bucket_installed text,
-tank_interstitial_monitoring text,
-tank_automatic_tank_gauging_release_detection text,
-automatic_tank_gauging_continuous_leak_detection text,
-tank_manual_tank_gauging text,
-tank_statistical_inventory_reconciliation text,
-tank_tightness_testing text,
-tank_inventory_control text,
-tank_groundwater_monitoring text,
-tank_other_release_detection text,
-tank_vapor_monitoring text,
-compartment_status_id int4,
-tank_name  varchar(50));
-
-insert into v_ust_compartment2(facility_id ,
-tank_id ,
-compartment_name ,
-compartment_capacity_gallons ,
-overfill_prevention_ball_float_valve ,
-overfill_prevention_flow_shutoff_device ,
-overfill_prevention_high_level_alarm ,
-overfill_prevention_other ,
-spill_bucket_installed ,
-tank_interstitial_monitoring ,
-tank_automatic_tank_gauging_release_detection ,
-automatic_tank_gauging_continuous_leak_detection ,
-tank_manual_tank_gauging ,
-tank_statistical_inventory_reconciliation ,
-tank_tightness_testing ,
-tank_inventory_control ,
-tank_groundwater_monitoring ,
-tank_other_release_detection ,
-tank_vapor_monitoring ,
-compartment_status_id ,
-tank_name )
-select  
-c.facility_id as facility_id,
-c.tank_id,
-"TankCompartmentNumber"::character varying(50) as compartment_name,
-"TankCapacityAmount"::integer as compartment_capacity_gallons,
-case "TankOverfillProtection" when 'Ball Float Valves' then 'Yes' end overfill_prevention_ball_float_valve,
-case "TankOverfillProtection" when 'Automatic Shutoff Device' then 'Yes' end overfill_prevention_flow_shutoff_device,
-case "TankOverfillProtection" when 'Overfill Alarm' then 'Yes' end overfill_prevention_high_level_alarm,
-case "TankOverfillProtection" when 'Other' then 'Yes' end overfill_prevention_other,
-case "TankSpillProtection" when 'Spill Bucket' then 'Yes' end spill_bucket_installed,
-case "TankReleaseDetection" when 'Interstitial Monitoring' then 'Yes' end tank_interstitial_monitoring,
-case "TankReleaseDetection" when 'Automatic Tank Gauging' then 'Yes' end tank_automatic_tank_gauging_release_detection,
-case "TankReleaseDetection" when 'Automatic Tank Gauging' then 'Yes' end automatic_tank_gauging_continuous_leak_detection,
-case "TankReleaseDetection" when 'Manual Gauging' then 'Yes' end tank_manual_tank_gauging,
-case "TankReleaseDetection" when 'S.I.R.' then 'Yes' end tank_statistical_inventory_reconciliation,
-case "TankReleaseDetection" when 'Tightness Testing' then 'Yes' end tank_tightness_testing,
-case "TankReleaseDetection" when 'Inventory Control' then 'Yes' end tank_inventory_control,
-case "TankReleaseDetection" when 'Groundwater Monitoring' then 'Yes' end tank_groundwater_monitoring,
-case "TankReleaseDetection" when 'Other' then 'Yes' end tank_other_release_detection,
-case "TankReleaseDetection" when 'Vapor' then 'Yes' end tank_vapor_monitoring,
-COALESCE (ts.tank_status_id,8) tank_status_id ,
-tank_name
-from sd_ust.tanks x 
-join sd_ust.v_ust_tank c on x."FacilityNumber" = c.facility_id  and x."TankNumber" = c.tank_name::int
-left join sd_ust.v_tank_status_xwalk ts on x."StatusName" = ts.organization_value
-where "FacilityType" = 'UST';
-
-
-select * from v_ust_compartment; 22611
-
-select * from sd_ust.v_ust_compartment order by 1, 2, 3;
-
-select * from sd_ust.v_ust_compartment where facility_id = '01-00002' and tank_id = '';
-select count(*) from sd_ust.v_ust_compartment;
---11155
-
---------------------------------------------------------------------------------------------------------------------------
---ust_compartment_substance 
-
-/*
-If the state reports substances at the compartment level OR you can 
-establish a one-to-one relationship between substance and compartment 
-(for example, if the state considers all compartments to be unique 
-tanks and only has one substance per tank), you must populate table 
-ust_compartment_substance. 
-In the case of WV, they don't report at the compartment level and have
-a one-to-many relationship between tanks and substances. 
-*/
-select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
-from v_ust_table_population_sql
-where ust_control_id = 9 and epa_table_name = 'ust_compartment_substance'
-order by column_sort_order;
-
-select * from ust_compartment_substance;
-
-
-create or replace view sd_ust.v_ust_compartment_substance as 
-select distinct 
-ust_tank_substance_id,
-c.compartment_id as ust_compartment_id
-from sd_ust.tanks x 
-join sd_ust.erg_tank t on x."FacilityNumber" = t.facility_id  
-join sd_ust.erg_compartment c on t.facility_id = c.facility_id and t.tank_id = c.tank_id
-left join sd_ust.v_substance_xwalk sx on x."TankProduct" = sx.organization_value;
-
-select * from v_substance_xwalk;
-
-select * from erg_compartment;
-
-select * from sd_ust.v_ust_compartment_substance order by 1;
-select count(*) from sd_ust.v_ust_compartment_substance;
-
-
-select  *  from sd_ust.tanks where "TankCompartmentNumber"=2;
+COALESCE (ts.tank_status_id,8) compartment_status_id
+from sd_ust.tanks x
+join sd_ust.erg_compartment c on x."FacilityNumber" = c.facility_id and x."TankNumber" = c.tank_id
+left join sd_ust.v_tank_status_xwalk ts on x."StatusName" = ts.organization_value;
 
 
 
-10-00020
-10-00020
-10-00020
-10-00020
-10-00020
 
-select * from sd_ust.tanks a, sd_ust.tanks b
-where a."FacilityNumber"=b."FacilityNumber"
-and a."TankNumber" = b."TankNumber"
-and a."TankProduct" <>b."TankProduct" ;
+select count(*) from v_ust_tank; 10645
+select count(*) from v_ust_compartment;10647
 
-select * from sd_ust.tanks where "FacilityNumber" = '01-00098' and "TankNumber"='1';
+select facility_id,tank_id
+from  v_ust_compartment
+where (facility_id,tank_id) not in (select facility_id,tank_id from v_ust_tank  )
+
+
 --------------------------------------------------------------------------------------------------------------------------
 --ust_piping
 
@@ -1202,79 +909,19 @@ select facility_id,tank_id,compartment_id from sd_ust.v_ust_compartment;
 
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
+	selected_column, programmer_comments,
 	database_lookup_table, database_lookup_column,
 	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+	deagg_table_name, deagg_column_name
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_piping'
 order by column_sort_order;
 
+drop view v_ust_piping;
 
-update ust_element_mapping 
-set programmer_comments = 'where TankPipingReleaseDetection = Unknown '
-where ust_control_id=9 and epa_column_name = 'pipe_secondary_containment_unknown';
-
-select distinct "TankPipingReleaseDetection" from sd_ust.tanks order by 1;
-
-Wrong data type for ust_piping.piping_id = sd_ust.v_ust_piping.piping_id
-
-select piping_id from sd_ust.v_ust_piping;
-delete from ust_element_mapping
-where ust_control_id=9  and epa_column_name = 'piping_release_detection_other';
-
-drop table sd_ust.v_ust_piping ;
-
-create table  sd_ust.v_ust_piping0 (
-piping_id int generated always as identity,
-facility_id varchar(50),
-tank_id int4,
-compartment_id int4,
-piping_style_id int4,
-safe_suction text,
-american_suction text,
-high_pressure_or_bulk_piping text,
-piping_material_frp text,
-piping_material_gal_steel text,
-piping_material_stainless_steel text,
-piping_material_steel text,
-piping_material_copper text,
-piping_material_flex text,
-piping_material_no_piping text,
-piping_material_unknown text,
-piping_groundwater_monitoring text,
-piping_vapor_monitoring text,
-piping_statistical_inventory_reconciliation text,
-piping_wall_type_id int4,
-pipe_secondary_containment_other text,
-pipe_secondary_containment_unknown varchar(50)
-)
-
-delete from v_ust_piping0;
-
-insert into sd_ust.v_ust_piping0 (
-facility_id,
-tank_id,
-compartment_id,
-piping_style_id,
-safe_suction,
-american_suction,
-high_pressure_or_bulk_piping,
-piping_material_frp,
-piping_material_gal_steel,
-piping_material_stainless_steel,
-piping_material_steel,
-piping_material_copper,
-piping_material_flex,
-piping_material_no_piping,
-piping_material_unknown,
-piping_groundwater_monitoring,
-piping_vapor_monitoring,
-piping_statistical_inventory_reconciliation,
-piping_wall_type_id,
-pipe_secondary_containment_other,
-pipe_secondary_containment_unknown)
-select  
+create or replace view sd_ust.v_ust_piping as
+select   distinct
+c.piping_id::varchar(50) piping_id,
 c.facility_id as facility_id,
 c.tank_id,
 c.compartment_id,
@@ -1296,57 +943,27 @@ case "TankPipingReleaseDetection" when 'S.I.R.' then 'Yes' end piping_statistica
 pwx.piping_wall_type_id as piping_wall_type_id,
 case "TankPipingReleaseDetection" when 'Secondary Containment' then 'Yes' end pipe_secondary_containment_other,
 case "TankPipingReleaseDetection" when 'Unknown' then 'Yes' end pipe_secondary_containment_unknown
-from sd_ust.tanks x 
-join sd_ust.v_ust_compartment2 c on x."FacilityNumber" = c.facility_id  and x."TankNumber" = c.tank_number::int
+from sd_ust.tanks x
+join sd_ust.erg_piping c on x."FacilityNumber" = c.facility_id  and x."TankNumber" = c.tank_id
 left join sd_ust.v_piping_style_xwalk px on x."TankProduct" = px.organization_value
 left join sd_ust.v_piping_wall_type_xwalk pwx on x."TankProduct" = pwx.organization_value
 where "FacilityType" = 'UST';
 
 
-create or replace view sd_ust.v_ust_piping as
-select
-piping_id::character varying(50) piping_id,
-facility_id,
-tank_id,
-compartment_id,
-piping_style_id,
-safe_suction,
-american_suction,
-high_pressure_or_bulk_piping,
-piping_material_frp,
-piping_material_gal_steel,
-piping_material_stainless_steel,
-piping_material_steel,
-piping_material_copper,
-piping_material_flex,
-piping_material_no_piping,
-piping_material_unknown,
-piping_groundwater_monitoring,
-piping_vapor_monitoring,
-piping_statistical_inventory_reconciliation,
-piping_wall_type_id,
-pipe_secondary_containment_other,
-pipe_secondary_containment_unknown
-from sd_ust.v_ust_piping0 ;
+select count(*) from sd_ust.v_ust_compartment;10647
+select count(*) from sd_ust.v_ust_piping;10647
 
 
-select tank_number from v_ust_compartment2;
-select count(*) from sd_ust.v_ust_piping;
 
-6494
-
-select * from sd_ust.v_ust_piping order by 1, 2, 3;
-select count(*) from sd_ust.v_ust_piping;
-6494
 --------------------------------------------------------------------------------------------------------------------------
 
 --QA/QC
 
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
-select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
+select epa_table_name, epa_column_name,
+	organization_table_name, organization_column_name,
+	organization_join_table, organization_join_column,
 	deagg_table_name, deagg_column_name
 from v_ust_missing_view_mapping a
 where ust_control_id = 9
@@ -1356,7 +973,7 @@ order by 1, 2;
 
 /*run script qa_check.py
 set variables:
-ust_or_release = 'ust' 
+ust_or_release = 'ust'
 control_id = 11
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
@@ -1364,54 +981,54 @@ export_file_name = None	# If export_file_path and export_file_dir/export_file_na
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
-   exist. 
+   exist.
 2) Counts of child tables that have too few rows (for example, v_ust_compartment should have at least as many rows as v_ust_tank because
-   every tank should have at least one compartment). 
+   every tank should have at least one compartment).
 3) Missing join columns to parent tables. For example, v_ust_compartment must contain facility_id and tank_id in order to be able to join it
-   to its parent tables. 
-4) Missing required columns. 
-5) Required columns that exist but contain null values. 
+   to its parent tables.
+4) Missing required columns.
+5) Required columns that exist but contain null values.
 6) Extraneous columns - will check for any columns in the views that don't match a column in the equivalent EPA table. This will help identify
-   typos or other errors. 
+   typos or other errors.
 7) Non-unique rows. To resolve any cases where the counts are greater than 0, check that you did a "select distinct" when creating these views.
-   Then check for bad joins.  
-8) Bad data types - will check for columns in the view where either the data type is different than the EPA column, or (for character columns) 
-   if the length of the state value is too long to fit into the EPA column. If the data is too long to fit in the EPA column, this may indicate 
-   an error in your code or mapping, OR it may mean you need to truncate the state's value to fit the EPA format. 
-9) Failed check constraints. 
-10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
-   and ensure the epa_value exists in the associated lookup table. 
+   Then check for bad joins.
+8) Bad data types - will check for columns in the view where either the data type is different than the EPA column, or (for character columns)
+   if the length of the state value is too long to fit into the EPA column. If the data is too long to fit in the EPA column, this may indicate
+   an error in your code or mapping, OR it may mean you need to truncate the state's value to fit the EPA format.
+9) Failed check constraints.
+10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping
+   and ensure the epa_value exists in the associated lookup table.
 
 The script will also provide the counts of rows in sd_ust.v_ust_facility, sd_ust.v_ust_tank, sd_ust.v_ust_compartment, and
-   sd_ust.v_ust_piping (if these views exist) - ensure these counts make sense! 
-   
-The script will export a QAQC spreadsheet (in additional to printing to the screen and logs). If there are errors, re-write the views above, 
+   sd_ust.v_ust_piping (if these views exist) - ensure these counts make sense!
+
+The script will export a QAQC spreadsheet (in additional to printing to the screen and logs). If there are errors, re-write the views above,
 then re-run the qa script, and proceed when all errors have been resolved. */
 
 
 
 --------------------------------------------------------------------------------------------------------------------------
---insert data into the EPA schema 
+--insert data into the EPA schema
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py
 set variables:
-ust_or_release = 'ust' 
+ust_or_release = 'ust'
 control_id = 11
 delete_existing = False # can set to True if there is existing UST data you need to delete before inserting new
 */
 
 --------------------------------------------------------------------------------------------------------------------------
 --Quick sanity check of number of rows inserted:
-select table_name, num_rows 
+select table_name, num_rows
 from v_ust_table_row_count
-where ust_control_id = 9 
+where ust_control_id = 9
 order by sort_order;
 /*
-ust_facility	3274
-ust_tank	10652
-ust_tank_substance	10403
-ust_compartment	22611
-ust_piping	84609
+ust_facility	3270
+ust_tank	10654
+ust_tank_substance	10395
+ust_compartment	10672
+ust_piping	10680
 */
 
 
