@@ -33,16 +33,9 @@ CREATE TABLE public.ust_facility (
     financial_responsibility_other_method character varying(500)  NULL ,
     ust_reported_release character varying(7)  NULL ,
     associated_ust_release_id character varying(40)  NULL ,
-    dispenser_id character varying(50)  NULL ,
-    dispenser_udc character varying(7)  NULL ,
-    dispenser_udc_wall_type_id integer  NULL ,
     ust_control_id integer  NULL );
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_coordinate_source_fk FOREIGN KEY (coordinate_source_id) REFERENCES coordinate_sources(coordinate_source_id);
-
-ALTER TABLE public.ust_facility ADD CONSTRAINT facility_disp_udc_wall_type_fk FOREIGN KEY (dispenser_udc_wall_type_id) REFERENCES dispenser_udc_wall_types(dispenser_udc_wall_type_id);
-
-ALTER TABLE public.ust_facility ADD CONSTRAINT facility_dispenser_udc_chk CHECK (((dispenser_udc)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_epa_region_chk CHECK ((facility_epa_region = ANY (ARRAY[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])));
 
@@ -93,10 +86,6 @@ CREATE INDEX ust_facility_control_idx ON public.ust_facility USING btree (ust_co
 CREATE INDEX ust_facility_associated_ust_release_id_idx ON public.ust_facility USING btree (associated_ust_release_id)
 
 CREATE INDEX ust_facility_coordinate_source_id_idx ON public.ust_facility USING btree (coordinate_source_id)
-
-CREATE INDEX ust_facility_dispenser_id_idx ON public.ust_facility USING btree (dispenser_id)
-
-CREATE INDEX ust_facility_dispenser_udc_wall_type_id_idx ON public.ust_facility USING btree (dispenser_udc_wall_type_id)
 
 CREATE INDEX ust_facility_facility_id_idx ON public.ust_facility USING btree (facility_id)
 

@@ -29,20 +29,13 @@ CREATE TABLE public.ust_compartment (
     tank_vapor_monitoring character varying(7)  NULL ,
     tank_subpart_k_tightness_testing character varying(7)  NULL ,
     tank_subpart_k_other character varying(7)  NULL ,
-    tank_other_release_detection character varying(7)  NULL ,
-    dispenser_id character varying(50)  NULL ,
-    dispenser_udc character varying(7)  NULL ,
-    dispenser_udc_wall_type_id integer  NULL );
+    tank_other_release_detection character varying(7)  NULL );
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_automatic_tank_gauging_continuous_leak_detection_ch CHECK (((automatic_tank_gauging_continuous_leak_detection)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_compartment_status_fk FOREIGN KEY (compartment_status_id) REFERENCES compartment_statuses(compartment_status_id);
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_concrete_berm_installed_chk CHECK (((concrete_berm_installed)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_disp_udc_wall_type_fk FOREIGN KEY (dispenser_udc_wall_type_id) REFERENCES dispenser_udc_wall_types(dispenser_udc_wall_type_id);
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_dispenser_udc_chk CHECK (((dispenser_udc)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_prevention_ball_float_valve_chk CHECK (((overfill_prevention_ball_float_valve)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
@@ -95,10 +88,6 @@ ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_vapor_monitor
 CREATE UNIQUE INDEX compartment_pkey ON public.ust_compartment USING btree (ust_compartment_id)
 
 CREATE INDEX ust_compartment_compartment_status_id_idx ON public.ust_compartment USING btree (compartment_status_id)
-
-CREATE INDEX ust_compartment_dispenser_id_idx ON public.ust_compartment USING btree (dispenser_id)
-
-CREATE INDEX ust_compartment_dispenser_udc_wall_type_id_idx ON public.ust_compartment USING btree (dispenser_udc_wall_type_id)
 
 CREATE INDEX ust_compartment_spill_bucket_wall_type_id_idx ON public.ust_compartment USING btree (spill_bucket_wall_type_id)
 

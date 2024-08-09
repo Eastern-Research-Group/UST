@@ -31,9 +31,7 @@ create or replace view "public"."v_ust_compartment" as
     a.tank_vapor_monitoring AS "TankVaporMonitoring",
     a.tank_subpart_k_tightness_testing AS "TankSubpartKTightnessTesting",
     a.tank_subpart_k_other AS "TankSubpartKOther",
-    a.tank_other_release_detection AS "TankOtherReleaseDetection",
-    a.dispenser_id AS "DispenserID",
-    a.dispenser_udc AS "DispenserUDC"
+    a.tank_other_release_detection AS "TankOtherReleaseDetection"
    FROM (((((((ust_compartment a
      JOIN ust_tank b ON ((a.ust_tank_id = b.ust_tank_id)))
      JOIN ust_facility c ON ((b.ust_facility_id = c.ust_facility_id)))

@@ -23,20 +23,13 @@ CREATE TABLE public.ust_tank (
     tank_corrosion_protection_unknown character varying(7)  NULL ,
     tank_secondary_containment_id integer  NULL ,
     cert_of_installation_id integer  NULL ,
-    cert_of_installation_other character varying(1000)  NULL ,
-    dispenser_id character varying(50)  NULL ,
-    dispenser_udc character varying(7)  NULL ,
-    dispenser_udc_wall_type_id integer  NULL );
+    cert_of_installation_other character varying(1000)  NULL );
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_airport_hydrant_system_chk CHECK (((airport_hydrant_system)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_cert_of_installation_fk FOREIGN KEY (cert_of_installation_id) REFERENCES cert_of_installations(cert_of_installation_id);
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_compartmentalized_ust_chk CHECK (((compartmentalized_ust)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
-
-ALTER TABLE public.ust_tank ADD CONSTRAINT tank_disp_udc_wall_type_fk FOREIGN KEY (dispenser_udc_wall_type_id) REFERENCES dispenser_udc_wall_types(dispenser_udc_wall_type_id);
-
-ALTER TABLE public.ust_tank ADD CONSTRAINT tank_dispenser_udc_chk CHECK (((dispenser_udc)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_emergency_generator_chk CHECK (((emergency_generator)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
@@ -75,10 +68,6 @@ ALTER TABLE public.ust_tank ADD CONSTRAINT ust_tank_fac_id_fk FOREIGN KEY (ust_f
 CREATE UNIQUE INDEX tank_pkey ON public.ust_tank USING btree (ust_tank_id)
 
 CREATE INDEX ust_tank_cert_of_installation_id_idx ON public.ust_tank USING btree (cert_of_installation_id)
-
-CREATE INDEX ust_tank_dispenser_id_idx ON public.ust_tank USING btree (dispenser_id)
-
-CREATE INDEX ust_tank_dispenser_udc_wall_type_id_idx ON public.ust_tank USING btree (dispenser_udc_wall_type_id)
 
 CREATE INDEX ust_tank_tank_location_id_idx ON public.ust_tank USING btree (tank_location_id)
 
