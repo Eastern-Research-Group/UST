@@ -23,15 +23,11 @@ create or replace view "public"."v_ust_tank" as
     b.tank_corrosion_protection_unknown AS "TankCorrosionProtectionUnknown",
     tc.tank_secondary_containment AS "TankSecondaryContainment",
     ci.cert_of_installation AS "CertOfInstallation",
-    b.cert_of_installation_other AS "CertOfInstallationOther",
-    b.dispenser_id AS "DispenserID",
-    b.dispenser_udc AS "DispenserUDC",
-    dw.dispenser_udc_wall_type AS "DispenserUDCWallType"
-   FROM (((((((ust_tank b
+    b.cert_of_installation_other AS "CertOfInstallationOther"
+   FROM ((((((ust_tank b
      JOIN ust_facility c ON ((b.ust_facility_id = c.ust_facility_id)))
      LEFT JOIN tank_locations tl ON ((b.tank_location_id = tl.tank_location_id)))
      LEFT JOIN tank_material_descriptions tm ON ((b.tank_material_description_id = tm.tank_material_description_id)))
      LEFT JOIN tank_secondary_containments tc ON ((b.tank_secondary_containment_id = tc.tank_secondary_containment_id)))
      LEFT JOIN tank_statuses ts ON ((b.tank_status_id = ts.tank_status_id)))
-     LEFT JOIN dispenser_udc_wall_types dw ON ((b.dispenser_udc_wall_type_id = dw.dispenser_udc_wall_type_id)))
      LEFT JOIN cert_of_installations ci ON ((b.cert_of_installation_id = ci.cert_of_installation_id)));
