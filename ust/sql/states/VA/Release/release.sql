@@ -1,9 +1,9 @@
-select * from release_control ;
+select * from release_control where release_control_id=3;
 
 insert into release_control (organization_id,date_received,date_processed,data_source,comments)
 values ('VA',current_date,current_date,'CSV downloads from https://geohub-vadeq.hub.arcgis.com/pages/16b992debdff41cd945f48d348e17c59 ','');
 
-
+SELECT * FROM va_release.petroleum_release_sites;
 
 
 --Get an overview of what the state's data looks like. In this case, we only have one table
@@ -131,7 +131,14 @@ select distinct "FAC_TYPE" from va_ust.registered_petroleum_tank_facilities  ord
 --If you have questions or comments, replace the "null" with your comment. 
 --After you have updated all the SQL statements, run them to update the database. 
 select * from public.v_release_element_summary_sql;
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (3,'ust_release','facility_id','release_txt','rst_fac_id','This is the Release ID.  There is a different fac ID for UST called ceds_fac_id.');
+
+select rst_id  from release_txt ; 
+51948
+43899
+
+delete from release_element_mapping where release_control_id = '3' and  epa_column_name = 'facility_id'
+select * from va_release.petroleum_release_sites;
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (3,'ust_release','facility_id','petroleum_release_sites','rst_id','This is the Release ID.  There is a different fac ID for UST called ceds_fac_id.');
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (3,'ust_release','release_id','release_txt','pollution_complaint_pc_number',null);
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (3,'ust_release','federally_reportable_release','release_txt','federally_regulated_ust',null);
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (3,'ust_release','site_name','release_txt','site_name_',null);
@@ -146,6 +153,9 @@ insert into release_element_mapping (release_control_id, epa_table_name, epa_col
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (3,'ust_release','release_status_id','release_txt','case_status',null);
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (3,'ust_release','reported_date','release_txt','release_reported_date',null);
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (3,'ust_release','nfa_date','release_txt','case_closed_date',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (3,'ust_release','military_dod_site','registered_petroleum_tank_facilities','fac_type','When FEDERAL MILITARY then Y else N.');
+
+
 
 select * from release_element_mapping where release_control_id= 3;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -243,6 +253,16 @@ insert into release_element_value_mapping (release_element_mapping_id, organizat
 
 
 
+
+select * from release_element_value_mapping
+where release_element_mapping_id= 42 and  organization_value= 'FEDERAL MILITARY';
+
+
+update release_element_value_mapping
+set  organization_comments = 'Federal Non-Military should be Federally Owned (Cell A8)'
+where release_element_mapping_id= 42 and  organization_value= 'FEDERAL NON-MILITARY';
+
+
 --to assist with the mapping above, check the archived mapping table for old examples of mapping 
 select * from ust_element_value_mapping where ust_element_mapping_id=9 order by organization_value;
 --AIRCRAFT	Aviation/airport (non-rental car)
@@ -305,6 +325,16 @@ from "release_txt" order by 1;
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (45, 'Closed', 'No further action', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (45, 'Open', 'Active: general', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (45, 'Reopened', 'Active: general', 'Please verify');
+
+
+select * from release_element_value_mapping
+where release_element_mapping_id= 45 and  organization_value= 'Reopened';
+
+
+select * from 
+update release_element_value_mapping
+set organization_comments = 'Correct - reopened sites can be any release status/phase of investigation'
+where release_element_mapping_id= 45 and  organization_value= 'Reopened';
 
 
 --epa options
@@ -374,10 +404,6 @@ from v_release_needed_mapping
 where release_control_id = 3 and mapping_complete = 'N'
 order by 1, 2;
 
-
--- pa_release.v_release_bad_mapping source
-
- 
 --check if any of the mapping is bad:
 select database_lookup_table, epa_value 
 from v_release_bad_mapping 
@@ -389,16 +415,18 @@ where release_control_id = 3 order by 1, 2;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
---Step 1: create crosswalk views for columns that use a lookup table
---run script org_mapping_xwalks.py to create crosswalk views for all lookup tables 
---see new views:
+/*Step 1: create crosswalk views for columns that use a lookup table
+run script org_mapping_xwalks.py to create crosswalk views for all lookup tables 
+see new views:*/
 select table_name 
 from information_schema.tables 
 where table_schema = 'va_release' and table_type = 'VIEW'
 and table_name like '%_xwalk' order by 1;
---v_facility_type_xwalk
---v_release_status_xwalk
---v_state_xwalk
+/*
+v_facility_type_xwalk
+v_release_status_xwalk
+v_state_xwalk
+*/
 
 
 --Step 2: see the EPA tables we need to populate, and in what order
@@ -406,70 +434,108 @@ select distinct epa_table_name, table_sort_order
 from v_release_table_population 
 where release_control_id = 3
 order by table_sort_order;
---ust_release	1
+/*
+ust_release
+ust_release_cause
+ust_release_corrective_action_strategy
+ust_release_source
+ust_release_substance
+ust_release_substance
+ust_release_cause
+*/
 
---Step 3: check if there where any dataset-level comments you need to incorporate:
---in this case we need to ignore the aboveground storage tanks,
---so add this to the where clause of the ust_release view 
+/*Step 3: check if there where any dataset-level comments you need to incorporate:
+in this case we need to ignore the aboveground storage tanks,
+so add this to the where clause of the ust_release view */
 select comments from release_control where release_control_id = 3;
---ignore rows in release_txt where federally_regulated_ust <> Yes
+--ignore rows where sor_type <> 'UST'
 
---Step 4: work through the tables in order, using the information you collected 
---to write views that can be used to populate the data tables 
-select epa_column_name, '"' || organization_table_name || '"' organization_table_name, 
-	case when database_lookup_table is null then '"' || organization_column_name || '" as ' || epa_column_name || ',' 
-		else '"' || organization_column_name || '"' end organization_column_name, 
-	programmer_comments, 
-	database_lookup_table, database_lookup_column, 
-	--'"' || organization_join_table || '"' organization_join_table, 
-	--'"' || organization_join_column || '"' organization_join_column,  
+select * from v_release_table_population;
+
+/*Step 4: work through the tables in order, using the information you collected 
+to write views that can be used to populate the data tables 
+NOTE! The view queried below (v_release_table_population_sql) contains columns that help
+      construct the select sql for the insertion views, but will require manual 
+      oversight and manipulation by you! 
+      In particular, check out the organization_join_table and organization_join_column 
+      are used!!*/
+select organization_table_name_qtd, selected_column, programmer_comments, 
+	database_lookup_table, database_lookup_column,
+	--organization_join_table_qtd, organization_join_column_qtd,
 	deagg_table_name, deagg_column_name 
-from v_release_table_population 
+from v_release_table_population_sql
 where release_control_id = 3 and epa_table_name = 'ust_release'
 order by column_sort_order;
 
-
---Step 5: use the information from the queries above to create the view:
---!!! NOTE how I'm using the programmer_comments column to adjust the view (e.g. nfa_date)
---!!! NOTE also sometimes you need to explicitly cast data types. In this example, the two
---    dates "CONFIRMED_DATE" and "STATUS_DATE" are text fields in the state's data and need 
---    to be cast as dates to fit into the EPA table  
+/*Step 5: use the information from the queries above to create the view:
+!!! NOTE how I'm using the programmer_comments column to adjust the view (e.g. nfa_date)
+!!! NOTE also sometimes you need to explicitly cast data types. In this example, the two
+    dates "CONFIRMED_DATE" and "STATUS_DATE" are text fields in the state's data and need 
+    to be cast as dates to fit into the EPA table  
+!!! NOTE also you may get errors related to data conversion when trying to compile the view
+    you are creating here. This is good because it alerts you the data you are trying to
+    insert is not compatible with the EPA format. Fix these errors before proceeding! 
+!!! NOTE: Remember to do "select distinct" if necessary
+!!! NOTE: Some states do not include State or EPA Region in their database, but it is generally
+    safe for you to insert these yourself, so add them! */
+drop view va_release.v_ust_release;
 
 create or replace view va_release.v_ust_release as 
-select 	"rst_fac_id" as facility_id,
-		"pollution_complaint_pc_number" as release_id,
-		"federally_regulated_ust" as federally_reportable_release,
-		"site_name_" as site_name,
-		"address_1_" as site_address,
-		"city_" as site_city,
-		"zip_5" as zipcode,
-		"county" as county,
-		"fac_l_state",
-		c."FAC_TYPE"  ,
-		a.lat as latitude,
-		a.lon as longitude,
-		"case_status" ,
-		"release_reported_date" as reported_date,
-		"case_closed_date" as nfa_date
-from  petroleum_release_sites a, release_txt b
-	left  join va_ust.registered_petroleum_tank_facilities c on b.ceds_fac_id  = c."CEDS_FAC_ID"
-where a.pcnum=b.pollution_complaint_pc_number
+select distinct 
+"rst_id"::character varying(50) as facility_id,
+"pollution_complaint_pc_number"::character varying(50) as release_id,
+"federally_regulated_ust"::character varying(7) as federally_reportable_release,
+"site_name_"::character varying(200) as site_name,
+"address_1_"::character varying(100) as site_address,
+"city_"::character varying(100) as site_city,
+"zip_5"::character varying(10) as zipcode,
+"county"::character varying(100) as county,
+ft.facility_type_id as facility_type_id,
+"lat"::double precision as latitude,
+"lon"::double precision as longitude,
+rs.release_status_id as release_status_id,
+"release_reported_date"::date as reported_date,
+"case_closed_date"::date as nfa_date,
+case when "FAC_TYPE" = 'FEDERAL MILITARY' then 'Yes' else 'No' end as military_dod_site,
+3 as epa_region, 
+'VA' as state
+from va_release.release_txt  b,  va_release.petroleum_release_sites d  
+left join va_ust.registered_petroleum_tank_facilities c on b.ceds_fac_id  = c."CEDS_FAC_ID"
+left join va_release.v_facility_type_xwalk	ft on c."FAC_TYPE" = ft.organization_value 
+left join va_release.v_release_status_xwalk	rs on b."case_status" = rs.organization_value 
+where d.pcnum=b.pollution_complaint_pc_number
 and federally_regulated_ust='Yes';
 
 
---select *
---from petroleum_release_sites a, release_txt b
---left  join va_ust.registered_petroleum_tank_facilities c on b.ceds_fac_id  = c."CEDS_FAC_ID"
---where a.pcnum=b.pollution_complaint_pc_number
---and  (federally_regulated_ust='Yes')
+select 	distinct "rst_id" as facility_id,
+"pollution_complaint_pc_number" as release_id,
+"federally_regulated_ust" as federally_reportable_release,
+"site_name_" as site_name,
+"address_1_" as site_address,
+"city_" as site_city,
+"zip_5" as zipcode,
+"county" as county,
+"fac_l_state",
+"FAC_TYPE",
+"lat" as latitude,
+"lon" as longitude,
+"case_status",
+"release_reported_date" as reported_date,
+"case_closed_date" as nfa_date
+from  petroleum_release_sites a, release_txt b
+left  join va_ust.registered_petroleum_tank_facilities c on b.ceds_fac_id  = c."CEDS_FAC_ID"
+where a.pcnum=b.pollution_complaint_pc_number
+and federally_regulated_ust='Yes';
+
 --review: 
-select * from va_release.v_ust_release;
+select  * from va_release.v_ust_release;
 select count(*) from va_release.v_ust_release;
---69865
---------------------------------------------------------------------------------------------------------------------------
+--13245
 
 
+
 --------------------------------------------------------------------------------------------------------------------------
+--QA/QC
 
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
@@ -481,89 +547,86 @@ from v_release_missing_view_mapping a
 where release_control_id = 3
 order by 1, 2;
 
+
+select distinct state from v_ust_release;
+/*
+select b.column_name, b.data_type, b.character_maximum_length, a.data_type, a.character_maximum_length 
+from information_schema.columns a join information_schema.columns b on a.column_name = b.column_name 
+where a.table_schema = 'va_release' and a.table_name = 'v_ust_release'
+and b.table_schema = 'public' and b.table_name = 'ust_release'
+and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length )
+order by b.ordinal_position;
+*/
+
+--run Python QA/QC script
+
+/*run script qa_check.py
+set variables:
+ust_or_release = 'release' 
+control_id = 2
+export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+
+This script will check the views you just created in the state schema for the following:
+1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
+   exist. 
+2) Counts of child tables that have too few rows (for example, v_ust_compartment should have at least as many rows as v_ust_tank because
+   every tank should have at least one compartment). 
+3) Missing join columns to parent tables. For example, v_ust_compartment must contain facility_id and tank_id in order to be able to join it
+   to its parent tables. 
+4) Missing required columns. 
+5) Required columns that exist but contain null values. 
+6) Extraneous columns - will check for any columns in the views that don't match a column in the equivalent EPA table. This will help identify
+   typos or other errors. 
+7) Non-unique rows. To resolve any cases where the counts are greater than 0, check that you did a "select distinct" when creating these views.
+   Then check for bad joins.  
+8) Bad data types - will check for columns in the view where either the data type is different than the EPA column, or (for character columns) 
+   if the length of the state value is too long to fit into the EPA column. If the data is too long to fit in the EPA column, this may indicate 
+   an error in your code or mapping, OR it may mean you need to truncate the state's value to fit the EPA format. 
+9) Failed check constraints. 
+10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
+   and ensure the epa_value exists in the associated lookup table. 
+
+The script will also provide the counts of rows in wv_ust.v_ust_release, wv_ust.v_ust_release_substance, wv_ust.v_ust_release_source, 
+   wv_ust.v_ust_release_cause, and wv_ust.v_ust_release_corrective_action_strategy (if these views exist) - ensure these counts make sense! 
+   
+The script will export a QAQC spreadsheet (in additional to printing to the screen and logs). If there are errors, re-write the views above, 
+then re-run the qa script, and proceed when all errors have been resolved. */
+
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-select table_name, view_name
-from release_template_data_tables
-order by sort_order;
+/*run script populate_epa_data_tables.py	
+set variables:
+ust_or_release = 'release' 
+control_id = 3
+delete_existing = False # can set to True if there is existing release data you need to delete before inserting new
+*/
 
---ust_release	v_ust_release
+--------------------------------------------------------------------------------------------------------------------------
+--Quick sanity check of number of rows inserted:
+select table_name, num_rows from v_release_table_row_count
+where release_control_id = 3 order by sort_order;
+ust_release	13245
 
-select column_name from information_schema.columns 
-where table_schema = 'va_release' and table_name = 'v_ust_release'
+--------------------------------------------------------------------------------------------------------------------------
+--export template
 
-
-insert into ust_release(facility_id,
-release_id,
-federally_reportable_release,
-site_name,
-site_address,
-site_city,
-zipcode,
-county,
-state,
-facility_type_id,
-latitude,
-longitude,
-release_status_id,
-reported_date,
-nfa_date,
-release_control_id)
-select 
-facility_id,
-release_id,
-federally_reportable_release,
-site_name,
-site_address,
-site_city,
-zipcode,
-county,
-fac_l_state state,
-"FAC_TYPE",va_ust.get_lookup_id(9,"FAC_TYPE",'fac_type')::int facility_type_id, -- reuse the mapping function from the UST schema
-latitude::float8 latitude,
-longitude::float8 longitude,
-case when case_status = 'Closed' then 6 
-when case_status in ('Open','Reopened') then 1
-end  release_status_id,
-TO_DATE(reported_date,'MM/DD/YYYY')  reported_date,
-TO_DATE(nfa_date,'MM/DD/YYYY')  nfa_date, 
-3
- from v_ust_release;
- 
-
---final output to the excel template tab
-	select
-	facility_id,
-	null tank_id,
-	release_id,
-	federally_reportable_release,
-	site_name,
-	site_address,
-	null site_address2,
-	site_city,
-	zipcode,
-	county,
-	state,
-	'03' region,
-	ft.facility_type ,
-	null tribe_site,
-	null tribe,
-	latitude,
-	longitude,
-	null coordinate_source,
-	rs.release_status,
-	reported_date,
-	nfa_date
-from
-	ust_release a
-left join facility_types ft on
-	a.facility_type_id = ft.facility_type_id
-left join release_statuses rs on
-	a.release_status_id = rs.release_status_id
-where
-	release_control_id = 3;
+/*run script export_template.py
+set variables:
+control_id = 2
+ust_or_release = 'release' 
+organization_id = None  	# Can leave as None if you specify the control_id
+data_only = False 		# Set to False to export full template including mapping and reference tabs
+template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
+export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
+--------------------------------------------------------------------------------------------------------------------------
 
-select * from release_element_value_mapping where release_element_mapping_id = 45;
+
+--export control table  summary
+
