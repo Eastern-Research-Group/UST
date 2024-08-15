@@ -12,9 +12,9 @@ from python.util import utils, config
 
 #TODO: this script has not yet been tested for states where ust_compartment_status is populated
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 14
-delete_existing = True 
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 6
+delete_existing = False 
 
 
 def main(control_id, ust_or_release, delete_existing=False):

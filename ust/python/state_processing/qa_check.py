@@ -14,8 +14,8 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 14
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 6
 export_file_path = None
 export_file_dir = None
 export_file_name = None

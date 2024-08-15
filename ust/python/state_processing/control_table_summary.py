@@ -11,8 +11,8 @@ import openpyxl as op
 from python.util.logger_factory import logger
 from python.util import utils
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 11
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 6
 organization_id = None
 
 export_file_path = None
