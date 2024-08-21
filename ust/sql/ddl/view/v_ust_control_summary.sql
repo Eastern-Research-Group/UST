@@ -27,4 +27,10 @@ UNION ALL
     5 AS sort_order,
     'comments'::text AS summary_item,
     ust_control.comments AS summary_detail
+   FROM ust_control
+UNION ALL
+ SELECT ust_control.ust_control_id,
+    6 AS sort_order,
+    'organization_compartment_data_flag'::text AS summary_item,
+    ust_control.comments AS summary_detail
    FROM ust_control;

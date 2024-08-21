@@ -32,13 +32,9 @@ create or replace view "public"."v_ust_facility" as
     a.financial_responsibility_trust_fund AS "FinancialResponsibilityTrustFund",
     a.financial_responsibility_other_method AS "FinancialResponsibilityOtherMethod",
     a.ust_reported_release AS "USTReportedRelease",
-    a.associated_ust_release_id AS "AssociatedUSTReleaseID",
-    a.dispenser_id AS "DispenserID",
-    a.dispenser_udc AS "DispenserUDC",
-    duwt.dispenser_udc_wall_type AS "DispenserUDCWallType"
-   FROM (((((ust_facility a
+    a.associated_ust_release_id AS "AssociatedUSTReleaseID"
+   FROM ((((ust_facility a
      LEFT JOIN owner_types ot ON ((a.owner_type_id = ot.owner_type_id)))
      LEFT JOIN coordinate_sources cs ON ((a.coordinate_source_id = cs.coordinate_source_id)))
      LEFT JOIN facility_types ft ON ((a.facility_type1 = ft.facility_type_id)))
-     LEFT JOIN facility_types ft2 ON ((a.facility_type2 = ft2.facility_type_id)))
-     LEFT JOIN dispenser_udc_wall_types duwt ON ((a.dispenser_udc_wall_type_id = duwt.dispenser_udc_wall_type_id)));
+     LEFT JOIN facility_types ft2 ON ((a.facility_type2 = ft2.facility_type_id)));
