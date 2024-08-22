@@ -240,6 +240,16 @@ def delete_all_ust_data(control_id):
     conn = connect_db()
     cur = conn.cursor() 
 
+    sql = """delete from public.ust_compartment_dispenser 
+             where ust_compartment_id in
+                (select ust_compartment_id from ust_compartment 
+                where ust_tank_id in 
+                    (select ust_tank_id from ust_tank 
+                    where ust_facility_id in
+                        (select ust_facility_id from ust_facility where ust_control_id = %s)))"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted %s rows from public.ust_compartment_dispenser', cur.rowcount)
+
     sql = """delete from public.ust_piping 
              where ust_compartment_id in
                 (select ust_compartment_id from ust_compartment 
@@ -258,7 +268,7 @@ def delete_all_ust_data(control_id):
                     where ust_facility_id in
                         (select ust_facility_id from ust_facility where ust_control_id = %s)))"""
     cur.execute(sql, (control_id,))
-    logger.info('Deleted %s rows from public.ust_compartment_status', cur.rowcount)
+    logger.info('Deleted %s rows from public.ust_compartment_substance', cur.rowcount)
 
     sql = """delete from ust_compartment
              where ust_tank_id in 
@@ -267,6 +277,14 @@ def delete_all_ust_data(control_id):
                      (select ust_facility_id from ust_facility where ust_control_id = %s))"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_compartment', cur.rowcount)
+
+    sql = """delete from ust_tank_dispenser
+             where ust_tank_id in 
+                (select ust_tank_id from ust_tank 
+                where ust_facility_id in
+                     (select ust_facility_id from ust_facility where ust_control_id = %s))"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted %s rows from public.ust_tank_dispenser', cur.rowcount)
 
     sql = """delete from ust_tank_substance 
              where ust_tank_id in 
@@ -281,6 +299,12 @@ def delete_all_ust_data(control_id):
                  (select ust_facility_id from ust_facility where ust_control_id = %s)"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_tank', cur.rowcount)
+
+    sql = """delete from ust_facility_dispenser
+             where ust_facility_id in
+                 (select ust_facility_id from ust_facility where ust_control_id = %s)"""
+    cur.execute(sql, (control_id,))
+    logger.info('Deleted %s rows from public.ust_facility_dispenser', cur.rowcount)
 
     sql = """delete from ust_facility where ust_control_id = %s"""
     cur.execute(sql, (control_id,))

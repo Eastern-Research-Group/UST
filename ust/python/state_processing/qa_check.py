@@ -1,9 +1,9 @@
+from datetime import datetime
 import os
 from pathlib import Path
 import sys  
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
-from datetime import datetime
 
 import psycopg2.errors
 import openpyxl as op
@@ -14,18 +14,21 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 6
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 18
 export_file_path = None
 export_file_dir = None
 export_file_name = None
 
 join_cols = {}
 join_cols['v_ust_facility'] = []
+join_cols['v_ust_facility_dispenser'] = ['facility_id']
 join_cols['v_ust_tank'] = ['facility_id']
 join_cols['v_ust_tank_substance'] = ['facility_id','tank_id']
+join_cols['v_ust_tank_dispenser'] = ['facility_id','tank_id']
 join_cols['v_ust_compartment'] = ['facility_id','tank_id']
 join_cols['v_ust_compartment_substance'] = ['facility_id','tank_id','compartment_id']
+join_cols['v_ust_compartment_dispenser'] = ['facility_id','tank_id','compartment_id']
 join_cols['v_ust_piping'] = ['facility_id','tank_id','compartment_id']
 join_cols['v_ust_release'] = []
 join_cols['v_ust_release_source'] = ['release_id'] 
