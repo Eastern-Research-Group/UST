@@ -124,6 +124,8 @@ class QualityCheck:
 			if self.export_file_name[-5:] != '.xlsx':
 				self.export_file_name = self.export_file_name + '.xlsx'
 			self.export_file_path = os.path.join(self.export_file_dir, self.export_file_name)
+		self.export_file_name = self.export_file_name.replace('_ust_','_UST_')
+		self.export_file_path = self.export_file_path.replace('_ust_','_UST_')
 		logger.debug('export_file_name = %s; export_file_dir = %s; export_file_path = %s', self.export_file_name, self.export_file_dir, self.export_file_path)
 
 
