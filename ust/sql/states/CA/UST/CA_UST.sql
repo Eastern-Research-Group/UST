@@ -1299,6 +1299,11 @@ order by 1, 2, 3
 update ust_element_mapping set epa_table_name = 'ust_compartment'
 where ust_element_mapping_id = 1173;
 
+
+
+delete from ust_element_mapping where ust_element_mapping_id = 1172;
+delete from ust_element_mapping where ust_element_mapping_id = 1129;
+
 --run Python QA/QC script
 
 /*run script qa_check.py
