@@ -15,7 +15,6 @@ from python.util import utils
 ust_or_release = 'release' # valid values are 'ust' or 'release'
 control_id = 6
 
-
 yellow_cell_fill = 'FFFF00' # yellow
 left_align = Alignment(horizontal='left', vertical='center', wrap_text=True)
 center_align = Alignment(horizontal='center', vertical='center', wrap_text=True)
@@ -62,6 +61,8 @@ class PopulatedTemplate():
 					(select 1 from {self.ust_or_release}_element_mapping d 
 					where d.{self.ust_or_release}_control_id = {self.control_id} and x.org_table_name = d.organization_table_name and x.org_column_name = d.organization_column_name)
 				order by org_table_name, ordinal_position"""
+		print(sql)
+		exit()
 		cur.execute(sql, (self.schema, ))
 		rows = cur.fetchall()
 		i = 0
@@ -214,10 +215,10 @@ class PopulatedTemplate():
 		conn = utils.connect_db()
 		cur = conn.cursor()
 		sql = f"""select b.table_name, a.database_column_name 
-				from release_elements a join release_elements_tables b on a.element_id = b.element_id 
+				from {self.ust_or_release}_elements a join {self.ust_or_release}_elements_tables b on a.element_id = b.element_id 
 				where not exists 
-					(select 1 from release_element_mapping c
-					where release_control_id = %s
+					(select 1 from {self.ust_or_release}_element_mapping c
+					where {self.ust_or_release}_control_id = %s
 					and c.epa_table_name = b.table_name and c.epa_column_name = a.database_column_name)
 				and exists 
 					(select 1 from information_schema.columns d
@@ -462,30 +463,13 @@ if __name__ == '__main__':
 	pop_temp = PopulatedTemplate(ust_or_release, control_id)
 
 	# # Step 1: populate mapping
-	# pop_temp.populate_element_mapping()
+	pop_temp.populate_element_mapping()
 	# # If necessary, manually insert missing mapping (the function above will print a list of unmapped elements)
 	# pop_temp.insert_column_mapping('ust_facility', 'AssociatedLUSTID', 'ust_facility', 'AssociatedUSTReleaseID')
 
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy1StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy2StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
 	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy3StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy4StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy5StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy6StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','CorrectiveActionStrategy7StartDate','ust_release_corrective_action_strategy','corrective_action_strategy_start_date');
-	# pop_temp.insert_column_mapping('ust_release','LUSTID','ust_release','release_id');
-	# pop_temp.insert_column_mapping('ust_release','LUSTStatus','ust_release','release_status_id');
-	# pop_temp.insert_column_mapping('ust_release','QuantityReleased1','ust_release_substance','quantity_released');
-	# pop_temp.insert_column_mapping('ust_release','QuantityReleased2','ust_release_substance','quantity_released');
-	# pop_temp.insert_column_mapping('ust_release','QuantityReleased3','ust_release_substance','quantity_released');
-	# pop_temp.insert_column_mapping('ust_release','QuantityReleased4','ust_release_substance','quantity_released');
-	# pop_temp.insert_column_mapping('ust_release','QuantityReleased5','ust_release_substance','quantity_released');
-	# pop_temp.insert_column_mapping('ust_release','Unit1','ust_release_substance','unit');
-	# pop_temp.insert_column_mapping('ust_release','Unit2','ust_release_substance','unit');
-	# pop_temp.insert_column_mapping('ust_release','Unit3','ust_release_substance','unit');
-	# pop_temp.insert_column_mapping('ust_release','Unit4','ust_release_substance','unit');
-	# pop_temp.insert_column_mapping('ust_release','Unit5','ust_release_substance','unit');
-
 
 	# # Export a workbork pre-populated with exact value mapping matches 
 	# pop_temp.check_state_mapping()

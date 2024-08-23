@@ -1,15 +1,15 @@
-import os
+import glob
 from pathlib import Path
+import os
 import sys  
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
-import glob
 
 import pandas as pd
 from psycopg2.errors import DuplicateSchema, UndefinedTable
 
-from python.util.logger_factory import logger
 from python.util import config, utils
+from python.util.logger_factory import logger
 
 
 class DatabaseImporter:
@@ -72,32 +72,12 @@ class DatabaseImporter:
         return table_name
         
         
-    def save_file_to_db(self, file_path, engine=None):
-        table_name = self.get_table_name_from_file_name(file_path)
+    def save_table_to_db(self, df, table_name):
         if table_name in self.existing_tables and not self.overwrite_table:
             logger.warning('Table %s already exists in the database and will not be imported because the overwrite_table flag is set to False', table_name)
             return True
-
-        logger.info('New table name will be %s', table_name)
-
-        if file_path[-4:] == 'xlsx' or file_path[-3:] == 'xls' :
-            try:
-                df = pd.read_excel(file_path)   
-            except ValueError as e:
-                logger.error('Error opening %s; skipping: %s', file_path, e) 
-                self.bad_file_list.append(table_name)
-                return False
-        elif file_path[-3:] == 'csv':
-            df = pd.read_csv(file_path, encoding='ansi', low_memory=False)
-        elif file_path[-3:] == 'txt':
-            df = pd.read_csv(file_path, sep='\t', encoding='ansi', low_memory=False)
-        else:
-            logger.info(f'{file_path} is not an .xlsx, .csv, or .txt file so aborting...')
-            sys.exit()
-        logger.debug(f'{file_path} read into dataframe')    
-
-        if not engine:
-            engine = utils.get_engine(schema=self.schema)    
+        logger.info('New table name will be %s', table_name)    
+        engine = utils.get_engine(schema=self.schema)    
         if self.overwrite_table:    
             df.to_sql(table_name, engine, index=False, if_exists='replace')
             logger.info('Created table %s', table_name)
@@ -108,8 +88,41 @@ class DatabaseImporter:
             except error as e:
                 self.bad_file_list.append(table_name)
                 logger.error('Unable to load table %s; adding to bad_file_list: %s: %s', table_name, e)
+        return True
+
+
+    def save_file_to_db(self, file_path, engine=None):
+        if utils.is_excel(file_path):
+            xls = pd.ExcelFile(file_path)
+            sheet_names = xls.sheet_names
+            if len(sheet_names) > 1:
+                for sheet_name in sheet_names:
+                    df = pd.read_excel(file_path, sheet_name=sheet_name)
+                    logger.debug('%s, worksheet %s read into dataframe', file_path, sheet_name)
+                    self.save_table_to_db(df, table_name=sheet_name)
+            else:
+                try:
+                    df = pd.read_excel(file_path)   
+                    logger.debug('%s read into dataframe', file_path)
+                except ValueError as e:
+                    logger.error('Error opening %s; skipping: %s', file_path, e) 
+                    self.bad_file_list.append(table_name)
+                    return False
+                self.save_table_to_db(df, table_name=self.get_table_name_from_file_name(file_path))
+        elif file_path[-3:] == 'csv':
+            df = pd.read_csv(file_path, encoding='ansi', low_memory=False)
+            logger.debug('%s read into dataframe', file_path)
+            self.save_table_to_db(df, table_name=self.get_table_name_from_file_name(file_path))
+        elif file_path[-3:] == 'txt':
+            df = pd.read_csv(file_path, sep='\t', encoding='ansi', low_memory=False)
+            logger.debug('%s read into dataframe', file_path)
+            self.save_table_to_db(df, table_name=self.get_table_name_from_file_name(file_path))
+        else:
+            logger.info('%s is not an .xlsx, .csv, or .txt file so aborting...', file_path)
+            sys.exit()
 
         return True
+
 
     def get_files(self):
         file_list = []
