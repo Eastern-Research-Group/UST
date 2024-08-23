@@ -11,7 +11,8 @@ CREATE TABLE public.release_element_mapping (
     programmer_comments text  NULL ,
     organization_comments text  NULL ,
     deagg_table_name character varying(100)  NULL ,
-    deagg_column_name character varying(100)  NULL );
+    deagg_column_name character varying(100)  NULL ,
+    epa_comments character varying(4000)  NULL );
 
 ALTER TABLE public.release_element_mapping ADD CONSTRAINT release_element_mapping_pkey PRIMARY KEY (release_element_mapping_id);
 

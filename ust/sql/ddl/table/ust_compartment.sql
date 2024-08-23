@@ -4,8 +4,6 @@ CREATE TABLE public.ust_compartment (
     compartment_id integer  NOT NULL ,
     compartment_name character varying(50)  NULL ,
     compartment_status_id integer  NOT NULL ,
-    substance_id integer  NULL ,
-    compartment_substance_casno character varying(12)  NULL ,
     compartment_capacity_gallons integer  NULL ,
     overfill_prevention_ball_float_valve character varying(7)  NULL ,
     overfill_prevention_flow_shutoff_device character varying(7)  NULL ,
@@ -59,8 +57,6 @@ ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_prevention_n
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_prevention_other_chk CHECK (((spill_prevention_other)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
 
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_substance_fk FOREIGN KEY (substance_id) REFERENCES substances(substance_id);
-
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_automatic_tank_gauging_release_detection_chk CHECK (((tank_automatic_tank_gauging_release_detection)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_groundwater_monitoring_chk CHECK (((tank_groundwater_monitoring)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
@@ -90,7 +86,5 @@ CREATE UNIQUE INDEX compartment_pkey ON public.ust_compartment USING btree (ust_
 CREATE INDEX ust_compartment_compartment_status_id_idx ON public.ust_compartment USING btree (compartment_status_id)
 
 CREATE INDEX ust_compartment_spill_bucket_wall_type_id_idx ON public.ust_compartment USING btree (spill_bucket_wall_type_id)
-
-CREATE INDEX ust_compartment_substance_id_idx ON public.ust_compartment USING btree (substance_id)
 
 CREATE INDEX ust_compartment_ust_tank_id_idx ON public.ust_compartment USING btree (ust_tank_id)

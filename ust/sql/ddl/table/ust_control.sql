@@ -7,6 +7,8 @@ CREATE TABLE public.ust_control (
     comments text  NULL ,
     organization_compartment_flag character varying(1)  NULL );
 
+ALTER TABLE public.ust_control ADD CONSTRAINT ust_control_org_comp_flag_chk CHECK (((organization_compartment_flag)::text = ANY (ARRAY['Y'::text, 'N'::text])));
+
 ALTER TABLE archive."archive.ust_control" ADD CONSTRAINT ust_control_pkey PRIMARY KEY (control_id);
 
 ALTER TABLE public.ust_control ADD CONSTRAINT ust_control_pkey PRIMARY KEY (ust_control_id);
