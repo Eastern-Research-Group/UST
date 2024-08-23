@@ -10,7 +10,7 @@ from python.util import utils
 
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 14
+control_id = 18
 
 
 def main(control_id, ust_or_release):

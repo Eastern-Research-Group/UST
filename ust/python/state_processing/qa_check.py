@@ -1,31 +1,35 @@
+from datetime import datetime
 import os
 from pathlib import Path
 import sys  
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
-from datetime import datetime
 
 import psycopg2.errors
 import openpyxl as op
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.borders import Border, Side
 
+from python.state_processing import element_mapping_to_excel
 from python.util.logger_factory import logger
 from python.util import utils
 
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 14
+control_id = 18
 export_file_path = None
 export_file_dir = None
 export_file_name = None
 
 join_cols = {}
 join_cols['v_ust_facility'] = []
+join_cols['v_ust_facility_dispenser'] = ['facility_id']
 join_cols['v_ust_tank'] = ['facility_id']
 join_cols['v_ust_tank_substance'] = ['facility_id','tank_id']
+join_cols['v_ust_tank_dispenser'] = ['facility_id','tank_id']
 join_cols['v_ust_compartment'] = ['facility_id','tank_id']
 join_cols['v_ust_compartment_substance'] = ['facility_id','tank_id','compartment_id']
+join_cols['v_ust_compartment_dispenser'] = ['facility_id','tank_id','compartment_id']
 join_cols['v_ust_piping'] = ['facility_id','tank_id','compartment_id']
 join_cols['v_ust_release'] = []
 join_cols['v_ust_release_source'] = ['release_id'] 
@@ -87,6 +91,7 @@ class QualityCheck:
 			self.check_failed_constraints()
 			self.check_bad_mapping()
 		self.write_overview()
+		element_mapping_to_excel.build_ws(self.ust_or_release, self.control_id, self.wb.create_sheet(), admin=True)
 		self.cleanup_wb()
 		self.disconnect_db()
 
@@ -121,6 +126,8 @@ class QualityCheck:
 			if self.export_file_name[-5:] != '.xlsx':
 				self.export_file_name = self.export_file_name + '.xlsx'
 			self.export_file_path = os.path.join(self.export_file_dir, self.export_file_name)
+		self.export_file_name = self.export_file_name.replace('_ust_','_UST_')
+		self.export_file_path = self.export_file_path.replace('_ust_','_UST_')
 		logger.debug('export_file_name = %s; export_file_dir = %s; export_file_path = %s', self.export_file_name, self.export_file_dir, self.export_file_path)
 
 

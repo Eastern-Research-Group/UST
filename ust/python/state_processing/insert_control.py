@@ -9,13 +9,13 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-organization_id = 'AZ'
-system_type = 'release' # Accepted values are 'ust' or 'release'
-data_source = 'State sent a spreadsheet in EPA template format by email' # Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
-date_received = '2024-06-25' # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
+organization_id = 'CA'
+system_type = 'ust'   # Accepted values are 'ust' or 'release'
+data_source = 'State granted web access to CERS database (https://cersregulator.calepa.ca.gov/)' # Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
+date_received = '2024-08-14' # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 date_processed = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
-comments = 'State asked for help mapping Substances and Causes' 
-
+comments = 'Wrote a Python script to download individual Excel spreadsheets for each of 104 Regulators (as we were advised to download each separately), then combined them.' 
+organization_compartment_flag = None   # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. 
 
 class ControlTable:
     def __init__(self, 
@@ -24,7 +24,8 @@ class ControlTable:
                  data_source, 
                  date_received=datetime.today(), 
                  date_processed=datetime.today(), 
-                 comments=None):
+                 comments=None,
+                 organization_compartment_flag=None):
 
         if system_type.lower() not in ['ust','release']:
             logger.critical("System type '%s' not recognized, aborting.", system_type)
@@ -48,11 +49,18 @@ class ControlTable:
     def insert_db(self):
         conn = utils.connect_db()
         cur = conn.cursor()
-        sql = f"""insert into {self.system_type}_control 
-                    (organization_id, date_received, date_processed, data_source, comments)
-                  values (%s, %s, %s, %s, %s)
-                  returning {self.system_type}_control_id"""
-        cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments))
+        if self.system_type == 'ust' and self.organization_compartment_flag:
+            sql = f"""insert into {self.system_type}_control 
+                        (organization_id, date_received, date_processed, data_source, comments, organization_compartment_flag)
+                      values (%s, %s, %s, %s, %s, %s)
+                      returning {self.system_type}_control_id"""
+            cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments, self.organization_compartment_flag))
+        else:
+            sql = f"""insert into {self.system_type}_control 
+                        (organization_id, date_received, date_processed, data_source, comments)
+                      values (%s, %s, %s, %s, %s)
+                      returning {self.system_type}_control_id"""
+            cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments))
         control_id = cur.fetchone()[0]
         self.control_id = control_id
         logger.info('Inserted into %s_control; %s_control_id = %s', self.system_type, self.system_type, control_id)
@@ -69,6 +77,7 @@ if __name__ == '__main__':
         data_source=data_source,
         date_received=date_received,
         date_processed=date_processed,
-        comments=comments)
+        comments=comments,
+        organization_compartment_flag=organization_compartment_flag)
     c.insert_db()
     logger.info('New control_id for %s is %s', c.organization_id, c.control_id)

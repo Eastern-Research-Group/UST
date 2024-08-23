@@ -12,9 +12,8 @@ from python.util.logger_factory import logger
 from python.util import utils
 
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 15
-
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 6
 
 yellow_cell_fill = 'FFFF00' # yellow
 left_align = Alignment(horizontal='left', vertical='center', wrap_text=True)
@@ -476,7 +475,7 @@ if __name__ == '__main__':
 	# pop_temp.check_state_mapping()
 
 	# # Step 2: Complete any missing mapping in workbook exported above and insert all mappings into database 
-	# mapping_file_path = fr'C:\Users\erguser\repos\ERG\UST\ust\python\exports\mapping\AZ\AZ_UST_mapping_20240723215305.xlsx'
+	mapping_file_path = fr'C:\Users\erguser\repos\ERG\UST\ust\python\exports\mapping\AZ\AZ_Releases_mapping_20240724192944.xlsx'
 	# pop_temp.insert_element_value_mapping(mapping_file_path)
 	
 	# # Step 3: Check that all mapping is complete 
@@ -484,4 +483,4 @@ if __name__ == '__main__':
 	# pop_temp.check_incomplete_mapping()
 
 	# # Step 4: After receiving state/EPA feedback, you can either re-run Step 2 to re-insert the entire workbook into the database, or process individual mapping tabs:
-	# pop_temp.insert_element_value_mapping(mapping_file_path, sheetname='CompartmentSubstanceStored')
+	pop_temp.insert_element_value_mapping(mapping_file_path, sheetname='corrective_action_strategy')

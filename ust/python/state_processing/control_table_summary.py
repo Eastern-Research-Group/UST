@@ -7,12 +7,13 @@ from datetime import date
 import ntpath
 
 import openpyxl as op
+from openpyxl.styles import Alignment, Font
 
 from python.util.logger_factory import logger
 from python.util import utils
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 11
+control_id = 18
 organization_id = None
 
 export_file_path = None
@@ -44,6 +45,9 @@ class Summary:
 		self.wb = op.Workbook()
 		self.wb.save(self.export_file_path)
 		self.export_summary()
+		self.export_row_counts()
+		self.performance_measure_comparison()
+		self.mapped_element_summary()
 		self.cleanup_wb()
 		logger.info('Summary exported to %s', self.export_file_path)
 
@@ -112,26 +116,229 @@ class Summary:
 
 	def export_summary(self):
 		ws = self.wb.create_sheet(self.organization_id.upper() + ' ' + self.ust_or_release.upper() + ' Summary')
-
 		conn = utils.connect_db()
-		cur = conn.cursor()
- 
+		cur = conn.cursor() 
 		sql = f"""select summary_item, summary_detail 
 				from public.v_{self.ust_or_release}_control_summary
 				where {self.ust_or_release}_control_id = %s
 				order by sort_order"""
 		cur.execute(sql, (self.control_id,))
 		data = cur.fetchall()
+		cur.close()
+		conn.close()
 		for rowno, row in enumerate(data, start=1):
 			for colno, cell_value in enumerate(row, start=1):
 				ws.cell(row=rowno, column=colno).value = cell_value
-
 		utils.autowidth(ws)
+		logger.info('Exported %s_control_table summary for control_id %s to %s', self.ust_or_release, self.control_id, self.export_file_path)
+
+
+	def export_row_counts(self):
+		ws = self.wb.create_sheet(self.organization_id.upper() + ' ' + self.ust_or_release.upper() + ' Row Count')
+		headers = ['Table Name', 'Number of Rows']
+		for colno, header in enumerate(headers, start=1):
+			ws.cell(row=1, column=colno).value = header
+		header_range = ws["A1:Z1"]
+		for row in header_range:
+			for cell in row:
+				cell.font = Font(bold=True)
+
+		conn = utils.connect_db()
+		cur = conn.cursor() 
+		sql = f"""select table_name, num_rows 
+				from public.v_{self.ust_or_release}_row_count_summary
+				where ust_control_id = %s
+				order by sort_order"""
+		cur.execute(sql, (self.control_id,))
+		data = cur.fetchall()
+		cur.close()
+		conn.close()
+		for rowno, row in enumerate(data, start=2):
+			for colno, cell_value in enumerate(row, start=1):
+				ws.cell(row=rowno, column=colno).value = cell_value
+				if colno == 2:
+					ws.cell(row=rowno, column=colno).number_format = '#,##0'
+		utils.autowidth(ws)
+		logger.info('Exported table row counts for control_id %s to %s', self.control_id, self.export_file_path)
+
+
+	def performance_measure_comparison(self):
+		ws = self.wb.create_sheet('Performance Measure Comparison')
+		conn = utils.connect_db()
+		cur = conn.cursor() 
+		
+		if self.ust_or_release == 'ust':
+			headers = ['Performance Measure', 'Total UST']
+			for colno, header in enumerate(headers, start=1):
+				ws.cell(row=1, column=colno).value = header
+			header_range = ws["A1:Z1"]
+			for row in header_range:
+				for cell in row:
+					cell.font = Font(bold=True)
+
+			sql = """select total_type, total_ust
+					from v_ust_performance_measures
+					where organization_id = %s
+					order by sort_order"""
+			cur.execute(sql, (self.organization_id,))
+			data = cur.fetchall()
+			for rowno, row in enumerate(data, start=2):
+				for colno, cell_value in enumerate(row, start=1):
+					ws.cell(row=rowno, column=colno).value = cell_value
+					if colno == 2:
+						ws.cell(row=rowno, column=colno).number_format = '#,##0'
+			ws.cell(row=rowno, column=1).font = Font(bold=True)			
+			ws.cell(row=rowno, column=2).font = Font(bold=True)		
+
+			rowno = rowno + 2			
+			ws.cell(row=rowno, column=1).value = 'EPA Template'		
+			ws.cell(row=rowno, column=1).font = Font(bold=True, underline='single')
+
+			rowno = rowno + 1
+			ws.cell(row=rowno, column=1).value = 'EPA Compartment Status'		
+			ws.cell(row=rowno, column=1).font = Font(bold=True)
+			ws.cell(row=rowno, column=2).value = 'Total UST'		
+			ws.cell(row=rowno, column=2).font = Font(bold=True)
+
+			sql = """select "CompartmentStatus", count(*) from v_ust_compartment
+					where ust_control_id = %s group by "CompartmentStatus" """
+			cur.execute(sql, (self.control_id,))
+			data = cur.fetchall()
+			for rowno, row in enumerate(data, start=rowno+1):
+				for colno, cell_value in enumerate(row, start=1):
+					ws.cell(row=rowno, column=colno).value = cell_value
+					if colno == 2:
+						ws.cell(row=rowno, column=colno).number_format = '#,##0'
+
+			rowno = rowno + 1
+			sql = "select count(*) from v_ust_compartment where ust_control_id = %s" 
+			cur.execute(sql, (self.control_id,))
+			cnt = cur.fetchone()[0]
+			ws.cell(row=rowno, column=1).value = 'Total UST EPA Template'
+			ws.cell(row=rowno, column=1).font = Font(bold=True)
+			ws.cell(row=rowno, column=2).value = cnt 
+			ws.cell(row=rowno, column=2).font = Font(bold=True)
+			ws.cell(row=rowno, column=2).number_format = '#,##0'
+
+		else: # release
+			headers = ['Performance Measure', 'Total Releases']
+			for colno, header in enumerate(headers, start=1):
+				ws.cell(row=1, column=colno).value = header
+			header_range = ws["A1:Z1"]
+			for row in header_range:
+				for cell in row:
+					cell.font = Font(bold=True)
+
+			sql = f"""select total_type, total_cumulative_releases
+					from v_release_performance_measures
+					where organization_id = %s
+					order by sort_order"""
+			cur.execute(sql, (self.organization_id,))
+			data = cur.fetchall()
+			for rowno, row in enumerate(data, start=2):
+				for colno, cell_value in enumerate(row, start=1):
+					ws.cell(row=rowno, column=colno).value = cell_value
+					if colno == 2:
+						ws.cell(row=rowno, column=colno).number_format = '#,##0'
+			ws.cell(row=rowno, column=1).font = Font(bold=True)			
+			ws.cell(row=rowno, column=2).font = Font(bold=True)		
+
+			rowno = rowno + 2
+			ws.cell(row=rowno, column=1).value = 'EPA Template'		
+			ws.cell(row=rowno, column=1).font = Font(bold=True, underline='single')
+
+			rowno = rowno + 1
+			ws.cell(row=rowno, column=1).value = 'Release Status'		
+			ws.cell(row=rowno, column=1).font = Font(bold=True)
+			ws.cell(row=rowno, column=2).value = 'Total Releases'		
+			ws.cell(row=rowno, column=2).font = Font(bold=True)
+			sql = f"""select "USTReleaseStatus", count(*) from v_ust_release
+					where release_control_id = %s group by "USTReleaseStatus" """
+			cur.execute(sql, (self.control_id,))
+			data = cur.fetchall()
+			for rowno, row in enumerate(data, start=rowno+1):
+				for colno, cell_value in enumerate(row, start=1):
+					ws.cell(row=rowno, column=colno).value = cell_value
+					if colno == 2:
+						ws.cell(row=rowno, column=colno).number_format = '#,##0'	
+
+			rowno = rowno + 1			
+			sql = "select count(*) from v_ust_release where ust_control_id = %s" 
+			cur.execute(sql, (self.control_id,))
+			cnt = cur.fetchone()[0]
+			ws.cell(row=rowno, column=1).value = 'Total Releases EPA Template'
+			ws.cell(row=rowno, column=1).font = Font(bold=True)
+			ws.cell(row=rowno, column=2).value = cnt 
+			ws.cell(row=rowno, column=2).font = Font(bold=True)
+			ws.cell(row=rowno, column=2).number_format = '#,##0'
 
 		cur.close()
 		conn.close()
+		
+		utils.autowidth(ws)
+		logger.info('Exported performance measure summary information for control_id %s to %s', self.control_id, self.export_file_path)
 
-		logger.info('Exported %s_control_table summary for control_id %s to %s', self.ust_or_release, self.control_id, self.export_file_path)
+
+	def mapped_element_summary(self):
+		ws = self.wb.create_sheet('Mapped Element Summary')
+		conn = utils.connect_db()
+		cur = conn.cursor() 
+
+		rowno = 1 
+		ws.cell(row=rowno, column=1).value = 'Mapped Data Elements'
+		ws.cell(row=rowno, column=1).font = Font(bold=True, underline='single')
+		ws.cell(row=rowno, column=4).value = 'Unmapped Data Elements'
+		ws.cell(row=rowno, column=4).font = Font(bold=True, underline='single')
+		
+		rowno = 2
+		ws.cell(row=rowno, column=1).value = 'Table Name'
+		ws.cell(row=rowno, column=1).font = Font(bold=True)
+		ws.cell(row=rowno, column=2).value = 'Column Name'
+		ws.cell(row=rowno, column=2).font = Font(bold=True)
+
+		ws.cell(row=rowno, column=4).value = 'Table Name'
+		ws.cell(row=rowno, column=4).font = Font(bold=True)
+		ws.cell(row=rowno, column=5).value = 'Column Name'
+		ws.cell(row=rowno, column=5).font = Font(bold=True)
+
+		start = 3
+		sql = f"""select table_name, element_name 
+				from v_{self.ust_or_release}_element_mapping_for_export
+				where {self.ust_or_release}_control_id = %s
+				order by table_sort_order, column_sort_order"""
+		cur.execute(sql, (self.control_id,))
+		data = cur.fetchall()
+		for rowno, row in enumerate(data, start=start):
+			for colno, cell_value in enumerate(row, start=1):
+				ws.cell(row=rowno, column=colno).value = cell_value
+
+		start = 3
+		sql = f"""select template_tab_name, element_name from
+					(select template_tab_name, element_name, d.sort_order as table_sort_order, c.sort_order as column_sort_order
+					from {self.ust_or_release}_elements a join ust_elements_tables b on a.element_id = b.element_id 
+						join {self.ust_or_release}_elements_tables c on b.element_id = c.element_id and c.table_name = b.table_name
+						join {self.ust_or_release}_template_data_tables d on b.table_name = d.table_name
+					where not exists 
+						(select 1 from v_{self.ust_or_release}_element_mapping_for_export x 
+						where x.{self.ust_or_release}_control_id = %s
+						and b.table_name = x.epa_table_name and a.database_column_name = x.epa_column_name)) a
+				where not (template_tab_name in ('Facility Dispenser','Tank Dispenser','Compartment Dispenser','Piping','Compartment Substance')
+							and element_name in ('FacilityID','TankID','TankName','CompartmentID','CompartmentName'))
+				and not (template_tab_name in ('Compartment','Tank Substance') and element_name in  ('FacilityID','TankID','TankName'))
+				and not (template_tab_name = 'Tank' and element_name = 'FacilityID')
+				and not (template_tab_name in ('Substance','Source','Cause','Corrective Action Strategy') and element_name = 'ReleaseID')
+				and element_name not like '%%Comment'
+				order by table_sort_order, column_sort_order"""
+		cur.execute(sql, (self.control_id,))
+		data = cur.fetchall()
+		for rowno, row in enumerate(data, start=start):
+			for colno, cell_value in enumerate(row, start=4):
+				ws.cell(row=rowno, column=colno).value = cell_value
+
+		cur.close()
+		conn.close()				
+		utils.autowidth(ws)
+		logger.info('Exported mapped element summary for control_id %s to %s', self.control_id, self.export_file_path)
 
 
 

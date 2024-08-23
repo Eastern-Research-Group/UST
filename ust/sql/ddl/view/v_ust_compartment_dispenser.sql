@@ -11,5 +11,5 @@ create or replace view "public"."v_ust_compartment_dispenser" as
    FROM ((((ust_compartment a
      JOIN ust_tank b ON ((a.ust_tank_id = b.ust_tank_id)))
      JOIN ust_facility c ON ((b.ust_facility_id = c.ust_facility_id)))
-     JOIN ust_tank_dispenser d ON ((b.ust_tank_id = d.ust_tank_id)))
+     JOIN ust_compartment_dispenser d ON ((a.ust_compartment_id = d.ust_compartment_id)))
      LEFT JOIN dispenser_udc_wall_types dw ON ((d.dispenser_udc_wall_type_id = dw.dispenser_udc_wall_type_id)));

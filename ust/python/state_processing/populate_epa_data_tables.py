@@ -10,10 +10,8 @@ from python.util.logger_factory import logger
 from python.util import utils, config
 
 
-#TODO: this script has not yet been tested for states where ust_compartment_status is populated
-
 ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 14
+control_id = 18
 delete_existing = True 
 
 
@@ -86,7 +84,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 					parent_table = 'ust_facility' 
 					join_col = 'facility_id' 
 					epa_col = 'ust_facility_id' 
-				if ust_or_release == 'release' or view_name in ('v_ust_facility','v_ust_tank'):
+				if ust_or_release == 'release' or view_name in ('v_ust_facility','v_ust_tank','v_ust_facility_dispenser'):
 					insert_sql = f"""insert into public.{table_name} ({column_list})
 									select distinct {column_list} from {schema}.{view_name} a 
 										join (select {epa_col}, {join_col} from public.{parent_table} where {ust_or_release}_control_id = %s) b
@@ -96,6 +94,14 @@ def main(control_id, ust_or_release, delete_existing=False):
 					column_list = column_list.replace(', facility_id','').replace(', tank_id','')
 					insert_sql = f"""insert into public.ust_tank_substance ({column_list})
 									select distinct {column_list} from {schema}.v_ust_tank_substance a 
+										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
+											on a.facility_id = b.facility_id
+										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id"""
+				elif view_name == 'v_ust_tank_dispenser':
+					column_list = 'ust_tank_id, ' + org_column_list[:-2] 
+					column_list = column_list.replace(', facility_id','').replace(', tank_id','')
+					insert_sql = f"""insert into public.ust_tank_dispenser ({column_list})
+									select distinct {column_list} from {schema}.v_ust_tank_dispenser a 
 										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
 											on a.facility_id = b.facility_id
 										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id"""
@@ -127,6 +133,15 @@ def main(control_id, ust_or_release, delete_existing=False):
 					column_list = column_list.replace(', facility_id','').replace(', tank_id','').replace(', compartment_id','')
 					insert_sql = f"""insert into public.ust_piping ({column_list})
 									select distinct {column_list} from {schema}.v_ust_piping a 
+										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
+											on a.facility_id = b.facility_id
+										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
+										join ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id"""
+				elif view_name == 'v_ust_compartment_dispenser':
+					column_list = 'ust_compartment_id, ' + org_column_list[:-2] 
+					column_list = column_list.replace(', facility_id','').replace(', tank_id','').replace(', compartment_id','')
+					insert_sql = f"""insert into public.ust_compartment_dispenser ({column_list})
+									select distinct {column_list} from {schema}.v_ust_compartment_dispenser a 
 										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
 											on a.facility_id = b.facility_id
 										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
