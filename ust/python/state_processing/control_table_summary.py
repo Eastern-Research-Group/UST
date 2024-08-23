@@ -21,6 +21,8 @@ export_file_dir = None
 export_file_name = None
 
 
+yellow_cell_fill = 'FFFF00' # yellow
+
 class Summary:
 	wb = None     
 
@@ -129,6 +131,8 @@ class Summary:
 		for rowno, row in enumerate(data, start=1):
 			for colno, cell_value in enumerate(row, start=1):
 				ws.cell(row=rowno, column=colno).value = cell_value
+				if ws.cell(row=rowno, column=colno-1).value == 'organization_compartment_flag' and ws.cell(row=rowno, column=colno).value == None:
+					 ws.cell(row=rowno, column=colno).fill = utils.get_fill_gen(yellow_cell_fill)
 		utils.autowidth(ws)
 		logger.info('Exported %s_control_table summary for control_id %s to %s', self.ust_or_release, self.control_id, self.export_file_path)
 
