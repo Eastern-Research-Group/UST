@@ -32,5 +32,5 @@ UNION ALL
  SELECT ust_control.ust_control_id,
     6 AS sort_order,
     'organization_compartment_flag'::text AS summary_item,
-    ust_control.comments AS summary_detail
+    ust_control.organization_compartment_flag AS summary_detail
    FROM ust_control;

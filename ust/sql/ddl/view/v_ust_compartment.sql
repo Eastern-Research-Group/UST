@@ -6,8 +6,6 @@ create or replace view "public"."v_ust_compartment" as
     a.compartment_id AS "CompartmentID",
     a.compartment_name AS "CompartmentName",
     cs.compartment_status AS "CompartmentStatus",
-    s.substance AS "CompartmentSubstanceStored",
-    ts.substance_casno AS "CompartmentSubstanceCASNO",
     a.compartment_capacity_gallons AS "CompartmentCapacityGallons",
     a.overfill_prevention_ball_float_valve AS "OverfillPreventionBallFloatValve",
     a.overfill_prevention_flow_shutoff_device AS "OverfillPreventionFlowShutoffDevice",
