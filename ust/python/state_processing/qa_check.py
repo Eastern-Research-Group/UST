@@ -10,6 +10,7 @@ import openpyxl as op
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.borders import Border, Side
 
+from python.state_processing import element_mapping_to_excel
 from python.util.logger_factory import logger
 from python.util import utils
 
@@ -90,6 +91,7 @@ class QualityCheck:
 			self.check_failed_constraints()
 			self.check_bad_mapping()
 		self.write_overview()
+		element_mapping_to_excel.build_ws(self.ust_or_release, self.control_id, self.wb.create_sheet(), admin=True)
 		self.cleanup_wb()
 		self.disconnect_db()
 

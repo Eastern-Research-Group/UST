@@ -1,15 +1,16 @@
+from datetime import date
+import ntpath
 import os
 from pathlib import Path
 import sys  
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
-from datetime import date
-import ntpath
 
 import openpyxl as op
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.borders import Border, Side
 
+from python.state_processing import element_mapping_to_excel
 from python.util.logger_factory import logger
 from python.util import utils, config
 
@@ -67,6 +68,7 @@ class Template:
 			self.make_reference_tab()
 			self.make_lookup_tabs()
 			if not self.template_only:
+				element_mapping_to_excel.build_ws(self.ust_or_release, self.control_id, self.wb.create_sheet(), admin=False)
 				self.make_mapping_tabs()
 		self.make_data_tabs()	
 		self.cleanup_wb()
@@ -374,6 +376,8 @@ class Template:
 			pretty_name = 'Tank Material Desc'
 		elif pretty_name == 'Tank Secondary Containments':
 			pretty_name = 'Secondary Containment'
+		elif pretty_name == 'Pipe Tank Top Sump Wall Types':
+			pretty_name = 'Pipe Top Sump Wall Type'
 		elif pretty_name == 'Corrective Action Strategies':
 			pretty_name = 'Corrective Actions'
 
@@ -488,20 +492,20 @@ class Template:
 		if self.ust_or_release == 'ust':
 			if tab_name == 'Facility':
 				green_cells = ['FacilityID']
+			elif tab_name == 'FacilityDispenser':
+				green_cells = ['DispenserID']
+				orange_cells = ['FacilityID']
 			elif tab_name == 'Tank':
 				green_cells = ['TankID']
 				orange_cells = ['FacilityID']
-			elif tab_name == 'Tank Substance':
-				green_cells = ['Substance']
+			elif tab_name == 'Tank Substance' or tab_name == 'Tank Dispenser':
+				green_cells = ['Substance','DispenserID']
 				orange_cells = ['FacilityID','TankID','TankName']
 			elif tab_name == 'Compartment':
 				green_cells = ['CompartmentID']
 				orange_cells = ['FacilityID','TankID','TankName']
-			elif tab_name == 'Compartment Substance':
-				green_cells = ['Substance']
-				orange_cells = ['FacilityID','TankID','TankName','CompartmentID','CompartmentName']
-			elif tab_name == 'Piping' or tab_name == 'Compartment Substance':
-				green_cells = ['PipingID']
+			elif tab_name == 'Piping' or tab_name == 'Compartment Substance' or tab_name == 'CompartmentDispenser':
+				green_cells = ['Substance','PipingID','DispenserID']
 				orange_cells = ['FacilityID','TankID','TankName','CompartmentID','CompartmentName']
 		for colno, header in enumerate(headers, start=1):
 			cell = ws.cell(row=1, column=colno)
