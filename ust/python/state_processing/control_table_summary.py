@@ -12,8 +12,8 @@ from openpyxl.styles import Alignment, Font
 from python.util.logger_factory import logger
 from python.util import utils
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 18
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 7
 organization_id = None
 
 export_file_path = None
@@ -89,11 +89,7 @@ class Summary:
 
 	def populate_export_vars(self):
 		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
-			if self.ust_or_release == 'ust':
-				uor = 'UST'
-			elif self.ust_or_release == 'release':
-				uor = 'Releases'
-			self.export_file_name = self.organization_id.upper() + '_' + uor + '_control_summary_' + utils.get_timestamp_str() + '.xlsx'
+			self.export_file_name = self.organization_id.upper() + '_' + utils.get_pretty_ust_or_release(self.ust_or_release) + '_control_summary_' + utils.get_timestamp_str() + '.xlsx'
 			self.export_file_dir = '../exports/control_table_summaries/' + self.organization_id.upper() + '/'
 			self.export_file_path = self.export_file_dir + self.export_file_name
 			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
@@ -117,7 +113,7 @@ class Summary:
 
 
 	def export_summary(self):
-		ws = self.wb.create_sheet(self.organization_id.upper() + ' ' + self.ust_or_release.upper() + ' Summary')
+		ws = self.wb.create_sheet(self.organization_id.upper() + ' ' + utils.get_pretty_ust_or_release(self.ust_or_release) + ' Summary')
 		conn = utils.connect_db()
 		cur = conn.cursor() 
 		sql = f"""select summary_item, summary_detail 
@@ -131,14 +127,14 @@ class Summary:
 		for rowno, row in enumerate(data, start=1):
 			for colno, cell_value in enumerate(row, start=1):
 				ws.cell(row=rowno, column=colno).value = cell_value
-				if ws.cell(row=rowno, column=colno-1).value == 'organization_compartment_flag' and ws.cell(row=rowno, column=colno).value == None:
+				if colno == 2 and ws.cell(row=rowno, column=colno-1).value == 'organization_compartment_flag' and ws.cell(row=rowno, column=colno).value == None:
 					 ws.cell(row=rowno, column=colno).fill = utils.get_fill_gen(yellow_cell_fill)
 		utils.autowidth(ws)
 		logger.info('Exported %s_control_table summary for control_id %s to %s', self.ust_or_release, self.control_id, self.export_file_path)
 
 
 	def export_row_counts(self):
-		ws = self.wb.create_sheet(self.organization_id.upper() + ' ' + self.ust_or_release.upper() + ' Row Count')
+		ws = self.wb.create_sheet(self.organization_id.upper() + ' ' + utils.get_pretty_ust_or_release(self.ust_or_release) + ' Row Count')
 		headers = ['Table Name', 'Number of Rows']
 		for colno, header in enumerate(headers, start=1):
 			ws.cell(row=1, column=colno).value = header
@@ -151,7 +147,7 @@ class Summary:
 		cur = conn.cursor() 
 		sql = f"""select table_name, num_rows 
 				from public.v_{self.ust_or_release}_row_count_summary
-				where ust_control_id = %s
+				where {self.ust_or_release}_control_id = %s
 				order by sort_order"""
 		cur.execute(sql, (self.control_id,))
 		data = cur.fetchall()
@@ -181,7 +177,7 @@ class Summary:
 					cell.font = Font(bold=True)
 
 			sql = """select total_type, total_ust
-					from v_ust_performance_measures
+					from public.v_ust_performance_measures
 					where organization_id = %s
 					order by sort_order"""
 			cur.execute(sql, (self.organization_id,))
@@ -204,8 +200,8 @@ class Summary:
 			ws.cell(row=rowno, column=2).value = 'Total UST'		
 			ws.cell(row=rowno, column=2).font = Font(bold=True)
 
-			sql = """select "CompartmentStatus", count(*) from v_ust_compartment
-					where ust_control_id = %s group by "CompartmentStatus" """
+			sql = """select "CompartmentStatus", count(*) from public.v_ust_compartment
+					where public.ust_control_id = %s group by "CompartmentStatus" """
 			cur.execute(sql, (self.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=rowno+1):
@@ -215,7 +211,7 @@ class Summary:
 						ws.cell(row=rowno, column=colno).number_format = '#,##0'
 
 			rowno = rowno + 1
-			sql = "select count(*) from v_ust_compartment where ust_control_id = %s" 
+			sql = "select count(*) from public.v_ust_compartment where public.ust_control_id = %s" 
 			cur.execute(sql, (self.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total UST EPA Template'
@@ -234,7 +230,7 @@ class Summary:
 					cell.font = Font(bold=True)
 
 			sql = f"""select total_type, total_cumulative_releases
-					from v_release_performance_measures
+					from public.v_release_performance_measures
 					where organization_id = %s
 					order by sort_order"""
 			cur.execute(sql, (self.organization_id,))
@@ -256,7 +252,7 @@ class Summary:
 			ws.cell(row=rowno, column=1).font = Font(bold=True)
 			ws.cell(row=rowno, column=2).value = 'Total Releases'		
 			ws.cell(row=rowno, column=2).font = Font(bold=True)
-			sql = f"""select "USTReleaseStatus", count(*) from v_ust_release
+			sql = f"""select "USTReleaseStatus", count(*) from public.v_ust_release
 					where release_control_id = %s group by "USTReleaseStatus" """
 			cur.execute(sql, (self.control_id,))
 			data = cur.fetchall()
@@ -267,7 +263,7 @@ class Summary:
 						ws.cell(row=rowno, column=colno).number_format = '#,##0'	
 
 			rowno = rowno + 1			
-			sql = "select count(*) from v_ust_release where ust_control_id = %s" 
+			sql = "select count(*) from public.v_ust_release where release_control_id = %s" 
 			cur.execute(sql, (self.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total Releases EPA Template'
@@ -307,7 +303,7 @@ class Summary:
 
 		start = 3
 		sql = f"""select table_name, element_name 
-				from v_{self.ust_or_release}_element_mapping_for_export
+				from public.v_{self.ust_or_release}_element_mapping_for_export
 				where {self.ust_or_release}_control_id = %s
 				order by table_sort_order, column_sort_order"""
 		cur.execute(sql, (self.control_id,))
@@ -319,11 +315,11 @@ class Summary:
 		start = 3
 		sql = f"""select template_tab_name, element_name from
 					(select template_tab_name, element_name, d.sort_order as table_sort_order, c.sort_order as column_sort_order
-					from {self.ust_or_release}_elements a join ust_elements_tables b on a.element_id = b.element_id 
+					from public.{self.ust_or_release}_elements a join public.{self.ust_or_release}_elements_tables b on a.element_id = b.element_id 
 						join {self.ust_or_release}_elements_tables c on b.element_id = c.element_id and c.table_name = b.table_name
 						join {self.ust_or_release}_template_data_tables d on b.table_name = d.table_name
 					where not exists 
-						(select 1 from v_{self.ust_or_release}_element_mapping_for_export x 
+						(select 1 from public.v_{self.ust_or_release}_element_mapping_for_export x 
 						where x.{self.ust_or_release}_control_id = %s
 						and b.table_name = x.epa_table_name and a.database_column_name = x.epa_column_name)) a
 				where not (template_tab_name in ('Facility Dispenser','Tank Dispenser','Compartment Dispenser','Piping','Compartment Substance')
