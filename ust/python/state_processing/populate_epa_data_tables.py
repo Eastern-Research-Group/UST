@@ -12,8 +12,8 @@ from python.util import utils, config
 
 #TODO: this script has not yet been tested for states where ust_compartment_status is populated
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 14
+ust_or_release = 'release' # valid values are 'ust' or 'release'
+control_id = 7
 delete_existing = True 
 
 
