@@ -713,10 +713,17 @@ select distinct
 	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 99 || ', ''' || "Substance" || ''', '''', null);'
 from wv_ust."erg_substance_deagg" order by 1;
 
+select database_lookup_table, database_lookup_column 
+from ust_element_mapping a join ust_elements b on a.epa_column_name = b.database_column_name 
+where ust_control_id = 18 and epa_column_name = 'facility_type1'
+
+select * from ust_elements;
+
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
 if necessary, replace the "null" with any questions or comments you have about the specific mapping 
 */
-insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'AV Gas', 'Aviation gasoline', null);
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) 
+values (99, 'AV Gas', 'Aviation gasoline', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Biodiesel', 'Diesel fuel (b-unknown)', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'Crude Oil', 'Petroleum product', null);
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (99, 'DEF', 'Diesel exhaust fluid (DEF, not federally regulated)', 'Not federally requlated',null);
@@ -807,6 +814,13 @@ from archive.v_ust_element_mapping
 where lower(element_name) like lower('%substance%')
 and lower(state_value) like lower('%biod%')
 order by 1, 2;
+
+select distinct organization_value, epa_value
+from public.v_ust_element_mapping 
+where epa_column_name = 'facility_type1'
+and lower(organization_value) like lower ('%%')
+order by 1, 2;
+
 
 /*!!! WARNING! Some of the lookups have changed for the new template format, so if you used the 
 archive.v_ust_element_mapping and/or archive.v_lust_element_mapping views and copied values 

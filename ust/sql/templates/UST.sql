@@ -21,6 +21,7 @@
  * Step 3: Get an overview of the source data and prepare it for processing
  * Step 4: Map the source data elements to the EPA template elements 
  * Step 5: Map the source data values to EPA values 
+ * Step 6: Create the value mapping crosswalk views
  * 
 */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,7 +130,7 @@ where table_schema = lower('XX_ust') order by 1;
   
 select 'alter table ' || table_schema || '."' || table_name || '" rename to "NNNNNNNNNNN";'
 from information_schema.tables 
-where table_schema = lower('CA_ust') and table_type = 'BASE TABLE'
+where table_schema = lower('XX_ust') and table_type = 'BASE TABLE'
 order by 1;
 
  * Check the column names out too:
@@ -147,7 +148,7 @@ order by table_name, ordinal_position;
   
 select 'alter table ' || table_schema || '."' || table_name || '" rename column "' || column_name || '" to "NNNNNNNNNNN";'
 from information_schema.columns
-where table_schema = lower('CA_ust') and table_type = 'BASE TABLE'
+where table_schema = lower('XX_ust') and table_type = 'BASE TABLE'
 order by 1;
   
  * NOTE: 
@@ -234,14 +235,14 @@ order by 1, 2, 3, 4, 5;
  * Sometimes states stored multiple values in a single cell, separated by a comma or other separator (if you're lucky...)
  * When examining the state's data with this query:
 
-select distinct ORG_COL_NAME
+select distinct "ORG_COL_NAME"
 from XX_ust."ORG_TAB_NAME"
 order by 1;
 
  * If some rows appear to contain multiple values, you will have to DEAGGREGATE the data. This is most easily done
  * using a Python script written for that purpose and is discussed in the next step. In this step, set the 
  * organization_table_name and organization_column_name to the source data table and column containing the 
- * multiple values. When you get to the next step where you are mapping the values and you create the deagg time, 
+ * multiple values. When you get to the next step where you are mapping the values and you create the deagg table, 
  * go back and UPDATE public.ust_element_mapping to populate the deagg_table_name and deagg_column_name with 
  * the appropriate names. See Step 5 for more information. The query below finds examples of how 
  * public.ust_element_mapping eventually gets populated for these fields. 
@@ -254,7 +255,6 @@ where deagg_table_name is not null
 order by 1, 2, 3, 4, 5;
 
 */
-
 
 --ust_facility: This table is REQUIRED
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
@@ -609,20 +609,24 @@ select epa_column_name from
 	from public.v_ust_needed_mapping 
 	where ust_control_id = ZZ and mapping_complete = 'N'
 	order by table_sort_order, column_sort_order) x;
+ 
+ * To generate the SQL that will assist you in doing the value mapping, run the script 
+ * generate_value_mapping.sql. This script will output a SQL file (located by default in
+ * the repo at /ust/sql/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your
+ * database console and step through it.  
+*/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Step 6: Create the value mapping crosswalk views
 
- * For EACH of the columns found above, perform the following steps:
- * 1) Run the following query, replacing EPA_COL_NAME with the column name above. 
+/* 
+ * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
+ * 
+ * To see the crosswalk views after running the script:
 
-select distinct 'select distinct "' || organization_column_name || '" from XX_ust."' || organization_table_name || '" order by 1;'
-from public.v_ust_needed_mapping 
-where ust_control_id = XX and epa_column_name = 'EPA_COL_NAME';
+select table_name 
+from information_schema.tables 
+where table_schema = lower('XX_ust') and table_type = 'VIEW'
+and table_name like '%_xwalk' order by 1;
 
- * 2) Copy the SQL statement generated above and paste below, then run the statement. 
- *    For example, the SQL will look like this:
-
-select distinct "ORG_COL_NAME" from XX_ust."ORG_TAB_NAME" order by 1;
-
- * 3) 
-
-
+*/
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
