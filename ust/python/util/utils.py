@@ -399,3 +399,13 @@ def is_excel(file_path):
         return True 
     else:
         return False
+
+
+def get_pretty_ust_or_release(ust_or_release):
+    if ust_or_release.lower() == 'ust':
+        return 'UST'
+    elif ust_or_release.lower() == 'release':
+        return 'Releases'
+    else:
+        logger.warning('Invalid value for ust_or_release: %s. Valid values are "ust" and "release"')
+        return None 

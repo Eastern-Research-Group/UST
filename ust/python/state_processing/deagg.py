@@ -40,7 +40,7 @@ def main(control_id, ust_or_release, table_name, column_name, delimiter=',', dro
 			 where {control_column_name} = %s"""
 	cur.execute(sql, (control_id,))
 	schema = utils.get_schema_from_control_id(control_id, ust_or_release)
-	deagg_table_name = 'erg_' + column_name.lower() + '_deagg'
+	deagg_table_name = 'erg_' + column_name.lower().replace(' ','_') + '_deagg'
 
 	logger.info('Schema = %s', schema )
 	logger.info('Deagg table name = %s', deagg_table_name )

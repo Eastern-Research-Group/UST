@@ -90,6 +90,8 @@ class QualityCheck:
 			self.check_bad_datatypes()
 			self.check_failed_constraints()
 			self.check_bad_mapping()
+			if self.ust_or_release == 'ust':
+				self.check_compartment_data_flag()
 		self.write_overview()
 		element_mapping_to_excel.build_ws(self.ust_or_release, self.control_id, self.wb.create_sheet(), admin=True)
 		self.cleanup_wb()
@@ -407,6 +409,18 @@ class QualityCheck:
 			if cnt < 1:
 				self.error_dict['invalid EPA value in ' + epa_column_name] = epa_value 
 				logger.warning('Invalid EPA value for %s.%s: %s', self.table_name, epa_column_name, cnt)
+
+
+	def check_compartment_data_flag(self):
+		sql = "select organization_compartment_flag from ust_control where ust_control_id = %s"
+		self.cur.execute(sql, (self.control_id,))
+		org_comp_flag = self.cur.fetchone()[0]
+		if not org_comp_flag:
+			self.error_dict['Missing organization_compartment_flag in ust_control'] = org_comp_flag 
+			logger.warning('Missing organization_compartment_flag in ust_control')
+		elif org_comp_flag not in ['Y','N']:
+			self.error_dict['Bad value of in organization_compartment_flag in ust_control'] = org_comp_flag
+			logger.warning('Bad value of %s in  organization_compartment_flag in ust_control', org_comp_flag)
 
 
 	def write_overview(self):
