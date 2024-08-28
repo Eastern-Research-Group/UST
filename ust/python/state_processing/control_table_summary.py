@@ -11,10 +11,10 @@ from openpyxl.styles import Alignment, Font
 
 from python.util.logger_factory import logger
 from python.util import utils
+from python.util.dataset import Dataset 
 
 ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 7
-organization_id = None
+control_id = 10
 
 export_file_path = None
 export_file_dir = None
@@ -27,81 +27,16 @@ class Summary:
 	wb = None     
 
 	def __init__(self, 
-				 ust_or_release,
-				 organization_id=None,
-				 control_id=None, 
-				 export_file_name=None, 
-				 export_file_dir=None,
-				 export_file_path=None):
-		self.ust_or_release = ust_or_release.lower()
-		if self.ust_or_release not in ['ust','release']:
-			logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
-			exit()
-		self.organization_id = organization_id
-		self.control_id = control_id
-		self.export_file_name = export_file_name
-		self.export_file_dir = export_file_dir
-		self.export_file_path = export_file_path
-		self.populate_org_control()
-		self.populate_export_vars()
+				 dataset):
+		self.dataset = dataset
 		self.wb = op.Workbook()
-		self.wb.save(self.export_file_path)
+		self.wb.save(self.dataset.export_file_path)
 		self.export_summary()
 		self.export_row_counts()
 		self.performance_measure_comparison()
 		self.mapped_element_summary()
 		self.cleanup_wb()
-		logger.info('Summary exported to %s', self.export_file_path)
-
-
-	def print_self(self):
-		print('ust_or_release = ' + str(self.ust_or_release))
-		print('organization_id = ' + str(self.organization_id))
-		print('control_id = ' + str(self.control_id))
-		print('export_file_name = ' + str(self.export_file_name))
-		print('export_file_dir = ' + str(self.export_file_dir))
-		print('export_file_path = ' + str(self.export_file_path))
-
-
-	def populate_org_control(self):
-		self.print_self()
-		conn = utils.connect_db()
-		cur = conn.cursor()	
-		if not self.organization_id and not self.control_id:
-			logger.error("Either organization_id or control_id must be passed. Exiting...")
-			exit()
-		elif not self.control_id:
-			sql = f"select max({self.ust_or_release}_control_id) from {self.ust_or_release}_control where organization_id = %s"
-			cur.execute(sql, (self.organization_id,))
-			self.control_id = cur.fetchone()[0]
-		else:
-			sql = f"select organization_id from {self.ust_or_release}_control where {self.ust_or_release}_control_id = %s"
-			cur.execute(sql, (self.control_id,))
-			org_id = cur.fetchone()[0]
-			if self.organization_id and org_id != self.organization_id:
-				logger.warning('%s_control_id %s is %s, but %s was passed. Exiting.', self.ust_or_release, self.control_id, org_id, self.organization_id)
-				exit()
-			self.organization_id = org_id
-		cur.close()
-		conn.close()
-		logger.debug('control_id = %s, organization_id = %s', self.control_id, self.organization_id)
-
-
-	def populate_export_vars(self):
-		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
-			self.export_file_name = self.organization_id.upper() + '_' + utils.get_pretty_ust_or_release(self.ust_or_release) + '_control_summary_' + utils.get_timestamp_str() + '.xlsx'
-			self.export_file_dir = '../exports/control_table_summaries/' + self.organization_id.upper() + '/'
-			self.export_file_path = self.export_file_dir + self.export_file_name
-			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
-		elif self.export_file_path:
-			fp = ntpath.split(self.export_file_path)
-			self.export_file_dir = fp[0]
-			self.export_file_name = fp[1]
-		elif self.export_file_dir and self.export_file_name:
-			if self.export_file_name[-5:] != '.xlsx':
-				self.export_file_name = self.export_file_name + '.xlsx'
-			self.export_file_path = os.path.join(self.export_file_dir, self.export_file_name)
-		logger.debug('export_file_name = %s; export_file_dir = %s; export_file_path = %s', self.export_file_name, self.export_file_dir, self.export_file_path)
+		logger.info('Summary exported to %s', self.dataset.export_file_path)
 
 
 	def cleanup_wb(self):
@@ -109,18 +44,18 @@ class Summary:
 			self.wb.remove(self.wb['Sheet'])
 		except:
 			pass
-		self.wb.save(self.export_file_path)
+		self.wb.save(self.dataset.export_file_path)
 
 
 	def export_summary(self):
-		ws = self.wb.create_sheet(self.organization_id.upper() + ' ' + utils.get_pretty_ust_or_release(self.ust_or_release) + ' Summary')
+		ws = self.wb.create_sheet(self.dataset.organization_id.upper() + ' ' + utils.get_pretty_ust_or_release(self.dataset.ust_or_release) + ' Summary')
 		conn = utils.connect_db()
 		cur = conn.cursor() 
 		sql = f"""select summary_item, summary_detail 
-				from public.v_{self.ust_or_release}_control_summary
-				where {self.ust_or_release}_control_id = %s
+				from public.v_{self.dataset.ust_or_release}_control_summary
+				where {self.dataset.ust_or_release}_control_id = %s
 				order by sort_order"""
-		cur.execute(sql, (self.control_id,))
+		cur.execute(sql, (self.dataset.control_id,))
 		data = cur.fetchall()
 		cur.close()
 		conn.close()
@@ -130,11 +65,11 @@ class Summary:
 				if colno == 2 and ws.cell(row=rowno, column=colno-1).value == 'organization_compartment_flag' and ws.cell(row=rowno, column=colno).value == None:
 					 ws.cell(row=rowno, column=colno).fill = utils.get_fill_gen(yellow_cell_fill)
 		utils.autowidth(ws)
-		logger.info('Exported %s_control_table summary for control_id %s to %s', self.ust_or_release, self.control_id, self.export_file_path)
+		logger.info('Exported %s_control_table summary for control_id %s to %s', self.dataset.ust_or_release, self.dataset.control_id, self.dataset.export_file_path)
 
 
 	def export_row_counts(self):
-		ws = self.wb.create_sheet(self.organization_id.upper() + ' ' + utils.get_pretty_ust_or_release(self.ust_or_release) + ' Row Count')
+		ws = self.wb.create_sheet(self.dataset.organization_id.upper() + ' ' + utils.get_pretty_ust_or_release(self.dataset.ust_or_release) + ' Row Count')
 		headers = ['Table Name', 'Number of Rows']
 		for colno, header in enumerate(headers, start=1):
 			ws.cell(row=1, column=colno).value = header
@@ -146,10 +81,10 @@ class Summary:
 		conn = utils.connect_db()
 		cur = conn.cursor() 
 		sql = f"""select table_name, num_rows 
-				from public.v_{self.ust_or_release}_row_count_summary
-				where {self.ust_or_release}_control_id = %s
+				from public.v_{self.dataset.ust_or_release}_row_count_summary
+				where {self.dataset.ust_or_release}_control_id = %s
 				order by sort_order"""
-		cur.execute(sql, (self.control_id,))
+		cur.execute(sql, (self.dataset.control_id,))
 		data = cur.fetchall()
 		cur.close()
 		conn.close()
@@ -159,7 +94,7 @@ class Summary:
 				if colno == 2:
 					ws.cell(row=rowno, column=colno).number_format = '#,##0'
 		utils.autowidth(ws)
-		logger.info('Exported table row counts for control_id %s to %s', self.control_id, self.export_file_path)
+		logger.info('Exported table row counts for control_id %s to %s', self.dataset.control_id, self.dataset.export_file_path)
 
 
 	def performance_measure_comparison(self):
@@ -167,7 +102,7 @@ class Summary:
 		conn = utils.connect_db()
 		cur = conn.cursor() 
 		
-		if self.ust_or_release == 'ust':
+		if self.dataset.ust_or_release == 'ust':
 			headers = ['Performance Measure', 'Total UST']
 			for colno, header in enumerate(headers, start=1):
 				ws.cell(row=1, column=colno).value = header
@@ -180,7 +115,7 @@ class Summary:
 					from public.v_ust_performance_measures
 					where organization_id = %s
 					order by sort_order"""
-			cur.execute(sql, (self.organization_id,))
+			cur.execute(sql, (self.dataset.organization_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=1):
@@ -202,7 +137,7 @@ class Summary:
 
 			sql = """select "CompartmentStatus", count(*) from public.v_ust_compartment
 					where public.ust_control_id = %s group by "CompartmentStatus" """
-			cur.execute(sql, (self.control_id,))
+			cur.execute(sql, (self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=rowno+1):
 				for colno, cell_value in enumerate(row, start=1):
@@ -212,7 +147,7 @@ class Summary:
 
 			rowno = rowno + 1
 			sql = "select count(*) from public.v_ust_compartment where public.ust_control_id = %s" 
-			cur.execute(sql, (self.control_id,))
+			cur.execute(sql, (self.dataset.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total UST EPA Template'
 			ws.cell(row=rowno, column=1).font = Font(bold=True)
@@ -233,7 +168,7 @@ class Summary:
 					from public.v_release_performance_measures
 					where organization_id = %s
 					order by sort_order"""
-			cur.execute(sql, (self.organization_id,))
+			cur.execute(sql, (self.dataset.organization_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=1):
@@ -254,7 +189,7 @@ class Summary:
 			ws.cell(row=rowno, column=2).font = Font(bold=True)
 			sql = f"""select "USTReleaseStatus", count(*) from public.v_ust_release
 					where release_control_id = %s group by "USTReleaseStatus" """
-			cur.execute(sql, (self.control_id,))
+			cur.execute(sql, (self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=rowno+1):
 				for colno, cell_value in enumerate(row, start=1):
@@ -264,7 +199,7 @@ class Summary:
 
 			rowno = rowno + 1			
 			sql = "select count(*) from public.v_ust_release where release_control_id = %s" 
-			cur.execute(sql, (self.control_id,))
+			cur.execute(sql, (self.dataset.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total Releases EPA Template'
 			ws.cell(row=rowno, column=1).font = Font(bold=True)
@@ -276,7 +211,7 @@ class Summary:
 		conn.close()
 		
 		utils.autowidth(ws)
-		logger.info('Exported performance measure summary information for control_id %s to %s', self.control_id, self.export_file_path)
+		logger.info('Exported performance measure summary information for control_id %s to %s', self.dataset.control_id, self.dataset.export_file_path)
 
 
 	def mapped_element_summary(self):
@@ -303,10 +238,10 @@ class Summary:
 
 		start = 3
 		sql = f"""select table_name, element_name 
-				from public.v_{self.ust_or_release}_element_mapping_for_export
-				where {self.ust_or_release}_control_id = %s
+				from public.v_{self.dataset.ust_or_release}_element_mapping_for_export
+				where {self.dataset.ust_or_release}_control_id = %s
 				order by table_sort_order, column_sort_order"""
-		cur.execute(sql, (self.control_id,))
+		cur.execute(sql, (self.dataset.control_id,))
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=start):
 			for colno, cell_value in enumerate(row, start=1):
@@ -315,12 +250,12 @@ class Summary:
 		start = 3
 		sql = f"""select template_tab_name, element_name from
 					(select template_tab_name, element_name, d.sort_order as table_sort_order, c.sort_order as column_sort_order
-					from public.{self.ust_or_release}_elements a join public.{self.ust_or_release}_elements_tables b on a.element_id = b.element_id 
-						join {self.ust_or_release}_elements_tables c on b.element_id = c.element_id and c.table_name = b.table_name
-						join {self.ust_or_release}_template_data_tables d on b.table_name = d.table_name
+					from public.{self.dataset.ust_or_release}_elements a join public.{self.dataset.ust_or_release}_elements_tables b on a.element_id = b.element_id 
+						join {self.dataset.ust_or_release}_elements_tables c on b.element_id = c.element_id and c.table_name = b.table_name
+						join {self.dataset.ust_or_release}_template_data_tables d on b.table_name = d.table_name
 					where not exists 
-						(select 1 from public.v_{self.ust_or_release}_element_mapping_for_export x 
-						where x.{self.ust_or_release}_control_id = %s
+						(select 1 from public.v_{self.dataset.ust_or_release}_element_mapping_for_export x 
+						where x.{self.dataset.ust_or_release}_control_id = %s
 						and b.table_name = x.epa_table_name and a.database_column_name = x.epa_column_name)) a
 				where not (template_tab_name in ('Facility Dispenser','Tank Dispenser','Compartment Dispenser','Piping','Compartment Substance')
 							and element_name in ('FacilityID','TankID','TankName','CompartmentID','CompartmentName'))
@@ -329,7 +264,7 @@ class Summary:
 				and not (template_tab_name in ('Substance','Source','Cause','Corrective Action Strategy') and element_name = 'ReleaseID')
 				and element_name not like '%%Comment'
 				order by table_sort_order, column_sort_order"""
-		cur.execute(sql, (self.control_id,))
+		cur.execute(sql, (self.dataset.control_id,))
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=start):
 			for colno, cell_value in enumerate(row, start=4):
@@ -338,22 +273,23 @@ class Summary:
 		cur.close()
 		conn.close()				
 		utils.autowidth(ws)
-		logger.info('Exported mapped element summary for control_id %s to %s', self.control_id, self.export_file_path)
+		logger.info('Exported mapped element summary for control_id %s to %s', self.dataset.control_id, self.dataset.export_file_path)
 
 
 
 def main(ust_or_release, organization_id=None, control_id=None, export_file_name=None, export_file_dir=None, export_file_path=None):
-	template = Summary(ust_or_release=ust_or_release,
-					    organization_id=organization_id, 
-						control_id=control_id,
-						export_file_name=export_file_name,
-						export_file_dir=export_file_dir,
-						export_file_path=export_file_path)
+	dataset = Dataset(ust_or_release=ust_or_release,
+		              control_id=control_id,
+		              base_file_name='control_summary_' + utils.get_timestamp_str() + '.xlsx',
+					  export_file_name=export_file_name,
+					  export_file_dir=export_file_dir,
+					  export_file_path=export_file_path)
+
+	template = Summary(dataset=dataset)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
-		 organization_id=organization_id, 
 		 control_id=control_id, 
 		 export_file_name=export_file_name,
 		 export_file_dir=export_file_dir,

@@ -13,11 +13,11 @@ from openpyxl.styles.borders import Border, Side
 from python.state_processing import element_mapping_to_excel
 from python.util.logger_factory import logger
 from python.util import utils, config
+from python.util.dataset import Dataset 
 
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'
 control_id = 18
-organization_id = None
 data_only = False
 template_only = False
 export_file_name = None 
@@ -41,106 +41,23 @@ class Template:
 	wb = None     
 
 	def __init__(self, 
-				 ust_or_release,
-				 organization_id=None,
-				 control_id=None, 
-				 export_file_name=None, 
-				 export_file_dir=None,
-				 export_file_path=None,
+				 dataset,
 				 data_only=False,
 				 template_only=False):
-		self.ust_or_release = ust_or_release.lower()
-		if self.ust_or_release not in ['ust','release']:
-			logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
-			exit()
-		self.organization_id = organization_id
-		self.control_id = control_id
-		self.export_file_name = export_file_name
-		self.export_file_dir = export_file_dir
-		self.export_file_path = export_file_path
+		self.dataset = dataset
 		self.data_only = data_only		
 		self.template_only = template_only
-		self.populate_org_control()
-		self.populate_export_vars()
 		self.wb = op.Workbook()
-		self.wb.save(self.export_file_path)
+		self.wb.save(self.dataset.export_file_path)
 		if not self.data_only:
 			self.make_reference_tab()
 			self.make_lookup_tabs()
 			if not self.template_only:
-				element_mapping_to_excel.build_ws(self.ust_or_release, self.control_id, self.wb.create_sheet(), admin=False)
+				element_mapping_to_excel.build_ws(self.dataset.ust_or_release, self.dataset.control_id, self.wb.create_sheet(), admin=False)
 				self.make_mapping_tabs()
 		self.make_data_tabs()	
 		self.cleanup_wb()
-		logger.info('Template exported to %s', self.export_file_path)
-
-
-	def print_self(self):
-		print('ust_or_release = ' + str(self.ust_or_release))
-		print('organization_id = ' + str(self.organization_id))
-		print('control_id = ' + str(self.control_id))
-		print('export_file_name = ' + str(self.export_file_name))
-		print('export_file_dir = ' + str(self.export_file_dir))
-		print('export_file_path = ' + str(self.export_file_path))
-		print('data_only = ' + str(self.data_only))
-		print('template_only = ' + str(self.template_only))
-
-
-	def populate_org_control(self):
-		self.print_self()
-		conn = utils.connect_db()
-		cur = conn.cursor()	
-		if self.template_only and not self.organization_id and not self.control_id and not self.export_file_path and not self.export_file_dir and not self.export_file_name:
-			logger.error('If you want to export a template only and are not passing an organization_id or control_id, you must pass export_file_name and export_file_dir OR export_file_path. Exiting...')
-			exit()
-		elif self.template_only and not (self.export_file_path or (self.export_file_dir and self.export_file_name)) and (self.organization_id or self.control_id):
-			logger.warning("You requested a template only but didn't pass an export path or directory/file name. The file name and path will be constructed from the organization_id/control_id passed (%s/%s)", self.organization_id, self.control_id)
-		elif self.template_only and (self.export_file_path or self.export_file_dir or self.export_file_name):
-			if self.export_file_path or (self.export_file_dir and self.export_file_name):
-				pass 
-			else:  
-				logger.error("If you want a template only but don't pass a full path to export_file_path, you must pass both export_file_dir AND export_file_name. Exiting...")
-				exit()
-		elif not self.organization_id and not self.control_id:
-			logger.error("If you don't want a template only, either organization_id or control_id must be passed. Exiting...")
-			exit()
-		elif not self.control_id:
-			sql = f"select max({self.ust_or_release}_control_id) from {self.ust_or_release}_control where organization_id = %s"
-			cur.execute(sql, (self.organization_id,))
-			self.control_id = cur.fetchone()[0]
-		else:
-			sql = f"select organization_id from {self.ust_or_release}_control where {self.ust_or_release}_control_id = %s"
-			cur.execute(sql, (self.control_id,))
-			org_id = cur.fetchone()[0]
-			if self.organization_id and org_id != self.organization_id:
-				logger.warning('%s_control_id %s is %s, but %s was passed. Exiting.', self.ust_or_release, self.control_id, org_id, self.organization_id)
-				exit()
-			self.organization_id = org_id
-		cur.close()
-		conn.close()
-		logger.debug('control_id = %s, organization_id = %s', self.control_id, self.organization_id)
-
-
-	def populate_export_vars(self):
-		if self.ust_or_release == 'ust':
-			uor = 'UST'
-		elif self.ust_or_release == 'release':
-			uor = 'Releases'		
-		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
-			self.export_file_name = self.organization_id.upper() + '_' + uor + '_template_' + utils.get_timestamp_str() + '.xlsx'
-			self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
-	 # self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
-			self.export_file_path = self.export_file_dir + self.export_file_name
-			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
-		elif self.export_file_path:
-			fp = ntpath.split(self.export_file_path)
-			self.export_file_dir = fp[0]
-			self.export_file_name = fp[1]
-		elif self.export_file_dir and self.export_file_name:
-			if self.export_file_name[-5:] != '.xlsx':
-				self.export_file_name = self.export_file_name + '.xlsx'
-			self.export_file_path = os.path.join(self.export_file_dir, self.export_file_name)
-		logger.debug('export_file_name = %s; export_file_dir = %s; export_file_path = %s', self.export_file_name, self.export_file_dir, self.export_file_path)
+		logger.info('Template exported to %s', self.dataset.export_file_path)
 
 
 	def cleanup_wb(self):
@@ -148,18 +65,18 @@ class Template:
 			self.wb.remove(self.wb['Sheet'])
 		except:
 			pass
-		self.wb.save(self.export_file_path)
+		self.wb.save(self.dataset.export_file_path)
 
 
 	def make_reference_tab(self):
 		ws = self.wb.create_sheet('Reference')
 
-		headers = utils.get_headers(f'v_{self.ust_or_release}_elements')
+		headers = utils.get_headers(f'v_{self.dataset.ust_or_release}_elements')
 		for colno, header in enumerate(headers, start=1):
 			ws.cell(row=1, column=colno).value = header
 		conn = utils.connect_db()
 		cur = conn.cursor()
-		sql = f"select * from public.v_{self.ust_or_release}_elements"	
+		sql = f"select * from public.v_{self.dataset.ust_or_release}_elements"	
 		cur.execute(sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
@@ -268,15 +185,15 @@ class Template:
 			ws.column_dimensions['H'].width = 70
 
 		ws.freeze_panes = ws['A2']
-		self.wb.save(self.export_file_path)
+		self.wb.save(self.dataset.export_file_path)
 		logger.info('Created Reference tab')
 
 
 	def make_lookup_tabs(self):
-		lookups = utils.get_lookup_tabs(ust_or_release=self.ust_or_release)
+		lookups = utils.get_lookup_tabs(ust_or_release=self.dataset.ust_or_release)
 		for lookup in lookups:
 			self.make_lookup_tab(lookup)
-		self.wb.save(self.export_file_path)
+		self.wb.save(self.dataset.export_file_path)
 
 
 	def make_lookup_tab(self, lookup):
@@ -343,9 +260,9 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 		sql = f"""select epa_table_name, epa_column_name, database_lookup_table, database_lookup_column   
-				from v_{self.ust_or_release}_available_mapping
-				where {self.ust_or_release}_control_id = %s order by 1, 2"""
-		cur.execute(sql, (self.control_id,))
+				from v_{self.dataset.ust_or_release}_available_mapping
+				where {self.dataset.ust_or_release}_control_id = %s order by 1, 2"""
+		cur.execute(sql, (self.dataset.control_id,))
 		rows = cur.fetchall()
 		cur.close()
 		conn.close()
@@ -356,7 +273,7 @@ class Template:
 		mappings = self.get_mapping_tabs()
 		for mapping in mappings:
 			self.make_mapping_tab(mapping)
-		self.wb.save(self.export_file_path)
+		self.wb.save(self.dataset.export_file_path)
 
 
 	def make_mapping_tab(self, mapping):
@@ -398,10 +315,10 @@ class Template:
 				ws.cell(row=rowno, column=colno).value = cell_value.replace('"','')
 
 		sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
-				from public.v_{self.ust_or_release}_element_mapping 
-				where {self.ust_or_release}_control_id = %s and epa_column_name = %s
+				from public.v_{self.dataset.ust_or_release}_element_mapping 
+				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s
 				order by 1, 2"""
-		cur.execute(sql, (self.control_id, mapping_column_name))
+		cur.execute(sql, (self.dataset.control_id, mapping_column_name))
 
 		if cur.rowcount > 0:
 			cell = ws.cell(row=1, column=3)
@@ -440,10 +357,10 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 		sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
-				from public.v_{self.ust_or_release}_element_mapping 
-				where {self.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'
+				from public.v_{self.dataset.ust_or_release}_element_mapping 
+				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'
 				order by 1, 2"""
-		cur.execute(sql, (self.control_id,))
+		cur.execute(sql, (self.dataset.control_id,))
 
 		if cur.rowcount > 0:
 			cell = ws.cell(row=1, column=4)
@@ -475,10 +392,10 @@ class Template:
 
 
 	def make_data_tabs(self):
-		tabs = utils.get_data_tabs(ust_or_release=self.ust_or_release)
+		tabs = utils.get_data_tabs(ust_or_release=self.dataset.ust_or_release)
 		for tab in tabs:
 			self.make_data_tab(tab)
-		self.wb.save(self.export_file_path)
+		self.wb.save(self.dataset.export_file_path)
 
 
 	def make_data_tab(self, tab):
@@ -489,7 +406,7 @@ class Template:
 		headers = utils.get_headers(view_name)
 		green_cells = []
 		orange_cells = []
-		if self.ust_or_release == 'ust':
+		if self.dataset.ust_or_release == 'ust':
 			if tab_name == 'Facility':
 				green_cells = ['FacilityID']
 			elif tab_name == 'FacilityDispenser':
@@ -518,8 +435,8 @@ class Template:
 		if not self.template_only:
 			conn = utils.connect_db()
 			cur = conn.cursor()
-			sql = f"select * from public.{view_name} where {self.ust_or_release}_control_id = %s"
-			cur.execute(sql, (self.control_id,))
+			sql = f"select * from public.{view_name} where {self.dataset.ust_or_release}_control_id = %s"
+			cur.execute(sql, (self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=1):
@@ -533,20 +450,21 @@ class Template:
 
 
 
-def main(ust_or_release, organization_id=None, control_id=None, data_only=False, template_only=False, export_file_name=None, export_file_dir=None, export_file_path=None):
-	template = Template(ust_or_release=ust_or_release,
-					    organization_id=organization_id, 
-						control_id=control_id,
+def main(ust_or_release, control_id=None, data_only=False, template_only=False, export_file_name=None, export_file_dir=None, export_file_path=None):
+	dataset = Dataset(ust_or_release=ust_or_release,
+				 	  control_id=control_id, 
+				 	  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx',
+					  export_file_name=export_file_name,
+					  export_file_dir=export_file_dir,
+					  export_file_path=export_file_path)
+
+	template = Template(dataset=dataset,
 						data_only=data_only,
-						template_only=template_only,
-						export_file_name=export_file_name,
-						export_file_dir=export_file_dir,
-						export_file_path=export_file_path)
+						template_only=template_only)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
-		 organization_id=organization_id, 
 		 control_id=control_id, 
 		 data_only=data_only, 
 		 template_only=template_only,

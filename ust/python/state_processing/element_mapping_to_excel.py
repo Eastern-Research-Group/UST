@@ -9,15 +9,15 @@ from openpyxl.styles import Alignment, Font
 
 from python.util.logger_factory import logger
 from python.util import utils, config
+from python.util.dataset import Dataset 
 
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'
 control_id = 18
 
 
-def build_ws(ust_or_release, control_id, ws, admin=False):
+def build_ws(dataset, ws, admin=False):
 	logger.info('Working on Element Mapping tab')
-	ust_or_release = ust_or_release.lower()
 	ws.title = 'Element Mapping'
 
 	if admin:
@@ -41,10 +41,10 @@ def build_ws(ust_or_release, control_id, ws, admin=False):
 	else:
 		cols = 'table_name, element_name, organization_table_name, organization_column_name, programmer_comments, epa_comments, organization_comments'
 	sql = f"""select {cols}
-			from v_{ust_or_release}_element_mapping_for_export
-			where {ust_or_release}_control_id = %s
+			from v_{dataset.ust_or_release}_element_mapping_for_export
+			where {dataset.ust_or_release}_control_id = %s
 			order by table_sort_order, column_sort_order"""
-	cur.execute(sql, (control_id,))
+	cur.execute(sql, (dataset.control_id,))
 	data = cur.fetchall()
 	cur.close()
 	conn.close()
@@ -58,23 +58,17 @@ def build_ws(ust_or_release, control_id, ws, admin=False):
 	return ws
 
 
-def main(ust_or_release, control_id, wb=None):
-	if not wb:
-		organization_id = utils.get_org_from_control_id(control_id, ust_or_release)
-		if ust_or_release == 'ust':
-			uor = 'UST'
-		elif ust_or_release == 'release':
-			uor = 'Releases'	
-		export_file_name = organization_id + '_' + uor + '_Element_Mapping_' + utils.get_timestamp_str() + '.xlsx'
-		export_file_dir = '../exports/mapping/' + organization_id + '/'
-		export_file_path = export_file_dir + export_file_name
-		Path(export_file_dir).mkdir(parents=True, exist_ok=True)
-		wb = op.Workbook()
-		wb.save(export_file_path)
+def main(ust_or_release, control_id):
+	dataset = Dataset(ust_or_release=ust_or_release,
+				 	  control_id=control_id, 
+				 	  base_file_name='element_mapping_' + utils.get_timestamp_str() + '.xlsx')
+
+	wb = op.Workbook()
+	wb.save(dataset.export_file_path)
 	ws = wb.create_sheet()
-	ws = build_ws(ust_or_release, control_id, ws)
+	ws = build_ws(dataset, ws)
 	wb.remove(wb['Sheet'])
-	wb.save(export_file_path)
+	wb.save(dataset.export_file_path)
 
 
 
