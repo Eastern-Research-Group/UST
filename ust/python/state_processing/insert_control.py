@@ -17,6 +17,7 @@ date_processed = None # Defaults to datetime.today(). To use a date other than t
 comments = 'Wrote a Python script to download individual Excel spreadsheets for each of 104 Regulators (as we were advised to download each separately), then combined them.' 
 organization_compartment_flag = None   # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. 
 
+
 class ControlTable:
     def __init__(self, 
                  system_type,
