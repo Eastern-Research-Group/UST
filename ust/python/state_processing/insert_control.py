@@ -10,7 +10,7 @@ from python.util import utils
 
 
 organization_id = 'CA'
-system_type = 'ust'   # Accepted values are 'ust' or 'release'
+ust_or_release = 'ust'   # Accepted values are 'ust' or 'release'
 data_source = 'State granted web access to CERS database (https://cersregulator.calepa.ca.gov/)' # Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
 date_received = '2024-08-14' # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 date_processed = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
@@ -20,7 +20,7 @@ organization_compartment_flag = None   # For UST only set to 'Y' if state data i
 
 class ControlTable:
     def __init__(self, 
-                 system_type,
+                 ust_or_release,
                  organization_id, 
                  data_source, 
                  date_received=datetime.today(), 
@@ -28,11 +28,10 @@ class ControlTable:
                  comments=None,
                  organization_compartment_flag=None):
 
-        if system_type.lower() not in ['ust','release']:
-            logger.critical("System type '%s' not recognized, aborting.", system_type)
-            exit()
-
-        self.system_type = system_type.lower()
+        self.ust_or_release = ust_or_release.lower()
+        if ust_or_release not in ['ust','release']:
+            logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
+            exit()       
         self.organization_id = organization_id
         self.data_source = data_source
         if date_received:
@@ -50,21 +49,21 @@ class ControlTable:
     def insert_db(self):
         conn = utils.connect_db()
         cur = conn.cursor()
-        if self.system_type == 'ust' and self.organization_compartment_flag:
-            sql = f"""insert into {self.system_type}_control 
+        if self.ust_or_release == 'ust' and self.organization_compartment_flag:
+            sql = f"""insert into {self.ust_or_release}_control 
                         (organization_id, date_received, date_processed, data_source, comments, organization_compartment_flag)
                       values (%s, %s, %s, %s, %s, %s)
-                      returning {self.system_type}_control_id"""
+                      returning {self.ust_or_release}_control_id"""
             cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments, self.organization_compartment_flag))
         else:
-            sql = f"""insert into {self.system_type}_control 
+            sql = f"""insert into {self.ust_or_release}_control 
                         (organization_id, date_received, date_processed, data_source, comments)
                       values (%s, %s, %s, %s, %s)
-                      returning {self.system_type}_control_id"""
+                      returning {self.ust_or_release}_control_id"""
             cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments))
         control_id = cur.fetchone()[0]
         self.control_id = control_id
-        logger.info('Inserted into %s_control; %s_control_id = %s', self.system_type, self.system_type, control_id)
+        logger.info('Inserted into %s_control; %s_control_id = %s', self.ust_or_release, self.ust_or_release, control_id)
         conn.commit()
         cur.close()
         conn.close()
@@ -73,7 +72,7 @@ class ControlTable:
     
 if __name__ == '__main__':       
     c = ControlTable(
-        system_type=system_type, 
+        ust_or_release=ust_or_release, 
         organization_id=organization_id, 
         data_source=data_source,
         date_received=date_received,
