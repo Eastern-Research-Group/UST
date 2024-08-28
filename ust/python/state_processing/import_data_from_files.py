@@ -18,10 +18,7 @@ overwrite_table = False # Set to True if you are replacing existing data in the 
 import_service = ImportService()
 
 def import_files(ust_or_release, organization_id, path, overwrite_table=False):
-    ust_or_release = ust_or_release.lower()
-    if ust_or_release not in ['ust','release']:
-        logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
-        exit()
+    ust_or_release = utils.verify_ust_or_release(ust_or_release)
     import_service.import_data(organization_id, ust_or_release, path,  overwrite_table=overwrite_table)
    
     

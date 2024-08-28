@@ -23,10 +23,7 @@ drop_existing = True # defaults to False; if True will drop existing deagg table
 
 
 def main(control_id, ust_or_release, table_name, column_name, delimiter=',', drop_existing=False):
-	ust_or_release = ust_or_release.lower()
-	if ust_or_release not in ['ust','release']:
-		logger.error('Invalid value %s for ust_or_release. Valid values are ust or release. Exiting...', ust_or_release)
-		exit()
+	ust_or_release = utils.verify_ust_or_release(ust_or_release)
 
 	if delimiter == None:
 		delimiter = ','

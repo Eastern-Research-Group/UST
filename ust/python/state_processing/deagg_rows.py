@@ -24,11 +24,7 @@ drop_existing = True # Defaults to False. Set to True to drop the _datarows_deag
 
 
 def main(control_id, ust_or_release, data_table_name, data_table_pk_cols, data_deagg_column_name, deagg_table_name, delimiter=',', drop_existing=False):
-	ust_or_release = ust_or_release.lower()
-	if ust_or_release not in ['ust','release']:
-		logger.error('Invalid value %s for ust_or_release. Valid values are ust or release. Exiting...', ust_or_release)
-		exit()
-
+	ust_or_release = utils.verify_ust_or_release(ust_or_release)
 	schema = utils.get_schema_from_control_id(control_id, ust_or_release)
 	data_deagg_table_name = deagg_table_name.replace('_deagg','_datarows_deagg')
 

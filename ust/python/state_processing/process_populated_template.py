@@ -22,10 +22,7 @@ center_align = Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 class PopulatedTemplate():
 	def __init__(self, ust_or_release, control_id):
-		self.ust_or_release = ust_or_release.lower()
-		if self.ust_or_release not in ['ust','release']:
-			logger.error('Invalid value %s for ust_or_release. Valid values are ust or release. Exiting...', ust_or_release)
-			exit()
+		self.ust_or_release = utils.verify_ust_or_release(ust_or_release)
 		self.control_id = control_id  
 		self.schema = utils.get_schema_from_control_id(control_id, ust_or_release)
 		self.organization_id = utils.get_org_from_control_id(control_id, ust_or_release)

@@ -14,7 +14,7 @@ control_id = 10
 
 
 def main(control_id, ust_or_release):
-	ust_or_release = ust_or_release.lower()
+	ust_or_release = utils.verify_ust_or_release(ust_or_release)
 	schema = utils.get_schema_from_control_id(control_id, ust_or_release)
 
 	conn = utils.connect_db()
