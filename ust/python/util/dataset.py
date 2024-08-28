@@ -17,10 +17,7 @@ class Dataset:
 				 export_file_path=None, 
 				 export_file_dir=None, 
 				 export_file_name=None):
-			self.ust_or_release = ust_or_release.lower()
-			if self.ust_or_release not in ['ust','release']:
-				logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
-				exit()
+			self.ust_or_release = utils.verify_ust_or_release(ust_or_release)
 			self.control_id = control_id
 			self.organization_id = utils.get_org_from_control_id(self.control_id, self.ust_or_release)
 			self.schema = utils.get_schema_from_control_id(self.control_id, self.ust_or_release)

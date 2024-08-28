@@ -28,10 +28,7 @@ class ControlTable:
                  comments=None,
                  organization_compartment_flag=None):
 
-        self.ust_or_release = ust_or_release.lower()
-        if ust_or_release not in ['ust','release']:
-            logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
-            exit()       
+        self.ust_or_release = utils.verify_ust_or_release(ust_or_release)
         self.organization_id = organization_id
         self.data_source = data_source
         if date_received:

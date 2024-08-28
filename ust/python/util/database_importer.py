@@ -13,12 +13,12 @@ from python.util.logger_factory import logger
 
 
 class DatabaseImporter:
-    def __init__(self, organization_id, system_type, file_path, overwrite_table=True):
+    def __init__(self, organization_id, ust_or_release, file_path, overwrite_table=True):
         self.organization_id = organization_id
-        self.system_type = system_type
+        self.ust_or_release = utils.verify_ust_or_release(ust_or_release)
         self.file_path = file_path
         self.overwrite_table = overwrite_table
-        self.schema = self.organization_id.lower() + '_' + self.system_type.lower() 
+        self.schema = self.organization_id.lower() + '_' + self.ust_or_release.lower() 
         self.create_schema()
         self.existing_tables = []
         self.bad_file_list = []
@@ -27,7 +27,7 @@ class DatabaseImporter:
 
     def print_self(self):
         print('organization_id = ' + str(self.organization_id))
-        print('system_type = ' + str(self.system_type))
+        print('ust_or_release = ' + str(self.ust_or_release))
         print('file_path = ' + str(self.file_path))
         print('overwrite_table = ' + str(self.overwrite_table))
         print('schema = ' + str(self.schema))

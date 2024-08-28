@@ -411,3 +411,9 @@ def get_pretty_ust_or_release(ust_or_release):
         return None 
 
 
+def verify_ust_or_release(ust_or_release):
+    if ust_or_release.lower() not in ['ust','release']
+        logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
+        exit()
+    else:
+        return ust_or_release.lower()
