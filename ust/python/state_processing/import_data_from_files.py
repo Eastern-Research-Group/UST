@@ -5,27 +5,28 @@ ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
 from python.util.import_service import ImportService
+from python.util.logger_factory import logger
 
+
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
 organization_id = 'CA' 
-# Enter a directory (NOT a path to a specific file) for ust_path and release_path
-# Set to None if not applicable
-ust_path = r'C:\Users\erguser\repos\ERG\UST\ust\python\state_processing\states\CA\exports'
-# ust_path = None
-# release_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\State Data\AZ\Release' 
-release_path = None 
-overwrite_table = False 
+# Enter a directory (NOT a path to a specific file)
+path = r'C:\Users\erguser\repos\ERG\UST\ust\python\state_processing\states\CA\exports'
+overwrite_table = False # Set to True if you are replacing existing data in the schema
+
 
 import_service = ImportService()
 
-def import_files(organization_id, ust_path=None, release_path=None, overwrite_table=False):
-    if ust_path:
-        import_service.import_data(organization_id, 'ust', ust_path,  overwrite_table=overwrite_table)
-    if release_path:
-        import_service.import_data(organization_id, 'release', release_path, overwrite_table=overwrite_table)
-
+def import_files(ust_or_release, organization_id, path, overwrite_table=False):
+    ust_or_release = ust_or_release.lower()
+    if ust_or_release not in ['ust','release']:
+        logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
+        exit()
+    import_service.import_data(organization_id, ust_or_release, path,  overwrite_table=overwrite_table)
+   
     
 if __name__ == '__main__':       
-    import_files(organization_id, ust_path, release_path, overwrite_table=False)
+    import_files(ust_or_release, organization_id, path, overwrite_table=overwrite_table)
 
 
 
