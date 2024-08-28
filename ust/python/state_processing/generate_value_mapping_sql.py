@@ -7,9 +7,10 @@ from datetime import datetime
 
 from python.util.logger_factory import logger
 from python.util import utils
+from python.util.dataset import Dataset 
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 5
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 18
 only_incomplete = False # Set to true to restrict the output to EPA columns that have not yet been value mapped
 
 export_file_path = None
@@ -22,48 +23,13 @@ class ValueMapper:
 	organization_compartment_flag = None 
 	
 	def __init__(self, 
-				 ust_or_release, 
-				 control_id, 
-				 only_incomplete=False,
-				 export_file_path=None, 
-				 export_file_dir=None, 
-				 export_file_name=None):
-		self.ust_or_release = ust_or_release.lower()
-		if self.ust_or_release not in ['ust','release']:
-			logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
-			exit()
-		self.control_id = control_id
+				 dataset, 
+				 only_incomplete=False):
+		self.dataset = dataset
 		self.only_incomplete = only_incomplete
-		self.organization_id = utils.get_org_from_control_id(self.control_id, self.ust_or_release)
-		self.schema = utils.get_schema_from_control_id(self.control_id, self.ust_or_release)
-		self.export_file_name = export_file_name
-		self.export_file_dir = export_file_dir
-		self.export_file_path = export_file_path
-		self.populate_export_vars()
 		self.set_compartment_flag()	
 		self.generate_sql()
 		self.write_sql()
-
-
-	def populate_export_vars(self):
-		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
-			if self.ust_or_release == 'ust':
-				uor = 'UST'
-			elif self.ust_or_release == 'release':
-				uor = 'Releases'
-			self.export_file_name = self.organization_id.upper() + '_' + uor + '_value_mapping.sql'
-			self.export_file_dir = '../../sql/states/' + self.organization_id.upper() + '/' + uor + '/'
-			self.export_file_path = self.export_file_dir + self.export_file_name
-			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
-		elif self.export_file_path:
-			fp = ntpath.split(self.export_file_path)
-			self.export_file_dir = fp[0]
-			self.export_file_name = fp[1]
-		elif self.export_file_dir and self.export_file_name:
-			if self.export_file_name[-4:] != '.sql':
-				self.export_file_name = self.export_file_name + '.sql'
-			self.export_file_path = os.path.join(self.export_file_dir, self.export_file_name)
-		logger.debug('export_file_name = %s; export_file_dir = %s; export_file_path = %s', self.export_file_name, self.export_file_dir, self.export_file_path)
 
 
 	def set_compartment_flag(self):
@@ -262,18 +228,22 @@ class ValueMapper:
 
 
 
-def main(ust_or_release, control_id, export_file_name=None, export_file_dir=None, export_file_path=None):
-	export = ValueMapper(ust_or_release=ust_or_release,
-						 control_id=control_id,
-						 export_file_name=export_file_name,
-						 export_file_dir=export_file_dir,
-						 export_file_path=export_file_path)
+def main(ust_or_release, control_id, only_incomplete=False, export_file_name=None, export_file_dir=None, export_file_path=None):
+	dataset = Dataset(ust_or_release=ust_or_release,
+				 	  control_id=control_id, 
+				 	  base_file_name='value_mapping.sql',
+					  export_file_name=export_file_name,
+					  export_file_dir=export_file_dir,
+					  export_file_path=export_file_path)
+
+	export = ValueMapper(dataset=dataset, only_incomplete=only_incomplete)
 
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id, 
+		 only_incomplete=only_incomplete,
 		 export_file_name=export_file_name,
 		 export_file_dir=export_file_dir,
 		 export_file_path=export_file_path)

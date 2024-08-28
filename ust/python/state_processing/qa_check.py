@@ -13,6 +13,7 @@ from openpyxl.styles.borders import Border, Side
 from python.state_processing import element_mapping_to_excel
 from python.util.logger_factory import logger
 from python.util import utils
+from python.util.dataset import Dataset 
 
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'
@@ -50,28 +51,13 @@ class QualityCheck:
 	view_counts = {}
 
 	def __init__(self, 
-				 ust_or_release,
-				 control_id,
-				 export_file_name=None, 
-				 export_file_dir=None,
-				 export_file_path=None):
-		self.ust_or_release = ust_or_release.lower()
-		if self.ust_or_release not in ['ust','release']:
-			logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
-			exit()
-		self.control_id = control_id
-		self.export_file_name = export_file_name
-		self.export_file_dir = export_file_dir
-		self.export_file_path = export_file_path
-		self.organization_id = utils.get_org_from_control_id(self.control_id, self.ust_or_release)
-		self.schema = utils.get_schema_from_control_id(self.control_id, self.ust_or_release)
+				 dataset):
+		self.dataset = dataset
 		self.conn = utils.connect_db()
 		self.cur = self.conn.cursor()
-		self.set_export_path()
 		self.set_views()
-		# self.print_self()
 		if not self.views_to_review:
-			logger.warning('No %s template views found in schema %s; exiting.', self.ust_or_release, self.schema)
+			logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
 			logger.info('Views this script looks for: %s', self.get_view_names())
 			self.disconnect_db()
 			exit()
@@ -90,47 +76,12 @@ class QualityCheck:
 			self.check_bad_datatypes()
 			self.check_failed_constraints()
 			self.check_bad_mapping()
-			if self.ust_or_release == 'ust':
+			if self.dataset.ust_or_release == 'ust':
 				self.check_compartment_data_flag()
 		self.write_overview()
-		element_mapping_to_excel.build_ws(self.ust_or_release, self.control_id, self.wb.create_sheet(), admin=True)
+		element_mapping_to_excel.build_ws(self.dataset.ust_or_release, self.dataset.control_id, self.wb.create_sheet(), admin=True)
 		self.cleanup_wb()
 		self.disconnect_db()
-
-
-	def print_self(self):
-		print('ust_or_release = ' + str(self.ust_or_release))
-		print('control_id = ' + str(self.control_id))
-		print('organization_id = ' + str(self.organization_id))
-		print('export_file_name = ' + str(self.export_file_name))
-		print('export_file_dir = ' + str(self.export_file_dir))
-		print('export_file_path = ' + str(self.export_file_path))
-		print('schema = ' + str(self.schema))
-		print('views_to_review = ' + str(self.views_to_review))
-		print('view_name = ' + str(self.view_name))
-		print('table_name = ' + str(self.table_name))
-		print('view_col_str = ' + str(self.view_col_str))
-		print('error_dict = ' + str(self.error_dict))
-		print('error_cnt_dict = ' + str(self.error_cnt_dict))
-
-
-	def set_export_path(self):
-		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
-			self.export_file_name = self.organization_id.upper() + '_' + self.ust_or_release + '_QAQC_' + utils.get_timestamp_str() + '.xlsx'
-			self.export_file_dir = '../exports/QAQC/' + self.organization_id.upper() + '/'
-			self.export_file_path = self.export_file_dir + self.export_file_name
-			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
-		elif self.export_file_path:
-			fp = ntpath.split(self.export_file_path)
-			self.export_file_dir = fp[0]
-			self.export_file_name = fp[1]
-		elif self.export_file_dir and self.export_file_name:
-			if self.export_file_name[-5:] != '.xlsx':
-				self.export_file_name = self.export_file_name + '.xlsx'
-			self.export_file_path = os.path.join(self.export_file_dir, self.export_file_name)
-		self.export_file_name = self.export_file_name.replace('_ust_','_UST_')
-		self.export_file_path = self.export_file_path.replace('_ust_','_UST_')
-		logger.debug('export_file_name = %s; export_file_dir = %s; export_file_path = %s', self.export_file_name, self.export_file_dir, self.export_file_path)
 
 
 	def disconnect_db(self):
@@ -139,7 +90,7 @@ class QualityCheck:
 
 
 	def get_view_names(self):
-		sql = f"select view_name from public.{self.ust_or_release}_template_data_tables order by sort_order"
+		sql = f"select view_name from public.{self.dataset.ust_or_release}_template_data_tables order by sort_order"
 		self.cur.execute(sql)
 		rows = self.cur.fetchall()
 		views = [r[0] for r in rows]
@@ -148,22 +99,22 @@ class QualityCheck:
 
 	def set_views(self):
 		sql = f"""select a.table_name as view_name 
-					from information_schema.tables a join public.{self.ust_or_release}_template_data_tables b on a.table_name = b.view_name 
+					from information_schema.tables a join public.{self.dataset.ust_or_release}_template_data_tables b on a.table_name = b.view_name 
 					where a.table_schema = %s
 					order by b.sort_order"""
-		self.cur.execute(sql, (self.schema,))
+		self.cur.execute(sql, (self.dataset.schema,))
 		rows = self.cur.fetchall()		
 		self.views_to_review = [r[0] for r in rows]
 		logger.info("The following views will be QC'ed: %s", self.views_to_review)
 
 
 	def set_view_counts(self):
-		sql = f"select view_name from public.{self.ust_or_release}_template_data_tables order by sort_order"
+		sql = f"select view_name from public.{self.dataset.ust_or_release}_template_data_tables order by sort_order"
 		self.cur.execute(sql)
 		rows = self.cur.fetchall()
 		for row in rows:
 			view_name = row[0]
-			sql2 = f"select count(*) from {self.schema}.{view_name}"
+			sql2 = f"select count(*) from {self.dataset.schema}.{view_name}"
 			try:
 				self.cur.execute(sql2)
 			except psycopg2.errors.UndefinedTable:
@@ -174,7 +125,7 @@ class QualityCheck:
 
 
 	def check_view_counts(self):
-		if self.ust_or_release == 'ust':
+		if self.dataset.ust_or_release == 'ust':
 			if 'v_ust_compartment' in self.views_to_review and 'v_ust_tank' in self.views_to_review:
 				if self.view_counts['v_ust_compartment'] < self.view_counts['v_ust_tank']:
 					self.error_dict['Fewer rows in child table than expected'] = 'v_compartment_tank should have at least as many rows as v_ust_tank'
@@ -186,7 +137,7 @@ class QualityCheck:
 	def check_missing_views(self):
 		# check that all parent 
 		missing_views = []
-		if self.ust_or_release == 'ust':
+		if self.dataset.ust_or_release == 'ust':
 			if 'v_ust_piping' in self.views_to_review:
 				if 'v_ust_compartment' not in self.views_to_review:
 					missing_views.insert(0, 'v_ust_compartment')
@@ -196,8 +147,8 @@ class QualityCheck:
 				if 'v_ust_tank' not in self.views_to_review and 'v_ust_tank' not in missing_views:
 					missing_views.insert(0, 'v_ust_tank')
 			for view_name in missing_views:
-				self.error_dict['Missing required view (child data present)'] = self.schema + '.' + view_name  
-				logger.warning('Missing required view (child data present) %s.%s', self.schema, self.view_name)
+				self.error_dict['Missing required view (child data present)'] = self.dataset.schema + '.' + view_name  
+				logger.warning('Missing required view (child data present) %s.%s', self.dataset.schema, self.view_name)
 
 
 	def set_view_col_str(self):
@@ -205,7 +156,7 @@ class QualityCheck:
 				from information_schema.columns 
 				where table_schema = %s and table_name = %s
 				order by ordinal_position"""
-		self.cur.execute(sql, (self.schema, self.view_name))
+		self.cur.execute(sql, (self.dataset.schema, self.view_name))
 		rows = self.cur.fetchall()
 		col_str = ''
 		for row in rows:
@@ -218,7 +169,7 @@ class QualityCheck:
 	def write_to_ws(self, data, ws_name):
 		if data:
 			ws = self.wb.create_sheet(ws_name)
-			headers = utils.get_headers(self.view_name, self.schema)
+			headers = utils.get_headers(self.view_name, self.dataset.schema)
 			for colno, header in enumerate(headers, start=1):
 				ws.cell(row=1, column=colno).value = header
 			for rowno, row in enumerate(data, start=2):
@@ -235,13 +186,13 @@ class QualityCheck:
 		sql = f"""select column_name from information_schema.columns 
 				where table_schema = %s and table_name = %s
 				order by ordinal_position"""
-		self.cur.execute(sql, (self.schema, self.view_name,))
+		self.cur.execute(sql, (self.dataset.schema, self.view_name,))
 		rows = self.cur.fetchall()
 		existing_cols = [r[0] for r in rows]
 		for rcol in req_cols:
 			if rcol not in existing_cols:
-				self.error_dict['Missing join column'] = self.schema + '.' + self.view_name + '.' + rcol 
-				logger.warning('Missing join column %s in view %s.%s', rcol, self.schema, self.view_name)
+				self.error_dict['Missing join column'] = self.dataset.schema + '.' + self.view_name + '.' + rcol 
+				logger.warning('Missing join column %s in view %s.%s', rcol, self.dataset.schema, self.view_name)
 
 
 	def check_required_cols(self):
@@ -258,13 +209,13 @@ class QualityCheck:
 			sql2 = """select count(*) from information_schema.columns 
 			         where table_schema = %s and table_name = %s
 			         and column_name = %s"""
-			self.cur.execute(sql2, (self.schema, self.view_name, col_name))
+			self.cur.execute(sql2, (self.dataset.schema, self.view_name, col_name))
 			cnt = self.cur.fetchone()[0]
 			if cnt < 1:
-				self.error_dict['Missing required column'] = self.schema + '.' + self.view_name + '.' + col_name 
-				logger.warning('Missing required column %s in view %s.%s', col_name, self.schema, self.view_name)
+				self.error_dict['Missing required column'] = self.dataset.schema + '.' + self.view_name + '.' + col_name 
+				logger.warning('Missing required column %s in view %s.%s', col_name, self.dataset.schema, self.view_name)
 			else:
-				sql3 = f"select * from {self.schema}.{self.view_name} where {col_name} is null"
+				sql3 = f"select * from {self.dataset.schema}.{self.view_name} where {col_name} is null"
 				self.cur.execute(sql3)
 				data = self.cur.fetchall()
 				num_rows = self.cur.rowcount 
@@ -281,7 +232,7 @@ class QualityCheck:
 			view_data_type = d[3]
 			view_len = d[4]
 			if view_len and table_len and view_len > table_len:
-				sql2 = f"select * from {self.schema}.{self.view_name} where length({col_name}) > %s"
+				sql2 = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
 				self.cur.execute(sql2, (table_len,))
 				data = self.cur.fetchall()
 				num_rows = self.cur.rowcount 
@@ -289,7 +240,7 @@ class QualityCheck:
 				logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
 				self.write_to_ws(data, col_name + ' too long')
 			elif view_data_type == 'text' and table_data_type == 'character varying':
-				sql = f"select * from {self.schema}.{self.view_name} where length({col_name}) > %s"
+				sql = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
 				self.cur.execute(sql, (table_len,))
 				data = self.cur.fetchall()
 				num_rows = self.cur.rowcount 
@@ -298,7 +249,7 @@ class QualityCheck:
 					logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
 					self.write_to_ws(data, col_name + ' too long')
 			elif table_data_type != view_data_type:
-				self.error_dict['Wrong data type for ' + self.table_name + '.' + col_name] = self.schema + '.' + self.view_name + '.' + col_name
+				self.error_dict['Wrong data type for ' + self.table_name + '.' + col_name] = self.dataset.schema + '.' + self.view_name + '.' + col_name
 
 
 	def check_bad_datatypes(self):
@@ -310,12 +261,12 @@ class QualityCheck:
 				and b.table_schema  = %s and b.table_name = %s
 				and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length)
 				order by a.ordinal_position"""
-		self.cur.execute(sql, (self.table_name, self.schema, self.view_name))
+		self.cur.execute(sql, (self.table_name, self.dataset.schema, self.view_name))
 		data = self.cur.fetchall()
 		self.get_bad_datatypes(data)
 
 		# check the data type of the EPA table join columns 
-		if self.ust_or_release == 'ust':
+		if self.dataset.ust_or_release == 'ust':
 			if self.view_name == 'v_ust_tank':
 				epa_table_name = 'ust_facility'
 			elif self.view_name == 'v_ust_compartment':
@@ -331,7 +282,7 @@ class QualityCheck:
 						and b.table_schema = %s and b.table_name = %s
 						and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length)
 						order by a.ordinal_position"""
-				self.cur.execute(sql, (epa_table_name, self.schema, self.view_name))
+				self.cur.execute(sql, (epa_table_name, self.dataset.schema, self.view_name))
 				data = self.cur.fetchall()
 				self.get_bad_datatypes(data)
 
@@ -343,23 +294,23 @@ class QualityCheck:
 		     		(select column_name from information_schema.columns 
 		     		where table_schema = 'public' and table_name = %s)
 		     	order by column_name"""
-		self.cur.execute(sql, (self.schema, self.view_name, self.table_name))
+		self.cur.execute(sql, (self.dataset.schema, self.view_name, self.table_name))
 		rows = self.cur.fetchall()
 		for row in rows:
 			col_name = row[0]
 			if col_name not in join_cols[self.view_name] and not (self.view_name == 'v_ust_compartment_substance' and col_name == 'substance_id'):
-				self.error_dict['Extraneous column'] = self.schema + '.' + self.view_name + '.' + col_name 
-				logger.warning('Extraneous column %s in view %s.%s', col_name, self.schema, self.view_name)
+				self.error_dict['Extraneous column'] = self.dataset.schema + '.' + self.view_name + '.' + col_name 
+				logger.warning('Extraneous column %s in view %s.%s', col_name, self.dataset.schema, self.view_name)
 
 
 	def check_nonunique(self):
 		# check for non-unique (repeating) rows	
-		sql = f"select {self.view_col_str}, count(*) from {self.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
+		sql = f"select {self.view_col_str}, count(*) from {self.dataset.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
 		self.cur.execute(sql)
 		data = self.cur.fetchall()
 		num_rows = self.cur.rowcount 
-		self.error_cnt_dict['nonunique rows in ' + self.schema + '.' + self.view_name] = num_rows
-		logger.warning('Number of non-unique rows in %s.%s: %s', self.schema, self.view_name, num_rows)
+		self.error_cnt_dict['nonunique rows in ' + self.dataset.schema + '.' + self.view_name] = num_rows
+		logger.warning('Number of non-unique rows in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
 		self.write_to_ws(data, self.view_name + ' nonunique')
 
 
@@ -376,14 +327,14 @@ class QualityCheck:
 		for row in rows:
 			constraint_name = row[0]
 			check_clause = row[1]
-			sql2 = f"select * from {self.schema}.{self.view_name} where not {check_clause}"
+			sql2 = f"select * from {self.dataset.schema}.{self.view_name} where not {check_clause}"
 			try:
 				self.cur.execute(sql2)
 			except psycopg2.errors.UndefinedColumn:
 				continue 
 			data = self.cur.fetchall()
 			num_rows = self.cur.rowcount 
-			self.error_cnt_dict['failed check constraint ' + self.schema + '.' + constraint_name] = num_rows
+			self.error_cnt_dict['failed check constraint ' + self.dataset.schema + '.' + constraint_name] = num_rows
 			logger.warning('Number of failed rows for check constraint %s.%s: %s', self.table_name, constraint_name, num_rows)
 			self.write_to_ws(data, constraint_name)
 
@@ -391,10 +342,10 @@ class QualityCheck:
 	def check_bad_mapping(self):
 		# check for bad mapping values
 		sql = f"""select distinct epa_column_name, epa_value, database_lookup_table, database_column_name 
-				from public.v_{self.ust_or_release}_element_mapping a join public.{self.ust_or_release}_elements b on a.epa_column_name = b.database_column_name 
-				where {self.ust_or_release}_control_id = %s and epa_table_name = %s and epa_value is not null
+				from public.v_{self.dataset.ust_or_release}_element_mapping a join public.{self.dataset.ust_or_release}_elements b on a.epa_column_name = b.database_column_name 
+				where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_value is not null
 				order by 1, 2, 3"""
-		self.cur.execute(sql, (self.control_id, self.table_name))
+		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
 		rows = self.cur.fetchall()
 		for row in rows:
 			epa_column_name = row[0]
@@ -413,7 +364,7 @@ class QualityCheck:
 
 	def check_compartment_data_flag(self):
 		sql = "select organization_compartment_flag from ust_control where ust_control_id = %s"
-		self.cur.execute(sql, (self.control_id,))
+		self.cur.execute(sql, (self.dataset.control_id,))
 		org_comp_flag = self.cur.fetchone()[0]
 		if not org_comp_flag:
 			self.error_dict['Missing organization_compartment_flag in ust_control'] = org_comp_flag 
@@ -478,16 +429,19 @@ class QualityCheck:
 			self.wb.active = self.wb['Overview']
 		except:
 			pass
-		self.wb.save(self.export_file_path)
+		self.wb.save(self.dataset.export_file_path)
 
 
 
 def main(ust_or_release, control_id=None, export_file_name=None, export_file_dir=None, export_file_path=None):
-	qc = QualityCheck(ust_or_release=ust_or_release,
-						control_id=control_id,
-						export_file_name=export_file_name,
-						export_file_dir=export_file_dir,
-						export_file_path=export_file_path)
+	dataset = Dataset(ust_or_release=ust_or_release,
+				 	  control_id=control_id, 
+				 	  base_file_name='QAQC_' + utils.get_timestamp_str() + '.xlsx',
+					  export_file_name=export_file_name,
+					  export_file_dir=export_file_dir,
+					  export_file_path=export_file_path)
+
+	qc = QualityCheck(dataset=dataset)
 
 
 if __name__ == '__main__':   
