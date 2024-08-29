@@ -26,7 +26,7 @@ drop_existing = True # Defaults to False. Set to True to drop the _datarows_deag
 def main(control_id, ust_or_release, data_table_name, data_table_pk_cols, data_deagg_column_name, deagg_table_name, delimiter=',', drop_existing=False):
 	ust_or_release = utils.verify_ust_or_release(ust_or_release)
 	schema = utils.get_schema_from_control_id(control_id, ust_or_release)
-	data_deagg_table_name = deagg_table_name.replace('_deagg','_datarows_deagg')
+	data_deagg_table_name = utils.get_deagg_datarows_table_name(deagg_table_name)
 
 	conn = utils.connect_db()
 	cur = conn.cursor()

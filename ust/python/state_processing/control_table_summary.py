@@ -13,9 +13,10 @@ from python.util.logger_factory import logger
 from python.util import utils
 from python.util.dataset import Dataset 
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 10
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 
+# These variables can usually be left unset. This script will general an Excel file in the appropriate state folder in the repo under /ust/python/exports/control_table_summaries
 export_file_path = None
 export_file_dir = None
 export_file_name = None

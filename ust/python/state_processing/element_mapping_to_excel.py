@@ -12,8 +12,9 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 18
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+
 
 
 def build_ws(dataset, ws, admin=False):
