@@ -16,13 +16,16 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 18
-data_only = False
-template_only = False
-export_file_name = None 
-export_file_dir = None 
-export_file_path = None 
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+
+data_only = False				# Boolean; defaults to False. Set to True to generate a populated template that does not include the Reference and Lookup tabs.
+template_only = False			# Boolean; defaults to False. Set to True to generate an blank template with no data.
+
+# These variables can usually be left unset. This script will general an Excel file in the appropriate state folder in the repo under /ust/python/exports/epa_templates
+export_file_path = None
+export_file_dir = None
+export_file_name = None
 
 
 gray_cell_fill = 'C9C9C9' # gray

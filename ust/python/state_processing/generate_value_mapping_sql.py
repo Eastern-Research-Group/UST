@@ -10,10 +10,11 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 18
-only_incomplete = False # Set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+only_incomplete = False 		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 
+# These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None
 export_file_dir = None
 export_file_name = None

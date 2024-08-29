@@ -1,0 +1,135 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/* ORGANIZATION VALUES MAY NEED TO BE DEAGGREGATED for ust_tank_substance.substance_id!
+ * 
+ * Schema = "wv_ust"
+ * Organization table name = "tanks"
+ * Organization column name = "Substance"
+ * Review the organization values below. If there are multiple values in a single row, the values need to be deaggregated before proceeding.
+ */
+
+--select distinct "Substance" from wv_ust."tanks" where "Substance" is not null order by 1;
+/* Organization values:
+'AV Gas'
+'Biodiesel'
+'Biodiesel\nPremium Unleaded\nRegular Unleaded'
+'Crude Oil'
+'DEF'
+'DEF\nDiesel'
+'DEF\nDiesel-onroad'
+'Diesel'
+'Diesel-offroad'
+'Diesel-offroad\nDiesel-onroad'
+'Diesel-offroad\nDiesel-onroad\nEthanol Free'
+'Diesel-offroad\nDiesel-onroad\nGasoline'
+'Diesel-offroad\nDiesel-onroad\nGasoline\nPremium Unleaded'
+'Diesel-offroad\nDiesel-onroad\nKerosene'
+'Diesel-offroad\nDiesel-onroad\nPremium Unleaded\nRegular Unleaded'
+'Diesel-offroad\nEthanol Free\nKerosene'
+'Diesel-offroad\nEthanol Free\nPremium Unleaded'
+'Diesel-offroad\nGasoline'
+'Diesel-offroad\nGasoline\nKerosene'
+'Diesel-offroad\nKerosene'
+'Diesel-offroad\nPremium Unleaded'
+'Diesel-onroad'
+'Diesel-onroad\nE85'
+'Diesel-onroad\nEthanol Free'
+'Diesel-onroad\nEthanol Free\nGasoline'
+'Diesel-onroad\nEthanol Free\nPremium Unleaded'
+'Diesel-onroad\nGasoline'
+'Diesel-onroad\nGasoline\nKerosene'
+'Diesel-onroad\nKerosene'
+'Diesel-onroad\nPremium Unleaded'
+'Diesel-onroad\nRegular Unleaded'
+'Diesel-ultra low sulfur\nPremium Unleaded'
+'Diesel\nDiesel-offroad'
+'Diesel\nDiesel-offroad\nGasoline'
+'Diesel\nDiesel-onroad'
+'Diesel\nDiesel-ultra low sulfur'
+'Diesel\nEthanol Free'
+'Diesel\nEthanol Free\nRegular Unleaded'
+'Diesel\nGasoline'
+'Diesel\nGasoline\nKerosene'
+'Diesel\nGasoline\nPremium Unleaded'
+'Diesel\nGasoline\nWaste Oil'
+'Diesel\nKerosene'
+'Diesel\nPremium Unleaded'
+'Diesel\nPremium Unleaded\nRegular Unleaded'
+'Diesel\nRegular Unleaded'
+'E85'
+'E85\nEthanol Free\nPremium Unleaded'
+'E85\nGasoline'
+'E85\nGasoline\nPremium Unleaded'
+'E85\nPremium Unleaded'
+'E85\nRegular Unleaded'
+'Empty'
+'Ethanol'
+'Ethanol Free'
+'Ethanol Free\nGasoline'
+'Ethanol Free\nHeating Oil'
+'Ethanol Free\nPremium Unleaded'
+'Ethanol Free\nPremium Unleaded\nRegular Unleaded'
+'Ethanol Free\nRegular Unleaded'
+'ETHYLENE GLYCOL'
+'Gasohol'
+'Gasohol\nGasoline\nKerosene'
+'Gasoline'
+'Gasoline\nKerosene'
+'Gasoline\nMidgrade Unleaded\nPremium Unleaded'
+'Gasoline\nPremium Unleaded'
+'Gasoline\nPremium Unleaded\nRegular Unleaded'
+'Gasoline\nRegular Unleaded'
+'Hazardous Substance'
+'Heating Oil'
+'Hydraulic Oil'
+'Jet Fuel'
+'Kerosene'
+'Kerosene\nPremium Unleaded'
+'Kerosene\nRegular Unleaded'
+'Midgrade Unleaded'
+'Mixture'
+'Motor Oil'
+'New Oil'
+'Not Listed'
+'Other'
+'Other\nUsed Oil'
+'Premium Unleaded'
+'Premium Unleaded\nRegular Unleaded'
+'Regular Unleaded'
+'Unknown'
+'Used Oil'
+'Waste Oil'
+ */
+
+/* IF after reviewing the organization values, you determine that there are in fact multiple values per row,
+ * run deagg.py, setting the variables below:
+
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 11
+table_name = 'tanks'
+column_name = 'Substance' 
+delimiter = '\n' # defaults to ','; delimiter from the column beging deaggregated in the state table. Use \n for hard returns.
+drop_existing = False # defaults to False; if True will drop existing deagg table with the same name
+
+
+* After running deagg.py, run the SQL below to view the value deagg table:
+*/
+select * from wv_ust.erg_substance_deagg order by 2;
+
+/* Next, run script deagg_rows.py to crosswalk the deaggreated value to facility, tank, or compartment-level rows.
+ * Set the script variables below, substituting XXXXX and ZZZZZ
+for a list of the columns in the SOURCE data you need to group by (e.g. ["FacilityID","TankID","ComartmentID"]).
+
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 11
+data_table_name = 'tanks'
+data_table_pk_cols = ['XXXXX','ZZZZZ'] # list of column names that the new table should be grouped by 
+delimiter = '\n' # defaults to ','; delimiter from the column beging deaggregated in the state table. Use \n for hard returns.
+deagg_table_name = 'erg_substance_deagg'
+drop_existing = False # defaults to False. Set to True to drop the _datarows_deagg table before beginning (if you need to redo it)
+
+
+ * After running deagg_rows.py, run the SQL below to view the rows deagg table:
+ */
+select * from wv_ust.erg_substance_datarows_deagg order by 2;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------

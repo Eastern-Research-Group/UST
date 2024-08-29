@@ -10,9 +10,9 @@ from python.util import utils, config
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 18
-delete_existing = True 
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+delete_existing = False 		# Boolean, defaults to False. Set to True to delete existing data. Script will return an error if this variable is False and data exists in the EPA data tables for the control_id.			
 
 
 def main(control_id, ust_or_release, delete_existing=False):

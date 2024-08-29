@@ -417,3 +417,12 @@ def verify_ust_or_release(ust_or_release):
         exit()
     else:
         return ust_or_release.lower()
+
+
+def get_deagg_table_name(column_name):
+    return 'erg_' + column_name.lower().replace(' ','_') + '_deagg'
+
+
+def get_deagg_datarows_table_name(deagg_table_name):
+    return deagg_table_name.replace('_deagg','_datarows_deagg')
+
