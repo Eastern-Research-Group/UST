@@ -56,7 +56,7 @@ class Template:
 			self.make_reference_tab()
 			self.make_lookup_tabs()
 			if not self.template_only:
-				element_mapping_to_excel.build_ws(self.dataset.ust_or_release, self.dataset.control_id, self.wb.create_sheet(), admin=False)
+				element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=False)
 				self.make_mapping_tabs()
 		self.make_data_tabs()	
 		self.cleanup_wb()

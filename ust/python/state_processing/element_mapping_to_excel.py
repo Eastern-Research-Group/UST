@@ -38,7 +38,7 @@ def build_ws(dataset, ws, admin=False):
 	cur = conn.cursor()
 	
 	if admin:
-		cols = f'epa_table_name, epa_column_name, organization_table_name, organization_column_name, {ust_or_release}_element_mapping_id, programmer_comments, epa_comments, organization_comments'
+		cols = f'epa_table_name, epa_column_name, organization_table_name, organization_column_name, {dataset.ust_or_release}_element_mapping_id, programmer_comments, epa_comments, organization_comments'
 	else:
 		cols = 'table_name, element_name, organization_table_name, organization_column_name, programmer_comments, epa_comments, organization_comments'
 	sql = f"""select {cols}

@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 11                 # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = False 		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -70,7 +70,9 @@ class ValueMapper:
 				self.value_mapping_sql = self.value_mapping_sql + f'\nCopy the tank status mapping down to the compartment!\n'
 				self.value_mapping_sql = self.value_mapping_sql + 'The lookup tables for compartment_statuses and tank_stasuses are the same.\n */\n\n'
 				
-			sql2 = f"""select {self.dataset.ust_or_release}_element_mapping_id, organization_table_name, organization_column_name 
+
+
+			sql2 = f"""select {self.dataset.ust_or_release}_element_mapping_id, organization_table_name, organization_column_name, deagg_table_name, deagg_column_name 
 					from public.{self.dataset.ust_or_release}_element_mapping 
 					where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s"""
 			cur.execute(sql2, (self.dataset.control_id, epa_column_name))
@@ -78,8 +80,16 @@ class ValueMapper:
 			element_mapping_id = row2[0]
 			org_table_name = row2[1]
 			org_column_name = row2[2]
+			deagg_table_name = row2[3]
+			deagg_column_name = row2[4]
 
-			sql3 = f"""select distinct "{org_column_name}" from {self.dataset.schema}."{org_table_name}" where "{org_column_name}" is not null order by 1"""
+			select_table = org_table_name
+			select_col = org_column_name
+			if deagg_table_name:
+				select_table = deagg_table_name
+				select_col = deagg_column_name
+
+			sql3 = f"""select distinct "{select_col}" from {self.dataset.schema}."{select_table}" where "{select_col}" is not null order by 1"""
 			self.value_mapping_sql = self.value_mapping_sql + '--' + sql3 + ';\n/* Organization values are:\n\n'
 			cur.execute(sql3)
 			rows3 = cur.fetchall()
@@ -98,7 +108,7 @@ class ValueMapper:
 			db_lookup_table = row4[0]
 			db_lookup_col = row4[1]	
 
-			sql4 = f"""select distinct "{org_column_name}" from {self.dataset.schema}."{org_table_name}" where "{org_column_name}" is not null order by 1"""	
+			sql4 = f"""select distinct "{select_col}" from {self.dataset.schema}."{select_table}" where "{select_col}" is not null order by 1"""	
 			cur.execute(sql4)
 			rows4 = cur.fetchall()
 			for row4 in rows4:
@@ -112,9 +122,9 @@ class ValueMapper:
 
 				self.value_mapping_sql = self.value_mapping_sql + f'insert into public.{self.dataset.ust_or_release}_element_value_mapping ({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments)\n'
 				if epa_value:
-					self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, '{org_value}', '{epa_value}', null);\n"
+					self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {repr(org_value)}, '{epa_value}', null);\n"
 				else:
-					self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, '{org_value}', '', null);\n"
+					self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {repr(org_value)}, '', null);\n"
 
 			if epa_column_name == 'substance_id':
 				sql6 = "select substance from public.substances order by substance_group, substance"
@@ -146,8 +156,6 @@ class ValueMapper:
 		conn.close()
 		self.value_mapping_sql = self.value_mapping_sql + '------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n'
 	
-		# print(self.value_mapping_sql)
-
 
 	def write_sql(self):
 		with open(self.dataset.export_file_path, 'w', encoding='utf-8') as f:
