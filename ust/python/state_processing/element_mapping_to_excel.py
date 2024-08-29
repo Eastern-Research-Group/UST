@@ -7,9 +7,9 @@ sys.path.append(os.path.join(ROOT_PATH, ''))
 import openpyxl as op
 from openpyxl.styles import Alignment, Font
 
-from python.util.logger_factory import logger
 from python.util import utils, config
 from python.util.dataset import Dataset 
+from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'

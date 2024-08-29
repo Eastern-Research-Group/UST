@@ -8,8 +8,8 @@ import openpyxl as op
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.borders import Border, Side
 
-from python.util.logger_factory import logger
 from python.util import utils
+from python.util.logger_factory import logger
 
 
 ust_or_release = 'release' # valid values are 'ust' or 'release'

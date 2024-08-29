@@ -1,5 +1,5 @@
 create or replace view "public"."v_ust_needed_mapping" as
- SELECT a.ust_control_id,
+ SELECT DISTINCT a.ust_control_id,
     b.ust_element_mapping_id,
     a.epa_table_name,
     a.epa_column_name,

@@ -28,3 +28,5 @@ CREATE INDEX release_element_value_mapping_release_element_mapping_id_idx ON pub
 CREATE INDEX release_element_value_mapping_release_element_value_mapping_id_ ON public.release_element_value_mapping USING btree (release_element_value_mapping_id)
 
 CREATE UNIQUE INDEX release_element_value_mapping_unique ON public.release_element_value_mapping USING btree (release_element_mapping_id, organization_value, epa_value)
+
+CREATE UNIQUE INDEX release_element_value_mapping_org_val_idex ON public.release_element_value_mapping USING btree (release_element_mapping_id, organization_value)

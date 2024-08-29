@@ -5,15 +5,15 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
-import psycopg2.errors
 import openpyxl as op
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.borders import Border, Side
+import psycopg2.errors
 
 from python.state_processing import element_mapping_to_excel
-from python.util.logger_factory import logger
 from python.util import utils
 from python.util.dataset import Dataset 
+from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'

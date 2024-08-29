@@ -11,9 +11,9 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.borders import Border, Side
 
 from python.state_processing import element_mapping_to_excel
-from python.util.logger_factory import logger
 from python.util import utils, config
 from python.util.dataset import Dataset 
+from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' # valid values are 'ust' or 'release'

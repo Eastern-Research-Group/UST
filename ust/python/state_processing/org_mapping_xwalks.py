@@ -5,8 +5,8 @@ ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 from datetime import datetime
 
-from python.util.logger_factory import logger
 from python.util import utils
+from python.util.logger_factory import logger
 
 
 ust_or_release = 'release' # valid values are 'ust' or 'release'
