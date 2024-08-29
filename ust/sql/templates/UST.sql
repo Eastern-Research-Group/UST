@@ -613,13 +613,13 @@ values (ZZ,'ust_compartment_dispenser','dispenser_udc_wall_type','ORG_TAB_NAME',
  * in this format, and then perform the deaggregation if necessary. 
  * Set the following variables before running the script:
  
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = ZZ
-only_incomplete = False # Set to true to restrict the output to EPA columns that have not yet been value mapped
- 
- * This script will output a SQL file (located by default in the repo at 
- * /ust/sql/XX/UST/XX_UST_deagg.sql). Open the generated file in your database console 
- * and step through it.  
+ust_or_release = 'ust' 			# valid values are 'ust' or 'release'
+control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+
+ * If - and only if - this script identifies possible aggregrated data, it will output SQL file in the repo at
+ * /ust/sql/XX/UST/XX_UST_deagg.sql). Open the generated file in your database console and step through it.  
+ * If no file is produced, proceed to the next step. 
  */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -12,7 +12,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+only_incomplete = True   		# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None         
@@ -21,7 +21,7 @@ export_file_name = None
 
 
 class DeaggCode:
-	deagg_sql = None 
+	deagg_sql = '' 
 	
 	def __init__(self, 
 				 dataset, 
@@ -105,29 +105,29 @@ class DeaggCode:
 				self.deagg_sql = self.deagg_sql + '/* IF after reviewing the organization values, you determine that there are in fact multiple values per row,\n'
 				self.deagg_sql = self.deagg_sql + ' * run deagg.py, setting the variables below:\n\n'
 
-				script_params = f"ust_or_release = '{self.dataset.ust_or_release}' # valid values are 'ust' or 'release'\n"
-				script_params = script_params + f'control_id = {self.dataset.control_id}\n'
-				script_params = script_params + f"table_name = '{org_table_name}'\n"
-				script_params = script_params + f"column_name = '{org_column_name}' \n"
-				script_params = script_params + f"delimiter = {repr(delimiter)} # defaults to ','; delimiter from the column beging deaggregated in the state table. Use \\n for hard returns.\n"
-				script_params = script_params + 'drop_existing = False # defaults to False; if True will drop existing deagg table with the same name\n'
+				script_params = f"ust_or_release = '{self.dataset.ust_or_release}' 			# Valid values are 'ust' or 'release'\n"
+				script_params = script_params + f"control_id = {self.dataset.control_id}                  # Enter an integer that is the ust_control_id or release_control_id\n"
+				script_params = script_params + f"table_name = '{org_table_name}' 				# Enter a string containing organization table name\n"
+				script_params = script_params + f"column_name = '{org_column_name}'				# Enter a string containing organization column name\n"
+				script_params = script_params + f"delimiter = '{repr(delimiter)}' 				# Defaults to ','; delimiter from the column beging deaggregated in the state table. Use \n for hard returns.\n"
+				script_params = script_params + f"drop_existing = False 			# Boolean, defaults to False; if True will drop existing deagg table with the same name\n"
 				self.deagg_sql = self.deagg_sql + script_params + '\n\n'
 
 				deagg_table_name = utils.get_deagg_table_name(org_column_name)
 				deagg_row_table_name = utils.get_deagg_datarows_table_name(deagg_table_name)
 				self.deagg_sql = self.deagg_sql + '* After running deagg.py, run the SQL below to view the value deagg table:\n*/\n'
 				self.deagg_sql = self.deagg_sql + f'select * from {self.dataset.schema}.{deagg_table_name} order by 2;\n\n'
-
 				self.deagg_sql = self.deagg_sql + '/* Next, run script deagg_rows.py to crosswalk the deaggreated value to facility, tank, or compartment-level rows.\n'
 				self.deagg_sql = self.deagg_sql + ' * Set the script variables below, substituting XXXXX and ZZZZZ\nfor a list of the columns in the SOURCE data you need to group by (e.g. ["FacilityID","TankID","ComartmentID"]).\n\n'
 
-				script_params = f"ust_or_release = '{self.dataset.ust_or_release}' # valid values are 'ust' or 'release'\n"
-				script_params = script_params + f'control_id = {self.dataset.control_id}\n'
-				script_params = script_params + f"data_table_name = '{org_table_name}'\n"
-				script_params = script_params + f"data_table_pk_cols = ['XXXXX','ZZZZZ'] # list of column names that the new table should be grouped by \n"
-				script_params = script_params + f"delimiter = {repr(delimiter)} # defaults to ','; delimiter from the column beging deaggregated in the state table. Use \\n for hard returns.\n"
-				script_params = script_params + f"deagg_table_name = '{deagg_table_name}'\n"
-				script_params = script_params + 'drop_existing = False # defaults to False. Set to True to drop the _datarows_deagg table before beginning (if you need to redo it)\n'
+				script_params = f"ust_or_release = '{self.dataset.ust_or_release}' 			# Valid values are 'ust' or 'release'\n"
+				script_params = script_params + f"control_id = {self.dataset.control_id}                 # Enter an integer that is the ust_control_id or release_control_id\n"
+				script_params = script_params + f"data_table_name = '{org_table_name}' 			# Enter a string containing organization table name that contains the aggregated data \n" 
+				script_params = script_params + f"data_table_pk_cols = ['XXXXX','ZZZZZ'] 		# Python list of column names FROM THE SOURCE DATA that the new table should be grouped by, for example, in UST, substances may be grouped by ['FacilityID','TankID'] or ['FacilityID','TankID','CompartmentID'] \n"
+				script_params = script_params + f"data_deagg_column_name = '' 	# Column name FROM THE SOURCE DATA that contains the aggregated values \n"
+				script_params = script_params + f"delimiter = {repr(delimiter)} 				# Defaults to ', '; delimiter from the column beging deaggregated in the source table. Use '\\n' for hard returns.\n"
+				script_params = script_params + f"deagg_table_name = '{deagg_table_name}'           # Deagg table name generated by deagg.py. It will begin with an 'erg_' prefix. Check column deagg_table_name in table ust_element_mapping or release_element_mapping if you don't know it. (deagg.py will set this value.)\n"
+				script_params = script_params + f"drop_existing = False 			# Boolean, defaults to False. Set to True to drop the _datarows_deagg table that this script creates before beginning (for example, if you need to rerun this script)\n"
 
 				self.deagg_sql = self.deagg_sql + script_params + '\n\n'
 				self.deagg_sql = self.deagg_sql + ' * After running deagg_rows.py, run the SQL below to view the rows deagg table:\n */\n'
@@ -147,7 +147,7 @@ class DeaggCode:
 def main(ust_or_release, control_id, only_incomplete=False, export_file_name=None, export_file_dir=None, export_file_path=None):
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id, 
-				 	  base_file_name='deagg_check.sql',
+				 	  base_file_name='deagg.sql',
 					  export_file_name=export_file_name,
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
