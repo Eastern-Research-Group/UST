@@ -20,11 +20,11 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-from python.util.logger_factory import logger
 from python.util import utils
+from python.util.logger_factory import logger
 
 
 ust_path = '../imports/perf_measures_ust.csv'

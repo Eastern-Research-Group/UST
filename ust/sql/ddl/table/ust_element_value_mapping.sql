@@ -28,3 +28,5 @@ CREATE INDEX ust_element_value_mapping_ust_element_mapping_id_idx ON public.ust_
 CREATE INDEX ust_element_value_mapping_ust_element_value_mapping_id_idx ON public.ust_element_value_mapping USING btree (ust_element_value_mapping_id)
 
 CREATE UNIQUE INDEX ust_element_value_mapping_unique ON public.ust_element_value_mapping USING btree (ust_element_mapping_id, organization_value, epa_value)
+
+CREATE UNIQUE INDEX ust_element_value_mapping_org_val_idex ON public.ust_element_value_mapping USING btree (ust_element_mapping_id, organization_value)

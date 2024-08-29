@@ -1,21 +1,21 @@
+from datetime import date
+import ntpath
 import os
 from pathlib import Path
 import sys  
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
-from datetime import date
-import ntpath
 
-from python.util.logger_factory import logger
 from python.util import utils, config
+from python.util.logger_factory import logger
 
 
 # THIS SCRIPT DEAGGREGATES SINGLE COLUMN LOOKUP VALUES (for example, SUBSTANCES)
 # USE deagg_rows.py TO CREATE DEAGG TABLES AT THE FACILITY/TANK/COMPARTMENT LEVEL
 # THAT USE THE TABLES THIS SCRIPT CREATES
 
-ust_or_release = 'release' # valid values are 'ust' or 'release'
-control_id = 5
+ust_or_release = 'ust' # valid values are 'ust' or 'release'
+control_id = 11
 table_name = 'ust_all-tn-environmental-sites'
 column_name = 'Productreleased'
 delimiter = ', ' # defaults to ','; delimiter from the column beging deaggregated in the state table. Use \n for hard returns.

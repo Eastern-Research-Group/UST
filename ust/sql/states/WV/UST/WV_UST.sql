@@ -1090,6 +1090,25 @@ from wv_ust.erg_substance_datarows_deagg x
 	left join wv_ust.v_substance_xwalk sx on x."Substance" = sx.organization_value
 where x."Substance" is not null; 
 
+create or replace view wv_ust.v_ust_tank_substance_new as 
+select distinct 
+	"Facility ID"::character varying(50) as facility_id, 
+	"Tank Id"::int as tank_id,
+	sx.substance_id
+from wv_ust.tanks x 
+	join wv_ust.v_substance_xwalk sx on x."Substance" like '%' || sx.organization_value || '%'
+	
+select count(*) from 	wv_ust.v_ust_tank_substance_new
+
+select * from wv_ust.v_ust_tank_substance_new a where not exists 
+	(select 1 from  wv_ust.v_ust_tank_substance b 
+	where a.facility_id = b.facility_id and a.tank_id = b.tank_id 
+	and a.substance_id = b.substance_id);
+
+select * from wv_ust.v_tank_status_xwalk
+	
+select * from wv_ust.v_substance_xwalk
+
 select * from wv_ust.v_ust_tank_substance;
 select count(*) from wv_ust.v_ust_tank_substance;
 --26776

@@ -10,12 +10,12 @@ Fuel Distribution
 Motor Vehicle Fueling
 Other
 Processor
-*/
+ */
 
 /*
-Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
-If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
-*/
+ * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
+ * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
+ */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1099, 'Farm', '', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -51,8 +51,8 @@ Wholesale
 Other
 Unknown
 
-Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
-Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
+ * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
+ * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
 
 select distinct organization_value, epa_value
 from public.v_ust_element_mapping
@@ -60,10 +60,10 @@ where epa_column_name = 'facility_type1'
 and lower(organization_value) like lower('%XXXX%')
 order by 1, 2;
 
-You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
-Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
-to do mapping, check public.facility_types to find the updated epa_value.
-*/
+ * You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
+ * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
+ * to do mapping, check public.facility_types to find the updated epa_value.
+ */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --tank_status_id
@@ -80,12 +80,12 @@ Temporary UST Closure
 UST Change to AST
 UST Permanent Closure on Site
 UST Removal
-*/
+ */
 
 /*
-Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
-If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
-*/
+ * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
+ * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
+ */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1130, 'AST Change to UST', '', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -117,8 +117,8 @@ Abandoned
 Other
 Unknown
 
-Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
-Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
+ * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
+ * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
 
 select distinct organization_value, epa_value
 from public.v_ust_element_mapping
@@ -126,10 +126,10 @@ where epa_column_name = 'tank_status_id'
 and lower(organization_value) like lower('%XXXX%')
 order by 1, 2;
 
-You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
-Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
-to do mapping, check public.tank_statuses to find the updated epa_value.
-*/
+ * You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
+ * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
+ * to do mapping, check public.tank_statuses to find the updated epa_value.
+ */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --tank_material_description_id
@@ -143,12 +143,12 @@ Other
 Steel
 Steel + Internal Lining
 Unknown
-*/
+ */
 
 /*
-Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
-If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
-*/
+ * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
+ * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
+ */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1136, 'Fiberglass', '', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -177,8 +177,8 @@ Concrete
 Other
 Unknown
 
-Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
-Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
+ * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
+ * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
 
 select distinct organization_value, epa_value
 from public.v_ust_element_mapping
@@ -186,10 +186,10 @@ where epa_column_name = 'tank_material_description_id'
 and lower(organization_value) like lower('%XXXX%')
 order by 1, 2;
 
-You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
-Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
-to do mapping, check public.tank_material_descriptions to find the updated epa_value.
-*/
+ * You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
+ * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
+ * to do mapping, check public.tank_material_descriptions to find the updated epa_value.
+ */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --tank_secondary_containment_id
@@ -203,12 +203,12 @@ Jacketed
 Other
 Steel
 Unknown
-*/
+ */
 
 /*
-Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
-If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
-*/
+ * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
+ * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
+ */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1140, 'Exterior Membrane Liner', '', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -235,8 +235,8 @@ Tank-within-a-tank retrofit (UL standard 1856)
 Other
 Unknown
 
-Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
-Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
+ * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
+ * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
 
 select distinct organization_value, epa_value
 from public.v_ust_element_mapping
@@ -244,10 +244,10 @@ where epa_column_name = 'tank_secondary_containment_id'
 and lower(organization_value) like lower('%XXXX%')
 order by 1, 2;
 
-You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
-Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
-to do mapping, check public.tank_secondary_containments to find the updated epa_value.
-*/
+ * You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
+ * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
+ * to do mapping, check public.tank_secondary_containments to find the updated epa_value.
+ */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --substance_id
@@ -270,12 +270,12 @@ Petroleum Blend Fuel
 Premium Unleaded
 Regular Unleaded
 Used Oil
-*/
+ */
 
 /*
-Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
-If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
-*/
+ * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
+ * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
+ */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1141, 'Aviation  Gas', '', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -339,6 +339,7 @@ Gasoline E-10 (E1-E10)
 Gasoline E-15 (E-11-E15)
 Gasoline/ethanol blend containing more than 83% and less than 98% ethanol
 Gasoline/ethanol blends E16-E50
+Leaded gasoline
 Racing fuel
 Biofuel/bioheat
 Heating oil/fuel oil 1
@@ -361,8 +362,8 @@ Petroleum product
 Solvent
 Unknown
 
-Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
-Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
+ * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
+ * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
 
 select distinct organization_value, epa_value
 from public.v_ust_element_mapping
@@ -370,10 +371,10 @@ where epa_column_name = 'substance_id'
 and lower(organization_value) like lower('%XXXX%')
 order by 1, 2;
 
-You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
-Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
-to do mapping, check public.substances to find the updated epa_value.
-*/
+ * You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
+ * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
+ * to do mapping, check public.substances to find the updated epa_value.
+ */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --compartment_status_id
@@ -383,7 +384,7 @@ CA does not report at the Compartment level, but CompartmentStatus is required.
 
 Copy the tank status mapping down to the compartment!
 The lookup tables for compartment_statuses and tank_stasuses are the same.
-*/
+ */
 
 --select distinct "Type of Action" from ca_ust."tank" where "Type of Action" is not null order by 1;
 /* Organization values are:
@@ -397,12 +398,12 @@ Temporary UST Closure
 UST Change to AST
 UST Permanent Closure on Site
 UST Removal
-*/
+ */
 
 /*
-Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
-If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
-*/
+ * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
+ * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
+ */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1173, 'AST Change to UST', '', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -434,8 +435,8 @@ Abandoned
 Other
 Unknown
 
-Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
-Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
+ * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
+ * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
 
 select distinct organization_value, epa_value
 from public.v_ust_element_mapping
@@ -443,10 +444,10 @@ where epa_column_name = 'compartment_status_id'
 and lower(organization_value) like lower('%XXXX%')
 order by 1, 2;
 
-You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
-Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
-to do mapping, check public.compartment_statuses to find the updated epa_value.
-*/
+ * You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
+ * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
+ * to do mapping, check public.compartment_statuses to find the updated epa_value.
+ */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --piping_style_id
@@ -458,12 +459,12 @@ to do mapping, check public.compartment_statuses to find the updated epa_value.
 Conventional Suction
 Gravity
 Pressure
-*/
+ */
 
 /*
-Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
-If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
-*/
+ * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
+ * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
+ */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1161, '23 CCR Â§2636(a)(3) Suction', '', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -484,8 +485,8 @@ Other
 Unknown
 No piping
 
-Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
-Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
+ * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
+ * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
 
 select distinct organization_value, epa_value
 from public.v_ust_element_mapping
@@ -493,10 +494,10 @@ where epa_column_name = 'piping_style_id'
 and lower(organization_value) like lower('%XXXX%')
 order by 1, 2;
 
-You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
-Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
-to do mapping, check public.piping_styles to find the updated epa_value.
-*/
+ * You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
+ * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
+ * to do mapping, check public.piping_styles to find the updated epa_value.
+ */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --pipe_tank_top_sump_wall_type_id
@@ -506,12 +507,12 @@ to do mapping, check public.piping_styles to find the updated epa_value.
 
 Double-walled
 Single-walled
-*/
+ */
 
 /*
-Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
-If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
-*/
+ * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
+ * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
+ */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1168, 'Double-walled', '', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -524,8 +525,8 @@ Single
 Double
 Unknown
 
-Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
-Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
+ * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
+ * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
 
 select distinct organization_value, epa_value
 from public.v_ust_element_mapping
@@ -533,10 +534,10 @@ where epa_column_name = 'pipe_tank_top_sump_wall_type_id'
 and lower(organization_value) like lower('%XXXX%')
 order by 1, 2;
 
-You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
-Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
-to do mapping, check public.pipe_tank_top_sump_wall_types to find the updated epa_value.
-*/
+ * You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
+ * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
+ * to do mapping, check public.pipe_tank_top_sump_wall_types to find the updated epa_value.
+ */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --piping_wall_type_id
@@ -547,12 +548,12 @@ to do mapping, check public.pipe_tank_top_sump_wall_types to find the updated ep
 Double-walled
 Other
 Single-walled
-*/
+ */
 
 /*
-Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
-If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
-*/
+ * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.
+ * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
+ */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1169, 'Double-walled', 'Double walled', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -567,8 +568,8 @@ Single walled
 Double walled
 Other
 
-Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
-Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
+ * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.
+ * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.
 
 select distinct organization_value, epa_value
 from public.v_ust_element_mapping
@@ -576,9 +577,9 @@ where epa_column_name = 'piping_wall_type_id'
 and lower(organization_value) like lower('%XXXX%')
 order by 1, 2;
 
-You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
-Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
-to do mapping, check public.piping_wall_types to find the updated epa_value.
-*/
+ * You can also review the mapping from the pilot using a query similar to the above, looking in archive.v_ust_element_mapping.
+ * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
+ * to do mapping, check public.piping_wall_types to find the updated epa_value.
+ */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
