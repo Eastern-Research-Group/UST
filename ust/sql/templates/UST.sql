@@ -23,6 +23,7 @@
  * Step 5: Check for lookup data that needs to be deaggregated 
  * Step 6: Map the source data values to EPA values 
  * Step 7: Create the value mapping crosswalk views
+ * Step 8: Write the views that convert the source data to the EPA format
  * 
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,11 +35,10 @@
  * If the data was submitted in the form of an Excel spreadsheet or a CSV/text file,
  * you can run script import_data_file_files.py. To run, set these variables:
 
-organization_id = 'XX' 
-# Enter a directory (not a path to a specific file) for ust_path
-# Set to None if not applicable
-ust_path = 'path\to\folder\containing\source\data\files' 
-overwrite_table = False  # Set this to true if you need to re-import the files
+ust_or_release = 'ust'          # Valid values are 'ust' or 'release'
+organization_id = 'XX'          # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
+path = r''                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
+overwrite_table = False         # Boolean, defaults to False; set to True if you are replacing existing data in the schema
 
  * Script import_data_file_files.py will create the correct schema (if it doesn't yet exist), 
  * then upload all .xlsx, .xls, .csv, and .txt in the specified directory to this schema. 
@@ -99,13 +99,13 @@ order by table_name, ordinal_position;
  * 
  * Set the following variables at the top of the script:
  
-organization_id = 'XX'
-system_type = 'ust'  			 		# Accepted values are 'ust' or 'release'
-data_source = '' 						# Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
-date_received = 'YYYY-MM-DD' 			# Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
-date_processed = None 					# Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
-comments = None 						# Optional string. Populate as described above	
-organization_compartment_flag = None   	# Set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. 
+organization_id = 'XX'                  # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
+ust_or_release = 'ust'                  # Valid values are 'ust' or 'release'
+data_source = ''                        # Describe in detail where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
+date_received = 'YYYY-MM-DD'            # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
+date_processed = None                   # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
+comments = ''                           # Top-level comments on the dataset. An example would be "Exclude Aboveground Storage Tanks".
+organization_compartment_flag = None    # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. You can set this later if you don't know.
 
  * OR:
 
@@ -174,7 +174,17 @@ order by 1;
  *     and ORG_COL_NAME variables to match the state's data. 
  *  3) If you have questions or comments about the mapping, replace "null" with your 
  *     comment. 
- *  4) Also use the programmer_comments field to enter specifics about the mapping. 
+ *  4) There should be only a one-to-one relationship between the EPA column and the
+ *     source data column. If you need to use a combination of state columns to map
+ *     to a single EPA column, create a crosswalk table (prefix the name of this table
+ *     with "erg_" so it is obvious by glancing at the schema that we created it) that
+ *     contains the primary key column(s) from the source data table (for example, 
+ *     FacilityID or FacilityID and TankID, etc.) and then a column that performs 
+ *     whatever manipulation you need to do to the data to transform it into a single
+ *     column. Enter the table name and column name from the table you created into 
+ *     ORG_TAB_NAME and ORG_COLUMN_NAME and describe in detail in programmer_comments
+ *     what you did. 
+ *  5) Also use the programmer_comments field to enter specifics about the mapping. 
  *     FOR EXAMPLE, say the source data has a single column for Financial Responsibility,
  *     in table "facilities" and column "fr_type", with a list of possible values like
  *     ["credit", "guarantee", "local gov't", "self insurance", "state fund", "other"]. 
@@ -215,7 +225,7 @@ order by 1, 2;
 select * from public.facility_types order by 1;
 
 --then see what the state's data looks like:
-select distinct ORG_COL_NAME
+select distinct "ORG_COL_NAME"
 from XX_ust."ORG_TAB_NAME"
 order by 1;
 
@@ -248,10 +258,10 @@ order by 1;
  * If some rows appear to contain multiple values, you will have to DEAGGREGATE the data. This is most easily done
  * using a Python script written for that purpose and is discussed in the next step. In this step, set the 
  * organization_table_name and organization_column_name to the source data table and column containing the 
- * multiple values. When you get to the next step where you are mapping the values and you create the deagg table, 
- * go back and UPDATE public.ust_element_mapping to populate the deagg_table_name and deagg_column_name with 
- * the appropriate names. See Step 5 for more information. The query below finds examples of how 
- * public.ust_element_mapping eventually gets populated for these fields. 
+ * multiple values. When you get to the next step where you are mapping the values and you run deagg.py to
+ * perform the deaggregation, the script will update the deagg_table_name and deagg_column_name columns of
+ * public.ust_element_mapping for you. The query below finds examples of how ust_element_mapping eventually gets 
+ * populated for these fields. 
 
 select ust_control_id, epa_table_name, epa_column_name, 
 	organization_table_name, organization_column_name,
@@ -613,13 +623,13 @@ values (ZZ,'ust_compartment_dispenser','dispenser_udc_wall_type','ORG_TAB_NAME',
  * in this format, and then perform the deaggregation if necessary. 
  * Set the following variables before running the script:
  
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = ZZ
-only_incomplete = False # Set to true to restrict the output to EPA columns that have not yet been value mapped
- 
- * This script will output a SQL file (located by default in the repo at 
- * /ust/sql/XX/UST/XX_UST_deagg.sql). Open the generated file in your database console 
- * and step through it.  
+ust_or_release = 'ust' 			# valid values are 'ust' or 'release'
+control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+
+ * If - and only if - this script identifies possible aggregrated data, it will output SQL file in the repo at
+ * /ust/sql/XX/UST/XX_UST_deagg.sql). Open the generated file in your database console and step through it.  
+ * If no file is produced, proceed to the next step. 
  */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -645,10 +655,10 @@ select epa_column_name from
  * To generate the SQL that will assist you in doing the value mapping, run the script 
  * generate_value_mapping.sql. Set the following variables before running the script:
  
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = ZZ
-only_incomplete = False # Set to true to restrict the output to EPA columns that have not yet been value mapped
- 
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+only_incomplete = False 		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+
  * 
  * This script will output a SQL file (located by default in the repo at 
  * /ust/sql/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console 
@@ -664,8 +674,28 @@ only_incomplete = False # Set to true to restrict the output to EPA columns that
  * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
  * Set these variables in the script:
  
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = ZZ
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+  
+ * To see the crosswalk views after running the script:
+
+select table_name 
+from information_schema.tables 
+where table_schema = lower('XX_ust') and table_type = 'VIEW'
+and table_name like '%_xwalk' order by 1;
+
+*/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Step 8: Write the views that convert the source data to the EPA format
+
+/* 
+ * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
+ * Set these variables in the script:
+ 
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
   
  * To see the crosswalk views after running the script:
 

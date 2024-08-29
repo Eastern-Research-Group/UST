@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
 
 # These variables can usually be left unset. This script will general an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
 export_file_path = None
@@ -81,7 +81,7 @@ class QualityCheck:
 			if self.dataset.ust_or_release == 'ust':
 				self.check_compartment_data_flag()
 		self.write_overview()
-		element_mapping_to_excel.build_ws(self.dataset.ust_or_release, self.dataset.control_id, self.wb.create_sheet(), admin=True)
+		element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=True)
 		self.cleanup_wb()
 		self.disconnect_db()
 
@@ -345,7 +345,7 @@ class QualityCheck:
 		# check for bad mapping values
 		sql = f"""select distinct epa_column_name, epa_value, database_lookup_table, database_column_name 
 				from public.v_{self.dataset.ust_or_release}_element_mapping a join public.{self.dataset.ust_or_release}_elements b on a.epa_column_name = b.database_column_name 
-				where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_value is not null
+				where {self.dataset.ust_or_release}_control_id = %s and database_lookup_table is not null and epa_table_name = %s and epa_value is not null
 				order by 1, 2, 3"""
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
 		rows = self.cur.fetchall()
