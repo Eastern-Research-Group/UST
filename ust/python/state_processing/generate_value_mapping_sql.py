@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 11                 # Enter an integer that is the ust_control_id or release_control_id
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = False 		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
