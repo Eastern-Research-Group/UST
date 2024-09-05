@@ -316,6 +316,8 @@ def delete_all_ust_data(control_id):
 
 
 def get_schema_from_control_id(control_id, ust_or_release):
+    if control_id == 1:
+        return None
     org = get_org_from_control_id(control_id, ust_or_release)
     return org.lower() + '_' + ust_or_release.lower()
 
