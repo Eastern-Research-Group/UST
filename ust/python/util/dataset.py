@@ -1,4 +1,5 @@
 from datetime import datetime
+import ntpath
 import os
 from pathlib import Path
 import sys  
@@ -13,6 +14,7 @@ class Dataset:
 	def __init__(self, 
 				 ust_or_release, 
 				 control_id, 
+				 requires_export=True,
 				 base_file_name=None,
 				 export_file_path=None, 
 				 export_file_dir=None, 
@@ -21,11 +23,13 @@ class Dataset:
 			self.control_id = control_id
 			self.organization_id = utils.get_org_from_control_id(self.control_id, self.ust_or_release)
 			self.schema = utils.get_schema_from_control_id(self.control_id, self.ust_or_release)
+			self.requires_export = requires_export
 			self.base_file_name = base_file_name
 			self.export_file_name = export_file_name
 			self.export_file_dir = export_file_dir
 			self.export_file_path = export_file_path
-			self.populate_export_vars()
+			if self.requires_export:
+				self.populate_export_vars()
 			self.print_self()
 
 			

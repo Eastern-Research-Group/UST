@@ -23,7 +23,8 @@
  * Step 5: Check for lookup data that needs to be deaggregated 
  * Step 6: Map the source data values to EPA values 
  * Step 7: Create the value mapping crosswalk views
- * Step 8: Write the views that convert the source data to the EPA format
+ * Step 8: Create unique identifiers if they dont' exist
+ * Step 9: Write the views that convert the source data to the EPA format
  * 
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -688,21 +689,20 @@ and table_name like '%_xwalk' order by 1;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 8: Write the views that convert the source data to the EPA format
+--Step 8: Create unique identifiers if they dont' exist
 
 /* 
- * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
- * Set these variables in the script:
- 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-  
- * To see the crosswalk views after running the script:
+ * 
 
-select table_name 
-from information_schema.tables 
-where table_schema = lower('XX_ust') and table_type = 'VIEW'
-and table_name like '%_xwalk' order by 1;
+*/
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Step 9: Write the views that convert the source data to the EPA format
+
+/* 
+ * 
 
 */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------

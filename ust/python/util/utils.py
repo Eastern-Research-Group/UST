@@ -316,6 +316,8 @@ def delete_all_ust_data(control_id):
 
 
 def get_schema_from_control_id(control_id, ust_or_release):
+    if control_id == 1:
+        return None
     org = get_org_from_control_id(control_id, ust_or_release)
     return org.lower() + '_' + ust_or_release.lower()
 
@@ -425,4 +427,39 @@ def get_deagg_table_name(column_name):
 
 def get_deagg_datarows_table_name(deagg_table_name):
     return deagg_table_name.replace('_deagg','_datarows_deagg')
+
+
+def get_epa_region(organization_id):
+    conn = connect_db()
+    cur = conn.cursor()
+    sql = "select epa_region from public.epa_regions where organization_id = %s"
+    cur.execute(sql, (organization_id,))
+    try:
+        epa_region =  cur.fetchone()[0]
+    except:
+        logger.warning('No such organization_id in table public.epa_regions: %s', organization_id)
+        epa_region = None 
+    cur.close()
+    conn.close()
+    return epa_region
+
+
+def get_datatype_sql(data_type, character_maximum_length=None):
+    datatype_sql = None 
+    if data_type == 'character varying' and not character_maximum_length:
+        logger.error('character_maximum_length is required if data_type = character varying')
+        exit()
+    elif character_maximum_length:
+        try:
+            int(character_maximum_length)
+        except:
+            logger.error('character_maximum_length must be an integer (received %s)', character_maximum_length)
+            exit()
+    if data_type == 'character varying':
+        datatype_sql = data_type + '(' + str(character_maximum_length) + ')'
+    else:
+        datatype_sql = data_type 
+    return data_type
+
+
 

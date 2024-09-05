@@ -217,7 +217,7 @@ class Template:
 		
 		conn = utils.connect_db()
 		cur = conn.cursor()	
-
+		
 		sql = f"select {lookup_column_name} from {lookup_table_name} order by 1"
 		cur.execute(sql)
 		data = cur.fetchall()
@@ -385,12 +385,10 @@ class Template:
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=4):
 					ws.cell(row=rowno, column=colno).value = cell_value		
-
 		utils.autowidth(ws)
 
 		cur.close()
 		conn.close()
-
 		logger.info('Created Substances mapping tab')
 
 
@@ -412,7 +410,7 @@ class Template:
 		if self.dataset.ust_or_release == 'ust':
 			if tab_name == 'Facility':
 				green_cells = ['FacilityID']
-			elif tab_name == 'FacilityDispenser':
+			elif tab_name == 'Facility Dispenser':
 				green_cells = ['DispenserID']
 				orange_cells = ['FacilityID']
 			elif tab_name == 'Tank':
@@ -424,7 +422,7 @@ class Template:
 			elif tab_name == 'Compartment':
 				green_cells = ['CompartmentID']
 				orange_cells = ['FacilityID','TankID','TankName']
-			elif tab_name == 'Piping' or tab_name == 'Compartment Substance' or tab_name == 'CompartmentDispenser':
+			elif tab_name == 'Piping' or tab_name == 'Compartment Substance' or tab_name == 'Compartment Dispenser':
 				green_cells = ['Substance','PipingID','DispenserID']
 				orange_cells = ['FacilityID','TankID','TankName','CompartmentID','CompartmentName']
 		for colno, header in enumerate(headers, start=1):
@@ -454,6 +452,9 @@ class Template:
 
 
 def main(ust_or_release, control_id=None, data_only=False, template_only=False, export_file_name=None, export_file_dir=None, export_file_path=None):
+	if template_only and control_id == 0:
+		control_id = 1
+
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id, 
 				 	  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx',
