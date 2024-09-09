@@ -7,8 +7,8 @@ sys.path.append(os.path.join(ROOT_PATH, ''))
 import pandas as pd
 import zipfile
 
-from python.util.logger_factory import logger
 from python.util import config, utils
+from python.util.logger_factory import logger
 
 
 file_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\UST\UST Finder\Exports\\'
