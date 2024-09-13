@@ -348,7 +348,7 @@ def get_tables_with_missing_cols(dataset):
 				where {dataset.ust_or_release}_control_id = %s and a.table_name = c.epa_table_name and a.column_name = c.epa_column_name)
 			and (a.table_name = 'ust_compartment' or exists 
 				(select 1 from public.{dataset.ust_or_release}_element_mapping c
-				where ust_control_id = %s and a.table_name = c.epa_table_name))
+				where {dataset.ust_or_release}_control_id = %s and a.table_name = c.epa_table_name))
 			order by sort_order"""
 	cur.execute(sql, (dataset.control_id, dataset.control_id))
 	rows = cur.fetchall()
