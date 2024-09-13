@@ -153,9 +153,9 @@ class IdColumns:
 
 		if self.table_name == 'ust_tank' or self.table_name == 'ust_facility_dispenser':
 			if self.table_name == 'ust_tank':
-				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int generated always as identity)"
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int generated always as identity)"
 			else:
-				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), dispenser_id int generated always as identity)"
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), dispenser_id int generated always as identity)"
 			self.cur.execute(sql)
 			logger.info('Created table %s.%s', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
@@ -174,7 +174,7 @@ class IdColumns:
 			if tank_name_info:
 				tank_name_table = '"' + tank_name_info[0] + '"'
 				tank_name_col = '"' + tank_name_info[1] + '"'
-				select_cols = select_cols + ", " + tank_name_col + "::varchar(200)"
+				select_cols = select_cols + ", " + tank_name_col + "::varchar(50)"
 			else: 
 				select_cols = select_cols + ", null"
 			sql = sql + select_cols + '\nfrom ' + self.dataset.schema + '.' + facility_id_table
@@ -187,9 +187,9 @@ class IdColumns:
 
 		elif self.table_name == 'ust_compartment' or self.table_name == 'ust_tank_dispenser'::
 			if self.table_name == 'ust_compartment':
-				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), compartment_id int generated always as identity)"
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), compartment_id int generated always as identity)"
 			else:
-				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), dispenser_id int generated always as identity)"
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), dispenser_id int generated always as identity)"
 			self.cur.execute(sql)
 			logger.info('Created table %s.%s', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
@@ -233,7 +233,7 @@ class IdColumns:
 				if tank_name_info:
 					tank_name_table = '"' + tank_name_info[0] + '"'
 					tank_name_col = '"' + tank_name_info[1] + '"'
-					select_cols = select_cols + ", " + tank_name_col + "::varchar(200)"
+					select_cols = select_cols + ", " + tank_name_col + "::varchar(50)"
 				else: 
 					select_cols = select_cols + ", null"
 				if tank_id_info:
@@ -245,7 +245,7 @@ class IdColumns:
 				if compartment_name_info:
 					compartment_name_table = '"' + compartment_name_info[0] + '"'
 					compartment_name_col = '"' + compartment_name_info[1] + '"'
-					select_cols = select_cols + ", " + compartment_name_col + "::varchar(200)"
+					select_cols = select_cols + ", " + compartment_name_col + "::varchar(50)"
 				else: 
 					select_cols = select_cols + ", null"
 				v_sql = v_sql + select_cols + ' from ' + self.dataset.schema + '.' + tank_id_table
@@ -258,9 +258,9 @@ class IdColumns:
 
 		elif self.table_name == 'ust_piping' or self.table_name == 'ust_compartment_dispenser':
 			if self.table_name == 'ust_piping':
-				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), compartment_id int, piping_id int generated always as identity)"
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), compartment_id int, piping_id int generated always as identity)"
 			else: 
-				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), compartment_id int, dispenser_id int generated always as identity)"
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), compartment_id int, dispenser_id int generated always as identity)"
 			self.cur.execute(sql)
 			logger.info('Created table %s.%s', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
@@ -307,7 +307,7 @@ class IdColumns:
 				if tank_name_info:
 					tank_name_table = '"' + tank_name_info[0] + '"'
 					tank_name_col = '"' + tank_name_info[1] + '"'
-					select_cols = select_cols + ", " + tank_name_col + "::varchar(200)"
+					select_cols = select_cols + ", " + tank_name_col + "::varchar(50)"
 				else: 
 					select_cols = select_cols + ", null"
 				if tank_id_info:
@@ -319,7 +319,7 @@ class IdColumns:
 				if compartment_name_info:
 					compartment_name_table = '"' + compartment_name_info[0] + '"'
 					compartment_name_col = '"' + compartment_name_info[1] + '"'
-					select_cols = select_cols + ", " + compartment_name_col + "::varchar(200)"
+					select_cols = select_cols + ", " + compartment_name_col + "::varchar(50)"
 				else: 
 					select_cols = select_cols + ", null"
 				if compartment_id_info:
