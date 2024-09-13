@@ -40,7 +40,7 @@ class IdColumns:
 		self.set_db_connection()
 		self.column_name = self.get_column_name()
 		self.compartment_flag = self.get_compartment_flag()
-		self.erg_table_name = 'erg_' + self.column_name +  '2'
+		self.erg_table_name = 'erg_' + self.column_name
 		self.drop_existing_table()
 		self.create_table()
 		self.disconnect_db()
