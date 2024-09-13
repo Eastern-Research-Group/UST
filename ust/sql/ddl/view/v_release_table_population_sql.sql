@@ -15,12 +15,15 @@ create or replace view "public"."v_release_table_population_sql" as
         END AS selected_column,
     v_release_table_population.organization_join_table,
     v_release_table_population.organization_join_column,
+    v_release_table_population.organization_join_fk,
     (('"'::text || (v_release_table_population.organization_join_table)::text) || '"'::text) AS organization_join_table_qtd,
     (('"'::text || (v_release_table_population.organization_join_column)::text) || '"'::text) AS organization_join_column_qtd,
+    (('"'::text || (v_release_table_population.organization_join_fk)::text) || '"'::text) AS organization_join_fk_qtd,
     v_release_table_population.database_lookup_table,
     v_release_table_population.database_lookup_column,
     v_release_table_population.deagg_table_name,
     v_release_table_population.deagg_column_name,
     v_release_table_population.table_sort_order,
-    v_release_table_population.column_sort_order
+    v_release_table_population.column_sort_order,
+    v_release_table_population.primary_key
    FROM v_release_table_population;
