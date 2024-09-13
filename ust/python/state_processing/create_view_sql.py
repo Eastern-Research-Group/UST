@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 11                 # Enter an integer that is the ust_control_id or release_control_id
-table_name = 'ust_facility'     # Enter EPA table name we are writing the view to populate. D
+table_name = 'ust_facility'     # Enter EPA table name we are writing the view to populate. 
 drop_existing = False           # Boolean, defaults to False. Set to True to drop the view if it exists before creating it new. 
 
 
@@ -195,7 +195,6 @@ class ViewSql:
 		conn.close()
 
 		return self.view_sql 
-
 
 
 def main(ust_or_release, control_id, table_name, drop_existing):
