@@ -462,4 +462,14 @@ def get_datatype_sql(data_type, character_maximum_length=None):
     return data_type
 
 
+def get_pretty_query(cursor):
+    query = cursor.query.decode('utf-8')
+    str(query).replace('\t','').strip() + ';'
+    return query
+
+
+def pretty_print_query(cursor):
+    print(get_pretty_query(cursor))
+
+
 
