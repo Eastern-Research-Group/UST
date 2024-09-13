@@ -9,7 +9,7 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' 			 # The only valid value for this script is 'ust' because it is not needed for releases! 
+ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release'
 control_id = 0                   # Enter an integer that is the ust_control_id
 drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
