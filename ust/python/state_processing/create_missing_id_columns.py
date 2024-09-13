@@ -124,20 +124,21 @@ class IdColumns:
 
 
 	def record_element_mapping(self):
+		self.sql_text = self.sql_text + '--Record new mapping in public.' + self.dataset.ust_or_release + '_element_mapping\n\n'
+		
 		if self.get_col_mapping_existence(self.table_name, self.column_name):
 			logger.warning('A mapping already existed for table %s, column %s; it will be deleted and replaced with the ERG-created table', self.table_name, self.column_name)
 			sql = f"""delete from public.{self.dataset.ust_or_release}_element_mapping
-					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
+					\nwhere {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
 			self.cur.execute(sql, (self.dataset.control_id, self.table_name, self.column_name))
 			logger.info('Deleted mapping info for table %s, column %s from public.%s_element_mapping', self.table_name, self.column_name, self.dataset.ust_or_release)
+			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
 		sql = f"""insert into public.{self.dataset.ust_or_release}_element_mapping ({self.dataset.ust_or_release}_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments)
-				  values (%s, %s, %s, %s, %s, %s)"""
+				  \nvalues (%s, %s, %s, %s, %s, %s)"""
 		comment = 'This required field is not present in the source data. Table ' + self.erg_table_name + ' was created by ERG so the data can conform to the EPA template structure.'
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name, self.column_name, self.erg_table_name, self.column_name, comment))
 		logger.info('Inserted mapping from %s.%s to %s.%s', self.table_name, self.column_name, self.erg_table_name, self.column_name)
-
-		self.sql_text = self.sql_text + '--Record new mapping in public.' + self.dataset.ust_or_release + '_element_mapping\n\n'
 		self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
 		self.conn.commit()
@@ -145,16 +146,21 @@ class IdColumns:
 
 	def create_table(self):
 		logger.info('Working on %s.%s', self.table_name, self.column_name)
-		self.sql_text = self.sql_text + '\n------------------------------------------------------------------------------------------------------------------------------------\n'
+		self.sql_text = self.sql_text + '------------------------------------------------------------------------------------------------------------------------------------------------\n'
+		self.sql_text = self.sql_text + '------------------------------------------------------------------------------------------------------------------------------------------------\n'
+		self.sql_text = self.sql_text + '------------------------------------------------------------------------------------------------------------------------------------------------\n'
 		self.sql_text = self.sql_text + '--Create table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
 
-		if self.table_name == 'ust_tank':
-			sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int generated always as identity)"
+		if self.table_name == 'ust_tank' or self.table_name == 'ust_facility_dispenser':
+			if self.table_name == 'ust_tank':
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int generated always as identity)"
+			else:
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), dispenser_id int generated always as identity)"
 			self.cur.execute(sql)
 			logger.info('Created table %s.%s', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
-			sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name) select distinct "
+			sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name)\nselect distinct "
 			select_cols = ''
 			facility_id_info = self.get_org_col_name(self.table_name, 'facility_id')
 			tank_name_info = self.get_org_col_name(self.table_name, 'tank_name')
@@ -171,7 +177,7 @@ class IdColumns:
 				select_cols = select_cols + ", " + tank_name_col + "::varchar(200)"
 			else: 
 				select_cols = select_cols + ", null"
-			sql = sql + select_cols + ' from ' + self.dataset.schema + '.' + facility_id_table
+			sql = sql + select_cols + '\nfrom ' + self.dataset.schema + '.' + facility_id_table
 			self.cur.execute(sql) 
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
@@ -179,8 +185,11 @@ class IdColumns:
 
 			self.record_element_mapping()
 
-		elif self.table_name == 'ust_compartment':
-			sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), compartment_id int generated always as identity)"
+		elif self.table_name == 'ust_compartment' or self.table_name == 'ust_tank_dispenser'::
+			if self.table_name == 'ust_compartment':
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), compartment_id int generated always as identity)"
+			else:
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), dispenser_id int generated always as identity)"
 			self.cur.execute(sql)
 			logger.info('Created table %s.%s', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
@@ -189,7 +198,7 @@ class IdColumns:
 			if self.compartment_flag == 'N':
 				compartment_table_name = self.get_tank_table_name()
 
-			v_sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name, tank_id, compartment_name) select distinct "
+			v_sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name, tank_id, compartment_name)\nselect distinct "
 			select_cols = ''
 
 			sql = f"""select count(*) from public.ust_element_mapping 
@@ -203,11 +212,11 @@ class IdColumns:
 				if compartment_name_info: # get the organization column names to build the join
 					facility_id_info = self.get_org_col_name('ust_compartment', 'facility_id')
 					tank_id_info = self.get_org_col_name('ust_compartment', 'tank_id')
-					v_sql = v_sql + 'a.facility_id, a.tank_name, a.tank_id, b.compartment_name from ' 
+					v_sql = v_sql + 'a.facility_id, a.tank_name, a.tank_id, b.compartment_name\nfrom ' 
 					v_sql = v_sql + self.dataset.schema + '.erg_tank_id a left join ' + self.dataset.schema + '.' + compartment_name_info[0] + ' b '
 					v_sql = v_sql + ' on a.facility_id = b.' + facility_id_info[1] + ' and a.tank_id = b.' + tank_id_info[1]
 				else: # just enter null for compartment name because it's not in the source data 
-					v_sql = v_sql + 'facility_id, tank_name, tank_id, null from ' + self.dataset.schema + '.erg_tank_id'
+					v_sql = v_sql + 'facility_id, tank_name, tank_id, null\nfrom ' + self.dataset.schema + '.erg_tank_id'
 
 			else: # Source data had Tank ID; get the select columns from the source table
 				facility_id_info = self.get_org_col_name(compartment_table_name, 'facility_id')
@@ -247,8 +256,11 @@ class IdColumns:
 
 			self.record_element_mapping()
 
-		elif self.table_name == 'ust_piping':
-			sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), compartment_id int, piping_id int generated always as identity)"
+		elif self.table_name == 'ust_piping' or self.table_name == 'ust_compartment_dispenser':
+			if self.table_name == 'ust_piping':
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), compartment_id int, piping_id int generated always as identity)"
+			else: 
+				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(200), tank_id int, compartment_name varchar(200), compartment_id int, dispenser_id int generated always as identity)"
 			self.cur.execute(sql)
 			logger.info('Created table %s.%s', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
@@ -257,7 +269,7 @@ class IdColumns:
 			if self.compartment_flag == 'N':
 				compartment_table_name = self.get_tank_table_name()
 
-			v_sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name, tank_id, compartment_name, compartment_id) select distinct "
+			v_sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name, tank_id, compartment_name, compartment_id)\nselect distinct "
 			select_cols = ''
 
 			sql = f"""select count(*) from public.ust_element_mapping 
@@ -323,13 +335,6 @@ class IdColumns:
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
 			self.record_element_mapping()
-
-
-
-# ust_piping	piping_id
-# ust_facility_dispenser	dispenser_id
-# ust_tank_dispenser	dispenser_id
-# ust_compartment_dispenser	dispenser_id
 
 
 
