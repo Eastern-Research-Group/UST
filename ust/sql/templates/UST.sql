@@ -702,8 +702,21 @@ drop_existing = False 		     # Boolean, defaults to False. Set to True to drop t
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
+ * By default, this script will generate any required ID columns, update the public.ust_element_mapping table,
+ * and export a SQL file (located by default in the repo at  /ust/sql/XX/UST/XX_UST_id_column_generation.sql).
+ * You do NOT need to run the SQL in the generated file, however, if the script encounters errors or if you
+ * are unable to write the views in the next step because the script did not correctly create the ID
+ * generation tables, you can review this SQL file and make changes as needed to fix the data. If you do
+ * need to make changes to generated ID tables, be sure to accurately update public.ust_element_mapping table,
+ * including making robust comments in the programmer_comments columns.
 
 */
+--check to see if the script generated any tables 
+select epa_table_name, epa_column_name, organization_table_name 
+from public.v_ust_element_mapping a join public.ust_template_data_tables b 
+	on a.epa_table_name = b.table_name 
+where ust_control_id = ZZ and organization_table_name like 'erg%'
+order by sort_order;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
