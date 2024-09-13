@@ -10,8 +10,8 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			 # The only valid value for this script is 'ust' because it is not needed for releases! 
-control_id = 18                   # Enter an integer that is the ust_control_id
-drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+control_id = 0                   # Enter an integer that is the ust_control_id
+drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
