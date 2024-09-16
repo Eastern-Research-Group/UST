@@ -26,7 +26,7 @@ class ViewSql:
 	required_col_ids = None
 	existing_col_ids = None
 	epa_column_name = None
-	view_sql = None  
+	view_sql = '----------------------------------------------------------------------------------------------------------\n\n'  
 
 	def __init__(self, 
 				 dataset,
@@ -46,6 +46,7 @@ class ViewSql:
 		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids)
 		self.generate_sql()		
 		self.disconnect_db()
+		# self.show_existing_cols()
 		self.write_self()	
 
 
@@ -58,6 +59,12 @@ class ViewSql:
 		self.conn.commit()
 		self.cur.close()
 		self.conn.close()
+
+
+	def show_existing_cols(self):
+		for k, v in self.existing_cols.items():
+			print('column ID = ' + str(k))
+			print('column_name = ' + v['column_name'])
 
 
 	def write_self(self):
@@ -134,24 +141,26 @@ class ViewSql:
 				programmer_comments = '	  -- ' + programmer_comments
 			else:
 				programmer_comments = ''
-			existing_cols[column_id] = {'column_name': column_name, 'selected_column': selected_column, 'programmer_comments': programmer_comments}		
+			existing_cols[column_id] = {'column_name': column_name, 
+			                            'selected_column': selected_column, 
+			                            'programmer_comments': programmer_comments}		
 		return existing_cols
 
 
-	def get_join_info(self):
-		sql = f"""select organization_table_name, organization_column_name, organization_join_table, organization_join_column, organization_join_fk
+	def get_join_info(self, organization_table_name):
+		sql = f"""select organization_column_name, organization_join_table, organization_join_column, organization_join_fk
            from public.v_{self.dataset.ust_or_release}_table_population_sql
-           where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s"""
-		self.cur.execute(sql, (self.dataset.control_id, self.epa_column_name))			
+           where {self.dataset.ust_or_release}_control_id = %s 
+           and epa_table_name = %s and organization_table_name = %s"""
+		self.cur.execute(sql, (self.dataset.control_id, self.table_name, organization_table_name))		
+		# utils.pretty_print_query(self.cur)	
 		cols = self.cur.fetchone()
-		join_infos = []
-		for col in cols:
-			join_infos.append({'organization_table_name': cols[0], 
-				               'organization_column_name': cols[1], 
-				               'organization_join_table': cols[2], 
-				               'organization_join_column': cols[3], 
-				               'organization_join_fk': cols[4]})
-		return join_infos
+		join_info = {}
+		join_info['organization_column_name'] = cols[0]
+		join_info['organization_join_table'] = cols[1]
+		join_info['organization_join_column'] = cols[2]
+		join_info['organization_join_fk'] = cols[3]
+		return join_info
 
 
 	def build_select_query(self):
@@ -170,20 +179,25 @@ class ViewSql:
 			if self.all_col_ids[i] in self.existing_col_ids: # the column we are working on was mapped in the element_mapping table
 				self.epa_column_name = self.existing_cols[column_id]['column_name']
 				logger.info('Working on column %s', self.epa_column_name)
-				selected_column = self.existing_cols[column_id]['selected_column']
+				selected_column = self.existing_cols[column_id]['selected_column'].replace('""','????')
+				if 'facility_type' in self.epa_column_name and '_id' not in self.epa_column_name:
+					selection_column = selected_column.replace('facility_type1','facility_type_id').replace('facility_type2','facility_type_id')
 				programmer_comments = self.existing_cols[column_id]['programmer_comments']
 			else: # the column we are working on wasn't mapped in the element mapping table but is a required field so add it anyway
 				self.epa_column_name = self.required_cols[column_id]['column_name']
 				logger.info('Working on column %s', self.epa_column_name)
 				data_type = self.required_cols[column_id]['data_type']
 				character_maximum_length = self.required_cols[column_id]['character_maximum_length']
-				org_col = '??' # print a symbol making it obvious to the developer they need to update the generated SQL
+				org_col = '????' # print a symbol making it obvious to the developer they need to update the generated SQL
 			if self.epa_column_name == 'facility_state':
-				org_col = f"'{self.dataset.organization_id}'"
-				# if we are working on ust_facility and we are on facility state, set the region_next variable
-				if self.dataset.ust_or_release == 'ust' and self.table_name == 'ust_facility' and 13 not in self.existing_col_ids:
-					region_next = True
+				# if facility_state wasn't mapped, set it as the organization ID
+				if 11 not in self.existing_col_ids:
+					org_col = f"'{self.dataset.organization_id}'"
 					selected_column = org_col + '::' + utils.get_datatype_sql(data_type, character_maximum_length) + ' as ' + self.epa_column_name + ','
+				# if we are working on ust_facility and we are on facility state, set the region_next variable
+				if self.dataset.ust_or_release == 'ust' and self.table_name == 'ust_facility' and 12 not in self.existing_col_ids:
+					region_next = True
+				
 			self.view_sql = self.view_sql + '\t' + selected_column + programmer_comments + '\n'
 		
 
@@ -215,7 +229,7 @@ class ViewSql:
 		          where table_name is not null 
 		          order by sort_order"""
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name))
-		# utils.pretty_print_query(cur)
+		# utils.pretty_print_query(self.cur)
 		rows = self.cur.fetchall()
 		aliases = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 		i = 0 
@@ -234,7 +248,9 @@ class ViewSql:
 					from_sql = from_sql + ' left join '				
 				from_sql = from_sql + self.dataset.schema + '.' + '"' + from_table_name + '" ' + alias + '\n'
 				if not first_org_table:
-					from_sql = from_sql + ' on ' + aliases[i-1] + '."???" = ' + alias + '."???"\n'
+					join_info = self.get_join_info(from_table_name)
+					from_sql = from_sql + ' on ' + aliases[i-1] + '."' + join_info['organization_join_column'] + '" = ' 
+					from_sql = from_sql + alias + '."' + join_info['organization_join_fk'] + '"\n'
 				else:
 					first_org_table = False
 			elif from_table_type == 'deagg_table':
@@ -246,15 +262,10 @@ class ViewSql:
 				organization_column_name = cols[1]
 				from_sql = from_sql + '\tjoin ' + self.dataset.schema + '.' + from_table_name + ' ' + alias + ' on a."' + organization_column_name + '" = ' + alias + '."' + deagg_column_name + '"\n'
 			elif from_table_type == 'join_table': 
-				sql = f"""select organization_join_column, organization_column_name, organization_join_fk
-				           from public.v_{self.dataset.ust_or_release}_table_population_sql
-				           where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and organization_join_table = %s """
-				cur.execute(sql, (self.dataset.control_id, self.table_name, from_table_name))			
-				cols = self.cur.fetchone()
-				join_column_name = cols[0]
-				organization_column_name = cols[1]
-				organization_join_fk = cols[2]
-				from_sql = from_sql + '\tleft join ' + self.dataset.schema + '."' + from_table_name + '" ' + alias + ' on a."' + organization_column_name + '" = ' + alias + '."' + join_column_name + '"\n'
+				join_info = self.get_join_info()
+				from_sql = from_sql + '\tleft join ' + self.dataset.schema + '."' + from_table_name + '" ' 
+				from_sql = from_sql + alias + ' on a."' + join_info['organization_column_name'] + '" = ' 
+				from_sql = from_sql + alias + '."' + join_info['organization_join_column'] + '"\n'
 			elif from_table_type == 'lookup_table':
 				sql = f"""select database_lookup_column, organization_column_name from public.v_{self.dataset.ust_or_release}_table_population_sql
 				           where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s """
@@ -268,11 +279,11 @@ class ViewSql:
 				from_sql = from_sql + '\tleft join ' + self.dataset.schema + '.' + xwalk_view_name + ' ' + alias + ' on a."' + organization_column_name + '" = ' + alias + '.organization_value\n'
 			i += 1
 			tables_used.append(from_table_name)
-		self.view_sql = self.view_sql + from_sql[:-1] + ';\n'
+		self.view_sql = self.view_sql + from_sql[:-1] + ';\n\n'
 
 
 	def generate_sql(self):
-		self.view_sql = f'create view {self.dataset.schema}.{self.view_name} as\n'
+		self.view_sql = self.view_sql + f'create view {self.dataset.schema}.{self.view_name} as\n'
 		self.build_select_query()
 		self.build_from_query()
 		# print(self.view_sql)
