@@ -11,8 +11,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 18                 # Enter an integer that is the ust_control_id or release_control_id
-table_name = 'ust_facility'     # Enter EPA table name we are writing the view to populate. 
-drop_existing = False           # Boolean, defaults to False. Set to True to drop the view if it exists before creating it new. 
+table_name = None               # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
 overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -35,11 +34,9 @@ class ViewSql:
 				 overwrite_sql_file=False):
 		self.dataset = dataset
 		self.table_name = table_name 
-		self.drop_existing = drop_existing
 		self.overwrite_sql_file = overwrite_sql_file
 		self.view_name = 'v_' + self.table_name
 		self.set_db_connection()
-		self.drop_existing_view()
 		self.required_cols = self.get_required_cols()
 		self.existing_cols = self.get_existing_cols()
 		self.required_col_ids = [n for n in self.required_col_ids if n not in self.existing_col_ids]
@@ -73,21 +70,7 @@ class ViewSql:
 		else:
 			wora = 'a'
 		with open(self.dataset.export_file_path, wora, encoding='utf-8') as f:
-			f.write(self.view_sql.replace('\t',''))
-
-
-	def drop_existing_view(self):
-		sql = """select count(*) from information_schema.tables 
-		         where table_schema = %s and table_name = %s and table_type = 'VIEW'"""
-		self.cur.execute(sql, (self.dataset.schema, self.view_name))
-		cnt = self.cur.fetchone()[0]
-		if cnt > 0 and self.drop_existing:
-			sql = f"drop view {self.dataset.schema}.{self.view_name}"
-			cur.execute(sql)
-			logger.info('Dropped existing view %s.%s', self.dataset.schema, view_name)
-		elif cnt > 0:
-			logger.warning('View %s.%s already exists. Set variable drop_existing = True to drop it before creating a new one. Exiting...', self.dataset.schema, self.view_name)
-			# sys.exit()
+			f.write(self.view_sql.replace('\t','    '))
 
 
 	def get_required_cols(self):
@@ -181,7 +164,7 @@ class ViewSql:
 				logger.info('Working on column %s', self.epa_column_name)
 				selected_column = self.existing_cols[column_id]['selected_column'].replace('""','????')
 				if 'facility_type' in self.epa_column_name and '_id' not in self.epa_column_name:
-					selection_column = selected_column.replace('facility_type1','facility_type_id').replace('facility_type2','facility_type_id')
+					selected_column = selected_column.replace('facility_type1 as','facility_type_id as').replace('facility_type2 as','facility_type_id as')
 				programmer_comments = self.existing_cols[column_id]['programmer_comments']
 			else: # the column we are working on wasn't mapped in the element mapping table but is a required field so add it anyway
 				self.epa_column_name = self.required_cols[column_id]['column_name']
@@ -245,14 +228,14 @@ class ViewSql:
 			alias = aliases[i]
 			if from_table_type == 'org_table':
 				if not first_org_table:
-					from_sql = from_sql + ' left join '				
-				from_sql = from_sql + self.dataset.schema + '.' + '"' + from_table_name + '" ' + alias + '\n'
+					from_sql = from_sql + '\tleft join '				
+				from_sql = from_sql + self.dataset.schema + '.' + '"' + from_table_name + '" ' + alias
 				if not first_org_table:
 					join_info = self.get_join_info(from_table_name)
-					from_sql = from_sql + ' on ' + aliases[i-1] + '."' + join_info['organization_join_column'] + '" = ' 
-					from_sql = from_sql + alias + '."' + join_info['organization_join_fk'] + '"\n'
+					from_sql = from_sql + ' on ' + aliases[i-1] + '."' + join_info['organization_join_column'] + '" = ' + alias + '."' + join_info['organization_join_fk'] + '"'
 				else:
 					first_org_table = False
+				from_sql = from_sql  + '\n'
 			elif from_table_type == 'deagg_table':
 				sql = f"""select deagg_column_name, organization_column_name from public.v_{self.dataset.ust_or_release}_table_population_sql
 				           where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and deagg_table_name = %s """
@@ -290,23 +273,43 @@ class ViewSql:
 		return self.view_sql 
 
 
-def main(ust_or_release, control_id, table_name, drop_existing):
+
+
+def get_tables_needed(dataset):
+	conn = utils.connect_db()
+	cur = conn.cursor()
+	sql = f"""select distinct epa_table_name, table_sort_order
+			from public.v_{dataset.ust_or_release}_table_population 
+			where {dataset.ust_or_release}_control_id = %s
+			order by table_sort_order"""
+	cur.execute(sql, (dataset.control_id,))
+	rows = cur.fetchall()
+	cur.close()
+	conn.close()
+	return [r[0] for r in rows]
+
+
+
+def main(ust_or_release, control_id, table_name=None):
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id,
 					  base_file_name='view_creation.sql',
 					  export_file_name=export_file_name,
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
-
-	sql = ViewSql(dataset=dataset, 
-		          table_name=table_name, 
-		          drop_existing=drop_existing)
-
-	print(sql.view_sql)
+	if table_name:
+		sql = ViewSql(dataset=dataset, 
+			          table_name=table_name)
+		print(sql.view_sql)
+	else:
+		tables_needed = get_tables_needed(dataset)
+		for table in tables_needed: 
+			sql = ViewSql(dataset=dataset, 
+				          table_name=table)
+			# print(sql.view_sql)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
-		 table_name=table_name,
-		 drop_existing=drop_existing)
+		 table_name=table_name)
