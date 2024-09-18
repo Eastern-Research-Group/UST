@@ -33,7 +33,7 @@ class Export:
 	                 'v_ust_release': ['"ReleaseID"'],
 	                 'v_ust_release_substance': ['"ReleaseID"','"SubstanceReleased"'],
 	                 'v_ust_release_source': ['"ReleaseID"','"SourceOfRelease"'],
-	                 'v_ust_release_cause': ['"ReleaseID",'"CauseOfRelease"''],
+	                 'v_ust_release_cause': ['"ReleaseID"','"CauseOfRelease"'],
 	                 'v_ust_release_corrective_action_strategy': ['"ReleaseID"','"CorrectiveActionStrategy"']
 	                 }
 
