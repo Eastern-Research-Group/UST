@@ -86,10 +86,10 @@ class Export:
 
 		where_sql = ''
 		if self.ust_exclude_orgs:
-			where_sql = '\nwhere b.organization_id not in ('
+			where_sql = '\nwhere (b.organization_id not in ('
 			for org in self.ust_exclude_orgs:
 				where_sql = where_sql + "'" + org + "',"
-			where_sql = where_sql[:-1] + ')'
+			where_sql = where_sql[:-1] + '))'
 		if self.exclude_invalid_coords:
 			if where_sql:
 				where_sql = where_sql + '\nand '
@@ -107,9 +107,9 @@ class Export:
 	def build_sql(self, view_name, ust_or_release):
 		sql = f"from public.{view_name} a join public.{ust_or_release}_control b on a.{ust_or_release}_control_id = b.{ust_or_release}_control_id\n"
 		if ust_or_release == 'ust':
-			sql = sql + 'where not exists (select 1 from public.temp_facids c where a."FacilityID" = c."FacilityID" and a.ust_control_id = b.ust_control_id)' + ';\n\n'
+			sql = sql + 'where exists (select 1 from public.temp_facids c where a."FacilityID" = c."FacilityID" and a.ust_control_id = b.ust_control_id)' + ';\n\n'
 		else:
-			sql = sql + 'where not exists (select 1 from public.temp_releaseids c where a."ReleaseID" = c."ReleaseID" and a.release_control_id = c.release_control_id)' + ';\n\n'
+			sql = sql + 'where exists (select 1 from public.temp_releaseids c where a."ReleaseID" = c."ReleaseID" and a.release_control_id = c.release_control_id)' + ';\n\n'
 		return sql
 
 
@@ -173,7 +173,6 @@ class Export:
 		# with ZipFile(zip_file_path, 'w') as zf:
 		#     zf.write(full_path, compress_type=compression)
 		# logger.info('Zip file saved to %s', zip_file_path)
-
 
 
 
