@@ -30,7 +30,7 @@ class Dataset:
 			self.export_file_path = export_file_path
 			if self.requires_export:
 				self.populate_export_vars()
-			self.print_self()
+			# self.print_self()
 
 			
 	def populate_export_vars(self):
