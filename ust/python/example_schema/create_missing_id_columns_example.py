@@ -4,8 +4,8 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+from python.example_schema.dataset_example import Dataset 
 from python.util import utils
-from python.util.dataset_example import Dataset 
 from python.util.logger_factory import logger
 
 
@@ -273,9 +273,9 @@ class IdColumns:
 					v_sql = v_sql + 'facility_id, tank_name, tank_id, null\nfrom ' + self.dataset.schema + '.erg_tank_id'
 
 				# build the join columns assuming we had to create erg_tank_id because no Tank ID in source data
-				self.organization_join_table = self.get_join_table('tank_id', table_name='ust_tank')
-				self.organization_join_column = self.get_join_column('facility_id', table_name='erg_tank_id')
-				self.organization_join_column2 = self.get_join_column('tank_id', table_name='erg_tank_id')
+				self.organization_join_table = 'erg_tank_id'
+				self.organization_join_column = 'facility_id'
+				self.organization_join_column2 = 'tank_id'
 				self.organization_join_column3 = self.get_join_column('compartment_name')
 				self.organization_join_fk = 'facility_id'
 				self.organization_join_fk2 = 'tank_id'
@@ -283,14 +283,6 @@ class IdColumns:
 					self.organization_join_fk3 = 'compartment_name'
 				else:
 					self.organization_join_fk3 = None
-
-				print('organization_join_table = ' + str(self.organization_join_table))
-				print('organization_join_column = ' + str(self.organization_join_column))
-				print('organization_join_column2 = ' + str(self.organization_join_column2))
-				print('organization_join_column3 = ' + str(self.organization_join_column3))
-				print('organization_join_fk = ' + str(self.organization_join_fk))
-				print('organization_join_fk2 = ' + str(self.organization_join_fk2))
-				print('organization_join_fk3= ' + str(self.organization_join_fk3))
 
 			else: # Source data had Tank ID; get the select columns from the source table
 				facility_id_info = self.get_org_col_name(compartment_table_name, 'facility_id')
@@ -324,19 +316,19 @@ class IdColumns:
 					select_cols = select_cols + ", null"
 				v_sql = v_sql + select_cols + ' from ' + self.dataset.schema + '.' + tank_id_table
 
-				# self.organization_join_table = self.get_join_table('tank_id')
-				# self.organization_join_column = self.get_join_column('tank_id')
-				# if self.table_name == 'ust_compartment':
-				# 	self.organization_join_column2 = self.get_join_column('compartment_name')
-				# else:
-				# 	self.organization_join_column2 = None
-				# self.organization_join_column3 = None
-				# self.organization_join_fk = 'facility_id'
-				# if self.table_name == 'ust_compartment' and compartment_name_info:
-				# 	self.organization_join_fk2 = 'compartment_name'
-				# else:
-				# 	self.organization_join_fk2 = None
-				# self.organization_join_fk3 = None
+				# State supplied Tank IDs, but not compartments, so get join info
+				# TODO: not sure if this will work!!
+				self.organization_join_table = self.get_join_table('tank_id')
+				self.organization_join_column = self.get_join_column('facility_id')
+				self.organization_join_column2 = self.get_join_column('tank_id')
+				if self.table_name == 'ust_compartment':
+					self.organization_join_column3 = self.get_join_column('compartment_name')
+				else:
+					self.organization_join_column3 = None
+				self.organization_join_fk = 'facility_id'
+				self.organization_join_fk2 = 'tank_id'
+				if self.table_name == 'ust_compartment' and compartment_name_info:
+					self.organization_join_fk3 = 'compartment_name'
 
 			self.cur.execute(v_sql) 
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
