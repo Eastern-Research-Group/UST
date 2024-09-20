@@ -6,12 +6,12 @@ ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
 from python.util import utils
-from python.util.dataset import Dataset 
+from python.util.dataset_example import Dataset 
 from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True   		# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -40,7 +40,7 @@ class DeaggCode:
 		cur = conn.cursor()
 
 		sql = f"""select epa_table_name, epa_column_name, organization_table_name, organization_column_name
-				from public.v_{self.dataset.ust_or_release}_needed_mapping a join public.{self.dataset.ust_or_release}_element_table_sort_order b 
+				from example.v_{self.dataset.ust_or_release}_needed_mapping a join public.{self.dataset.ust_or_release}_element_table_sort_order b 
 					on a.epa_table_name = b.table_name
 				where {self.dataset.ust_or_release}_control_id = %s and db_lookup = 'Y'"""
 		if self.only_incomplete:

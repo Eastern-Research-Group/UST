@@ -81,6 +81,11 @@ create table example."Tanks"
 	"Installation Date" date,
 	"Tank Substance" varchar(100)
 	);
+alter table example."Tanks" add "Tank Type" varchar(100);
+
+
+
+
 drop table example.erg_tank_id ;
 create table example.erg_tank_id (facility_id varchar(100),
 tank_name varchar(100),
@@ -146,12 +151,53 @@ where ust_control_id = 18 and epa_column_name = 'tank_id'
 select * from example.ust_element_mapping;
 
 insert into example."Facilities" 
-values ('ABCD1234', 'Gas Station #1', '123 Main St.', '')
+values ('ABCD1234', 'Gomez Gas', '123 Main St.', 'Berkeley', '95294', 37.871666, -122.272781, 'Gomez Gasoline Incorporated');
+insert into example."Facilities" 
+values ('WXYZ8877', 'Gas Station #1', '7654 40th St', 'Santa Cruz', '98765', 36.974117, 122.030792, 'Luna Petrol');
+
+create table example."Tank Status Lookup" ("Tank Status Id" int, "Tank Status Desc" varchar(100));
+
+select * from tank_statuses 
+
+insert into example."Tank Status Lookup" values (1, 'Open');
+insert into example."Tank Status Lookup" values (2, 'Temporarily Closed');
+insert into example."Tank Status Lookup" values (3, 'Closed');
+
+select * from substances;
+
+insert into example."Tanks"
+values ('ABCD1234','Tank #1',3,null,'1978-06-04','Leaded Gasoline');
+insert into example."Tanks"
+values ('ABCD1234','Tank #2',1,null,'2000-05-24','Unleaded Gasoline, Antifreeze, Racing Gasoline');
+insert into example."Tanks"
+values ('ABCD1234','Tank #3',1,null,'2018-09-15','Premium Gasoline, Motor Oil');
+
+insert into example."Tanks"
+values ('WXYZ8877','A',1,null,'1999-11-23','Premium Gasoline, Used Motor Oil');
+insert into example."Tanks"
+values ('WXYZ8877','B',2,null,'2003-11-24','Diesel');
+insert into example."Tanks"
+values ('WXYZ8877','C',1,null,'2016-03-17','Diesel','AST');
+
+update example."Tanks" set "Tank Type" = 'UST' where "Tank Type" is null;
+
+
+alter table example."Tanks" alter column "Tank Status Id" type int using "Tank Status Id"::int;
+
 
 create table example.erg_substance_deagg (
  erg_substance_deagg_id int generated always as identity,
  "Substance" text,
  constraint erg_substance_deagg_unique unique ("Substance"))
+ 
+insert into  example.erg_substance_deagg ("Substance") values ('Diesel');
+insert into  example.erg_substance_deagg ("Substance") values ('Antifreeze');
+insert into  example.erg_substance_deagg ("Substance") values ('Racing Gasoline');
+insert into  example.erg_substance_deagg ("Substance") values ('Premium Gasoline');
+insert into  example.erg_substance_deagg ("Substance") values ('Unleaded Gasoline');
+insert into  example.erg_substance_deagg ("Substance") values ('Used Motor Oil');
+insert into  example.erg_substance_deagg ("Substance") values ('Motor Oil');
+insert into  example.erg_substance_deagg ("Substance") values ('Leaded Gasoline');
  
 create table example.erg_substance_datarows_deagg (
  "Facility Id" varchar(100),
@@ -159,14 +205,66 @@ create table example.erg_substance_datarows_deagg (
  "Substance" varchar(100)
 );
 
+update example."Tanks" set "Closure Date" = '2024-04-13' where "Tank Status Id" = 3;
 
-select * from information_schema.tables 
-where table_name like '%deagg%'
+select * from example."Tanks"
+
+insert into example.erg_substance_datarows_deagg values ('ABCD1234','Tank #1','Leaded Gasoline');
+insert into example.erg_substance_datarows_deagg values ('ABCD1234','Tank #2','Unleaded Gasoline');
+insert into example.erg_substance_datarows_deagg values ('ABCD1234','Tank #2','Antifreeze');
+insert into example.erg_substance_datarows_deagg values ('ABCD1234','Tank #2','Racing Gasoline');
+insert into example.erg_substance_datarows_deagg values ('ABCD1234','Tank #3','Premium Gasoline');
+insert into example.erg_substance_datarows_deagg values ('ABCD1234','Tank #3','Motor Oil');
+insert into example.erg_substance_datarows_deagg values ('WXYZ8877','A','Premium Gasoline');
+insert into example.erg_substance_datarows_deagg values ('WXYZ8877','A','Used Motor Oil');
+insert into example.erg_substance_datarows_deagg values ('WXYZ8877','B','Diesel');
+
+select * from example.erg_substance_datarows_deagg;
+
+select * from example."Tank Piping";
+
+alter table example."Tank Piping" drop column "Piping Style Id"
+
+select * from piping_material;
 
 
+insert into example."Piping Material Lookup" values (1, 'Fiberglass Reinforced Plastic');
+insert into example."Piping Material Lookup" values (2, 'Copper');
+insert into example."Piping Material Lookup" values (3, 'Stainless Steel');
+insert into example."Piping Material Lookup" values (4, 'Steel');
+insert into example."Piping Material Lookup" values (5, 'Flex Piping');
+insert into example."Piping Material Lookup" values (6, 'Other');
 
-select * from ust_element_mapping 
-where deagg_table_name is not null;
+insert into example."Tank Piping" values ('ABCD1234', 'Tank #1',4);
+insert into example."Tank Piping" values ('ABCD1234', 'Tank #2',1);
+insert into example."Tank Piping" values ('ABCD1234', 'Tank #2',3);
+insert into example."Tank Piping" values ('ABCD1234', 'Tank #2',6);
+insert into example."Tank Piping" values ('ABCD1234', 'Tank #3',2);
+insert into example."Tank Piping" values ('WXYZ8877', 'A',6);
+insert into example."Tank Piping" values ('WXYZ8877', 'B',5);
+insert into example."Tank Piping" values ('WXYZ8877', 'B',1);
+
+drop table example."Piping Style Lookup"
+
+select * from example.erg_tank_id;
+
+insert into example.erg_tank_id (facility_id, tank_name) values ('ABCD1234','Tank #1');
+insert into example.erg_tank_id (facility_id, tank_name) values ('ABCD1234','Tank #2');
+insert into example.erg_tank_id (facility_id, tank_name) values ('ABCD1234','Tank #3');
+insert into example.erg_tank_id (facility_id, tank_name) values ('WXYZ8877','A');
+insert into example.erg_tank_id (facility_id, tank_name) values ('WXYZ8877','B');
+
+select * from example.ust_element_mapping;
+
+
+CREATE OR REPLACE VIEW example.v_tank_status_xwalk
+AS SELECT a.organization_value,
+    a.epa_value,
+    b.tank_status_id
+   FROM example.v_ust_element_mapping a
+     LEFT JOIN public.tank_statuses b ON a.epa_value::text = b.tank_status::text
+  WHERE a.ust_control_id = 1 AND a.epa_column_name::text = 'tank_status_id'::text;
+
 
 ---------------------------------------------------------------
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
@@ -186,8 +284,9 @@ insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_col
 values (1,'ust_tank','tank_name','Tanks','Tank Name',null);
 
 insert into example.ust_element_mapping 
-(ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (1,'ust_tank','tank_status_id','Tanks','Tank Status Id',null);
+(ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name,
+	organization_join_table, organization_join_column, organization_join_fk) 
+values (1,'ust_tank','tank_status_id','Tank Status Lookup','Tank Status Desc', 'Tanks','Tank Status Id','Tank Status ID');
 
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (1,'ust_tank','tank_closure_date','Tanks','Closure Date',null);
@@ -195,9 +294,38 @@ values (1,'ust_tank','tank_closure_date','Tanks','Closure Date',null);
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (1,'ust_tank','tank_installation_date','Tanks','Install Date',null);
 
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (1,'ust_tank','tank_location_id','Tanks','Tank Type','Exclude if = AST');
+
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (1,'ust_tank_substance','facility_id','Tanks','Facility Id',null);
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (1,'ust_tank_substance','tank_name','Tanks','Tank Name',null);
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name,
+	programmer_comments, deagg_table_name, deagg_column_name) 
+values (1,'ust_tank_substance','substance_id','Tanks','Tank Substance','Source data contains multiple substances per row, delimited with a comma and space.',
+'erg_substance_datarows_deagg','Substance'
+);
+
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (1,'ust_piping','facility_id','Tanks','Facility Id',null);
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (1,'ust_piping','tank_name','Tanks','Tank Name',null);
 
 
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (1,'ust_piping','tank_name','Tanks','Tank Name',null);
 
+
+select * from example."Piping Material Lookup" 
+1	Fiberglass Reinforced Plastic
+2	Copper
+3	Stainless Steel
+4	Steel
+5	Flex Piping
+6	Other
+
+select  8f
 
 delete from example.ust_element_mapping 
 where epa_table_name = 'ust_tank'
