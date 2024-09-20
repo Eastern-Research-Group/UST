@@ -5,9 +5,9 @@ CREATE TABLE public.release_elements_tables (
     sort_order integer  NULL ,
     primary_key character varying(1)  NULL );
 
-ALTER TABLE public.release_elements_tables ADD CONSTRAINT release_elements_tables_element_id_fkey FOREIGN KEY (element_id) REFERENCES release_elements(element_id);
-
 ALTER TABLE public.release_elements_tables ADD CONSTRAINT release_elements_tables_pkey PRIMARY KEY (element_table_id);
+
+ALTER TABLE public.release_elements_tables ADD CONSTRAINT release_elements_tables_element_id_fkey FOREIGN KEY (element_id) REFERENCES release_elements(element_id);
 
 CREATE UNIQUE INDEX release_elements_tables_pkey ON public.release_elements_tables USING btree (element_table_id)
 

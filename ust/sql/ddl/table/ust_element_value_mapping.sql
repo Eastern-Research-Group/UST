@@ -11,7 +11,11 @@ CREATE TABLE public.ust_element_value_mapping (
 
 ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_value_mapping_pkey PRIMARY KEY (ust_element_value_mapping_id);
 
+ALTER TABLE example."example.ust_element_value_mapping" ADD CONSTRAINT ust_element_value_mapping_pkey PRIMARY KEY (ust_element_value_mapping_id);
+
 ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_value_mapping_unique UNIQUE (ust_element_mapping_id, organization_value, epa_value);
+
+ALTER TABLE example."example.ust_element_value_mapping" ADD CONSTRAINT ust_element_value_mapping_unique UNIQUE (ust_element_mapping_id, organization_value, epa_value);
 
 CREATE UNIQUE INDEX ust_element_value_mapping_pkey ON public.ust_element_value_mapping USING btree (ust_element_value_mapping_id)
 

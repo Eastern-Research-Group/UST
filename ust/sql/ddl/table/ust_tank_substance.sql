@@ -7,9 +7,9 @@ CREATE TABLE public.ust_tank_substance (
 
 ALTER TABLE public.ust_tank_substance ADD CONSTRAINT ust_tank_substance_pkey PRIMARY KEY (ust_tank_substance_id);
 
-ALTER TABLE public.ust_tank_substance ADD CONSTRAINT ust_tank_substance_sub_fk FOREIGN KEY (substance_id) REFERENCES substances(substance_id);
-
 ALTER TABLE public.ust_tank_substance ADD CONSTRAINT ust_tank_substance_tankid_fk FOREIGN KEY (ust_tank_id) REFERENCES ust_tank(ust_tank_id);
+
+ALTER TABLE public.ust_tank_substance ADD CONSTRAINT ust_tank_substance_sub_fk FOREIGN KEY (substance_id) REFERENCES substances(substance_id);
 
 CREATE UNIQUE INDEX ust_tank_substance_pkey ON public.ust_tank_substance USING btree (ust_tank_substance_id)
 

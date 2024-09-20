@@ -30,35 +30,35 @@ CREATE TABLE public.ust_release (
     military_dod_site character varying(7)  NULL ,
     release_control_id integer  NOT NULL );
 
-ALTER TABLE public.ust_release ADD CONSTRAINT release_closed_with_contamination_chk CHECK (((closed_with_contamination)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text, ('Unknown'::character varying)::text])));
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_coordinate_source_fk FOREIGN KEY (coordinate_source_id) REFERENCES coordinate_sources(coordinate_source_id);
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_epa_region_chk CHECK ((epa_region = ANY (ARRAY[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])));
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_facility_type_fk FOREIGN KEY (facility_type_id) REFERENCES facility_types(facility_type_id);
-
 ALTER TABLE public.ust_release ADD CONSTRAINT release_federally_reportable_release_chk CHECK (((federally_reportable_release)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text, ('Unknown'::character varying)::text])));
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_how_release_detected_fk FOREIGN KEY (how_release_detected_id) REFERENCES how_release_detected(how_release_detected_id);
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_media_impacted_groundwater_chk CHECK (((media_impacted_groundwater)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text])));
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_media_impacted_soil_chk CHECK (((media_impacted_soil)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text])));
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_media_impacted_surface_water_chk CHECK (((media_impacted_surface_water)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text])));
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_military_dod_site_chk CHECK (((military_dod_site)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text, ('Unknown'::character varying)::text])));
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_release_status_fk FOREIGN KEY (release_status_id) REFERENCES release_statuses(release_status_id);
-
-ALTER TABLE public.ust_release ADD CONSTRAINT release_state_fk FOREIGN KEY (state) REFERENCES states(state);
 
 ALTER TABLE public.ust_release ADD CONSTRAINT release_tribal_site_chk CHECK (((tribal_site)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text, ('Unknown'::character varying)::text])));
 
-ALTER TABLE public.ust_release ADD CONSTRAINT ust_release_control_fk FOREIGN KEY (release_control_id) REFERENCES release_control(release_control_id);
+ALTER TABLE public.ust_release ADD CONSTRAINT release_media_impacted_soil_chk CHECK (((media_impacted_soil)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text])));
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_media_impacted_groundwater_chk CHECK (((media_impacted_groundwater)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text])));
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_media_impacted_surface_water_chk CHECK (((media_impacted_surface_water)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text])));
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_epa_region_chk CHECK ((epa_region = ANY (ARRAY[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])));
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_closed_with_contamination_chk CHECK (((closed_with_contamination)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text, ('Unknown'::character varying)::text])));
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_military_dod_site_chk CHECK (((military_dod_site)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text, ('Unknown'::character varying)::text])));
 
 ALTER TABLE public.ust_release ADD CONSTRAINT ust_release_pkey PRIMARY KEY (ust_release_id);
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_coordinate_source_fk FOREIGN KEY (coordinate_source_id) REFERENCES coordinate_sources(coordinate_source_id);
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_facility_type_fk FOREIGN KEY (facility_type_id) REFERENCES facility_types(facility_type_id);
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_state_fk FOREIGN KEY (state) REFERENCES states(state);
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_release_status_fk FOREIGN KEY (release_status_id) REFERENCES release_statuses(release_status_id);
+
+ALTER TABLE public.ust_release ADD CONSTRAINT release_how_release_detected_fk FOREIGN KEY (how_release_detected_id) REFERENCES how_release_detected(how_release_detected_id);
+
+ALTER TABLE public.ust_release ADD CONSTRAINT ust_release_control_fk FOREIGN KEY (release_control_id) REFERENCES release_control(release_control_id);
 
 CREATE UNIQUE INDEX ust_release_pkey ON public.ust_release USING btree (ust_release_id)
 

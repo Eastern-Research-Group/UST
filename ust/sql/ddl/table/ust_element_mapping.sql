@@ -13,9 +13,15 @@ CREATE TABLE public.ust_element_mapping (
     deagg_table_name character varying(100)  NULL ,
     deagg_column_name character varying(100)  NULL ,
     epa_comments character varying(4000)  NULL ,
-    organization_join_fk character varying(100)  NULL );
+    organization_join_fk character varying(100)  NULL ,
+    organization_join_column2 character varying(100)  NULL ,
+    organization_join_column3 character varying(100)  NULL ,
+    organization_join_fk2 character varying(100)  NULL ,
+    organization_join_fk3 character varying(100)  NULL );
 
 ALTER TABLE public.ust_element_mapping ADD CONSTRAINT ust_element_mapping_pkey PRIMARY KEY (ust_element_mapping_id);
+
+ALTER TABLE example."example.ust_element_mapping" ADD CONSTRAINT ust_element_mapping_pkey PRIMARY KEY (ust_element_mapping_id);
 
 CREATE UNIQUE INDEX ust_element_mapping_pkey ON public.ust_element_mapping USING btree (ust_element_mapping_id)
 

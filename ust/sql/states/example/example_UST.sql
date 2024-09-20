@@ -92,6 +92,11 @@ CREATE TABLE example."Tank Piping" (
 	"Tank Name" varchar(100) NULL,
 	"Piping Material Id" int4 NULL
 );
+create table example."Dispensers" (
+	"Facility Id" varchar(100) NULL, 
+	"Tank name" varchar(100) NULL, 
+	"UDC" varchar(1) NULL
+);
 CREATE TABLE example."Tank Status Lookup" (
 	"Tank Status ID" int4 NULL,
 	"Tank Status Desc" varchar(100) NULL
@@ -130,7 +135,14 @@ INSERT INTO example."Tank Piping" ("Facility Id","Tank Name","Piping Material Id
 	 ('WXYZ8877','A',6),
 	 ('WXYZ8877','B',5),
 	 ('WXYZ8877','B',1);
-
+INSERT INTO example."Dispensers" ("Facility Id","Tank name","UDC") VALUES
+	 ('ABCD1234','Tank #1','N'),
+	 ('ABCD1234','Tank #2','Y'),
+	 ('ABCD1234','Tank #3','Y'),
+	 ('WXYZ8877','A','Y'),
+	 ('WXYZ8877','B','N'),
+	 ('WXYZ8877','C','Y');
+	
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -452,6 +464,15 @@ values (1,'ust_piping','piping_material_other','Piping Material Lookup','Piping 
         'if "Piping Material Desc" = "Other" then "Yes"',
        'Tank Piping','Piping Material Id','Piping Material ID');
 
+--ust_tank_dispenser: Map and populate this table only if the state stores dispenser data at the Tank level.
+--Dispenser data is OPTIONAL.
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (1,'ust_tank_dispenser','facility_id','Dispensers','Facility Id',null);
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (1,'ust_tank_dispenser','tank_name','Dispensers','Tank name',null);
+insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (1,'ust_tank_dispenser','dispenser_udc','Dispensers','UDC','If "Y" then "Yes"; if "N" then "No"');
+
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -540,7 +561,7 @@ and table_name like '%_xwalk' order by 1;
  * Set these variables in the script:
 
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
-control_id = 1                  # Enter an integer that is the ust_control_id
+control_id = 1                   # Enter an integer that is the ust_control_id
 drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
@@ -556,7 +577,7 @@ overwrite_sql_file = False       # Boolean, defaults to False. Set to True to ov
 */
 --check to see if the script generated any tables 
 select epa_table_name, epa_column_name, organization_table_name 
-from example.v_ust_element_mapping a join example.ust_template_data_tables b 
+from example.v_ust_element_mapping a join public.ust_template_data_tables b 
 	on a.epa_table_name = b.table_name 
 where ust_control_id = 1 and organization_table_name like 'erg%'
 order by sort_order;

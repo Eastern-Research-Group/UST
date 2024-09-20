@@ -185,7 +185,7 @@ class IdColumns:
 
 			self.record_element_mapping()
 
-		elif self.table_name == 'ust_compartment' or self.table_name == 'ust_tank_dispenser'::
+		elif self.table_name == 'ust_compartment' or self.table_name == 'ust_tank_dispenser':
 			if self.table_name == 'ust_compartment':
 				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), compartment_id int generated always as identity)"
 			else:
