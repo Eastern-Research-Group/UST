@@ -6,12 +6,12 @@ ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
 from python.util import utils
-from python.util.dataset import Dataset 
+from python.util.dataset_example import Dataset 
 from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = False 		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -38,7 +38,7 @@ class ValueMapper:
 		if self.dataset.ust_or_release == 'ust':
 			conn = utils.connect_db()
 			cur = conn.cursor()
-			sql = "select organization_compartment_flag from public.ust_control where ust_control_id = %s"
+			sql = "select organization_compartment_flag from example.ust_control where ust_control_id = %s"
 			cur.execute(sql, (self.dataset.control_id,))
 			self.organization_compartment_flag = cur.fetchone()[0]
 			cur.close()
@@ -51,7 +51,7 @@ class ValueMapper:
 
 		sql = f"""select epa_column_name from 
 				(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-				from public.v_{self.dataset.ust_or_release}_needed_mapping 
+				from example.v_{self.dataset.ust_or_release}_needed_mapping 
 				where {self.dataset.ust_or_release}_control_id = %s """
 		if self.only_incomplete:
 			sql = sql + "and mapping_complete = 'N'"
@@ -69,9 +69,9 @@ class ValueMapper:
 				self.value_mapping_sql = self.value_mapping_sql + f'/*\n{self.dataset.organization_id} does not report at the Compartment level, but CompartmentStatus is required.\n'
 				self.value_mapping_sql = self.value_mapping_sql + f'\nCopy the tank status mapping down to the compartment!\n'
 				self.value_mapping_sql = self.value_mapping_sql + 'The lookup tables for compartment_statuses and tank_stasuses are the same.\n */\n\n'
-				
+
 			sql2 = f"""select {self.dataset.ust_or_release}_element_mapping_id, organization_table_name, organization_column_name, deagg_table_name, deagg_column_name 
-					from public.{self.dataset.ust_or_release}_element_mapping 
+					from example.{self.dataset.ust_or_release}_element_mapping 
 					where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s"""
 			cur.execute(sql2, (self.dataset.control_id, epa_column_name))
 			row2 = cur.fetchone()
@@ -99,7 +99,7 @@ class ValueMapper:
 			self.value_mapping_sql = self.value_mapping_sql + ' * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.\n */\n'
 				
 			sql4 = f"""select database_lookup_table, database_lookup_column 
-						from public.{self.dataset.ust_or_release}_element_mapping a join public.{self.dataset.ust_or_release}_elements b on a.epa_column_name = b.database_column_name 
+						from example.{self.dataset.ust_or_release}_element_mapping a join public.{self.dataset.ust_or_release}_elements b on a.epa_column_name = b.database_column_name 
 						where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s"""
 			cur.execute(sql4, (self.dataset.control_id, epa_column_name))
 			row4 = cur.fetchone()
@@ -118,7 +118,7 @@ class ValueMapper:
 				except:
 					epa_value = None
 
-				self.value_mapping_sql = self.value_mapping_sql + f'insert into public.{self.dataset.ust_or_release}_element_value_mapping ({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments)\n'
+				self.value_mapping_sql = self.value_mapping_sql + f'insert into example.{self.dataset.ust_or_release}_element_value_mapping ({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments)\n'
 				if epa_value:
 					self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {repr(org_value)}, '{epa_value}', null);\n"
 				else:
@@ -140,7 +140,7 @@ class ValueMapper:
 			self.value_mapping_sql = self.value_mapping_sql + ' * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.\n\n'
 
 			self.value_mapping_sql = self.value_mapping_sql + "select distinct organization_value, epa_value\n"
-			self.value_mapping_sql = self.value_mapping_sql + f"from public.v_{self.dataset.ust_or_release}_element_mapping\n"
+			self.value_mapping_sql = self.value_mapping_sql + f"from example.v_{self.dataset.ust_or_release}_element_mapping\n"
 			self.value_mapping_sql = self.value_mapping_sql + f"where epa_column_name = '{epa_column_name}'\n"
 			self.value_mapping_sql = self.value_mapping_sql + "and lower(organization_value) like lower('%XXXX%')\n"
 			self.value_mapping_sql = self.value_mapping_sql + "order by 1, 2;\n\n"
@@ -148,7 +148,7 @@ class ValueMapper:
 			archive_view_name = f"archive.v_{self.dataset.ust_or_release.replace('release','lust')}_element_mapping"
 			self.value_mapping_sql = self.value_mapping_sql + f' * You can also review the mapping from the pilot using a query similar to the above, looking in {archive_view_name}.\n'
 			self.value_mapping_sql = self.value_mapping_sql + f' * Beware, however, that some of the lookup values have changed since the pilot so if you do use {archive_view_name}\n'
-			self.value_mapping_sql = self.value_mapping_sql + f' * to do mapping, check public.{db_lookup_table} to find the updated epa_value.\n */\n\n'
+			self.value_mapping_sql = self.value_mapping_sql + f' * to do mapping, check example.{db_lookup_table} to find the updated epa_value.\n */\n\n'
 		
 		cur.close()
 		conn.close()

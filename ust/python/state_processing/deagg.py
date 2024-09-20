@@ -78,7 +78,7 @@ def main(dataset, table_name, column_name, delimiter=',', drop_existing=False):
 			  set deagg_table_name = %s, deagg_column_name = %s
 	          where {dataset.ust_or_release}_control_id = %s 
 	          and organization_table_name = %s and organization_column_name = %s"""
-	cur.execute(sql, (deagg_table_name, id_column_name, dataset.control_id, table_name, column_name))
+	cur.execute(sql, (deagg_table_name, column_name, dataset.control_id, table_name, column_name))
 
 	conn.commit()
 	cur.close()
