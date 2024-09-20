@@ -274,6 +274,7 @@ order by 1, 2, 3, 4, 5;
  */
 
 --ust_facility: This table is REQUIRED
+--NOTE: facility_id is a required field. If Facility ID does not exist in the source data, STOP and talk to the state. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_facility','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments)
@@ -295,12 +296,12 @@ values (ZZ,'ust_facility','facility_county','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_facility','facility_zip_code','ORG_TAB_NAME','ORG_COL_NAME',null);
 --NOTE: facility_state is a required field but is not always populated in the state's data because the
---source database may assume all facilities are in the state. If that's the case, make sure you hardcode 
---the state into your v_ust_facility view later on, but you won't map anything here. 
+--source database may assume all facilities are in the state. This column will be added to the v_ust_facility view 
+--in a later step if it is not mapped here
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_facility','facility_state','ORG_TAB_NAME','ORG_COL_NAME',null);
 --NOTE: EPA region is rarely populated in the state data, other than TrUSTD (the tribal database)
---so it won't often be mapped here, but you can hardcode it into view v_ust_facility later. 
+--so it won't often be mapped here, but it will be added to view v_ust_facility later. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_facility','facility_epa_region','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
@@ -347,11 +348,15 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_facility','associated_ust_release_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 
 --ust_tank: This table is REQUIRED.
---At a mimimum we need a Tank ID and Tank Status. If these fields don't exist in the source data, stop and talk to EPA and/or the state. 
+--At a mimimum we need a Tank ID (or Tank Name) and Tank Status. If these fields don't exist in the source data, stop and talk to EPA and/or the state. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_tank','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null);
+--NOTE: Tank ID is required, but we can create it in a later step as long as Tank Name exists in the source data.
+--Tank ID must be an INTEGER (or able to be converted to an integer). 
+--If the source data contains a column called Tank ID but it contains alphanumeric values, map it to EPA column tank_name instead of tank_id.
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_tank','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null);
+--NOTE: Either tank_id or tank_name (or both) must be mapped. Use tank_id for numeric fields and tank_name for alphanumeric/text fields. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_tank','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
@@ -403,6 +408,8 @@ values (ZZ,'ust_tank_substance','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_tank_substance','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (ZZ,'ust_tank_substance','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_tank_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_tank_substance','substance_casno','ORG_TAB_NAME','ORG_COL_NAME',null);
@@ -413,7 +420,7 @@ values (ZZ,'ust_tank_substance','substance_casno','ORG_TAB_NAME','ORG_COL_NAME',
 --ust_compartment: This table is REQUIRED. 
 --If the state does not report compartment data, we will be creating a Compartment ID for it in a later step. 
 --Look for these data elements in the tank data for states that don't report compartments. 
---Compartment Status is required; copy the Tank Status for Compartment Status data for states 
+--Compartment Status is required; copy the Tank Status mapping for Compartment Status data for states 
 --that don't report compartments or do report compartments but don't have a separate compartment status. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_compartment','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null);
@@ -421,10 +428,14 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_compartment','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_compartment','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null);
+--NOTE: Compartment ID must be an INTEGER (or able to be converted to an integer). 
+--If the source data contains a column called Compartment ID but it contains alphanumeric values, map it to EPA column compartment_name instead of compartment_id.
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_compartment','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null);
+--NOTE: Use compartment_id for numeric fields and compartment_name for alphanumeric/text fields. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_compartment','compartment_name','ORG_TAB_NAME','ORG_COL_NAME',null);
+--NOTE: Compartment Status is a required field. If the state does not report compartments, use the same element mapping as Tank Status
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_compartment','compartment_status_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
@@ -489,6 +500,9 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_piping','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_piping','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null);
+--NOTE: Piping ID is a required field but if there is no INTEGER field in the source data that uniquely identifies each
+--piping run per Facility/Tank (non-compartment states) or Facility/Tank/Compartment (compartment states),
+--we will be constructing a Piping ID in a later step so don't map it now.
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_piping','piping_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
@@ -689,12 +703,34 @@ and table_name like '%_xwalk' order by 1;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 8: Create unique identifiers if they dont' exist
+--Step 8: Create unique identifiers if they don't exist
 
 /* 
- * 
+ * Run script create_missing_id_columns.py to identify if any required columns (e.g. Tank ID, Compartment ID, etc.)
+ * are missing and to create an ERG table containing generated IDs if necessary. 
+ * Set these variables in the script:
+
+ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
+control_id = ZZ                  # Enter an integer that is the ust_control_id
+drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
+overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
+
+ * By default, this script will generate any required ID columns, update the public.ust_element_mapping table,
+ * and export a SQL file (located by default in the repo at  /ust/sql/XX/UST/XX_UST_id_column_generation.sql).
+ * You do NOT need to run the SQL in the generated file, however, if the script encounters errors or if you
+ * are unable to write the views in the next step because the script did not correctly create the ID
+ * generation tables, you can review this SQL file and make changes as needed to fix the data. If you do
+ * need to make changes to generated ID tables, be sure to accurately update public.ust_element_mapping table,
+ * including making robust comments in the programmer_comments columns.
 
 */
+--check to see if the script generated any tables 
+select epa_table_name, epa_column_name, organization_table_name 
+from public.v_ust_element_mapping a join public.ust_template_data_tables b 
+	on a.epa_table_name = b.table_name 
+where ust_control_id = ZZ and organization_table_name like 'erg%'
+order by sort_order;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -702,7 +738,16 @@ and table_name like '%_xwalk' order by 1;
 --Step 9: Write the views that convert the source data to the EPA format
 
 /* 
+ * Run script create_view_sql.py to create the BASIC STRUCTURE of the views that will be used to
+ * populate the templates. 
+ * WARNING! The queries generated by the script are a STARTING PLACE for the developers but will 
+ * in most cases need to be manually manipulated to correctly select the data. 
  * 
+*/
+
+--Remind yourself if there are any state-level business rules you need to take into consideration
+--when writing the views (such as excluding AST, for example).
+select comments from public.ust_control where ust_control_id = ZZ;
 
 */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------

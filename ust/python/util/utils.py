@@ -462,4 +462,19 @@ def get_datatype_sql(data_type, character_maximum_length=None):
     return data_type
 
 
+def remove_extra_whitespace(string):
+    return re.sub(r"(?:(?!\n)\s)+", " ",string)
 
+
+def get_pretty_query(cursor):
+    try:
+        query = cursor.query.decode('utf-8')
+    except AttributeError as e:
+        logger.warning('Wrote input to cursor.query; unable to print: %s', e)
+        return
+    query = remove_extra_whitespace(query) + ';'
+    return query
+
+
+def pretty_print_query(cursor):
+    print(get_pretty_query(cursor))

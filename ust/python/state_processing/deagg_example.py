@@ -7,19 +7,19 @@ ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
 from python.util import utils, config
-from python.util.dataset import Dataset 
+from python.util.dataset_example import Dataset 
 from python.util.logger_factory import logger
 
 
 # THIS SCRIPT DEAGGREGATES SINGLE COLUMN LOOKUP VALUES (for example, SUBSTANCES)
-# USE deagg_rows.py TO CREATE DEAGG TABLES AT THE FACILITY/TANK/COMPARTMENT LEVEL
+# USE deagg_rows_example.py TO CREATE DEAGG TABLES AT THE FACILITY/TANK/COMPARTMENT LEVEL
 # THAT USE THE TABLES THIS SCRIPT CREATES
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_dataset.control_id or release_dataset.control_id
-table_name = '' 				# Enter a string containing organization table name
-column_name = ''				# Enter a string containing organization column name
-delimiter = ', ' 				# Defaults to ','; delimiter from the column beging deaggregated in the state table. Use \n for hard returns.
+control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
+table_name = 'Tanks' 				# Enter a string containing organization table name
+column_name = 'Tank Substance'				# Enter a string containing organization column name
+delimiter = ', ' 				# Defaults to ','; delimiter from the column beging deaggregated in the state table. Use '\n' for hard returns.
 drop_existing = False 			# Boolean, defaults to False; if True will drop existing deagg table with the same name
 
 
@@ -74,7 +74,7 @@ def main(dataset, table_name, column_name, delimiter=',', drop_existing=False):
 			           values (%s) on conflict("{column_name}") do nothing"""
 			cur.execute(sql2, (part,))
 
-	sql = f"""update public.{dataset.ust_or_release}_element_mapping 
+	sql = f"""update example.{dataset.ust_or_release}_element_mapping 
 			  set deagg_table_name = %s, deagg_column_name = %s
 	          where {dataset.ust_or_release}_control_id = %s 
 	          and organization_table_name = %s and organization_column_name = %s"""

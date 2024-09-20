@@ -2,7 +2,8 @@ CREATE TABLE public.release_elements_tables (
     element_table_id integer  NOT NULL generated always as identity,
     element_id integer  NOT NULL ,
     table_name character varying(100)  NOT NULL ,
-    sort_order integer  NULL );
+    sort_order integer  NULL ,
+    primary_key character varying(1)  NULL );
 
 ALTER TABLE public.release_elements_tables ADD CONSTRAINT release_elements_tables_element_id_fkey FOREIGN KEY (element_id) REFERENCES release_elements(element_id);
 

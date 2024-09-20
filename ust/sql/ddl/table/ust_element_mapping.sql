@@ -12,7 +12,8 @@ CREATE TABLE public.ust_element_mapping (
     organization_comments text  NULL ,
     deagg_table_name character varying(100)  NULL ,
     deagg_column_name character varying(100)  NULL ,
-    epa_comments character varying(4000)  NULL );
+    epa_comments character varying(4000)  NULL ,
+    organization_join_fk character varying(100)  NULL );
 
 ALTER TABLE public.ust_element_mapping ADD CONSTRAINT ust_element_mapping_pkey PRIMARY KEY (ust_element_mapping_id);
 
