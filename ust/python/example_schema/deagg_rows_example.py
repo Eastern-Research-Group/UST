@@ -6,9 +6,9 @@ sys.path.append(os.path.join(ROOT_PATH, ''))
 from datetime import date
 import ntpath
 
-from python.util.logger_factory import logger
-from python.util.dataset_example import Dataset 
+from python.example_schema.dataset_example import Dataset 
 from python.util import utils, config
+from python.util.logger_factory import logger
 
 
 # THIS SCRIPT DEAGGREGATES ENTIRE ROWS OF DATA THAT CONTAIN ROLLED UP DATA

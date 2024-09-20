@@ -4,13 +4,13 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+from python.example_schema.dataset_example import Dataset 
 from python.util import utils
-from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
 table_name = None               # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
 overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -43,7 +43,7 @@ class ViewSql:
 		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids)
 		self.generate_sql()		
 		self.disconnect_db()
-		# self.show_existing_cols()
+		self.show_existing_cols()
 		self.write_self()	
 
 
@@ -79,7 +79,7 @@ class ViewSql:
 					on a.table_name = b.table_name and a.column_name = b.column_name
 				where table_schema = 'public' and a.table_name = %s 
 				and b.column_name not in 
-					(select epa_column_name from public.v_{self.dataset.ust_or_release}_table_population_sql
+					(select epa_column_name from example.v_{self.dataset.ust_or_release}_table_population_sql
 					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s)
 				order by ordinal_position"""
 		self.cur.execute(sql, (self.table_name, self.dataset.control_id, self.table_name))
@@ -104,7 +104,7 @@ class ViewSql:
 				   database_lookup_table, database_lookup_column,
 				   deagg_table_name, deagg_column_name,
 				   column_sort_order, programmer_comments, primary_key
-			from public.v_{self.dataset.ust_or_release}_table_population_sql
+			from example.v_{self.dataset.ust_or_release}_table_population_sql
 			where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s
 			order by column_sort_order """
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
@@ -132,7 +132,7 @@ class ViewSql:
 
 	def get_join_info(self, organization_table_name):
 		sql = f"""select organization_column_name, organization_join_table, organization_join_column, organization_join_fk
-           from public.v_{self.dataset.ust_or_release}_table_population_sql
+           from example.v_{self.dataset.ust_or_release}_table_population_sql
            where {self.dataset.ust_or_release}_control_id = %s 
            and epa_table_name = %s and organization_table_name = %s"""
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name, organization_table_name))		
@@ -188,26 +188,26 @@ class ViewSql:
 		self.view_sql = self.view_sql[:-2] + '\nfrom '
 		sql = f"""select * from (
 					   select distinct organization_table_name table_name, 'org_table' as table_type, 1 as sort_order
-					  from public.v_{self.dataset.ust_or_release}_table_population_sql
+					  from example.v_{self.dataset.ust_or_release}_table_population_sql
 					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key = 'Y'
 					  union all 
 					  select distinct organization_table_name table_name, 'org_table' as table_type, 2 as sort_order
-					  from public.v_{self.dataset.ust_or_release}_table_population_sql
+					  from example.v_{self.dataset.ust_or_release}_table_population_sql
 					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key is null 
 					  and organization_table_name not in 
-					  	(select organization_table_name from public.v_ust_table_population_sql
+					  	(select organization_table_name from example.v_ust_table_population_sql
 					  	where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key = 'Y')
 			          union all 
 			          select distinct deagg_table_name, 'deagg_table' as table_type, 2 as sort_order  
-			          from public.v_{self.dataset.ust_or_release}_table_population_sql
+			          from example.v_{self.dataset.ust_or_release}_table_population_sql
 			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
 			          union all 
 			          select distinct organization_join_table, 'join_table' as table_type, 3 as sort_order  
-			          from public.v_{self.dataset.ust_or_release}_table_population_sql
+			          from example.v_{self.dataset.ust_or_release}_table_population_sql
 			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
 			          union all 
 			          select distinct database_lookup_table, 'lookup_table' as table_type, 4 as sort_order  
-			          from public.v_{self.dataset.ust_or_release}_table_population_sql
+			          from example.v_{self.dataset.ust_or_release}_table_population_sql
 			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s) x
 		          where table_name is not null 
 		          order by sort_order"""
@@ -237,7 +237,7 @@ class ViewSql:
 					first_org_table = False
 				from_sql = from_sql  + '\n'
 			elif from_table_type == 'deagg_table':
-				sql = f"""select deagg_column_name, organization_column_name from public.v_{self.dataset.ust_or_release}_table_population_sql
+				sql = f"""select deagg_column_name, organization_column_name from example.v_{self.dataset.ust_or_release}_table_population_sql
 				           where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and deagg_table_name = %s """
 				cur.execute(sql, (self.dataset.control_id, self.table_name, from_table_name))
 				cols = self.cur.fetchone()
@@ -250,7 +250,7 @@ class ViewSql:
 				from_sql = from_sql + alias + ' on a."' + join_info['organization_column_name'] + '" = ' 
 				from_sql = from_sql + alias + '."' + join_info['organization_join_column'] + '"\n'
 			elif from_table_type == 'lookup_table':
-				sql = f"""select database_lookup_column, organization_column_name from public.v_{self.dataset.ust_or_release}_table_population_sql
+				sql = f"""select database_lookup_column, organization_column_name from example.v_{self.dataset.ust_or_release}_table_population_sql
 				           where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s """
 				self.cur.execute(sql, (self.dataset.control_id, self.table_name, from_table_name))
 				cols = self.cur.fetchone()
@@ -279,7 +279,7 @@ def get_tables_needed(dataset):
 	conn = utils.connect_db()
 	cur = conn.cursor()
 	sql = f"""select distinct epa_table_name, table_sort_order
-			from public.v_{dataset.ust_or_release}_table_population 
+			from example.v_{dataset.ust_or_release}_table_population 
 			where {dataset.ust_or_release}_control_id = %s
 			order by table_sort_order"""
 	cur.execute(sql, (dataset.control_id,))

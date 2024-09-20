@@ -187,7 +187,7 @@ organization_compartment_flag = None    # For UST only set to 'Y' if state data 
  * OR:
 */
 insert into example.ust_control (organization_id, date_received, data_processed, data_source, comments, organization_compartment_flag)
-values ('XX', '2024-09-18', current_date, 'Pseudo data to be used as an example only', 'Example data for element mapping', 'N');
+values ('XX', '2024-09-18', current_date, 'Pseudo data to be used as an example only', 'Example data for element mapping; includes ASTs', 'N');
 returning ust_control_id;
 1
 
@@ -418,13 +418,13 @@ values (1,'ust_tank_substance','substance_id','Tanks','Tank Substance','Source d
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (1,'ust_compartment','facility_id','Tanks','Facility Id',null);
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (1,'ust_compartment','tank_name','Tanks','Facility Id',null);
+values (1,'ust_compartment','tank_name','Tanks','Tank Name',null);
 --NOTE: Compartment Status is a required field. If the state does not report compartments, use the same element mapping as Tank Status
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments,
 	organization_join_table, organization_join_column, organization_join_fk) 
 values (1,'ust_compartment','compartment_status_id','Tank Status Lookup','Tank Status Desc', 
 		'State does not report compartments; copied from Tank Status', 'Tanks','Tank Status Id','Tank Status ID');
-
+	
 --ust_piping: This table is OPTIONAL, do not map if there is no piping data in the source data
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (1,'ust_piping','facility_id','Tanks','Facility Id',null);
@@ -540,7 +540,7 @@ only_incomplete = False 		# Boolean, defaults to True. Set to False to output ma
  * Set these variables in the script:
  
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 1                 # Enter an integer that is the ust_control_id or release_control_id
+control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
   
  * To see the crosswalk views after running the script:
 

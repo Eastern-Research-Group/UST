@@ -6,8 +6,8 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+from python.example_schema.dataset_example import Dataset 
 from python.util import utils, config
-from python.util.dataset_example import Dataset 
 from python.util.logger_factory import logger
 
 
