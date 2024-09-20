@@ -29,11 +29,21 @@ CREATE TABLE public.ust_compartment (
     tank_subpart_k_other character varying(7)  NULL ,
     tank_other_release_detection character varying(7)  NULL );
 
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_automatic_tank_gauging_continuous_leak_detection_ch CHECK (((automatic_tank_gauging_continuous_leak_detection)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_bucket_installed_chk CHECK (((spill_bucket_installed)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_compartment_status_fk FOREIGN KEY (compartment_status_id) REFERENCES compartment_statuses(compartment_status_id);
 
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_pkey PRIMARY KEY (ust_compartment_id);
+
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_id_fkey FOREIGN KEY (ust_tank_id) REFERENCES ust_tank(ust_tank_id);
+
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_bucket_wall_type_fk FOREIGN KEY (spill_bucket_wall_type_id) REFERENCES spill_bucket_wall_types(spill_bucket_wall_type_id);
+
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_concrete_berm_installed_chk CHECK (((concrete_berm_installed)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
+
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_prevention_other_chk CHECK (((spill_prevention_other)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
+
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_prevention_not_required_chk CHECK (((spill_prevention_not_required)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_prevention_ball_float_valve_chk CHECK (((overfill_prevention_ball_float_valve)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
@@ -41,45 +51,35 @@ ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_preventio
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_prevention_high_level_alarm_chk CHECK (((overfill_prevention_high_level_alarm)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_prevention_not_required_chk CHECK (((overfill_prevention_not_required)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
-
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_prevention_other_chk CHECK (((overfill_prevention_other)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_prevention_unknown_chk CHECK (((overfill_prevention_unknown)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_pkey PRIMARY KEY (ust_compartment_id);
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_bucket_installed_chk CHECK (((spill_bucket_installed)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_bucket_wall_type_fk FOREIGN KEY (spill_bucket_wall_type_id) REFERENCES spill_bucket_wall_types(spill_bucket_wall_type_id);
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_prevention_not_required_chk CHECK (((spill_prevention_not_required)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_prevention_other_chk CHECK (((spill_prevention_other)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_automatic_tank_gauging_release_detection_chk CHECK (((tank_automatic_tank_gauging_release_detection)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_groundwater_monitoring_chk CHECK (((tank_groundwater_monitoring)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_id_fkey FOREIGN KEY (ust_tank_id) REFERENCES ust_tank(ust_tank_id);
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_prevention_not_required_chk CHECK (((overfill_prevention_not_required)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_interstitial_monitoring_chk CHECK (((tank_interstitial_monitoring)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_inventory_control_chk CHECK (((tank_inventory_control)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_automatic_tank_gauging_release_detection_chk CHECK (((tank_automatic_tank_gauging_release_detection)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
+
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_automatic_tank_gauging_continuous_leak_detection_ch CHECK (((automatic_tank_gauging_continuous_leak_detection)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_manual_tank_gauging_chk CHECK (((tank_manual_tank_gauging)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_other_release_detection_chk CHECK (((tank_other_release_detection)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
-
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_statistical_inventory_reconciliation_chk CHECK (((tank_statistical_inventory_reconciliation)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_subpart_k_other_chk CHECK (((tank_subpart_k_other)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
-
-ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_subpart_k_tightness_testing_chk CHECK (((tank_subpart_k_tightness_testing)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_tightness_testing_chk CHECK (((tank_tightness_testing)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_inventory_control_chk CHECK (((tank_inventory_control)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
+
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_groundwater_monitoring_chk CHECK (((tank_groundwater_monitoring)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
+
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_vapor_monitoring_chk CHECK (((tank_vapor_monitoring)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
+
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_subpart_k_tightness_testing_chk CHECK (((tank_subpart_k_tightness_testing)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
+
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_subpart_k_other_chk CHECK (((tank_subpart_k_other)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
+
+ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_tank_other_release_detection_chk CHECK (((tank_other_release_detection)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 CREATE UNIQUE INDEX compartment_pkey ON public.ust_compartment USING btree (ust_compartment_id)
 

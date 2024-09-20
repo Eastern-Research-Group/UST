@@ -252,5 +252,3 @@ order by 1, 2;
  * Beware, however, that some of the lookup values have changed since the pilot so if you do use archive.v_ust_element_mapping
  * to do mapping, check example.compartment_statuses to find the updated epa_value.
  */
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------

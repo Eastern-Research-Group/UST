@@ -35,15 +35,21 @@ CREATE TABLE public.ust_facility (
     associated_ust_release_id character varying(40)  NULL ,
     ust_control_id integer  NULL );
 
+ALTER TABLE public.ust_facility ADD CONSTRAINT facility_facility_type1_fk FOREIGN KEY (facility_type1) REFERENCES facility_types(facility_type_id);
+
+ALTER TABLE public.ust_facility ADD CONSTRAINT facility_facility_type2_fk FOREIGN KEY (facility_type2) REFERENCES facility_types(facility_type_id);
+
+ALTER TABLE public.ust_facility ADD CONSTRAINT facility_owner_type_fk FOREIGN KEY (owner_type_id) REFERENCES owner_types(owner_type_id);
+
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_coordinate_source_fk FOREIGN KEY (coordinate_source_id) REFERENCES coordinate_sources(coordinate_source_id);
+
+ALTER TABLE public.ust_facility ADD CONSTRAINT facility_state_fk FOREIGN KEY (facility_state) REFERENCES states(state);
+
+ALTER TABLE public.ust_facility ADD CONSTRAINT facility_pkey PRIMARY KEY (ust_facility_id);
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_epa_region_chk CHECK ((facility_epa_region = ANY (ARRAY[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])));
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_facility_tribal_site_chk CHECK (((facility_tribal_site)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
-
-ALTER TABLE public.ust_facility ADD CONSTRAINT facility_facility_type1_fk FOREIGN KEY (facility_type1) REFERENCES facility_types(facility_type_id);
-
-ALTER TABLE public.ust_facility ADD CONSTRAINT facility_facility_type2_fk FOREIGN KEY (facility_type2) REFERENCES facility_types(facility_type_id);
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_financial_responsibility_bond_rating_test_chk CHECK (((financial_responsibility_bond_rating_test)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
 
@@ -65,17 +71,11 @@ ALTER TABLE public.ust_facility ADD CONSTRAINT facility_financial_responsibility
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_financial_responsibility_trust_fund_chk CHECK (((financial_responsibility_trust_fund)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
 
-ALTER TABLE public.ust_facility ADD CONSTRAINT facility_fr_obtained_chk CHECK (((financial_responsibility_obtained)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying, 'N/A'::character varying])::text[])));
-
-ALTER TABLE public.ust_facility ADD CONSTRAINT facility_owner_type_fk FOREIGN KEY (owner_type_id) REFERENCES owner_types(owner_type_id);
-
-ALTER TABLE public.ust_facility ADD CONSTRAINT facility_pkey PRIMARY KEY (ust_facility_id);
-
-ALTER TABLE public.ust_facility ADD CONSTRAINT facility_state_fk FOREIGN KEY (facility_state) REFERENCES states(state);
-
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_ust_reported_release_chk CHECK (((ust_reported_release)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT ust_facility_control_fk FOREIGN KEY (ust_control_id) REFERENCES ust_control(ust_control_id);
+
+ALTER TABLE public.ust_facility ADD CONSTRAINT facility_fr_obtained_chk CHECK (((financial_responsibility_obtained)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying, 'N/A'::character varying])::text[])));
 
 CREATE INDEX u_fac_idx ON public.ust_facility USING btree (facility_id)
 

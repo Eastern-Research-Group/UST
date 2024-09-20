@@ -603,11 +603,11 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_tank_dispenser','dispenser_udc','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_tank_dispenser','dispenser_udc_wall_type','ORG_TAB_NAME','ORG_COL_NAME',null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (ZZ,'ust_compartment_dispenser','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 
 --ust_compartment_dispenser: Map and populate this table only if the state stores dispenser data at the Compartment level.
 --Dispenser data is OPTIONAL.
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (ZZ,'ust_compartment_dispenser','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (ZZ,'ust_compartment_dispenser','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 

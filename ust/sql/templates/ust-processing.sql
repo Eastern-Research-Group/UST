@@ -438,3 +438,95 @@ AS SELECT x.ust_control_id,
                  SELECT 'ust_compartment_dispenser'::character varying(100) AS epa_table_name) z
           WHERE a.epa_column_name::text = 'ust_id'::text) x
   ORDER BY x.ust_control_id, x.epa_table_name, x.table_sort_order, x.column_sort_order;
+
+ 
+ 
+ select * from ust_required_view_columns 
+ 
+ select * from example.erg_compartment_id 
+ 
+ drop table example.erg_compartment_id ;
+ 
+
+
+select distinct a.table_name, sort_order
+ from public.ust_required_view_columns a join public.ust_template_data_tables b on a.table_name = b.table_name 
+ where auto_create = 'Y' and not exists 
+ (select 1 from example.ust_element_mapping c
+ where ust_control_id = 1 and a.table_name = c.epa_table_name and a.column_name = c.epa_column_name)
+ and (a.table_name = 'ust_compartment' or exists 
+ (select 1 from example.ust_element_mapping c
+ where ust_control_id = 1 and a.table_name = c.epa_table_name))
+ order by sort_order;
+ 
+
+select * from ust_required_view_columns a join public.ust_template_data_tables b on a.table_name = b.table_name 
+ where auto_create = 'Y'
+
+ select * from example.ust_element_mapping 
+where ust_control_id = 1 and epa_table_name = 'ust_tank' 
+
+select * 
+from example.v_ust_element_mapping_joins
+where ust_control_id = 1 
+and epa_table_name in ('ust_tank','ust_compartment')
+order by table_sort_order, column_sort_order;
+
+
+create view public.v_ust_element_mapping_joins as
+select epa_table_name, epa_column_name, 
+       organization_table_name, organization_column_name, 
+       organization_join_table, 
+       organization_join_column, organization_join_fk,
+       organization_join_column2, organization_join_fk2,
+       organization_join_column3, organization_join_fk3,
+       ust_element_mapping_id, ust_control_id, 
+       b.sort_order as table_sort_order, d.sort_order as column_sort_order
+from public.ust_element_mapping a left join public.ust_element_table_sort_order b 
+		on a.epa_table_name = b.table_name	
+	left join public.ust_elements c 
+		on a.epa_column_name = c.database_column_name 
+	left join public.ust_elements_tables d 
+		on c.element_id = d.element_id and b.table_name = d.table_name;
+
+create view public.v_release_element_mapping_joins as
+select epa_table_name, epa_column_name, 
+       organization_table_name, organization_column_name, 
+       organization_join_table, 
+       organization_join_column, organization_join_fk,
+       organization_join_column2, organization_join_fk2,
+       organization_join_column3, organization_join_fk3,
+       release_element_mapping_id, release_control_id, 
+       b.sort_order as table_sort_order, d.sort_order as column_sort_order
+from public.release_element_mapping a left join public.release_element_table_sort_order b 
+		on a.epa_table_name = b.table_name	
+	left join public.release_elements c 
+		on a.epa_column_name = c.database_column_name 
+	left join public.release_elements_tables d 
+		on c.element_id = d.element_id and b.table_name = d.table_name;
+	
+	
+	
+select * from ust_elements_tables 
+
+select * from ust_elements;
+
+ 
+select 
+from example.ust_element_mapping 
+where ust_control_id = 1
+and epa_table_name = 'ust_compartment' 
+ 
+select * from example.erg_compartment_id ;
+ 
+ 
+select table_name from information_schema.tables 
+where table_schema = 'example' and table_name like 'erg%id'
+order by 1
+
+
+
+select epa_column_name from 
+(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+from example.v_ust_needed_mapping 
+where ust_control_id = 1) x

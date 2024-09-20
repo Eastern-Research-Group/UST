@@ -12,7 +12,8 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = False 		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+overwrite_existing = False      # boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None
@@ -26,7 +27,8 @@ class ValueMapper:
 
 	def __init__(self, 
 				 dataset, 
-				 only_incomplete=False):
+				 only_incomplete=True,
+				 overwrite_existing=False):
 		self.dataset = dataset
 		self.only_incomplete = only_incomplete
 		self.set_compartment_flag()
@@ -156,7 +158,10 @@ class ValueMapper:
 	
 
 	def write_sql(self):
-		with open(self.dataset.export_file_path, 'w', encoding='utf-8') as f:
+		wora = 'a'
+		if self.overwrite_existing:
+			wora = 'w'
+		with open(self.dataset.export_file_path, wora, encoding='utf-8') as f:
 			f.write(self.value_mapping_sql)
 
 
