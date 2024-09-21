@@ -957,10 +957,10 @@ AS SELECT x.ust_control_id,
             a.organization_join_column3,
             a.organization_join_fk3
            FROM example.ust_element_mapping a
-             JOIN public.ust_elements b ON a.epa_column_name::text = b.database_column_name::text
-             JOIN public.ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
-             JOIN public.ust_template_data_tables d ON c.table_name::text = d.table_name::text
-             JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name
+             left JOIN public.ust_elements b ON a.epa_column_name::text = b.database_column_name::text
+             left JOIN public.ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
+             left JOIN public.ust_template_data_tables d ON c.table_name::text = d.table_name::text
+             left JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name
         UNION ALL
          SELECT a.ust_control_id,
             z.epa_table_name,
@@ -989,10 +989,10 @@ AS SELECT x.ust_control_id,
             a.organization_join_column3,
             a.organization_join_fk3
            FROM example.ust_element_mapping a
-             JOIN public.ust_elements b ON a.epa_column_name::text = b.database_column_name::text
-             JOIN public.ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
-             JOIN public.ust_template_data_tables d ON c.table_name::text = d.table_name::text
-             JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name,
+             left JOIN public.ust_elements b ON a.epa_column_name::text = b.database_column_name::text
+             left JOIN public.ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
+             left JOIN public.ust_template_data_tables d ON c.table_name::text = d.table_name::text
+             left JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name,
             ( SELECT 'ust_tank'::character varying(100) AS epa_table_name
                 UNION ALL
                  SELECT 'ust_tank_substance'::character varying(100) AS epa_table_name
@@ -1051,4 +1051,54 @@ AS SELECT v_ust_table_population.ust_control_id,
     v_ust_table_population.column_sort_order,
     v_ust_table_population.primary_key
    FROM example.v_ust_table_population;
+
+select * from information_schema.columns
+
+
+select * from example.v_ust_table_population_sql
+where ust_control_id = 1
+and epa_table_name = 'ust_tank'
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_tank'
+
+select * from example.v_ust_table_population
+where ust_control_id = 1
+and epa_table_name = 'ust_tank'
+
+
+
+select organization_column_name, organization_join_table, 
+ organization_join_column, organization_join_fk,
+ organization_join_column2, organization_join_fk2,
+ organization_join_column3, organization_join_fk3
+ from example.v_ust_table_population_sql
+ where ust_control_id = 1 
+ and epa_table_name = 'ust_tank' and organization_table_name = 'Tanks';
+
+
+
+			column_id = existing_col[13]
+			column_name = existing_col[0]
+			selected_column = existing_col[5]
+			programmer_comments = existing_col[14]
+
+			
+select 
+from example.ust_element_mapping 
+where a.ust_control_id = 1 and a.epa_table_name = 'ust_tank'
+			
+select column_sort_order as column_id, 
+	epa_column_name as column_name,
+	programmer_comments
+from example.v_ust_element_mapping_joins 
+where ust_control_id = 1 and epa_table_name = 'ust_tank';
+
+
+select * from example.v_ust_element_mapping_joins 
+where epa_table_name = 'ust_tank'
+order column_sort_order
+
+
+
 
