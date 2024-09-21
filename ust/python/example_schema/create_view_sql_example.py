@@ -114,7 +114,7 @@ class ViewSql:
 		sql = """select data_type, character_maximum_length from information_schema.columns 
 		         where table_schema = 'public' and table_name = %s and column_name = %s"""
 		self.cur.execute(sql, (epa_table_name, epa_column_name))
-		utils.pretty_print_query(self.cur)
+		# utils.pretty_print_query(self.cur)
 		row = self.cur.fetchone()
 		data_type = row[0]
 		max_len = row[1]
@@ -165,7 +165,7 @@ class ViewSql:
            where {self.dataset.ust_or_release}_control_id = %s 
            and epa_table_name = %s and organization_table_name = %s"""
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name, organization_table_name))		
-		utils.pretty_print_query(self.cur)	
+		# utils.pretty_print_query(self.cur)	
 		cols = self.cur.fetchone()
 		join_info = {}
 		join_info['organization_column_name'] = cols[0]
@@ -176,10 +176,8 @@ class ViewSql:
 		join_info['organization_join_fk2'] = cols[5]
 		join_info['organization_join_column3'] = cols[6]
 		join_info['organization_join_fk3'] = cols[7]
-
-		for k, v in join_info.items():
-			print(k + ' = ' + str(v))
-
+		# for k, v in join_info.items():
+		# 	print(k + ' = ' + str(v))
 		return join_info
 
 
@@ -221,34 +219,17 @@ class ViewSql:
 			self.view_sql = self.view_sql + '\t' + selected_column + programmer_comments + '\n'
 		
 
+# TODO: update the if statement below to use the new table_types:
+# key, id, org, join, lookup, deagg
 	def build_from_query(self):
 		self.view_sql = self.view_sql[:-2] + '\nfrom '
-		sql = f"""select * from (
-					   select distinct organization_table_name table_name, 'org_table' as table_type, 1 as sort_order
-					  from example.v_{self.dataset.ust_or_release}_table_population_sql
-					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key = 'Y'
-					  union all 
-					  select distinct organization_table_name table_name, 'org_table' as table_type, 2 as sort_order
-					  from example.v_{self.dataset.ust_or_release}_table_population_sql
-					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key is null 
-					  and organization_table_name not in 
-					  	(select organization_table_name from example.v_ust_table_population_sql
-					  	where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key = 'Y')
-			          union all 
-			          select distinct deagg_table_name, 'deagg_table' as table_type, 2 as sort_order  
-			          from example.v_{self.dataset.ust_or_release}_table_population_sql
-			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
-			          union all 
-			          select distinct organization_join_table, 'join_table' as table_type, 3 as sort_order  
-			          from example.v_{self.dataset.ust_or_release}_table_population_sql
-			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
-			          union all 
-			          select distinct database_lookup_table, 'lookup_table' as table_type, 4 as sort_order  
-			          from example.v_{self.dataset.ust_or_release}_table_population_sql
-			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s) x
-		          where table_name is not null 
-		          order by sort_order"""
-		self.cur.execute(sql, (self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name))
+		sql = f"""select organization_table_name, table_type, x.sort_order from 
+					(select organization_table_name, min(sort_order) as sort_order 
+					from example.v_{self.dataset.ust_or_release}_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
+					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s
+					group by organization_table_name) x join public.mapped_table_types y on x.sort_order = y.sort_order 
+					order by x.sort_order, organization_table_name"""
+		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
 		# utils.pretty_print_query(self.cur)
 		rows = self.cur.fetchall()
 		aliases = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
@@ -259,7 +240,9 @@ class ViewSql:
 		for row in rows:
 			from_table_name = row[0]
 			from_table_type = row[1]
+			print(from_table_name)
 			if from_table_name in tables_used:
+				print('already used')
 				continue
 			logger.info('Working on from_table_name %s, which is a %s', from_table_name, from_table_type)
 			alias = aliases[i]
