@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
-table_name = None               # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
+table_name = 'ust_tank'         # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
 overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -41,9 +41,16 @@ class ViewSql:
 		self.existing_cols = self.get_existing_cols()
 		self.required_col_ids = [n for n in self.required_col_ids if n not in self.existing_col_ids]
 		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids)
-		self.generate_sql()		
+		try:
+			self.generate_sql()	
+		except Exception as e:
+			print('------------------------------------------------')
+			import logging
+			logging.error(e, exc_info=True)
+			print('------------------------------------------------')
+
 		self.disconnect_db()
-		self.show_existing_cols()
+		# self.show_existing_cols()
 		self.write_self()	
 
 
@@ -95,16 +102,35 @@ class ViewSql:
 		return req_cols
 			
 
+	def get_column_select_sql(self, epa_column_name, org_column_name):
+		epa_table_name = self.table_name
+		if epa_column_name == 'facility_id' and self.table_name != 'ust_facility':
+			epa_table_name = 'ust_facility'
+		elif (epa_column_name == 'tank_id' or epa_column_name == 'tank_name') and self.table_name != 'ust_tank':
+			epa_table_name = 'ust_tank'
+		elif (epa_column_name == 'compartment_id' or epa_column_name == 'compartment_name') and self.table_name != 'ust_compartment':
+			epa_table_name = 'ust_compartment'
+
+		sql = """select data_type, character_maximum_length from information_schema.columns 
+		         where table_schema = 'public' and table_name = %s and column_name = %s"""
+		self.cur.execute(sql, (epa_table_name, epa_column_name))
+		# utils.pretty_print_query(self.cur)
+		row = self.cur.fetchone()
+		data_type = row[0]
+		max_len = row[1]
+		selected_column = '"' + org_column_name + '"::' + data_type
+		if max_len:
+			selected_column = selected_column + '(' + str(max_len) + ')'
+		selected_column = selected_column + ' as ' + epa_column_name + ','
+		return selected_column 
+
+
 	def get_existing_cols(self):
-		sql = f"""select epa_column_name, 
-				   data_type, character_maximum_length,
-				   organization_table_name, organization_column_name,
-				   selected_column, 
-				   organization_join_table, organization_join_column, organization_join_fk,
-				   database_lookup_table, database_lookup_column,
-				   deagg_table_name, deagg_column_name,
-				   column_sort_order, programmer_comments, primary_key
-			from example.v_{self.dataset.ust_or_release}_table_population_sql
+		sql = f"""select column_sort_order as column_id, 
+					epa_column_name,
+					organization_column_name,
+					programmer_comments
+			from example.v_{self.dataset.ust_or_release}_element_mapping_joins
 			where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s
 			order by column_sort_order """
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
@@ -113,25 +139,28 @@ class ViewSql:
 			logger.warning('No elements have been mapped for EPA table %s. Exiting...', self.table_name)
 			self.disconnect_db()
 			exit()
-		self.existing_col_ids = [c[13] for c in existing_col_info]
+		self.existing_col_ids = [c[0] for c in existing_col_info]
 		existing_cols = {}
 		for existing_col in existing_col_info:
-			column_id = existing_col[13]
-			column_name = existing_col[0]
-			selected_column = existing_col[5]
-			programmer_comments = existing_col[14]
+			column_id = existing_col[0]
+			epa_column_name = existing_col[1]
+			org_column_name = existing_col[2]
+			programmer_comments = existing_col[3]
 			if programmer_comments:
 				programmer_comments = '	  -- ' + programmer_comments
 			else:
 				programmer_comments = ''
-			existing_cols[column_id] = {'column_name': column_name, 
-			                            'selected_column': selected_column, 
+			existing_cols[column_id] = {'column_name': epa_column_name, 
+			                            'selected_column': self.get_column_select_sql(epa_column_name, org_column_name), 
 			                            'programmer_comments': programmer_comments}		
 		return existing_cols
 
 
 	def get_join_info(self, organization_table_name):
-		sql = f"""select organization_column_name, organization_join_table, organization_join_column, organization_join_fk
+		sql = f"""select organization_column_name, organization_join_table, 
+						 organization_join_column, organization_join_fk,
+						 organization_join_column2, organization_join_fk2,
+						 organization_join_column3, organization_join_fk3
            from example.v_{self.dataset.ust_or_release}_table_population_sql
            where {self.dataset.ust_or_release}_control_id = %s 
            and epa_table_name = %s and organization_table_name = %s"""
@@ -143,6 +172,12 @@ class ViewSql:
 		join_info['organization_join_table'] = cols[1]
 		join_info['organization_join_column'] = cols[2]
 		join_info['organization_join_fk'] = cols[3]
+		join_info['organization_join_column2'] = cols[4]
+		join_info['organization_join_fk2'] = cols[5]
+		join_info['organization_join_column3'] = cols[6]
+		join_info['organization_join_fk3'] = cols[7]
+		# for k, v in join_info.items():
+		# 	print(k + ' = ' + str(v))
 		return join_info
 
 
@@ -154,7 +189,7 @@ class ViewSql:
 			if region_next:
 				epa_region = None 
 				selected_column = str(utils.get_epa_region(self.dataset.organization_id)) + '::integer as facility_epa_region,'
-				self.view_sql = self.view_sql + '\t' + selected_column + '\n'
+				self.view_sql = self.view_sql + '\t--' + selected_column + '\n'
 				region_next = False
 
 			# build the select columns component of the query
@@ -184,34 +219,17 @@ class ViewSql:
 			self.view_sql = self.view_sql + '\t' + selected_column + programmer_comments + '\n'
 		
 
+# TODO: update the if statement below to use the new table_types:
+# key, id, org, join, lookup, deagg
 	def build_from_query(self):
 		self.view_sql = self.view_sql[:-2] + '\nfrom '
-		sql = f"""select * from (
-					   select distinct organization_table_name table_name, 'org_table' as table_type, 1 as sort_order
-					  from example.v_{self.dataset.ust_or_release}_table_population_sql
-					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key = 'Y'
-					  union all 
-					  select distinct organization_table_name table_name, 'org_table' as table_type, 2 as sort_order
-					  from example.v_{self.dataset.ust_or_release}_table_population_sql
-					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key is null 
-					  and organization_table_name not in 
-					  	(select organization_table_name from example.v_ust_table_population_sql
-					  	where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key = 'Y')
-			          union all 
-			          select distinct deagg_table_name, 'deagg_table' as table_type, 2 as sort_order  
-			          from example.v_{self.dataset.ust_or_release}_table_population_sql
-			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
-			          union all 
-			          select distinct organization_join_table, 'join_table' as table_type, 3 as sort_order  
-			          from example.v_{self.dataset.ust_or_release}_table_population_sql
-			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
-			          union all 
-			          select distinct database_lookup_table, 'lookup_table' as table_type, 4 as sort_order  
-			          from example.v_{self.dataset.ust_or_release}_table_population_sql
-			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s) x
-		          where table_name is not null 
-		          order by sort_order"""
-		self.cur.execute(sql, (self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name))
+		sql = f"""select organization_table_name, table_type, x.sort_order from 
+					(select organization_table_name, min(sort_order) as sort_order 
+					from example.v_{self.dataset.ust_or_release}_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
+					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s
+					group by organization_table_name) x join public.mapped_table_types y on x.sort_order = y.sort_order 
+					order by x.sort_order, organization_table_name"""
+		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
 		# utils.pretty_print_query(self.cur)
 		rows = self.cur.fetchall()
 		aliases = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
@@ -222,7 +240,9 @@ class ViewSql:
 		for row in rows:
 			from_table_name = row[0]
 			from_table_type = row[1]
+			print(from_table_name)
 			if from_table_name in tables_used:
+				print('already used')
 				continue
 			logger.info('Working on from_table_name %s, which is a %s', from_table_name, from_table_type)
 			alias = aliases[i]
@@ -232,7 +252,20 @@ class ViewSql:
 				from_sql = from_sql + self.dataset.schema + '.' + '"' + from_table_name + '" ' + alias
 				if not first_org_table:
 					join_info = self.get_join_info(from_table_name)
-					from_sql = from_sql + ' on ' + aliases[i-1] + '."' + join_info['organization_join_column'] + '" = ' + alias + '."' + join_info['organization_join_fk'] + '"'
+					organization_column_name = join_info['organization_column_name']
+					organization_join_table = join_info['organization_join_table']
+					organization_join_column = join_info['organization_join_column']
+					organization_join_fk = join_info['organization_join_fk']
+					organization_join_column2 = join_info['organization_join_column2']
+					organization_join_fk2 = join_info['organization_join_fk2']
+					organization_join_column3 = join_info['organization_join_column3']
+					organization_join_fk3 = join_info['organization_join_fk3']			
+					from_sql = from_sql + ' on ' + aliases[i-1] + '."' + organization_join_column + '" = ' + alias + '."' + organization_join_fk + '"'
+					if organization_join_column2:
+						from_sql = from_sql + ' and ' + aliases[i-1] + '."' + organization_join_column2 + '" = ' + alias + '."' + organization_join_fk2 + '"'
+					if organization_join_column3:
+						from_sql = from_sql + ' and ' + aliases[i-1] + '."' + organization_join_column3 + '" = ' + alias + '."' + organization_join_fk3 + '"'
+					from_sql = from_sql + '\n'
 				else:
 					first_org_table = False
 				from_sql = from_sql  + '\n'
@@ -246,9 +279,24 @@ class ViewSql:
 				from_sql = from_sql + '\tjoin ' + self.dataset.schema + '.' + from_table_name + ' ' + alias + ' on a."' + organization_column_name + '" = ' + alias + '."' + deagg_column_name + '"\n'
 			elif from_table_type == 'join_table': 
 				join_info = self.get_join_info()
+				organization_column_name = join_info['organization_column_name']
+				organization_join_table = join_info['organization_join_table']
+				organization_join_column = join_info['organization_join_column']
+				organization_join_fk = join_info['organization_join_fk']
+				organization_join_column2 = join_info['organization_join_column2']
+				organization_join_fk2 = join_info['organization_join_fk2']
+				organization_join_column3 = join_info['organization_join_column3']
+				organization_join_fk3 = join_info['organization_join_fk3']			
 				from_sql = from_sql + '\tleft join ' + self.dataset.schema + '."' + from_table_name + '" ' 
 				from_sql = from_sql + alias + ' on a."' + join_info['organization_column_name'] + '" = ' 
 				from_sql = from_sql + alias + '."' + join_info['organization_join_column'] + '"\n'
+				if organization_join_column2:
+					from_sql = from_sql + alias + ' and a."' + organization_column_name + '" = ' 
+					from_sql = from_sql + alias + '."' + organization_join_column2 + '"\n'
+				if organization_join_column3:
+					from_sql = from_sql + alias + ' and a."' + organization_column_name + '" = ' 
+					from_sql = from_sql + alias + '."' + organization_join_column3 + '"\n'
+
 			elif from_table_type == 'lookup_table':
 				sql = f"""select database_lookup_column, organization_column_name from example.v_{self.dataset.ust_or_release}_table_population_sql
 				           where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s """

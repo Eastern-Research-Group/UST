@@ -957,10 +957,10 @@ AS SELECT x.ust_control_id,
             a.organization_join_column3,
             a.organization_join_fk3
            FROM example.ust_element_mapping a
-             JOIN public.ust_elements b ON a.epa_column_name::text = b.database_column_name::text
-             JOIN public.ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
-             JOIN public.ust_template_data_tables d ON c.table_name::text = d.table_name::text
-             JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name
+             left JOIN public.ust_elements b ON a.epa_column_name::text = b.database_column_name::text
+             left JOIN public.ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
+             left JOIN public.ust_template_data_tables d ON c.table_name::text = d.table_name::text
+             left JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name
         UNION ALL
          SELECT a.ust_control_id,
             z.epa_table_name,
@@ -989,10 +989,10 @@ AS SELECT x.ust_control_id,
             a.organization_join_column3,
             a.organization_join_fk3
            FROM example.ust_element_mapping a
-             JOIN public.ust_elements b ON a.epa_column_name::text = b.database_column_name::text
-             JOIN public.ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
-             JOIN public.ust_template_data_tables d ON c.table_name::text = d.table_name::text
-             JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name,
+             left JOIN public.ust_elements b ON a.epa_column_name::text = b.database_column_name::text
+             left JOIN public.ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
+             left JOIN public.ust_template_data_tables d ON c.table_name::text = d.table_name::text
+             left JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name,
             ( SELECT 'ust_tank'::character varying(100) AS epa_table_name
                 UNION ALL
                  SELECT 'ust_tank_substance'::character varying(100) AS epa_table_name
@@ -1051,4 +1051,171 @@ AS SELECT v_ust_table_population.ust_control_id,
     v_ust_table_population.column_sort_order,
     v_ust_table_population.primary_key
    FROM example.v_ust_table_population;
+
+select * from information_schema.columns
+
+
+select * from example.v_ust_table_population_sql
+where ust_control_id = 1
+and epa_table_name = 'ust_tank'
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_tank'
+
+select * from example.v_ust_table_population
+where ust_control_id = 1
+and epa_table_name = 'ust_tank'
+
+
+
+select organization_column_name, organization_join_table, 
+ organization_join_column, organization_join_fk,
+ organization_join_column2, organization_join_fk2,
+ organization_join_column3, organization_join_fk3
+ from example.v_ust_table_population_sql
+ where ust_control_id = 1 
+ and epa_table_name = 'ust_tank' and organization_table_name = 'Tanks';
+
+
+
+			column_id = existing_col[13]
+			column_name = existing_col[0]
+			selected_column = existing_col[5]
+			programmer_comments = existing_col[14]
+
+			
+select 
+from example.ust_element_mapping 
+where a.ust_control_id = 1 and a.epa_table_name = 'ust_tank'
+			
+select column_sort_order as column_id, 
+	epa_column_name as column_name,
+	programmer_comments
+from example.v_ust_element_mapping_joins 
+where ust_control_id = 1 and epa_table_name = 'ust_tank';
+
+
+select case when  
+from example.v_ust_element_mapping_joins 
+where epa_table_name = 'ust_tank' and epa_column_name = 'tank_id'
+order by column_sort_order
+
+
+
+
+select * from (
+ select distinct organization_table_name table_name, 'org_table' as table_type, 1 as sort_order
+ from example.v_ust_table_population_sql
+ where ust_control_id = 1 and epa_table_name = 'ust_tank' and primary_key = 'Y' and organization_table_name not like 'erg%id'
+ union all 
+ select distinct organization_table_name table_name, 'org_table' as table_type, 2 as sort_order
+ from example.v_ust_table_population_sql
+ where ust_control_id = 1 and epa_table_name = 'ust_tank' and (primary_key is null or organization_table_name like 'erg%id') 
+ and organization_table_name not in 
+ (select organization_table_name from example.v_ust_table_population_sql
+ where ust_control_id = 1 and epa_table_name = 'ust_tank' and primary_key = 'Y')
+ union all 
+ select distinct deagg_table_name, 'deagg_table' as table_type, 2 as sort_order 
+ from example.v_ust_table_population_sql
+ where ust_control_id = 1 and epa_table_name = 'ust_tank' 
+ union all 
+ select distinct organization_join_table, 'join_table' as table_type, 3 as sort_order 
+ from example.v_ust_table_population_sql
+ where ust_control_id = 1 and epa_table_name = 'ust_tank' 
+ union all 
+ select distinct database_lookup_table, 'lookup_table' as table_type, 4 as sort_order 
+ from example.v_ust_table_population_sql
+ where ust_control_id = 1 and epa_table_name = 'ust_tank') x
+ where table_name is not null 
+ order by sort_order;
+
+create or replace view example.v_ust_mapped_table_types as
+select ust_control_id, epa_table_name, organization_table_name, 'key' as table_type
+from example.v_ust_table_population_sql
+where primary_key = 'Y' and organization_table_name not like 'erg%id'
+and organization_table_name is not null
+union all 
+select ust_control_id, epa_table_name, organization_table_name, 'id' as table_type
+from example.v_ust_table_population_sql
+where organization_table_name like 'erg%id'
+and organization_table_name is not null
+union all 
+select ust_control_id, epa_table_name, organization_table_name, 'org' as table_type
+from example.v_ust_table_population_sql
+where primary_key <> 'Y' 
+and organization_table_name is not null
+union all 
+select ust_control_id, epa_table_name, organization_join_table, 'join' as table_type
+from example.v_ust_table_population_sql
+where primary_key <> 'Y' 
+and organization_join_table is not null
+union all 
+select ust_control_id, epa_table_name, database_lookup_table, 'lookup' as table_type
+from example.v_ust_table_population_sql
+where database_lookup_table is not null
+union all 
+select ust_control_id, epa_table_name, deagg_table_name, 'deagg' as table_type
+from example.v_ust_table_population_sql
+where deagg_table_name is not null;
+
+create table public.mapped_table_types (table_type varchar(15) not null primary key, sort_order int);
+
+insert into  public.mapped_table_types values ('key', 1);
+insert into  public.mapped_table_types values ('id', 2);
+insert into  public.mapped_table_types values ('org', 3);
+insert into  public.mapped_table_types values ('join', 4);
+insert into  public.mapped_table_types values ('lookup', 5);
+insert into  public.mapped_table_types values ('deag', 6);
+
+select organization_table_name, table_type, x.sort_order from 
+(select organization_table_name, min(sort_order) as sort_order 
+from example.v_ust_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
+where ust_control_id = 1 and epa_table_name = 'ust_tank'
+group by organization_table_name) x join public.mapped_table_types y on x.sort_order = y.sort_order 
+order by x.sort_order, organization_table_name 
+
+
+select * from example.v_ust_mapped_table_types
+
+
+
+select distinct organization_table_name, 'id_table', 2 as sort_order  
+from example.v_ust_table_population_sql
+where ust_control_id = 1 and epa_table_name = 'ust_tank' 
+and organization_table_name like 'erg%id' and organization_table_name is not null
+union all
+select distinct organization_table_name, 'org_table', 3 as sort_order  
+from example.v_ust_table_population_sql
+where ust_control_id = 1 and epa_table_name = 'ust_tank' 
+and organization_join_table is null and deagg_table_name is null
+and primary_key <> 'Y'  and organization_table_name is not null
+union all
+select distinct organization_join_table, 'join_table', 4 as sort_order  
+from example.v_ust_table_population_sql
+where ust_control_id = 1 and epa_table_name = 'ust_tank'
+and organization_join_table is not null
+union all
+select distinct database_lookup_table, 'lookup_table', 5 as sort_order  
+from example.v_ust_table_population_sql
+where ust_control_id = 1 and epa_table_name = 'ust_tank'
+and database_lookup_table is not null
+union all
+select distinct deagg_table_name, 'deagg_table', 6 as sort_order  
+from example.v_ust_table_population_sql
+where ust_control_id = 1 and epa_table_name = 'ust_tank'
+and deagg_table_name is not null
+
+
+
+select * from example.v_ust_table_population_sql
+where epa_table_name = 'ust_tank'
+
+	select organization_table_name, min(sort_order) sort_order from 
+	
+
+	group by organization_table_name;
+
+select * from example.ust_element_mapping
+where epa_table_name = 'ust_tank'
+
 
