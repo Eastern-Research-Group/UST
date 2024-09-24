@@ -1008,6 +1008,26 @@ from ca_ust.tank x
 	left join ca_ust.v_tank_material_description_xwalk md on x."Tank Primary _Containment _Construction " = md.organization_value
 	left join ca_ust.v_tank_secondary_containment_xwalk sc on x."Tank Secondary _Containment _Construction " = sc.organization_value;
 
+
+select organization_table_name, organization_column_name, 
+	   organization_join_table, 
+       organization_join_column, organization_join_fk, 
+       organization_join_column2, organization_join_fk2, 
+       organization_join_column3, organization_join_fk3,
+       ust_element_mapping_id
+from v_ust_element_mapping_joins 
+where ust_control_id = 18 and epa_column_name = 'tank_id'
+1175
+
+update ust_element_mapping 
+set organization_join_table = 'tank',
+	organization_join_column2 = 'CERS TankID',
+	organization_join_fk2 = 'tank_name',
+	organization_join_column = 'facility_id',
+	organization_join_fk = 'CERS TankID'
+where ust_element_mapping_id = 1175;
+
+
 select * from ca_ust.v_tank_status_xwalk;
 
 select * from ust_element_mapping where ust_control_id = 18 and organization_column_name = 'Type of Action';
@@ -1391,5 +1411,46 @@ organization_id = None  	# Can leave as None if you specify the control_id
 export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+
+
+
+
+
+select * from wv_release.erg_release_status;
+
+select * from release_control 
+
+select * from v_release_element_mapping where release_control_id = 10;
+
+Organization value comes from ERG-created crosswalk table that calculates status based 
+on three dates fields. See programmer_comment in Element Mapping.
+
+select * from release_element_value_mapping 
+where release_element_mapping_id in 
+(select release_element_mapping_id from v_release_element_mapping where release_control_id = 10)
+
+select * from release_element_mapping
+where release_control_id = 10
+
+
+ERG created table erg_release_status to calculate release status from three date columns: 
+"Closed Date", "Cleanup Initiated", and "Closed Date", with the following logic:
+case when "Closed Date" is not null then 'No further action'
+when "Cleanup Initiated" is not null then 'Active: corrective action'
+when "Confirmed Release" is not null then 'Active: general' else 'Other'
+
+
+select * from facility_types 
+
+select * from owner_types 
+
+
+
+--add environmental audit to how release detected, update tn_release  
+--add release comment field, pg_catalog.brin_inclusion_add_value(:$1, :$2, :$3, :$4) de repairs in how release detected in tn_release
+
+
+
+
 
 --------------------------------------------------------------------------------------------------------------------------
