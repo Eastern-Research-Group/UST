@@ -843,15 +843,18 @@ select * from example.erg_compartment_id ;
 
 
 
-
-create view public.v_ust_element_mapping_joins as
+drop view public.v_ust_element_mapping_joins;
+create or replace view public.v_ust_element_mapping_joins as
 select epa_table_name, epa_column_name, 
        organization_table_name, organization_column_name, 
        organization_join_table, 
        organization_join_column, organization_join_fk,
        organization_join_column2, organization_join_fk2,
        organization_join_column3, organization_join_fk3,
+       deagg_table_name, deagg_column_name, 
+       database_lookup_table, database_lookup_column,
        ust_element_mapping_id, ust_control_id, 
+       programmer_comments,
        b.sort_order as table_sort_order, d.sort_order as column_sort_order
 from public.ust_element_mapping a left join public.ust_element_table_sort_order b 
 		on a.epa_table_name = b.table_name	
@@ -860,6 +863,29 @@ from public.ust_element_mapping a left join public.ust_element_table_sort_order 
 	left join public.ust_elements_tables d 
 		on c.element_id = d.element_id and b.table_name = d.table_name;
 
+	drop view example.v_ust_element_mapping_joins;
+	
+create or replace view example.v_ust_element_mapping_joins as
+select epa_table_name, epa_column_name, 
+       organization_table_name, organization_column_name, 
+       organization_join_table, 
+       organization_join_column, organization_join_fk,
+       organization_join_column2, organization_join_fk2,
+       organization_join_column3, organization_join_fk3,
+       deagg_table_name, deagg_column_name, 
+       database_lookup_table, database_lookup_column,
+       ust_element_mapping_id, ust_control_id, 
+       programmer_comments,
+       b.sort_order as table_sort_order, d.sort_order as column_sort_order
+from example.ust_element_mapping a left join public.ust_element_table_sort_order b 
+		on a.epa_table_name = b.table_name	
+	left join public.ust_elements c 
+		on a.epa_column_name = c.database_column_name 
+	left join public.ust_elements_tables d 
+		on c.element_id = d.element_id and b.table_name = d.table_name;	
+	
+	
+	drop view v_release_element_mapping_joins;
 create view public.v_release_element_mapping_joins as
 select epa_table_name, epa_column_name, 
        organization_table_name, organization_column_name, 
@@ -867,7 +893,10 @@ select epa_table_name, epa_column_name,
        organization_join_column, organization_join_fk,
        organization_join_column2, organization_join_fk2,
        organization_join_column3, organization_join_fk3,
+       deagg_table_name, deagg_column_name, 
+       database_lookup_table, database_lookup_column,       
        release_element_mapping_id, release_control_id, 
+       programmer_comments,
        b.sort_order as table_sort_order, d.sort_order as column_sort_order
 from public.release_element_mapping a left join public.release_element_table_sort_order b 
 		on a.epa_table_name = b.table_name	
@@ -1167,12 +1196,22 @@ insert into  public.mapped_table_types values ('join', 4);
 insert into  public.mapped_table_types values ('lookup', 5);
 insert into  public.mapped_table_types values ('deag', 6);
 
-select organization_table_name, table_type, x.sort_order from 
+select organization_table_name, table_type, x.sort_order,
+	chr(96 + row_number() over (partition by 'a' order by x.sort_order)::int) as alias
+from 
 (select organization_table_name, min(sort_order) as sort_order 
 from example.v_ust_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
 where ust_control_id = 1 and epa_table_name = 'ust_tank'
 group by organization_table_name) x join public.mapped_table_types y on x.sort_order = y.sort_order 
-order by x.sort_order, organization_table_name 
+order by x.sort_order, organization_table_name;
+
+select * from example.v_ust_mapped_table_types
+where epa_table_name = 'ust_tank'
+
+select * from example.v_ust_table_population_sql 
+
+select * from example.v_ust_element_mapping_joins
+where epa_table_name = 'ust_tank'
 
 
 select * from example.v_ust_mapped_table_types
@@ -1215,7 +1254,7 @@ where epa_table_name = 'ust_tank'
 
 	group by organization_table_name;
 
-select * from example.ust_element_mapping
+select * from example.v_ust_element_mapping_joins 
 where epa_table_name = 'ust_tank'
 
 
