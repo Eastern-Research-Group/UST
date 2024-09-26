@@ -181,7 +181,7 @@ def get_selenium_driver(url):
 def get_org_from_control_id(control_id, ust_or_release):
     if ust_or_release.lower() not in ['ust','release']:
         logger.error('Invalid value %s for ust_or_release. Valid values are ust or release. Exiting...', ust_or_release)
-        exit()
+        exit()        
     conn = connect_db()
     cur = conn.cursor()    
     table_name = ust_or_release.lower() + '_control'

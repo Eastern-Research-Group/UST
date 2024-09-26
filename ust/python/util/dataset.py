@@ -37,7 +37,10 @@ class Dataset:
 		if not self.base_file_name:
 			self.base_file_name = '_export.sql'
 		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
-			self.export_file_name = self.organization_id.upper() + '_' + utils.get_pretty_ust_or_release(self.ust_or_release) + '_' + self.base_file_name
+			if self.organization_id:
+				self.export_file_name = self.organization_id.upper() + '_' + utils.get_pretty_ust_or_release(self.ust_or_release) + '_' + self.base_file_name
+			else:
+				self.export_file_name = utils.get_pretty_ust_or_release(self.ust_or_release) + '_' + self.base_file_name
 			if not self.export_file_dir and self.base_file_name[-4:] == '.sql':
 				self.export_file_dir = '../../sql/states/' + self.organization_id.upper() + '/' + utils.get_pretty_ust_or_release(self.ust_or_release) + '/'
 			elif not self.export_file_dir and self.base_file_name[-5:] == '.xlsx':
@@ -53,7 +56,10 @@ class Dataset:
 					folder = 'epa_templates/'
 				else:
 					folder = 'other/'
-				self.export_file_dir = self.export_file_dir + folder + self.organization_id.upper() + '/' + utils.get_pretty_ust_or_release(self.ust_or_release) + '/'
+				if self.organization_id:
+					self.export_file_dir = self.export_file_dir + folder + self.organization_id.upper() + '/' + utils.get_pretty_ust_or_release(self.ust_or_release) + '/'
+				else:
+					self.export_file_dir = self.export_file_dir + folder 
 			else:
 				logger.error('Please set export_file_dir so I know where to save the export file. Exiting....')
 
