@@ -98,6 +98,13 @@ def main(dataset, data_table_name, data_table_pk_cols, data_deagg_column_name, d
 			
 		conn.commit()
 
+		sql = f"""select count(*) from example.{dataset.ust_or_release}_element_mapping
+		          where """
+
+
+
+
+
 
 	conn.commit()
 	cur.close()

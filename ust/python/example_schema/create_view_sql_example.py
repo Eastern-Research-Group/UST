@@ -13,7 +13,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
-table_name = 'ust_tank'         # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
+table_name = 'ust_compartment'         # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
 overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -44,7 +44,7 @@ class ViewSql:
 		self.required_cols = self.get_required_cols()
 		self.existing_cols = self.get_existing_cols()
 		self.required_col_ids = [n for n in self.required_col_ids if n not in self.existing_col_ids]
-		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids)
+		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids, key=lambda x: x or 0)
 		try:
 			self.generate_sql()	
 		except Exception as e:
@@ -131,13 +131,14 @@ class ViewSql:
 
 	def get_existing_cols(self):
 		sql = f"""select column_sort_order as column_id, 
-					epa_column_name,
-					organization_column_name,
-					programmer_comments
-			from example.v_{self.dataset.ust_or_release}_element_mapping_joins
+					epa_column_name, organization_column_name, 
+					selected_column, programmer_comments
+			from example.v_{self.dataset.ust_or_release}_table_population_sql
 			where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s
+			and column_sort_order is not null
 			order by column_sort_order """
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
+		# utils.pretty_print_query(self.cur)
 		existing_col_info = self.cur.fetchall()
 		if not existing_col_info:
 			logger.warning('No elements have been mapped for EPA table %s. Exiting...', self.table_name)
@@ -148,14 +149,19 @@ class ViewSql:
 		for existing_col in existing_col_info:
 			column_id = existing_col[0]
 			epa_column_name = existing_col[1]
-			org_column_name = existing_col[2]
-			programmer_comments = existing_col[3]
+			organization_column_name = existing_col[2]
+			selected_column = existing_col[3]
+			programmer_comments = existing_col[4]
+			if not selected_column:
+				selected_column = self.get_column_select_sql(epa_column_name, organization_column_name)
 			if programmer_comments:
 				programmer_comments = '	  -- ' + programmer_comments
 			else:
 				programmer_comments = ''
+			if column_id == max(self.existing_col_ids):
+				selected_column = selected_column[:-1]
 			existing_cols[column_id] = {'column_name': epa_column_name, 
-			                            'selected_column': self.get_column_select_sql(epa_column_name, org_column_name), 
+			                            'selected_column': selected_column, 
 			                            'programmer_comments': programmer_comments}		
 		return existing_cols
 
@@ -163,40 +169,34 @@ class ViewSql:
 	def print_join_info(self):
 		print(self.join_info)
 
-	# 	print(f"organization_column_name = {self.join_info['organization_column_name']}")
-	# 	print('organization_join_table = ' + str(self.join_info['organization_join_table']))
-	# 	print('organization_join_column = ' + str(self.join_info['organization_join_column']))
-	# 	print('organization_join_fk = ' + str(self.join_info['organization_join_fk']))
-	# 	print('organization_join_column2 = ' + str(self.join_info['organization_join_column2']))
-	# 	print('organization_join_fk2 = ' + str(self.join_info['organization_join_fk2']))
-	# 	print('organization_join_column3 = ' + str(self.join_info['organization_join_column3']))
-	# 	print('organization_join_fk3 = ' + str(self.join_info['organization_join_fk3']))
 
-
-	def set_join_info(self, org_table_name):
-		sql = f"""select distinct organization_join_table, 
+	def set_join_info(self, org_table_name, where_table='organization_table_name'):
+		sql = f"""select distinct organization_table_name, organization_join_table, 
 					organization_join_column, organization_join_fk,
 					organization_join_column2, organization_join_fk2,
 					organization_join_column3, organization_join_fk3,
 					organization_column_name
 				from example.v_{self.dataset.ust_or_release}_element_mapping_joins
-				where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and organization_table_name = %s
+				where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
+				and {where_table} = %s
 				order by 1, 2, 3"""
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name, org_table_name))
 		rows = self.cur.fetchall()	
 		self.join_info = {}
 		for row in rows:
-			self.join_info['organization_join_table'] = row[0]
-			self.join_info['organization_join_column'] = row[1]
-			self.join_info['organization_join_fk'] = row[2]
-			self.join_info['organization_join_column2'] = row[3]
-			self.join_info['organization_join_fk2'] = row[4]
-			self.join_info['organization_join_column3'] = row[5]
-			self.join_info['organization_join_fk3'] = row[6]	
-			self.join_info['organization_column_name'] = row[7]				
+			self.join_info['organization_table_name'] = row[0]
+			self.join_info['organization_join_table'] = row[1]
+			self.join_info['organization_join_column'] = row[2]
+			self.join_info['organization_join_fk'] = row[3]
+			self.join_info['organization_join_column2'] = row[4]
+			self.join_info['organization_join_fk2'] = row[5]
+			self.join_info['organization_join_column3'] = row[6]
+			self.join_info['organization_join_fk3'] = row[7]	
+			self.join_info['organization_column_name'] = row[8]				
 
 
 	def build_from_sql(self, from_table, alias, join_alias):
+		self.print_join_info()
 		if self.join_info['organization_join_column'] and self.join_info['organization_join_fk']:
 			self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '."' + self.join_info['organization_join_fk'] + '" '
 		if self.join_info['organization_join_column2'] and self.join_info['organization_join_fk2']:
@@ -224,7 +224,6 @@ class ViewSql:
 				selected_column = self.existing_cols[column_id]['selected_column'].replace('""','????')
 				if 'facility_type' in self.epa_column_name and '_id' not in self.epa_column_name:
 					selected_column = selected_column.replace('facility_type1 as','facility_type_id as').replace('facility_type2 as','facility_type_id as')
-				programmer_comments = self.existing_cols[column_id]['programmer_comments']
 			else: # the column we are working on wasn't mapped in the element mapping table but is a required field so add it anyway
 				self.epa_column_name = self.required_cols[column_id]['column_name']
 				logger.info('Working on column %s', self.epa_column_name)
@@ -240,7 +239,7 @@ class ViewSql:
 				if self.dataset.ust_or_release == 'ust' and self.table_name == 'ust_facility' and 12 not in self.existing_col_ids:
 					region_next = True
 				
-			self.view_sql = self.view_sql + '\t' + selected_column + programmer_comments + '\n'
+			self.view_sql = self.view_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['programmer_comments']+ '\n'
 		
 
 	def build_from_query(self):
@@ -257,33 +256,33 @@ class ViewSql:
 		df = pd.read_sql(sql, utils.get_engine(), index_col='organization_table_name')
 		print(df)
 
-		from_sql = ''
 		for index, row in df.iterrows():
 			logger.info('Working on %s', index)
 			alias = row['alias']
-			
-			self.set_join_info(index)
-			self.print_join_info()
-			organization_join_table = self.join_info['organization_join_table']
-			organization_join_column = self.join_info['organization_join_column']
-			organization_join_fk = self.join_info['organization_join_fk']
-			organization_join_column2 = self.join_info['organization_join_column2']
-			organization_join_fk2 = self.join_info['organization_join_fk2']
-			organization_join_column3 = self.join_info['organization_join_column3']
-			organization_join_fk3 = self.join_info['organization_join_fk3']
-			organization_column_name = self.join_info['organization_column_name']
-			try:
-				join_alias = df.loc[organization_join_table]['alias']
-			except:
-				join_alias = 'a'
-			print('alias = ' + alias)
-			print('join_alias = ' + join_alias)
 
 			if row['alias'] == 'a':
 				self.from_sql = self.from_sql + self.dataset.schema + '.' + '"' + index + '" ' + alias
-			elif row['table_type'] == 'id' or row['table_type'] == 'org' or row['table_type'] == 'join':
-				self.build_from_sql(index, alias, join_alias)
+
+			elif row['table_type'] == 'id' or row['table_type'] == 'org':
+				from_table = index
+				self.set_join_info(from_table)
+				try:
+					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
+				except:
+					join_alias = 'a'
+				self.build_from_sql(from_table, alias, join_alias)
+
+			elif row['table_type'] == 'join':
+				from_table = index
+				self.set_join_info(from_table, 'organization_join_table')
+				try:
+					join_alias = df.loc[self.join_info['organization_table_name']]['alias']
+				except:
+					join_alias = 'a'
+				self.build_from_sql(from_table, alias, join_alias)
+
 			elif row['table_type'] == 'lookup':
+				self.set_join_info(index, 'database_lookup_table')
 				sql = f"""select distinct database_lookup_column 
 						from example.v_{self.dataset.ust_or_release}_element_mapping_joins
 						where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s"""
@@ -293,16 +292,35 @@ class ViewSql:
 				db_lookup_col = None
 				for row in rows:
 					db_lookup_col = row[0]
-				view_name = 'v_' + db_lookup_col + '_xwalk'
-				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + view_name + ' ' + alias + ' on ' + join_alias + '."' + organization_column_name + '" = ' + alias + '.organization_value'
+				from_table = 'v_' + db_lookup_col + '_xwalk'	
+				try:
+					join_alias = df.loc[self.join_info['organization_table_name']]['alias']
+				except:
+				 	join_alias = 'a'
+				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
+
 			elif row['table_type'] == 'deagg':
-				self.build_from_sql(view_name, alias, join_alias)
+				self.set_join_info(index, 'deagg_table_name')
+				sql = f"""select distinct deagg_column_name 
+						from example.v_{self.dataset.ust_or_release}_element_mapping_joins
+						where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
+						and deagg_table_name = %s"""
+				self.cur.execute(sql, (self.dataset.control_id, self.table_name, index))
+				# utils.pretty_print_query(self.cur)
+				rows = self.cur.fetchall()
+				db_lookup_col = None
+				for row in rows:
+					db_lookup_col = row[0]
+				from_table = index
+				try:
+					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
+				except:
+					join_alias = 'a'
+				self.build_from_sql(from_table, alias, join_alias)
 
 
-
-		print(self.from_sql)
-
-
+		self.view_sql = self.view_sql + self.from_sql
+		self.view_sql = self.view_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
 
 
 	def generate_sql(self):
