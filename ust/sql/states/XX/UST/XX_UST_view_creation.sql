@@ -915,3 +915,12 @@ select distinct
     "Tank Name"::character varying(50) as tank_name, 
     "compartment_id"::integer as compartment_id,       -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
     compartment_status_id as compartment_status_id       -- State does not report compartments; copied from Tank Status
+----------------------------------------------------------------------------------------------------------
+
+create view example.v_ust_compartment as
+select distinct
+    "Facility Id"::character varying(50) as facility_id, 
+    "tank_id"::integer as tank_id,       -- Row inserted automatically to map a required field from a child table.
+    "Tank Name"::character varying(50) as tank_name, 
+    "compartment_id"::integer as compartment_id,       -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
+    compartment_status_id as compartment_status_id       -- State does not report compartments; copied from Tank Status
