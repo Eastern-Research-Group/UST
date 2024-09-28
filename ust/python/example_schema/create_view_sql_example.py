@@ -28,8 +28,10 @@ class ViewSql:
 	existing_col_ids = None
 	epa_column_name = None
 	join_info = {}
+	select_sql = ''
 	from_sql = ''
-	view_sql = '----------------------------------------------------------------------------------------------------------\n\n'  
+	view_sql = '----------------------------------------------------------------------------------------------------------\n\n'
+
 
 	def __init__(self, 
 				 dataset,
@@ -52,9 +54,8 @@ class ViewSql:
 			import logging
 			logging.error(e, exc_info=True)
 			print('------------------------------------------------')
-
 		self.disconnect_db()
-		# self.show_existing_cols()
+		self.show_existing_cols()
 		self.write_self()	
 
 
@@ -85,15 +86,16 @@ class ViewSql:
 
 
 	def get_required_cols(self):
-		sql = f"""select ordinal_position, a.column_name, a.data_type, a.character_maximum_length
+		sql = f"""select column_sort_order, a.column_name, a.data_type, a.character_maximum_length
 				from information_schema.columns a join public.{self.dataset.ust_or_release}_required_view_columns b 
 					on a.table_name = b.table_name and a.column_name = b.column_name
 				where table_schema = 'public' and a.table_name = %s 
 				and b.column_name not in 
 					(select epa_column_name from example.v_{self.dataset.ust_or_release}_element_mapping_joins
 					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s)
-				order by ordinal_position"""
+				order by column_sort_order"""
 		self.cur.execute(sql, (self.table_name, self.dataset.control_id, self.table_name))
+		# utils.pretty_print_query(self.cur)
 		req_col_info = self.cur.fetchall()
 		self.required_col_ids = [c[0] for c in req_col_info]
 		req_cols = {}
@@ -103,6 +105,7 @@ class ViewSql:
 			data_type = req_col[2]
 			character_maximum_length = req_col[3]
 			req_cols[column_id] = {'column_name': column_name, 'data_type': data_type, 'character_maximum_length':character_maximum_length}
+		# print(req_cols)
 		return req_cols
 			
 
@@ -138,7 +141,7 @@ class ViewSql:
 			and column_sort_order is not null
 			order by column_sort_order """
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
-		# utils.pretty_print_query(self.cur)
+		utils.pretty_print_query(self.cur)
 		existing_col_info = self.cur.fetchall()
 		if not existing_col_info:
 			logger.warning('No elements have been mapped for EPA table %s. Exiting...', self.table_name)
@@ -170,7 +173,9 @@ class ViewSql:
 		print(self.join_info)
 
 
-	def set_join_info(self, org_table_name, where_table='organization_table_name'):
+	def set_join_info(self, org_table_name, where_table='organization_table_name', epa_table_name=None):
+		if not epa_table_name:
+			epa_table_name = self.table_name
 		sql = f"""select distinct organization_table_name, organization_join_table, 
 					organization_join_column, organization_join_fk,
 					organization_join_column2, organization_join_fk2,
@@ -180,7 +185,8 @@ class ViewSql:
 				where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
 				and {where_table} = %s
 				order by 1, 2, 3"""
-		self.cur.execute(sql, (self.dataset.control_id, self.table_name, org_table_name))
+		self.cur.execute(sql, (self.dataset.control_id, epa_table_name, org_table_name))
+		# utils.pretty_print_query(self.cur)
 		rows = self.cur.fetchall()	
 		self.join_info = {}
 		for row in rows:
@@ -200,50 +206,13 @@ class ViewSql:
 		if self.join_info['organization_join_column'] and self.join_info['organization_join_fk']:
 			self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '."' + self.join_info['organization_join_fk'] + '" '
 		if self.join_info['organization_join_column2'] and self.join_info['organization_join_fk2']:
-			self.from_sql = self.from_sql + ' and ' + join_alias + '."' + self.join_info['organization_join_column2'] + '" = ' + alias + '."' + self.join_info['organization_join_fk2'] + '" '
+			self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column2'] + '" = ' + alias + '."' + self.join_info['organization_join_fk2'] + '" '
 		if self.join_info['organization_join_column3'] and self.join_info['organization_join_fk3']:
-			self.from_sql = self.from_sql + ' and ' + join_alias + '."' + self.join_info['organization_join_column3'] + '" = ' + alias + '."' + self.join_info['organization_join_fk3'] + '" '
+			self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column3'] + '" = ' + alias + '."' + self.join_info['organization_join_fk3'] + '" '
 
-
-	def build_select_query(self):
-		self.view_sql = self.view_sql + 'select distinct\n'
-		region_next = False 
-		for i in range(len(self.all_col_ids)):
-			# deal with EPARegion column if in ust_facility and the last column was FacilityState
-			if region_next:
-				epa_region = None 
-				selected_column = str(utils.get_epa_region(self.dataset.organization_id)) + '::integer as facility_epa_region,'
-				self.view_sql = self.view_sql + '\t--' + selected_column + '\n'
-				region_next = False
-
-			# build the select columns component of the query
-			column_id = self.all_col_ids[i]
-			if self.all_col_ids[i] in self.existing_col_ids: # the column we are working on was mapped in the element_mapping table
-				self.epa_column_name = self.existing_cols[column_id]['column_name']
-				logger.info('Working on column %s', self.epa_column_name)
-				selected_column = self.existing_cols[column_id]['selected_column'].replace('""','????')
-				if 'facility_type' in self.epa_column_name and '_id' not in self.epa_column_name:
-					selected_column = selected_column.replace('facility_type1 as','facility_type_id as').replace('facility_type2 as','facility_type_id as')
-			else: # the column we are working on wasn't mapped in the element mapping table but is a required field so add it anyway
-				self.epa_column_name = self.required_cols[column_id]['column_name']
-				logger.info('Working on column %s', self.epa_column_name)
-				data_type = self.required_cols[column_id]['data_type']
-				character_maximum_length = self.required_cols[column_id]['character_maximum_length']
-				org_col = '????' # print a symbol making it obvious to the developer they need to update the generated SQL
-			if self.epa_column_name == 'facility_state':
-				# if facility_state wasn't mapped, set it as the organization ID
-				if 11 not in self.existing_col_ids:
-					org_col = f"'{self.dataset.organization_id}'"
-					selected_column = org_col + '::' + utils.get_datatype_sql(data_type, character_maximum_length) + ' as ' + self.epa_column_name + ','
-				# if we are working on ust_facility and we are on facility state, set the region_next variable
-				if self.dataset.ust_or_release == 'ust' and self.table_name == 'ust_facility' and 12 not in self.existing_col_ids:
-					region_next = True
-				
-			self.view_sql = self.view_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['programmer_comments']+ '\n'
-		
 
 	def build_from_query(self):
-		self.view_sql = self.view_sql[:-2] + '\nfrom '
+		self.from_sql = 'from '
 
 		sql = f"""select organization_table_name, table_type,
 					chr(96 + row_number() over (partition by 'a' order by x.sort_order)::int) as alias
@@ -253,6 +222,7 @@ class ViewSql:
 					where {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and epa_table_name = '{self.table_name}'
 					group by organization_table_name) x join public.mapped_table_types y on x.sort_order = y.sort_order 
 					order by alias"""
+		# print(sql)
 		df = pd.read_sql(sql, utils.get_engine(), index_col='organization_table_name')
 		print(df)
 
@@ -272,12 +242,21 @@ class ViewSql:
 					join_alias = 'a'
 				self.build_from_sql(from_table, alias, join_alias)
 
-			elif row['table_type'] == 'join':
+			elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
 				from_table = index
-				self.set_join_info(from_table, 'organization_join_table')
+				if self.table_name == 'ust_compartment':
+					epa_table_name = 'ust_tank'
+					search_table = 'organization_table_name'
+				else:
+					epa_table_name = self.table_name
+					search_table = 'organization_join_table'
+				self.set_join_info(from_table, search_table, epa_table_name)
 				try:
 					join_alias = df.loc[self.join_info['organization_table_name']]['alias']
 				except:
+					join_alias = 'a'
+				# TODO: this if statement probably usually works but is a total hack; we should look up what the alias really is
+				if alias == join_alias:
 					join_alias = 'a'
 				self.build_from_sql(from_table, alias, join_alias)
 
@@ -318,18 +297,53 @@ class ViewSql:
 					join_alias = 'a'
 				self.build_from_sql(from_table, alias, join_alias)
 
+		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
 
-		self.view_sql = self.view_sql + self.from_sql
-		self.view_sql = self.view_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
+
+	def build_select_query(self):
+		self.select_sql = self.select_sql + 'select distinct\n'
+		region_next = False 
+		for i in range(len(self.all_col_ids)):
+			# deal with EPARegion column if in ust_facility and the last column was FacilityState
+			if region_next:
+				epa_region = None 
+				selected_column = str(utils.get_epa_region(self.dataset.organization_id)) + '::integer as facility_epa_region,'
+				self.select_sql = self.select_sql + '\t--' + selected_column + '\n'
+				region_next = False
+
+			# build the select columns component of the query
+			column_id = self.all_col_ids[i]
+			if self.all_col_ids[i] in self.existing_col_ids: # the column we are working on was mapped in the element_mapping table
+				self.epa_column_name = self.existing_cols[column_id]['column_name']
+				logger.info('Working on column %s', self.epa_column_name)
+				selected_column = self.existing_cols[column_id]['selected_column'].replace('""','????')
+				if 'facility_type' in self.epa_column_name and '_id' not in self.epa_column_name:
+					selected_column = selected_column.replace('facility_type1 as','facility_type_id as').replace('facility_type2 as','facility_type_id as')
+			else: # the column we are working on wasn't mapped in the element mapping table but is a required field so add it anyway
+				self.epa_column_name = self.required_cols[column_id]['column_name']
+				logger.info('Working on column %s', self.epa_column_name)
+				data_type = self.required_cols[column_id]['data_type']
+				character_maximum_length = self.required_cols[column_id]['character_maximum_length']
+				org_col = '????' # print a symbol making it obvious to the developer they need to update the generated SQL
+			if self.epa_column_name == 'facility_state':
+				# if facility_state wasn't mapped, set it as the organization ID
+				if 11 not in self.existing_col_ids:
+					org_col = f"'{self.dataset.organization_id}'"
+					selected_column = org_col + '::' + utils.get_datatype_sql(data_type, character_maximum_length) + ' as ' + self.epa_column_name + ','
+				# if we are working on ust_facility and we are on facility state, set the region_next variable
+				if self.dataset.ust_or_release == 'ust' and self.table_name == 'ust_facility' and 12 not in self.existing_col_ids:
+					region_next = True
+				
+			self.select_sql = self.select_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['programmer_comments']+ '\n'
 
 
 	def generate_sql(self):
-		# self.view_sql = self.view_sql + f'create view {self.dataset.schema}.{self.view_name} as\n'
-		# self.build_select_query()
-		self.build_from_query()
+		# self.build_from_query()
+		self.build_select_query()
+		self.view_sql = self.view_sql + f'create view {self.dataset.schema}.{self.view_name} as\n'
+		self.view_sql = self.view_sql + self.select_sql + self.from_sql
 		# print(self.view_sql)
 		return self.view_sql 
-
 
 
 

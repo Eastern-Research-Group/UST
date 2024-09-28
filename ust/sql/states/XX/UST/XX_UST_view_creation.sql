@@ -796,4 +796,122 @@ from example."Tanks" a
     left join example."erg_tank_id" d on b."facility_id" = d."facility_id"  and b."tank_id" = d."tank_id" 
     left join example.v_compartment_status_xwalk e on c."Tank Status Desc" = e.organization_value
 where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
-;
+;----------------------------------------------------------------------------------------------------------
+from example."Tanks" a
+    left join example."erg_compartment_id" b on d."facility_id" = b."facility_id"  and d."tank_id" = b."tank_id" 
+    left join example."Tank Status Lookup" c on a."Tank Status Id" = c."Tank Status ID" 
+    left join example."erg_tank_id" d on b."facility_id" = d."facility_id"  and b."tank_id" = d."tank_id" 
+    left join example.v_compartment_status_xwalk e on c."Tank Status Desc" = e.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+from ----------------------------------------------------------------------------------------------------------
+from ----------------------------------------------------------------------------------------------------------
+from example."Tanks" a
+    left join example."erg_compartment_id" b on d."facility_id" = b."facility_id"  and d."tank_id" = b."tank_id" 
+    left join example."Tank Status Lookup" c on a."Tank Status Id" = c."Tank Status ID" 
+    left join example."erg_tank_id" d on b."facility_id" = d."facility_id"  and b."tank_id" = d."tank_id" 
+    left join example.v_compartment_status_xwalk e on c."Tank Status Desc" = e.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+from example."Tanks" a
+    left join example."erg_compartment_id" b on d."facility_id" = b."facility_id"  and d."tank_id" = b."tank_id" 
+    left join example."Tank Status Lookup" c on a."Tank Status Id" = c."Tank Status ID" 
+    left join example."erg_tank_id" d on b."facility_id" = d."facility_id"  and b."tank_id" = d."tank_id" 
+    left join example.v_compartment_status_xwalk e on c."Tank Status Desc" = e.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+from ----------------------------------------------------------------------------------------------------------
+from ----------------------------------------------------------------------------------------------------------
+from ----------------------------------------------------------------------------------------------------------
+from example."Tanks" a
+    left join example."erg_tank_id" b on c."facility_id" = b."facility_id"  and c."tank_id" = b."tank_id" 
+    left join example."erg_compartment_id" c on b."facility_id" = c."facility_id"  and b."tank_id" = c."tank_id" 
+    left join example."Tank Status Lookup" d on a."Tank Status Id" = d."Tank Status ID" 
+    left join example.v_compartment_status_xwalk e on d."Tank Status Desc" = e.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+from ----------------------------------------------------------------------------------------------------------
+from ----------------------------------------------------------------------------------------------------------
+from ----------------------------------------------------------------------------------------------------------
+from ----------------------------------------------------------------------------------------------------------
+from example."Tanks" a
+    left join example."erg_tank_id" b on b."Facility Id" = b."facility_id"  and b."Tank Name" = b."tank_name" 
+    left join example."erg_compartment_id" c on b."facility_id" = c."facility_id"  and b."tank_id" = c."tank_id" 
+    left join example."Tank Status Lookup" d on a."Tank Status Id" = d."Tank Status ID" 
+    left join example.v_compartment_status_xwalk e on d."Tank Status Desc" = e.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+from example."Tanks" a
+    left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
+    left join example."erg_compartment_id" c on b."facility_id" = c."facility_id" and b."tank_id" = c."tank_id" 
+    left join example."Tank Status Lookup" d on a."Tank Status Id" = d."Tank Status ID" 
+    left join example.v_compartment_status_xwalk e on d."Tank Status Desc" = e.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+from create view example.v_ust_compartment as
+select distinct
+    "Facility Id"::character varying(50) as facility_id, 
+    "Tank Name"::character varying(50) as tank_name, 
+    "compartment_id"::integer as compartment_id,       -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
+    compartment_status_id as compartment_status_id       -- State does not report compartments; copied from Tank Status
+example."Tanks" a
+    left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
+    left join example."erg_compartment_id" c on b."facility_id" = c."facility_id" and b."tank_id" = c."tank_id" 
+    left join example."Tank Status Lookup" d on a."Tank Status Id" = d."Tank Status ID" 
+    left join example.v_compartment_status_xwalk e on d."Tank Status Desc" = e.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+
+create view example.v_ust_compartment as
+select distinct
+    "Facility Id"::character varying(50) as facility_id, 
+    "Tank Name"::character varying(50) as tank_name, 
+    "compartment_id"::integer as compartment_id,       -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
+    compartment_status_id as compartment_status_id       -- State does not report compartments; copied from Tank Status
+
+from example."Tanks" a
+    left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
+    left join example."erg_compartment_id" c on b."facility_id" = c."facility_id" and b."tank_id" = c."tank_id" 
+    left join example."Tank Status Lookup" d on a."Tank Status Id" = d."Tank Status ID" 
+    left join example.v_compartment_status_xwalk e on d."Tank Status Desc" = e.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+
+create view example.v_ust_compartment as
+select distinct
+    "Facility Id"::character varying(50) as facility_id, 
+    "Tank Name"::character varying(50) as tank_name, 
+    "compartment_id"::integer as compartment_id,       -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
+    compartment_status_id as compartment_status_id       -- State does not report compartments; copied from Tank Status
+----------------------------------------------------------------------------------------------------------
+
+create view example.v_ust_compartment as
+select distinct
+    "Facility Id"::character varying(50) as facility_id, 
+    "Tank Name"::character varying(50) as tank_name, 
+    "compartment_id"::integer as compartment_id,       -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
+    compartment_status_id as compartment_status_id       -- State does not report compartments; copied from Tank Status
+----------------------------------------------------------------------------------------------------------
+
+create view example.v_ust_compartment as
+select distinct
+    "Facility Id"::character varying(50) as facility_id, 
+    "Tank Name"::character varying(50) as tank_name, 
+    "compartment_id"::integer as compartment_id,       -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
+    compartment_status_id as compartment_status_id       -- State does not report compartments; copied from Tank Status
+----------------------------------------------------------------------------------------------------------
+
+create view example.v_ust_compartment as
+select distinct
+    "Facility Id"::character varying(50) as facility_id, 
+    "Tank Name"::character varying(50) as tank_name, 
+    "compartment_id"::integer as compartment_id,       -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
+    compartment_status_id as compartment_status_id       -- State does not report compartments; copied from Tank Status
+----------------------------------------------------------------------------------------------------------
+
+create view example.v_ust_compartment as
+select distinct
+    "Facility Id"::character varying(50) as facility_id, 
+    "Tank Name"::character varying(50) as tank_name, 
+    "compartment_id"::integer as compartment_id,       -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
+    compartment_status_id as compartment_status_id       -- State does not report compartments; copied from Tank Status

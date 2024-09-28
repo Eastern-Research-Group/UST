@@ -11,6 +11,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = 1                   # Enter an integer that is the ust_control_id
+table_name = 'ust_compartment'                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
 drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
@@ -23,7 +24,12 @@ export_file_name = None
 
 child_tables = {'ust_tank': ['ust_tank_substance','ust_compartment','ust_tank_dispenser'],
                 'ust_compartment': ['ust_piping','ust_compartment_dispenser']}
-
+id_table_names = {'ust_tank': 'erg_tank_id', 
+				  'ust_compartment': 'erg_compartment_id', 
+				  'ust_piping': 'erg_piping_id', 
+				  'ust_facility_dispenser': 'erg_dispenser_id',
+				  'ust_tank_dispenser': 'erg_dispenser_id',
+				  'ust_compartment_dispenser': 'erg_dispenser_id',}
 
 
 class IdColumns:
@@ -171,6 +177,10 @@ class IdColumns:
 				self.record_element_mapping(child_table)
 		except KeyError:
 			pass 
+
+
+		if self.table_name == 'ust_compartment':
+			sql = ""
 
 
 	def get_join_table(self, col_name, table_name=None):
@@ -453,8 +463,34 @@ def get_tables_with_missing_cols(dataset):
 	return [r[0] for r in rows]
 
 
-def drop_tables(dataset):
-	logger.info('Dropped existing ID generation tables')
+def drop_table(dataset, table_name, cursor=None):
+	if cursor:
+		cur = cursor
+	else:
+		conn = utils.connect_db()
+		cur = conn.cursor()
+
+	sql = f"""delete from {dataset.schema}.{dataset.ust_or_release}_element_mapping
+	           where organization_table_name = %s"""
+	cur.execute(sql, (table_name,))
+	logger.info('Deleted %s rows from %s.%s_element_mapping where organization_table_name = %s', cur.rowcount, dataset.schema, dataset.ust_or_release, table_name)
+	conn.commit()
+
+	sql = f"drop table {dataset.schema}.{table_name}"
+	cur.execute(sql)
+	logger.info('Dropped table %s.%s', dataset.schema, table_name)
+
+	if not cursor:
+		cur.close()
+		conn.close()
+
+
+def drop_tables(dataset, table_name=None):
+	if table_name:
+		erg_table_name = id_table_names[table_name]
+		drop_table(dataset, erg_table_name)
+		return 
+	logger.info('Dropping existing ID generation tables')
 	conn = utils.connect_db()
 	cur = conn.cursor()
 	sql = """select table_name from information_schema.tables 
@@ -463,25 +499,14 @@ def drop_tables(dataset):
 	cur.execute(sql, (dataset.schema,))
 	rows = cur.fetchall()
 	for row in rows:
-		table_name = row[0]
-		sql2 = f"""delete from {dataset.schema}.{dataset.ust_or_release}_element_mapping
-		           where organization_table_name = %s"""
-		cur.execute(sql2, (table_name,))
-		logger.info('Deleted %s rows from %s.%s_element_mapping where organization_table_name = %s', cur.rowcount, dataset.schema, dataset.ust_or_release, table_name)
-		conn.commit()
-
-		sql2 = f"drop table {dataset.schema}.{table_name}"
-		cur.execute(sql2)
-		logger.info('Dropped table %s.%s', dataset.schema, table_name)
-
+		drop_table(dataset, row[0])
 	cur.close()
 	conn.close()
 	logger.info('All existing ID generation tables dropped')
 
 
 
-
-def main(ust_or_release, control_id):
+def main(ust_or_release, control_id, table_name=None):
 	dataset = Dataset(ust_or_release=ust_or_release,
 					  control_id=control_id,
 					  base_file_name='id_column_generation.sql',
@@ -490,19 +515,27 @@ def main(ust_or_release, control_id):
 					  export_file_path=export_file_path)
 
 	if drop_existing:
-		drop_tables(dataset)
+		drop_tables(dataset, table_name)
 
-	tables_needed = get_tables_with_missing_cols(dataset)
-	for table in tables_needed: 
-		logger.info('-------------------------------------------------------------------------\nWorking on table %s', table)
+	if table_name:
 		columns = IdColumns(dataset=dataset, 
-							table_name=table, 
+							table_name=table_name, 
 							drop_existing=drop_existing,
 							write_sql=write_sql,
-							overwrite_sql_file=overwrite_sql_file)
+							overwrite_sql_file=overwrite_sql_file)		
+	else:
+		tables_needed = get_tables_with_missing_cols(dataset)
+		for table in tables_needed: 
+			logger.info('-------------------------------------------------------------------------\nWorking on table %s', table)
+			columns = IdColumns(dataset=dataset, 
+								table_name=table, 
+								drop_existing=drop_existing,
+								write_sql=write_sql,
+								overwrite_sql_file=overwrite_sql_file)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
-		 control_id=control_id)
+		 control_id=control_id,
+		 table_name=table_name)
 
