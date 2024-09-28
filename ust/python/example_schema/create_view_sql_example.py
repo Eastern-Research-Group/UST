@@ -24,14 +24,17 @@ export_file_name = None
 class ViewSql:
 	conn = None  
 	cur = None  
+	required_cols = None 
+	existing_cols = None
 	required_col_ids = None
 	existing_col_ids = None
+	all_col_ids = None
 	epa_column_name = None
 	join_info = {}
 	select_sql = ''
 	from_sql = ''
 	view_sql = '----------------------------------------------------------------------------------------------------------\n\n'
-
+	table_aliases = {}
 
 	def __init__(self, 
 				 dataset,
@@ -43,10 +46,6 @@ class ViewSql:
 		self.overwrite_sql_file = overwrite_sql_file
 		self.view_name = 'v_' + self.table_name
 		self.set_db_connection()
-		self.required_cols = self.get_required_cols()
-		self.existing_cols = self.get_existing_cols()
-		self.required_col_ids = [n for n in self.required_col_ids if n not in self.existing_col_ids]
-		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids, key=lambda x: x or 0)
 		try:
 			self.generate_sql()	
 		except Exception as e:
@@ -55,7 +54,7 @@ class ViewSql:
 			logging.error(e, exc_info=True)
 			print('------------------------------------------------')
 		self.disconnect_db()
-		self.show_existing_cols()
+		# self.show_existing_cols()
 		self.write_self()	
 
 
@@ -129,19 +128,21 @@ class ViewSql:
 		if max_len:
 			selected_column = selected_column + '(' + str(max_len) + ')'
 		selected_column = selected_column + ' as ' + epa_column_name + ','
+
 		return selected_column 
 
 
 	def get_existing_cols(self):
 		sql = f"""select column_sort_order as column_id, 
 					epa_column_name, organization_column_name, 
-					selected_column, programmer_comments
+					selected_column, programmer_comments,
+					organization_table_name
 			from example.v_{self.dataset.ust_or_release}_table_population_sql
 			where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s
 			and column_sort_order is not null
 			order by column_sort_order """
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
-		utils.pretty_print_query(self.cur)
+		# utils.pretty_print_query(self.cur)
 		existing_col_info = self.cur.fetchall()
 		if not existing_col_info:
 			logger.warning('No elements have been mapped for EPA table %s. Exiting...', self.table_name)
@@ -155,8 +156,13 @@ class ViewSql:
 			organization_column_name = existing_col[2]
 			selected_column = existing_col[3]
 			programmer_comments = existing_col[4]
+			organization_table_name = existing_col[5]
 			if not selected_column:
 				selected_column = self.get_column_select_sql(epa_column_name, organization_column_name)
+				try:
+					selected_column = self.table_aliases[organization_table_name] + '.' + selected_column
+				except KeyError:
+					pass
 			if programmer_comments:
 				programmer_comments = '	  -- ' + programmer_comments
 			else:
@@ -165,7 +171,8 @@ class ViewSql:
 				selected_column = selected_column[:-1]
 			existing_cols[column_id] = {'column_name': epa_column_name, 
 			                            'selected_column': selected_column, 
-			                            'programmer_comments': programmer_comments}		
+			                            'programmer_comments': programmer_comments,
+			                            'organization_table_name': organization_table_name}		
 		return existing_cols
 
 
@@ -202,7 +209,7 @@ class ViewSql:
 
 
 	def build_from_sql(self, from_table, alias, join_alias):
-		self.print_join_info()
+		# self.print_join_info()
 		if self.join_info['organization_join_column'] and self.join_info['organization_join_fk']:
 			self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '."' + self.join_info['organization_join_fk'] + '" '
 		if self.join_info['organization_join_column2'] and self.join_info['organization_join_fk2']:
@@ -227,11 +234,12 @@ class ViewSql:
 		print(df)
 
 		for index, row in df.iterrows():
-			logger.info('Working on %s', index)
+			logger.info('Working on table %s', index)
 			alias = row['alias']
 
-			if row['alias'] == 'a':
+			if alias == 'a':
 				self.from_sql = self.from_sql + self.dataset.schema + '.' + '"' + index + '" ' + alias
+				self.table_aliases[index] = alias
 
 			elif row['table_type'] == 'id' or row['table_type'] == 'org':
 				from_table = index
@@ -241,6 +249,7 @@ class ViewSql:
 				except:
 					join_alias = 'a'
 				self.build_from_sql(from_table, alias, join_alias)
+				self.table_aliases[index] = alias
 
 			elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
 				from_table = index
@@ -259,6 +268,7 @@ class ViewSql:
 				if alias == join_alias:
 					join_alias = 'a'
 				self.build_from_sql(from_table, alias, join_alias)
+				self.table_aliases[index] = alias
 
 			elif row['table_type'] == 'lookup':
 				self.set_join_info(index, 'database_lookup_table')
@@ -277,6 +287,7 @@ class ViewSql:
 				except:
 				 	join_alias = 'a'
 				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
+				self.table_aliases[index] = alias
 
 			elif row['table_type'] == 'deagg':
 				self.set_join_info(index, 'deagg_table_name')
@@ -296,6 +307,7 @@ class ViewSql:
 				except:
 					join_alias = 'a'
 				self.build_from_sql(from_table, alias, join_alias)
+				self.table_aliases[index] = alias
 
 		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
 
@@ -338,7 +350,11 @@ class ViewSql:
 
 
 	def generate_sql(self):
-		# self.build_from_query()
+		self.build_from_query()
+		self.required_cols = self.get_required_cols()
+		self.existing_cols = self.get_existing_cols()
+		self.required_col_ids = [n for n in self.required_col_ids if n not in self.existing_col_ids]
+		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids, key=lambda x: x or 0)		
 		self.build_select_query()
 		self.view_sql = self.view_sql + f'create view {self.dataset.schema}.{self.view_name} as\n'
 		self.view_sql = self.view_sql + self.select_sql + self.from_sql
