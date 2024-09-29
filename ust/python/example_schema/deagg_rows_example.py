@@ -23,103 +23,151 @@ deagg_table_name = 'erg_tank_substance_deagg'           # Deagg table name gener
 drop_existing = False 			# Boolean, defaults to False. Set to True to drop the _datarows_deagg table that this script creates before beginning (for example, if you need to rerun this script)
 
 
-def main(dataset, data_table_name, data_table_pk_cols, data_deagg_column_name, deagg_table_name, delimiter=',', drop_existing=False):
-	data_deagg_table_name = utils.get_deagg_datarows_table_name(deagg_table_name)
+class deaggRows:
+	conn = None  
+	cur = None  
 
-	conn = utils.connect_db()
-	cur = conn.cursor()
+	def __init__(self, 
+				 dataset,
+				 data_table_name,
+				 data_table_pk_cols,
+				 data_deagg_column_name,
+				 delimiter,
+				 deagg_table_name,
+				 drop_existing=False):
+		self.dataset = dataset
+		self.data_table_name = data_table_name
+		self.data_table_pk_cols = data_table_pk_cols
+		self.data_deagg_column_name = data_deagg_column_name
+		self.delimiter = delimiter
+		self.deagg_table_name = deagg_table_name
+		self.data_deagg_table_name = utils.get_deagg_datarows_table_name(self.deagg_table_name)
+		self.epa_table_name = self.deagg_table_name.replace('erg', self.dataset.ust_or_release).replace('_deagg','')
+		self.element_mapping_table = self.dataset.ust_or_release + '_element_mapping'
+		self.set_db_connection()
+		# self.create_deagg_rows_table()
+		self.update_element_mapping()
+		self.disconnect_db()
 
-	sql = "select count(*) from information_schema.tables where table_schema = %s and table_name = %s"
-	cur.execute(sql, (dataset.schema, data_deagg_table_name))
-	cnt = cur.fetchone()[0]
-	if cnt > 0:
-		if drop_existing:
-			sql2 = f'drop table {dataset.schema}."{data_deagg_table_name}"'
-			cur.execute(sql2)
-		else:
-			logger.warning('Table %s.%s already exists but drop_existing flag is False. Set drop_existing to True to continue. Exiting...', dataset.schema, data_deagg_table_name)
-			exit()
 
-	# convert list of columns into a string and wrap each one in quotes 
-	col_str = ''  
-	for col in data_table_pk_cols:
-		col_str = col_str + '"' + col + '",' 
-	
-	# create _datarows_deagg table with empty column for deagged values 
-	sql = f"""select {col_str} cast(null as varchar(400)) as "{data_deagg_column_name}" 
-	          into {dataset.schema}."{data_deagg_table_name}" 
-	          from {dataset.schema}."{data_table_name}" where 1=2""" 
-	cur.execute(sql)
+	def set_db_connection(self):
+		self.conn = utils.connect_db()
+		self.cur = self.conn.cursor()
 
-	sql = f"""select distinct {col_str} "{data_deagg_column_name}" from {dataset.schema}."{data_table_name}" order by 1, 2""" 
-	cur.execute(sql)
-	rows = cur.fetchall()
-	for row in rows: 
-		i = len(row)-1
-		col_text = row[i]
-		try:
-			parts = col_text.split(delimiter)
-		except AttributeError:
-			parts = [None]
-		for part in parts:
-			# TODO: make this dynamic
-			if i == 1:
-				sql2 = f"""insert into {dataset.schema}.{data_deagg_table_name} ({col_str} "{data_deagg_column_name}") 
-				           values (%s, %s)"""
-				cur.execute(sql2, (row[0], part))
-				logger.info('Inserted %s, %s into %s.%s', row[0], part, dataset.schema, data_deagg_table_name)
-			elif i == 2:
-				sql2 = f"""insert into {dataset.schema}.{data_deagg_table_name} ({col_str} "{data_deagg_column_name}") 
-				           values (%s, %s, %s)"""
-				cur.execute(sql2, (row[0], row[1], part))
-				logger.info('Inserted %s, %s, %s into %s.%s', row[0], row[1], part, dataset.schema, data_deagg_table_name)
-			elif i == 3:
-				sql2 = f"""insert into {dataset.schema}.{data_deagg_table_name} ({col_str} "{data_deagg_column_name}") 
-				           values (%s, %s, %s, %s)"""
-				cur.execute(sql2, (row[0], row[1], row[2], part))
-				logger.info('Inserted %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], part, dataset.schema, data_deagg_table_name)
-			elif i == 4:
-				sql2 = f"""insert into {dataset.schema}.{data_deagg_table_name} ({col_str} "{data_deagg_column_name}") 
-				           values (%s, %s, %s, %s, %s)"""
-				cur.execute(sql2, (row[0], row[1], row[2], row[3], part))
-				logger.info('Inserted %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], part, dataset.schema, data_deagg_table_name)
-			elif i == 5:
-				sql2 = f"""insert into {dataset.schema}.{data_deagg_table_name} ({col_str} "{data_deagg_column_name}") 
-				           values (%s, %s, %s, %s, %s, %s)"""
-				cur.execute(sql2, (row[0], row[1], row[2], row[3], row[4], part))
-				logger.info('Inserted %s, %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], row[4], part, dataset.schema, data_deagg_table_name)
-			elif i == 6:
-				sql2 = f"""insert into {dataset.schema}.{data_deagg_table_name} ({col_str} "{data_deagg_column_name}") 
-				           values (%s, %s, %s, %s, %s, %s, %s)"""
-				cur.execute(sql2, (row[0], row[1], row[2], row[3], row[4], row[5], part))
-				logger.info('Inserted %s, %s, %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], row[4], row[5], part, dataset.schema, data_deagg_table_name)
+
+	def disconnect_db(self):
+		self.conn.commit()
+		self.cur.close()
+		self.conn.close()
+
+
+	def create_deagg_rows_table(self):
+		sql = "select count(*) from information_schema.tables where table_schema = %s and table_name = %s"
+		self.cur.execute(sql, (self.dataset.schema, self.data_deagg_table_name))
+		cnt = self.cur.fetchone()[0]
+		if cnt > 0:
+			if self.drop_existing:
+				sql2 = f'drop table {self.dataset.schema}."{self.data_deagg_table_name}"'
+				self.cur.execute(sql2)
 			else:
-				logger.critical('There are more grouped by/pk columns (%s) in data_table_pk_cols (%s) than this script has been coded to handle. Update the loop that does the deagg.', i, data_table_pk_cols)
-			
-		conn.commit()
+				logger.warning('Table %s.%s already exists but drop_existing flag is False. Set drop_existing to True to continue. Exiting...', self.dataset.schema, self.data_deagg_table_name)
+				exit()
 
-		sql = f"""select count(*) from example.{dataset.ust_or_release}_element_mapping
-		          where """
+		# convert list of columns into a string and wrap each one in quotes 
+		col_str = ''  
+		for col in data_table_pk_cols:
+			col_str = col_str + '"' + col + '",' 
+		
+		# create _datarows_deagg table with empty column for deagged values 
+		sql = f"""select {col_str} cast(null as varchar(400)) as "{self.data_deagg_column_name}" 
+		          into {self.dataset.schema}."{self.data_deagg_table_name}" 
+		          from {self.dataset.schema}."{self.data_table_name}" where 1=2""" 
+		self.cur.execute(sql)
+
+		sql = f"""select distinct {col_str} "{self.data_deagg_column_name}" 
+		          from {self.dataset.schema}."{self.data_table_name}" order by 1, 2""" 
+		self.cur.execute(sql)
+		rows = self.cur.fetchall()
+		for row in rows: 
+			i = len(row)-1
+			col_text = row[i]
+			try:
+				parts = col_text.split(self.delimiter)
+			except AttributeError:
+				parts = [None]
+			for part in parts:
+				# TODO: make this dynamic
+				if i == 1:
+					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
+					           values (%s, %s)"""
+					self.cur.execute(sql2, (row[0], part))
+					logger.info('Inserted %s, %s into %s.%s', row[0], part, self.dataset.schema, self.data_deagg_table_name)
+				elif i == 2:
+					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
+					           values (%s, %s, %s)"""
+					self.cur.execute(sql2, (row[0], row[1], part))
+					logger.info('Inserted %s, %s, %s into %s.%s', row[0], row[1], part, self.dataset.schema, self.data_deagg_table_name)
+				elif i == 3:
+					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
+					           values (%s, %s, %s, %s)"""
+					self.cur.execute(sql2, (row[0], row[1], row[2], part))
+					logger.info('Inserted %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], part, self.dataset.schema, self.data_deagg_table_name)
+				elif i == 4:
+					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
+					           values (%s, %s, %s, %s, %s)"""
+					self.cur.execute(sql2, (row[0], row[1], row[2], row[3], part))
+					logger.info('Inserted %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], part, self.dataset.schema, self.data_deagg_table_name)
+				elif i == 5:
+					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
+					           values (%s, %s, %s, %s, %s, %s)"""
+					self.cur.execute(sql2, (row[0], row[1], row[2], row[3], row[4], part))
+					logger.info('Inserted %s, %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], row[4], part, self.dataset.schema, self.data_deagg_table_name)
+				elif i == 6:
+					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
+					           values (%s, %s, %s, %s, %s, %s, %s)"""
+					self.cur.execute(sql2, (row[0], row[1], row[2], row[3], row[4], row[5], part))
+					logger.info('Inserted %s, %s, %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], row[4], row[5], part, self.dataset.schema, self.data_deagg_table_name)
+				else:
+					logger.critical('There are more grouped by/pk columns (%s) in data_table_pk_cols (%s) than this script has been coded to handle. Update the loop that does the deagg.', i, self.data_table_pk_cols)
+			self.conn.commit()
+		logger.info('Finished deagging %s."%s"."%s" into %s', self.dataset.schema, self.data_table_name, self.data_deagg_column_name, self.data_deagg_table_name)
 
 
+	def update_element_mapping(self):
+		logger.info('Updating %s for %s', self.element_mapping_table, self.deagg_table_name)
+		sql = f"""update example.{self.element_mapping_table} 
+				  set deagg_table_name = %s
+		          where {self.dataset.ust_or_release}_control_id = %s 
+		          and deagg_table_name = %s"""
+		self.cur.execute(sql, (self.data_deagg_table_name, self.dataset.control_id, self.deagg_table_name))
+		self.conn.commit()
+		logger.info('Updated element mapping for %s in %s', self.data_deagg_table_name, self.element_mapping_table)
 
 
-
-
-	conn.commit()
-	cur.close()
-	conn.close()
-
-	logger.info('Finished deagging %s."%s"."%s" into %s', dataset.schema, data_table_name, data_deagg_column_name, data_deagg_table_name)
-
-
-
-if __name__ == '__main__':   
+def main(ust_or_release,
+		 control_id, 
+	     data_table_name, 
+	     data_table_pk_cols,
+	     data_deagg_column_name,
+	     deagg_table_name,
+	     delimiter,
+	     drop_existing
+	     ):
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id,
 					  requires_export=False)
+	drows = deaggRows(dataset=dataset, 
+					 data_table_name=data_table_name, 
+					 data_table_pk_cols=data_table_pk_cols,
+					 data_deagg_column_name=data_deagg_column_name,
+					 deagg_table_name=deagg_table_name,
+					 delimiter=delimiter,
+					 drop_existing=drop_existing)
 
-	main(dataset=dataset, 
+
+if __name__ == '__main__':   
+	main(ust_or_release=ust_or_release, 
+		 control_id=control_id,
 		 data_table_name=data_table_name, 
 		 data_table_pk_cols=data_table_pk_cols,
 		 data_deagg_column_name=data_deagg_column_name,

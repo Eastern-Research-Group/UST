@@ -1083,4 +1083,24 @@ from example."Tanks" a
     left join example."Tank Status Lookup" d on a."Tank Status Id" = d."Tank Status ID" 
     left join example.v_compartment_status_xwalk e on d."Tank Status Desc" = e.organization_value
 where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+
+create view example.v_ust_tank_substance as
+select distinct
+    a."Facility Id"::character varying(50) as facility_id, 
+    substance_id as substance_id       -- Source data contains multiple substances per row, delimited with a comma and space.
+from example."Tanks" a
+    left join example.v_substance_xwalk b on a."Tank Substance" = b.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+;----------------------------------------------------------------------------------------------------------
+
+create view example.v_ust_tank_substance as
+select distinct
+    a."Facility Id"::character varying(50) as facility_id, 
+    b."tank_id"::integer as tank_id,       -- This required field is not present in the source data. Table erg_tank_id was created by ERG so the data can conform to the EPA template structure.
+    substance_id as substance_id       -- Source data contains multiple substances per row, delimited with a comma and space.
+from example."Tanks" a
+    left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
+    left join example.v_substance_xwalk c on a."Tank Substance" = c.organization_value
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
 ;
