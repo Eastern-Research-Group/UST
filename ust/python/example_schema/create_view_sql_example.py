@@ -13,7 +13,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
-table_name = 'ust_tank_substance'         # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
+table_name = 'ust_piping'       # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
 overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -87,8 +87,8 @@ class ViewSql:
 	def get_required_cols(self):
 		sql = f"""select column_sort_order, a.column_name, a.data_type, a.character_maximum_length
 				from information_schema.columns a join public.{self.dataset.ust_or_release}_required_view_columns b 
-					on a.table_name = b.table_name and a.column_name = b.column_name
-				where table_schema = 'public' and a.table_name = %s 
+					on a.table_name = b.information_schema_table_name and a.column_name = b.column_name
+				where table_schema = 'public' and b.table_name = %s 
 				and b.column_name not in 
 					(select epa_column_name from example.v_{self.dataset.ust_or_release}_element_mapping_joins
 					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s)
@@ -233,8 +233,9 @@ class ViewSql:
 		df = pd.read_sql(sql, utils.get_engine(), index_col='organization_table_name')
 		print(df)
 
+		deagg_rows_alias = None 
 		for index, row in df.iterrows():
-			logger.info('Working on table %s', index)
+			# logger.info('Working on table %s', index)
 			alias = row['alias']
 
 			if alias == 'a':
@@ -243,11 +244,16 @@ class ViewSql:
 
 			elif row['table_type'] == 'id' or row['table_type'] == 'org':
 				from_table = index
+
 				self.set_join_info(from_table)
 				try:
 					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
 				except:
 					join_alias = 'a'
+				if alias == 'd':
+					print(from_table)
+					print(join_alias)
+
 				self.build_from_sql(from_table, alias, join_alias)
 				self.table_aliases[index] = alias
 
@@ -270,25 +276,6 @@ class ViewSql:
 				self.build_from_sql(from_table, alias, join_alias)
 				self.table_aliases[index] = alias
 
-			elif row['table_type'] == 'lookup':
-				self.set_join_info(index, 'database_lookup_table')
-				sql = f"""select distinct database_lookup_column 
-						from example.v_{self.dataset.ust_or_release}_element_mapping_joins
-						where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s"""
-				self.cur.execute(sql, (self.dataset.control_id, self.table_name, index))
-				# utils.pretty_print_query(self.cur)
-				rows = self.cur.fetchall()
-				db_lookup_col = None
-				for row in rows:
-					db_lookup_col = row[0]
-				from_table = 'v_' + db_lookup_col + '_xwalk'	
-				try:
-					join_alias = df.loc[self.join_info['organization_table_name']]['alias']
-				except:
-				 	join_alias = 'a'
-				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
-				self.table_aliases[index] = alias
-
 			elif row['table_type'] == 'deagg':
 				self.set_join_info(index, 'deagg_table_name')
 				sql = f"""select distinct deagg_column_name 
@@ -307,6 +294,30 @@ class ViewSql:
 				except:
 					join_alias = 'a'
 				self.build_from_sql(from_table, alias, join_alias)
+				self.table_aliases[index] = alias
+				if 'datarows' in from_table:
+					deagg_rows_alias = alias
+
+			elif row['table_type'] == 'lookup':
+				self.set_join_info(index, 'database_lookup_table')
+				sql = f"""select distinct database_lookup_column 
+						from example.v_{self.dataset.ust_or_release}_element_mapping_joins
+						where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s"""
+				self.cur.execute(sql, (self.dataset.control_id, self.table_name, index))
+				# utils.pretty_print_query(self.cur)
+				rows = self.cur.fetchall()
+				db_lookup_col = None
+				for row in rows:
+					db_lookup_col = row[0]
+				from_table = 'v_' + db_lookup_col + '_xwalk'	
+				if deagg_rows_alias:
+					join_alias = deagg_rows_alias
+				else:
+					try:
+						join_alias = df.loc[self.join_info['organization_table_name']]['alias']
+					except:
+					 	join_alias = 'a'
+				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
 				self.table_aliases[index] = alias
 
 		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
@@ -327,7 +338,7 @@ class ViewSql:
 			column_id = self.all_col_ids[i]
 			if self.all_col_ids[i] in self.existing_col_ids: # the column we are working on was mapped in the element_mapping table
 				self.epa_column_name = self.existing_cols[column_id]['column_name']
-				logger.info('Working on column %s', self.epa_column_name)
+				# logger.info('Working on column %s', self.epa_column_name)
 				selected_column = self.existing_cols[column_id]['selected_column'].replace('""','????')
 				if 'facility_type' in self.epa_column_name and '_id' not in self.epa_column_name:
 					selected_column = selected_column.replace('facility_type1 as','facility_type_id as').replace('facility_type2 as','facility_type_id as')
@@ -345,7 +356,7 @@ class ViewSql:
 				# if we are working on ust_facility and we are on facility state, set the region_next variable
 				if self.dataset.ust_or_release == 'ust' and self.table_name == 'ust_facility' and 12 not in self.existing_col_ids:
 					region_next = True
-				
+			
 			self.select_sql = self.select_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['programmer_comments']+ '\n'
 
 

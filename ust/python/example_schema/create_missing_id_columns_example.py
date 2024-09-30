@@ -22,7 +22,7 @@ export_file_dir = None
 export_file_name = None
 
 
-child_tables = {'ust_tank': ['ust_tank_substance','ust_compartment','ust_tank_dispenser'],
+child_tables = {'ust_tank': ['ust_tank_substance','ust_compartment','ust_tank_dispenser','ust_piping','ust_compartment_dispenser'],
                 'ust_compartment': ['ust_piping','ust_compartment_dispenser']}
 id_table_names = {'ust_tank': 'erg_tank_id', 
 				  'ust_compartment': 'erg_compartment_id', 
