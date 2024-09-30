@@ -130,17 +130,14 @@ class IdColumns:
 		return self.cur.fetchone()[0]
 
 
-	def record_element_mapping(self):
-		self.sql_text = self.sql_text + '--Record new mapping in public.' + self.dataset.ust_or_release + '_element_mapping\n\n'
-		
-		if self.get_col_mapping_existence(self.table_name, self.column_name):
-			logger.warning('A mapping already existed for table %s, column %s; it will be deleted and replaced with the ERG-created table', self.table_name, self.column_name)
+	def record_element_mapping(self, table_name):
+		if self.get_col_mapping_existence(table_name, self.column_name):
+			logger.warning('A mapping already existed for table %s, column %s; it will be deleted and replaced with the ERG-created table', table_name, self.column_name)
 			sql = f"""delete from public.{self.dataset.ust_or_release}_element_mapping
 					\nwhere {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
-			self.cur.execute(sql, (self.dataset.control_id, self.table_name, self.column_name))
-			logger.info('Deleted mapping info for table %s, column %s from public.%s_element_mapping', self.table_name, self.column_name, self.dataset.ust_or_release)
+			self.cur.execute(sql, (self.dataset.control_id, table_name, self.column_name))
+			logger.info('Deleted mapping info for table %s, column %s from public.%s_element_mapping', table_name, self.column_name, self.dataset.ust_or_release)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
-
 		sql = f"""insert into public.{self.dataset.ust_or_release}_element_mapping ({self.dataset.ust_or_release}_control_id, epa_table_name, epa_column_name,
 					 organization_table_name, organization_column_name, 
 					 programmer_comments, organization_join_table,
@@ -149,15 +146,25 @@ class IdColumns:
 				  \nvalues (%s, %s, %s, %s, %s, %s,\n%s, %s, %s, %s, %s, %s, %s)"""
 		comment = 'This required field is not present in the source data. Table ' + self.erg_table_name + ' was created by ERG so the data can conform to the EPA template structure.'
 		self.cur.execute(sql, 
-						 (self.dataset.control_id, self.table_name, self.column_name, self.erg_table_name, self.column_name, 
+						 (self.dataset.control_id, table_name, self.column_name, self.erg_table_name, self.column_name, 
 						  comment, self.organization_join_table, 
 						  self.organization_join_column, self.organization_join_column2, self.organization_join_column3,
 						  self.organization_join_fk, self.organization_join_fk2, self.organization_join_fk3))
-		logger.info('Inserted mapping from %s.%s to %s.%s', self.table_name, self.column_name, self.erg_table_name, self.column_name)
+		logger.info('Inserted mapping from %s.%s to %s.%s', table_name, self.column_name, self.erg_table_name, self.column_name)
 		self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
-
 		self.conn.commit()
 
+
+	def element_mapping(self):
+		self.sql_text = self.sql_text + '--Record new mapping in public.' + self.dataset.ust_or_release + '_element_mapping\n\n'
+		self.record_element_mapping(self.table_name)
+
+		try:
+			for child_table in child_tables[self.table_name]:
+				logger.info('Checking for existing mapping for %s', child_table)
+				self.record_element_mapping(child_table)
+		except KeyError:
+			pass 
 
 	def get_join_table(self, col_name, table_name=None):
 		if not table_name:
@@ -237,7 +244,7 @@ class IdColumns:
 				self.organization_join_fk2 = None
 			self.organization_join_fk3 = None
 			
-			self.record_element_mapping()
+			self.element_mapping()
 
 		elif self.table_name == 'ust_compartment' or self.table_name == 'ust_tank_dispenser':
 			if self.table_name == 'ust_compartment':
@@ -335,7 +342,7 @@ class IdColumns:
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
-			self.record_element_mapping()
+			self.element_mapping()
 
 		elif self.table_name == 'ust_piping' or self.table_name == 'ust_compartment_dispenser':
 			if self.table_name == 'ust_piping':
@@ -415,7 +422,7 @@ class IdColumns:
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
-			self.record_element_mapping()
+			self.element_mapping()
 
 
 
