@@ -1581,6 +1581,10 @@ select organization_table_name, table_type,
 	
 select * from  public.mapped_table_types order by 2;
 	
+update  public.mapped_table_types  set sort_order = 6 where table_type = 'deagg';
+update  public.mapped_table_types  set sort_order = 7 where table_type = 'lookup';
+
+
 update  public.mapped_table_types  set sort_order = 3 where table_type = 'id'
 
 select * from example.v_ust_mapped_table_types
@@ -1632,19 +1636,56 @@ UNION ALL
 UNION ALL
  SELECT v_ust_table_population_sql.ust_control_id,
     v_ust_table_population_sql.epa_table_name,
-    v_ust_table_population_sql.database_lookup_table AS organization_table_name,
-    'lookup'::text AS table_type,
-    6 as sort_order
-   FROM example.v_ust_table_population_sql
-  WHERE v_ust_table_population_sql.database_lookup_table IS NOT NULL
-UNION ALL
- SELECT v_ust_table_population_sql.ust_control_id,
-    v_ust_table_population_sql.epa_table_name,
     v_ust_table_population_sql.deagg_table_name AS organization_table_name,
     'deagg'::text AS table_type,
+    6 as sort_order
+   FROM example.v_ust_table_population_sql
+  WHERE v_ust_table_population_sql.deagg_table_name IS NOT NULL
+ UNION ALL
+ SELECT v_ust_table_population_sql.ust_control_id,
+    v_ust_table_population_sql.epa_table_name,
+    v_ust_table_population_sql.database_lookup_table AS organization_table_name,
+    'lookup'::text AS table_type,
     7 as sort_order
    FROM example.v_ust_table_population_sql
-  WHERE v_ust_table_population_sql.deagg_table_name IS NOT NULL;
+  WHERE v_ust_table_population_sql.database_lookup_table IS NOT NULL ;
+
+ 
+ select distinct deagg_column_name 
+ 
+ select *
+ from example.v_ust_element_mapping_joins
+ where ust_control_id = 1 and epa_table_name = 'ust_tank_substance' 
+ and deagg_table_name = 'erg_tank_substance_datarows_deagg';
+ 
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_tank_substance' 
+
+select * from example.erg_tank_substance_datarows_deagg;
+
+update example.ust_element_mapping 
+ set deagg_table_name = 'erg_tank_substance_datarows_deagg', 
+	organization_join_table = 'Tanks' , 
+	organization_join_column = 'Facility Id',
+	organization_join_fk = 'Facility Id',
+	organization_join_column2 = 'Tank Name', 
+	organization_join_fk2 = 'Tank Name' 
+where ust_control_id = 1 and deagg_table_name = 'erg_tank_substance_datarows_deagg';
+
+
+select distinct
+	a."Facility Id"::character varying(50) as facility_id, 
+	b."tank_id"::integer as tank_id, 	  -- This required field is not present in the source data. Table erg_tank_id was created by ERG so the data can conform to the EPA template structure.
+	substance_id as substance_id 	  -- Source data contains multiple substances per row, delimited with a comma and space.
+from example."Tanks" a
+	left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
+	left join example."erg_tank_substance_datarows_deagg" c on a."Facility Id" = c."Facility Id" and a."Tank Name" = c."Tank Name" 
+	left join example.v_substance_xwalk d on c."Tank Substance" = d.organization_value
+order by 1, 2;	
+	
+
+select * from example.ust_element_mapping where epa_table_name = 'ust_piping'
+
 
 drop view example.v_ust_mapped_table_types;
 create or replace view example.v_ust_mapped_table_types as
@@ -1668,10 +1709,15 @@ select distinct
 	"Facility Id"::character varying(50) as facility_id,
 	substance_id as substance_id,	  -- Source data contains multiple substances per row, delimited with a comma and space
 from example."Tanks" a
-	left join example.erg_tank_substance_deagg b on a."Tank Substance" = b."Tank Substance" 
+	left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
+	left join example.erg_tank_substance_deagg c on a."Tank Substance" = b."Tank Substance" 
 
 	select * from example.erg_tank_substance_deagg;
-	
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_tank_substance'
+
+
 select distinct
 	"Facility Id"::character varying(50) as facility_id,
 	"tank_id"::integer as tank_id,	  -- This required field is not present in the source data. Table erg_tank_id was created by ERG so the data can conform to the EPA template structure.
@@ -1686,6 +1732,84 @@ from example."Tanks" a
 	left join example.v_tank_status_xwalk d on c."Tank Status Desc" = d.organization_value
 	left join example.v_tank_location_xwalk e on a."Tank Type" = e.organization_value
 where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+
+
+select distinct
+	a."Facility Id"::character varying(50) as facility_id, 
+	a."Tank Name"::character varying(50) as tank_name, 
+	"piping_id"::character varying(50) as piping_id, 	  -- This required field is not present in the source data. Table erg_piping_id was created by ERG so the data can conform to the EPA template structure.
+--	"Piping Material Desc"::character varying(3) as piping_material_frp, 	  -- if "Piping Material Desc" = "Fiberglass Reinforced Plastic" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_stainless_steel, 	  -- if "Piping Material Desc" = "Stainless Steel" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_steel, 	  -- if "Piping Material Desc" = "Steel" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_copper, 	  -- if "Piping Material Desc" = "Copper" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_flex, 	  -- if "Piping Material Desc" = "Flex Piping" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_other 	  -- if "Piping Material Desc" = "Other" then "Yes"
+from example."Tanks" a
+	left join example."erg_tank_id" b on c."facility_id" = b."facility_id" and c."tank_id" = b."tank_id" 
+	left join example."erg_compartment_id" c on b."facility_id" = c."facility_id" and b."tank_id" = c."tank_id" 
+	left join example."Piping Material Lookup" e on f."Piping Material Id" = e."Piping Material ID" 
+	left join example."Tank Piping" f on e."Piping Material Id" = f."Piping Material ID" 
+
+
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_piping'
+
+
+
+select a.table_name, column_sort_order, a.column_name, a.data_type, a.character_maximum_length
+from information_schema.columns a join public.ust_required_view_columns b 
+	on a.table_name = b.information_schema_table_name and a.column_name = b.column_name
+where table_schema = 'public' and b.table_name = 'ust_piping' 
+and b.column_name not in 
+	(select epa_column_name from example.v_ust_element_mapping_joins
+	where ust_control_id = 1 and epa_table_name =  'ust_piping' )
+order by column_sort_order
+
+select * from public.ust_required_view_columns
+where table_name = 'ust_piping' 
+order by column_sort_order;
+
+
+select column_sort_order as column_id, 
+					epa_column_name, organization_column_name, 
+					selected_column, programmer_comments,
+					organization_table_name
+			from example.v_ust_table_population_sql
+			where ust_control_id = 1 and epa_table_name = 'ust_piping_id'
+--			and column_sort_order is not null
+			order by column_sort_order
+
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_piping'
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_compartment'
+
+
+select distinct
+	a."Facility Id"::character varying(50) as facility_id, 
+	b."tank_id"::integer as tank_id, 	  -- This required field is not present in the source data. Table erg_tank_id was created by ERG so the data can conform to the EPA template structure.
+	a."Tank Name"::character varying(50) as tank_name, 
+	"piping_id"::character varying(50) as piping_id, 	  -- This required field is not present in the source data. Table erg_piping_id was created by ERG so the data can conform to the EPA template structure.
+	"Piping Material Desc"::character varying(3) as piping_material_frp, 	  -- if "Piping Material Desc" = "Fiberglass Reinforced Plastic" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_stainless_steel, 	  -- if "Piping Material Desc" = "Stainless Steel" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_steel, 	  -- if "Piping Material Desc" = "Steel" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_copper, 	  -- if "Piping Material Desc" = "Copper" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_flex, 	  -- if "Piping Material Desc" = "Flex Piping" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_other 	  -- if "Piping Material Desc" = "Other" then "Yes"
+from example."Tanks" a
+	left join example."erg_tank_id" b on c."facility_id" = b."facility_id" and c."tank_id" = b."tank_id" 
+	left join example."erg_compartment_id" c on b."facility_id" = c."facility_id" and b."tank_id" = c."tank_id" 
+	left join example."Piping Material Lookup" e on f."Piping Material Id" = e."Piping Material ID" 
+	left join example."Tank Piping" f on e."Piping Material Id" = f."Piping Material ID" 
+
+
+
+
+
+
 
 
 

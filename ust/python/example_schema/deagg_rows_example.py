@@ -136,10 +136,19 @@ class deaggRows:
 	def update_element_mapping(self):
 		logger.info('Updating %s for %s', self.element_mapping_table, self.deagg_table_name)
 		sql = f"""update example.{self.element_mapping_table} 
-				  set deagg_table_name = %s
-		          where {self.dataset.ust_or_release}_control_id = %s 
-		          and deagg_table_name = %s"""
-		self.cur.execute(sql, (self.data_deagg_table_name, self.dataset.control_id, self.deagg_table_name))
+				  set deagg_table_name = %s, organization_join_table = %s """
+		i = 1
+		for pk_col in self.data_table_pk_cols:
+				if i == 1:
+					join_col_name = 'organization_join_column'
+					fk_col_name = 'organization_join_fk'
+				else:
+					join_col_name = 'organization_join_column' + str(i)
+					fk_col_name = 'organization_join_fk' + str(i)					
+				sql = sql + f", {join_col_name} = '{pk_col}', {fk_col_name} = '{pk_col}'" 
+				i += 1
+		sql = sql + f""" where {self.dataset.ust_or_release}_control_id = %s and deagg_table_name = %s"""
+		self.cur.execute(sql, (self.data_deagg_table_name, self.data_table_name, self.dataset.control_id, self.deagg_table_name))
 		self.conn.commit()
 		logger.info('Updated element mapping for %s in %s', self.data_deagg_table_name, self.element_mapping_table)
 
