@@ -40,6 +40,7 @@ class ControlTable:
         else:
             self.date_processed = datetime.today()
         self.comments = comments
+        self.organization_compartment_flag = organization_compartment_flag
         self.control_id = None
 
 
