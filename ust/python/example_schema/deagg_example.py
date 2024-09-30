@@ -70,7 +70,7 @@ class deagg:
 
 		sql = """select count(*) from information_schema.tables 
 		         where table_schema = %s and table_name = %s"""
-		cur.execute(sql, (self.dataset.schema, self.deagg_table_name))
+		self.cur.execute(sql, (self.dataset.schema, self.deagg_table_name))
 		cnt =  self.cur.fetchone()[0]
 		if cnt > 0 and self.drop_existing:
 			sql = f"drop table {self.dataset.schema}.{self.deagg_table_name}"
@@ -82,7 +82,7 @@ class deagg:
 			exit()
 
 		sql = f"""create table {self.dataset.schema}.{self.deagg_table_name}
-			 ({id_column_name} int not null generated always as identity primary key,
+			 ({self.id_column_name} int not null generated always as identity primary key,
 			 "{self.column_name}" text,
 			 constraint {self.deagg_table_name}_unique unique ("{self.column_name}"))"""
 		self.cur.execute(sql)
@@ -120,11 +120,11 @@ def main(ust_or_release, control_id, table_name, column_name, delimiter=',', dro
 				 	  control_id=control_id,
 					  requires_export=False)
 
-	deagg = deagg(dataset=dataset, 
-  				  table_name=table_name, 
-				  column_name=column_name,
-				  delimiter=delimiter,
-				  drop_existing=drop_existing)
+	deagged = deagg(dataset=dataset, 
+  				    table_name=table_name, 
+				    column_name=column_name,
+				    delimiter=delimiter,
+				    drop_existing=drop_existing)
 
 
 if __name__ == '__main__':   

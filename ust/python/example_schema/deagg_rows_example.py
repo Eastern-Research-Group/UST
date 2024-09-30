@@ -41,6 +41,7 @@ class deaggRows:
 		self.data_deagg_column_name = data_deagg_column_name
 		self.delimiter = delimiter
 		self.deagg_table_name = deagg_table_name
+		self.drop_existing = drop_existing
 		self.data_deagg_table_name = utils.get_deagg_datarows_table_name(self.deagg_table_name)
 		self.epa_table_name = self.deagg_table_name.replace('erg', self.dataset.ust_or_release).replace('_deagg','')
 		self.element_mapping_table = self.dataset.ust_or_release + '_element_mapping'
@@ -85,7 +86,9 @@ class deaggRows:
 		self.cur.execute(sql)
 
 		sql = f"""select distinct {col_str} "{self.data_deagg_column_name}" 
-		          from {self.dataset.schema}."{self.data_table_name}" order by 1, 2""" 
+		          from {self.dataset.schema}."{self.data_table_name}" 
+                  where "{self.data_deagg_column_name}" is not null
+                  order by 1, 2""" 
 		self.cur.execute(sql)
 		rows = self.cur.fetchall()
 		for row in rows: 
