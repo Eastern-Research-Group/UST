@@ -1809,19 +1809,59 @@ from example."Tanks" a
 
 
 
+select distinct
+	a."Facility Id"::character varying(50) as facility_id, 
+	b."tank_id"::integer as tank_id, 	  -- This required field is not present in the source data. Table erg_tank_id was created by ERG so the data can conform to the EPA template structure.
+	a."Tank Name"::character varying(50) as tank_name, 
+	"piping_id"::character varying(50) as piping_id--, 	  -- This required field is not present in the source data. Table erg_piping_id was created by ERG so the data can conform to the EPA template structure.
+--	"Piping Material Desc"::character varying(3) as piping_material_frp, 	  -- if "Piping Material Desc" = "Fiberglass Reinforced Plastic" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_stainless_steel, 	  -- if "Piping Material Desc" = "Stainless Steel" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_steel, 	  -- if "Piping Material Desc" = "Steel" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_copper, 	  -- if "Piping Material Desc" = "Copper" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_flex, 	  -- if "Piping Material Desc" = "Flex Piping" then "Yes"
+--	"Piping Material Desc"::character varying(3) as piping_material_other 	  -- if "Piping Material Desc" = "Other" then "Yes"
+from example."Tanks" a
+	left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
+	left join example."erg_compartment_id" c on b."facility_id" = c."facility_id" and b."tank_id" = c."tank_id" 
+	left join example."Piping Material Lookup" e on f."Piping Material Id" = e."Piping Material ID" 
+	left join example."Tank Piping" f on e."Piping Material Id" = f."Piping Material ID" 
+	
+--ust_compartment	
+Tanks                          key     a
+erg_tank_id                id-join     b
+erg_compartment_id              id     c
+Tank Status Lookup             org     d
+compartment_statuses        lookup     e
+
+--ust_piping 
+Tanks                          key     a
+erg_tank_id                id-join     b
+erg_compartment_id              id     c
+erg_piping_id                   id     d
+Piping Material Lookup         org     e
+Tank Piping                   join     f
+
+select * from example.erg_piping_id
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_piping'
+
+select distinct organization_table_name, organization_join_table, 
+					organization_join_column, organization_join_fk,
+					organization_join_column2, organization_join_fk2,
+					organization_join_column3, organization_join_fk3,
+					organization_column_name
+from example.v_ust_element_mapping_joins
+where ust_control_id = 1 and epa_table_name = 'ust_piping'
+and organization_table_name = '' 
+order by 1, 2, 3
 
 
-
-
-
-
-
---create_missing_id_columns_example.py:
-----add mapping for tank_id if table_name == 'ust_compartment' and tank_id not in ust_element_mapping, 
----same for tank_id and compartment_id in 'ust_piping'
-
-
-
+from example."Tanks" a
+	left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
+	left join example."erg_compartment_id" c on b."facility_id" = c."facility_id" and b."tank_id" = c."tank_id" 
+	left join example."Tank Status Lookup" d on a."Tank Status Id" = d."Tank Status ID" 
+	left join example.v_compartment_status_xwalk e on d."Tank Status Desc" = e.organization_value
 
 
 --add environmental audit to how release detected (for DET), update tn_release  to other
