@@ -1856,6 +1856,33 @@ where ust_control_id = 1 and epa_table_name = 'ust_piping'
 and organization_table_name = '' 
 order by 1, 2, 3
 
+select distinct organization_table_name, organization_join_table, 
+ organization_join_column, organization_join_fk,
+ organization_join_column2, organization_join_fk2,
+ organization_join_column3, organization_join_fk3,
+ organization_column_name
+ from example.v_ust_element_mapping_joins
+ where ust_control_id = 1 and epa_table_name = 'ust_piping' 
+ and organization_table_name = 'erg_piping_id'
+ order by 1, 2, 3;
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_piping' 
+ and organization_table_name = 'erg_piping_id'
+ order by 1, 2, 3;
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_piping' 
+
+
+select * from example.ust_element_mapping 
+where organization_table_name  = 'erg_compartment_id' 
+
+
+
+--update create_missign_id_example.py, the if statement where = 'ust_piping':
+--need join column info!!
+
 
 from example."Tanks" a
 	left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
