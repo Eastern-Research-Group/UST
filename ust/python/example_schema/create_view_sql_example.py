@@ -193,7 +193,7 @@ class ViewSql:
 				and {where_table} = %s
 				order by 1, 2, 3"""
 		self.cur.execute(sql, (self.dataset.control_id, epa_table_name, org_table_name))
-		# utils.pretty_print_query(self.cur)
+		utils.pretty_print_query(self.cur)
 		rows = self.cur.fetchall()	
 		self.join_info = {}
 		for row in rows:
@@ -222,20 +222,22 @@ class ViewSql:
 		self.from_sql = 'from '
 
 		sql = f"""select organization_table_name, table_type,
-					chr(96 + row_number() over (partition by 'a' order by x.sort_order)::int) as alias
-				  from 
+						chr(96 + row_number() over (partition by 'a' order by x.sort_order, z.sort_order)::int) as alias
+				from 
 					(select organization_table_name, min(sort_order) as sort_order 
 					from example.v_{self.dataset.ust_or_release}_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
 					where {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and epa_table_name = '{self.table_name}'
-					group by organization_table_name) x join public.mapped_table_types y on x.sort_order = y.sort_order 
-					order by alias"""
+					group by organization_table_name) x 
+					join public.mapped_table_types y on x.sort_order = y.sort_order 
+					left join public.generated_table_sort_order z on x.organization_table_name = z.table_name
+				order by alias"""
 		# print(sql)
 		df = pd.read_sql(sql, utils.get_engine(), index_col='organization_table_name')
 		print(df)
 
 		deagg_rows_alias = None 
 		for index, row in df.iterrows():
-			# logger.info('Working on table %s', index)
+			logger.info('Working on table %s', index)
 			alias = row['alias']
 
 			if alias == 'a':
@@ -259,13 +261,23 @@ class ViewSql:
 
 			elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
 				from_table = index
+
+				# org_table_name, where_table='organization_table_name', epa_table_name=None
+
 				if self.table_name == 'ust_compartment':
 					epa_table_name = 'ust_tank'
+					search_table = 'organization_table_name'
+				elif self.table_name == 'ust_piping':
+					epa_table_name = 'ust_compartment'
 					search_table = 'organization_table_name'
 				else:
 					epa_table_name = self.table_name
 					search_table = 'organization_join_table'
+				# print('from_table = ' + from_table)
+				# print('search_table = ' + search_table)
+				# print('epa_table_name = ' + epa_table_name)
 				self.set_join_info(from_table, search_table, epa_table_name)
+				self.print_join_info()
 				try:
 					join_alias = df.loc[self.join_info['organization_table_name']]['alias']
 				except:
@@ -319,7 +331,7 @@ class ViewSql:
 					 	join_alias = 'a'
 				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
 				self.table_aliases[index] = alias
-
+			print(self.from_sql) 
 		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
 
 
