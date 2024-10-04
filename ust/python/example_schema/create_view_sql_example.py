@@ -273,9 +273,9 @@ class ViewSql:
 				else:
 					epa_table_name = self.table_name
 					search_table = 'organization_join_table'
-				print('from_table = ' + from_table)
-				print('search_table = ' + search_table)
-				print('epa_table_name = ' + epa_table_name)
+				# print('from_table = ' + from_table)
+				# print('search_table = ' + search_table)
+				# print('epa_table_name = ' + epa_table_name)
 				self.set_join_info(from_table, search_table, epa_table_name)
 				self.print_join_info()
 				try:
