@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 from pathlib import Path
 import re
@@ -92,27 +93,27 @@ def get_select_cols(sql):
     return cols
 
 
-def get_view_info(state, ust_or_lust, view):
-    schema = get_schema_name(state, ust_or_lust)
-    view_name = '"' + schema + '"."' + view + '"'
-    view_sql = get_view_sql(view_name)
-    view_sql = process_view_sql(view_sql)
-    from_sql = view_sql[1]
-    cols = get_select_cols(view_sql[0])
-    return cols, from_sql 
+# def get_view_info(state, ust_or_lust, view):
+#     schema = get_schema_name(state, ust_or_lust)
+#     view_name = '"' + schema + '"."' + view + '"'
+#     view_sql = get_view_sql(view_name)
+#     view_sql = process_view_sql(view_sql)
+#     from_sql = view_sql[1]
+#     cols = get_select_cols(view_sql[0])
+#     return cols, from_sql 
 
 
-def get_schema_name(state, ust_or_lust):
-    return state.upper() + '_' + ust_or_lust.upper() 
+# def get_schema_name(state, ust_or_lust):
+#     return state.upper() + '_' + ust_or_lust.upper() 
 
 
-def get_view_name(state, ust_or_lust, view_name=None):
-    schema = get_schema_name(state, ust_or_lust)    
-    if view_name:
-        view = '"' + schema + '".' + view_name
-    else:
-        view = '"' + schema + '".v_' + ust_or_lust.lower() + '_base'
-    return view
+# def get_view_name(state, ust_or_lust, view_name=None):
+#     schema = get_schema_name(state, ust_or_lust)    
+#     if view_name:
+#         view = '"' + schema + '".' + view_name
+#     else:
+#         view = '"' + schema + '".v_' + ust_or_lust.lower() + '_base'
+#     return view
 
 
 def autowidth(worksheet):
@@ -242,67 +243,67 @@ def delete_all_ust_data(control_id):
 
     sql = """delete from public.ust_compartment_dispenser 
              where ust_compartment_id in
-                (select ust_compartment_id from ust_compartment 
+                (select ust_compartment_id from public.ust_compartment 
                 where ust_tank_id in 
-                    (select ust_tank_id from ust_tank 
+                    (select ust_tank_id from public.ust_tank 
                     where ust_facility_id in
-                        (select ust_facility_id from ust_facility where ust_control_id = %s)))"""
+                        (select ust_facility_id from public.ust_facility where ust_control_id = %s)))"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_compartment_dispenser', cur.rowcount)
 
     sql = """delete from public.ust_piping 
              where ust_compartment_id in
-                (select ust_compartment_id from ust_compartment 
+                (select ust_compartment_id from public.ust_compartment 
                 where ust_tank_id in 
-                    (select ust_tank_id from ust_tank 
+                    (select ust_tank_id from public.ust_tank 
                     where ust_facility_id in
-                        (select ust_facility_id from ust_facility where ust_control_id = %s)))"""
+                        (select ust_facility_id from public.ust_facility where ust_control_id = %s)))"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_piping', cur.rowcount)
 
     sql = """delete from public.ust_compartment_substance
              where ust_compartment_id in
-                (select ust_compartment_id from ust_compartment 
+                (select ust_compartment_id from public.ust_compartment 
                 where ust_tank_id in 
-                    (select ust_tank_id from ust_tank 
+                    (select ust_tank_id from public.ust_tank 
                     where ust_facility_id in
-                        (select ust_facility_id from ust_facility where ust_control_id = %s)))"""
+                        (select ust_facility_id from public.ust_facility where ust_control_id = %s)))"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_compartment_substance', cur.rowcount)
 
     sql = """delete from ust_compartment
              where ust_tank_id in 
-                (select ust_tank_id from ust_tank 
+                (select ust_tank_id from public.ust_tank 
                 where ust_facility_id in
-                     (select ust_facility_id from ust_facility where ust_control_id = %s))"""
+                     (select ust_facility_id from public.ust_facility where ust_control_id = %s))"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_compartment', cur.rowcount)
 
     sql = """delete from ust_tank_dispenser
              where ust_tank_id in 
-                (select ust_tank_id from ust_tank 
+                (select ust_tank_id from public.ust_tank 
                 where ust_facility_id in
-                     (select ust_facility_id from ust_facility where ust_control_id = %s))"""
+                     (select ust_facility_id from public.ust_facility where ust_control_id = %s))"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_tank_dispenser', cur.rowcount)
 
     sql = """delete from ust_tank_substance 
              where ust_tank_id in 
-                (select ust_tank_id from ust_tank 
+                (select ust_tank_id from public.ust_tank 
                 where ust_facility_id in
-                     (select ust_facility_id from ust_facility where ust_control_id = %s))"""
+                     (select ust_facility_id from public.ust_facility where ust_control_id = %s))"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_tank_substance', cur.rowcount)
 
     sql = """delete from ust_tank 
              where ust_facility_id in
-                 (select ust_facility_id from ust_facility where ust_control_id = %s)"""
+                 (select ust_facility_id from public.ust_facility where ust_control_id = %s)"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_tank', cur.rowcount)
 
     sql = """delete from ust_facility_dispenser
              where ust_facility_id in
-                 (select ust_facility_id from ust_facility where ust_control_id = %s)"""
+                 (select ust_facility_id from public.ust_facility where ust_control_id = %s)"""
     cur.execute(sql, (control_id,))
     logger.info('Deleted %s rows from public.ust_facility_dispenser', cur.rowcount)
 
@@ -478,3 +479,9 @@ def get_pretty_query(cursor):
 
 def pretty_print_query(cursor):
     print(get_pretty_query(cursor))
+
+
+def get_element_name_from_colname(column_name):
+    return column_name.replace('_',' ').title().replace(' ','')
+
+
