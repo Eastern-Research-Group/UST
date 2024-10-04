@@ -427,9 +427,9 @@ values (1,'ust_compartment','compartment_status_id','Tank Status Lookup','Tank S
 	
 --ust_piping: This table is OPTIONAL, do not map if there is no piping data in the source data
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (1,'ust_piping','facility_id','Tanks','Facility Id',null);
+values (1,'ust_piping','facility_id','Tank Piping','Facility Id',null);
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (1,'ust_piping','tank_name','Tanks','Tank Name',null);	
+values (1,'ust_piping','tank_name','Tank Piping','Tank Name',null);	
 --NOTE: Piping ID is a required field but if there is no INTEGER field in the source data that uniquely identifies each
 --piping run per Facility/Tank (non-compartment states) or Facility/Tank/Compartment (compartment states),
 --we will be constructing a Piping ID in a later step so don't map it now.

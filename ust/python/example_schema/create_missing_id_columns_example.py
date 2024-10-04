@@ -165,6 +165,8 @@ class IdColumns:
 						  comment, self.organization_join_table, 
 						  self.organization_join_column, self.organization_join_column2, self.organization_join_column3,
 						  self.organization_join_fk, self.organization_join_fk2, self.organization_join_fk3))
+		if column_name == 'compartment_id':
+			utils.pretty_print_query(self.cur)
 		logger.info('Inserted mapping from %s.%s to %s.%s', table_name, column_name, self.erg_table_name, column_name)
 		self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 		self.conn.commit()
@@ -181,13 +183,20 @@ class IdColumns:
 		except KeyError:
 			pass 
 
-
-		if self.table_name == 'ust_compartment':
+		if self.table_name in ['ust_compartment','ust_tank_substance', 'ust_tank_dispenser']:
 			sql = f"select count(*) from example.{self.dataset.ust_or_release}_element_mapping where epa_table_name = %s and epa_column_name = %s"
 			self.cur.execute(sql, (self.table_name, 'tank_id'))
 			cnt = self.cur.fetchone()[0]
 			if cnt == 0:
 				self.record_element_mapping(self.table_name, 'tank_id')
+
+		if self.table_name in ['ust_piping','ust_compartment_dispenser']:
+			sql = f"select count(*) from example.{self.dataset.ust_or_release}_element_mapping where epa_table_name = %s and epa_column_name = %s"
+			self.cur.execute(sql, (self.table_name, 'compartment_id'))
+			cnt = self.cur.fetchone()[0]
+			if cnt == 0:
+				self.record_element_mapping(self.table_name, 'compartment_id')
+
 
 
 	def get_join_table(self, col_name, table_name=None):
@@ -255,7 +264,7 @@ class IdColumns:
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
 			self.organization_join_table = self.get_join_table('facility_id')
-			self.organization_join_column = self.get_join_column('facility_id')
+			self.p = self.get_join_column('facility_id')
 			if self.table_name == 'ust_tank':
 				self.organization_join_column2 = self.get_join_column('tank_name')
 			else:
@@ -389,7 +398,7 @@ class IdColumns:
 			self.cur.execute(sql, (self.dataset.control_id,))
 			cnt = self.cur.fetchone()[0]
 
-			if cnt > 0: # We already created erg_tank_id; use it for the select columns instead of the source table
+			if cnt > 0: # We already created erg_compartment_id; use it for the select columns instead of the source table
 				# next, figure out if compartment_name is in source_data
 				compartment_name_info = self.get_org_col_name('ust_compartment', 'compartment_name')
 				if compartment_name_info: # get the organization column names to build the join
@@ -402,6 +411,15 @@ class IdColumns:
 					v_sql = v_sql + ' and a.compartment_id = b.' + compartment_id_info[1]
 				else: # just enter null for compartment name because it's not in the source data 
 					v_sql = v_sql + 'facility_id, tank_name, tank_id, null, compartment_id from ' + self.dataset.schema + '.erg_compartment_id'
+
+				# build the join columns assuming we had to create erg_tank_id because no Tank ID in source data
+				self.organization_join_table = 'erg_compartment_id'
+				self.organization_join_column = 'facility_id'
+				self.organization_join_column2 = 'tank_id'
+				self.organization_join_column3 = 'compartment_id'
+				self.organization_join_fk = 'facility_id'
+				self.organization_join_fk2 = 'tank_id'
+				self.organization_join_fk3 = 'compatment_id'
 
 			else: # Source data had Compartment ID; get the select columns from the source table
 				facility_id_info = self.get_org_col_name(compartment_table_name, 'facility_id')

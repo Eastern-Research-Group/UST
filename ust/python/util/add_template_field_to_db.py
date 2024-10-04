@@ -25,7 +25,7 @@ element_description = ''					# Element definition for the related EPA template t
 sql_only = False                            # If True, will write SQL statements to file but will not change anything in the database. If False, will perform db changes. 
 
 # Variables that are less likely to need to be changed 
-sql_export_path = '../../sql/misc/'			# Directory will SQL file will be written. 
+sql_export_path = '../../sql/misc/'			# Directory where SQL file will be written. 
 column_sort_order = None                    # Sort order the new element should appear in the template tab associated with the table the column has been added to. If None, will sort to last. 
 schema = 'public'							# Schema the table and column above are located in. Will almost always be 'public'.
 template_element_name = None   				# If None, will default to a camelcase version of the new_column_name variable with no spaces

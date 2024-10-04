@@ -222,13 +222,15 @@ class ViewSql:
 		self.from_sql = 'from '
 
 		sql = f"""select organization_table_name, table_type,
-					chr(96 + row_number() over (partition by 'a' order by x.sort_order)::int) as alias
-				  from 
+						chr(96 + row_number() over (partition by 'a' order by x.sort_order, z.sort_order)::int) as alias
+				from 
 					(select organization_table_name, min(sort_order) as sort_order 
 					from example.v_{self.dataset.ust_or_release}_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
 					where {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and epa_table_name = '{self.table_name}'
-					group by organization_table_name) x join public.mapped_table_types y on x.sort_order = y.sort_order 
-					order by alias"""
+					group by organization_table_name) x 
+					join public.mapped_table_types y on x.sort_order = y.sort_order 
+					left join public.generated_table_sort_order z on x.organization_table_name = z.table_name
+				order by alias"""
 		# print(sql)
 		df = pd.read_sql(sql, utils.get_engine(), index_col='organization_table_name')
 		print(df)
@@ -271,6 +273,9 @@ class ViewSql:
 				else:
 					epa_table_name = self.table_name
 					search_table = 'organization_join_table'
+				print('from_table = ' + from_table)
+				print('search_table = ' + search_table)
+				print('epa_table_name = ' + epa_table_name)
 				self.set_join_info(from_table, search_table, epa_table_name)
 				self.print_join_info()
 				try:

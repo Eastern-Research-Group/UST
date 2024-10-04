@@ -1890,6 +1890,75 @@ from example."Tanks" a
 	left join example."Tank Status Lookup" d on a."Tank Status Id" = d."Tank Status ID" 
 	left join example.v_compartment_status_xwalk e on d."Tank Status Desc" = e.organization_value
 
+	
+
+select epa_table_name, epa_column_name, organization_table_name, organization_column_name,
+	organization_join_table, organization_join_column, organization_join_fk,
+	organization_join_column2, organization_join_fk2,
+	organization_join_column3, organization_join_fk3
+from example.ust_element_mapping 
+where (epa_table_name = 'ust_piping' and organization_table_name = 'erg_piping_id')
+or (epa_table_name = 'ust_compartment' and organization_table_name = 'erg_compartment_id');
+
+	
+	select epa_table_name, epa_column_name, organization_table_name, organization_column_name,
+		organization_join_table, organization_join_column, organization_join_fk,
+		organization_join_column2, organization_join_fk2,
+		organization_join_column3, organization_join_fk3
+	from example.ust_element_mapping 
+	where epa_table_name = 'ust_piping' and epa_column_name = 'compartment_id'
+
+
+select distinct epa_column_name, organization_table_name, organization_join_table, 
+ organization_join_column, organization_join_fk,
+ organization_join_column2, organization_join_fk2,
+ organization_join_column3, organization_join_fk3,
+ organization_column_name
+ from example.v_ust_element_mapping_joins
+ where ust_control_id = 1 and epa_table_name = 'ust_piping' 
+ and organization_table_name = 'Tank Piping'
+ order by 1, 2, 3;	
+
+select * from example.ust_element_mapping 
+where epa_table_name = 'ust_piping'
+
+update example.ust_element_mapping 
+set organization_table_name = 'Tank Piping'
+where ust_element_mapping_id in (22, 23)
+
+select organization_table_name, table_type,
+					chr(96 + row_number() over (partition by 'a' order by x.sort_order)::int) as alias
+from 
+	(select organization_table_name, min(sort_order) as sort_order 
+	from example.v_ust_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
+	where ust_control_id = 1 and epa_table_name = 'ust_piping'
+group by organization_table_name) x join public.mapped_table_types y on x.sort_order = y.sort_order 
+order by alias
+
+select * from public.mapped_table_types order by 2;
+
+create table public.generated_table_sort_order (table_name varchar(100) primary key, 	
+ sort_order int);
+
+insert into public.generated_table_sort_order values ('erg_facility_id', 1);
+insert into public.generated_table_sort_order values ('erg_tank_id', 2);
+insert into public.generated_table_sort_order values ('erg_compartment_id', 3);
+insert into public.generated_table_sort_order values ('erg_piping_id', 4);
+
+select * from example.ust_element_mapping 
+where organization_table_name = 'Tank Piping'
+
+select * from example.v_ust_mapped_table_types 
+where organization_table_name = 'Tank Piping'
+
+select * from example.ust_element_mapping 
+where organization_join_table = 'Tank Piping'
+
+
+
+
+
+
 
 --add environmental audit to how release detected (for DET), update tn_release  to other
 --add release comment field, repairs in how release detected in tn_release
