@@ -44,7 +44,7 @@ class IdColumns:
 		self.drop_existing = drop_existing
 		self.write_sql = write_sql
 		self.overwrite_sql_file = overwrite_sql_file
-		self.set_db_connection()
+		self.connect_db()
 		self.column_name = self.get_column_name()
 		self.compartment_flag = self.get_compartment_flag()
 		self.erg_table_name = 'erg_' + self.column_name
@@ -54,15 +54,17 @@ class IdColumns:
 		self.write_self()	
 
 
-	def set_db_connection(self):
+	def connect_db(self):
 		self.conn = utils.connect_db()
 		self.cur = self.conn.cursor()
+		logger.info('Connected to database')
 
 
 	def disconnect_db(self):
 		self.conn.commit()
 		self.cur.close()
 		self.conn.close()
+		logger.info('Diconnected from database')
 
 
 	def get_column_name(self):

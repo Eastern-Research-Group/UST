@@ -44,22 +44,24 @@ class deagg:
 		self.deagg_rows = deagg_rows
 		self.deagg_table_name = utils.get_deagg_table_name(column_name)
 		self.id_column_name = self.deagg_table_name + '_id'
-		self.set_db_connection()
+		self.connect_db()
 		self.create_deagg_table()
 		self.update_element_mapping()
 		self.run_deagg_rows()
 		self.disconnect_db()
 
 
-	def set_db_connection(self):
+	def connect_db(self):
 		self.conn = utils.connect_db()
 		self.cur = self.conn.cursor()
+		logger.info('Connected to database')
 
 
 	def disconnect_db(self):
 		self.conn.commit()
 		self.cur.close()
 		self.conn.close()
+		logger.info('Diconnected from database')
 
 
 	def create_deagg_table(self):
