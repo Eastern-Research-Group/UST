@@ -252,39 +252,35 @@ class ViewSql:
 					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
 				except:
 					join_alias = 'a'
-				if alias == 'd':
-					print(from_table)
-					print(join_alias)
-
 				self.build_from_sql(from_table, alias, join_alias)
 				self.table_aliases[index] = alias
 
 			elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
 				from_table = index
 
-				# org_table_name, where_table='organization_table_name', epa_table_name=None
-
-				if self.table_name == 'ust_compartment':
-					epa_table_name = 'ust_tank'
-					search_table = 'organization_table_name'
-				elif self.table_name == 'ust_piping':
-					epa_table_name = 'ust_compartment'
-					search_table = 'organization_table_name'
-				else:
-					epa_table_name = self.table_name
-					search_table = 'organization_join_table'
-				# print('from_table = ' + from_table)
-				# print('search_table = ' + search_table)
-				# print('epa_table_name = ' + epa_table_name)
+				# if self.table_name == 'ust_compartment':
+				# 	epa_table_name = 'ust_tank'
+				# 	search_table = 'organization_table_name'
+				# elif self.table_name == 'ust_piping':
+				# 	epa_table_name = 'ust_compartment'
+				# 	search_table = 'organization_table_name'
+				# else:
+				epa_table_name = self.table_name
+				search_table = 'organization_join_table'
+				print('from_table = ' + from_table)
+				print('search_table = ' + search_table)
+				print('epa_table_name = ' + epa_table_name)
 				self.set_join_info(from_table, search_table, epa_table_name)
 				self.print_join_info()
 				try:
 					join_alias = df.loc[self.join_info['organization_table_name']]['alias']
 				except:
 					join_alias = 'a'
-				# TODO: this if statement probably usually works but is a total hack; we should look up what the alias really is
 				if alias == join_alias:
-					join_alias = 'a'
+					try:
+						join_alias = df.loc[self.join_info['organization_join_table']]['alias']
+					except KeyError:
+						join_alias = 'a'
 				self.build_from_sql(from_table, alias, join_alias)
 				self.table_aliases[index] = alias
 
@@ -331,7 +327,7 @@ class ViewSql:
 					 	join_alias = 'a'
 				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
 				self.table_aliases[index] = alias
-			print(self.from_sql) 
+			# print(self.from_sql) 
 		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
 
 
@@ -376,6 +372,11 @@ class ViewSql:
 		self.build_from_query()
 		self.required_cols = self.get_required_cols()
 		self.existing_cols = self.get_existing_cols()
+		# print(self.required_cols)
+		# print(self.existing_cols)
+		# for k, v in self.existing_cols.items():
+		# 	print('k = ' + str(k) + '; v = ' + str(v))
+		# exit()
 		self.required_col_ids = [n for n in self.required_col_ids if n not in self.existing_col_ids]
 		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids, key=lambda x: x or 0)		
 		self.build_select_query()
