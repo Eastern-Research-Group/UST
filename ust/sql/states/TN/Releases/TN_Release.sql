@@ -14,15 +14,7 @@ select * from public.release_control where release_control_id = 5;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*-----======= Step 2: Upload the state data 
- -- As my first time, rename previous tables for reference
- alter table tn_lust rename to tn_lust_old 
- alter table "SubstanceReleased_deagg" rename to "SubstanceReleased_deagg_old"; 
- alter table "TN_LUST_template" rename to "TN_LUST_template_old"; 
- alter table "tn_lust_geocoded" rename to "tn_lust_geocoded_old"; 
- alter table "ust_all-tn-environmental-sites" rename to "ust_all-tn-environmental-sites_old";
-*/
-/*
-EITHER:
+ EITHER:
 script import_data_file_files.py will create the correct schema (if it doesn't yet exist), 
 then upload all .xlsx, .xls, .csv, and .txt in the specified directory to this schema. 
 To run, set these variables:
@@ -39,14 +31,14 @@ manually in the database, create schema pa_release if it does not exist, then ma
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-/*-----======= Step 3: View the original state data ========------------
+-----======= Step 3: View the original state data ========------------
 --Get an overview of what the state's data looks like. In this case, we only have one table
   select * from tn_release."ust_all-tn-environmental-sites" ;
 
-/* As noted before, there are statuses we need exclude, 
+-- As noted before, there are statuses we need exclude, 
   -- Add comments in release_control
 update release_control set
-comments='for records with currentstatus in (0a Suspected Release - Closed,0 Suspected Release - RD records,3 Release Investigation) were excluded per the state's direction during the pilot.'
+comments='for records with currentstatus in (0a Suspected Release - Closed,0 Suspected Release - RD records,3 Release Investigation) were excluded per the state''s direction during the pilot.'
 where release_control_id = 5;
 
 --see what columns exist in the state's data 
@@ -55,10 +47,8 @@ from information_schema.columns
 where table_schema = 'tn_release' and table_name = 'ust_all-tn-environmental-sites' 
 order by ordinal_position;
 
-*/
-
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-/*-----======= Step 4: Map data for related EPA tables ======------------
+-----======= Step 4: Map data for related EPA tables ======------------
 --get the EPA tables that we need to populate
 select table_name
 from public.release_element_table_sort_order
@@ -138,19 +128,30 @@ select * from public.v_release_element_summary_sql;
 
 after check state data, I have 12
 */
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','facility_id','ust_all-tn-environmental-sites','Facilityid',null);
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','site_name','ust_all-tn-environmental-sites','Facilityname',null);
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','site_address','ust_all-tn-environmental-sites','Facilityaddress1',null);
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','site_address2','ust_all-tn-environmental-sites','Facilityaddress2',null);
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','site_city','ust_all-tn-environmental-sites','Facilitycity',null);
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','zipcode','ust_all-tn-environmental-sites','Facilityzip',null);
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','county','ust_all-tn-environmental-sites','Facilitycounty',null);
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','release_status_id','ust_all-tn-environmental-sites','Currentstatus',null);
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','reported_date','ust_all-tn-environmental-sites','Discoverydate',null);
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release','how_release_detected_id','ust_all-tn-environmental-sites','Howdiscovered',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','facility_id','ust_all-tn-environmental-sites','Facilityid',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','site_name','ust_all-tn-environmental-sites','Facilityname',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','site_address','ust_all-tn-environmental-sites','Facilityaddress1',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','site_address2','ust_all-tn-environmental-sites','Facilityaddress2',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','site_city','ust_all-tn-environmental-sites','Facilitycity',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','zipcode','ust_all-tn-environmental-sites','Facilityzip',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','county','ust_all-tn-environmental-sites','Facilitycounty',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','release_status_id','ust_all-tn-environmental-sites','Currentstatus',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','reported_date','ust_all-tn-environmental-sites','Discoverydate',null);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release','how_release_detected_id','ust_all-tn-environmental-sites','Howdiscovered',null);
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (5,'ust_release_substance','substance_id','ust_all-tn-environmental-sites','Productreleased','Column is comma-separated');
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (5,'ust_release_cause','cause_id','ust_all-tn-environmental-sites','Cause','data have number with text);
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (5,'ust_release_cause','cause_id','ust_all-tn-environmental-sites','Cause','data have number with text');
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -166,8 +167,6 @@ ust_release			release_status
 ust_release_cause		cause_id
 ust_release_substance		substance_id
 */
-*/
-
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------ust_release.how_release_detected_id
@@ -280,7 +279,7 @@ select distinct
 	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 71 || ', ''' || "Currentstatus" || ''', '''', null);'
 from tn_release."ust_all-tn-environmental-sites" order by 1;
 
-/* Query results and edit
+-- Query results and edit
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
 values (71, '1 Tank Closure', 'No further action', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
@@ -364,9 +363,10 @@ select distinct
 from tn_release."erg_productreleased_deagg" order by 1;
 
 ----Query for insert statement---------------------
+/*
 "insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
 values (75, ' Diesel', '', null);"
-
+*/
 ------list valid EPA values to match 
 select * from public.substances order by 1;
 
@@ -437,6 +437,10 @@ select * from public.causes order by 1;
 "Weather/natural disaster (i.e., hurricane, flooding, fire, earthquake)"
 "Other"
 "Unknown"
+--newly added--
+"Install problem"
+"General spill"
+"Physical/mechnical damage"
 */
 
 select insert_sql 
@@ -482,7 +486,7 @@ values (76, 'Unknown', 'Unknown', null);
 select * from release_element_value_mapping 
 where release_element_mapping_id=76;
 
-==========================================
+-- ==========================================
 --check if there is any more mapping to do
 select distinct epa_table_name, epa_column_name
 from v_release_needed_mapping 
@@ -496,7 +500,7 @@ where release_control_id = 5 order by 1, 2;
 --!!!if there are results from this query, fix them!!!
 
 --if not, it's time to write the queries that manipulate the state's data into EPA's tables 
-SET search_path TO "tn_release";
+--  SET search_path TO "tn_release";
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -----=====EPA Data Tables =============---------------
@@ -523,8 +527,10 @@ where release_control_id = 5
 order by table_sort_order;
 /*
 ust_release
-ust_release_substance
 ust_release_cause
+ust_release_substance
+ust_release_source
+ust_release_corrective_action_strategy
 */
 
   -----------Step 3--------------
@@ -534,7 +540,7 @@ so add this to the where clause of the ust_release view */
 select comments from release_control where release_control_id = 5;
 --"for records with currentstatus in (0a Suspected Release - Closed,0 Suspected Release - RD records,3 Release Investigation) were excluded per the state's direction during the pilot."
 --ignore those rows where "Currentstatus" in ('0a Suspected Release - Closed','0 Suspected Release - RD records','3 Release Investigation')
-*/
+
 select * from v_release_table_population
 where release_control_id=5;
 
@@ -654,7 +660,6 @@ where release_control_id = 5 and epa_table_name = 'ust_release_cause'
 order by column_sort_order;
 
 create or replace view tn_release.v_ust_release_cause as 
-create or replace view tn_release.v_ust_release_cause as 
 select distinct  ("Facilityid"||'-'||"Sitenumber")::character varying(50) as release_id, "cause_id" as cause_id
  from tn_release."ust_all-tn-environmental-sites" x
    left join tn_release."v_cause_xwalk" rc on x."Cause" = rc.organization_value 
@@ -665,11 +670,7 @@ select * from  tn_release.v_ust_release_cause;
 select count(*) from tn_release.v_ust_release_cause;
 --5883
 
---------------------------------------------------------------------------------------------------------------------------
-----------------
-
-
-=====================================================================================
+-- =====================================================================================
 --------------------------------------------------------------------------------------------------------------------------
 ---- ===== QAQC ==========-------
 
@@ -703,13 +704,6 @@ control_id = 5
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-#    self.export_file_dir = '../exports/QAQC/' + self.organization_id.upper() + '/'
-     self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/QAQC/' + self.organization_id.upper() + '/'
-
-(due to error for mine at local setting
-add physical path due to access:
-FileNotFoundError: [WinError 3] The system cannot find the path specified: '..\\exports\\QAQC\\TN')
-
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)  exist. 
@@ -734,14 +728,17 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 ---------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*
+run script populate_epa_data_tables.py	
 set variables:
 ust_or_release = 'release' 
 control_id = 5
 delete_existing = False # can set to True if there is existing release data you need to delete before inserting new
-*/--insert data into the EPA schema 
+*/
+--insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*
+run script populate_epa_data_tables.py	
 set variables:
 ust_or_release = 'release' 
 control_id = 5
@@ -767,9 +764,6 @@ export_file_path = None # If export_file_path and export_file_dir/export_file_na
 export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
-----Similar error for folder exports, had to set physical path
-    self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/epa_templates/' + self.organization_id.upper() + '/'
-  # self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
 */
 
 
