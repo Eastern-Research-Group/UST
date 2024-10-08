@@ -21,6 +21,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 
 	conn = utils.connect_db()
 	cur = conn.cursor()
+	logger.info('Connected to database')
 
 	if delete_existing:
 		if ust_or_release == 'release':
@@ -151,6 +152,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 
 	cur.close()
 	conn.close()
+	logger.info('Diconnected from database')
 
 
 if __name__ == '__main__':   

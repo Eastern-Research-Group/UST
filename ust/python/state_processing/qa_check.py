@@ -45,6 +45,8 @@ yellow_cell_fill = 'FFFF00' # yellow
 
 
 class QualityCheck:
+	conn = None 
+	cur = None 
 	views_to_review = []
 	view_name = None 
 	table_name = None 
@@ -56,8 +58,7 @@ class QualityCheck:
 	def __init__(self, 
 				 dataset):
 		self.dataset = dataset
-		self.conn = utils.connect_db()
-		self.cur = self.conn.cursor()
+		self.connect_db()
 		self.set_views()
 		if not self.views_to_review:
 			logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
@@ -87,9 +88,16 @@ class QualityCheck:
 		self.disconnect_db()
 
 
+	def connect_db(self):
+		self.conn = utils.connect_db()
+		self.cur = self.conn.cursor()
+		logger.info('Connected to database')
+		
+
 	def disconnect_db(self):
 		self.cur.close()
 		self.conn.close()
+		logger.info('Diconnected from database')
 
 
 	def get_view_names(self):

@@ -45,7 +45,7 @@ class ViewSql:
 		self.table_name = table_name 
 		self.overwrite_sql_file = overwrite_sql_file
 		self.view_name = 'v_' + self.table_name
-		self.set_db_connection()
+		self.connect_db()
 		try:
 			self.generate_sql()	
 		except Exception as e:
@@ -58,15 +58,17 @@ class ViewSql:
 		self.write_self()	
 
 
-	def set_db_connection(self):
+	def connect_db(self):
 		self.conn = utils.connect_db()
 		self.cur = self.conn.cursor()
+		logger.info('Connected to database')
 
 
 	def disconnect_db(self):
 		self.conn.commit()
 		self.cur.close()
 		self.conn.close()
+		logger.info('Diconnected from database')
 
 
 	def show_existing_cols(self):

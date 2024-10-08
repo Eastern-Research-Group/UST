@@ -100,7 +100,7 @@ class NewColumn:
 		self.database_lookup_table = database_lookup_table
 		self.database_lookup_column = database_lookup_column
 		self.generic_template = generic_template
-		self.set_db_connection()
+		self.connect_db()
 		self.check_existing()
 		self.set_export_path()
 		self.set_ust_or_release()
@@ -112,7 +112,7 @@ class NewColumn:
 		self.write_sql()
 
 
-	def set_db_connection(self):
+	def connect_db(self):
 		self.conn = utils.connect_db()
 		self.cur = self.conn.cursor()
 

@@ -47,6 +47,7 @@ class ControlTable:
     def insert_db(self):
         conn = utils.connect_db()
         cur = conn.cursor()
+        logger.info('Connected to database')
         if self.ust_or_release == 'ust' and self.organization_compartment_flag:
             sql = f"""insert into {self.ust_or_release}_control 
                         (organization_id, date_received, date_processed, data_source, comments, organization_compartment_flag)
@@ -65,6 +66,7 @@ class ControlTable:
         conn.commit()
         cur.close()
         conn.close()
+        logger.info('Diconnected from database')
         return control_id
 
     

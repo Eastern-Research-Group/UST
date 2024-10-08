@@ -16,6 +16,7 @@ control_id = 0                  # Enter an integer that is the ust_control_id or
 def main(dataset):
 	conn = utils.connect_db()
 	cur = conn.cursor()
+	logger.info('Connected to database')
 
 	sql = f"""select epa_column_name, organization_table_name, organization_column_name,
 					database_lookup_table, database_lookup_column 
@@ -55,6 +56,7 @@ def main(dataset):
 
 	cur.close()
 	conn.close()
+	logger.info('Diconnected from database')
 
 
 

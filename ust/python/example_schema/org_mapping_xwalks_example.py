@@ -14,7 +14,6 @@ control_id = 1                  # Enter an integer that is the ust_control_id or
 
 
 def main(dataset):
-
 	conn = utils.connect_db()
 	cur = conn.cursor()
 
