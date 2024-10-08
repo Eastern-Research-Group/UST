@@ -15,7 +15,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
-all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those references in ust_element_mapping or release_element_mapping.
+all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those referenced in ust_element_mapping or release_element_mapping.
 tables_to_exclude = []          # Python list of strings; defaults to empty list. Populate with table names in the organization schema that should be excluded from the export. (NOTE: ERG-created tables will not be exported regardless of the values in this list.)
 empty_export_dir = True         # Boolen, defaults to True. If True, will delete all files in the export directory before proceeding. If False, will not delete any files, but will overwrite any that have the same name as the generated file name. 
 
@@ -97,7 +97,7 @@ class SourceData:
 			          	and b.{self.dataset.ust_or_release}_control_id = {self.dataset.control_id})
 			          order by 1"""			
 		self.cur.execute(sql, (self.dataset.schema,))
-		utils.pretty_print_query(self.cur)
+		# utils.pretty_print_query(self.cur)
 		self.table_list = [r[0] for r in self.cur.fetchall()]
 		if not self.table_list:
 			logger.info('No non-ERG-created tables found in schema %s; exiting.', self.dataset.schema)
