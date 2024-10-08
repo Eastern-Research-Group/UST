@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = 1                   # Enter an integer that is the ust_control_id
-table_name = 'ust_piping'                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
+table_name = 'ust_tank'                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
 drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
@@ -128,9 +128,11 @@ class IdColumns:
 
 
 	def get_tank_table_name(self):
-		sql = f"""select distinct epa_column_name, epa_table_name from example.ust_element_mapping 
-				  where ust_control_id = %s and epa_column_name in ('tank_id','tank_name')
-				  order by epa_column_name desc"""
+		sql = f"""select epa_column_name, epa_table_name, b.sort_order 
+				from example.ust_element_mapping a join public.ust_element_table_sort_order b 
+					on a.epa_table_name = b.table_name
+				where ust_control_id = %s and epa_column_name in ('tank_id','tank_name')
+				order by epa_column_name desc, b.sort_order """
 		self.cur.execute(sql, (self.dataset.control_id,))
 		return self.cur.fetchone()[1]
 
@@ -150,6 +152,26 @@ class IdColumns:
 			self.cur.execute(sql, (self.dataset.control_id, table_name, column_name))
 			logger.info('Deleted mapping info for table %s, column %s from example.%s_element_mapping', table_name, column_name, self.dataset.ust_or_release)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
+		
+		if table_name == self.table_name:
+			org_join_table = self.organization_join_table
+			org_join_col = self.organization_join_column
+			org_join_fk = self.organization_join_fk
+			org_join_col2 = self.organization_join_column2
+			org_join_fk2 = self.organization_join_fk2
+			org_join_col3 = self.organization_join_column3
+			org_join_fk3 = self.organization_join_fk3
+		else:
+			join_info = self.get_child_join_info(column_name, table_name)
+			org_join_table = join_info['organization_join_table']
+			org_join_col = join_info['organization_join_column']
+			org_join_fk = None 
+			org_join_col2 = None 
+			org_join_fk2 = None 
+			org_join_col3 = None 
+			org_join_fk3 = None 
+			
+
 		sql = f"""insert into example.{self.dataset.ust_or_release}_element_mapping ({self.dataset.ust_or_release}_control_id, epa_table_name, epa_column_name,
 					 organization_table_name, organization_column_name, 
 					 programmer_comments, organization_join_table,
@@ -162,11 +184,9 @@ class IdColumns:
 			comment = 'Row inserted automatically to map a required field from a child table.'
 		self.cur.execute(sql, 
 						 (self.dataset.control_id, table_name, column_name, self.erg_table_name, column_name, 
-						  comment, self.organization_join_table, 
-						  self.organization_join_column, self.organization_join_column2, self.organization_join_column3,
-						  self.organization_join_fk, self.organization_join_fk2, self.organization_join_fk3))
-		if column_name == 'compartment_id':
-			utils.pretty_print_query(self.cur)
+						  comment, org_join_table, org_join_col, org_join_fk, org_join_col2, org_join_fk2, org_join_col3, org_join_fk3))
+		# if column_name == 'compartment_id':
+		# 	utils.pretty_print_query(self.cur)
 		logger.info('Inserted mapping from %s.%s to %s.%s', table_name, column_name, self.erg_table_name, column_name)
 		self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 		self.conn.commit()
@@ -224,6 +244,63 @@ class IdColumns:
 			return None 
 
 
+	# def set_all_join_info(self, col_name, table_name):
+	# 	print(col_name)
+	# 	if col_name == 'tank_id':
+	# 		epa_col_name = "'tank_id','tank_name'"
+	# 	elif col_name == 'compartment_id':
+	# 		epa_col_name = "'compartment_id','compartment_name'"
+	# 	else:
+	# 		epa_col_name = col_name
+	# 	sql = f"""select organization_table_name, organization_column_name, organization_join_table, 
+	# 				organization_join_column, organization_join_fk, 
+	# 				organization_join_column2, organization_join_fk2,   
+	# 				organization_join_column3, organization_join_fk3
+	# 			from example.{self.dataset.ust_or_release}_element_mapping 
+	# 			where  {self.dataset.ust_or_release}_control_id = %s 
+	# 			and epa_table_name = %s and epa_column_name in ({epa_col_name})
+	# 			order by epa_column_name desc"""
+	# 	self.cur.execute(sql, (self.dataset.control_id, table_name))
+	# 	# utils.pretty_print_query(self.cur)
+	# 	row = self.cur.fetchone()
+	# 	print(row)
+	# 	if not row:
+	# 		return
+	# 	self.organization_table_name = row[0]
+	# 	self.organization_column_name = row[1]
+	# 	self.organization_join_table = row[2]
+	# 	self.organization_join_column = row[3]
+	# 	self.organization_join_fk = row[4]
+	# 	self.organization_join_column2 = row[5]
+	# 	self.organization_join_fk2 = row[6]
+	# 	self.organization_join_column3 = row[7]
+	# 	self.organization_join_fk3 = row[8]
+
+	def get_child_join_info(self, col_name, table_name):
+		if col_name == 'tank_id':
+			epa_col_name = "'tank_id','tank_name'"
+		elif col_name == 'compartment_id':
+			epa_col_name = "'compartment_id','compartment_name'"
+		else:
+			epa_col_name = col_name
+		sql = f"""select organization_table_name, organization_column_name
+				from example.{self.dataset.ust_or_release}_element_mapping 
+				where  {self.dataset.ust_or_release}_control_id = %s 
+				and epa_table_name = %s and epa_column_name in ({epa_col_name})
+				order by epa_column_name desc"""
+		self.cur.execute(sql, (self.dataset.control_id, table_name))
+		# utils.pretty_print_query(self.cur)
+		row = self.cur.fetchone()	
+		join_info = {}	
+		if not row:
+			join_info['organization_join_table'] = None
+			join_info['organization_join_column'] = None
+		else:
+			join_info['organization_join_table'] = row[0]
+			join_info['organization_join_column'] = row[1] 
+		return join_info
+
+
 	def create_table(self):
 		logger.info('Working on %s.%s', self.table_name, self.column_name)
 		self.sql_text = self.sql_text + '------------------------------------------------------------------------------------------------------------------------------------------------\n'
@@ -264,7 +341,7 @@ class IdColumns:
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
 			self.organization_join_table = self.get_join_table('facility_id')
-			self.p = self.get_join_column('facility_id')
+			self.organization_join_column = self.get_join_column('facility_id')
 			if self.table_name == 'ust_tank':
 				self.organization_join_column2 = self.get_join_column('tank_name')
 			else:
@@ -419,7 +496,7 @@ class IdColumns:
 				self.organization_join_column3 = 'compartment_id'
 				self.organization_join_fk = 'facility_id'
 				self.organization_join_fk2 = 'tank_id'
-				self.organization_join_fk3 = 'compatment_id'
+				self.organization_join_fk3 = 'compartment_id'
 
 			else: # Source data had Compartment ID; get the select columns from the source table
 				facility_id_info = self.get_org_col_name(compartment_table_name, 'facility_id')
