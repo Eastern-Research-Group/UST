@@ -22,7 +22,8 @@ control_id = 0                  # Enter an integer that is the ust_control_id or
 data_only = False				# Boolean; defaults to False. Set to True to generate a populated template that does not include the Reference and Lookup tabs.
 template_only = False			# Boolean; defaults to False. Set to True to generate an blank template with no data.
 
-# These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/epa_templates
+# These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/epa_templates.
+# This file directory and its contents are excluded from pushes to the repo by .gitignore.
 export_file_path = None
 export_file_dir = None
 export_file_name = None
@@ -457,7 +458,6 @@ def main(ust_or_release, control_id=None, data_only=False, template_only=False, 
 
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id, 
-				 	  # requires_export=requires_export,
 				 	  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx',
 					  export_file_name=export_file_name,
 					  export_file_dir=export_file_dir,
