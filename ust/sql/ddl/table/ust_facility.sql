@@ -33,7 +33,8 @@ CREATE TABLE public.ust_facility (
     financial_responsibility_other_method character varying(500)  NULL ,
     ust_reported_release character varying(7)  NULL ,
     associated_ust_release_id character varying(40)  NULL ,
-    ust_control_id integer  NULL );
+    ust_control_id integer  NULL ,
+    facility_comment character varying(4000)  NULL );
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_facility_type1_fk FOREIGN KEY (facility_type1) REFERENCES facility_types(facility_type_id);
 

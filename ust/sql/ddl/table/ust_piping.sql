@@ -37,7 +37,8 @@ CREATE TABLE public.ust_piping (
     piping_wall_type_id integer  NULL ,
     pipe_trench_liner character varying(7)  NULL ,
     pipe_secondary_containment_other character varying(7)  NULL ,
-    pipe_secondary_containment_unknown character varying(7)  NULL );
+    pipe_secondary_containment_unknown character varying(7)  NULL ,
+    piping_comment character varying(4000)  NULL );
 
 ALTER TABLE public.ust_piping ADD CONSTRAINT piping_piping_style_fk FOREIGN KEY (piping_style_id) REFERENCES piping_styles(piping_style_id);
 

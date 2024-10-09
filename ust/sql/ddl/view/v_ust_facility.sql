@@ -1,5 +1,5 @@
 create or replace view "public"."v_ust_facility" as
- SELECT a.ust_control_id,
+ SELECT DISTINCT a.ust_control_id,
     a.facility_id AS "FacilityID",
     a.facility_name AS "FacilityName",
     ot.owner_type AS "OwnerType",
@@ -32,7 +32,8 @@ create or replace view "public"."v_ust_facility" as
     a.financial_responsibility_trust_fund AS "FinancialResponsibilityTrustFund",
     a.financial_responsibility_other_method AS "FinancialResponsibilityOtherMethod",
     a.ust_reported_release AS "USTReportedRelease",
-    a.associated_ust_release_id AS "AssociatedUSTReleaseID"
+    a.associated_ust_release_id AS "AssociatedUSTReleaseID",
+    a.facility_comment AS "FacilityComment"
    FROM ((((ust_facility a
      LEFT JOIN owner_types ot ON ((a.owner_type_id = ot.owner_type_id)))
      LEFT JOIN coordinate_sources cs ON ((a.coordinate_source_id = cs.coordinate_source_id)))

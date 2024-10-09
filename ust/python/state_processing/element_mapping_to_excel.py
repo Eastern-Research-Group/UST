@@ -43,7 +43,7 @@ def build_ws(dataset, ws, admin=False):
 	else:
 		cols = 'table_name, element_name, organization_table_name, organization_column_name, programmer_comments, epa_comments, organization_comments'
 	sql = f"""select {cols}
-			from v_{dataset.ust_or_release}_element_mapping_for_export
+			from public.v_{dataset.ust_or_release}_element_mapping_for_export
 			where {dataset.ust_or_release}_control_id = %s
 			order by table_sort_order, column_sort_order"""
 	cur.execute(sql, (dataset.control_id,))

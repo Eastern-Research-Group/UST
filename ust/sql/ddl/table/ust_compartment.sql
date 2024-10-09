@@ -27,7 +27,8 @@ CREATE TABLE public.ust_compartment (
     tank_vapor_monitoring character varying(7)  NULL ,
     tank_subpart_k_tightness_testing character varying(7)  NULL ,
     tank_subpart_k_other character varying(7)  NULL ,
-    tank_other_release_detection character varying(7)  NULL );
+    tank_other_release_detection character varying(7)  NULL ,
+    compartment_comment character varying(4000)  NULL );
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_bucket_installed_chk CHECK (((spill_bucket_installed)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
 

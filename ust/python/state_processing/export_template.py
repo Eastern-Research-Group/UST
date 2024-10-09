@@ -203,6 +203,7 @@ class Template:
 	def make_lookup_tab(self, lookup):
 		lookup_table_name = lookup[0]
 		lookup_column_name = lookup[1]
+		lookup_column_id = lookup[2]
 		logger.info('Working on lookup table %s, column %s', lookup_table_name, lookup_column_name)
 		if lookup_table_name == 'substances':
 			ws = self.wb.create_sheet('Substances lookup')
@@ -248,7 +249,7 @@ class Template:
 
 		conn = utils.connect_db()
 		cur = conn.cursor()	
-		sql = f"select substance_group, substance from substances order by 1, 2"
+		sql = f"select substance_group, substance from public.substances order by 1, 2"
 		cur.execute(sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
@@ -264,7 +265,7 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 		sql = f"""select epa_table_name, epa_column_name, database_lookup_table, database_lookup_column   
-				from v_{self.dataset.ust_or_release}_available_mapping
+				from public.v_{self.dataset.ust_or_release}_available_mapping
 				where {self.dataset.ust_or_release}_control_id = %s order by 1, 2"""
 		cur.execute(sql, (self.dataset.control_id,))
 		rows = cur.fetchall()

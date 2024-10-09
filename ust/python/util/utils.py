@@ -330,7 +330,7 @@ def get_lookup_tabs(ust_or_release='ust'):
         return 
     conn = connect_db()
     cur = conn.cursor() 
-    sql = f"""select table_name, desc_column_name  
+    sql = f"""select table_name, desc_column_name, id_column_name  
             from {ust_or_release}_template_lookup_tables
             order by sort_order"""
     cur.execute(sql)

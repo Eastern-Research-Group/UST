@@ -23,7 +23,8 @@ CREATE TABLE public.ust_tank (
     tank_corrosion_protection_unknown character varying(7)  NULL ,
     tank_secondary_containment_id integer  NULL ,
     cert_of_installation_id integer  NULL ,
-    cert_of_installation_other character varying(1000)  NULL );
+    cert_of_installation_other character varying(1000)  NULL ,
+    tank_comment character varying(4000)  NULL );
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_tank_location_fk FOREIGN KEY (tank_location_id) REFERENCES tank_locations(tank_location_id);
 
@@ -33,13 +34,13 @@ ALTER TABLE public.ust_tank ADD CONSTRAINT tank_material_description_fk FOREIGN 
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_secondary_containment_fk FOREIGN KEY (tank_secondary_containment_id) REFERENCES tank_secondary_containments(tank_secondary_containment_id);
 
-ALTER TABLE public.ust_tank ADD CONSTRAINT tank_cert_of_installation_fk FOREIGN KEY (cert_of_installation_id) REFERENCES cert_of_installations(cert_of_installation_id);
-
 ALTER TABLE public.ust_tank ADD CONSTRAINT ust_tank_fac_id_fk FOREIGN KEY (ust_facility_id) REFERENCES ust_facility(ust_facility_id);
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_pkey PRIMARY KEY (ust_tank_id);
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_facility_id_fkey FOREIGN KEY (ust_facility_id) REFERENCES ust_facility(ust_facility_id);
+
+ALTER TABLE public.ust_tank ADD CONSTRAINT tank_cert_of_installation_fk FOREIGN KEY (cert_of_installation_id) REFERENCES cert_of_installations(cert_of_installation_id);
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_federally_regulated_chk CHECK (((federally_regulated)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 

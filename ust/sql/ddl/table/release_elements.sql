@@ -12,7 +12,8 @@ CREATE TABLE public.release_elements (
     notes character varying(4000)  NULL ,
     database_column_name character varying(100)  NULL ,
     database_lookup_table character varying(100)  NULL ,
-    database_lookup_column character varying(100)  NULL );
+    database_lookup_column character varying(100)  NULL ,
+    generic_template character varying(1)  NULL );
 
 ALTER TABLE public.release_elements ADD CONSTRAINT release_elements_pkey PRIMARY KEY (element_id);
 
