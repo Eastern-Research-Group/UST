@@ -1,5 +1,5 @@
 create or replace view "public"."v_ust_piping" as
- SELECT d.ust_control_id,
+ SELECT DISTINCT d.ust_control_id,
     d.facility_id AS "FacilityID",
     c.tank_id AS "TankID",
     c.tank_name AS "TankName",
@@ -41,7 +41,8 @@ create or replace view "public"."v_ust_piping" as
     pw.piping_wall_type AS "PipingWallType",
     a.pipe_trench_liner AS "PipeTrenchLiner",
     a.pipe_secondary_containment_other AS "PipeSecondaryContainmentOther",
-    a.pipe_secondary_containment_unknown AS "PipeSecondaryContainmentUnknown"
+    a.pipe_secondary_containment_unknown AS "PipeSecondaryContainmentUnknown",
+    a.piping_comment AS "PipingComment"
    FROM ((((((ust_piping a
      JOIN ust_compartment b ON ((a.ust_compartment_id = b.ust_compartment_id)))
      JOIN ust_tank c ON ((b.ust_tank_id = c.ust_tank_id)))

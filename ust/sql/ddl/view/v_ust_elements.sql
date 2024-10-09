@@ -14,7 +14,7 @@ create or replace view "public"."v_ust_elements" as
     a.notes AS "Notes"
    FROM ((ust_elements a
      JOIN ust_elements_tables b ON ((a.element_id = b.element_id)))
-     JOIN ust_element_table_sort_order c ON (((b.table_name)::text = (b.table_name)::text)))
+     JOIN ust_element_table_sort_order c ON (((b.table_name)::text = (c.table_name)::text)))
   WHERE ((a.generic_template)::text = 'Y'::text)
-  GROUP BY a.element_id, a.element_name, a.element_description, a.element_size, a.required, a.allowed_values, a.notes
-  ORDER BY a.element_id;
+  GROUP BY a.element_id, a.element_name, a.element_description, a.element_size, a.required, a.allowed_values, a.notes, c.sort_order, b.sort_order
+  ORDER BY c.sort_order, b.sort_order;

@@ -10,8 +10,13 @@ create or replace view "public"."v_release_element_mapping_joins" as
     a.organization_join_fk2,
     a.organization_join_column3,
     a.organization_join_fk3,
+    a.deagg_table_name,
+    a.deagg_column_name,
+    c.database_lookup_table,
+    c.database_lookup_column,
     a.release_element_mapping_id,
     a.release_control_id,
+    a.programmer_comments,
     b.sort_order AS table_sort_order,
     d.sort_order AS column_sort_order
    FROM (((release_element_mapping a

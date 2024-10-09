@@ -28,7 +28,8 @@ CREATE TABLE public.ust_release (
     closed_with_contamination character varying(7)  NULL ,
     no_further_action_letter_url character varying(2000)  NULL ,
     military_dod_site character varying(7)  NULL ,
-    release_control_id integer  NOT NULL );
+    release_control_id integer  NOT NULL ,
+    release_comment character varying(4000)  NULL );
 
 ALTER TABLE public.ust_release ADD CONSTRAINT release_federally_reportable_release_chk CHECK (((federally_reportable_release)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text, ('Unknown'::character varying)::text])));
 

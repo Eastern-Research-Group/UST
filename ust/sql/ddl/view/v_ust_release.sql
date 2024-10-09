@@ -28,7 +28,7 @@ create or replace view "public"."v_ust_release" as
     a.closed_with_contamination AS "ClosedWithContamination",
     a.no_further_action_letter_url AS "NoFurtherActionLetterURL",
     a.military_dod_site AS "MilitaryDoDSite",
-    a.release_comment as "ReleaseComment"
+    a.release_comment AS "ReleaseComment"
    FROM ((((ust_release a
      LEFT JOIN facility_types ft ON ((a.facility_type_id = ft.facility_type_id)))
      LEFT JOIN coordinate_sources cs ON ((a.coordinate_source_id = cs.coordinate_source_id)))

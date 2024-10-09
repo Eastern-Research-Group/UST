@@ -1,5 +1,5 @@
 create or replace view "public"."v_ust_compartment" as
- SELECT c.ust_control_id,
+ SELECT DISTINCT c.ust_control_id,
     c.facility_id AS "FacilityID",
     b.tank_id AS "TankID",
     b.tank_name AS "TankName",
@@ -29,7 +29,8 @@ create or replace view "public"."v_ust_compartment" as
     a.tank_vapor_monitoring AS "TankVaporMonitoring",
     a.tank_subpart_k_tightness_testing AS "TankSubpartKTightnessTesting",
     a.tank_subpart_k_other AS "TankSubpartKOther",
-    a.tank_other_release_detection AS "TankOtherReleaseDetection"
+    a.tank_other_release_detection AS "TankOtherReleaseDetection",
+    a.compartment_comment AS "CompartmentComment"
    FROM (((((((ust_compartment a
      JOIN ust_tank b ON ((a.ust_tank_id = b.ust_tank_id)))
      JOIN ust_facility c ON ((b.ust_facility_id = c.ust_facility_id)))

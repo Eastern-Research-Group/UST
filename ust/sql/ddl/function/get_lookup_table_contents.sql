@@ -7,7 +7,7 @@ declare
 	x record;
 	v_text text := '';
 begin
-	for x in execute format('select %I from %I', v_column_name, v_table_name)
+	for x in execute format('select %I from (select * from %I order by 1) x', v_column_name, v_table_name)
 	loop
 		v_text := v_text || replace(replace(x::text,'(',''),')','') || chr(10);
 	end loop;
