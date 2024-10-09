@@ -220,7 +220,7 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 		
-		sql = f"select {lookup_column_name} from {lookup_table_name} order by 1"
+		sql = f"select {lookup_column_name} from public.{lookup_table_name} order by 1"
 		cur.execute(sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
