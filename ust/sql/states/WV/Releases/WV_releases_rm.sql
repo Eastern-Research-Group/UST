@@ -96,3 +96,16 @@ select count(*) from wv_release.v_ust_release_rm;
 select count(*) from wv_release."WVDEP.USTLUSTReports_FOIA-LUSTPublic" 
 where "Suspected Release" <> 'Yes';
 
+
+--======10/10/2024============
+--correct typo in programmer_comments
+select * from release_element_mapping where release_control_id=10;
+
+update release_element_mapping 
+set "programmer_comments"='ERG created table erg_release_status to calculate release status from three date columns: "Closed Date", "Cleanup Initiated", and "Confirmed Date", with the following logic: case when "Closed Date" is not null then ''No further action'' when "Cleanup Initiated" is not null then ''Active: corrective action'' when "Confirmed Release" is not null then ''Active: general'' else ''Other''',
+"epa_comments"='Changing "Active: general" to "Active: general/open release" to make it clear that the status is of the release, not the corrective action.'
+where release_control_id=10
+and release_element_mapping_id=287 ;
+
+
+
