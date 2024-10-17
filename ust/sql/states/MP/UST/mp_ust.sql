@@ -1,9 +1,3 @@
-todo: 
---on line 452
---There’s a current tank status notes field in the MP source data but it doesn’t tie directly a specific tank.  For now, I’ve hard-coded “Currently in use” as the tank status for all because it’s a required field.  We could manually go through the tank status data and figure out the status of most of the tanks but should we be generating that data ourselves? 
---There is no tank status field for the closed/removed tanks so I’ve hardcoded that as “Closed (general)”
-
-
 select * from public.ust_control where ust_control_id = 22;
 
 ALTER TABLE "UST_UNIVERSE_tracking_file_FY2023" rename to mp_ust;
