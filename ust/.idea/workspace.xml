@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ca93c9e9-77be-45c5-be1e-35e6a620e8fb" name="Changes" comment="Added ReleaseComment to public.v_ust_release">
+      <change beforePath="$PROJECT_DIR$/python/state_processing/control_table_summary.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/state_processing/control_table_summary.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/state_processing/export_source_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/state_processing/export_source_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/state_processing/export_template.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/state_processing/export_template.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/state_processing/org_mapping_xwalks.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/state_processing/org_mapping_xwalks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/state_processing/populate_epa_data_tables.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/state_processing/populate_epa_data_tables.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/state_processing/qa_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/state_processing/qa_check.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$/.." value="main3" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2mmyZuTiFtgn5e1nJpRP6KgacyI" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.control_table_summary.executor": "Run",
+    "Python.export_source_data.executor": "Run",
+    "Python.export_template.executor": "Run",
+    "Python.import_data_from_files.executor": "Run",
+    "Python.insert_control.executor": "Run",
+    "Python.org_mapping_xwalks.executor": "Run",
+    "Python.populate_epa_data_tables.executor": "Run",
+    "Python.qa_check.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "SD-UST"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-0509580d9d50-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.14494.241" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ca93c9e9-77be-45c5-be1e-35e6a620e8fb" name="Changes" comment="" />
+      <created>1727696106739</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1727696106739</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Added ReleaseComment to public.v_ust_release">
+      <option name="closed" value="true" />
+      <created>1727962950449</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1727962950449</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added ReleaseComment to public.v_ust_release" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added ReleaseComment to public.v_ust_release" />
+  </component>
+</project>

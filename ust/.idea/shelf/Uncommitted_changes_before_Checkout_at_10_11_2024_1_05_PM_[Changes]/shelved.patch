@@ -1,0 +1,921 @@
+Index: python/state_processing/insert_control.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from datetime import datetime\r\nimport os\r\nfrom pathlib import Path\r\nimport sys  \r\nROOT_PATH = Path(__file__).parent.parent.parent\r\nsys.path.append(os.path.join(ROOT_PATH, ''))\r\n\r\nfrom python.util import utils\r\nfrom python.util.logger_factory import logger\r\n\r\n\r\norganization_id = 'XX'                  # Enter the two-character code for the state, or \"TRUSTD\" for the tribes database \r\nust_or_release = 'ust'                  # Valid values are 'ust' or 'release'\r\ndata_source = ''                        # Describe in detail where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)\r\ndate_received = 'YYYY-MM-DD'            # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.\r\ndate_processed = None                   # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.\r\ncomments = ''                           # Top-level comments on the dataset. An example would be \"Exclude Aboveground Storage Tanks\".\r\norganization_compartment_flag = None    # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. You can set this later if you don't know.\r\n\r\n\r\nclass ControlTable:\r\n    def __init__(self, \r\n                 ust_or_release,\r\n                 organization_id, \r\n                 data_source, \r\n                 date_received=datetime.today(), \r\n                 date_processed=datetime.today(), \r\n                 comments=None,\r\n                 organization_compartment_flag=None):\r\n\r\n        self.ust_or_release = utils.verify_ust_or_release(ust_or_release)\r\n        self.organization_id = organization_id\r\n        self.data_source = data_source\r\n        if date_received:\r\n            self.date_received = date_received\r\n        else:\r\n            self.date_received = datetime.today()\r\n        if date_processed:\r\n            self.date_processed = date_processed\r\n        else:\r\n            self.date_processed = datetime.today()\r\n        self.comments = comments\r\n        self.control_id = None\r\n\r\n\r\n    def insert_db(self):\r\n        conn = utils.connect_db()\r\n        cur = conn.cursor()\r\n        if self.ust_or_release == 'ust' and self.organization_compartment_flag:\r\n            sql = f\"\"\"insert into {self.ust_or_release}_control \r\n                        (organization_id, date_received, date_processed, data_source, comments, organization_compartment_flag)\r\n                      values (%s, %s, %s, %s, %s, %s)\r\n                      returning {self.ust_or_release}_control_id\"\"\"\r\n            cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments, self.organization_compartment_flag))\r\n        else:\r\n            sql = f\"\"\"insert into {self.ust_or_release}_control \r\n                        (organization_id, date_received, date_processed, data_source, comments)\r\n                      values (%s, %s, %s, %s, %s)\r\n                      returning {self.ust_or_release}_control_id\"\"\"\r\n            cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments))\r\n        control_id = cur.fetchone()[0]\r\n        self.control_id = control_id\r\n        logger.info('Inserted into %s_control; %s_control_id = %s', self.ust_or_release, self.ust_or_release, control_id)\r\n        conn.commit()\r\n        cur.close()\r\n        conn.close()\r\n        return control_id\r\n\r\n    \r\nif __name__ == '__main__':       \r\n    c = ControlTable(\r\n        ust_or_release=ust_or_release, \r\n        organization_id=organization_id, \r\n        data_source=data_source,\r\n        date_received=date_received,\r\n        date_processed=date_processed,\r\n        comments=comments,\r\n        organization_compartment_flag=organization_compartment_flag)\r\n    c.insert_db()\r\n    logger.info('New control_id for %s is %s', c.organization_id, c.control_id)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/python/state_processing/insert_control.py b/python/state_processing/insert_control.py
+--- a/python/state_processing/insert_control.py	(revision d430d9f653ac53c7546c17464e3b86ec402dd191)
++++ b/python/state_processing/insert_control.py	(date 1728666020265)
+@@ -1,26 +1,25 @@
+-from datetime import datetime
+ import os
+ from pathlib import Path
+ import sys  
+ ROOT_PATH = Path(__file__).parent.parent.parent
+ sys.path.append(os.path.join(ROOT_PATH, ''))
++from datetime import datetime
+ 
+-from python.util import utils
+ from python.util.logger_factory import logger
++from python.util import utils
+ 
+ 
+-organization_id = 'XX'                  # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
+-ust_or_release = 'ust'                  # Valid values are 'ust' or 'release'
+-data_source = ''                        # Describe in detail where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
+-date_received = 'YYYY-MM-DD'            # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
+-date_processed = None                   # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
+-comments = ''                           # Top-level comments on the dataset. An example would be "Exclude Aboveground Storage Tanks".
+-organization_compartment_flag = None    # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. You can set this later if you don't know.
+-
++organization_id = 'CA'
++system_type = 'ust'   # Accepted values are 'ust' or 'release'
++data_source = 'State granted web access to CERS database (https://cersregulator.calepa.ca.gov/)' # Describe where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
++date_received = '2024-08-14' # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
++date_processed = None # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
++comments = 'Wrote a Python script to download individual Excel spreadsheets for each of 104 Regulators (as we were advised to download each separately), then combined them.' 
++organization_compartment_flag = None   # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. 
+ 
+ class ControlTable:
+     def __init__(self, 
+-                 ust_or_release,
++                 system_type,
+                  organization_id, 
+                  data_source, 
+                  date_received=datetime.today(), 
+@@ -28,7 +27,11 @@
+                  comments=None,
+                  organization_compartment_flag=None):
+ 
+-        self.ust_or_release = utils.verify_ust_or_release(ust_or_release)
++        if system_type.lower() not in ['ust','release']:
++            logger.critical("System type '%s' not recognized, aborting.", system_type)
++            exit()
++
++        self.system_type = system_type.lower()
+         self.organization_id = organization_id
+         self.data_source = data_source
+         if date_received:
+@@ -46,21 +49,21 @@
+     def insert_db(self):
+         conn = utils.connect_db()
+         cur = conn.cursor()
+-        if self.ust_or_release == 'ust' and self.organization_compartment_flag:
+-            sql = f"""insert into {self.ust_or_release}_control 
++        if self.system_type == 'ust' and self.organization_compartment_flag:
++            sql = f"""insert into {self.system_type}_control 
+                         (organization_id, date_received, date_processed, data_source, comments, organization_compartment_flag)
+                       values (%s, %s, %s, %s, %s, %s)
+-                      returning {self.ust_or_release}_control_id"""
++                      returning {self.system_type}_control_id"""
+             cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments, self.organization_compartment_flag))
+         else:
+-            sql = f"""insert into {self.ust_or_release}_control 
++            sql = f"""insert into {self.system_type}_control 
+                         (organization_id, date_received, date_processed, data_source, comments)
+                       values (%s, %s, %s, %s, %s)
+-                      returning {self.ust_or_release}_control_id"""
++                      returning {self.system_type}_control_id"""
+             cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments))
+         control_id = cur.fetchone()[0]
+         self.control_id = control_id
+-        logger.info('Inserted into %s_control; %s_control_id = %s', self.ust_or_release, self.ust_or_release, control_id)
++        logger.info('Inserted into %s_control; %s_control_id = %s', self.system_type, self.system_type, control_id)
+         conn.commit()
+         cur.close()
+         conn.close()
+@@ -69,7 +72,7 @@
+     
+ if __name__ == '__main__':       
+     c = ControlTable(
+-        ust_or_release=ust_or_release, 
++        system_type=system_type, 
+         organization_id=organization_id, 
+         data_source=data_source,
+         date_received=date_received,
+Index: python/state_processing/export_template.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from datetime import date\r\nimport ntpath\r\nimport os\r\nfrom pathlib import Path\r\nimport sys  \r\nROOT_PATH = Path(__file__).parent.parent.parent\r\nsys.path.append(os.path.join(ROOT_PATH, ''))\r\n\r\nimport openpyxl as op\r\nfrom openpyxl.styles import Alignment, Font, PatternFill\r\nfrom openpyxl.styles.borders import Border, Side\r\n\r\nfrom python.state_processing import element_mapping_to_excel\r\nfrom python.util import utils, config\r\nfrom python.util.dataset import Dataset \r\nfrom python.util.logger_factory import logger\r\n\r\n\r\nust_or_release = 'ust' \t\t\t# Valid values are 'ust' or 'release'\r\ncontrol_id = 0                  # Enter an integer that is the ust_control_id or release_control_id\r\n\r\ndata_only = False\t\t\t\t# Boolean; defaults to False. Set to True to generate a populated template that does not include the Reference and Lookup tabs.\r\ntemplate_only = True\t\t\t# Boolean; defaults to False. Set to True to generate an blank template with no data.\r\n\r\n# These variables can usually be left unset. This script will general an Excel file in the appropriate state folder in the repo under /ust/python/exports/epa_templates\r\nexport_file_path = None\r\nexport_file_dir = None\r\nexport_file_name = None\r\n\r\n\r\ngray_cell_fill = 'C9C9C9' # gray\r\ngreen_cell_fill = '92D050' # green\r\nyellow_cell_fill = 'FFFF00' # yellow\r\norange_cell_fill = 'FFC000' # orange\r\nthin_border = Border(left=Side(style='thin'), \r\n\t\t\t\t\t right=Side(style='thin'), \r\n\t\t\t\t\t top=Side(style='thin'), \r\n\t\t\t\t\t bottom=Side(style='thin'))\r\nleft_align = Alignment(horizontal='left', vertical='center', wrap_text=True)\r\ncenter_align = Alignment(horizontal='center', vertical='center', wrap_text=True)\r\n\r\n\r\nclass Template:\r\n\twb = None     \r\n\r\n\tdef __init__(self, \r\n\t\t\t\t dataset,\r\n\t\t\t\t data_only=False,\r\n\t\t\t\t template_only=False):\r\n\t\tself.dataset = dataset\r\n\t\tself.data_only = data_only\t\t\r\n\t\tself.template_only = template_only\r\n\t\tself.wb = op.Workbook()\r\n\t\tself.wb.save(self.dataset.export_file_path)\r\n\t\tif not self.data_only:\r\n\t\t\tself.make_reference_tab()\r\n\t\t\tself.make_lookup_tabs()\r\n\t\t\tif not self.template_only:\r\n\t\t\t\telement_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=False)\r\n\t\t\t\tself.make_mapping_tabs()\r\n\t\tself.make_data_tabs()\t\r\n\t\tself.cleanup_wb()\r\n\t\tlogger.info('Template exported to %s', self.dataset.export_file_path)\r\n\r\n\r\n\tdef cleanup_wb(self):\r\n\t\ttry:\r\n\t\t\tself.wb.remove(self.wb['Sheet'])\r\n\t\texcept:\r\n\t\t\tpass\r\n\t\tself.wb.save(self.dataset.export_file_path)\r\n\r\n\r\n\tdef make_reference_tab(self):\r\n\t\tws = self.wb.create_sheet('Reference')\r\n\r\n\t\theaders = utils.get_headers(f'v_{self.dataset.ust_or_release}_elements')\r\n\t\tfor colno, header in enumerate(headers, start=1):\r\n\t\t\tws.cell(row=1, column=colno).value = header\r\n\t\tconn = utils.connect_db()\r\n\t\tcur = conn.cursor()\r\n\t\tsql = f\"select * from public.v_{self.dataset.ust_or_release}_elements\"\t\r\n\t\tcur.execute(sql)\r\n\t\tdata = cur.fetchall()\r\n\t\tfor rowno, row in enumerate(data, start=2):\r\n\t\t\tfor colno, cell_value in enumerate(row, start=1):\r\n\t\t\t\tif (colno == 8 or colno == 7) and cell_value:\r\n\t\t\t\t\tcell_value = cell_value.replace('\"','')\r\n\t\t\t\tws.cell(row=rowno, column=colno).value = cell_value\r\n\t\tcur.close()\r\n\t\tconn.close()\r\n\r\n\t\tif ust_or_release == 'ust':\r\n\t\t\tfor row in ws[1:ws.max_row]:  \r\n\t\t\t\tcell = row[0]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[1]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell.font = Font(bold=True)\r\n\t\t\t\tcell = row[2]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[3]            \r\n\t\t\t\tcell.alignment = center_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[4]            \r\n\t\t\t\tcell.alignment = center_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[5]            \r\n\t\t\t\tcell.alignment = center_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[6]            \r\n\t\t\t\tcell.alignment = center_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[7]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[8]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\theader_range = ws[\"A1:I1\"]\r\n\t\t\tfor row in header_range:\r\n\t\t\t\tfor cell in row:\r\n\t\t\t\t\tcell.fill = utils.get_fill_gen(gray_cell_fill)\r\n\t\t\t\t\tcell.alignment = center_align\r\n\t\t\t\t\tcell.font = Font(bold=True)\r\n\t\t\telement_name_range = ws[\"B2:B200\"]\r\n\t\t\tgreen_cells = ['FacilityID','TankID','CompartmentID','PipingID']\r\n\t\t\tfor row in element_name_range:\r\n\t\t\t    for cell in row:\r\n\t\t\t        if cell.value in green_cells:\r\n\t\t\t        \tcell.fill = utils.get_fill_gen(green_cell_fill)\r\n\t\t\t        \tif cell.value != 'FacilityID':\r\n\t\t\t\t        \tcell.offset(row=0, column=1).fill = utils.get_fill_gen(yellow_cell_fill)\r\n\t\t\tws.column_dimensions['A'].width = 14\r\n\t\t\tws.column_dimensions['B'].width = 69\r\n\t\t\tws.column_dimensions['B'].font = Font(bold=True)\r\n\t\t\tws.column_dimensions['C'].width = 30\r\n\t\t\tws.column_dimensions['D'].width = 15\r\n\t\t\tws.column_dimensions['E'].width = 8\r\n\t\t\tws.column_dimensions['F'].width = 13\r\n\t\t\tws.column_dimensions['G'].width = 13\r\n\t\t\tws.column_dimensions['H'].width = 32\r\n\t\t\tws.column_dimensions['I'].width = 70\r\n\t\telif ust_or_release == 'release':\r\n\t\t\tfor row in ws[1:ws.max_row]:  \r\n\t\t\t\tcell = row[0]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell.font = Font(bold=True)\r\n\t\t\t\tcell = row[1]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[2]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[3]            \r\n\t\t\t\tcell.alignment = center_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[4]            \r\n\t\t\t\tcell.alignment = center_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[5]            \r\n\t\t\t\tcell.alignment = center_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[6]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\t\tcell = row[7]            \r\n\t\t\t\tcell.alignment = left_align\r\n\t\t\t\tcell.border = thin_border\r\n\t\t\theader_range = ws[\"A1:H1\"]\r\n\t\t\tfor row in header_range:\r\n\t\t\t\tfor cell in row:\r\n\t\t\t\t\tcell.fill = utils.get_fill_gen(gray_cell_fill)\r\n\t\t\t\t\tcell.alignment = center_align\r\n\t\t\t\t\tcell.font = Font(bold=True)\r\n\t\t\tws.column_dimensions['A'].width = 69\r\n\t\t\tws.column_dimensions['A'].font = Font(bold=True)\r\n\t\t\tws.column_dimensions['B'].width = 30\r\n\t\t\tws.column_dimensions['C'].width = 15\r\n\t\t\tws.column_dimensions['D'].width = 8\r\n\t\t\tws.column_dimensions['E'].width = 13\r\n\t\t\tws.column_dimensions['F'].width = 13\r\n\t\t\tws.column_dimensions['G'].width = 32\r\n\t\t\tws.column_dimensions['H'].width = 70\r\n\r\n\t\tws.freeze_panes = ws['A2']\r\n\t\tself.wb.save(self.dataset.export_file_path)\r\n\t\tlogger.info('Created Reference tab')\r\n\r\n\r\n\tdef make_lookup_tabs(self):\r\n\t\tlookups = utils.get_lookup_tabs(ust_or_release=self.dataset.ust_or_release)\r\n\t\tfor lookup in lookups:\r\n\t\t\tself.make_lookup_tab(lookup)\r\n\t\tself.wb.save(self.dataset.export_file_path)\r\n\r\n\r\n\tdef make_lookup_tab(self, lookup):\r\n\t\tlookup_table_name = lookup[0]\r\n\t\tlookup_column_name = lookup[1]\r\n\t\tlogger.info('Working on lookup table %s, column %s', lookup_table_name, lookup_column_name)\r\n\t\tif lookup_table_name == 'substances':\r\n\t\t\tws = self.wb.create_sheet('Substances lookup')\r\n\t\t\tself.make_substance_lookup_tab(ws)\r\n\t\t\tlogger.info('Created Substances lookup tab')\r\n\t\t\treturn\r\n\r\n\t\tif lookup_table_name == 'corrective_action_strategies':\r\n\t\t\tpretty_name = 'Corrective Actions'\r\n\t\telse:\r\n\t\t\tpretty_name = lookup_table_name.replace('_',' ').title()\r\n\t\tws = self.wb.create_sheet(pretty_name + ' lookup')\r\n\t\t\r\n\t\tconn = utils.connect_db()\r\n\t\tcur = conn.cursor()\t\r\n\t\t\r\n\t\tsql = f\"select {lookup_column_name} from {lookup_table_name} order by 1\"\r\n\t\tcur.execute(sql)\r\n\t\tdata = cur.fetchall()\r\n\t\tfor rowno, row in enumerate(data, start=2):\r\n\t\t\tfor colno, cell_value in enumerate(row, start=1):\r\n\t\t\t\tws.cell(row=rowno, column=colno).value = cell_value.replace('\"','')\r\n\t\tcell = ws.cell(row=1, column=1)\r\n\t\tcell.value = pretty_name\r\n\t\tcell.font = Font(bold=True)\r\n\t\tutils.autowidth(ws)\r\n\r\n\t\tcur.close()\r\n\t\tconn.close()\r\n\t\tlogger.info('Created %s lookup tab', pretty_name)\r\n\r\n\r\n\tdef make_substance_lookup_tab(self, ws):\r\n\t\tcell = ws.cell(row=1, column=1)\r\n\t\tcell.value = 'Substance Group'\r\n\t\tcell.font = Font(bold=True)\r\n\t\tcell.alignment = center_align\r\n\r\n\t\tcell = ws.cell(row=1, column=2)\r\n\t\tcell.value = 'Substance'\r\n\t\tcell.font = Font(bold=True)\r\n\t\tcell.alignment = center_align\r\n\r\n\t\tconn = utils.connect_db()\r\n\t\tcur = conn.cursor()\t\r\n\t\tsql = f\"select substance_group, substance from substances order by 1, 2\"\r\n\t\tcur.execute(sql)\r\n\t\tdata = cur.fetchall()\r\n\t\tfor rowno, row in enumerate(data, start=2):\r\n\t\t\tfor colno, cell_value in enumerate(row, start=1):\r\n\t\t\t\tcell = ws.cell(row=rowno, column=colno)\r\n\t\t\t\tcell.value = cell_value.replace('\"','')\r\n\t\tutils.autowidth(ws)\r\n\t\tcur.close()\r\n\t\tconn.close()\r\n\r\n\r\n\tdef get_mapping_tabs(self):\r\n\t\tconn = utils.connect_db()\r\n\t\tcur = conn.cursor()\t\r\n\t\tsql = f\"\"\"select epa_table_name, epa_column_name, database_lookup_table, database_lookup_column   \r\n\t\t\t\tfrom v_{self.dataset.ust_or_release}_available_mapping\r\n\t\t\t\twhere {self.dataset.ust_or_release}_control_id = %s order by 1, 2\"\"\"\r\n\t\tcur.execute(sql, (self.dataset.control_id,))\r\n\t\trows = cur.fetchall()\r\n\t\tcur.close()\r\n\t\tconn.close()\r\n\t\treturn rows\r\n\r\n\r\n\tdef make_mapping_tabs(self):\r\n\t\tmappings = self.get_mapping_tabs()\r\n\t\tfor mapping in mappings:\r\n\t\t\tself.make_mapping_tab(mapping)\r\n\t\tself.wb.save(self.dataset.export_file_path)\r\n\r\n\r\n\tdef make_mapping_tab(self, mapping):\r\n\t\tmapping_table_name = mapping[0]\r\n\t\tmapping_column_name = mapping[1]\r\n\t\tdatabase_lookup_table = mapping[2]\r\n\t\tdatabase_lookup_column = mapping[3]\r\n\t\tlogger.info('Working on mapping table %s, column %s using lookup table %s, column %s',\r\n\t\t\t mapping_table_name, mapping_column_name, database_lookup_table, database_lookup_column)\r\n\t\tif database_lookup_table == 'substances':\r\n\t\t\tself.make_substance_mapping_tab()\r\n\t\t\tlogger.info('Created Substances mapping tab')\r\n\t\t\treturn\r\n\t\tpretty_name = database_lookup_table.replace('_',' ').title()\r\n\t\t# avoid tab names longer than 31 characters\r\n\t\tif pretty_name == 'Tank Material Descriptions':\r\n\t\t\tpretty_name = 'Tank Material Desc'\r\n\t\telif pretty_name == 'Tank Secondary Containments':\r\n\t\t\tpretty_name = 'Secondary Containment'\r\n\t\telif pretty_name == 'Pipe Tank Top Sump Wall Types':\r\n\t\t\tpretty_name = 'Pipe Top Sump Wall Type'\r\n\t\telif pretty_name == 'Corrective Action Strategies':\r\n\t\t\tpretty_name = 'Corrective Actions'\r\n\r\n\t\tws = self.wb.create_sheet(pretty_name + ' mapping')\r\n\r\n\t\tcell = ws.cell(row=1, column=1)\r\n\t\tcell.value = pretty_name\r\n\t\tcell.font = Font(bold=True)\r\n\r\n\t\tconn = utils.connect_db()\r\n\t\tcur = conn.cursor()\t\r\n\r\n\t\tsql = f\"select {database_lookup_column} from {database_lookup_table} order by 1\"\r\n\t\tcur.execute(sql)\r\n\t\tdata = cur.fetchall()\r\n\t\tfor rowno, row in enumerate(data, start=2):\r\n\t\t\tfor colno, cell_value in enumerate(row, start=1):\r\n\t\t\t\tws.cell(row=rowno, column=colno).value = cell_value.replace('\"','')\r\n\r\n\t\tsql = f\"\"\"select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments\r\n\t\t\t\tfrom public.v_{self.dataset.ust_or_release}_element_mapping \r\n\t\t\t\twhere {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s\r\n\t\t\t\torder by 1, 2\"\"\"\r\n\t\tcur.execute(sql, (self.dataset.control_id, mapping_column_name))\r\n\r\n\t\tif cur.rowcount > 0:\r\n\t\t\tcell = ws.cell(row=1, column=3)\r\n\t\t\tcell.value = 'Organization Value'\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tcell = ws.cell(row=1, column=4)\r\n\t\t\tcell.value = 'EPA Value'\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tcell = ws.cell(row=1, column=5)\r\n\t\t\tcell.value = 'Programmer Comments'\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tcell = ws.cell(row=1, column=6)\r\n\t\t\tcell.value = 'EPA Comments'\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tcell = ws.cell(row=1, column=7)\r\n\t\t\tcell.value = 'Organization Comments'\r\n\t\t\tcell.font = Font(bold=True)\r\n\r\n\t\t\tdata = cur.fetchall()\r\n\t\t\tfor rowno, row in enumerate(data, start=2):\r\n\t\t\t\tfor colno, cell_value in enumerate(row, start=3):\r\n\t\t\t\t\tws.cell(row=rowno, column=colno).value = cell_value\t\t\r\n\r\n\t\tutils.autowidth(ws)\r\n\r\n\t\tcur.close()\r\n\t\tconn.close()\r\n\r\n\t\tlogger.info('Created %s mapping tab', pretty_name)\r\n\r\n\r\n\tdef make_substance_mapping_tab(self):\r\n\t\tws = self.wb.create_sheet('Substances mapping')\r\n\t\tself.make_substance_lookup_tab(ws)\r\n\r\n\t\tconn = utils.connect_db()\r\n\t\tcur = conn.cursor()\t\r\n\t\tsql = f\"\"\"select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments\r\n\t\t\t\tfrom public.v_{self.dataset.ust_or_release}_element_mapping \r\n\t\t\t\twhere {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'\r\n\t\t\t\torder by 1, 2\"\"\"\r\n\t\tcur.execute(sql, (self.dataset.control_id,))\r\n\r\n\t\tif cur.rowcount > 0:\r\n\t\t\tcell = ws.cell(row=1, column=4)\r\n\t\t\tcell.value = 'Organization Value'\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tcell = ws.cell(row=1, column=5)\r\n\t\t\tcell.value = 'EPA Value'\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tcell = ws.cell(row=1, column=6)\r\n\t\t\tcell.value = 'Programmer Comments'\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tcell = ws.cell(row=1, column=7)\r\n\t\t\tcell.value = 'EPA Comments'\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tcell = ws.cell(row=1, column=8)\r\n\t\t\tcell.value = 'Organization Comments'\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tdata = cur.fetchall()\r\n\t\t\tfor rowno, row in enumerate(data, start=2):\r\n\t\t\t\tfor colno, cell_value in enumerate(row, start=4):\r\n\t\t\t\t\tws.cell(row=rowno, column=colno).value = cell_value\t\t\r\n\t\tutils.autowidth(ws)\r\n\r\n\t\tcur.close()\r\n\t\tconn.close()\r\n\t\tlogger.info('Created Substances mapping tab')\r\n\r\n\r\n\tdef make_data_tabs(self):\r\n\t\ttabs = utils.get_data_tabs(ust_or_release=self.dataset.ust_or_release)\r\n\t\tfor tab in tabs:\r\n\t\t\tself.make_data_tab(tab)\r\n\t\tself.wb.save(self.dataset.export_file_path)\r\n\r\n\r\n\tdef make_data_tab(self, tab):\r\n\t\tview_name = tab[0]\r\n\t\ttab_name = tab[1]\r\n\t\tws = self.wb.create_sheet(tab_name)\r\n\t\tws.title = tab_name\r\n\t\theaders = utils.get_headers(view_name)\r\n\t\tgreen_cells = []\r\n\t\torange_cells = []\r\n\t\tif self.dataset.ust_or_release == 'ust':\r\n\t\t\tif tab_name == 'Facility':\r\n\t\t\t\tgreen_cells = ['FacilityID']\r\n\t\t\telif tab_name == 'Facility Dispenser':\r\n\t\t\t\tgreen_cells = ['DispenserID']\r\n\t\t\t\torange_cells = ['FacilityID']\r\n\t\t\telif tab_name == 'Tank':\r\n\t\t\t\tgreen_cells = ['TankID']\r\n\t\t\t\torange_cells = ['FacilityID']\r\n\t\t\telif tab_name == 'Tank Substance' or tab_name == 'Tank Dispenser':\r\n\t\t\t\tgreen_cells = ['Substance','DispenserID']\r\n\t\t\t\torange_cells = ['FacilityID','TankID','TankName']\r\n\t\t\telif tab_name == 'Compartment':\r\n\t\t\t\tgreen_cells = ['CompartmentID']\r\n\t\t\t\torange_cells = ['FacilityID','TankID','TankName']\r\n\t\t\telif tab_name == 'Piping' or tab_name == 'Compartment Substance' or tab_name == 'Compartment Dispenser':\r\n\t\t\t\tgreen_cells = ['Substance','PipingID','DispenserID']\r\n\t\t\t\torange_cells = ['FacilityID','TankID','TankName','CompartmentID','CompartmentName']\r\n\t\tfor colno, header in enumerate(headers, start=1):\r\n\t\t\tcell = ws.cell(row=1, column=colno)\r\n\t\t\tcell.value = header\r\n\t\t\tcell.font = Font(bold=True)\r\n\t\t\tif cell.value in green_cells:\r\n\t\t\t\tcell.fill = utils.get_fill_gen(green_cell_fill)\r\n\t\t\tif cell.value in orange_cells:\r\n\t\t\t\tcell.fill = utils.get_fill_gen(orange_cell_fill)\r\n\t\tif not self.template_only:\r\n\t\t\tconn = utils.connect_db()\r\n\t\t\tcur = conn.cursor()\r\n\t\t\tsql = f\"select * from public.{view_name} where {self.dataset.ust_or_release}_control_id = %s\"\r\n\t\t\tcur.execute(sql, (self.dataset.control_id,))\r\n\t\t\tdata = cur.fetchall()\r\n\t\t\tfor rowno, row in enumerate(data, start=2):\r\n\t\t\t\tfor colno, cell_value in enumerate(row, start=1):\r\n\t\t\t\t\tws.cell(row=rowno, column=colno).value = cell_value\r\n\t\t\tcur.close()\r\n\t\t\tconn.close()\r\n\t\tws.delete_cols(1)\r\n\t\tutils.autowidth(ws)\r\n\t\tws.freeze_panes = ws['A2']\r\n\t\tlogger.info('Created %s tab', tab_name)\r\n\r\n\r\n\r\ndef main(ust_or_release, control_id=None, data_only=False, template_only=False, export_file_name=None, export_file_dir=None, export_file_path=None):\r\n\tif template_only and control_id == 0:\r\n\t\tcontrol_id = 1\r\n\r\n\tdataset = Dataset(ust_or_release=ust_or_release,\r\n\t\t\t\t \t  control_id=control_id, \r\n\t\t\t\t \t  # requires_export=requires_export,\r\n\t\t\t\t \t  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx',\r\n\t\t\t\t\t  export_file_name=export_file_name,\r\n\t\t\t\t\t  export_file_dir=export_file_dir,\r\n\t\t\t\t\t  export_file_path=export_file_path)\r\n\r\n\ttemplate = Template(dataset=dataset,\r\n\t\t\t\t\t\tdata_only=data_only,\r\n\t\t\t\t\t\ttemplate_only=template_only)\r\n\r\n\r\nif __name__ == '__main__':   \r\n\tmain(ust_or_release=ust_or_release,\r\n\t\t control_id=control_id, \r\n\t\t data_only=data_only, \r\n\t\t template_only=template_only,\r\n\t\t export_file_name=export_file_name,\r\n\t\t export_file_dir=export_file_dir,\r\n\t\t export_file_path=export_file_path)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/python/state_processing/export_template.py b/python/state_processing/export_template.py
+--- a/python/state_processing/export_template.py	(revision d430d9f653ac53c7546c17464e3b86ec402dd191)
++++ b/python/state_processing/export_template.py	(date 1728666015237)
+@@ -11,21 +11,18 @@
+ from openpyxl.styles.borders import Border, Side
+ 
+ from python.state_processing import element_mapping_to_excel
+-from python.util import utils, config
+-from python.util.dataset import Dataset 
+ from python.util.logger_factory import logger
+-
++from python.util import utils, config
+ 
+-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+ 
+-data_only = False				# Boolean; defaults to False. Set to True to generate a populated template that does not include the Reference and Lookup tabs.
+-template_only = True			# Boolean; defaults to False. Set to True to generate an blank template with no data.
+-
+-# These variables can usually be left unset. This script will general an Excel file in the appropriate state folder in the repo under /ust/python/exports/epa_templates
+-export_file_path = None
+-export_file_dir = None
+-export_file_name = None
++ust_or_release = 'ust' # valid values are 'ust' or 'release'
++control_id = 18
++organization_id = None
++data_only = False
++template_only = False
++export_file_name = None 
++export_file_dir = None 
++export_file_path = None 
+ 
+ 
+ gray_cell_fill = 'C9C9C9' # gray
+@@ -44,23 +41,106 @@
+ 	wb = None     
+ 
+ 	def __init__(self, 
+-				 dataset,
++				 ust_or_release,
++				 organization_id=None,
++				 control_id=None, 
++				 export_file_name=None, 
++				 export_file_dir=None,
++				 export_file_path=None,
+ 				 data_only=False,
+ 				 template_only=False):
+-		self.dataset = dataset
++		self.ust_or_release = ust_or_release.lower()
++		if self.ust_or_release not in ['ust','release']:
++			logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
++			exit()
++		self.organization_id = organization_id
++		self.control_id = control_id
++		self.export_file_name = export_file_name
++		self.export_file_dir = export_file_dir
++		self.export_file_path = export_file_path
+ 		self.data_only = data_only		
+ 		self.template_only = template_only
++		self.populate_org_control()
++		self.populate_export_vars()
+ 		self.wb = op.Workbook()
+-		self.wb.save(self.dataset.export_file_path)
++		self.wb.save(self.export_file_path)
+ 		if not self.data_only:
+ 			self.make_reference_tab()
+ 			self.make_lookup_tabs()
+ 			if not self.template_only:
+-				element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=False)
++				element_mapping_to_excel.build_ws(self.ust_or_release, self.control_id, self.wb.create_sheet(), admin=False)
+ 				self.make_mapping_tabs()
+ 		self.make_data_tabs()	
+ 		self.cleanup_wb()
+-		logger.info('Template exported to %s', self.dataset.export_file_path)
++		logger.info('Template exported to %s', self.export_file_path)
++
++
++	def print_self(self):
++		print('ust_or_release = ' + str(self.ust_or_release))
++		print('organization_id = ' + str(self.organization_id))
++		print('control_id = ' + str(self.control_id))
++		print('export_file_name = ' + str(self.export_file_name))
++		print('export_file_dir = ' + str(self.export_file_dir))
++		print('export_file_path = ' + str(self.export_file_path))
++		print('data_only = ' + str(self.data_only))
++		print('template_only = ' + str(self.template_only))
++
++
++	def populate_org_control(self):
++		self.print_self()
++		conn = utils.connect_db()
++		cur = conn.cursor()	
++		if self.template_only and not self.organization_id and not self.control_id and not self.export_file_path and not self.export_file_dir and not self.export_file_name:
++			logger.error('If you want to export a template only and are not passing an organization_id or control_id, you must pass export_file_name and export_file_dir OR export_file_path. Exiting...')
++			exit()
++		elif self.template_only and not (self.export_file_path or (self.export_file_dir and self.export_file_name)) and (self.organization_id or self.control_id):
++			logger.warning("You requested a template only but didn't pass an export path or directory/file name. The file name and path will be constructed from the organization_id/control_id passed (%s/%s)", self.organization_id, self.control_id)
++		elif self.template_only and (self.export_file_path or self.export_file_dir or self.export_file_name):
++			if self.export_file_path or (self.export_file_dir and self.export_file_name):
++				pass 
++			else:  
++				logger.error("If you want a template only but don't pass a full path to export_file_path, you must pass both export_file_dir AND export_file_name. Exiting...")
++				exit()
++		elif not self.organization_id and not self.control_id:
++			logger.error("If you don't want a template only, either organization_id or control_id must be passed. Exiting...")
++			exit()
++		elif not self.control_id:
++			sql = f"select max({self.ust_or_release}_control_id) from {self.ust_or_release}_control where organization_id = %s"
++			cur.execute(sql, (self.organization_id,))
++			self.control_id = cur.fetchone()[0]
++		else:
++			sql = f"select organization_id from {self.ust_or_release}_control where {self.ust_or_release}_control_id = %s"
++			cur.execute(sql, (self.control_id,))
++			org_id = cur.fetchone()[0]
++			if self.organization_id and org_id != self.organization_id:
++				logger.warning('%s_control_id %s is %s, but %s was passed. Exiting.', self.ust_or_release, self.control_id, org_id, self.organization_id)
++				exit()
++			self.organization_id = org_id
++		cur.close()
++		conn.close()
++		logger.debug('control_id = %s, organization_id = %s', self.control_id, self.organization_id)
++
++
++	def populate_export_vars(self):
++		if self.ust_or_release == 'ust':
++			uor = 'UST'
++		elif self.ust_or_release == 'release':
++			uor = 'Releases'		
++		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
++			self.export_file_name = self.organization_id.upper() + '_' + uor + '_template_' + utils.get_timestamp_str() + '.xlsx'
++			self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
++	 # self.export_file_dir = '../exports/epa_templates/' + self.organization_id.upper() + '/'
++			self.export_file_path = self.export_file_dir + self.export_file_name
++			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
++		elif self.export_file_path:
++			fp = ntpath.split(self.export_file_path)
++			self.export_file_dir = fp[0]
++			self.export_file_name = fp[1]
++		elif self.export_file_dir and self.export_file_name:
++			if self.export_file_name[-5:] != '.xlsx':
++				self.export_file_name = self.export_file_name + '.xlsx'
++			self.export_file_path = os.path.join(self.export_file_dir, self.export_file_name)
++		logger.debug('export_file_name = %s; export_file_dir = %s; export_file_path = %s', self.export_file_name, self.export_file_dir, self.export_file_path)
+ 
+ 
+ 	def cleanup_wb(self):
+@@ -68,18 +148,18 @@
+ 			self.wb.remove(self.wb['Sheet'])
+ 		except:
+ 			pass
+-		self.wb.save(self.dataset.export_file_path)
++		self.wb.save(self.export_file_path)
+ 
+ 
+ 	def make_reference_tab(self):
+ 		ws = self.wb.create_sheet('Reference')
+ 
+-		headers = utils.get_headers(f'v_{self.dataset.ust_or_release}_elements')
++		headers = utils.get_headers(f'v_{self.ust_or_release}_elements')
+ 		for colno, header in enumerate(headers, start=1):
+ 			ws.cell(row=1, column=colno).value = header
+ 		conn = utils.connect_db()
+ 		cur = conn.cursor()
+-		sql = f"select * from public.v_{self.dataset.ust_or_release}_elements"	
++		sql = f"select * from public.v_{self.ust_or_release}_elements"	
+ 		cur.execute(sql)
+ 		data = cur.fetchall()
+ 		for rowno, row in enumerate(data, start=2):
+@@ -188,15 +268,15 @@
+ 			ws.column_dimensions['H'].width = 70
+ 
+ 		ws.freeze_panes = ws['A2']
+-		self.wb.save(self.dataset.export_file_path)
++		self.wb.save(self.export_file_path)
+ 		logger.info('Created Reference tab')
+ 
+ 
+ 	def make_lookup_tabs(self):
+-		lookups = utils.get_lookup_tabs(ust_or_release=self.dataset.ust_or_release)
++		lookups = utils.get_lookup_tabs(ust_or_release=self.ust_or_release)
+ 		for lookup in lookups:
+ 			self.make_lookup_tab(lookup)
+-		self.wb.save(self.dataset.export_file_path)
++		self.wb.save(self.export_file_path)
+ 
+ 
+ 	def make_lookup_tab(self, lookup):
+@@ -217,7 +297,7 @@
+ 		
+ 		conn = utils.connect_db()
+ 		cur = conn.cursor()	
+-		
++
+ 		sql = f"select {lookup_column_name} from {lookup_table_name} order by 1"
+ 		cur.execute(sql)
+ 		data = cur.fetchall()
+@@ -263,9 +343,9 @@
+ 		conn = utils.connect_db()
+ 		cur = conn.cursor()	
+ 		sql = f"""select epa_table_name, epa_column_name, database_lookup_table, database_lookup_column   
+-				from v_{self.dataset.ust_or_release}_available_mapping
+-				where {self.dataset.ust_or_release}_control_id = %s order by 1, 2"""
+-		cur.execute(sql, (self.dataset.control_id,))
++				from v_{self.ust_or_release}_available_mapping
++				where {self.ust_or_release}_control_id = %s order by 1, 2"""
++		cur.execute(sql, (self.control_id,))
+ 		rows = cur.fetchall()
+ 		cur.close()
+ 		conn.close()
+@@ -276,7 +356,7 @@
+ 		mappings = self.get_mapping_tabs()
+ 		for mapping in mappings:
+ 			self.make_mapping_tab(mapping)
+-		self.wb.save(self.dataset.export_file_path)
++		self.wb.save(self.export_file_path)
+ 
+ 
+ 	def make_mapping_tab(self, mapping):
+@@ -318,10 +398,10 @@
+ 				ws.cell(row=rowno, column=colno).value = cell_value.replace('"','')
+ 
+ 		sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
+-				from public.v_{self.dataset.ust_or_release}_element_mapping 
+-				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s
++				from public.v_{self.ust_or_release}_element_mapping 
++				where {self.ust_or_release}_control_id = %s and epa_column_name = %s
+ 				order by 1, 2"""
+-		cur.execute(sql, (self.dataset.control_id, mapping_column_name))
++		cur.execute(sql, (self.control_id, mapping_column_name))
+ 
+ 		if cur.rowcount > 0:
+ 			cell = ws.cell(row=1, column=3)
+@@ -360,10 +440,10 @@
+ 		conn = utils.connect_db()
+ 		cur = conn.cursor()	
+ 		sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
+-				from public.v_{self.dataset.ust_or_release}_element_mapping 
+-				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'
++				from public.v_{self.ust_or_release}_element_mapping 
++				where {self.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'
+ 				order by 1, 2"""
+-		cur.execute(sql, (self.dataset.control_id,))
++		cur.execute(sql, (self.control_id,))
+ 
+ 		if cur.rowcount > 0:
+ 			cell = ws.cell(row=1, column=4)
+@@ -385,18 +465,20 @@
+ 			for rowno, row in enumerate(data, start=2):
+ 				for colno, cell_value in enumerate(row, start=4):
+ 					ws.cell(row=rowno, column=colno).value = cell_value		
++
+ 		utils.autowidth(ws)
+ 
+ 		cur.close()
+ 		conn.close()
++
+ 		logger.info('Created Substances mapping tab')
+ 
+ 
+ 	def make_data_tabs(self):
+-		tabs = utils.get_data_tabs(ust_or_release=self.dataset.ust_or_release)
++		tabs = utils.get_data_tabs(ust_or_release=self.ust_or_release)
+ 		for tab in tabs:
+ 			self.make_data_tab(tab)
+-		self.wb.save(self.dataset.export_file_path)
++		self.wb.save(self.export_file_path)
+ 
+ 
+ 	def make_data_tab(self, tab):
+@@ -407,10 +489,10 @@
+ 		headers = utils.get_headers(view_name)
+ 		green_cells = []
+ 		orange_cells = []
+-		if self.dataset.ust_or_release == 'ust':
++		if self.ust_or_release == 'ust':
+ 			if tab_name == 'Facility':
+ 				green_cells = ['FacilityID']
+-			elif tab_name == 'Facility Dispenser':
++			elif tab_name == 'FacilityDispenser':
+ 				green_cells = ['DispenserID']
+ 				orange_cells = ['FacilityID']
+ 			elif tab_name == 'Tank':
+@@ -422,7 +504,7 @@
+ 			elif tab_name == 'Compartment':
+ 				green_cells = ['CompartmentID']
+ 				orange_cells = ['FacilityID','TankID','TankName']
+-			elif tab_name == 'Piping' or tab_name == 'Compartment Substance' or tab_name == 'Compartment Dispenser':
++			elif tab_name == 'Piping' or tab_name == 'Compartment Substance' or tab_name == 'CompartmentDispenser':
+ 				green_cells = ['Substance','PipingID','DispenserID']
+ 				orange_cells = ['FacilityID','TankID','TankName','CompartmentID','CompartmentName']
+ 		for colno, header in enumerate(headers, start=1):
+@@ -436,8 +518,8 @@
+ 		if not self.template_only:
+ 			conn = utils.connect_db()
+ 			cur = conn.cursor()
+-			sql = f"select * from public.{view_name} where {self.dataset.ust_or_release}_control_id = %s"
+-			cur.execute(sql, (self.dataset.control_id,))
++			sql = f"select * from public.{view_name} where {self.ust_or_release}_control_id = %s"
++			cur.execute(sql, (self.control_id,))
+ 			data = cur.fetchall()
+ 			for rowno, row in enumerate(data, start=2):
+ 				for colno, cell_value in enumerate(row, start=1):
+@@ -451,25 +533,20 @@
+ 
+ 
+ 
+-def main(ust_or_release, control_id=None, data_only=False, template_only=False, export_file_name=None, export_file_dir=None, export_file_path=None):
+-	if template_only and control_id == 0:
+-		control_id = 1
+-
+-	dataset = Dataset(ust_or_release=ust_or_release,
+-				 	  control_id=control_id, 
+-				 	  # requires_export=requires_export,
+-				 	  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx',
+-					  export_file_name=export_file_name,
+-					  export_file_dir=export_file_dir,
+-					  export_file_path=export_file_path)
++def main(ust_or_release, organization_id=None, control_id=None, data_only=False, template_only=False, export_file_name=None, export_file_dir=None, export_file_path=None):
++	template = Template(ust_or_release=ust_or_release,
++					    organization_id=organization_id, 
++						control_id=control_id,
++						data_only=data_only,
++						template_only=template_only,
++						export_file_name=export_file_name,
++						export_file_dir=export_file_dir,
++						export_file_path=export_file_path)
+ 
+-	template = Template(dataset=dataset,
+-						data_only=data_only,
+-						template_only=template_only)
+-
+ 
+ if __name__ == '__main__':   
+ 	main(ust_or_release=ust_or_release,
++		 organization_id=organization_id, 
+ 		 control_id=control_id, 
+ 		 data_only=data_only, 
+ 		 template_only=template_only,
+Index: python/state_processing/import_data_from_files.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import os\r\nfrom pathlib import Path\r\nimport sys  \r\nROOT_PATH = Path(__file__).parent.parent.parent\r\nsys.path.append(os.path.join(ROOT_PATH, ''))\r\n\r\nfrom python.util.import_service import ImportService\r\nfrom python.util.logger_factory import logger\r\n\r\n\r\nust_or_release = 'ust'          # Valid values are 'ust' or 'release'\r\norganization_id = 'XX'          # Enter the two-character code for the state, or \"TRUSTD\" for the tribes database \r\npath = r''                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)\r\noverwrite_table = False         # Boolean, defaults to False; set to True if you are replacing existing data in the schema\r\n\r\n\r\nimport_service = ImportService()\r\n\r\ndef import_files(ust_or_release, organization_id, path, overwrite_table=False):\r\n    ust_or_release = utils.verify_ust_or_release(ust_or_release)\r\n    import_service.import_data(organization_id, ust_or_release, path,  overwrite_table=overwrite_table)\r\n   \r\n    \r\nif __name__ == '__main__':       \r\n    import_files(ust_or_release, organization_id, path, overwrite_table=overwrite_table)\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/python/state_processing/import_data_from_files.py b/python/state_processing/import_data_from_files.py
+--- a/python/state_processing/import_data_from_files.py	(revision d430d9f653ac53c7546c17464e3b86ec402dd191)
++++ b/python/state_processing/import_data_from_files.py	(date 1728666026093)
+@@ -5,24 +5,27 @@
+ sys.path.append(os.path.join(ROOT_PATH, ''))
+ 
+ from python.util.import_service import ImportService
+-from python.util.logger_factory import logger
+-
+ 
+-ust_or_release = 'ust'          # Valid values are 'ust' or 'release'
+-organization_id = 'XX'          # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
+-path = r''                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
+-overwrite_table = False         # Boolean, defaults to False; set to True if you are replacing existing data in the schema
+-
++organization_id = 'CA' 
++# Enter a directory (NOT a path to a specific file) for ust_path and release_path
++# Set to None if not applicable
++ust_path = r'C:\Users\erguser\repos\ERG\UST\ust\python\state_processing\states\CA\exports'
++# ust_path = None
++# release_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\State Data\AZ\Release' 
++release_path = None 
++overwrite_table = False 
+ 
+ import_service = ImportService()
+ 
+-def import_files(ust_or_release, organization_id, path, overwrite_table=False):
+-    ust_or_release = utils.verify_ust_or_release(ust_or_release)
+-    import_service.import_data(organization_id, ust_or_release, path,  overwrite_table=overwrite_table)
+-   
++def import_files(organization_id, ust_path=None, release_path=None, overwrite_table=False):
++    if ust_path:
++        import_service.import_data(organization_id, 'ust', ust_path,  overwrite_table=overwrite_table)
++    if release_path:
++        import_service.import_data(organization_id, 'release', release_path, overwrite_table=overwrite_table)
++
+     
+ if __name__ == '__main__':       
+-    import_files(ust_or_release, organization_id, path, overwrite_table=overwrite_table)
++    import_files(organization_id, ust_path, release_path, overwrite_table=False)
+ 
+ 
+ 
+Index: python/state_processing/qa_check.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from datetime import datetime\r\nimport os\r\nfrom pathlib import Path\r\nimport sys  \r\nROOT_PATH = Path(__file__).parent.parent.parent\r\nsys.path.append(os.path.join(ROOT_PATH, ''))\r\n\r\nimport openpyxl as op\r\nfrom openpyxl.styles import Alignment, Font, PatternFill\r\nfrom openpyxl.styles.borders import Border, Side\r\nimport psycopg2.errors\r\n\r\nfrom python.state_processing import element_mapping_to_excel\r\nfrom python.util import utils\r\nfrom python.util.dataset import Dataset \r\nfrom python.util.logger_factory import logger\r\n\r\n\r\nust_or_release = 'ust' \t\t\t# Valid values are 'ust' or 'release'\r\ncontrol_id = 0                 \t# Enter an integer that is the ust_control_id or release_control_id\r\n\r\n# These variables can usually be left unset. This script will general an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC\r\nexport_file_path = None\r\nexport_file_dir = None\r\nexport_file_name = None\r\n\r\njoin_cols = {}\r\njoin_cols['v_ust_facility'] = []\r\njoin_cols['v_ust_facility_dispenser'] = ['facility_id']\r\njoin_cols['v_ust_tank'] = ['facility_id']\r\njoin_cols['v_ust_tank_substance'] = ['facility_id','tank_id']\r\njoin_cols['v_ust_tank_dispenser'] = ['facility_id','tank_id']\r\njoin_cols['v_ust_compartment'] = ['facility_id','tank_id']\r\njoin_cols['v_ust_compartment_substance'] = ['facility_id','tank_id','compartment_id']\r\njoin_cols['v_ust_compartment_dispenser'] = ['facility_id','tank_id','compartment_id']\r\njoin_cols['v_ust_piping'] = ['facility_id','tank_id','compartment_id']\r\njoin_cols['v_ust_release'] = []\r\njoin_cols['v_ust_release_source'] = ['release_id'] \r\njoin_cols['v_ust_release_cause'] = ['release_id']\r\njoin_cols['v_ust_release_substance'] = ['release_id']\r\njoin_cols['v_ust_release_corrective_action_strategy'] = ['release_id']\r\n\r\nyellow_cell_fill = 'FFFF00' # yellow\r\n\r\n\r\nclass QualityCheck:\r\n\tviews_to_review = []\r\n\tview_name = None \r\n\ttable_name = None \r\n\tview_col_str = None \r\n\terror_dict = {}\r\n\terror_cnt_dict = {}\r\n\tview_counts = {}\r\n\r\n\tdef __init__(self, \r\n\t\t\t\t dataset):\r\n\t\tself.dataset = dataset\r\n\t\tself.conn = utils.connect_db()\r\n\t\tself.cur = self.conn.cursor()\r\n\t\tself.set_views()\r\n\t\tif not self.views_to_review:\r\n\t\t\tlogger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)\r\n\t\t\tlogger.info('Views this script looks for: %s', self.get_view_names())\r\n\t\t\tself.disconnect_db()\r\n\t\t\texit()\r\n\t\tself.wb = op.Workbook()\t\r\n\t\tself.check_missing_views()\r\n\t\tself.set_view_counts()\r\n\t\tself.check_view_counts()\r\n\t\tfor view_name in self.views_to_review:\r\n\t\t\tself.view_name = view_name\r\n\t\t\tself.table_name = view_name.replace('v_','')\r\n\t\t\tself.set_view_col_str()\r\n\t\t\tself.check_join_cols()\r\n\t\t\tself.check_required_cols()\r\n\t\t\tself.check_extraneous_cols()\r\n\t\t\tself.check_nonunique()\r\n\t\t\tself.check_bad_datatypes()\r\n\t\t\tself.check_failed_constraints()\r\n\t\t\tself.check_bad_mapping()\r\n\t\t\tif self.dataset.ust_or_release == 'ust':\r\n\t\t\t\tself.check_compartment_data_flag()\r\n\t\tself.write_overview()\r\n\t\telement_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=True)\r\n\t\tself.cleanup_wb()\r\n\t\tself.disconnect_db()\r\n\r\n\r\n\tdef disconnect_db(self):\r\n\t\tself.cur.close()\r\n\t\tself.conn.close()\r\n\r\n\r\n\tdef get_view_names(self):\r\n\t\tsql = f\"select view_name from public.{self.dataset.ust_or_release}_template_data_tables order by sort_order\"\r\n\t\tself.cur.execute(sql)\r\n\t\trows = self.cur.fetchall()\r\n\t\tviews = [r[0] for r in rows]\r\n\t\treturn views \r\n\r\n\r\n\tdef set_views(self):\r\n\t\tsql = f\"\"\"select a.table_name as view_name \r\n\t\t\t\t\tfrom information_schema.tables a join public.{self.dataset.ust_or_release}_template_data_tables b on a.table_name = b.view_name \r\n\t\t\t\t\twhere a.table_schema = %s\r\n\t\t\t\t\torder by b.sort_order\"\"\"\r\n\t\tself.cur.execute(sql, (self.dataset.schema,))\r\n\t\trows = self.cur.fetchall()\t\t\r\n\t\tself.views_to_review = [r[0] for r in rows]\r\n\t\tlogger.info(\"The following views will be QC'ed: %s\", self.views_to_review)\r\n\r\n\r\n\tdef set_view_counts(self):\r\n\t\tsql = f\"select view_name from public.{self.dataset.ust_or_release}_template_data_tables order by sort_order\"\r\n\t\tself.cur.execute(sql)\r\n\t\trows = self.cur.fetchall()\r\n\t\tfor row in rows:\r\n\t\t\tview_name = row[0]\r\n\t\t\tsql2 = f\"select count(*) from {self.dataset.schema}.{view_name}\"\r\n\t\t\ttry:\r\n\t\t\t\tself.cur.execute(sql2)\r\n\t\t\texcept psycopg2.errors.UndefinedTable:\r\n\t\t\t\tcontinue\r\n\t\t\trows = self.cur.fetchone()\r\n\t\t\tnum_rows = rows[0]\r\n\t\t\tself.view_counts[view_name] = num_rows\r\n\r\n\r\n\tdef check_view_counts(self):\r\n\t\tif self.dataset.ust_or_release == 'ust':\r\n\t\t\tif 'v_ust_compartment' in self.views_to_review and 'v_ust_tank' in self.views_to_review:\r\n\t\t\t\tif self.view_counts['v_ust_compartment'] < self.view_counts['v_ust_tank']:\r\n\t\t\t\t\tself.error_dict['Fewer rows in child table than expected'] = 'v_compartment_tank should have at least as many rows as v_ust_tank'\r\n\t\t\t# if 'v_ust_piping' in self.views_to_review and 'v_ust_compartment' in self.views_to_review:\r\n\t\t\t# \tif self.view_counts['v_ust_piping'] < self.view_counts['v_ust_compartment']:\r\n\t\t\t# \t\tself.error_dict['Fewer rows in child table than expected'] = 'v_ust_piping should have at least as many rows as v_ust_compartment'\r\n\r\n\r\n\tdef check_missing_views(self):\r\n\t\t# check that all parent \r\n\t\tmissing_views = []\r\n\t\tif self.dataset.ust_or_release == 'ust':\r\n\t\t\tif 'v_ust_piping' in self.views_to_review:\r\n\t\t\t\tif 'v_ust_compartment' not in self.views_to_review:\r\n\t\t\t\t\tmissing_views.insert(0, 'v_ust_compartment')\r\n\t\t\t\tif 'v_ust_tank' not in self.views_to_review:\r\n\t\t\t\t\tmissing_views.insert(0, 'v_ust_tank')\r\n\t\t\tif 'v_ust_compartment' in self.views_to_review:\r\n\t\t\t\tif 'v_ust_tank' not in self.views_to_review and 'v_ust_tank' not in missing_views:\r\n\t\t\t\t\tmissing_views.insert(0, 'v_ust_tank')\r\n\t\t\tfor view_name in missing_views:\r\n\t\t\t\tself.error_dict['Missing required view (child data present)'] = self.dataset.schema + '.' + view_name  \r\n\t\t\t\tlogger.warning('Missing required view (child data present) %s.%s', self.dataset.schema, self.view_name)\r\n\r\n\r\n\tdef set_view_col_str(self):\r\n\t\tsql = \"\"\"select column_name\r\n\t\t\t\tfrom information_schema.columns \r\n\t\t\t\twhere table_schema = %s and table_name = %s\r\n\t\t\t\torder by ordinal_position\"\"\"\r\n\t\tself.cur.execute(sql, (self.dataset.schema, self.view_name))\r\n\t\trows = self.cur.fetchall()\r\n\t\tcol_str = ''\r\n\t\tfor row in rows:\r\n\t\t\tcol_str = col_str + row[0] + ', '\r\n\t\tif col_str:\r\n\t\t\tcol_str = col_str[:-2]\r\n\t\tself.view_col_str = col_str \r\n\r\n\r\n\tdef write_to_ws(self, data, ws_name):\r\n\t\tif data:\r\n\t\t\tws = self.wb.create_sheet(ws_name)\r\n\t\t\theaders = utils.get_headers(self.view_name, self.dataset.schema)\r\n\t\t\tfor colno, header in enumerate(headers, start=1):\r\n\t\t\t\tws.cell(row=1, column=colno).value = header\r\n\t\t\tfor rowno, row in enumerate(data, start=2):\r\n\t\t\t\tfor colno, cell_value in enumerate(row, start=1):\r\n\t\t\t\t\tws.cell(row=rowno, column=colno).value = cell_value\r\n\t\t\tlogger.info('Data written to worksheet %s', ws_name)\r\n\t\telse:\r\n\t\t\tlogger.info('Nothing to write to %s', ws_name)\r\n\r\n\r\n\tdef check_join_cols(self):\r\n\t\t# check for missing columns in the view that join child to parent tables \r\n\t\treq_cols = join_cols[self.view_name]\r\n\t\tsql = f\"\"\"select column_name from information_schema.columns \r\n\t\t\t\twhere table_schema = %s and table_name = %s\r\n\t\t\t\torder by ordinal_position\"\"\"\r\n\t\tself.cur.execute(sql, (self.dataset.schema, self.view_name,))\r\n\t\trows = self.cur.fetchall()\r\n\t\texisting_cols = [r[0] for r in rows]\r\n\t\tfor rcol in req_cols:\r\n\t\t\tif rcol not in existing_cols:\r\n\t\t\t\tself.error_dict['Missing join column'] = self.dataset.schema + '.' + self.view_name + '.' + rcol \r\n\t\t\t\tlogger.warning('Missing join column %s in view %s.%s', rcol, self.dataset.schema, self.view_name)\r\n\r\n\r\n\tdef check_required_cols(self):\r\n\t\t# check for missing columns in the view that are required by EPA \r\n\t\tsql = \"\"\"select column_name from information_schema.columns \r\n\t\t\t\twhere table_schema = 'public' and table_name = %s \r\n\t\t\t\tand is_nullable = 'NO' and ordinal_position > 1\r\n\t\t\t\tand column_name not like 'ust%%id' and column_name not like 'release%%id'\r\n\t\t\t\torder by ordinal_position\"\"\"\r\n\t\tself.cur.execute(sql, (self.table_name,))\r\n\t\trows = self.cur.fetchall()\r\n\t\tfor row in rows:\r\n\t\t\tcol_name = row[0]\r\n\t\t\tsql2 = \"\"\"select count(*) from information_schema.columns \r\n\t\t\t         where table_schema = %s and table_name = %s\r\n\t\t\t         and column_name = %s\"\"\"\r\n\t\t\tself.cur.execute(sql2, (self.dataset.schema, self.view_name, col_name))\r\n\t\t\tcnt = self.cur.fetchone()[0]\r\n\t\t\tif cnt < 1:\r\n\t\t\t\tself.error_dict['Missing required column'] = self.dataset.schema + '.' + self.view_name + '.' + col_name \r\n\t\t\t\tlogger.warning('Missing required column %s in view %s.%s', col_name, self.dataset.schema, self.view_name)\r\n\t\t\telse:\r\n\t\t\t\tsql3 = f\"select * from {self.dataset.schema}.{self.view_name} where {col_name} is null\"\r\n\t\t\t\tself.cur.execute(sql3)\r\n\t\t\t\tdata = self.cur.fetchall()\r\n\t\t\t\tnum_rows = self.cur.rowcount \r\n\t\t\t\tself.error_cnt_dict['Number of null rows for required column ' + self.table_name + '.' + col_name] = num_rows\r\n\t\t\t\tlogger.warning('Number of null rows for required column %s.%s = %s', self.table_name, col_name, num_rows)\r\n\t\t\t\tself.write_to_ws(data, col_name + ' null')\r\n\r\n\r\n\tdef get_bad_datatypes(self, data):\r\n\t\tfor d in data:\r\n\t\t\tcol_name = d[0]\r\n\t\t\ttable_data_type = d[1]\r\n\t\t\ttable_len = d[2]\r\n\t\t\tview_data_type = d[3]\r\n\t\t\tview_len = d[4]\r\n\t\t\tif view_len and table_len and view_len > table_len:\r\n\t\t\t\tsql2 = f\"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s\"\r\n\t\t\t\tself.cur.execute(sql2, (table_len,))\r\n\t\t\t\tdata = self.cur.fetchall()\r\n\t\t\t\tnum_rows = self.cur.rowcount \r\n\t\t\t\tself.error_cnt_dict['Number of rows exceeding allowed length of ' + self.table_name + '.' + col_name] = num_rows\r\n\t\t\t\tlogger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)\r\n\t\t\t\tself.write_to_ws(data, col_name + ' too long')\r\n\t\t\telif view_data_type == 'text' and table_data_type == 'character varying':\r\n\t\t\t\tsql = f\"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s\"\r\n\t\t\t\tself.cur.execute(sql, (table_len,))\r\n\t\t\t\tdata = self.cur.fetchall()\r\n\t\t\t\tnum_rows = self.cur.rowcount \r\n\t\t\t\tif num_rows > 0:\r\n\t\t\t\t\tself.error_cnt_dict['Number of rows exceeding allowed length of ' + self.table_name + '.' + col_name] = num_rows\r\n\t\t\t\t\tlogger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)\r\n\t\t\t\t\tself.write_to_ws(data, col_name + ' too long')\r\n\t\t\telif table_data_type != view_data_type:\r\n\t\t\t\tself.error_dict['Wrong data type for ' + self.table_name + '.' + col_name] = self.dataset.schema + '.' + self.view_name + '.' + col_name\r\n\r\n\r\n\tdef check_bad_datatypes(self):\r\n\t\t# check for columns in the state schema view where the data type doesn't match the EPA table, or \r\n\t\t# the length of the value in a character column is too long in the state data \r\n\t\tsql = \"\"\"select a.column_name, a.data_type, a.character_maximum_length, b.data_type, b.character_maximum_length \r\n\t\t\t\tfrom information_schema.columns a join information_schema.columns b on a.column_name = b.column_name\r\n\t\t\t\twhere a.table_schema = 'public' and a.table_name = %s\r\n\t\t\t\tand b.table_schema  = %s and b.table_name = %s\r\n\t\t\t\tand (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length)\r\n\t\t\t\torder by a.ordinal_position\"\"\"\r\n\t\tself.cur.execute(sql, (self.table_name, self.dataset.schema, self.view_name))\r\n\t\tdata = self.cur.fetchall()\r\n\t\tself.get_bad_datatypes(data)\r\n\r\n\t\t# check the data type of the EPA table join columns \r\n\t\tif self.dataset.ust_or_release == 'ust':\r\n\t\t\tif self.view_name == 'v_ust_tank':\r\n\t\t\t\tepa_table_name = 'ust_facility'\r\n\t\t\telif self.view_name == 'v_ust_compartment':\r\n\t\t\t\tepa_table_name = 'ust_tank'\r\n\t\t\telif self.view_name == 'v_ust_piping':\r\n\t\t\t\tepa_table_name = 'ust_compartment'\r\n\t\t\telse: # no need to check v_ust_facility as it is the parent\r\n\t\t\t\tepa_table_name = None \r\n\t\t\tif epa_table_name:\r\n\t\t\t\tsql = \"\"\"select a.column_name, a.data_type, a.character_maximum_length, b.data_type, b.character_maximum_length \r\n\t\t\t\t\t\tfrom information_schema.columns a join information_schema.columns b on a.column_name = b.column_name\r\n\t\t\t\t\t\twhere a.table_schema = 'public' and a.table_name = %s\r\n\t\t\t\t\t\tand b.table_schema = %s and b.table_name = %s\r\n\t\t\t\t\t\tand (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length)\r\n\t\t\t\t\t\torder by a.ordinal_position\"\"\"\r\n\t\t\t\tself.cur.execute(sql, (epa_table_name, self.dataset.schema, self.view_name))\r\n\t\t\t\tdata = self.cur.fetchall()\r\n\t\t\t\tself.get_bad_datatypes(data)\r\n\r\n\r\n\tdef check_extraneous_cols(self):\r\n\t\t# check for columns in the state schema view that don't correspond to columns in the EPA template \r\n\t\tsql = \"\"\"select column_name from information_schema.columns \r\n\t\t     \twhere table_schema = %s and table_name = %s and column_name not in \r\n\t\t     \t\t(select column_name from information_schema.columns \r\n\t\t     \t\twhere table_schema = 'public' and table_name = %s)\r\n\t\t     \torder by column_name\"\"\"\r\n\t\tself.cur.execute(sql, (self.dataset.schema, self.view_name, self.table_name))\r\n\t\trows = self.cur.fetchall()\r\n\t\tfor row in rows:\r\n\t\t\tcol_name = row[0]\r\n\t\t\tif col_name not in join_cols[self.view_name] and not (self.view_name == 'v_ust_compartment_substance' and col_name == 'substance_id'):\r\n\t\t\t\tself.error_dict['Extraneous column'] = self.dataset.schema + '.' + self.view_name + '.' + col_name \r\n\t\t\t\tlogger.warning('Extraneous column %s in view %s.%s', col_name, self.dataset.schema, self.view_name)\r\n\r\n\r\n\tdef check_nonunique(self):\r\n\t\t# check for non-unique (repeating) rows\t\r\n\t\tsql = f\"select {self.view_col_str}, count(*) from {self.dataset.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2\"\r\n\t\tself.cur.execute(sql)\r\n\t\tdata = self.cur.fetchall()\r\n\t\tnum_rows = self.cur.rowcount \r\n\t\tself.error_cnt_dict['nonunique rows in ' + self.dataset.schema + '.' + self.view_name] = num_rows\r\n\t\tlogger.warning('Number of non-unique rows in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)\r\n\t\tself.write_to_ws(data, self.view_name + ' nonunique')\r\n\r\n\r\n\tdef check_failed_constraints(self):\r\n\t\t# check for failed check constraints\r\n\t\tsql = \"\"\"select cc.constraint_name, check_clause\r\n\t\t\t\t\tfrom information_schema.check_constraints cc \r\n\t\t\t\t\t\tjoin pg_constraint cons on cc.constraint_name = cons.conname\r\n\t\t\t\t\t\tjoin pg_class t on cons.conrelid = t.oid \r\n\t\t\t\t\twhere constraint_schema = 'public' and t.relname = %s\r\n\t\t\t\t\torder by 1, 2\"\"\"\r\n\t\tself.cur.execute(sql, (self.table_name,))\r\n\t\trows = self.cur.fetchall()\r\n\t\tfor row in rows:\r\n\t\t\tconstraint_name = row[0]\r\n\t\t\tcheck_clause = row[1]\r\n\t\t\tsql2 = f\"select * from {self.dataset.schema}.{self.view_name} where not {check_clause}\"\r\n\t\t\ttry:\r\n\t\t\t\tself.cur.execute(sql2)\r\n\t\t\texcept psycopg2.errors.UndefinedColumn:\r\n\t\t\t\tcontinue \r\n\t\t\tdata = self.cur.fetchall()\r\n\t\t\tnum_rows = self.cur.rowcount \r\n\t\t\tself.error_cnt_dict['failed check constraint ' + self.dataset.schema + '.' + constraint_name] = num_rows\r\n\t\t\tlogger.warning('Number of failed rows for check constraint %s.%s: %s', self.table_name, constraint_name, num_rows)\r\n\t\t\tself.write_to_ws(data, constraint_name)\r\n\r\n\r\n\tdef check_bad_mapping(self):\r\n\t\t# check for bad mapping values\r\n\t\tsql = f\"\"\"select distinct epa_column_name, epa_value, database_lookup_table, database_column_name \r\n\t\t\t\tfrom public.v_{self.dataset.ust_or_release}_element_mapping a join public.{self.dataset.ust_or_release}_elements b on a.epa_column_name = b.database_column_name \r\n\t\t\t\twhere {self.dataset.ust_or_release}_control_id = %s and database_lookup_table is not null and epa_table_name = %s and epa_value is not null\r\n\t\t\t\torder by 1, 2, 3\"\"\"\r\n\t\tself.cur.execute(sql, (self.dataset.control_id, self.table_name))\r\n\t\trows = self.cur.fetchall()\r\n\t\tfor row in rows:\r\n\t\t\tepa_column_name = row[0]\r\n\t\t\tepa_value = row[1]\r\n\t\t\tlookup_table = row[2]\r\n\t\t\tlookup_column = row[3].replace('_id','')\r\n\t\t\tif lookup_column == 'facility_type1' or lookup_column == 'facility_type2':\r\n\t\t\t\tlookup_column = 'facility_type'\r\n\t\t\tsql2 = f\"select count(*) from public.{lookup_table} where {lookup_column} = %s\"\r\n\t\t\tself.cur.execute(sql2, (epa_value,))\r\n\t\t\tcnt = self.cur.fetchone()[0]\r\n\t\t\tif cnt < 1:\r\n\t\t\t\tself.error_dict['invalid EPA value in ' + epa_column_name] = epa_value \r\n\t\t\t\tlogger.warning('Invalid EPA value for %s.%s: %s', self.table_name, epa_column_name, cnt)\r\n\r\n\r\n\tdef check_compartment_data_flag(self):\r\n\t\tsql = \"select organization_compartment_flag from ust_control where ust_control_id = %s\"\r\n\t\tself.cur.execute(sql, (self.dataset.control_id,))\r\n\t\torg_comp_flag = self.cur.fetchone()[0]\r\n\t\tif not org_comp_flag:\r\n\t\t\tself.error_dict['Missing organization_compartment_flag in ust_control'] = org_comp_flag \r\n\t\t\tlogger.warning('Missing organization_compartment_flag in ust_control')\r\n\t\telif org_comp_flag not in ['Y','N']:\r\n\t\t\tself.error_dict['Bad value of in organization_compartment_flag in ust_control'] = org_comp_flag\r\n\t\t\tlogger.warning('Bad value of %s in  organization_compartment_flag in ust_control', org_comp_flag)\r\n\r\n\r\n\tdef write_overview(self):\r\n\t\t# Print an overview of QA/QC results\r\n\t\tws = self.wb.create_sheet('Overview')\r\n\t\trowno = 1\r\n\t\tws.cell(row=rowno, column=1).value = 'View Name'\r\n\t\tws.cell(row=rowno, column=1).font = Font(bold=True)\r\n\t\tws.cell(row=rowno, column=2).value = 'Number of Rows'\r\n\t\tws.cell(row=rowno, column=2).font = Font(bold=True)\r\n\t\trowno +=1 \r\n\t\tfor k, v in self.view_counts.items():\r\n\t\t\tprint('Number of rows in ' + k + ' = ' + str(v))\r\n\t\t\tws.cell(row=rowno, column=1).value = k\r\n\t\t\tws.cell(row=rowno, column=2).value = v  \r\n\t\t\trowno += 1\r\n\r\n\t\trowno += 2\r\n\t\tws.cell(row=rowno, column=1).value = 'QA Check'\r\n\t\tws.cell(row=rowno, column=1).font = Font(bold=True)\r\n\t\tws.cell(row=rowno, column=2).value = 'Number of Rows'\r\n\t\tws.cell(row=rowno, column=2).font = Font(bold=True)\r\n\t\trowno +=1 \t\r\n\t\tfor k, v in self.error_cnt_dict.items():\r\n\t\t\tprint(k + ' = ' + str(v))\r\n\t\t\tws.cell(row=rowno, column=1).value = k\r\n\t\t\tws.cell(row=rowno, column=2).value = v  \r\n\t\t\tif v > 0:\r\n\t\t\t\tws.cell(row=rowno, column=2).fill = utils.get_fill_gen(yellow_cell_fill)\r\n\t\t\trowno += 1\r\n\t\r\n\t\tutils.autowidth(ws)\t\t\r\n\t\r\n\t\trowno += 2\r\n\t\tws.cell(row=rowno, column=1).value = 'Bad or Missing Data'\r\n\t\tws.cell(row=rowno, column=1).font = Font(bold=True)\r\n\t\tws.cell(row=rowno, column=2).value = 'Details'\r\n\t\tws.cell(row=rowno, column=2).font = Font(bold=True)\r\n\t\trowno +=1 \t\r\n\t\tbad = False\r\n\t\tfor k, v in self.error_dict.items():\r\n\t\t\tbad = True\r\n\t\t\tprint(k + ' = ' + str(v))\r\n\t\t\tws.cell(row=rowno, column=1).value = k\r\n\t\t\tws.cell(row=rowno, column=2).value = v  \r\n\t\t\trowno += 1\r\n\t\tif not bad: \r\n\t\t\tws.cell(row=rowno, column=1).value = 'No bad or missing data'\r\n\t\t\tws.cell(row=rowno, column=1).font = Font(italic=True)\r\n\r\n\r\n\tdef cleanup_wb(self):\r\n\t\ttry:\r\n\t\t\tself.wb.remove(self.wb['Sheet'])\r\n\t\t\tself.wb.active = self.wb['Overview']\r\n\t\texcept:\r\n\t\t\tpass\r\n\t\tself.wb.save(self.dataset.export_file_path)\r\n\r\n\r\n\r\ndef main(ust_or_release, control_id=None, export_file_name=None, export_file_dir=None, export_file_path=None):\r\n\tdataset = Dataset(ust_or_release=ust_or_release,\r\n\t\t\t\t \t  control_id=control_id, \r\n\t\t\t\t \t  base_file_name='QAQC_' + utils.get_timestamp_str() + '.xlsx',\r\n\t\t\t\t\t  export_file_name=export_file_name,\r\n\t\t\t\t\t  export_file_dir=export_file_dir,\r\n\t\t\t\t\t  export_file_path=export_file_path)\r\n\r\n\tqc = QualityCheck(dataset=dataset)\r\n\r\n\r\nif __name__ == '__main__':   \r\n\tmain(ust_or_release=ust_or_release,\r\n\t\t control_id=control_id, \r\n\t\t export_file_name=export_file_name,\r\n\t\t export_file_dir=export_file_dir,\r\n\t\t export_file_path=export_file_path)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/python/state_processing/qa_check.py b/python/state_processing/qa_check.py
+--- a/python/state_processing/qa_check.py	(revision d430d9f653ac53c7546c17464e3b86ec402dd191)
++++ b/python/state_processing/qa_check.py	(date 1728666017921)
+@@ -5,21 +5,18 @@
+ ROOT_PATH = Path(__file__).parent.parent.parent
+ sys.path.append(os.path.join(ROOT_PATH, ''))
+ 
++import psycopg2.errors
+ import openpyxl as op
+ from openpyxl.styles import Alignment, Font, PatternFill
+ from openpyxl.styles.borders import Border, Side
+-import psycopg2.errors
+ 
+ from python.state_processing import element_mapping_to_excel
++from python.util.logger_factory import logger
+ from python.util import utils
+-from python.util.dataset import Dataset 
+-from python.util.logger_factory import logger
+ 
+ 
+-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+-control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+-
+-# These variables can usually be left unset. This script will general an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
++ust_or_release = 'ust' # valid values are 'ust' or 'release'
++control_id = 18
+ export_file_path = None
+ export_file_dir = None
+ export_file_name = None
+@@ -53,13 +50,28 @@
+ 	view_counts = {}
+ 
+ 	def __init__(self, 
+-				 dataset):
+-		self.dataset = dataset
++				 ust_or_release,
++				 control_id,
++				 export_file_name=None, 
++				 export_file_dir=None,
++				 export_file_path=None):
++		self.ust_or_release = ust_or_release.lower()
++		if self.ust_or_release not in ['ust','release']:
++			logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
++			exit()
++		self.control_id = control_id
++		self.export_file_name = export_file_name
++		self.export_file_dir = export_file_dir
++		self.export_file_path = export_file_path
++		self.organization_id = utils.get_org_from_control_id(self.control_id, self.ust_or_release)
++		self.schema = utils.get_schema_from_control_id(self.control_id, self.ust_or_release)
+ 		self.conn = utils.connect_db()
+ 		self.cur = self.conn.cursor()
++		self.set_export_path()
+ 		self.set_views()
++		# self.print_self()
+ 		if not self.views_to_review:
+-			logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
++			logger.warning('No %s template views found in schema %s; exiting.', self.ust_or_release, self.schema)
+ 			logger.info('Views this script looks for: %s', self.get_view_names())
+ 			self.disconnect_db()
+ 			exit()
+@@ -78,21 +90,56 @@
+ 			self.check_bad_datatypes()
+ 			self.check_failed_constraints()
+ 			self.check_bad_mapping()
+-			if self.dataset.ust_or_release == 'ust':
++			if self.ust_or_release == 'ust':
+ 				self.check_compartment_data_flag()
+ 		self.write_overview()
+-		element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=True)
++		element_mapping_to_excel.build_ws(self.ust_or_release, self.control_id, self.wb.create_sheet(), admin=True)
+ 		self.cleanup_wb()
+ 		self.disconnect_db()
+ 
+ 
++	def print_self(self):
++		print('ust_or_release = ' + str(self.ust_or_release))
++		print('control_id = ' + str(self.control_id))
++		print('organization_id = ' + str(self.organization_id))
++		print('export_file_name = ' + str(self.export_file_name))
++		print('export_file_dir = ' + str(self.export_file_dir))
++		print('export_file_path = ' + str(self.export_file_path))
++		print('schema = ' + str(self.schema))
++		print('views_to_review = ' + str(self.views_to_review))
++		print('view_name = ' + str(self.view_name))
++		print('table_name = ' + str(self.table_name))
++		print('view_col_str = ' + str(self.view_col_str))
++		print('error_dict = ' + str(self.error_dict))
++		print('error_cnt_dict = ' + str(self.error_cnt_dict))
++
++
++	def set_export_path(self):
++		if not self.export_file_path and not self.export_file_path and not self.export_file_name:
++			self.export_file_name = self.organization_id.upper() + '_' + self.ust_or_release + '_QAQC_' + utils.get_timestamp_str() + '.xlsx'
++			self.export_file_dir = '../exports/QAQC/' + self.organization_id.upper() + '/'
++			self.export_file_path = self.export_file_dir + self.export_file_name
++			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
++		elif self.export_file_path:
++			fp = ntpath.split(self.export_file_path)
++			self.export_file_dir = fp[0]
++			self.export_file_name = fp[1]
++		elif self.export_file_dir and self.export_file_name:
++			if self.export_file_name[-5:] != '.xlsx':
++				self.export_file_name = self.export_file_name + '.xlsx'
++			self.export_file_path = os.path.join(self.export_file_dir, self.export_file_name)
++		self.export_file_name = self.export_file_name.replace('_ust_','_UST_')
++		self.export_file_path = self.export_file_path.replace('_ust_','_UST_')
++		logger.debug('export_file_name = %s; export_file_dir = %s; export_file_path = %s', self.export_file_name, self.export_file_dir, self.export_file_path)
++
++
+ 	def disconnect_db(self):
+ 		self.cur.close()
+ 		self.conn.close()
+ 
+ 
+ 	def get_view_names(self):
+-		sql = f"select view_name from public.{self.dataset.ust_or_release}_template_data_tables order by sort_order"
++		sql = f"select view_name from public.{self.ust_or_release}_template_data_tables order by sort_order"
+ 		self.cur.execute(sql)
+ 		rows = self.cur.fetchall()
+ 		views = [r[0] for r in rows]
+@@ -101,22 +148,22 @@
+ 
+ 	def set_views(self):
+ 		sql = f"""select a.table_name as view_name 
+-					from information_schema.tables a join public.{self.dataset.ust_or_release}_template_data_tables b on a.table_name = b.view_name 
++					from information_schema.tables a join public.{self.ust_or_release}_template_data_tables b on a.table_name = b.view_name 
+ 					where a.table_schema = %s
+ 					order by b.sort_order"""
+-		self.cur.execute(sql, (self.dataset.schema,))
++		self.cur.execute(sql, (self.schema,))
+ 		rows = self.cur.fetchall()		
+ 		self.views_to_review = [r[0] for r in rows]
+ 		logger.info("The following views will be QC'ed: %s", self.views_to_review)
+ 
+ 
+ 	def set_view_counts(self):
+-		sql = f"select view_name from public.{self.dataset.ust_or_release}_template_data_tables order by sort_order"
++		sql = f"select view_name from public.{self.ust_or_release}_template_data_tables order by sort_order"
+ 		self.cur.execute(sql)
+ 		rows = self.cur.fetchall()
+ 		for row in rows:
+ 			view_name = row[0]
+-			sql2 = f"select count(*) from {self.dataset.schema}.{view_name}"
++			sql2 = f"select count(*) from {self.schema}.{view_name}"
+ 			try:
+ 				self.cur.execute(sql2)
+ 			except psycopg2.errors.UndefinedTable:
+@@ -127,7 +174,7 @@
+ 
+ 
+ 	def check_view_counts(self):
+-		if self.dataset.ust_or_release == 'ust':
++		if self.ust_or_release == 'ust':
+ 			if 'v_ust_compartment' in self.views_to_review and 'v_ust_tank' in self.views_to_review:
+ 				if self.view_counts['v_ust_compartment'] < self.view_counts['v_ust_tank']:
+ 					self.error_dict['Fewer rows in child table than expected'] = 'v_compartment_tank should have at least as many rows as v_ust_tank'
+@@ -139,7 +186,7 @@
+ 	def check_missing_views(self):
+ 		# check that all parent 
+ 		missing_views = []
+-		if self.dataset.ust_or_release == 'ust':
++		if self.ust_or_release == 'ust':
+ 			if 'v_ust_piping' in self.views_to_review:
+ 				if 'v_ust_compartment' not in self.views_to_review:
+ 					missing_views.insert(0, 'v_ust_compartment')
+@@ -149,8 +196,8 @@
+ 				if 'v_ust_tank' not in self.views_to_review and 'v_ust_tank' not in missing_views:
+ 					missing_views.insert(0, 'v_ust_tank')
+ 			for view_name in missing_views:
+-				self.error_dict['Missing required view (child data present)'] = self.dataset.schema + '.' + view_name  
+-				logger.warning('Missing required view (child data present) %s.%s', self.dataset.schema, self.view_name)
++				self.error_dict['Missing required view (child data present)'] = self.schema + '.' + view_name  
++				logger.warning('Missing required view (child data present) %s.%s', self.schema, self.view_name)
+ 
+ 
+ 	def set_view_col_str(self):
+@@ -158,7 +205,7 @@
+ 				from information_schema.columns 
+ 				where table_schema = %s and table_name = %s
+ 				order by ordinal_position"""
+-		self.cur.execute(sql, (self.dataset.schema, self.view_name))
++		self.cur.execute(sql, (self.schema, self.view_name))
+ 		rows = self.cur.fetchall()
+ 		col_str = ''
+ 		for row in rows:
+@@ -171,7 +218,7 @@
+ 	def write_to_ws(self, data, ws_name):
+ 		if data:
+ 			ws = self.wb.create_sheet(ws_name)
+-			headers = utils.get_headers(self.view_name, self.dataset.schema)
++			headers = utils.get_headers(self.view_name, self.schema)
+ 			for colno, header in enumerate(headers, start=1):
+ 				ws.cell(row=1, column=colno).value = header
+ 			for rowno, row in enumerate(data, start=2):
+@@ -188,13 +235,13 @@
+ 		sql = f"""select column_name from information_schema.columns 
+ 				where table_schema = %s and table_name = %s
+ 				order by ordinal_position"""
+-		self.cur.execute(sql, (self.dataset.schema, self.view_name,))
++		self.cur.execute(sql, (self.schema, self.view_name,))
+ 		rows = self.cur.fetchall()
+ 		existing_cols = [r[0] for r in rows]
+ 		for rcol in req_cols:
+ 			if rcol not in existing_cols:
+-				self.error_dict['Missing join column'] = self.dataset.schema + '.' + self.view_name + '.' + rcol 
+-				logger.warning('Missing join column %s in view %s.%s', rcol, self.dataset.schema, self.view_name)
++				self.error_dict['Missing join column'] = self.schema + '.' + self.view_name + '.' + rcol 
++				logger.warning('Missing join column %s in view %s.%s', rcol, self.schema, self.view_name)
+ 
+ 
+ 	def check_required_cols(self):
+@@ -211,13 +258,13 @@
+ 			sql2 = """select count(*) from information_schema.columns 
+ 			         where table_schema = %s and table_name = %s
+ 			         and column_name = %s"""
+-			self.cur.execute(sql2, (self.dataset.schema, self.view_name, col_name))
++			self.cur.execute(sql2, (self.schema, self.view_name, col_name))
+ 			cnt = self.cur.fetchone()[0]
+ 			if cnt < 1:
+-				self.error_dict['Missing required column'] = self.dataset.schema + '.' + self.view_name + '.' + col_name 
+-				logger.warning('Missing required column %s in view %s.%s', col_name, self.dataset.schema, self.view_name)
++				self.error_dict['Missing required column'] = self.schema + '.' + self.view_name + '.' + col_name 
++				logger.warning('Missing required column %s in view %s.%s', col_name, self.schema, self.view_name)
+ 			else:
+-				sql3 = f"select * from {self.dataset.schema}.{self.view_name} where {col_name} is null"
++				sql3 = f"select * from {self.schema}.{self.view_name} where {col_name} is null"
+ 				self.cur.execute(sql3)
+ 				data = self.cur.fetchall()
+ 				num_rows = self.cur.rowcount 
+@@ -234,7 +281,7 @@
+ 			view_data_type = d[3]
+ 			view_len = d[4]
+ 			if view_len and table_len and view_len > table_len:
+-				sql2 = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
++				sql2 = f"select * from {self.schema}.{self.view_name} where length({col_name}) > %s"
+ 				self.cur.execute(sql2, (table_len,))
+ 				data = self.cur.fetchall()
+ 				num_rows = self.cur.rowcount 
+@@ -242,7 +289,7 @@
+ 				logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
+ 				self.write_to_ws(data, col_name + ' too long')
+ 			elif view_data_type == 'text' and table_data_type == 'character varying':
+-				sql = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
++				sql = f"select * from {self.schema}.{self.view_name} where length({col_name}) > %s"
+ 				self.cur.execute(sql, (table_len,))
+ 				data = self.cur.fetchall()
+ 				num_rows = self.cur.rowcount 
+@@ -251,7 +298,7 @@
+ 					logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
+ 					self.write_to_ws(data, col_name + ' too long')
+ 			elif table_data_type != view_data_type:
+-				self.error_dict['Wrong data type for ' + self.table_name + '.' + col_name] = self.dataset.schema + '.' + self.view_name + '.' + col_name
++				self.error_dict['Wrong data type for ' + self.table_name + '.' + col_name] = self.schema + '.' + self.view_name + '.' + col_name
+ 
+ 
+ 	def check_bad_datatypes(self):
+@@ -263,12 +310,12 @@
+ 				and b.table_schema  = %s and b.table_name = %s
+ 				and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length)
+ 				order by a.ordinal_position"""
+-		self.cur.execute(sql, (self.table_name, self.dataset.schema, self.view_name))
++		self.cur.execute(sql, (self.table_name, self.schema, self.view_name))
+ 		data = self.cur.fetchall()
+ 		self.get_bad_datatypes(data)
+ 
+ 		# check the data type of the EPA table join columns 
+-		if self.dataset.ust_or_release == 'ust':
++		if self.ust_or_release == 'ust':
+ 			if self.view_name == 'v_ust_tank':
+ 				epa_table_name = 'ust_facility'
+ 			elif self.view_name == 'v_ust_compartment':
+@@ -284,7 +331,7 @@
+ 						and b.table_schema = %s and b.table_name = %s
+ 						and (a.data_type <> b.data_type or b.character_maximum_length > a.character_maximum_length)
+ 						order by a.ordinal_position"""
+-				self.cur.execute(sql, (epa_table_name, self.dataset.schema, self.view_name))
++				self.cur.execute(sql, (epa_table_name, self.schema, self.view_name))
+ 				data = self.cur.fetchall()
+ 				self.get_bad_datatypes(data)
+ 
+@@ -296,23 +343,23 @@
+ 		     		(select column_name from information_schema.columns 
+ 		     		where table_schema = 'public' and table_name = %s)
+ 		     	order by column_name"""
+-		self.cur.execute(sql, (self.dataset.schema, self.view_name, self.table_name))
++		self.cur.execute(sql, (self.schema, self.view_name, self.table_name))
+ 		rows = self.cur.fetchall()
+ 		for row in rows:
+ 			col_name = row[0]
+ 			if col_name not in join_cols[self.view_name] and not (self.view_name == 'v_ust_compartment_substance' and col_name == 'substance_id'):
+-				self.error_dict['Extraneous column'] = self.dataset.schema + '.' + self.view_name + '.' + col_name 
+-				logger.warning('Extraneous column %s in view %s.%s', col_name, self.dataset.schema, self.view_name)
++				self.error_dict['Extraneous column'] = self.schema + '.' + self.view_name + '.' + col_name 
++				logger.warning('Extraneous column %s in view %s.%s', col_name, self.schema, self.view_name)
+ 
+ 
+ 	def check_nonunique(self):
+ 		# check for non-unique (repeating) rows	
+-		sql = f"select {self.view_col_str}, count(*) from {self.dataset.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
++		sql = f"select {self.view_col_str}, count(*) from {self.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
+ 		self.cur.execute(sql)
+ 		data = self.cur.fetchall()
+ 		num_rows = self.cur.rowcount 
+-		self.error_cnt_dict['nonunique rows in ' + self.dataset.schema + '.' + self.view_name] = num_rows
+-		logger.warning('Number of non-unique rows in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
++		self.error_cnt_dict['nonunique rows in ' + self.schema + '.' + self.view_name] = num_rows
++		logger.warning('Number of non-unique rows in %s.%s: %s', self.schema, self.view_name, num_rows)
+ 		self.write_to_ws(data, self.view_name + ' nonunique')
+ 
+ 
+@@ -329,14 +376,14 @@
+ 		for row in rows:
+ 			constraint_name = row[0]
+ 			check_clause = row[1]
+-			sql2 = f"select * from {self.dataset.schema}.{self.view_name} where not {check_clause}"
++			sql2 = f"select * from {self.schema}.{self.view_name} where not {check_clause}"
+ 			try:
+ 				self.cur.execute(sql2)
+ 			except psycopg2.errors.UndefinedColumn:
+ 				continue 
+ 			data = self.cur.fetchall()
+ 			num_rows = self.cur.rowcount 
+-			self.error_cnt_dict['failed check constraint ' + self.dataset.schema + '.' + constraint_name] = num_rows
++			self.error_cnt_dict['failed check constraint ' + self.schema + '.' + constraint_name] = num_rows
+ 			logger.warning('Number of failed rows for check constraint %s.%s: %s', self.table_name, constraint_name, num_rows)
+ 			self.write_to_ws(data, constraint_name)
+ 
+@@ -344,10 +391,10 @@
+ 	def check_bad_mapping(self):
+ 		# check for bad mapping values
+ 		sql = f"""select distinct epa_column_name, epa_value, database_lookup_table, database_column_name 
+-				from public.v_{self.dataset.ust_or_release}_element_mapping a join public.{self.dataset.ust_or_release}_elements b on a.epa_column_name = b.database_column_name 
+-				where {self.dataset.ust_or_release}_control_id = %s and database_lookup_table is not null and epa_table_name = %s and epa_value is not null
++				from public.v_{self.ust_or_release}_element_mapping a join public.{self.ust_or_release}_elements b on a.epa_column_name = b.database_column_name 
++				where {self.ust_or_release}_control_id = %s and epa_table_name = %s and epa_value is not null
+ 				order by 1, 2, 3"""
+-		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
++		self.cur.execute(sql, (self.control_id, self.table_name))
+ 		rows = self.cur.fetchall()
+ 		for row in rows:
+ 			epa_column_name = row[0]
+@@ -366,7 +413,7 @@
+ 
+ 	def check_compartment_data_flag(self):
+ 		sql = "select organization_compartment_flag from ust_control where ust_control_id = %s"
+-		self.cur.execute(sql, (self.dataset.control_id,))
++		self.cur.execute(sql, (self.control_id,))
+ 		org_comp_flag = self.cur.fetchone()[0]
+ 		if not org_comp_flag:
+ 			self.error_dict['Missing organization_compartment_flag in ust_control'] = org_comp_flag 
+@@ -431,20 +478,17 @@
+ 			self.wb.active = self.wb['Overview']
+ 		except:
+ 			pass
+-		self.wb.save(self.dataset.export_file_path)
++		self.wb.save(self.export_file_path)
+ 
+ 
+ 
+ def main(ust_or_release, control_id=None, export_file_name=None, export_file_dir=None, export_file_path=None):
+-	dataset = Dataset(ust_or_release=ust_or_release,
+-				 	  control_id=control_id, 
+-				 	  base_file_name='QAQC_' + utils.get_timestamp_str() + '.xlsx',
+-					  export_file_name=export_file_name,
+-					  export_file_dir=export_file_dir,
+-					  export_file_path=export_file_path)
++	qc = QualityCheck(ust_or_release=ust_or_release,
++						control_id=control_id,
++						export_file_name=export_file_name,
++						export_file_dir=export_file_dir,
++						export_file_path=export_file_path)
+ 
+-	qc = QualityCheck(dataset=dataset)
+-
+ 
+ if __name__ == '__main__':   
+ 	main(ust_or_release=ust_or_release,
+Index: python/state_processing/populate_epa_data_tables.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from datetime import date\r\nimport ntpath\r\nimport os\r\nfrom pathlib import Path\r\nimport sys  \r\nROOT_PATH = Path(__file__).parent.parent.parent\r\nsys.path.append(os.path.join(ROOT_PATH, ''))\r\n\r\nfrom python.util import utils, config\r\nfrom python.util.logger_factory import logger\r\n\r\n\r\nust_or_release = 'ust' \t\t\t# Valid values are 'ust' or 'release'\r\ncontrol_id = 0                  # Enter an integer that is the ust_control_id or release_control_id\r\ndelete_existing = False \t\t# Boolean, defaults to False. Set to True to delete existing data. Script will return an error if this variable is False and data exists in the EPA data tables for the control_id.\t\t\t\r\n\r\n\r\ndef main(control_id, ust_or_release, delete_existing=False):\r\n\tust_or_release = utils.verify_ust_or_release(ust_or_release)\r\n\tschema = utils.get_schema_from_control_id(control_id, ust_or_release)\r\n\r\n\tconn = utils.connect_db()\r\n\tcur = conn.cursor()\r\n\r\n\tif delete_existing:\r\n\t\tif ust_or_release == 'release':\r\n\t\t\tutils.delete_all_release_data(control_id)\r\n\t\telse:\r\n\t\t\tutils.delete_all_ust_data(control_id) \r\n\telse:\r\n\t\tif ust_or_release == 'release':\r\n\t\t\ttable_name = 'ust_release'\r\n\t\telse:\r\n\t\t\ttable_name = 'ust_facility'\r\n\r\n\t\tsql = f\"select count(*) from public.{table_name} where {ust_or_release}_control_id = %s\"\r\n\t\tcur.execute(sql, (control_id,))\r\n\t\tcnt = cur.fetchone()[0]\r\n\t\tif cnt > 0:\r\n\t\t\tlogger.warning('Data found in %s for %s_control_id %s. To proceed, set the delete_existing variable to True.', table_name, ust_or_release, control_id)\r\n\t\t\texit()\r\n\r\n\ttable_name = ust_or_release + '_template_data_tables'\r\n\tsql = f\"\"\"select table_name, view_name, sort_order\r\n\t\t\tfrom {table_name}\r\n\t\t\torder by sort_order\"\"\"\r\n\tcur.execute(sql)\r\n\trows = cur.fetchall()\r\n\tfor row in rows:\r\n\t\torg_column_list = ''\r\n\t\ttable_name = row[0]\r\n\t\tview_name = row[1]\r\n\t\tsort_order = row[2]\r\n\t\tlogger.info('Working on #%s: %s, %s', sort_order, table_name, view_name)\r\n\r\n\t\tsql2 = f\"\"\"select column_name from information_schema.columns \r\n\t\t\t\twhere table_schema = %s and table_name = %s \r\n\t\t\t\torder by ordinal_position\"\"\"\r\n\t\tcur.execute(sql2, (schema, view_name))\r\n\t\trows2 = cur.fetchall()\r\n\t\tfor row2 in rows2:\r\n\t\t\torg_column_list = org_column_list + row2[0] + ', '\r\n\t\tif org_column_list:\r\n\t\t\tif sort_order == 1:\r\n\t\t\t\torg_column_list = org_column_list + ust_or_release + '_control_id'\r\n\t\t\t\tselect_column_list = org_column_list.replace(ust_or_release + '_control_id', str(control_id))\r\n\t\t\t\tinsert_sql = f\"\"\"insert into public.{table_name} ({org_column_list}) \r\n\t\t\t\t\t\t\t\tselect {select_column_list} from {schema}.{view_name}\"\"\"\r\n\t\t\t\tcur.execute(insert_sql)\r\n\t\t\telse: \r\n\t\t\t\tif ust_or_release == 'release':\r\n\t\t\t\t\tcolumn_list = 'ust_release_id, ' + org_column_list[:-2]\r\n\t\t\t\t\tcolumn_list = column_list.replace(', release_id','')\r\n\t\t\t\t\tparent_table = 'ust_release'\r\n\t\t\t\t\tjoin_col = 'release_id'\r\n\t\t\t\t\tepa_col = 'ust_release_id'\r\n\t\t\t\telse:\r\n\t\t\t\t\tcolumn_list = 'ust_facility_id, ' + org_column_list[:-2] \r\n\t\t\t\t\tcolumn_list = column_list.replace(', facility_id','')\r\n\t\t\t\t\tparent_table = 'ust_facility' \r\n\t\t\t\t\tjoin_col = 'facility_id' \r\n\t\t\t\t\tepa_col = 'ust_facility_id' \r\n\t\t\t\tif ust_or_release == 'release' or view_name in ('v_ust_facility','v_ust_tank','v_ust_facility_dispenser'):\r\n\t\t\t\t\tinsert_sql = f\"\"\"insert into public.{table_name} ({column_list})\r\n\t\t\t\t\t\t\t\t\tselect distinct {column_list} from {schema}.{view_name} a \r\n\t\t\t\t\t\t\t\t\t\tjoin (select {epa_col}, {join_col} from public.{parent_table} where {ust_or_release}_control_id = %s) b\r\n\t\t\t\t\t\t\t\t\t\t\ton a.{join_col} = b.{join_col}\"\"\"\r\n\t\t\t\telif view_name == 'v_ust_tank_substance':\r\n\t\t\t\t\tcolumn_list = 'ust_tank_id, ' + org_column_list[:-2] \r\n\t\t\t\t\tcolumn_list = column_list.replace(', facility_id','').replace(', tank_id','')\r\n\t\t\t\t\tinsert_sql = f\"\"\"insert into public.ust_tank_substance ({column_list})\r\n\t\t\t\t\t\t\t\t\tselect distinct {column_list} from {schema}.v_ust_tank_substance a \r\n\t\t\t\t\t\t\t\t\t\tjoin (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b\r\n\t\t\t\t\t\t\t\t\t\t\ton a.facility_id = b.facility_id\r\n\t\t\t\t\t\t\t\t\t\tjoin public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id\"\"\"\r\n\t\t\t\telif view_name == 'v_ust_tank_dispenser':\r\n\t\t\t\t\tcolumn_list = 'ust_tank_id, ' + org_column_list[:-2] \r\n\t\t\t\t\tcolumn_list = column_list.replace(', facility_id','').replace(', tank_id','')\r\n\t\t\t\t\tinsert_sql = f\"\"\"insert into public.ust_tank_dispenser ({column_list})\r\n\t\t\t\t\t\t\t\t\tselect distinct {column_list} from {schema}.v_ust_tank_dispenser a \r\n\t\t\t\t\t\t\t\t\t\tjoin (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b\r\n\t\t\t\t\t\t\t\t\t\t\ton a.facility_id = b.facility_id\r\n\t\t\t\t\t\t\t\t\t\tjoin public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id\"\"\"\r\n\t\t\t\telif view_name == 'v_ust_compartment':\r\n\t\t\t\t\tcolumn_list = 'ust_tank_id, ' + org_column_list[:-2] \r\n\t\t\t\t\tcolumn_list = column_list.replace(', facility_id','').replace(', tank_id','')\r\n\t\t\t\t\tinsert_sql = f\"\"\"insert into public.ust_compartment ({column_list})\r\n\t\t\t\t\t\t\t\t\tselect distinct {column_list} from {schema}.v_ust_compartment a \r\n\t\t\t\t\t\t\t\t\t\tjoin (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b\r\n\t\t\t\t\t\t\t\t\t\t\ton a.facility_id = b.facility_id\r\n\t\t\t\t\t\t\t\t\t\tjoin public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id\"\"\"\r\n\t\t\t\telif view_name == 'v_ust_compartment_substance':\r\n\t\t\t\t\tcolumn_list = 'ust_tank_substance_id, ust_compartment_id'\r\n\t\t\t\t\tsql2 = \"\"\"select count(*) from information_schema.columns \r\n\t\t\t\t\t          where table_schema = %s and table_name = 'v_ust_compartment_substance' and column_name = 'substance_comment'\"\"\"\r\n\t\t\t\t\tcur.execute(sql2, (schema,))\r\n\t\t\t\t\tcnt = cur.fetchone()[0]\r\n\t\t\t\t\tif cnt > 0:\r\n\t\t\t\t\t\tcolumn_list = column_list + ', substance_comment'\r\n\t\t\t\t\tinsert_sql = f\"\"\"insert into public.ust_compartment_substance ({column_list})\r\n\t\t\t\t\t\t\t\t\tselect distinct {column_list.replace('substance_comment','a.substance_comment')} from {schema}.v_ust_compartment_substance a \r\n\t\t\t\t\t\t\t\t\t\tjoin (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b\r\n\t\t\t\t\t\t\t\t\t\t\ton a.facility_id = b.facility_id\r\n\t\t\t\t\t\t\t\t\t\tjoin public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id\r\n\t\t\t\t\t\t\t\t\t\tjoin ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id\r\n\t\t\t\t\t\t\t\t\t\tjoin public.ust_tank_substance e on c.ust_tank_id = e.ust_tank_id and a.substance_id = e.substance_id \"\"\"\r\n\t\t\t\telif view_name == 'v_ust_piping':\r\n\t\t\t\t\tcolumn_list = 'ust_compartment_id, ' + org_column_list[:-2] \r\n\t\t\t\t\tcolumn_list = column_list.replace(', facility_id','').replace(', tank_id','').replace(', compartment_id','')\r\n\t\t\t\t\tinsert_sql = f\"\"\"insert into public.ust_piping ({column_list})\r\n\t\t\t\t\t\t\t\t\tselect distinct {column_list} from {schema}.v_ust_piping a \r\n\t\t\t\t\t\t\t\t\t\tjoin (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b\r\n\t\t\t\t\t\t\t\t\t\t\ton a.facility_id = b.facility_id\r\n\t\t\t\t\t\t\t\t\t\tjoin public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id\r\n\t\t\t\t\t\t\t\t\t\tjoin ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id\"\"\"\r\n\t\t\t\telif view_name == 'v_ust_compartment_dispenser':\r\n\t\t\t\t\tcolumn_list = 'ust_compartment_id, ' + org_column_list[:-2] \r\n\t\t\t\t\tcolumn_list = column_list.replace(', facility_id','').replace(', tank_id','').replace(', compartment_id','')\r\n\t\t\t\t\tinsert_sql = f\"\"\"insert into public.ust_compartment_dispenser ({column_list})\r\n\t\t\t\t\t\t\t\t\tselect distinct {column_list} from {schema}.v_ust_compartment_dispenser a \r\n\t\t\t\t\t\t\t\t\t\tjoin (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b\r\n\t\t\t\t\t\t\t\t\t\t\ton a.facility_id = b.facility_id\r\n\t\t\t\t\t\t\t\t\t\tjoin public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id\r\n\t\t\t\t\t\t\t\t\t\tjoin ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id\"\"\"\r\n\t\t\t\t# print(insert_sql)\r\n\t\t\t\tcur.execute(insert_sql, (control_id, ))\r\n\r\n\t\t\trows_inserted = cur.rowcount\r\n\t\t\tconn.commit()\r\n\t\t\tlogger.info('Inserted %s rows into %s', rows_inserted, table_name)\r\n\r\n\tcur.close()\r\n\tconn.close()\r\n\r\n\r\nif __name__ == '__main__':   \r\n\tmain(control_id, ust_or_release, delete_existing)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/python/state_processing/populate_epa_data_tables.py b/python/state_processing/populate_epa_data_tables.py
+--- a/python/state_processing/populate_epa_data_tables.py	(revision d430d9f653ac53c7546c17464e3b86ec402dd191)
++++ b/python/state_processing/populate_epa_data_tables.py	(date 1728666019980)
+@@ -1,22 +1,26 @@
+-from datetime import date
+-import ntpath
+ import os
+ from pathlib import Path
+ import sys  
+ ROOT_PATH = Path(__file__).parent.parent.parent
+ sys.path.append(os.path.join(ROOT_PATH, ''))
++from datetime import date
++import ntpath
+ 
+-from python.util import utils, config
+ from python.util.logger_factory import logger
++from python.util import utils, config
+ 
+ 
+-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+-delete_existing = False 		# Boolean, defaults to False. Set to True to delete existing data. Script will return an error if this variable is False and data exists in the EPA data tables for the control_id.			
++ust_or_release = 'ust' # valid values are 'ust' or 'release'
++control_id = 18
++delete_existing = True 
+ 
+ 
+ def main(control_id, ust_or_release, delete_existing=False):
+-	ust_or_release = utils.verify_ust_or_release(ust_or_release)
++	ust_or_release = ust_or_release.lower()
++	if ust_or_release not in ['ust','release']:
++		logger.error('Invalid value %s for ust_or_release. Valid values are ust or release. Exiting...', ust_or_release)
++		exit()
++
+ 	schema = utils.get_schema_from_control_id(control_id, ust_or_release)
+ 
+ 	conn = utils.connect_db()
