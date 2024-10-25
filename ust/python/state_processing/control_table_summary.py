@@ -14,7 +14,7 @@ from python.util import utils
 from python.util.dataset import Dataset 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 19                  # Enter an integer that is the ust_control_id or release_control_id
 
 # These variables can usually be left unset. This script will general an Excel file in the appropriate state folder in the repo under /ust/python/exports/control_table_summaries
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -138,7 +138,7 @@ class Summary:
 			ws.cell(row=rowno, column=2).font = Font(bold=True)
 
 			sql = """select "CompartmentStatus", count(*) from public.v_ust_compartment
-					where public.ust_control_id = %s group by "CompartmentStatus" """
+					where ust_control_id = %s group by "CompartmentStatus" """
 			cur.execute(sql, (self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=rowno+1):
@@ -148,7 +148,7 @@ class Summary:
 						ws.cell(row=rowno, column=colno).number_format = '#,##0'
 
 			rowno = rowno + 1
-			sql = "select count(*) from public.v_ust_compartment where public.ust_control_id = %s" 
+			sql = "select count(*) from public.v_ust_compartment where ust_control_id = %s"
 			cur.execute(sql, (self.dataset.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total UST EPA Template'
