@@ -2067,3 +2067,230 @@ select distinct epa_column_name, organization_table_name, organization_join_tabl
 
 --add environmental audit to how release detected (for DET), update tn_release  to other
 --add release comment field, repairs in how release detected in tn_release
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+select distinct
+	a."Facility Id"::character varying(50) as facility_id, 
+	b."tank_id"::integer as tank_id, 	  -- This required field is not present in the source data. Table erg_tank_id was created by ERG so the data can conform to the EPA template structure.
+	a."Tank Name"::character varying(50) as tank_name, 
+	c."compartment_id"::integer as compartment_id, 	  -- This required field is not present in the source data. Table erg_compartment_id was created by ERG so the data can conform to the EPA template structure.
+	"piping_id"::character varying(50) as piping_id, 	  -- This required field is not present in the source data. Table erg_piping_id was created by ERG so the data can conform to the EPA template structure.
+	"Piping Material Desc"::character varying(3) as piping_material_frp, 	  -- if "Piping Material Desc" = "Fiberglass Reinforced Plastic" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_stainless_steel, 	  -- if "Piping Material Desc" = "Stainless Steel" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_steel, 	  -- if "Piping Material Desc" = "Steel" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_copper, 	  -- if "Piping Material Desc" = "Copper" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_flex, 	  -- if "Piping Material Desc" = "Flex Piping" then "Yes"
+	"Piping Material Desc"::character varying(3) as piping_material_other 	  -- if "Piping Material Desc" = "Other" then "Yes"
+from example."Tank Piping" a
+--	left join example."erg_tank_id" b on c."facility_id" = b."facility_id" and c."tank_id" = b."tank_id" 
+	left join example."erg_tank_id" b on a."Facility Id" = b."facility_id" and a."Tank Name" = b."tank_name" 
+--	left join example."erg_compartment_id" c on d."facility_id" = c."facility_id" and d."tank_id" = c."tank_id" and d."compartment_id" = c."compartment_id" 
+	left join example."erg_compartment_id" c on b."facility_id" = c."facility_id" and b."tank_id" = c."tank_id"  
+	left join example."erg_piping_id" d on c."facility_id" = d."facility_id" and c."tank_id" = d."tank_id" and c."compartment_id" = d."compartment_id"
+	left join example."Piping Material Lookup" e on a."Piping Material Id" = e."Piping Material ID" ;
+where -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE
+
+select * from example.erg_tank_id 
+
+
+Tank Piping                    key     a
+erg_tank_id                id-join     b
+erg_compartment_id         id-join     c
+erg_piping_id                   id     d
+Piping Material Lookup         org     e
+
+select * from example.ust_element_mapping
+where epa_table_name = 'ust_piping';
+
+
+
+
+select organization_table_name, table_type,
+		chr(96 + row_number() over (partition by 'a' order by x.sort_order, z.sort_order)::int) as alias
+from 
+	(select organization_table_name, min(sort_order) as sort_order 
+	from example.v_ust_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
+	where ust_control_id = 1 and epa_table_name = 'ust_piping'
+	group by organization_table_name) x 
+	join public.mapped_table_types y on x.sort_order = y.sort_order 
+	left join public.generated_table_sort_order z on x.organization_table_name = z.table_name
+order by alias
+
+Tank Piping	key	a
+erg_tank_id	id-join	b
+erg_compartment_id	id-join	c
+erg_piping_id	id	d
+Piping Material Lookup	org	e
+
+
+
+
+select 'comment on table ' || table_name || ' is '''';'
+from information_schema.tables where table_schema = 'public'
+order by 1;
+
+select element_name, database_column_name, database_lookup_table, database_lookup_column 
+from ust_elements order by 1;
+
+select * from v_release_available_mapping 
+
+comment on table causes is 'Lookup table for Cause (Release).';
+comment on table cert_of_installations is 'Lookup table for Certification of Installation (UST).';
+comment on table compartment_statuses is 'Lookup for Compartment Status (UST). Compartment Status and Tank Status have the same lookup values.';
+comment on table coordinate_sources is 'Lookup for Coordinate Source (UST).';
+comment on table corrective_action_strategies is 'Lookup for Corrective Action Strategy (Release).';
+comment on table dispenser_udc_wall_types is 'Lookup for Dispenser UDC Wall Type (UST).';
+comment on table epa_regions is 'Lookup for EPA Region (UST).';
+comment on table facility_types is 'Lookup for Facility Type (UST).';
+comment on table generated_table_sort_order is 'Sort order for tables created by ERG to create Facility IDs, Tank IDs, Compartment IDs, and Piping IDs when these required columns don''t exist in the source data. (UST).';
+comment on table how_release_detected is 'Lookup table for How Release Discovered (Release).';
+comment on table mapped_table_types is 'Sort order by table type (key, org, join, id-join, id, deagg, and lookup); used by Python script to build the where clause of the views of source data that populate the base UST and Release tables.';
+comment on table owner_types is 'Lookup table for Facility Owner (UST).';
+comment on table performance_measures_release is 'Performance measure numbers for Releases as extracted from OUST publications. A comparison of these numbers to the processed templates is included in the review materials sent to OUST. A Python script exists to refresh this data.';
+comment on table performance_measures_ust is 'Performance measure numbers for UST as extracted from OUST publications. A comparison of these numbers to the processed templates is included in the review materials sent to OUST. A Python script exists to refresh this data.';
+comment on table pipe_tank_top_sump_wall_types is 'Lookup table for Piping Tank Top Sump Wall Type (UST).';
+comment on table piping_styles is 'Lookup table for Piping Style (UST).';
+comment on table piping_wall_types is 'Lookup table for Piping Wall Type (UST).';
+comment on table release_control is 'Control table for Release submissions.';
+comment on table release_element_mapping is 'Data element mapping table for Releases.';
+comment on table release_element_table_sort_order is 'Sort order for EPA Releases template data tables; used by the Python script that exports a populated template.';
+comment on table release_element_value_mapping is 'Data element value mapping table for Releases.';
+comment on table release_elements is 'Information about Release data elements. This table can be used to construct the Reference tab of the EPA template and also includes a mapping from template element name to database column name, and where applicable, the associated lookup table.';
+comment on table release_elements_tables is 'Maps the Releases template elements/database columns to the template data table(s) they are in; includes a sort order, which is used by the Python script that exports populated EPA templates.';
+comment on table release_required_view_columns is 'Contains the required Release elements that must be included in the views of source data that populate the template data tables.';
+comment on table release_statuses is 'Lookup table for Release Status (Release).';
+comment on table release_template_data_tables is 'Maps the EPA Releases template data tables to the names of the source data views that populate them, and template tab name, and the sort order. Used by the Python script that exports a populated EPA template.';
+comment on table release_template_lookup_tables is 'Maps the Release lookup tables to their ID and description column names and contains a sort order for them. Used by the Python script that exports a populated template.';
+comment on table sources is 'Lookup table for Sources (Release).';
+comment on table spill_bucket_wall_types is 'Lookup table for Spill Bucket Wall Type (UST).';
+comment on table states is 'Lookup table for State (UST and Release).';
+comment on table substances is 'Lookup table for Substance (UST: Tank/Compartment Substance Stored; Release: Substance Released).';
+comment on table tank_locations is 'Lookup table for Tank Location (UST).';
+comment on table tank_material_descriptions is 'Lookup table for Tank Material Description (UST).';
+comment on table tank_secondary_containments is 'Lookup table for Tank Secondary Containment (UST).';
+comment on table tank_statuses is 'Lookup table for Tank Status (UST). Compartment Status and Tank Status have the same lookup values.';
+comment on table ust_compartment is 'Data table for Compartment in the UST template. This table must be populated with at least one compartment per tank, even for organizations that don''t report at the compartment level.';
+comment on table ust_compartment_dispenser is 'Data table for Compartment Dispenser in the UST template. Dispensers can be organized by facility, tank, and/or compartment within the source data. This table stores data organized by compartment.';
+comment on table ust_compartment_substance is 'Data table for Compartment Substance in the UST template. This table is only populated if the organization reports at the compartment level and the source data includes specific mapping between compartment and substance (as opposed to tank and substance).';
+comment on table ust_control is 'Control table for UST submissions.';
+comment on table ust_element_lookup_tables is 'Maps the UST lookup tables to their ID and description column names and contains a sort order for them. Used by the Python script that exports a populated template.';
+comment on table ust_element_mapping is 'Data element mapping table for UST.';
+comment on table ust_element_table_sort_order is 'Sort order for EPA UST template data tables; used by the Python script that exports a populated template.';
+comment on table ust_element_value_mapping is 'Data element value mapping table for UST.';
+comment on table ust_elements is 'Information about UST data elements. This table can be used to construct the Reference tab of the EPA template and also includes a mapping from template element name to database column name, and where applicable, the associated lookup table.';
+comment on table ust_elements_tables is 'Maps the UST template elements/database columns to the template data table(s) they are in; includes a sort order, which is used by the Python script that exports populated EPA templates.';
+comment on table ust_facility is 'Data table for Facility in the UST template, which is the parent of all other UST data tables.';
+comment on table ust_facility_dispenser is 'Data table for Facility Dispenser in the UST template. Dispensers can be organized by facility, tank, and/or compartment within the source data. This table stores data organized by facility.';
+comment on table ust_piping is 'Data table for Piping in the UST template. Population is this table is optional and is only applicable if piping data exists in the source data.';
+comment on table ust_release is 'Data table for Releases in the Release template, which is the parent of all other Release data tables.';
+comment on table ust_release_cause is 'Data table for Causes in the Release template. Population of the table is optional and is only applicable if cause exists in the source data.';
+comment on table ust_release_corrective_action_strategy is 'Data table for Corrective Action Strategies in the Release template. Population of the table is optional and is only applicable if corrective action strategy exists in the source data.';
+comment on table ust_release_source is 'Data table for Sources in the Release template. Population of the table is optional and is only applicable if source exists in the source data.';
+comment on table ust_release_substance is 'Data table for Substance Released in the Release template. Population of the table is optional and is only applicable if substance released exists in the source data.';
+comment on table ust_required_view_columns is 'Contains the required UST elements that must be included in the views of source data that populate the template data tables.';
+comment on table ust_tank is 'Data table for Tank in the UST template. There should be at least one tank per facility.';
+comment on table ust_tank_dispenser is 'Data table for Tank Dispenser in the UST template. Dispensers can be organized by facility, tank, and/or compartment within the source data. This table stores data organized by tank.';
+comment on table ust_tank_substance is 'Data table for Tank Substance in the UST template. This table should be populated for all organizations that have substance data, regardless of whether the organization reports at the tank or compartment level. Table ust_compartment_substance is a child of this table and should be populated only for organizations that report at the compartment level and map substances to specific compartments.';
+comment on table ust_template_data_tables is 'Maps the EPA UST template data tables to the names of the source data views that populate them, and template tab name, and the sort order. Used by the Python script that exports a populated EPA template.';
+comment on table ust_template_lookup_tables is 'Maps the UST lookup tables to their ID and description column names and contains a sort order for them. Used by the Python script that exports a populated template.';
+
+comment on view v_release_available_mapping is 'View that contains Release data columns that have been mapped in the release_element_mapping table. Used by the Python processing scripts.';
+comment on view v_release_bad_mapping is 'View that contains Release data columns that have been mapped to values that don''t exist in a lookup table in the release_element_value_mapping table. Used for QC purposes.';
+comment on view v_release_control_summary is 'View that pivots the data in the release_control table. Used by the Python script that exports the control table summary spreadsheet.';
+comment on view v_release_element_mapping is 'View that aggregates data in the release_element_mapping and release_element_value_mapping tables.';
+comment on view v_release_element_mapping_for_export is 'View that organizes the data in the release_element_mapping table for export by the Python script that exports element mapping for OUST review.';
+comment on view v_release_element_mapping_joins is 'View that organizes the data in the release_element_mapping table for use by the Python script that builds the SQL for the source data views that populate the Release data tables.';
+comment on view v_release_element_summary is 'View that summarizes Release data table and column names.';
+comment on view v_release_element_summary_sql is 'View that generates SQL to be copied and pasted and the manually altered to populate the release_element_mapping table. Used by the Release processing SQL template.';
+comment on view v_release_elements is 'View that summarizes the Release element information; used to build the Reference tab of the Release template by the Python script that exports populated templates.';
+comment on view v_release_mapped_table_types is 'View that summarizes the mapping of EPA data table to organization data table from the release_element_mapping table and assigns a table type to the organization table, which is used by the Python script that generates SQL to write the views that populate the Release data tables.';
+comment on view v_release_missing_view_mapping is 'View that contains element mapping in the release_element_mapping table that does not exist in the source data view that populates the Release data table. Used for QC purposes.';
+comment on view v_release_needed_mapping is 'View that contains element value mapping in the release_element_value_mapping table that corresponds to a lookup table. Used by various Python processing scripts.';
+comment on view v_release_needed_mapping_insert_sql is 'View that generates insert statements for release_element_value_mapping that can be copied, pasted, altered, and run by the developer.';
+comment on view v_release_needed_mapping_summary is 'View that summarizes the data in the v_release_needed_mapping view.';
+comment on view v_release_performance_measures is 'View that pivots the Release performance measures data for use by the Python script that exports the release control table summary to a spreadsheet.';
+comment on view v_release_row_count_summary is 'View that pivots the number of rows in each of the source data view that populate the Release data tables; used by the Python script that exports the QAQC spreadsheet.';
+comment on view v_release_table_population is 'View that summarizes the information in the release_element_mapping table; used by the Python script that generates SQL for the source data views that populate the Release data tables.';
+comment on view v_release_table_population_sql is 'View that summarizes the data in the v_release_table_population view.';
+comment on view v_release_table_row_count is 'View that counts the number of rows in the source data views that populate the Release data tables.';
+comment on view v_release_used_source_tables is 'View that summarizes the Release source data tables that have been mapped to EPA template elements. Used by the Python script that exports source data to CSV files for OUST review.';
+comment on view v_ust_available_mapping is 'View that contains UST data columns that have been mapped in the ust_element_mapping table. Used by the Python processing scripts.';
+comment on view v_ust_bad_mapping is 'View that contains UST data columns that have been mapped to values that don''t exist in a lookup table in the ust_element_value_mapping table. Used for QC purposes.';
+comment on view v_ust_compartment is 'Source data view that is used to populate the UST data table ust_compartment.';
+comment on view v_ust_compartment_dispenser is 'Source data view that is used to populate the UST data table ust_compartment_dispenser.';
+comment on view v_ust_compartment_status_mapping is 'View that filters UST data element value mapping for Compartment Status.';
+comment on view v_ust_compartment_substance is 'Source data view that is used to populate the UST data table ust_compartment_substance.';
+comment on view v_ust_control_summary is 'View that pivots the data in the ust_control table. Used by the Python script that exports the control table summary spreadsheet.';
+comment on view v_ust_coordinate_source_mapping is 'View that filters UST data element value mapping for Coordinate Source.';
+comment on view v_ust_element_mapping is 'View that aggregates data in the ust_element_mapping and ust_element_value_mapping tables.';
+comment on view v_ust_element_mapping_for_export is 'View that organizes the data in the ust_element_mapping for export by the Python script that exports element mapping for OUST review.';
+comment on view v_ust_element_mapping_joins is 'View that organizes the data in the ust_element_mapping table for use by the Python script that builds the SQL for the source data views that populate the UST data tables.';
+comment on view v_ust_element_summary is 'View that summarizes UST data table and column names.';
+comment on view v_ust_element_summary_sql is 'View that generates SQL to be copied and pasted and the manually altered to populate the release_element_mapping table. Used by the UST processing SQL template.';
+comment on view v_ust_elements is 'View that summarizes the UST element information; used to build the Reference tab of the UST template by the Python script that exports populated templates.';
+comment on view v_ust_facility is 'Source data view that is used to populate the UST data table ust_facility.';
+comment on view v_ust_facility_dispenser is 'Source data view that is used to populate the UST data table ust_facility_dispenser.';
+comment on view v_ust_facility_type_mapping is 'View that filters UST data element value mapping for Facility Type.';
+comment on view v_ust_mapped_table_types is 'View that summarizes the mapping of EPA data table to organization data table from the ust_element_mapping table and assigns a table type to the organization table, which is used by the Python script that generates SQL to write the views that populate the UST data tables.';
+comment on view v_ust_missing_view_mapping is 'View that contains element mapping in the ust_element_mapping table that does not exist in the source data view that populates the UST data table. Used for QC purposes.';
+comment on view v_ust_needed_mapping is 'View that contains element value mapping in the ust_element_value_mapping table that corresponds to a lookup table. Used by various Python processing scripts.';
+comment on view v_ust_needed_mapping_insert_sql is 'View that generates insert statements for ust_element_value_mapping that can be copied, pasted, altered, and run by the developer.';
+comment on view v_ust_needed_mapping_summary is 'View that summarizes the data in the v_ust_needed_mapping view.';
+comment on view v_ust_owner_type_mapping is 'View that filters UST data element value mapping for Owner Type.';
+comment on view v_ust_performance_measures is 'View that pivots the UST performance measures data for use by the Python script that exports the UST control table summary to a spreadsheet.';
+comment on view v_ust_pipe_tank_top_sump_wall_type_mapping is 'View that filters UST data element value mapping for Piping Tank Top Sump Wall Type.';
+comment on view v_ust_piping is 'Source data view that is used to populate the UST data table ust_piping.';
+comment on view v_ust_piping_style_mapping is 'View that filters UST data element value mapping for Piping Style.';
+comment on view v_ust_piping_wall_type_mapping is 'View that filters UST data element value mapping for Piping Wall Type.';
+comment on view v_ust_release is 'Source data view that is used to populate the Release data table ust_release.';
+comment on view v_ust_release_cause is 'Source data view that is used to populate the Release data table ust_release_cause.';
+comment on view v_ust_release_corrective_action_strategy is 'Source data view that is used to populate the Release data table ust_release_corrective_action_strategy.';
+comment on view v_ust_release_source is 'Source data view that is used to populate the Release data table ust_release_source.';
+comment on view v_ust_release_substance is 'Source data view that is used to populate the Release data table ust_release_substance.';
+comment on view v_ust_row_count_summary is 'View that pivots the number of rows in each of the source data view that populate the UST data tables; used by the Python script that exports the QAQC spreadsheet.';
+comment on view v_ust_spill_bucket_wall_type_mapping is 'View that filters UST data element value mapping for Spill Bucket Wall Type.';
+comment on view v_ust_substance_mapping is 'View that filters UST data element value mapping for Substance.';
+comment on view v_ust_table_population is 'View that summarizes the information in the ust_element_mapping table; used by the Python script that generates SQL for the source data views that populate the UST data tables.';
+comment on view v_ust_table_population_sql is 'View that summarizes the data in the v_ust_table_population view.';
+comment on view v_ust_table_row_count is 'View that counts the number of rows in the source data views that populate the UST data tables.';
+comment on view v_ust_tank is 'Source data view that is used to populate the UST data table ust_tank.';
+comment on view v_ust_tank_dispenser is 'Source data view that is used to populate the UST data table ust_tank_dispenser.';
+comment on view v_ust_tank_location_mapping is 'View that filters UST data element value mapping for Tank Location.';
+comment on view v_ust_tank_material_description_mapping is 'View that filters UST data element value mapping for Tank Material Description.';
+comment on view v_ust_tank_secondary_containment_mapping is 'View that filters UST data element value mapping for Tank Secondary Containment.';
+comment on view v_ust_tank_status_mapping is 'View that filters UST data element value mapping for Tank Status.';
+comment on view v_ust_tank_substance is 'Source data view that is used to populate the UST data table ust_tank_substance.';
+comment on view v_ust_used_source_tables is 'View that summarizes the UST source data tables that have been mapped to EPA template elements. Used by the Python script that exports source data to CSV files for OUST review.';
+
+
+
+
+
+
+
+CREATE FUNCTION get_table_comment(
+     p_relname text, p_schemaname text DEFAULT NULL
+ ) RETURNS text AS $f$
+    SELECT obj_description((CASE 
+       WHEN strpos($1, '.')>0 THEN $1
+       WHEN $2 IS NULL THEN 'public.'||$1
+       ELSE $2||'.'||$1
+            END)::regclass, 'pg_class');
+ $f$ LANGUAGE SQL;
+ 
+
+select get_table_comment('ust_elements')

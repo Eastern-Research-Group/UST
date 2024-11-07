@@ -241,6 +241,8 @@ class ViewSql:
 		for index, row in df.iterrows():
 			logger.info('Working on table %s', index)
 			alias = row['alias']
+			print('alias = ' + alias)
+			print("row['table_type'] = " + row['table_type'])
 
 			if alias == 'a':
 				self.from_sql = self.from_sql + self.dataset.schema + '.' + '"' + index + '" ' + alias
@@ -258,17 +260,19 @@ class ViewSql:
 				self.table_aliases[index] = alias
 
 			elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
+				print('hola')
 				from_table = index
 
-				# if self.table_name == 'ust_compartment':
-				# 	epa_table_name = 'ust_tank'
-				# 	search_table = 'organization_table_name'
+				if self.table_name == 'ust_compartment':
+					epa_table_name = 'ust_tank'
+					search_table = 'organization_table_name'
 				# elif self.table_name == 'ust_piping':
+					
 				# 	epa_table_name = 'ust_compartment'
 				# 	search_table = 'organization_table_name'
-				# else:
-				epa_table_name = self.table_name
-				search_table = 'organization_join_table'
+				else:
+					epa_table_name = self.table_name
+					search_table = 'organization_join_table'
 				print('from_table = ' + from_table)
 				print('search_table = ' + search_table)
 				print('epa_table_name = ' + epa_table_name)
@@ -330,6 +334,7 @@ class ViewSql:
 				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
 				self.table_aliases[index] = alias
 			# print(self.from_sql) 
+			print('__________________________________________________________________________________________________________________\n')
 		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
 
 
