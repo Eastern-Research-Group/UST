@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 24                  # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = False      # boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
 
@@ -31,6 +31,7 @@ class ValueMapper:
 				 overwrite_existing=False):
 		self.dataset = dataset
 		self.only_incomplete = only_incomplete
+		self.overwrite_existing = overwrite_existing
 		self.set_compartment_flag()
 		self.generate_sql()
 		self.write_sql()
