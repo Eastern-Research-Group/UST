@@ -97,7 +97,7 @@ class QualityCheck:
 	def disconnect_db(self):
 		self.cur.close()
 		self.conn.close()
-		logger.info('Diconnected from database')
+		logger.info('Disconnected from database')
 
 
 	def get_view_names(self):
