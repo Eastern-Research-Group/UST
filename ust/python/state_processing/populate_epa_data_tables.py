@@ -152,7 +152,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 
 	cur.close()
 	conn.close()
-	logger.info('Diconnected from database')
+	logger.info('Disconnected from database')
 
 
 if __name__ == '__main__':   
