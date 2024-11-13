@@ -68,7 +68,7 @@ class ViewSql:
 		self.conn.commit()
 		self.cur.close()
 		self.conn.close()
-		logger.info('Diconnected from database')
+		logger.info('Disconnected from database')
 
 
 	def show_existing_cols(self):

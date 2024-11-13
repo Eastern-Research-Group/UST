@@ -50,7 +50,7 @@ def build_ws(dataset, ws, admin=False):
 	data = cur.fetchall()
 	cur.close()
 	conn.close()
-	logger.info('Diconnected from database')
+	logger.info('Disconnected from database')
 	
 	for rowno, row in enumerate(data, start=2):
 		for colno, cell_value in enumerate(row, start=1):
