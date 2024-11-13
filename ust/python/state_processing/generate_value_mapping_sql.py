@@ -31,6 +31,7 @@ class ValueMapper:
 				 overwrite_existing=False):
 		self.dataset = dataset
 		self.only_incomplete = only_incomplete
+		self.overwrite_existing = overwrite_existing
 		self.set_compartment_flag()
 		self.generate_sql()
 		self.write_sql()
