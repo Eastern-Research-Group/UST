@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = 1                   # Enter an integer that is the ust_control_id
-table_name = 'ust_tank'                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
+table_name = 'ust_tank'          # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
 drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
@@ -245,38 +245,6 @@ class IdColumns:
 		except:
 			return None 
 
-
-	# def set_all_join_info(self, col_name, table_name):
-	# 	print(col_name)
-	# 	if col_name == 'tank_id':
-	# 		epa_col_name = "'tank_id','tank_name'"
-	# 	elif col_name == 'compartment_id':
-	# 		epa_col_name = "'compartment_id','compartment_name'"
-	# 	else:
-	# 		epa_col_name = col_name
-	# 	sql = f"""select organization_table_name, organization_column_name, organization_join_table, 
-	# 				organization_join_column, organization_join_fk, 
-	# 				organization_join_column2, organization_join_fk2,   
-	# 				organization_join_column3, organization_join_fk3
-	# 			from example.{self.dataset.ust_or_release}_element_mapping 
-	# 			where  {self.dataset.ust_or_release}_control_id = %s 
-	# 			and epa_table_name = %s and epa_column_name in ({epa_col_name})
-	# 			order by epa_column_name desc"""
-	# 	self.cur.execute(sql, (self.dataset.control_id, table_name))
-	# 	# utils.pretty_print_query(self.cur)
-	# 	row = self.cur.fetchone()
-	# 	print(row)
-	# 	if not row:
-	# 		return
-	# 	self.organization_table_name = row[0]
-	# 	self.organization_column_name = row[1]
-	# 	self.organization_join_table = row[2]
-	# 	self.organization_join_column = row[3]
-	# 	self.organization_join_fk = row[4]
-	# 	self.organization_join_column2 = row[5]
-	# 	self.organization_join_fk2 = row[6]
-	# 	self.organization_join_column3 = row[7]
-	# 	self.organization_join_fk3 = row[8]
 
 	def get_child_join_info(self, col_name, table_name):
 		if col_name == 'tank_id':
