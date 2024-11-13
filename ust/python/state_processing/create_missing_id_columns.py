@@ -4,13 +4,14 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+from python.example_schema.dataset_example import Dataset 
 from python.util import utils
-from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = 0                   # Enter an integer that is the ust_control_id
+table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
 drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
@@ -19,6 +20,16 @@ overwrite_sql_file = False       # Boolean, defaults to False. Set to True to ov
 export_file_path = None         
 export_file_dir = None
 export_file_name = None
+
+
+child_tables = {'ust_tank': ['ust_tank_substance','ust_compartment','ust_tank_dispenser','ust_piping','ust_compartment_dispenser'],
+                'ust_compartment': ['ust_piping','ust_compartment_dispenser']}
+id_table_names = {'ust_tank': 'erg_tank_id', 
+				  'ust_compartment': 'erg_compartment_id', 
+				  'ust_piping': 'erg_piping_id', 
+				  'ust_facility_dispenser': 'erg_dispenser_id',
+				  'ust_tank_dispenser': 'erg_dispenser_id',
+				  'ust_compartment_dispenser': 'erg_dispenser_id',}
 
 
 class IdColumns:
@@ -32,6 +43,7 @@ class IdColumns:
 	organization_join_fk = None
 	organization_join_fk2 = None
 	organization_join_fk3 = None
+	child_table = None
 
 	def __init__(self, 
 				 dataset, 
@@ -118,9 +130,11 @@ class IdColumns:
 
 
 	def get_tank_table_name(self):
-		sql = f"""select distinct epa_column_name, epa_table_name from public.ust_element_mapping 
-				  where ust_control_id = %s and epa_column_name in ('tank_id','tank_name')
-				  order by epa_column_name desc"""
+		sql = f"""select epa_column_name, epa_table_name, b.sort_order 
+				from public.ust_element_mapping a join public.ust_element_table_sort_order b 
+					on a.epa_table_name = b.table_name
+				where ust_control_id = %s and epa_column_name in ('tank_id','tank_name')
+				order by epa_column_name desc, b.sort_order """
 		self.cur.execute(sql, (self.dataset.control_id,))
 		return self.cur.fetchone()[1]
 
@@ -132,41 +146,80 @@ class IdColumns:
 		return self.cur.fetchone()[0]
 
 
-	def record_element_mapping(self, table_name):
-		if self.get_col_mapping_existence(table_name, self.column_name):
-			logger.warning('A mapping already existed for table %s, column %s; it will be deleted and replaced with the ERG-created table', table_name, self.column_name)
+	def record_element_mapping(self, table_name, column_name):
+		if self.get_col_mapping_existence(table_name, column_name):
+			logger.warning('A mapping already existed for table %s, column %s; it will be deleted and replaced with the ERG-created table', table_name, column_name)
 			sql = f"""delete from public.{self.dataset.ust_or_release}_element_mapping
 					\nwhere {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
-			self.cur.execute(sql, (self.dataset.control_id, table_name, self.column_name))
-			logger.info('Deleted mapping info for table %s, column %s from public.%s_element_mapping', table_name, self.column_name, self.dataset.ust_or_release)
+			self.cur.execute(sql, (self.dataset.control_id, table_name, column_name))
+			logger.info('Deleted mapping info for table %s, column %s from public.%s_element_mapping', table_name, column_name, self.dataset.ust_or_release)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
+		
+		if table_name == self.table_name:
+			org_join_table = self.organization_join_table
+			org_join_col = self.organization_join_column
+			org_join_fk = self.organization_join_fk
+			org_join_col2 = self.organization_join_column2
+			org_join_fk2 = self.organization_join_fk2
+			org_join_col3 = self.organization_join_column3
+			org_join_fk3 = self.organization_join_fk3
+		else:
+			join_info = self.get_child_join_info(column_name, table_name)
+			org_join_table = join_info['organization_join_table']
+			org_join_col = join_info['organization_join_column']
+			org_join_fk = None 
+			org_join_col2 = None 
+			org_join_fk2 = None 
+			org_join_col3 = None 
+			org_join_fk3 = None 
+			
+
 		sql = f"""insert into public.{self.dataset.ust_or_release}_element_mapping ({self.dataset.ust_or_release}_control_id, epa_table_name, epa_column_name,
 					 organization_table_name, organization_column_name, 
 					 programmer_comments, organization_join_table,
 					 organization_join_column, organization_join_column2, organization_join_column3,
 					 organization_join_fk, organization_join_fk2, organization_join_fk3)
 				  \nvalues (%s, %s, %s, %s, %s, %s,\n%s, %s, %s, %s, %s, %s, %s)"""
-		comment = 'This required field is not present in the source data. Table ' + self.erg_table_name + ' was created by ERG so the data can conform to the EPA template structure.'
+		if column_name == self.column_name:
+			comment = 'This required field is not present in the source data. Table ' + self.erg_table_name + ' was created by ERG so the data can conform to the EPA template structure.'
+		else:
+			comment = 'Row inserted automatically to map a required field from a child table.'
 		self.cur.execute(sql, 
-						 (self.dataset.control_id, table_name, self.column_name, self.erg_table_name, self.column_name, 
-						  comment, self.organization_join_table, 
-						  self.organization_join_column, self.organization_join_column2, self.organization_join_column3,
-						  self.organization_join_fk, self.organization_join_fk2, self.organization_join_fk3))
-		logger.info('Inserted mapping from %s.%s to %s.%s', table_name, self.column_name, self.erg_table_name, self.column_name)
+						 (self.dataset.control_id, table_name, column_name, self.erg_table_name, column_name, 
+						  comment, org_join_table, org_join_col, org_join_fk, org_join_col2, org_join_fk2, org_join_col3, org_join_fk3))
+		# if column_name == 'compartment_id':
+		# 	utils.pretty_print_query(self.cur)
+		logger.info('Inserted mapping from %s.%s to %s.%s', table_name, column_name, self.erg_table_name, column_name)
 		self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 		self.conn.commit()
 
 
 	def element_mapping(self):
 		self.sql_text = self.sql_text + '--Record new mapping in public.' + self.dataset.ust_or_release + '_element_mapping\n\n'
-		self.record_element_mapping(self.table_name)
+		self.record_element_mapping(self.table_name, self.column_name)
 
 		try:
 			for child_table in child_tables[self.table_name]:
 				logger.info('Checking for existing mapping for %s', child_table)
-				self.record_element_mapping(child_table)
+				self.record_element_mapping(child_table, self.column_name)
 		except KeyError:
 			pass 
+
+		if self.table_name in ['ust_compartment','ust_tank_substance', 'ust_tank_dispenser']:
+			sql = f"select count(*) from public.{self.dataset.ust_or_release}_element_mapping where epa_table_name = %s and epa_column_name = %s"
+			self.cur.execute(sql, (self.table_name, 'tank_id'))
+			cnt = self.cur.fetchone()[0]
+			if cnt == 0:
+				self.record_element_mapping(self.table_name, 'tank_id')
+
+		if self.table_name in ['ust_piping','ust_compartment_dispenser']:
+			sql = f"select count(*) from public.{self.dataset.ust_or_release}_element_mapping where epa_table_name = %s and epa_column_name = %s"
+			self.cur.execute(sql, (self.table_name, 'compartment_id'))
+			cnt = self.cur.fetchone()[0]
+			if cnt == 0:
+				self.record_element_mapping(self.table_name, 'compartment_id')
+
+
 
 	def get_join_table(self, col_name, table_name=None):
 		if not table_name:
@@ -191,6 +244,31 @@ class IdColumns:
 			return self.cur.fetchone()[0]
 		except:
 			return None 
+
+
+	def get_child_join_info(self, col_name, table_name):
+		if col_name == 'tank_id':
+			epa_col_name = "'tank_id','tank_name'"
+		elif col_name == 'compartment_id':
+			epa_col_name = "'compartment_id','compartment_name'"
+		else:
+			epa_col_name = col_name
+		sql = f"""select organization_table_name, organization_column_name
+				from public.{self.dataset.ust_or_release}_element_mapping 
+				where  {self.dataset.ust_or_release}_control_id = %s 
+				and epa_table_name = %s and epa_column_name in ({epa_col_name})
+				order by epa_column_name desc"""
+		self.cur.execute(sql, (self.dataset.control_id, table_name))
+		# utils.pretty_print_query(self.cur)
+		row = self.cur.fetchone()	
+		join_info = {}	
+		if not row:
+			join_info['organization_join_table'] = None
+			join_info['organization_join_column'] = None
+		else:
+			join_info['organization_join_table'] = row[0]
+			join_info['organization_join_column'] = row[1] 
+		return join_info
 
 
 	def create_table(self):
@@ -367,7 +445,7 @@ class IdColumns:
 			self.cur.execute(sql, (self.dataset.control_id,))
 			cnt = self.cur.fetchone()[0]
 
-			if cnt > 0: # We already created erg_tank_id; use it for the select columns instead of the source table
+			if cnt > 0: # We already created erg_compartment_id; use it for the select columns instead of the source table
 				# next, figure out if compartment_name is in source_data
 				compartment_name_info = self.get_org_col_name('ust_compartment', 'compartment_name')
 				if compartment_name_info: # get the organization column names to build the join
@@ -380,6 +458,15 @@ class IdColumns:
 					v_sql = v_sql + ' and a.compartment_id = b.' + compartment_id_info[1]
 				else: # just enter null for compartment name because it's not in the source data 
 					v_sql = v_sql + 'facility_id, tank_name, tank_id, null, compartment_id from ' + self.dataset.schema + '.erg_compartment_id'
+
+				# build the join columns assuming we had to create erg_tank_id because no Tank ID in source data
+				self.organization_join_table = 'erg_compartment_id'
+				self.organization_join_column = 'facility_id'
+				self.organization_join_column2 = 'tank_id'
+				self.organization_join_column3 = 'compartment_id'
+				self.organization_join_fk = 'facility_id'
+				self.organization_join_fk2 = 'tank_id'
+				self.organization_join_fk3 = 'compartment_id'
 
 			else: # Source data had Compartment ID; get the select columns from the source table
 				facility_id_info = self.get_org_col_name(compartment_table_name, 'facility_id')
@@ -448,8 +535,34 @@ def get_tables_with_missing_cols(dataset):
 	return [r[0] for r in rows]
 
 
-def drop_tables(dataset):
-	logger.info('Dropped existing ID generation tables')
+def drop_table(dataset, table_name, cursor=None):
+	if cursor:
+		cur = cursor
+	else:
+		conn = utils.connect_db()
+		cur = conn.cursor()
+
+	sql = f"""delete from {dataset.schema}.{dataset.ust_or_release}_element_mapping
+	           where organization_table_name = %s"""
+	cur.execute(sql, (table_name,))
+	logger.info('Deleted %s rows from %s.%s_element_mapping where organization_table_name = %s', cur.rowcount, dataset.schema, dataset.ust_or_release, table_name)
+	conn.commit()
+
+	sql = f"drop table {dataset.schema}.{table_name}"
+	cur.execute(sql)
+	logger.info('Dropped table %s.%s', dataset.schema, table_name)
+
+	if not cursor:
+		cur.close()
+		conn.close()
+
+
+def drop_tables(dataset, table_name=None):
+	if table_name:
+		erg_table_name = id_table_names[table_name]
+		drop_table(dataset, erg_table_name)
+		return 
+	logger.info('Dropping existing ID generation tables')
 	conn = utils.connect_db()
 	cur = conn.cursor()
 	sql = """select table_name from information_schema.tables 
@@ -458,25 +571,14 @@ def drop_tables(dataset):
 	cur.execute(sql, (dataset.schema,))
 	rows = cur.fetchall()
 	for row in rows:
-		table_name = row[0]
-		sql2 = f"""delete from {dataset.schema}.{dataset.ust_or_release}_element_mapping
-		           where organization_table_name = %s"""
-		cur.execute(sql2, (table_name,))
-		logger.info('Deleted %s rows from %s.%s_element_mapping where organization_table_name = %s', cur.rowcount, dataset.schema, dataset.ust_or_release, table_name)
-		conn.commit()
-
-		sql2 = f"drop table {dataset.schema}.{table_name}"
-		cur.execute(sql2)
-		logger.info('Dropped table %s.%s', dataset.schema, table_name)
-
+		drop_table(dataset, row[0])
 	cur.close()
 	conn.close()
 	logger.info('All existing ID generation tables dropped')
 
 
 
-
-def main(ust_or_release, control_id):
+def main(ust_or_release, control_id, table_name=None):
 	dataset = Dataset(ust_or_release=ust_or_release,
 					  control_id=control_id,
 					  base_file_name='id_column_generation.sql',
@@ -485,19 +587,27 @@ def main(ust_or_release, control_id):
 					  export_file_path=export_file_path)
 
 	if drop_existing:
-		drop_tables(dataset)
+		drop_tables(dataset, table_name)
 
-	tables_needed = get_tables_with_missing_cols(dataset)
-	for table in tables_needed: 
-		logger.info('-------------------------------------------------------------------------\nWorking on table %s', table)
+	if table_name:
 		columns = IdColumns(dataset=dataset, 
-							table_name=table, 
+							table_name=table_name, 
 							drop_existing=drop_existing,
 							write_sql=write_sql,
-							overwrite_sql_file=overwrite_sql_file)
+							overwrite_sql_file=overwrite_sql_file)		
+	else:
+		tables_needed = get_tables_with_missing_cols(dataset)
+		for table in tables_needed: 
+			logger.info('-------------------------------------------------------------------------\nWorking on table %s', table)
+			columns = IdColumns(dataset=dataset, 
+								table_name=table, 
+								drop_existing=drop_existing,
+								write_sql=write_sql,
+								overwrite_sql_file=overwrite_sql_file)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
-		 control_id=control_id)
+		 control_id=control_id,
+		 table_name=table_name)
 
