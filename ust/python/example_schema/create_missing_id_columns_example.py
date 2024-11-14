@@ -139,15 +139,21 @@ class IdColumns:
 		return self.cur.fetchone()[1]
 
 
-	def get_col_mapping_existence(self, table_name, column_name):
-		sql = f"""select count(*) from example.{self.dataset.ust_or_release}_element_mapping 
-				  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
-		self.cur.execute(sql, (self.dataset.control_id, table_name, column_name))
+	def get_mapping_existence(self, table_name, column_name=None):
+		sql = f"""select count(*) from public.{self.dataset.ust_or_release}_element_mapping 
+				  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s """
+		if column_name:
+			sql = sql + f" and epa_column_name = '{column_name}'"
+		self.cur.execute(sql, (self.dataset.control_id, table_name))
 		return self.cur.fetchone()[0]
 
 
 	def record_element_mapping(self, table_name, column_name):
-		if self.get_col_mapping_existence(table_name, column_name):
+		if table_name != 'ust_compartment' and not self.get_mapping_existence(table_name):
+			# Table is an optional child table with no other element mapping so do not map anything to it
+			return
+			
+		if self.get_mapping_existence(table_name, column_name):
 			logger.warning('A mapping already existed for table %s, column %s; it will be deleted and replaced with the ERG-created table', table_name, column_name)
 			sql = f"""delete from example.{self.dataset.ust_or_release}_element_mapping
 					\nwhere {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
