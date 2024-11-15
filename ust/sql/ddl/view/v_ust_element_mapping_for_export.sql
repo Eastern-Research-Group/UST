@@ -4,6 +4,7 @@ create or replace view "public"."v_ust_element_mapping_for_export" as
     a.organization_table_name,
     a.organization_column_name,
     a.programmer_comments,
+    a.query_logic,
     a.epa_comments,
     a.organization_comments,
     a.epa_table_name,
