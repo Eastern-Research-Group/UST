@@ -71,7 +71,7 @@ class SourceData:
 		self.conn.commit()
 		self.cur.close()
 		self.conn.close()
-		logger.info('Diconnected from database')
+		logger.info('Disconnected from database')
 
 
 	def clean_export_dir(self):

@@ -4,14 +4,16 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.util import utils
+import pandas as pd
+
 from python.util.dataset import Dataset 
+from python.util import utils
 from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
-table_name = None               # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
+control_id = 24                  # Enter an integer that is the ust_control_id or release_control_id
+table_name = 'ust_tank'       # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
 overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -22,10 +24,17 @@ export_file_name = None
 class ViewSql:
 	conn = None  
 	cur = None  
+	required_cols = None 
+	existing_cols = None
 	required_col_ids = None
 	existing_col_ids = None
+	all_col_ids = None
 	epa_column_name = None
-	view_sql = '----------------------------------------------------------------------------------------------------------\n\n'  
+	join_info = {}
+	select_sql = ''
+	from_sql = ''
+	view_sql = '----------------------------------------------------------------------------------------------------------\n\n'
+	table_aliases = {}
 
 	def __init__(self, 
 				 dataset,
@@ -37,11 +46,13 @@ class ViewSql:
 		self.overwrite_sql_file = overwrite_sql_file
 		self.view_name = 'v_' + self.table_name
 		self.connect_db()
-		self.required_cols = self.get_required_cols()
-		self.existing_cols = self.get_existing_cols()
-		self.required_col_ids = [n for n in self.required_col_ids if n not in self.existing_col_ids]
-		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids)
-		self.generate_sql()		
+		try:
+			self.generate_sql()	
+		except Exception as e:
+			print('------------------------------------------------')
+			import logging
+			logging.error(e, exc_info=True)
+			print('------------------------------------------------')
 		self.disconnect_db()
 		# self.show_existing_cols()
 		self.write_self()	
@@ -57,7 +68,7 @@ class ViewSql:
 		self.conn.commit()
 		self.cur.close()
 		self.conn.close()
-		logger.info('Diconnected from database')
+		logger.info('Disconnected from database')
 
 
 	def show_existing_cols(self):
@@ -76,15 +87,16 @@ class ViewSql:
 
 
 	def get_required_cols(self):
-		sql = f"""select ordinal_position, a.column_name, a.data_type, a.character_maximum_length
+		sql = f"""select column_sort_order, a.column_name, a.data_type, a.character_maximum_length
 				from information_schema.columns a join public.{self.dataset.ust_or_release}_required_view_columns b 
-					on a.table_name = b.table_name and a.column_name = b.column_name
-				where table_schema = 'public' and a.table_name = %s 
+					on a.table_name = b.information_schema_table_name and a.column_name = b.column_name
+				where table_schema = 'public' and b.table_name = %s 
 				and b.column_name not in 
-					(select epa_column_name from public.v_{self.dataset.ust_or_release}_table_population_sql
+					(select epa_column_name from public.v_{self.dataset.ust_or_release}_element_mapping_joins
 					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s)
-				order by ordinal_position"""
+				order by column_sort_order"""
 		self.cur.execute(sql, (self.table_name, self.dataset.control_id, self.table_name))
+		# utils.pretty_print_query(self.cur)
 		req_col_info = self.cur.fetchall()
 		self.required_col_ids = [c[0] for c in req_col_info]
 		req_cols = {}
@@ -94,80 +106,258 @@ class ViewSql:
 			data_type = req_col[2]
 			character_maximum_length = req_col[3]
 			req_cols[column_id] = {'column_name': column_name, 'data_type': data_type, 'character_maximum_length':character_maximum_length}
+		# print(req_cols)
 		return req_cols
 			
 
+	def get_column_select_sql(self, epa_column_name, org_column_name):
+		epa_table_name = self.table_name
+		if epa_column_name == 'facility_id' and self.table_name != 'ust_facility':
+			epa_table_name = 'ust_facility'
+		elif (epa_column_name == 'tank_id' or epa_column_name == 'tank_name') and self.table_name != 'ust_tank':
+			epa_table_name = 'ust_tank'
+		elif (epa_column_name == 'compartment_id' or epa_column_name == 'compartment_name') and self.table_name != 'ust_compartment':
+			epa_table_name = 'ust_compartment'
+
+		sql = """select data_type, character_maximum_length from information_schema.columns 
+		         where table_schema = 'public' and table_name = %s and column_name = %s"""
+		self.cur.execute(sql, (epa_table_name, epa_column_name))
+		# utils.pretty_print_query(self.cur)
+		row = self.cur.fetchone()
+		data_type = row[0]
+		max_len = row[1]
+		selected_column = '"' + org_column_name + '"::' + data_type
+		if max_len:
+			selected_column = selected_column + '(' + str(max_len) + ')'
+		selected_column = selected_column + ' as ' + epa_column_name + ','
+
+		return selected_column 
+
+
 	def get_existing_cols(self):
-		sql = f"""select epa_column_name, 
-				   data_type, character_maximum_length,
-				   organization_table_name, organization_column_name,
-				   selected_column, 
-				   organization_join_table, organization_join_column, organization_join_fk,
-				   database_lookup_table, database_lookup_column,
-				   deagg_table_name, deagg_column_name,
-				   column_sort_order, programmer_comments, primary_key
+		sql = f"""select column_sort_order as column_id, 
+					epa_column_name, organization_column_name, 
+					selected_column, programmer_comments,
+					organization_table_name
 			from public.v_{self.dataset.ust_or_release}_table_population_sql
 			where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s
+			and column_sort_order is not null
 			order by column_sort_order """
 		self.cur.execute(sql, (self.dataset.control_id, self.table_name))
+		# utils.pretty_print_query(self.cur)
 		existing_col_info = self.cur.fetchall()
 		if not existing_col_info:
 			logger.warning('No elements have been mapped for EPA table %s. Exiting...', self.table_name)
 			self.disconnect_db()
 			exit()
-		self.existing_col_ids = [c[13] for c in existing_col_info]
+		self.existing_col_ids = [c[0] for c in existing_col_info]
 		existing_cols = {}
 		for existing_col in existing_col_info:
-			column_id = existing_col[13]
-			column_name = existing_col[0]
-			selected_column = existing_col[5]
-			programmer_comments = existing_col[14]
+			column_id = existing_col[0]
+			epa_column_name = existing_col[1]
+			organization_column_name = existing_col[2]
+			selected_column = existing_col[3]
+			programmer_comments = existing_col[4]
+			organization_table_name = existing_col[5]
+			if not selected_column:
+				selected_column = self.get_column_select_sql(epa_column_name, organization_column_name)
+				try:
+					selected_column = self.table_aliases[organization_table_name] + '.' + selected_column
+				except KeyError:
+					pass
 			if programmer_comments:
 				programmer_comments = '	  -- ' + programmer_comments
 			else:
 				programmer_comments = ''
-			existing_cols[column_id] = {'column_name': column_name, 
+			if column_id == max(self.existing_col_ids):
+				selected_column = selected_column[:-1]
+			existing_cols[column_id] = {'column_name': epa_column_name, 
 			                            'selected_column': selected_column, 
-			                            'programmer_comments': programmer_comments}		
+			                            'programmer_comments': programmer_comments,
+			                            'organization_table_name': organization_table_name}		
 		return existing_cols
 
 
-	def get_join_info(self, organization_table_name):
-		sql = f"""select organization_column_name, organization_join_table, organization_join_column, organization_join_fk
-           from public.v_{self.dataset.ust_or_release}_table_population_sql
-           where {self.dataset.ust_or_release}_control_id = %s 
-           and epa_table_name = %s and organization_table_name = %s"""
-		self.cur.execute(sql, (self.dataset.control_id, self.table_name, organization_table_name))		
-		# utils.pretty_print_query(self.cur)	
-		cols = self.cur.fetchone()
-		join_info = {}
-		join_info['organization_column_name'] = cols[0]
-		join_info['organization_join_table'] = cols[1]
-		join_info['organization_join_column'] = cols[2]
-		join_info['organization_join_fk'] = cols[3]
-		return join_info
+	def print_join_info(self):
+		print(self.join_info)
+
+
+	def set_join_info(self, org_table_name, where_table='organization_table_name', epa_table_name=None):
+		if not epa_table_name:
+			epa_table_name = self.table_name
+		sql = f"""select distinct organization_table_name, organization_join_table, 
+					organization_join_column, organization_join_fk,
+					organization_join_column2, organization_join_fk2,
+					organization_join_column3, organization_join_fk3,
+					organization_column_name
+				from public.v_{self.dataset.ust_or_release}_element_mapping_joins
+				where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
+				and {where_table} = %s
+				order by 1, 2, 3"""
+		self.cur.execute(sql, (self.dataset.control_id, epa_table_name, org_table_name))
+		utils.pretty_print_query(self.cur)
+		rows = self.cur.fetchall()	
+		self.join_info = {}
+		for row in rows:
+			self.join_info['organization_table_name'] = row[0]
+			self.join_info['organization_join_table'] = row[1]
+			self.join_info['organization_join_column'] = row[2]
+			self.join_info['organization_join_fk'] = row[3]
+			self.join_info['organization_join_column2'] = row[4]
+			self.join_info['organization_join_fk2'] = row[5]
+			self.join_info['organization_join_column3'] = row[6]
+			self.join_info['organization_join_fk3'] = row[7]	
+			self.join_info['organization_column_name'] = row[8]				
+
+
+	def build_from_sql(self, from_table, alias, join_alias):
+		# self.print_join_info()
+		if self.join_info['organization_join_column'] and self.join_info['organization_join_fk']:
+			self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '."' + self.join_info['organization_join_fk'] + '" '
+		if self.join_info['organization_join_column2'] and self.join_info['organization_join_fk2']:
+			self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column2'] + '" = ' + alias + '."' + self.join_info['organization_join_fk2'] + '" '
+		if self.join_info['organization_join_column3'] and self.join_info['organization_join_fk3']:
+			self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column3'] + '" = ' + alias + '."' + self.join_info['organization_join_fk3'] + '" '
+
+
+	def build_from_query(self):
+		self.from_sql = 'from '
+
+		sql = f"""select organization_table_name, table_type,
+						chr(96 + row_number() over (partition by 'a' order by x.sort_order, z.sort_order)::int) as alias
+				from 
+					(select organization_table_name, min(sort_order) as sort_order 
+					from public.v_{self.dataset.ust_or_release}_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
+					where {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and epa_table_name = '{self.table_name}'
+					group by organization_table_name) x 
+					join public.mapped_table_types y on x.sort_order = y.sort_order 
+					left join public.generated_table_sort_order z on x.organization_table_name = z.table_name
+				order by alias"""
+		print(sql)
+		exit()
+		df = pd.read_sql(sql, utils.get_engine(), index_col='organization_table_name')
+		print(df)
+
+		deagg_rows_alias = None 
+		for index, row in df.iterrows():
+			logger.info('Working on table %s', index)
+			alias = row['alias']
+			print('alias = ' + alias)
+			print("row['table_type'] = " + row['table_type'])
+
+			if alias == 'a':
+				self.from_sql = self.from_sql + self.dataset.schema + '.' + '"' + index + '" ' + alias
+				self.table_aliases[index] = alias
+
+			elif row['table_type'] == 'id' or row['table_type'] == 'org':
+				from_table = index
+
+				self.set_join_info(from_table)
+				try:
+					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
+				except:
+					join_alias = 'a'
+				self.build_from_sql(from_table, alias, join_alias)
+				self.table_aliases[index] = alias
+
+			elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
+				print('hola')
+				from_table = index
+
+				if self.table_name == 'ust_compartment':
+					epa_table_name = 'ust_tank'
+					search_table = 'organization_table_name'
+				# elif self.table_name == 'ust_piping':
+					
+				# 	epa_table_name = 'ust_compartment'
+				# 	search_table = 'organization_table_name'
+				else:
+					epa_table_name = self.table_name
+					search_table = 'organization_join_table'
+				print('from_table = ' + from_table)
+				print('search_table = ' + search_table)
+				print('epa_table_name = ' + epa_table_name)
+				self.set_join_info(from_table, search_table, epa_table_name)
+				self.print_join_info()
+				try:
+					join_alias = df.loc[self.join_info['organization_table_name']]['alias']
+				except:
+					join_alias = 'a'
+				if alias == join_alias:
+					try:
+						join_alias = df.loc[self.join_info['organization_join_table']]['alias']
+					except KeyError:
+						join_alias = 'a'
+				self.build_from_sql(from_table, alias, join_alias)
+				self.table_aliases[index] = alias
+
+			elif row['table_type'] == 'deagg':
+				self.set_join_info(index, 'deagg_table_name')
+				sql = f"""select distinct deagg_column_name 
+						from public.v_{self.dataset.ust_or_release}_element_mapping_joins
+						where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
+						and deagg_table_name = %s"""
+				self.cur.execute(sql, (self.dataset.control_id, self.table_name, index))
+				# utils.pretty_print_query(self.cur)
+				rows = self.cur.fetchall()
+				db_lookup_col = None
+				for row in rows:
+					db_lookup_col = row[0]
+				from_table = index
+				try:
+					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
+				except:
+					join_alias = 'a'
+				self.build_from_sql(from_table, alias, join_alias)
+				self.table_aliases[index] = alias
+				if 'datarows' in from_table:
+					deagg_rows_alias = alias
+
+			elif row['table_type'] == 'lookup':
+				self.set_join_info(index, 'database_lookup_table')
+				sql = f"""select distinct database_lookup_column 
+						from public.v_{self.dataset.ust_or_release}_element_mapping_joins
+						where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s"""
+				self.cur.execute(sql, (self.dataset.control_id, self.table_name, index))
+				# utils.pretty_print_query(self.cur)
+				rows = self.cur.fetchall()
+				db_lookup_col = None
+				for row in rows:
+					db_lookup_col = row[0]
+				from_table = 'v_' + db_lookup_col + '_xwalk'	
+				if deagg_rows_alias:
+					join_alias = deagg_rows_alias
+				else:
+					try:
+						join_alias = df.loc[self.join_info['organization_table_name']]['alias']
+					except:
+					 	join_alias = 'a'
+				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
+				self.table_aliases[index] = alias
+			# print(self.from_sql) 
+			print('__________________________________________________________________________________________________________________\n')
+		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
 
 
 	def build_select_query(self):
-		self.view_sql = self.view_sql + 'select distinct\n'
+		self.select_sql = self.select_sql + 'select distinct\n'
 		region_next = False 
 		for i in range(len(self.all_col_ids)):
 			# deal with EPARegion column if in ust_facility and the last column was FacilityState
 			if region_next:
 				epa_region = None 
 				selected_column = str(utils.get_epa_region(self.dataset.organization_id)) + '::integer as facility_epa_region,'
-				self.view_sql = self.view_sql + '\t' + selected_column + '\n'
+				self.select_sql = self.select_sql + '\t--' + selected_column + '\n'
 				region_next = False
 
 			# build the select columns component of the query
 			column_id = self.all_col_ids[i]
 			if self.all_col_ids[i] in self.existing_col_ids: # the column we are working on was mapped in the element_mapping table
 				self.epa_column_name = self.existing_cols[column_id]['column_name']
-				logger.info('Working on column %s', self.epa_column_name)
+				# logger.info('Working on column %s', self.epa_column_name)
 				selected_column = self.existing_cols[column_id]['selected_column'].replace('""','????')
 				if 'facility_type' in self.epa_column_name and '_id' not in self.epa_column_name:
 					selected_column = selected_column.replace('facility_type1 as','facility_type_id as').replace('facility_type2 as','facility_type_id as')
-				programmer_comments = self.existing_cols[column_id]['programmer_comments']
 			else: # the column we are working on wasn't mapped in the element mapping table but is a required field so add it anyway
 				self.epa_column_name = self.required_cols[column_id]['column_name']
 				logger.info('Working on column %s', self.epa_column_name)
@@ -182,98 +372,26 @@ class ViewSql:
 				# if we are working on ust_facility and we are on facility state, set the region_next variable
 				if self.dataset.ust_or_release == 'ust' and self.table_name == 'ust_facility' and 12 not in self.existing_col_ids:
 					region_next = True
-				
-			self.view_sql = self.view_sql + '\t' + selected_column + programmer_comments + '\n'
-		
-
-	def build_from_query(self):
-		self.view_sql = self.view_sql[:-2] + '\nfrom '
-		sql = f"""select * from (
-					   select distinct organization_table_name table_name, 'org_table' as table_type, 1 as sort_order
-					  from public.v_{self.dataset.ust_or_release}_table_population_sql
-					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key = 'Y'
-					  union all 
-					  select distinct organization_table_name table_name, 'org_table' as table_type, 2 as sort_order
-					  from public.v_{self.dataset.ust_or_release}_table_population_sql
-					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key is null 
-					  and organization_table_name not in 
-					  	(select organization_table_name from public.v_ust_table_population_sql
-					  	where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and primary_key = 'Y')
-			          union all 
-			          select distinct deagg_table_name, 'deagg_table' as table_type, 2 as sort_order  
-			          from public.v_{self.dataset.ust_or_release}_table_population_sql
-			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
-			          union all 
-			          select distinct organization_join_table, 'join_table' as table_type, 3 as sort_order  
-			          from public.v_{self.dataset.ust_or_release}_table_population_sql
-			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
-			          union all 
-			          select distinct database_lookup_table, 'lookup_table' as table_type, 4 as sort_order  
-			          from public.v_{self.dataset.ust_or_release}_table_population_sql
-			          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s) x
-		          where table_name is not null 
-		          order by sort_order"""
-		self.cur.execute(sql, (self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name, self.dataset.control_id, self.table_name))
-		# utils.pretty_print_query(self.cur)
-		rows = self.cur.fetchall()
-		aliases = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-		i = 0 
-		from_sql = ''
-		first_org_table = True
-		tables_used = []
-		for row in rows:
-			from_table_name = row[0]
-			from_table_type = row[1]
-			if from_table_name in tables_used:
-				continue
-			logger.info('Working on from_table_name %s, which is a %s', from_table_name, from_table_type)
-			alias = aliases[i]
-			if from_table_type == 'org_table':
-				if not first_org_table:
-					from_sql = from_sql + '\tleft join '				
-				from_sql = from_sql + self.dataset.schema + '.' + '"' + from_table_name + '" ' + alias
-				if not first_org_table:
-					join_info = self.get_join_info(from_table_name)
-					from_sql = from_sql + ' on ' + aliases[i-1] + '."' + join_info['organization_join_column'] + '" = ' + alias + '."' + join_info['organization_join_fk'] + '"'
-				else:
-					first_org_table = False
-				from_sql = from_sql  + '\n'
-			elif from_table_type == 'deagg_table':
-				sql = f"""select deagg_column_name, organization_column_name from public.v_{self.dataset.ust_or_release}_table_population_sql
-				           where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and deagg_table_name = %s """
-				cur.execute(sql, (self.dataset.control_id, self.table_name, from_table_name))
-				cols = self.cur.fetchone()
-				deagg_column_name = cols[0]
-				organization_column_name = cols[1]
-				from_sql = from_sql + '\tjoin ' + self.dataset.schema + '.' + from_table_name + ' ' + alias + ' on a."' + organization_column_name + '" = ' + alias + '."' + deagg_column_name + '"\n'
-			elif from_table_type == 'join_table': 
-				join_info = self.get_join_info()
-				from_sql = from_sql + '\tleft join ' + self.dataset.schema + '."' + from_table_name + '" ' 
-				from_sql = from_sql + alias + ' on a."' + join_info['organization_column_name'] + '" = ' 
-				from_sql = from_sql + alias + '."' + join_info['organization_join_column'] + '"\n'
-			elif from_table_type == 'lookup_table':
-				sql = f"""select database_lookup_column, organization_column_name from public.v_{self.dataset.ust_or_release}_table_population_sql
-				           where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s """
-				self.cur.execute(sql, (self.dataset.control_id, self.table_name, from_table_name))
-				cols = self.cur.fetchone()
-				database_lookup_column = cols[0]
-				organization_column_name = cols[1]
-				xwalk_view_name = 'v_' + database_lookup_column + '_xwalk'
-				if database_lookup_column == 'facility_type1' or database_lookup_column == 'facility_type2':
-					database_lookup_column == 'facility_type_id'
-				from_sql = from_sql + '\tleft join ' + self.dataset.schema + '.' + xwalk_view_name + ' ' + alias + ' on a."' + organization_column_name + '" = ' + alias + '.organization_value\n'
-			i += 1
-			tables_used.append(from_table_name)
-		self.view_sql = self.view_sql + from_sql[:-1] + ';\n\n'
+			
+			self.select_sql = self.select_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['programmer_comments']+ '\n'
 
 
 	def generate_sql(self):
-		self.view_sql = self.view_sql + f'create view {self.dataset.schema}.{self.view_name} as\n'
-		self.build_select_query()
 		self.build_from_query()
+		self.required_cols = self.get_required_cols()
+		self.existing_cols = self.get_existing_cols()
+		# print(self.required_cols)
+		# print(self.existing_cols)
+		# for k, v in self.existing_cols.items():
+		# 	print('k = ' + str(k) + '; v = ' + str(v))
+		# exit()
+		self.required_col_ids = [n for n in self.required_col_ids if n not in self.existing_col_ids]
+		self.all_col_ids = sorted(self.required_col_ids + self.existing_col_ids, key=lambda x: x or 0)		
+		self.build_select_query()
+		self.view_sql = self.view_sql + f'create view {self.dataset.schema}.{self.view_name} as\n'
+		self.view_sql = self.view_sql + self.select_sql + self.from_sql
 		# print(self.view_sql)
 		return self.view_sql 
-
 
 
 
