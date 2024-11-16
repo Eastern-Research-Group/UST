@@ -2,7 +2,7 @@ create or replace view "public"."v_ust_table_population_sql" as
  SELECT v_ust_table_population.ust_control_id,
     v_ust_table_population.epa_table_name,
     v_ust_table_population.epa_column_name,
-    v_ust_table_population.programmer_comments,
+    v_ust_table_population.query_logic,
     v_ust_table_population.data_type,
     v_ust_table_population.character_maximum_length,
     v_ust_table_population.organization_table_name,

@@ -2,7 +2,7 @@ create or replace view "public"."v_release_table_population_sql" as
  SELECT v_release_table_population.release_control_id,
     v_release_table_population.epa_table_name,
     v_release_table_population.epa_column_name,
-    v_release_table_population.programmer_comments,
+    v_release_table_population.query_logic,
     v_release_table_population.data_type,
     v_release_table_population.character_maximum_length,
     v_release_table_population.organization_table_name,
