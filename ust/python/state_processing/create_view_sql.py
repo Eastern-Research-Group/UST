@@ -14,7 +14,7 @@ from python.util.logger_factory import logger
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 24                  # Enter an integer that is the ust_control_id or release_control_id
 table_name = 'ust_tank'       # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
-overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
+overwrite_sql_file = True      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None         
@@ -137,7 +137,7 @@ class ViewSql:
 	def get_existing_cols(self):
 		sql = f"""select column_sort_order as column_id, 
 					epa_column_name, organization_column_name, 
-					selected_column, programmer_comments,
+					selected_column, query_logic,
 					organization_table_name
 			from public.v_{self.dataset.ust_or_release}_table_population_sql
 			where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s
@@ -157,7 +157,7 @@ class ViewSql:
 			epa_column_name = existing_col[1]
 			organization_column_name = existing_col[2]
 			selected_column = existing_col[3]
-			programmer_comments = existing_col[4]
+			query_logic = existing_col[4]
 			organization_table_name = existing_col[5]
 			if not selected_column:
 				selected_column = self.get_column_select_sql(epa_column_name, organization_column_name)
@@ -165,15 +165,15 @@ class ViewSql:
 					selected_column = self.table_aliases[organization_table_name] + '.' + selected_column
 				except KeyError:
 					pass
-			if programmer_comments:
-				programmer_comments = '	  -- ' + programmer_comments
+			if query_logic:
+				query_logic = utils.comment_every_line(query_logic)
 			else:
-				programmer_comments = ''
+				query_logic = ''
 			if column_id == max(self.existing_col_ids):
 				selected_column = selected_column[:-1]
 			existing_cols[column_id] = {'column_name': epa_column_name, 
 			                            'selected_column': selected_column, 
-			                            'programmer_comments': programmer_comments,
+			                            'query_logic': query_logic,
 			                            'organization_table_name': organization_table_name}		
 		return existing_cols
 
@@ -233,10 +233,12 @@ class ViewSql:
 					join public.mapped_table_types y on x.sort_order = y.sort_order 
 					left join public.generated_table_sort_order z on x.organization_table_name = z.table_name
 				order by alias"""
-		print(sql)
-		exit()
+		# print(sql)
+		# exit()
 		df = pd.read_sql(sql, utils.get_engine(), index_col='organization_table_name')
 		print(df)
+		print('----------------------------------------------------------------------------------------------------------------------\n')
+		# exit()
 
 		deagg_rows_alias = None 
 		for index, row in df.iterrows():
@@ -257,11 +259,13 @@ class ViewSql:
 					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
 				except:
 					join_alias = 'a'
+				print('from_table = ' + from_table)
+				print('alias = ' + alias)
+				print('join_alias = ' + join_alias)
 				self.build_from_sql(from_table, alias, join_alias)
 				self.table_aliases[index] = alias
 
 			elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
-				print('hola')
 				from_table = index
 
 				if self.table_name == 'ust_compartment':
@@ -336,7 +340,7 @@ class ViewSql:
 				self.table_aliases[index] = alias
 			# print(self.from_sql) 
 			print('__________________________________________________________________________________________________________________\n')
-		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
+		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;\n'
 
 
 	def build_select_query(self):
@@ -347,7 +351,7 @@ class ViewSql:
 			if region_next:
 				epa_region = None 
 				selected_column = str(utils.get_epa_region(self.dataset.organization_id)) + '::integer as facility_epa_region,'
-				self.select_sql = self.select_sql + '\t--' + selected_column + '\n'
+				self.select_sql = self.select_sql + '\t' + selected_column + '\n'
 				region_next = False
 
 			# build the select columns component of the query
@@ -372,8 +376,9 @@ class ViewSql:
 				# if we are working on ust_facility and we are on facility state, set the region_next variable
 				if self.dataset.ust_or_release == 'ust' and self.table_name == 'ust_facility' and 12 not in self.existing_col_ids:
 					region_next = True
-			
-			self.select_sql = self.select_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['programmer_comments']+ '\n'
+			if self.existing_cols[column_id]['query_logic']:
+				selected_column = '  !!! ' + selected_column
+			self.select_sql = self.select_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['query_logic'] + '\n'
 
 
 	def generate_sql(self):
@@ -410,26 +415,36 @@ def get_tables_needed(dataset):
 
 
 
-def main(ust_or_release, control_id, table_name=None):
+def main(ust_or_release, control_id, table_name=None, overwrite_sql_file=False):
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id,
 					  base_file_name='view_creation.sql',
 					  export_file_name=export_file_name,
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
+
+	joins = utils.get_join_tables(dataset, 'ust_tank')
+	print(joins)
+
+	exit()
+
+
 	if table_name:
 		sql = ViewSql(dataset=dataset, 
-			          table_name=table_name)
+			          table_name=table_name,
+			          overwrite_sql_file=overwrite_sql_file)
 		print(sql.view_sql)
 	else:
 		tables_needed = get_tables_needed(dataset)
 		for table in tables_needed: 
 			sql = ViewSql(dataset=dataset, 
-				          table_name=table)
+				          table_name=table,
+				          overwrite_sql_file=overwrite_sql_file)
 			# print(sql.view_sql)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
-		 table_name=table_name)
+		 table_name=table_name,
+		 overwrite_sql_file=overwrite_sql_file)
