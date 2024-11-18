@@ -154,6 +154,26 @@ values (24,'ust_facility','facility_owner_company_name','facility','FacilityOwne
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (24,'ust_facility','financial_responsibility_obtained','facility','FinancialResponsibilityObtained',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_commercial_insurance','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_guarantee','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_letter_of_credit','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_local_government_financial_test','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_other_method','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_risk_retention_group','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_self_insurance_financial_test','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_state_fund','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_surety_bond','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
+values (24,'ust_facility','financial_responsibility_trust_fund','facility','FinancialResponsibilityObtained',null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (24,'ust_facility','associated_ust_release_id','facility','AssociatedLUSTID',null);
 
 --ust_tank: This table is REQUIRED.
