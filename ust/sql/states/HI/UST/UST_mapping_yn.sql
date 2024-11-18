@@ -139,3 +139,55 @@ where ust_element_mapping_id = 1387;
 update ust_element_mapping
 set query_logic = 'when TankCorrosionProtectionSacrificialAnode = TRUE then Yes, when TankCorrosionProtectionSacrificialAnode = FALSE then No'
 where ust_element_mapping_id = 1384;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "commercial insurance" then "Yes"
+when FinancialResponsibilityObtained = "Insurance" then "Yes"
+when FinancialResponsibilityObtained = "nsurance" then "Yes"
+when FinancialResponsibilityObtained is not "commercial insurance" and not "Insurance" and not "nsurance" then "No"'
+where ust_element_mapping_id = 1432;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Guarantee" then "Yes"
+when FinancialResponsibilityObtained is not "Guarantee" then "No"'
+where ust_element_mapping_id = 1433;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Letter of Credit" then "Yes"
+when FinancialResponsibilityObtained is not "Letter of Credit" then "No"'
+where ust_element_mapping_id = 1434;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Local Gov"t Bond Rating" then "Yes"
+when FinancialResponsibilityObtained is not "Local Gov"t Bond Rating" then "No"'
+where ust_element_mapping_id = 1435;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Other" then "Yes"
+when FinancialResponsibilityObtained is not "Other" then "No"'
+where ust_element_mapping_id = 1436;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Risk Retention Group" then "Yes"
+when FinancialResponsibilityObtained is not "Risk Retention Group" then "No"'
+where ust_element_mapping_id = 1437;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Self Insured" then "Yes"
+when FinancialResponsibilityObtained is not "Self Insured" then "No"'
+where ust_element_mapping_id = 1438;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "State Fund" then "Yes"
+when FinancialResponsibilityObtained is not "State Fund" then "No"'
+where ust_element_mapping_id = 1439;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Surety Bond" then "Yes"
+when FinancialResponsibilityObtained is not "Surety Bond" then "No"'
+where ust_element_mapping_id = 1440;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Trust Fund" then "Yes"
+when FinancialResponsibilityObtained is not "Trust Fund" then "No"'
+where ust_element_mapping_id = 1441;
