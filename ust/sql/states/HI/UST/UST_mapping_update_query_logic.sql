@@ -55,20 +55,6 @@ set query_logic = 'when UDCInstalled = TRUE then Yes, when UDCInstalled = FALSE 
 where ust_element_mapping_id = 1419;
 
 update ust_element_mapping
-set query_logic = 'when FinancialResponsibilityObtained = "commercial insurance" then Yes, 
-when FinancialResponsibilityObtained = "Guarantee" then Yes,
-when FinancialResponsibilityObtained = "Insurance" then Yes,
-when FinancialResponsibilityObtained = "Letter of Credit" then Yes,
-when FinancialResponsibilityObtained = "Local  Bond Rating" then Yes,
-when FinancialResponsibilityObtained = "nsurance" then Yes,
-when FinancialResponsibilityObtained = "Other" then Yes,
-when FinancialResponsibilityObtained = "Risk Retention Group" then Yes,
-when FinancialResponsibilityObtained = "Self Insured" then Yes,
-when FinancialResponsibilityObtained = "Exempt, Stage Agency" then No,
-when FinancialResponsibilityObtained = "Not Listed" then Unknown'
-where ust_element_mapping_id = 1370;
-
-update ust_element_mapping
 set query_logic = 'when PipingCorrosionProtectionImpressedCurrent = TRUE then Yes, when PipingCorrosionProtectionImpressedCurrent = FALSE then No'
 where ust_element_mapping_id = 1409;
 
@@ -190,4 +176,54 @@ where ust_element_mapping_id = 1440;
 update ust_element_mapping
 set query_logic = 'when FinancialResponsibilityObtained = "Trust Fund" then "Yes"
 when FinancialResponsibilityObtained is not "Trust Fund" then "No"'
+where ust_element_mapping_id = 1441;
+
+update ust_element_mapping 
+set query_logic = 'when x."FinancialResponsibilityObtained" = Not Listed then Unknown
+            when x."FinancialResponsibilityObtained" = Exempt, Stage Agency then No
+            when x."FinancialResponsibilityObtained" = / then null
+            when x."FinancialResponsibilityObtained" is null then null
+            else Yes';
+where ust_element_mapping_id = 1370;
+           
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "commercial insurance" then "Yes"
+when FinancialResponsibilityObtained = "Insurance" then "Yes"
+when FinancialResponsibilityObtained = "nsurance" then "Yes"'
+where ust_element_mapping_id = 1432;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Guarantee" then "Yes"'
+where ust_element_mapping_id = 1433;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Letter of Credit" then "Yes"'
+where ust_element_mapping_id = 1434;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Local Gov"t Bond Rating" then "Yes"'
+where ust_element_mapping_id = 1435;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Other" then "Yes"'
+where ust_element_mapping_id = 1436;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Risk Retention Group" then "Yes"'
+where ust_element_mapping_id = 1437;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Self Insured" then "Yes"'
+where ust_element_mapping_id = 1438;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "State Fund" then "Yes"'
+where ust_element_mapping_id = 1439;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Surety Bond" then "Yes"'
+where ust_element_mapping_id = 1440;
+
+update ust_element_mapping
+set query_logic = 'when FinancialResponsibilityObtained = "Trust Fund" then "Yes"'
 where ust_element_mapping_id = 1441;
