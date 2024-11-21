@@ -12,9 +12,9 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 24                  # Enter an integer that is the ust_control_id or release_control_id
-table_name = 'ust_tank'       # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
-overwrite_sql_file = True      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
+control_id = 24                 # Enter an integer that is the ust_control_id or release_control_id
+table_name = 'ust_tank'       		# Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
+overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None         
@@ -84,6 +84,7 @@ class ViewSql:
 			wora = 'a'
 		with open(self.dataset.export_file_path, wora, encoding='utf-8') as f:
 			f.write(self.view_sql.replace('\t','    '))
+		logger.info('Wrote SQL to %s', self.dataset.export_file_path)
 
 
 	def get_required_cols(self):
@@ -178,169 +179,208 @@ class ViewSql:
 		return existing_cols
 
 
-	def print_join_info(self):
-		print(self.join_info)
+	# def print_join_info(self):
+	# 	print(self.join_info)
 
 
-	def set_join_info(self, org_table_name, where_table='organization_table_name', epa_table_name=None):
-		if not epa_table_name:
-			epa_table_name = self.table_name
-		sql = f"""select distinct organization_table_name, organization_join_table, 
-					organization_join_column, organization_join_fk,
-					organization_join_column2, organization_join_fk2,
-					organization_join_column3, organization_join_fk3,
-					organization_column_name
-				from public.v_{self.dataset.ust_or_release}_element_mapping_joins
-				where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
-				and {where_table} = %s
-				order by 1, 2, 3"""
-		self.cur.execute(sql, (self.dataset.control_id, epa_table_name, org_table_name))
-		utils.pretty_print_query(self.cur)
-		rows = self.cur.fetchall()	
-		self.join_info = {}
-		for row in rows:
-			self.join_info['organization_table_name'] = row[0]
-			self.join_info['organization_join_table'] = row[1]
-			self.join_info['organization_join_column'] = row[2]
-			self.join_info['organization_join_fk'] = row[3]
-			self.join_info['organization_join_column2'] = row[4]
-			self.join_info['organization_join_fk2'] = row[5]
-			self.join_info['organization_join_column3'] = row[6]
-			self.join_info['organization_join_fk3'] = row[7]	
-			self.join_info['organization_column_name'] = row[8]				
+	# def set_join_info(self, org_table_name, where_table='organization_table_name', epa_table_name=None):
+	# 	if not epa_table_name:
+	# 		epa_table_name = self.table_name
+	# 	sql = f"""select distinct organization_table_name, organization_join_table, 
+	# 				organization_join_column, organization_join_fk,
+	# 				organization_join_column2, organization_join_fk2,
+	# 				organization_join_column3, organization_join_fk3,
+	# 				organization_column_name
+	# 			from public.v_{self.dataset.ust_or_release}_element_mapping_joins
+	# 			where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
+	# 			and {where_table} = %s
+	# 			order by 1, 2, 3"""
+	# 	self.cur.execute(sql, (self.dataset.control_id, epa_table_name, org_table_name))
+	# 	utils.pretty_print_query(self.cur)
+	# 	rows = self.cur.fetchall()	
+	# 	self.join_info = {}
+	# 	for row in rows:
+	# 		self.join_info['organization_table_name'] = row[0]
+	# 		self.join_info['organization_join_table'] = row[1]
+	# 		self.join_info['organization_join_column'] = row[2]
+	# 		self.join_info['organization_join_fk'] = row[3]
+	# 		self.join_info['organization_join_column2'] = row[4]
+	# 		self.join_info['organization_join_fk2'] = row[5]
+	# 		self.join_info['organization_join_column3'] = row[6]
+	# 		self.join_info['organization_join_fk3'] = row[7]	
+	# 		self.join_info['organization_column_name'] = row[8]				
 
 
 	def build_from_sql(self, from_table, alias, join_alias):
-		# self.print_join_info()
-		if self.join_info['organization_join_column'] and self.join_info['organization_join_fk']:
-			self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '."' + self.join_info['organization_join_fk'] + '" '
-		if self.join_info['organization_join_column2'] and self.join_info['organization_join_fk2']:
-			self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column2'] + '" = ' + alias + '."' + self.join_info['organization_join_fk2'] + '" '
-		if self.join_info['organization_join_column3'] and self.join_info['organization_join_fk3']:
-			self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column3'] + '" = ' + alias + '."' + self.join_info['organization_join_fk3'] + '" '
+		if self.join_info['table_type'] == 'lookup':
+			self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '.organization_value'
+		else:
+			if self.join_info['organization_join_column'] and self.join_info['organization_join_fk']:
+				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '."' + self.join_info['organization_join_fk'] + '" '
+			if self.join_info['organization_join_column2'] and self.join_info['organization_join_fk2']:
+				self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column2'] + '" = ' + alias + '."' + self.join_info['organization_join_fk2'] + '" '
+			if self.join_info['organization_join_column3'] and self.join_info['organization_join_fk3']:
+				self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column3'] + '" = ' + alias + '."' + self.join_info['organization_join_fk3'] + '" '
 
 
 	def build_from_query(self):
 		self.from_sql = 'from '
 
-		sql = f"""select organization_table_name, table_type,
-						chr(96 + row_number() over (partition by 'a' order by x.sort_order, z.sort_order)::int) as alias
-				from 
-					(select organization_table_name, min(sort_order) as sort_order 
-					from public.v_{self.dataset.ust_or_release}_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
-					where {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and epa_table_name = '{self.table_name}'
-					group by organization_table_name) x 
-					join public.mapped_table_types y on x.sort_order = y.sort_order 
-					left join public.generated_table_sort_order z on x.organization_table_name = z.table_name
-				order by alias"""
-		# print(sql)
-		# exit()
-		df = pd.read_sql(sql, utils.get_engine(), index_col='organization_table_name')
-		print(df)
+		df = pd.DataFrame(utils.get_join_tables(self.dataset, self.table_name))
+		df.set_index('organization_table_name', inplace=True)
+		print(df.to_string())
 		print('----------------------------------------------------------------------------------------------------------------------\n')
 		# exit()
 
-		deagg_rows_alias = None 
-		for index, row in df.iterrows():
-			logger.info('Working on table %s', index)
+		for from_table, row in df.iterrows():
+			logger.info('Working on table %s', from_table)
+			self.join_info = row
 			alias = row['alias']
-			print('alias = ' + alias)
-			print("row['table_type'] = " + row['table_type'])
+			table_type = row['table_type']
 
 			if alias == 'a':
-				self.from_sql = self.from_sql + self.dataset.schema + '.' + '"' + index + '" ' + alias
-				self.table_aliases[index] = alias
+				self.from_sql = self.from_sql + self.dataset.schema + '.' + '"' + from_table + '" ' + alias
+				self.table_aliases[from_table] = alias
 
-			elif row['table_type'] == 'id' or row['table_type'] == 'org':
-				from_table = index
-
-				self.set_join_info(from_table)
+			else:
 				try:
 					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
 				except:
 					join_alias = 'a'
-				print('from_table = ' + from_table)
-				print('alias = ' + alias)
-				print('join_alias = ' + join_alias)
+				# print('alias = ' + alias)
+				# print('join_alias = ' + join_alias)
 				self.build_from_sql(from_table, alias, join_alias)
-				self.table_aliases[index] = alias
+				self.table_aliases[from_table] = alias
 
-			elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
-				from_table = index
-
-				if self.table_name == 'ust_compartment':
-					epa_table_name = 'ust_tank'
-					search_table = 'organization_table_name'
-				# elif self.table_name == 'ust_piping':
-					
-				# 	epa_table_name = 'ust_compartment'
-				# 	search_table = 'organization_table_name'
-				else:
-					epa_table_name = self.table_name
-					search_table = 'organization_join_table'
-				print('from_table = ' + from_table)
-				print('search_table = ' + search_table)
-				print('epa_table_name = ' + epa_table_name)
-				self.set_join_info(from_table, search_table, epa_table_name)
-				self.print_join_info()
-				try:
-					join_alias = df.loc[self.join_info['organization_table_name']]['alias']
-				except:
-					join_alias = 'a'
-				if alias == join_alias:
-					try:
-						join_alias = df.loc[self.join_info['organization_join_table']]['alias']
-					except KeyError:
-						join_alias = 'a'
-				self.build_from_sql(from_table, alias, join_alias)
-				self.table_aliases[index] = alias
-
-			elif row['table_type'] == 'deagg':
-				self.set_join_info(index, 'deagg_table_name')
-				sql = f"""select distinct deagg_column_name 
-						from public.v_{self.dataset.ust_or_release}_element_mapping_joins
-						where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
-						and deagg_table_name = %s"""
-				self.cur.execute(sql, (self.dataset.control_id, self.table_name, index))
-				# utils.pretty_print_query(self.cur)
-				rows = self.cur.fetchall()
-				db_lookup_col = None
-				for row in rows:
-					db_lookup_col = row[0]
-				from_table = index
-				try:
-					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
-				except:
-					join_alias = 'a'
-				self.build_from_sql(from_table, alias, join_alias)
-				self.table_aliases[index] = alias
-				if 'datarows' in from_table:
-					deagg_rows_alias = alias
-
-			elif row['table_type'] == 'lookup':
-				self.set_join_info(index, 'database_lookup_table')
-				sql = f"""select distinct database_lookup_column 
-						from public.v_{self.dataset.ust_or_release}_element_mapping_joins
-						where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s"""
-				self.cur.execute(sql, (self.dataset.control_id, self.table_name, index))
-				# utils.pretty_print_query(self.cur)
-				rows = self.cur.fetchall()
-				db_lookup_col = None
-				for row in rows:
-					db_lookup_col = row[0]
-				from_table = 'v_' + db_lookup_col + '_xwalk'	
-				if deagg_rows_alias:
-					join_alias = deagg_rows_alias
-				else:
-					try:
-						join_alias = df.loc[self.join_info['organization_table_name']]['alias']
-					except:
-					 	join_alias = 'a'
-				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
-				self.table_aliases[index] = alias
-			# print(self.from_sql) 
 			print('__________________________________________________________________________________________________________________\n')
+
 		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;\n'
+
+	# def build_from_query(self):
+	# 	self.from_sql = 'from '
+
+	# 	# sql = f"""select organization_table_name, table_type,
+	# 	# 				chr(96 + row_number() over (partition by 'a' order by x.sort_order, z.sort_order)::int) as alias
+	# 	# 		from 
+	# 	# 			(select organization_table_name, min(sort_order) as sort_order 
+	# 	# 			from public.v_{self.dataset.ust_or_release}_mapped_table_types a join public.mapped_table_types b on a.table_type = b.table_type
+	# 	# 			where {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and epa_table_name = '{self.table_name}'
+	# 	# 			group by organization_table_name) x 
+	# 	# 			join public.mapped_table_types y on x.sort_order = y.sort_order 
+	# 	# 			left join public.generated_table_sort_order z on x.organization_table_name = z.table_name
+	# 	# 		order by alias"""
+	# 	# print(sql)
+	# 	# exit()
+	# 	# df = pd.read_sql(sql, utils.get_engine(), index_col='organization_table_name')
+		
+	# 	self.join_info = utils.get_join_tables(self.dataset, self.table_name)
+	# 	df = pd.DataFrame(self.join_info)
+	# 	df.set_index('organization_table_name', inplace=True)
+	# 	print(df)
+	# 	print('----------------------------------------------------------------------------------------------------------------------\n')
+	# 	# exit()
+
+	# 	# deagg_rows_alias = None 
+	# 	for index, row in df.iterrows():
+	# 		logger.info('Working on table %s', index)
+	# 		alias = row['alias']
+	# 		print('alias = ' + alias)
+	# 		print("table_type = " + row['table_type'])
+
+	# 		if alias == 'a':
+	# 			self.from_sql = self.from_sql + self.dataset.schema + '.' + '"' + index + '" ' + alias
+	# 			self.table_aliases[index] = alias
+
+	# 		elif row['table_type'] == 'id' or row['table_type'] == 'org':
+	# 			from_table = index
+
+	# 			# self.set_join_info(from_table)
+	# 			try:
+	# 				join_alias = df.loc[self.join_info['organization_join_table']]['alias']
+	# 			except:
+	# 				join_alias = 'a'
+	# 			print('from_table = ' + from_table)
+	# 			print('alias = ' + alias)
+	# 			print('join_alias = ' + join_alias)
+	# 			self.build_from_sql(from_table, alias, join_alias)
+	# 			self.table_aliases[index] = alias
+
+	# 		elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
+	# 			from_table = index
+
+	# 			if self.table_name == 'ust_compartment':
+	# 				epa_table_name = 'ust_tank'
+	# 				search_table = 'organization_table_name'
+	# 			# elif self.table_name == 'ust_piping':
+					
+	# 			# 	epa_table_name = 'ust_compartment'
+	# 			# 	search_table = 'organization_table_name'
+	# 			else:
+	# 				epa_table_name = self.table_name
+	# 				search_table = 'organization_join_table'
+	# 			print('from_table = ' + from_table)
+	# 			print('search_table = ' + search_table)
+	# 			print('epa_table_name = ' + epa_table_name)
+	# 			self.set_join_info(from_table, search_table, epa_table_name)
+	# 			self.print_join_info()
+	# 			try:
+	# 				join_alias = df.loc[self.join_info['organization_table_name']]['alias']
+	# 			except:
+	# 				join_alias = 'a'
+	# 			if alias == join_alias:
+	# 				try:
+	# 					join_alias = df.loc[self.join_info['organization_join_table']]['alias']
+	# 				except KeyError:
+	# 					join_alias = 'a'
+	# 			self.build_from_sql(from_table, alias, join_alias)
+	# 			self.table_aliases[index] = alias
+
+	# 		elif row['table_type'] == 'deagg':
+	# 			self.set_join_info(index, 'deagg_table_name')
+	# 			sql = f"""select distinct deagg_column_name 
+	# 					from public.v_{self.dataset.ust_or_release}_element_mapping_joins
+	# 					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s 
+	# 					and deagg_table_name = %s"""
+	# 			self.cur.execute(sql, (self.dataset.control_id, self.table_name, index))
+	# 			# utils.pretty_print_query(self.cur)
+	# 			rows = self.cur.fetchall()
+	# 			db_lookup_col = None
+	# 			for row in rows:
+	# 				db_lookup_col = row[0]
+	# 			from_table = index
+	# 			try:
+	# 				join_alias = df.loc[self.join_info['organization_join_table']]['alias']
+	# 			except:
+	# 				join_alias = 'a'
+	# 			self.build_from_sql(from_table, alias, join_alias)
+	# 			self.table_aliases[index] = alias
+	# 			if 'datarows' in from_table:
+	# 				deagg_rows_alias = alias
+
+	# 		elif row['table_type'] == 'lookup':
+	# 			self.set_join_info(index, 'database_lookup_table')
+	# 			sql = f"""select distinct database_lookup_column 
+	# 					from public.v_{self.dataset.ust_or_release}_element_mapping_joins
+	# 					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and database_lookup_table = %s"""
+	# 			self.cur.execute(sql, (self.dataset.control_id, self.table_name, index))
+	# 			# utils.pretty_print_query(self.cur)
+	# 			rows = self.cur.fetchall()
+	# 			db_lookup_col = None
+	# 			for row in rows:
+	# 				db_lookup_col = row[0]
+	# 			from_table = 'v_' + db_lookup_col + '_xwalk'	
+	# 			if deagg_rows_alias:
+	# 				join_alias = deagg_rows_alias
+	# 			else:
+	# 				try:
+	# 					join_alias = df.loc[self.join_info['organization_table_name']]['alias']
+	# 				except:
+	# 				 	join_alias = 'a'
+	# 			self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
+	# 			self.table_aliases[index] = alias
+	# 		# print(self.from_sql) 
+	# 		print('__________________________________________________________________________________________________________________\n')
+	# 	self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;\n'
 
 
 	def build_select_query(self):
@@ -423,12 +463,6 @@ def main(ust_or_release, control_id, table_name=None, overwrite_sql_file=False):
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
 
-	joins = utils.get_join_tables(dataset, 'ust_tank')
-	print(joins)
-
-	exit()
-
-
 	if table_name:
 		sql = ViewSql(dataset=dataset, 
 			          table_name=table_name,
@@ -441,6 +475,8 @@ def main(ust_or_release, control_id, table_name=None, overwrite_sql_file=False):
 				          table_name=table,
 				          overwrite_sql_file=overwrite_sql_file)
 			# print(sql.view_sql)
+
+	logger.info('Script complete.')
 
 
 if __name__ == '__main__':   

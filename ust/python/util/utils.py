@@ -500,8 +500,7 @@ def get_join_info(dataset, epa_table_name, wheresql, schema='public'):
     join_info = {}
     conn = connect_db()
     cur = conn.cursor() 
-    sql = f"""select organization_table_name, 
-                    organization_join_table,
+    sql = f"""select organization_table_name, organization_join_table,
                     organization_join_column, organization_join_fk,
                     organization_join_column2, organization_join_fk2,
                     organization_join_column3, organization_join_fk3,
@@ -531,16 +530,46 @@ def get_join_info(dataset, epa_table_name, wheresql, schema='public'):
     return join_info
 
 
+def get_lookup_info(dataset, epa_table_name, schema='public'):
+    joins = []
+    
+    conn = connect_db()
+    cur = conn.cursor() 
+    sql = f"""select distinct database_lookup_column, organization_column_name 
+            from {schema}.v_{dataset.ust_or_release}_element_mapping_joins
+            where {dataset.ust_or_release}_control_id = %s and epa_table_name = %s
+            and database_lookup_table is not null order by 1"""
+    cur.execute(sql, (dataset.control_id, epa_table_name))
+    i = 1
+    for row in cur.fetchall():
+        join_info = {}
+        join_info['organization_table_name'] = 'v_' + row[0] + '_xwalk' 
+        join_info['organization_join_table'] = None
+        join_info['organization_join_column'] = row[1]
+        join_info['organization_join_fk'] = None
+        join_info['organization_join_column2'] = None
+        join_info['organization_join_fk2'] = None
+        join_info['organization_join_column3'] = None
+        join_info['organization_join_fk3'] = None   
+        join_info['table_type'] = 'lookup'
+        joins.append(join_info)
+        i += 1
+    cur.close()
+    conn.close()     
+    return joins
+
+
 def get_join_tables(dataset, epa_table_name, schema='public'):
     aliases = list(string.ascii_lowercase)
     i = 0
+    tables = []
     joins = []
 
     key_wheresql = " and primary_key is not null and organization_table_name not like 'erg_%%' "
     join_info = get_join_info(dataset, epa_table_name, key_wheresql, schema)
 
-    # TODO: check if table already in list
-    if join_info:
+    if join_info and join_info['organization_table_name'] not in tables:
+        tables.append(join_info['organization_table_name'])
         join_info['table_type'] = 'key'
         join_info['alias'] = aliases[i]
         i += 1
@@ -548,7 +577,8 @@ def get_join_tables(dataset, epa_table_name, schema='public'):
 
     org_wheresql = " and organization_table_name not like 'erg_%%' and database_lookup_column is null "
     join_info = get_join_info(dataset, epa_table_name, org_wheresql, schema)
-    if join_info:
+    if join_info and join_info['organization_table_name'] not in tables:
+        tables.append(join_info['organization_table_name'])
         join_info['table_type'] = 'org'
         join_info['alias'] = aliases[i]
         i += 1
@@ -556,11 +586,19 @@ def get_join_tables(dataset, epa_table_name, schema='public'):
 
     id_wheresql = " and organization_table_name like 'erg_%%' "
     join_info = get_join_info(dataset, epa_table_name, id_wheresql, schema)
-    if join_info:
+    if join_info and join_info['organization_table_name'] not in tables:
+        tables.append(join_info['organization_table_name'])
         join_info['table_type'] = 'id'
         join_info['alias'] = aliases[i]
         i += 1
         joins.append(join_info)
 
+    lookups = get_lookup_info(dataset, epa_table_name)
+    for join_info in lookups:
+        join_info['organization_join_table'] = tables[0]
+        join_info['alias'] = aliases[i]
+        i += 1
+        joins.append(join_info)
 
+    # TODO: add deagg joins  
     return joins 
