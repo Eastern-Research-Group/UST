@@ -12,7 +12,7 @@ from python.util.logger_factory import logger
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = 0                   # Enter an integer that is the ust_control_id
 table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
-drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -153,10 +153,11 @@ class IdColumns:
 			# Table is an optional child table with no other element mapping so do not map anything to it
 			return
 
+		self.sql_text = self.sql_text + '--' + table_name + '.' + column_name + '\n'
 		if self.get_mapping_existence(table_name, column_name):
 			logger.warning('A mapping already existed for table %s, column %s; it will be deleted and replaced with the ERG-created table', table_name, column_name)
 			sql = f"""delete from public.{self.dataset.ust_or_release}_element_mapping
-					\nwhere {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
+					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
 			self.cur.execute(sql, (self.dataset.control_id, table_name, column_name))
 			logger.info('Deleted mapping info for table %s, column %s from public.%s_element_mapping', table_name, column_name, self.dataset.ust_or_release)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
@@ -180,11 +181,10 @@ class IdColumns:
 			org_join_fk3 = None 
 			
 		sql = f"""insert into public.{self.dataset.ust_or_release}_element_mapping ({self.dataset.ust_or_release}_control_id, epa_table_name, epa_column_name,
-					 organization_table_name, organization_column_name, 
-					 programmer_comments, organization_join_table,
-					 organization_join_column, organization_join_column2, organization_join_column3,
-					 organization_join_fk, organization_join_fk2, organization_join_fk3)
-				  \nvalues (%s, %s, %s, %s, %s, %s,\n%s, %s, %s, %s, %s, %s, %s)"""
+					 organization_table_name, organization_column_name, programmer_comments, organization_join_table,
+					 organization_join_column, organization_join_fk, organization_join_column2, organization_join_fk2,
+					 organization_join_column3, organization_join_fk3)
+				  values (%s, %s, %s, %s, %s, %s,\n%s, %s, %s, %s, %s, %s, %s)"""
 		if column_name == self.column_name:
 			comment = 'This required field is not present in the source data. Table ' + self.erg_table_name + ' was created by ERG so the data can conform to the EPA template structure.'
 		else:
@@ -200,7 +200,7 @@ class IdColumns:
 
 
 	def element_mapping(self):
-		self.sql_text = self.sql_text + '--Record new mapping in public.' + self.dataset.ust_or_release + '_element_mapping\n\n'
+		self.sql_text = self.sql_text + '--Record new mapping in public.' + self.dataset.ust_or_release + '_element_mapping\n'
 		self.record_element_mapping(self.table_name, self.column_name)
 
 		try:
@@ -281,7 +281,7 @@ class IdColumns:
 		self.sql_text = self.sql_text + '------------------------------------------------------------------------------------------------------------------------------------------------\n'
 		self.sql_text = self.sql_text + '------------------------------------------------------------------------------------------------------------------------------------------------\n'
 		self.sql_text = self.sql_text + '------------------------------------------------------------------------------------------------------------------------------------------------\n'
-		self.sql_text = self.sql_text + '--Create table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
+		self.sql_text = self.sql_text + '--Create table ' + self.dataset.schema + '.' + self.erg_table_name + '\n'
 
 		if self.table_name == 'ust_tank' or self.table_name == 'ust_facility_dispenser':
 			if self.table_name == 'ust_tank':
@@ -312,7 +312,7 @@ class IdColumns:
 			sql = sql + select_cols + '\nfrom ' + self.dataset.schema + '.' + facility_id_table
 			self.cur.execute(sql) 
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
-			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
+			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n'
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
 			self.organization_join_table = self.get_join_table('facility_id')
@@ -547,7 +547,7 @@ def drop_table(dataset, table_name, cursor=None):
 		conn = utils.connect_db()
 		cur = conn.cursor()
 
-	sql = f"""delete from {dataset.schema}.{dataset.ust_or_release}_element_mapping
+	sql = f"""delete from public.{dataset.ust_or_release}_element_mapping
 	           where organization_table_name = %s"""
 	cur.execute(sql, (table_name,))
 	logger.info('Deleted %s rows from %s.%s_element_mapping where organization_table_name = %s', cur.rowcount, dataset.schema, dataset.ust_or_release, table_name)
