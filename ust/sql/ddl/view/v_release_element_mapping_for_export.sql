@@ -3,6 +3,7 @@ create or replace view "public"."v_release_element_mapping_for_export" as
     b.element_name,
     a.organization_table_name,
     a.organization_column_name,
+    a.query_logic,
     a.programmer_comments,
     a.epa_comments,
     a.organization_comments,
