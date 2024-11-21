@@ -138,7 +138,7 @@ class Summary:
 			ws.cell(row=rowno, column=2).font = Font(bold=True)
 
 			sql = """select "CompartmentStatus", count(*) from public.v_ust_compartment
-					where public.ust_control_id = %s group by "CompartmentStatus" """
+					where ust_control_id = %s group by "CompartmentStatus" """
 			cur.execute(sql, (self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=rowno+1):
@@ -148,7 +148,7 @@ class Summary:
 						ws.cell(row=rowno, column=colno).number_format = '#,##0'
 
 			rowno = rowno + 1
-			sql = "select count(*) from public.v_ust_compartment where public.ust_control_id = %s" 
+			sql = "select count(*) from public.v_ust_compartment where ust_control_id = %s" 
 			cur.execute(sql, (self.dataset.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total UST EPA Template'
