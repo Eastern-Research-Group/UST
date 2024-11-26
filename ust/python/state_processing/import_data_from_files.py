@@ -1,6 +1,9 @@
 import os
 from pathlib import Path
-import sys  
+import sys
+
+from python.util import utils
+
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
@@ -9,8 +12,8 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust'          # Valid values are 'ust' or 'release'
-organization_id = 'XX'          # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
-path = r''                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
+organization_id = 'OK'          # Enter the two-character code for the state, or "TRUSTD" for the tribes database
+path = r'C:\Users\JChilton\OneDrive - Eastern Research Group\Desktop\UST\OK\tribal_analysis\data'                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
 overwrite_table = False         # Boolean, defaults to False; set to True if you are replacing existing data in the schema
 
 
