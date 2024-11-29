@@ -1,6 +1,7 @@
 create or replace view "public"."v_ust_element_mapping_joins" as
  SELECT a.epa_table_name,
     a.epa_column_name,
+    d.primary_key,
     a.organization_table_name,
     a.organization_column_name,
     a.organization_join_table,
@@ -16,6 +17,7 @@ create or replace view "public"."v_ust_element_mapping_joins" as
     c.database_lookup_column,
     a.ust_element_mapping_id,
     a.ust_control_id,
+    a.query_logic,
     a.programmer_comments,
     b.sort_order AS table_sort_order,
     d.sort_order AS column_sort_order
