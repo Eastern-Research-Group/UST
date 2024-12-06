@@ -1,6 +1,8 @@
 CREATE TABLE public.compartment_statuses (
     compartment_status_id integer  NOT NULL generated always as identity,
-    compartment_status character varying(100)  NULL );
+    compartment_status character varying(100)  NULL ,
+    status_hierarchy integer  NULL ,
+    status_comment character varying(4000)  NULL );
 
 ALTER TABLE public.compartment_statuses ADD CONSTRAINT compartment_statuses_pkey PRIMARY KEY (compartment_status_id);
 
