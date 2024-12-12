@@ -2157,7 +2157,7 @@ comment on table dispenser_udc_wall_types is 'Lookup for Dispenser UDC Wall Type
 comment on table epa_regions is 'Lookup for EPA Region (UST).';
 comment on table facility_types is 'Lookup for Facility Type (UST).';
 comment on table generated_table_sort_order is 'Sort order for tables created by ERG to create Facility IDs, Tank IDs, Compartment IDs, and Piping IDs when these required columns don''t exist in the source data. (UST).';
-comment on table how_release_detected is 'Lookup table for How Release Discovered (Release).';
+comment on table release_discovered  is 'Lookup table for Release Discovered (Release).';
 comment on table mapped_table_types is 'Sort order by table type (key, org, join, id-join, id, deagg, and lookup); used by Python script to build the where clause of the views of source data that populate the base UST and Release tables.';
 comment on table owner_types is 'Lookup table for Facility Owner (UST).';
 comment on table performance_measures_release is 'Performance measure numbers for Releases as extracted from OUST publications. A comparison of these numbers to the processed templates is included in the review materials sent to OUST. A Python script exists to refresh this data.';
