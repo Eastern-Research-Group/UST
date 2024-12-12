@@ -12,7 +12,7 @@ from python.util.logger_factory import logger
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = 0                   # Enter an integer that is the ust_control_id
 table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
-drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -479,6 +479,11 @@ class IdColumns:
 				tank_id_info = self.get_org_col_name(compartment_table_name, 'tank_id')
 				compartment_name_info = self.get_org_col_name(compartment_table_name, 'compartment_name')
 				compartment_id_info = self.get_org_col_name(compartment_table_name, 'compartment_id')
+
+				if not compartment_name_info and not compartment_id_info:
+					logger.error('Enter a row in public.ust_element_mapping for epa_table_name = "%s", and epa_column_name = "compartment_id" and/or epa_column_name = "compartment_name", then re-run this script', self.table_name)
+					sys.exit()
+			
 				if facility_id_info:
 					facility_id_table = '"' + facility_id_info[0] + '"'
 					facility_id_col = '"' + facility_id_info[1] + '"'					
@@ -499,18 +504,18 @@ class IdColumns:
 				else: 
 					select_cols = select_cols + ", null"
 				if compartment_name_info:
-					compartment_name_table = '"' + compartment_name_info[0] + '"'
+					compartment_table = '"' + compartment_name_info[0] + '"'
 					compartment_name_col = '"' + compartment_name_info[1] + '"'
 					select_cols = select_cols + ", " + compartment_name_col + "::varchar(50)"
 				else: 
 					select_cols = select_cols + ", null"
 				if compartment_id_info:
-					compartment_id_table = '"' + compartment_id_info[0] + '"'
+					compartment_table = '"' + compartment_id_info[0] + '"'
 					compartment_id_col = '"' + compartment_id_info[1] + '"'
 					select_cols = select_cols + ", " + compartment_id_col + "::int"
 				else: 
 					select_cols = select_cols + ", null"
-				v_sql = v_sql + select_cols + ' from ' + self.dataset.schema + '.' + compartment_id_table
+				v_sql = v_sql + select_cols + ' from ' + self.dataset.schema + '.' + compartment_table
 			self.cur.execute(v_sql) 
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'

@@ -521,6 +521,10 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_piping','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_piping','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_piping','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_piping','compartment_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 --NOTE: Unlike TankID and CompartmentID, PipingID is a string in the EPA template, so it is OK to map an alphanumeric
 --column in the source data to piping_id here. However, if there is no unique identifier for PipingID in the source 
 --data, we will be creating one in a separate step. 
