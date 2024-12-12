@@ -10,7 +10,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
-control_id = 29                  # Enter an integer that is the ust_control_id
+control_id = 0                   # Enter an integer that is the ust_control_id
 table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
 drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
