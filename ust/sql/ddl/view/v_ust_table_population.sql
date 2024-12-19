@@ -7,6 +7,7 @@ create or replace view "public"."v_ust_table_population" as
     x.data_type_complete,
     x.organization_table_name,
     x.organization_column_name,
+    x.query_logic,
     x.programmer_comments,
     x.organization_join_table,
     x.organization_join_column,
@@ -33,6 +34,7 @@ create or replace view "public"."v_ust_table_population" as
                 END AS data_type_complete,
             a.organization_table_name,
             a.organization_column_name,
+            a.query_logic,
             a.programmer_comments,
             a.organization_join_table,
             a.organization_join_column,
@@ -66,6 +68,7 @@ create or replace view "public"."v_ust_table_population" as
             a.organization_table_name,
             a.organization_column_name,
             a.organization_join_fk,
+            a.query_logic,
             a.programmer_comments,
             a.organization_join_table,
             a.organization_join_column,
@@ -85,7 +88,9 @@ create or replace view "public"."v_ust_table_population" as
              JOIN ust_elements_tables c ON (((b.element_id = c.element_id) AND ((a.epa_table_name)::text = (c.table_name)::text))))
              JOIN ust_template_data_tables d ON (((c.table_name)::text = (d.table_name)::text)))
              JOIN information_schema.columns e ON ((((a.epa_table_name)::text = (e.table_name)::name) AND ((a.epa_column_name)::text = (e.column_name)::name) AND ((e.table_schema)::name = 'public'::name)))),
-            ( SELECT 'ust_tank'::character varying(100) AS epa_table_name
+            ( SELECT 'ust_facility'::character varying(100) AS epa_table_name
+                UNION ALL
+                 SELECT 'ust_tank'::character varying(100) AS epa_table_name
                 UNION ALL
                  SELECT 'ust_tank_substance'::character varying(100) AS epa_table_name
                 UNION ALL

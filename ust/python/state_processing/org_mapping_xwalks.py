@@ -56,7 +56,7 @@ def main(dataset):
 
 	cur.close()
 	conn.close()
-	logger.info('Diconnected from database')
+	logger.info('Disconnected from database')
 
 
 

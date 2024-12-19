@@ -25,6 +25,8 @@ create or replace view "public"."v_ust_facility" as
     a.financial_responsibility_guarantee AS "FinancialResponsibilityGuarantee",
     a.financial_responsibility_letter_of_credit AS "FinancialResponsibilityLetterOfCredit",
     a.financial_responsibility_local_government_financial_test AS "FinancialResponsibilityLocalGovernmentFinancialTest",
+    a.financial_responsibility_local_government_fund AS "FinancialResponsibilityLocalGovernmentFund",
+    a.financial_responsibility_local_government_guarantee AS "FinancialResponsibilityLocalGovernmentGuarantee",
     a.financial_responsibility_risk_retention_group AS "FinancialResponsibilityRiskRetentionGroup",
     a.financial_responsibility_self_insurance_financial_test AS "FinancialResponsibilitySelfInsuranceFinancialTest",
     a.financial_responsibility_state_fund AS "FinancialResponsibilityStateFund",

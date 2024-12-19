@@ -23,10 +23,10 @@ def build_ws(dataset, ws, admin=False):
 
 	if admin:
 		headers = ['EPA Table Name','EPA Column Name', 'Organization Table Name', 'Organization Column Name',
-				   'Element Mapping ID', 'Programmer Comments', 'EPA Comments', 'Organization Comments']		
+				   'Element Mapping ID', 'Programmer Comments', 'Query Logic', 'EPA Comments', 'Organization Comments']		
 	else:
 		headers = ['Table Name', 'Element Name', 'Organization Table Name', 'Organization Column Name', 
-		           'Programmer Comments', 'EPA Comments', 'Organization Comments']
+		           'Programmer Comments', 'Query Logic', 'EPA Comments', 'Organization Comments']
 	for colno, header in enumerate(headers, start=1):
 		ws.cell(row=1, column=colno).value = header
 	header_range = ws["A1:J1"]
@@ -39,9 +39,9 @@ def build_ws(dataset, ws, admin=False):
 	logger.info('Connected to database')
 	
 	if admin:
-		cols = f'epa_table_name, epa_column_name, organization_table_name, organization_column_name, {dataset.ust_or_release}_element_mapping_id, programmer_comments, epa_comments, organization_comments'
+		cols = f'epa_table_name, epa_column_name, organization_table_name, organization_column_name, {dataset.ust_or_release}_element_mapping_id, programmer_comments, query_logic, epa_comments, organization_comments'
 	else:
-		cols = 'table_name, element_name, organization_table_name, organization_column_name, programmer_comments, epa_comments, organization_comments'
+		cols = 'table_name, element_name, organization_table_name, organization_column_name, programmer_comments, query_logic, epa_comments, organization_comments'
 	sql = f"""select {cols}
 			from public.v_{dataset.ust_or_release}_element_mapping_for_export
 			where {dataset.ust_or_release}_control_id = %s
@@ -50,7 +50,7 @@ def build_ws(dataset, ws, admin=False):
 	data = cur.fetchall()
 	cur.close()
 	conn.close()
-	logger.info('Diconnected from database')
+	logger.info('Disconnected from database')
 	
 	for rowno, row in enumerate(data, start=2):
 		for colno, cell_value in enumerate(row, start=1):
