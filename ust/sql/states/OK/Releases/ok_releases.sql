@@ -11,6 +11,8 @@ values ('OK',current_date,current_date,'Search by county here https://apps.sd.go
 select * from public.release_control where release_control_id = 13;
 
 
+
+
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --Upload the state data 
 /* 
@@ -67,6 +69,15 @@ insert into release_element_mapping (release_control_id, epa_table_name, epa_col
 
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (13,'ust_release','release_comment','ok_releases','Case Type',null);
 
+
+select * from release_element_mapping  where release_control_id= 13;
+
+select * from ok_releases where "Case Status" = 'Deactivate';
+
+update release_element_mapping set programmer_comments='Filtering out where case status = deactivated per EPA and the State.', epa_comments = '"Sue:  There are 98 counts of deactivated in the OK release file.  57 have a closed date.  Tom - should we exclude all because they are listed as deactivated or keep the ones listed as closed? Tom:  I agree that the deactivated sites should probably not be included in the database as they are likely suspected releases that were not confirmed, but this shouldbe confirmed w/ OK.',
+organization_comments='Deactivated cases are those that should not have been activated as a suspicion or confirmed release. Sometimes a release can be traced to a different active case or it is determined that a release doesn’t fall under OCC jurisdiction. '
+
+where release_control_id= 13 and epa_column_name = 'release_status_id';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -91,13 +102,16 @@ where release_control_id = 13 and epa_column_name = 'release_status_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 351 || ', ''' || "Case Status" || ''', '''', null);'
+	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 363 || ', ''' || "Case Status" || ''', '''', null);'
 from ok_release."ok_releases" order by 1;
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (351, 'Closed', 'No further action', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (351, 'Deactivate', 'No further action', 'Please verify');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (351, 'Open', 'Active: general / open release', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (363, 'Closed', 'No further action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (363, 'Deactivate', 'No further action', 'Please verify');
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (363, 'Open', 'Active: general / open release', null);
 
 
+delete from release_element_value_mapping where organization_value = 'Deactivate';
+
+Deactivated cases are those that should not have been activated as a suspicion or confirmed release. Sometimes a release can be traced to a different active case or it is determined that a release doesn’t fall under OCC jurisdiction. 
 select * from public.release_statuses rs 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -169,45 +183,35 @@ order by column_sort_order;
     safe for you to insert these yourself, so add them! */
 
 
-select * from public.ust_release where release_comment is not null;
-select column_name from information_schema.columns
-             where table_schema = 'public' and table_name = 'ust_release'
-             order by ordinal_position
-             
- select * from release_template_data_tables
- 
- select column_name from information_schema.columns
-             where table_schema = 'public' and table_name = 'v_ust_release'
-             order by ordinal_position
- release_comment
-             select * from ust_release;
-create or replace view ok_release.v_ust_release as 
-select distinct 
-"FACILITYID"::character varying(50) as facility_id,
-"LUSTKEY"::character varying(50) as release_id,
-"LOCNAME"::character varying(200) as site_name,
-"LOCSTR"::character varying(100) as site_address,
-"LOCCITY"::character varying(100) as site_city,
-"LOCZIP"::character varying(10) as zipcode,
-"LOCCOUNTY"::character varying(100) as county,
-facility_type_id as facility_type_id,
-"DDLat"::double precision as latitude,
-"DDLon"::double precision as longitude,
-release_status_id as release_status_id,
-"NOTIFICATI"::date as reported_date,
-"DATECLOSE"::date as nfa_date,
-6 as epa_region, 
-'OK' as state
-from ok_lust y 
-join fac x on x."FacilityID"  = y."FACILITYID"
-left join ok_release.v_release_status_xwalk	rs on y."NFAFORM" = rs.organization_value 
-left join ok_release.v_facility_type_xwalk	ft on x."FACILITYDE" = ft.organization_value 
-where  x."RELEASE" > 0;
 
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (11,'ust_release','release_comment','DEPTHGW','ok_lust','Mapped 4 groundwater related fields to this: DEPTHGW - This is the general depth to groundwater at the release site.  GWFLOWDIR1 - This is the groundwater flow direction at the release site.  GWFLOWDIR2 - An additional groundwater flow direction if it fluctuates seasonally, we can capture that here. CAPH2OTREA - This is a volume of groundwater treated by corrective action, generally used for pump and treat technologies.');
+            
+    
+-- ok_release.v_ust_release source
 
+CREATE OR REPLACE VIEW ok_release.v_ust_release
+AS SELECT DISTINCT y.facility_number::character varying(50) AS facility_id,
+    y.case_number::character varying(50) AS release_id,
+    y."Facility Name"::character varying(200) AS site_name,
+    y."Address"::character varying(100) AS site_address,
+    y."City"::character varying(100) AS site_city,
+    y."Zip Code"::character varying(10) AS zipcode,
+    y."Latitude" AS latitude,
+    y."Longitude" AS longitude,
+    rs.release_status_id,
+    y."Release Date"::date AS reported_date,
+    y."Close Date"::date AS nfa_date,
+    6 AS epa_region,
+    'OK'::text AS state
+   FROM ok_release.ok_releases y
+      JOIN ok_release.v_release_status_xwalk rs ON y."Case Status" = rs.organization_value::text
+and trim("Case Status") not in ('Deactivate');
 
-select * from  ok_release.v_ust_release;;
+select distinct trim("Case Status")
+   FROM ok_release.ok_releases y where trim("Case Status") <>  'Deactivate';
+   
+select count(*) from  ok_release.v_ust_release;
+
+select distinct "Case Status" from  ok_release.ok_releases;
 
 
 select count(*) from ok_release.v_ust_release;
@@ -285,7 +289,7 @@ delete_existing = False # can set to True if there is existing release data you 
 --Quick sanity check of number of rows inserted:
 select table_name, num_rows from v_release_table_row_count
 where release_control_id = 13 order by sort_order;
-ust_release	5493
+ust_release	6037
 
 --------------------------------------------------------------------------------------------------------------------------
 --export template
