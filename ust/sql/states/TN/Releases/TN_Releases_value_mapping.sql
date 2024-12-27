@@ -408,3 +408,10 @@ to do mapping, check public.causes to find the updated epa_value.
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- 12/27/2024 Update one value mapping for how release dicvovered
+select * from release_element_value_mapping 
+where release_element_mapping_id=74 ;
+
+update release_element_value_mapping 
+set epa_value='Environmental assessment', programmer_comments='OUST directed us to use ''Environmental assessment'' per our call on 9/25.'
+where release_element_mapping_id=74 and release_element_value_mapping_id=127;
