@@ -12,8 +12,8 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 24                 # Enter an integer that is the ust_control_id or release_control_id
-table_name = 'ust_tank'       		# Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+table_name = None       		# Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
 overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
