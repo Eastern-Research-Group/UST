@@ -122,7 +122,7 @@ def insert_releases(csv_path):
 
 
 if __name__ == '__main__':   
-	insert_ust(ust_path)
+	# insert_ust(ust_path)
 	insert_releases(releases_path)
 
 
