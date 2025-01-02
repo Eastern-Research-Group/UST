@@ -34,6 +34,7 @@ class ValueMapper:
 		self.overwrite_existing = overwrite_existing
 		self.set_compartment_flag()
 		self.generate_sql()
+		self.inferred_values()
 		self.write_sql()
 
 
@@ -157,6 +158,38 @@ class ValueMapper:
 		conn.close()
 		self.value_mapping_sql = self.value_mapping_sql + '------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n'
 	
+
+	def inferred_values(self):
+		if self.dataset.ust_or_release != 'ust':
+			return
+
+		logger.info('Adding SQL for inferred corrosion protection values.')
+		self.value_mapping_sql = self.value_mapping_sql + "\n/* If the source data contains tank material information for cathodically protected steel and doesn't\n"
+		self.value_mapping_sql = self.value_mapping_sql + "contain explicit cathodic protection elements, we can infer the cathodic protection, which will default to\n"
+		self.value_mapping_sql = self.value_mapping_sql + "sacraficial anodes because they are more prevelant than impressed current (per OUST).\n"
+		self.value_mapping_sql = self.value_mapping_sql + "Run the SQL below to insert rows into public.ust_element mapping if these conditions apply to this data.\n */\n\n"
+		self.value_mapping_sql = self.value_mapping_sql + f"""insert into public.ust_element_mapping
+	(ust_control_id, epa_table_name, epa_column_name, 
+	organization_table_name, organization_column_name, 
+	organization_join_table, organization_join_fk, organization_join_column2, organization_join_fk2, organization_join_column3, organization_join_fk3,
+	query_logic, inferred_value_comment)
+select ust_control_id, 'ust_tank', 'tank_corrosion_protection_sacrificial_anode', organization_table_name, organization_column_name, 
+	organization_join_table, organization_join_fk, organization_join_column2, organization_join_fk2, organization_join_column3, organization_join_fk3,
+	'when tank_material_description_id in (5,6) then ''Yes'' else null', 'Inferred from tank material'
+from public.ust_element_mapping a
+where ust_control_id = {self.dataset.control_id} and epa_column_name = 'tank_material_description_id'
+and exists 
+	(select 1 from public.ust_element_value_mapping b 
+	where a.ust_element_mapping_id = b.ust_element_mapping_id 
+	and epa_value like '%athod%')
+and not exists 
+	(select 1 from public.ust_element_mapping b 
+	where a.ust_control_id = b.ust_control_id
+    and b.epa_column_name like 'tank_corrosion_protection%');\n\n"""
+
+		self.value_mapping_sql = self.value_mapping_sql + '------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n'
+
+
 
 	def write_sql(self):
 		wora = 'a'
