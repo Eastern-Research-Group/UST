@@ -18,7 +18,8 @@ CREATE TABLE public.release_element_mapping (
     organization_join_column3 character varying(100)  NULL ,
     organization_join_fk2 character varying(100)  NULL ,
     organization_join_fk3 character varying(100)  NULL ,
-    query_logic character varying(4000)  NULL );
+    query_logic character varying(4000)  NULL ,
+    inferred_value_comment character varying(4000)  NULL );
 
 ALTER TABLE public.release_element_mapping ADD CONSTRAINT release_element_mapping_pkey PRIMARY KEY (release_element_mapping_id);
 

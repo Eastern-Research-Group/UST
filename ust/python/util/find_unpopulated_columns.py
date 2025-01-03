@@ -10,7 +10,7 @@ from python.util import utils
 from python.util.logger_factory import logger
 
 
-schema = '' 			# Set to the schema name
+schema = 'az_ust' 			# Set to the schema name
 table_name = None 		# If None, will check all tables in the specified schema. Set variable to a single table name to check a specific table. 
 
 

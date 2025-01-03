@@ -7,6 +7,7 @@ create or replace view "public"."v_ust_element_mapping_for_export" as
     a.query_logic,
     a.epa_comments,
     a.organization_comments,
+    a.inferred_value_comment,
     a.epa_table_name,
     a.epa_column_name,
     a.ust_element_mapping_id,
