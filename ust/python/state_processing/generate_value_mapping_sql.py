@@ -11,8 +11,8 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+control_id = 9                 # Enter an integer that is the ust_control_id or release_control_id
+only_incomplete = False  		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = False      # boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -122,6 +122,12 @@ class ValueMapper:
 				except:
 					epa_value = None
 
+				if not epa_value and epa_column_name == 'substance_id':
+					sql5 = f"select count(*) from public.v_hazardous_substances where lower(substance) = lower({repr(org_value)})"
+					cur.execute(sql5)
+					if cur.fetchone()[0] > 0:
+						epa_value = 'Hazardous substance'
+
 				self.value_mapping_sql = self.value_mapping_sql + f'insert into public.{self.dataset.ust_or_release}_element_value_mapping ({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments)\n'
 				if epa_value:
 					self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {repr(org_value)}, '{epa_value}', null);\n"
@@ -139,6 +145,10 @@ class ValueMapper:
 			for row6 in rows6:
 				epa_val = row6[0]
 				self.value_mapping_sql = self.value_mapping_sql + f"{epa_val}\n"
+
+			if epa_column_name == 'substance_id':
+				self.value_mapping_sql = self.value_mapping_sql + '\n * NOTE: Hazardous substances can be found in view public.v_hazardous_substances.'
+				self.value_mapping_sql = self.value_mapping_sql + '\n * If the state included a CAS No., you can also try mapping it to public.v_casno.\n'
 
 			self.value_mapping_sql = self.value_mapping_sql + '\n * Need some additional help with the mapping? See how similar fields have been mapped in other organizations.\n'
 			self.value_mapping_sql = self.value_mapping_sql + ' * Change the XXXX in the query below the organization value, or a substring thereof, that you are trying to map.\n\n'
