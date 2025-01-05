@@ -10,6 +10,10 @@ ALTER TABLE public.ust_release_source ADD CONSTRAINT release_source_fk FOREIGN K
 
 ALTER TABLE public.ust_release_source ADD CONSTRAINT release_source_release_fk FOREIGN KEY (ust_release_id) REFERENCES ust_release(ust_release_id);
 
+ALTER TABLE public.ust_release_source ADD CONSTRAINT ust_release_source_unique UNIQUE (ust_release_id, source_id);
+
 CREATE UNIQUE INDEX ust_release_source_pkey ON public.ust_release_source USING btree (ust_release_source_id)
 
 CREATE INDEX ust_release_source_ust_release_id_idx ON public.ust_release_source USING btree (ust_release_id)
+
+CREATE UNIQUE INDEX ust_release_source_unique ON public.ust_release_source USING btree (ust_release_id, source_id)

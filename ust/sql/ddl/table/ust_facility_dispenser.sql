@@ -12,4 +12,8 @@ ALTER TABLE public.ust_facility_dispenser ADD CONSTRAINT facility_dispenser_pk P
 
 ALTER TABLE public.ust_facility_dispenser ADD CONSTRAINT facility_dispenser_dispwt_fk FOREIGN KEY (dispenser_udc_wall_type_id) REFERENCES dispenser_udc_wall_types(dispenser_udc_wall_type_id);
 
+ALTER TABLE public.ust_facility_dispenser ADD CONSTRAINT ust_facility_dispenser_unique UNIQUE (ust_facility_id, dispenser_id);
+
 CREATE UNIQUE INDEX facility_dispenser_pk ON public.ust_facility_dispenser USING btree (facility_dispenser_id)
+
+CREATE UNIQUE INDEX ust_facility_dispenser_unique ON public.ust_facility_dispenser USING btree (ust_facility_id, dispenser_id)

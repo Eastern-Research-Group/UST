@@ -42,6 +42,8 @@ ALTER TABLE public.ust_tank ADD CONSTRAINT tank_facility_id_fkey FOREIGN KEY (us
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_cert_of_installation_fk FOREIGN KEY (cert_of_installation_id) REFERENCES cert_of_installations(cert_of_installation_id);
 
+ALTER TABLE public.ust_tank ADD CONSTRAINT ust_tank_factankid_unique UNIQUE (ust_facility_id, tank_id);
+
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_federally_regulated_chk CHECK (((federally_regulated)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_tank ADD CONSTRAINT tank_field_constructed_chk CHECK (((field_constructed)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
@@ -79,3 +81,5 @@ CREATE INDEX ust_tank_tank_secondary_containment_id_idx ON public.ust_tank USING
 CREATE INDEX ust_tank_tank_status_id_idx ON public.ust_tank USING btree (tank_status_id)
 
 CREATE INDEX ust_tank_ust_facility_id_idx ON public.ust_tank USING btree (ust_facility_id)
+
+CREATE UNIQUE INDEX ust_tank_factankid_unique ON public.ust_tank USING btree (ust_facility_id, tank_id)
