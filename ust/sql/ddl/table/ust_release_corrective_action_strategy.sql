@@ -11,6 +11,10 @@ ALTER TABLE public.ust_release_corrective_action_strategy ADD CONSTRAINT release
 
 ALTER TABLE public.ust_release_corrective_action_strategy ADD CONSTRAINT release_corrective_action_release_fk FOREIGN KEY (ust_release_id) REFERENCES ust_release(ust_release_id);
 
+ALTER TABLE public.ust_release_corrective_action_strategy ADD CONSTRAINT ust_release_corrective_action_strategy_unique UNIQUE (ust_release_id, corrective_action_strategy_id);
+
 CREATE UNIQUE INDEX ust_release_corrective_action_strategy_pkey ON public.ust_release_corrective_action_strategy USING btree (ust_release_corrective_action_strategy_id)
 
 CREATE INDEX ust_release_corrective_action_strategy_ust_release_id_idx ON public.ust_release_corrective_action_strategy USING btree (ust_release_id)
+
+CREATE UNIQUE INDEX ust_release_corrective_action_strategy_unique ON public.ust_release_corrective_action_strategy USING btree (ust_release_id, corrective_action_strategy_id)

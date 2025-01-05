@@ -50,6 +50,8 @@ ALTER TABLE public.ust_piping ADD CONSTRAINT piping_wall_type_fk FOREIGN KEY (pi
 
 ALTER TABLE public.ust_piping ADD CONSTRAINT piping_tank_top_sump_fk FOREIGN KEY (pipe_tank_top_sump_wall_type_id) REFERENCES pipe_tank_top_sump_wall_types(pipe_tank_top_sump_wall_type_id);
 
+ALTER TABLE public.ust_piping ADD CONSTRAINT ust_piping_unique UNIQUE (ust_compartment_id, piping_id);
+
 ALTER TABLE public.ust_piping ADD CONSTRAINT piping_piping_material_copper_chk CHECK (((piping_material_copper)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
 
 ALTER TABLE public.ust_piping ADD CONSTRAINT piping_piping_material_flex_chk CHECK (((piping_material_flex)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
@@ -125,3 +127,5 @@ CREATE INDEX ust_piping_piping_style_id_idx ON public.ust_piping USING btree (pi
 CREATE INDEX ust_piping_piping_wall_type_id_idx ON public.ust_piping USING btree (piping_wall_type_id)
 
 CREATE INDEX ust_piping_ust_compartment_id_idx ON public.ust_piping USING btree (ust_compartment_id)
+
+CREATE UNIQUE INDEX ust_piping_unique ON public.ust_piping USING btree (ust_compartment_id, piping_id)
