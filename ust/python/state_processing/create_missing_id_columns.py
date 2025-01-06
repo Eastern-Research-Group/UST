@@ -12,7 +12,7 @@ from python.util.logger_factory import logger
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = 0                   # Enter an integer that is the ust_control_id
 table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
-drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -344,6 +344,9 @@ class IdColumns:
 			if self.compartment_flag == 'N':
 				compartment_table_name = self.get_tank_table_name()
 
+
+			# print('compartment_table_name = ' + compartment_table_name)
+
 			v_sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name, tank_id, compartment_name)\nselect distinct "
 			select_cols = ''
 
@@ -351,16 +354,20 @@ class IdColumns:
 					  where ust_control_id = %s and organization_table_name = 'erg_tank_id'"""
 			self.cur.execute(sql, (self.dataset.control_id,))
 			cnt = self.cur.fetchone()[0]
-
 			if cnt > 0: # We already created erg_tank_id; use it for the select columns instead of the source table
 				# next, figure out if compartment_name is in source_data
 				compartment_name_info = self.get_org_col_name('ust_compartment', 'compartment_name')
+
 				if compartment_name_info: # get the organization column names to build the join
 					facility_id_info = self.get_org_col_name('ust_compartment', 'facility_id')
 					tank_id_info = self.get_org_col_name('ust_compartment', 'tank_id')
+
+					# print('facility_id_info = ' + str(facility_id_info))
+					# print('tank_id_info = ' + str(tank_id_info))
+
 					v_sql = v_sql + 'a.facility_id, a.tank_name, a.tank_id, b.compartment_name\nfrom ' 
 					v_sql = v_sql + self.dataset.schema + '.erg_tank_id a left join ' + self.dataset.schema + '.' + compartment_name_info[0] + ' b '
-					v_sql = v_sql + ' on a.facility_id = b.' + facility_id_info[1] + ' and a.tank_id = b.' + tank_id_info[1]
+					v_sql = v_sql + ' on a.facility_id = b."' + facility_id_info[1] + '" and a.tank_id = b."' + tank_id_info[1] + '"'
 				else: # just enter null for compartment name because it's not in the source data 
 					v_sql = v_sql + 'facility_id, tank_name, tank_id, null\nfrom ' + self.dataset.schema + '.erg_tank_id'
 
@@ -381,6 +388,7 @@ class IdColumns:
 				tank_name_info = self.get_org_col_name(compartment_table_name, 'tank_name')
 				tank_id_info = self.get_org_col_name(compartment_table_name, 'tank_id')
 				compartment_name_info = self.get_org_col_name(compartment_table_name, 'compartment_name')
+
 				if facility_id_info:
 					facility_id_table = '"' + facility_id_info[0] + '"'
 					facility_id_col = '"' + facility_id_info[1] + '"'					
@@ -422,6 +430,7 @@ class IdColumns:
 				if self.table_name == 'ust_compartment' and compartment_name_info:
 					self.organization_join_fk3 = 'compartment_name'
 
+			# print(v_sql)
 			self.cur.execute(v_sql) 
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
@@ -459,8 +468,8 @@ class IdColumns:
 					compartment_id_info = self.get_org_col_name('ust_compartment', 'compartment_id')
 					v_sql = v_sql + 'a.facility_id, a.tank_name, a.tank_id, b.compartment_name, b.compartment_id from ' 
 					v_sql = v_sql + self.dataset.schema + '.erg_tank_id a left join ' + self.dataset.schema + '.' + compartment_name_info[0] + ' b '
-					v_sql = v_sql + ' on a.facility_id = b.' + facility_id_info[1] + ' and a.tank_id = b.' + tank_id_info[1]
-					v_sql = v_sql + ' and a.compartment_id = b.' + compartment_id_info[1]
+					v_sql = v_sql + ' on a.facility_id = b."' + facility_id_info[1] + '" and a.tank_id = b."' + tank_id_info[1] + '"'
+					v_sql = v_sql + ' and a.compartment_id = b."' + compartment_id_info[1] + '"'
 				else: # just enter null for compartment name because it's not in the source data 
 					v_sql = v_sql + 'facility_id, tank_name, tank_id, null, compartment_id from ' + self.dataset.schema + '.erg_compartment_id'
 
@@ -516,6 +525,8 @@ class IdColumns:
 				else: 
 					select_cols = select_cols + ", null"
 				v_sql = v_sql + select_cols + ' from ' + self.dataset.schema + '.' + compartment_table
+			print(v_sql)
+			exit()
 			self.cur.execute(v_sql) 
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
@@ -546,6 +557,8 @@ def get_tables_with_missing_cols(dataset):
 
 
 def drop_table(dataset, table_name, cursor=None):
+	import psycopg2
+
 	if cursor:
 		cur = cursor
 	else:
@@ -559,7 +572,10 @@ def drop_table(dataset, table_name, cursor=None):
 	conn.commit()
 
 	sql = f"drop table {dataset.schema}.{table_name}"
-	cur.execute(sql)
+	try:
+		cur.execute(sql)
+	except psycopg2.errors.UndefinedTable:
+		pass
 	logger.info('Dropped table %s.%s', dataset.schema, table_name)
 
 	if not cursor:
