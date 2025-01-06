@@ -31,6 +31,8 @@ CREATE TABLE public.ust_release (
     release_control_id integer  NOT NULL ,
     release_comment character varying(4000)  NULL );
 
+ALTER TABLE public.ust_release ADD CONSTRAINT ust_release_unique UNIQUE (release_control_id, release_id);
+
 ALTER TABLE public.ust_release ADD CONSTRAINT release_discovered_fk FOREIGN KEY (release_discovered_id) REFERENCES release_discovered(release_discovered_id);
 
 ALTER TABLE public.ust_release ADD CONSTRAINT release_federally_reportable_release_chk CHECK (((federally_reportable_release)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text, ('Unknown'::character varying)::text])));
@@ -84,3 +86,5 @@ CREATE INDEX ust_release_release_id_idx ON public.ust_release USING btree (relea
 CREATE INDEX ust_release_release_status_id_idx ON public.ust_release USING btree (release_status_id)
 
 CREATE INDEX ust_release_ust_release_id_idx ON public.ust_release USING btree (ust_release_id)
+
+CREATE UNIQUE INDEX ust_release_unique ON public.ust_release USING btree (release_control_id, release_id)

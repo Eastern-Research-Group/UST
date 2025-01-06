@@ -7,6 +7,7 @@ create or replace view "public"."v_release_element_mapping_for_export" as
     a.programmer_comments,
     a.epa_comments,
     a.organization_comments,
+    a.inferred_value_comment,
     a.epa_table_name,
     a.epa_column_name,
     a.release_element_mapping_id,
