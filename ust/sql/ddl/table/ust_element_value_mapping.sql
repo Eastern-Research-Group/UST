@@ -9,13 +9,15 @@ CREATE TABLE public.ust_element_value_mapping (
     organization_comments text  NULL ,
     exclude_from_query character varying(1)  NULL );
 
-ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_value_mapping_pkey PRIMARY KEY (ust_element_value_mapping_id);
+ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_mapping_value_unique UNIQUE (ust_element_mapping_id, organization_value);
 
 ALTER TABLE example."example.ust_element_value_mapping" ADD CONSTRAINT ust_element_value_mapping_pkey PRIMARY KEY (ust_element_value_mapping_id);
 
-ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_value_mapping_unique UNIQUE (ust_element_mapping_id, organization_value, epa_value);
+ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_value_mapping_pkey PRIMARY KEY (ust_element_value_mapping_id);
 
 ALTER TABLE example."example.ust_element_value_mapping" ADD CONSTRAINT ust_element_value_mapping_unique UNIQUE (ust_element_mapping_id, organization_value, epa_value);
+
+ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_value_mapping_unique UNIQUE (ust_element_mapping_id, organization_value, epa_value);
 
 CREATE UNIQUE INDEX ust_element_value_mapping_pkey ON public.ust_element_value_mapping USING btree (ust_element_value_mapping_id)
 
@@ -34,3 +36,5 @@ CREATE INDEX ust_element_value_mapping_ust_element_value_mapping_id_idx ON publi
 CREATE UNIQUE INDEX ust_element_value_mapping_unique ON public.ust_element_value_mapping USING btree (ust_element_mapping_id, organization_value, epa_value)
 
 CREATE UNIQUE INDEX ust_element_value_mapping_org_val_idex ON public.ust_element_value_mapping USING btree (ust_element_mapping_id, organization_value)
+
+CREATE UNIQUE INDEX ust_element_mapping_value_unique ON public.ust_element_value_mapping USING btree (ust_element_mapping_id, organization_value)

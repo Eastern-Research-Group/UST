@@ -18,7 +18,10 @@ CREATE TABLE public.ust_element_mapping (
     organization_join_column3 character varying(100)  NULL ,
     organization_join_fk2 character varying(100)  NULL ,
     organization_join_fk3 character varying(100)  NULL ,
-    query_logic character varying(4000)  NULL );
+    query_logic character varying(4000)  NULL ,
+    inferred_value_comment character varying(4000)  NULL );
+
+ALTER TABLE public.ust_element_mapping ADD CONSTRAINT ust_element_mapping_unique UNIQUE (ust_control_id, epa_table_name, epa_column_name);
 
 ALTER TABLE public.ust_element_mapping ADD CONSTRAINT ust_element_mapping_pkey PRIMARY KEY (ust_element_mapping_id);
 
@@ -37,3 +40,5 @@ CREATE INDEX ust_element_mapping_id ON public.ust_element_mapping USING btree (u
 CREATE INDEX ust_element_mapping_ust_control_id_idx ON public.ust_element_mapping USING btree (ust_control_id)
 
 CREATE INDEX ust_element_mapping_ust_element_mapping_id_idx ON public.ust_element_mapping USING btree (ust_element_mapping_id)
+
+CREATE UNIQUE INDEX ust_element_mapping_unique ON public.ust_element_mapping USING btree (ust_control_id, epa_table_name, epa_column_name)

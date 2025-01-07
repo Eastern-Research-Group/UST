@@ -14,4 +14,8 @@ ALTER TABLE public.ust_compartment_dispenser ADD CONSTRAINT tank_dispenser_dispw
 
 ALTER TABLE public.ust_tank_dispenser ADD CONSTRAINT tank_dispenser_pk PRIMARY KEY (tank_dispenser_id);
 
+ALTER TABLE public.ust_tank_dispenser ADD CONSTRAINT ust_tank_dispenser_unique UNIQUE (ust_tank_id, dispenser_id);
+
 CREATE UNIQUE INDEX tank_dispenser_pk ON public.ust_tank_dispenser USING btree (tank_dispenser_id)
+
+CREATE UNIQUE INDEX ust_tank_dispenser_unique ON public.ust_tank_dispenser USING btree (ust_tank_id, dispenser_id)
