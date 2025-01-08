@@ -34,7 +34,9 @@ CREATE TABLE public.ust_facility (
     ust_reported_release character varying(7)  NULL ,
     associated_ust_release_id character varying(40)  NULL ,
     ust_control_id integer  NULL ,
-    facility_comment character varying(4000)  NULL );
+    facility_comment character varying(4000)  NULL ,
+    financial_responsibility_local_government_fund character varying(3)  NULL ,
+    financial_responsibility_local_government_guarantee character varying(3)  NULL );
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_facility_type1_fk FOREIGN KEY (facility_type1) REFERENCES facility_types(facility_type_id);
 
@@ -72,6 +74,12 @@ ALTER TABLE public.ust_facility ADD CONSTRAINT facility_financial_responsibility
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_financial_responsibility_trust_fund_chk CHECK (((financial_responsibility_trust_fund)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
 
+ALTER TABLE public.ust_facility ADD CONSTRAINT facility_financial_responsibility_local_government_fund CHECK (((financial_responsibility_local_government_fund)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text])));
+
+ALTER TABLE public.ust_facility ADD CONSTRAINT facility_financial_responsibility_local_government_guar CHECK (((financial_responsibility_local_government_guarantee)::text = ANY (ARRAY[('Yes'::character varying)::text, ('No'::character varying)::text])));
+
+ALTER TABLE public.ust_facility ADD CONSTRAINT ust_facility_facid_unique UNIQUE (ust_control_id, facility_id);
+
 ALTER TABLE public.ust_facility ADD CONSTRAINT facility_ust_reported_release_chk CHECK (((ust_reported_release)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_facility ADD CONSTRAINT ust_facility_control_fk FOREIGN KEY (ust_control_id) REFERENCES ust_control(ust_control_id);
@@ -95,3 +103,5 @@ CREATE INDEX ust_facility_owner_type_id_idx ON public.ust_facility USING btree (
 CREATE INDEX ust_facility_ust_control_id_idx ON public.ust_facility USING btree (ust_control_id)
 
 CREATE INDEX ust_facility_ust_facility_id_idx ON public.ust_facility USING btree (ust_facility_id)
+
+CREATE UNIQUE INDEX ust_facility_facid_unique ON public.ust_facility USING btree (ust_control_id, facility_id)
