@@ -419,7 +419,7 @@ values (ZZ,'ust_tank','tank_corrosion_protection_unknown','ORG_TAB_NAME','ORG_CO
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','tank_secondary_containment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_tank','cert_of_installation','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (ZZ,'ust_tank','cert_of_installation_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','cert_of_installation_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
@@ -698,7 +698,7 @@ select epa_column_name from
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
-overwrite_existing = False      # boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
  * /ust/sql/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console 
