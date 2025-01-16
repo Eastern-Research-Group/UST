@@ -80,6 +80,7 @@ class QualityCheck:
 			self.check_nonunique()
 			self.check_bad_datatypes()
 			self.check_failed_constraints()
+			self.check_missing_mapping()
 			self.check_bad_mapping()
 			if self.dataset.ust_or_release == 'ust':
 				self.check_compartment_data_flag()
@@ -385,6 +386,30 @@ class QualityCheck:
 			logger.warning('Number of failed rows for check constraint %s.%s: %s', self.table_name, constraint_name, num_rows)
 			self.write_to_ws(data, constraint_name)
 
+
+	def check_missing_mapping(self):
+		sql = f"""select c.column_name 
+				from information_schema.columns c 
+					join information_schema.tables t 
+						on c.table_schema = t.table_schema and c.table_name = t.table_name
+					join ust_template_data_tables x on c.table_name = x.view_name
+				where c.table_schema = %s and c.table_name = %s and not exists 
+					(select 1 from public.{self.dataset.ust_or_release}_element_mapping m
+					where x.table_name = m.epa_table_name and c.column_name = m.epa_column_name
+					and m.{self.dataset.ust_or_release}_control_id = %s)
+				order by c.ordinal_position"""
+		self.cur.execute(sql, (self.dataset.schema, self.view_name, self.dataset.control_id))
+		rows = self.cur.fetchall()
+		num_rows = self.cur.rowcount 
+		self.error_cnt_dict['Unmapped elements in ' + self.dataset.schema + '.' + self.view_name] = num_rows
+		unmapped_cols = ''
+		for row in rows:
+			unmapped_cols = row[0] + '; '
+		if unmapped_cols:
+			unmapped_cols = unmapped_cols[:-2]
+			self.error_dict['Unmapped elements in ' + self.view_name] = unmapped_cols 
+			logger.warning('Unmapped elements in %s: %s', self.view_name, unmapped_cols)
+			
 
 	def check_bad_mapping(self):
 		# check for bad mapping values
