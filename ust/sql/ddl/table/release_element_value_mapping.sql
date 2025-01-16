@@ -9,6 +9,8 @@ CREATE TABLE public.release_element_value_mapping (
     organization_comments text  NULL ,
     exclude_from_query character varying(1)  NULL );
 
+ALTER TABLE public.release_element_value_mapping ADD CONSTRAINT release_element_mapping_value_unique UNIQUE (release_element_mapping_id, organization_value);
+
 ALTER TABLE public.release_element_value_mapping ADD CONSTRAINT release_element_value_mapping_pkey PRIMARY KEY (release_element_value_mapping_id);
 
 ALTER TABLE public.release_element_value_mapping ADD CONSTRAINT release_element_value_mapping_unique UNIQUE (release_element_mapping_id, organization_value, epa_value);
@@ -30,3 +32,5 @@ CREATE INDEX release_element_value_mapping_release_element_value_mapping_id_ ON 
 CREATE UNIQUE INDEX release_element_value_mapping_unique ON public.release_element_value_mapping USING btree (release_element_mapping_id, organization_value, epa_value)
 
 CREATE UNIQUE INDEX release_element_value_mapping_org_val_idex ON public.release_element_value_mapping USING btree (release_element_mapping_id, organization_value)
+
+CREATE UNIQUE INDEX release_element_mapping_value_unique ON public.release_element_value_mapping USING btree (release_element_mapping_id, organization_value)
