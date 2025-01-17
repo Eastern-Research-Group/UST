@@ -302,6 +302,8 @@ class Template:
 			pretty_name = 'Pipe Top Sump Wall Type'
 		elif pretty_name == 'Corrective Action Strategies':
 			pretty_name = 'Corrective Actions'
+		if len(pretty_name) > 31:
+			pretty_name = pretty_name[:-31]
 
 		ws = self.wb.create_sheet(pretty_name + ' mapping')
 
