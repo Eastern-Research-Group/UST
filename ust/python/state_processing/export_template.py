@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 11                  # Enter an integer that is the ust_control_id or release_control_id
 
 data_only = False				# Boolean; defaults to False. Set to True to generate a populated template that does not include the Reference and Lookup tabs.
 template_only = False			# Boolean; defaults to False. Set to True to generate an blank template with no data.
@@ -58,6 +58,7 @@ class Template:
 			self.make_lookup_tabs()
 			if not self.template_only:
 				element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=False)
+				self.make_unmapped_tab()
 				self.make_mapping_tabs()
 		self.make_data_tabs()	
 		self.cleanup_wb()
@@ -259,6 +260,44 @@ class Template:
 		utils.autowidth(ws)
 		cur.close()
 		conn.close()
+
+
+	def make_unmapped_tab(self):
+		logger.info('Working on the Unmapped Source Elements tab')
+		ws = self.wb.create_sheet('Unmapped Source Elements')
+
+		cell = ws.cell(row=1, column=1)
+		cell.value = 'Organization Table Name'
+		cell.font = Font(bold=True)
+		cell = ws.cell(row=1, column=2)
+		cell.value = 'Organization Column Name'
+		cell.font = Font(bold=True)
+
+		conn = utils.connect_db()
+		cur = conn.cursor()	
+		sql = f"""select a.table_name, a.column_name
+				from information_schema.columns a join information_schema.tables t 
+					on a.table_schema = t.table_schema and a.table_name = t.table_name
+				where a.table_schema = %s and a.table_name not like 'erg_%%'
+				and table_type = 'BASE TABLE' and not exists 
+					(select 1 from public.{self.dataset.ust_or_release}_element_mapping b
+					where {self.dataset.ust_or_release}_control_id = %s 
+					and lower(a.table_name) = lower(b.organization_table_name) 
+					and lower(a.column_name) = lower(b.organization_column_name))
+				order by 1, 2"""
+		cur.execute(sql, (self.dataset.schema, self.dataset.control_id))
+		data = cur.fetchall()	
+		for rowno, row in enumerate(data, start=2):
+			for colno, cell_value in enumerate(row, start=1):
+				ws.cell(row=rowno, column=colno).value = cell_value		
+
+		utils.autowidth(ws)
+
+		cur.close()
+		conn.close()
+
+		logger.info('Created Unmapped Source Elements tab')
+
 
 
 	def get_mapping_tabs(self):
