@@ -10,8 +10,12 @@ ALTER TABLE public.ust_compartment_substance ADD CONSTRAINT ust_compartment_subs
 
 ALTER TABLE public.ust_compartment_substance ADD CONSTRAINT ust_compartment_substance_compd_fk FOREIGN KEY (ust_compartment_id) REFERENCES ust_compartment(ust_compartment_id);
 
+ALTER TABLE public.ust_compartment_substance ADD CONSTRAINT ust_compartment_substance_compsubid_unique UNIQUE (ust_tank_substance_id, ust_compartment_id);
+
 CREATE UNIQUE INDEX ust_compartment_substance_pkey ON public.ust_compartment_substance USING btree (ust_compartment_substance_id)
 
 CREATE INDEX ust_compartment_substance_ts_idx ON public.ust_compartment_substance USING btree (ust_tank_substance_id)
 
 CREATE INDEX ust_compartment_substance_compid_idx ON public.ust_compartment_substance USING btree (ust_compartment_id)
+
+CREATE UNIQUE INDEX ust_compartment_substance_compsubid_unique ON public.ust_compartment_substance USING btree (ust_tank_substance_id, ust_compartment_id)

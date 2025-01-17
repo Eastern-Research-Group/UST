@@ -12,6 +12,10 @@ ALTER TABLE public.ust_release_substance ADD CONSTRAINT release_substance_fk FOR
 
 ALTER TABLE public.ust_release_substance ADD CONSTRAINT release_release_fk FOREIGN KEY (ust_release_id) REFERENCES ust_release(ust_release_id);
 
+ALTER TABLE public.ust_release_substance ADD CONSTRAINT ust_release_substance_unique UNIQUE (ust_release_id, substance_id);
+
 CREATE UNIQUE INDEX ust_release_substance_pkey ON public.ust_release_substance USING btree (ust_release_substance_id)
 
 CREATE INDEX ust_release_substance_ust_release_id_idx ON public.ust_release_substance USING btree (ust_release_id)
+
+CREATE UNIQUE INDEX ust_release_substance_unique ON public.ust_release_substance USING btree (ust_release_id, substance_id)

@@ -419,7 +419,7 @@ values (ZZ,'ust_tank','tank_corrosion_protection_unknown','ORG_TAB_NAME','ORG_CO
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','tank_secondary_containment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_tank','cert_of_installation','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (ZZ,'ust_tank','cert_of_installation_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','cert_of_installation_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
@@ -698,7 +698,7 @@ select epa_column_name from
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
-overwrite_existing = False      # boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
  * /ust/sql/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console 
@@ -812,7 +812,8 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
  *    if the length of the state value is too long to fit into the EPA column. If the data is too long to fit in the EPA column, this may indicate 
  *    an error in your code or mapping, OR it may mean you need to truncate the state's value to fit the EPA format. 
  * 9) Failed check constraints. 
- * 10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
+ * 10) Columns that exist in the view that were not mapped in ust_element_mapping. 
+ * 11) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
  *     and ensure the epa_value exists in the associated lookup table. 
  *
  * The script will also provide the counts of rows in v_ust_facility, v_ust_tank, v_ust_compartment, and v_ust_piping (if these views exist) -
@@ -948,7 +949,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * tables from the ERG database to CSV files and upload them to the EPA Teams site at
  * Documents > General > 01 - UST Source Data > XX > ERG Source Data folder. 
  * 
- * To export the source data from the databaes, run script export_source_data.py
+ * To export the source data from the database, run script export_source_data.py
  * 
  * Set these variables in the script: 
  * 

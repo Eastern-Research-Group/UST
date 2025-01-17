@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
 
 # These variables can usually be left unset. This script will general an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -75,10 +75,12 @@ class QualityCheck:
 			self.set_view_col_str()
 			self.check_join_cols()
 			self.check_required_cols()
+			self.check_duplicate_rows()
 			self.check_extraneous_cols()
 			self.check_nonunique()
 			self.check_bad_datatypes()
 			self.check_failed_constraints()
+			self.check_missing_mapping()
 			self.check_bad_mapping()
 			if self.dataset.ust_or_release == 'ust':
 				self.check_compartment_data_flag()
@@ -125,13 +127,12 @@ class QualityCheck:
 		rows = self.cur.fetchall()
 		for row in rows:
 			view_name = row[0]
-			sql2 = f"select count(*) from {self.dataset.schema}.{view_name}"
+			sql = f"select count(*) from {self.dataset.schema}.{view_name}"
 			try:
-				self.cur.execute(sql2)
+				self.cur.execute(sql)
 			except psycopg2.errors.UndefinedTable:
 				continue
-			rows = self.cur.fetchone()
-			num_rows = rows[0]
+			num_rows = self.cur.fetchone()[0]
 			self.view_counts[view_name] = num_rows
 
 
@@ -233,6 +234,41 @@ class QualityCheck:
 				self.error_cnt_dict['Number of null rows for required column ' + self.table_name + '.' + col_name] = num_rows
 				logger.warning('Number of null rows for required column %s.%s = %s', self.table_name, col_name, num_rows)
 				self.write_to_ws(data, col_name + ' null')
+
+
+	def check_duplicate_rows(self):
+		# check for rows that have duplicate key columns
+		sql = f"""select column_name from public.{self.dataset.ust_or_release}_view_key_columns 
+		          where view_name = %s order by sort_order"""
+		self.cur.execute(sql, (self.view_name,))
+		key_cols = [r[0] for r in self.cur.fetchall()]
+		key_col_str = ''
+		join = ''
+		for col in key_cols:
+			key_col_str = key_col_str + col + ', '
+			join = join + 'a.' + col + ' = b.' + col + ' and ' 
+		key_col_str = key_col_str[:-2]
+		join = join[:-4]
+		sql = f"""select {key_col_str}, count(*) num_rows from {self.dataset.schema}.{self.view_name} 
+		          group by {key_col_str} having count(*) > 1"""
+		self.cur.execute(sql)
+		num_rows = self.cur.rowcount
+		self.error_cnt_dict['Number of duplicated key columns in ' + self.dataset.schema + '.' + self.view_name + ' (' + key_col_str + ')'] = num_rows
+		logger.warning('Number of duplicated key columns in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
+		if num_rows > 0:
+			sql = f"""select * from {self.dataset.schema}.{self.view_name}  a
+					where exists
+						(select {key_col_str}
+						from {self.dataset.schema}.{self.view_name}  b
+						where {join}
+						group by {key_col_str}
+						having count(*) > 1)
+					order by 1, 2, 3"""
+			self.cur.execute(sql)
+			data = self.cur.fetchall()
+			num_rows = self.cur.rowcount
+			self.write_to_ws(data, self.view_name + ' duplicates')
+			self.error_dict['Number of rows with duplicated key columns in ' + self.dataset.schema + '.' + self.view_name ] = num_rows
 
 
 	def get_bad_datatypes(self, data):
@@ -349,6 +385,30 @@ class QualityCheck:
 			logger.warning('Number of failed rows for check constraint %s.%s: %s', self.table_name, constraint_name, num_rows)
 			self.write_to_ws(data, constraint_name)
 
+
+	def check_missing_mapping(self):
+		sql = f"""select c.column_name 
+				from information_schema.columns c 
+					join information_schema.tables t 
+						on c.table_schema = t.table_schema and c.table_name = t.table_name
+					join ust_template_data_tables x on c.table_name = x.view_name
+				where c.table_schema = %s and c.table_name = %s and not exists 
+					(select 1 from public.{self.dataset.ust_or_release}_element_mapping m
+					where x.table_name = m.epa_table_name and c.column_name = m.epa_column_name
+					and m.{self.dataset.ust_or_release}_control_id = %s)
+				order by c.ordinal_position"""
+		self.cur.execute(sql, (self.dataset.schema, self.view_name, self.dataset.control_id))
+		rows = self.cur.fetchall()
+		num_rows = self.cur.rowcount 
+		self.error_cnt_dict['Unmapped elements in ' + self.dataset.schema + '.' + self.view_name] = num_rows
+		unmapped_cols = ''
+		for row in rows:
+			unmapped_cols = row[0] + '; '
+		if unmapped_cols:
+			unmapped_cols = unmapped_cols[:-2]
+			self.error_dict['Unmapped elements in ' + self.view_name] = unmapped_cols 
+			logger.warning('Unmapped elements in %s: %s', self.view_name, unmapped_cols)
+			
 
 	def check_bad_mapping(self):
 		# check for bad mapping values
