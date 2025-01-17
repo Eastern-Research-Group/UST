@@ -1,3 +1,5 @@
+# TODO: when creating v_ust_tank_substance and v_ust_compartment_substance, include substance_comment and populate with organization value
+
 import os
 from pathlib import Path
 import sys  
