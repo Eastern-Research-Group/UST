@@ -127,13 +127,12 @@ class QualityCheck:
 		rows = self.cur.fetchall()
 		for row in rows:
 			view_name = row[0]
-			sql2 = f"select count(*) from {self.dataset.schema}.{view_name}"
+			sql = f"select count(*) from {self.dataset.schema}.{view_name}"
 			try:
-				self.cur.execute(sql2)
+				self.cur.execute(sql)
 			except psycopg2.errors.UndefinedTable:
 				continue
-			rows = self.cur.fetchone()
-			num_rows = rows[0]
+			num_rows = self.cur.fetchone()[0]
 			self.view_counts[view_name] = num_rows
 
 
