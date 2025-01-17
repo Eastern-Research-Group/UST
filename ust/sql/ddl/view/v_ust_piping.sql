@@ -20,7 +20,10 @@ create or replace view "public"."v_ust_piping" as
     a.piping_material_other AS "PipingMaterialOther",
     a.piping_material_unknown AS "PipingMaterialUnknown",
     a.piping_flex_connector AS "PipingFlexConnector",
-    a.piping_corrosion_protection_sacrificial_anode AS "PipingCorrosionProtectionSacrificialAnode",
+        CASE
+            WHEN (x.cp_type = 'piping'::text) THEN (((a.piping_corrosion_protection_sacrificial_anode)::text || ' (inferred)'::text))::character varying
+            ELSE a.piping_corrosion_protection_sacrificial_anode
+        END AS "PipingCorrosionProtectionSacrificialAnode",
     a.piping_corrosion_protection_impressed_current AS "PipingCorrosionProtectionImpressedCurrent",
     a.piping_corrosion_protection_cathodic_not_required AS "PipingCorrosionProtectionCathodicNotRequired",
     a.piping_corrosion_protection_other AS "PipingCorrosionProtectionOther",
@@ -43,10 +46,11 @@ create or replace view "public"."v_ust_piping" as
     a.pipe_secondary_containment_other AS "PipeSecondaryContainmentOther",
     a.pipe_secondary_containment_unknown AS "PipeSecondaryContainmentUnknown",
     a.piping_comment AS "PipingComment"
-   FROM ((((((ust_piping a
+   FROM (((((((ust_piping a
      JOIN ust_compartment b ON ((a.ust_compartment_id = b.ust_compartment_id)))
      JOIN ust_tank c ON ((b.ust_tank_id = c.ust_tank_id)))
      JOIN ust_facility d ON ((c.ust_facility_id = d.ust_facility_id)))
      LEFT JOIN piping_styles ps ON ((a.piping_style_id = ps.piping_style_id)))
      LEFT JOIN pipe_tank_top_sump_wall_types pt ON ((a.pipe_tank_top_sump_wall_type_id = pt.pipe_tank_top_sump_wall_type_id)))
-     LEFT JOIN piping_wall_types pw ON ((a.piping_wall_type_id = pw.piping_wall_type_id)));
+     LEFT JOIN piping_wall_types pw ON ((a.piping_wall_type_id = pw.piping_wall_type_id)))
+     LEFT JOIN v_cp_inferred x ON ((d.ust_control_id = x.ust_control_id)));
