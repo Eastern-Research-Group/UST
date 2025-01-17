@@ -382,6 +382,9 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_tank','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','tank_location_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+--NOTE: tank_status_id is required. 
+--If it doesn't exist but Compartment Status exists, map tank_status_id to the organization's compartment status field. 
+--If neither status exists, talk to the state before proceeding. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','tank_status_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 

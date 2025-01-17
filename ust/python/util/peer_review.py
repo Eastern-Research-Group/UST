@@ -16,7 +16,6 @@ organization_id = None          # Optional; if control_id = 0 or None, will find
 
 
 
-
 class PeerReview:
 	conn = None 
 	cur = None 
