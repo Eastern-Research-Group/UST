@@ -299,7 +299,6 @@ class Template:
 		logger.info('Created Unmapped Source Elements tab')
 
 
-
 	def get_mapping_tabs(self):
 		conn = utils.connect_db()
 		cur = conn.cursor()	
