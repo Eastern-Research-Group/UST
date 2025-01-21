@@ -9,9 +9,9 @@ from python.util.import_service import ImportService
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust'          # Valid values are 'ust' or 'release'
-organization_id = 'XX'          # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
-path = r''                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
+ust_or_release = 'release'          # Valid values are 'ust' or 'release'
+organization_id = 'DE'          # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
+path = r'C:\Users\AAlford\Documents\GitHub\UST\ust\sql\states\DE\Releases\Data'                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
 overwrite_table = False         # Boolean, defaults to False; set to True if you are replacing existing data in the schema
 
 
