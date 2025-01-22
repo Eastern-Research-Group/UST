@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 31                 # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True  		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
 
@@ -74,10 +74,10 @@ class ValueMapper:
 				msql = msql + 'The lookup tables for compartment_statuses and tank_stasuses are the same.\n */\n\n'
 
 			if epa_column_name == 'tank_status_id' and self.organization_compartment_flag == 'Y':
-				sql = f"""select count(*) from ust_element_mapping a join ust_element_mapping b on a.ust_control_id = b.ust_control_id 
+				sql = f"""select count(*) from public.ust_element_mapping a join public.ust_element_mapping b on a.ust_control_id = b.ust_control_id 
 						and a.epa_column_name = 'tank_status_id' and b.epa_column_name = 'compartment_status_id'
 						and a.organization_table_name = b.organization_table_name and a.organization_column_name = b.organization_column_name
-						and (lower(b.organization_table_name) like '%comp%' or lower(b.organization_column_name) like '%comp%')
+						and (lower(b.organization_table_name) like '%%comp%%' or lower(b.organization_column_name) like '%%comp%%')
 						and a.ust_control_id = %s"""
 				cur.execute(sql, (self.dataset.control_id,))
 				if cur.fetchone()[0] > 0:
