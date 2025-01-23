@@ -213,7 +213,6 @@ class QualityCheck:
 				where table_schema = 'public' and table_name = %s 
 				and is_nullable = 'NO' and ordinal_position > 1
 				and column_name not like 'ust%%id' and column_name not like 'release%%id'
-				and column_name <> 'facility_state' and column_name not like '%%epa_region%'
 				order by ordinal_position"""
 		self.cur.execute(sql, (self.table_name,))
 		rows = self.cur.fetchall()
@@ -393,7 +392,8 @@ class QualityCheck:
 					join information_schema.tables t 
 						on c.table_schema = t.table_schema and c.table_name = t.table_name
 					join ust_template_data_tables x on c.table_name = x.view_name
-				where c.table_schema = %s and c.table_name = %s and not exists 
+				where c.table_schema = %s and c.table_name = %s 
+				and column_name not in ('facility_state', 'facility_epa_region') and not exists 
 					(select 1 from public.{self.dataset.ust_or_release}_element_mapping m
 					where x.table_name = m.epa_table_name and c.column_name = m.epa_column_name
 					and m.{self.dataset.ust_or_release}_control_id = %s)
