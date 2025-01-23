@@ -45,7 +45,7 @@
 /*
  * EITHER:
  * If the data was submitted in the form of an Excel spreadsheet or a CSV/text file,
- * you can run script import_data_file_files.py. To run, set these variables:
+ * you can run script import_data_from_files.py. To run, set these variables:
 
 ust_or_release = 'release'      # Valid values are 'ust' or 'release'
 organization_id = 'DE'          # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
