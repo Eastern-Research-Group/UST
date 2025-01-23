@@ -392,7 +392,8 @@ class QualityCheck:
 					join information_schema.tables t 
 						on c.table_schema = t.table_schema and c.table_name = t.table_name
 					join ust_template_data_tables x on c.table_name = x.view_name
-				where c.table_schema = %s and c.table_name = %s and not exists 
+				where c.table_schema = %s and c.table_name = %s 
+				and column_name not in ('facility_state', 'facility_epa_region') and not exists 
 					(select 1 from public.{self.dataset.ust_or_release}_element_mapping m
 					where x.table_name = m.epa_table_name and c.column_name = m.epa_column_name
 					and m.{self.dataset.ust_or_release}_control_id = %s)

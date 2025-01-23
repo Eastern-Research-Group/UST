@@ -118,7 +118,7 @@ class RowCounts:
 
 				colno = 2
 				for org_id, control_id in orgs.items():
-					logger.info('Working on %s: %s', org_id, control_id)
+					logger.info('Working on %s (control_id = %s)', org_id, control_id)
 
 					cell = ws.cell(row=2, column=colno)
 					cell.value = org_id
