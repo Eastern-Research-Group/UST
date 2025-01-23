@@ -213,6 +213,7 @@ class QualityCheck:
 				where table_schema = 'public' and table_name = %s 
 				and is_nullable = 'NO' and ordinal_position > 1
 				and column_name not like 'ust%%id' and column_name not like 'release%%id'
+				and column_name <> 'facility_state' and column_name not like '%%epa_region%'
 				order by ordinal_position"""
 		self.cur.execute(sql, (self.table_name,))
 		rows = self.cur.fetchall()
