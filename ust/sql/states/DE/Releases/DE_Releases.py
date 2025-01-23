@@ -96,77 +96,77 @@
 #  */
 
 # /*
- * To insert a new row into the control table: 
- *  
- * EITHER:
- * Run script insert_control.py
- * 
- * Set the following variables at the top of the script:
+#  * To insert a new row into the control table: 
+#  *  
+#  * EITHER:
+#  * Run script insert_control.py
+#  * 
+#  * Set the following variables at the top of the script:
  
-organization_id = 'DE'                  # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
-ust_or_release = 'release'              # Valid values are 'ust' or 'release'
-data_source = ''                        # Describe in detail where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
-date_received = 'YYYY-MM-DD'            # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
-date_processed = None                   # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
-comments = ''                           # Top-level comments on the dataset. An example would be "Exclude Aboveground Storage Tanks".
-organization_compartment_flag = None    # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. You can set this later if you don't know.
+# organization_id = 'DE'                  # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
+# ust_or_release = 'release'              # Valid values are 'ust' or 'release'
+# data_source = ''                        # Describe in detail where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
+# date_received = 'YYYY-MM-DD'            # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
+# date_processed = None                   # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
+# comments = ''                           # Top-level comments on the dataset. An example would be "Exclude Aboveground Storage Tanks".
+# organization_compartment_flag = None    # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. You can set this later if you don't know.
 
- * OR:
+#  * OR:
 
-insert into release_control (organization_id, date_received, data_processed, data_source, comments)
-values ('DE', 'YYYY-MM-DD', current_date, '', '');
-returning release_control_id;
+# insert into release_control (organization_id, date_received, data_processed, data_source, comments)
+# values ('DE', 'YYYY-MM-DD', current_date, '', '');
+# returning release_control_id;
 
- * Both of the above methods will return the new release_control_id, but if you need to
- * retrieve it, use the following query:
+#  * Both of the above methods will return the new release_control_id, but if you need to
+#  * retrieve it, use the following query:
 
-select max(release_control_id) from release_control where organization_id = 'DE;
+# select max(release_control_id) from release_control where organization_id = 'DE;
 
- * Do a global replace in this script from ZZ to the new release_control_id.
- */
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 3: Get an overview of the source data and prepare it for processing
+#  * Do a global replace in this script from ZZ to the new release_control_id.
+#  */
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#--Step 3: Get an overview of the source data and prepare it for processing
 
-/* Run this query to see what tables we have: 
-*/
-select table_name from information_schema.tables 
-where table_schema = lower('DE_release') order by 1;
+# /* Run this query to see what tables we have: 
+# */
+# select table_name from information_schema.tables 
+# where table_schema = lower('DE_release') order by 1;
 
-/*
- * If the table names came from Excel or CSV files and are hard to type and/or contain 
- * unfriendly characters, it's OK to re-name them.
- * You can use the following query to generate SQL to do so. 
+# /*
+#  * If the table names came from Excel or CSV files and are hard to type and/or contain 
+#  * unfriendly characters, it's OK to re-name them.
+#  * You can use the following query to generate SQL to do so. 
   
-select 'alter table ' || table_schema || '."' || table_name || '" rename to "NNNNNNNNNNN";'
-from information_schema.tables 
-where table_schema = lower('DE_release') and table_type = 'BASE TABLE'
-order by 1;
+# select 'alter table ' || table_schema || '."' || table_name || '" rename to "NNNNNNNNNNN";'
+# from information_schema.tables 
+# where table_schema = lower('DE_release') and table_type = 'BASE TABLE'
+# order by 1;
 
- * Check the column names out too:
- */
-select table_name, column_name
-from information_schema.columns
-where table_schema = lower('DE_release') 
-order by table_name, ordinal_position;
+#  * Check the column names out too:
+#  */
+# select table_name, column_name
+# from information_schema.columns
+# where table_schema = lower('DE_release') 
+# order by table_name, ordinal_position;
 
-/* 
- * If any columns have "bad" characters in them, you can use the following 
- * query to generate SQL to change them.
- * In general, try to keep the column names aligned with the source data as
- * much as possible as it will be easier for the states to understand the mapping. 
+# /* 
+#  * If any columns have "bad" characters in them, you can use the following 
+#  * query to generate SQL to change them.
+#  * In general, try to keep the column names aligned with the source data as
+#  * much as possible as it will be easier for the states to understand the mapping. 
   
-select 'alter table ' || table_schema || '."' || table_name || '" rename column "' || column_name || '" to "NNNNNNNNNNN";'
-from information_schema.columns
-where table_schema = lower('DE_release') and table_type = 'BASE TABLE'
-order by 1;
+# select 'alter table ' || table_schema || '."' || table_name || '" rename column "' || column_name || '" to "NNNNNNNNNNN";'
+# from information_schema.columns
+# where table_schema = lower('DE_release') and table_type = 'BASE TABLE'
+# order by 1;
   
- * NOTE: 
- * The ONLY changes we want to make to the source data is altering table and/or
- * column names to make it easier to query them. Any other manipulation that needs to be
- * done to the source data should be done by writing views or creating "erg_" prefixed tables.  
- */
+#  * NOTE: 
+#  * The ONLY changes we want to make to the source data is altering table and/or
+#  * column names to make it easier to query them. Any other manipulation that needs to be
+#  * done to the source data should be done by writing views or creating "erg_" prefixed tables.  
+#  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --Step 4: Map the source data elements to the EPA template elements 
 
@@ -279,114 +279,114 @@ order by 1, 2, 3, 4, 5;
 
 --ust_release: This table is REQUIRED
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic)
-values (ZZ,'ust_release','tank_id_associated_with_release','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','tank_id_associated_with_release','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 --NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
 --(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
 --and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','federally_reportable_release','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','federally_reportable_release','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','site_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','site_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','site_address','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','site_address','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','site_address2','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','site_address2','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','site_city','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','site_city','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','zipcode','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','zipcode','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','county','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','county','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','state','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','state','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 --NOTE: EPA region is rarely populated in the state data, other than TrUSTD (the tribal database)
 --so it won't often be mapped here, but it will be added to view v_ust_release later. 
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','epa_region','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','epa_region','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','facility_type_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','facility_type_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','tribal_site','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','tribal_site','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','tribe','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','tribe','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','latitude','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','latitude','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','longitude','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','longitude','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','coordinate_source_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','coordinate_source_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 --NOTE: release_status_id is a required field. If no such element exists in the source data, have Victoria ask the state to supply it.
 --You can continue mapping while waiting for a response from the state, but you won't be able to do the final insert into the EPA tables
 --until we receive the additional information.
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','release_status_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','release_status_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','reported_date','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','reported_date','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','nfa_date','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','nfa_date','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','media_impacted_soil','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','media_impacted_soil','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','media_impacted_groundwater','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','media_impacted_groundwater','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','media_impacted_surface_water','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','media_impacted_surface_water','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','release_discovered_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','release_discovered_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','closed_with_contamination','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','closed_with_contamination','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 --NOTE: no_further_action_letter_url ONLY applies to tribal/TrUSTD data. DO NOT MAP for any other organizations. 
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','no_further_action_letter_url','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','no_further_action_letter_url','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release','military_dod_site','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release','military_dod_site','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
 --ust_release_substance: This table is OPTIONAL, do not map if there is no substance data in the source data
 --NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
 --(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
 --and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_substance','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_substance','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 --NOTE: If you are populating this table, substance_id is a required field. 
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_substance','quantity_released','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_substance','quantity_released','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_substance','unit','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_substance','unit','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
 --ust_release_source: This table is OPTIONAL, do not map if there is no source data in the source data
 --NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
 --(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
 --and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_source','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_source','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 --NOTE: If you are populating this table, source_id is a required field. 
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_source','source_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_source','source_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
 --ust_release_cause: This table is OPTIONAL, do not map if there is no cause data in the source data
 --NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
 --(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
 --and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_cause','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_cause','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 --NOTE: If you are populating this table, cause_id is a required field. 
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_cause','cause_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_cause','cause_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
 --ust_release_corrective_action_strategy: This table is OPTIONAL, do not map if there is no corrective action strategy data in the source data
 --NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
 --(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
 --and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_corrective_action_strategy','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_corrective_action_strategy','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 --NOTE: If you are populating this table, corrective_action_strategy_id is a required field. 
 insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_release_corrective_action_strategy','corrective_action_strategy_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (20,'ust_release_corrective_action_strategy','corrective_action_strategy_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -404,7 +404,7 @@ values (ZZ,'ust_release_corrective_action_strategy','corrective_action_strategy_
  * Set the following variables before running the script:
  
 ust_or_release = 'release' 		# valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+control_id = 20                 # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
  * If - and only if - this script identifies possible aggregrated data, it will output SQL file in the repo at
@@ -429,14 +429,14 @@ only_incomplete = True 			# Boolean, set to True to restrict the output to EPA c
 select epa_column_name from 
 	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
 	from public.v_release_needed_mapping 
-	where release_control_id = ZZ and mapping_complete = 'N'
+	where release_control_id = 20 and mapping_complete = 'N'
 	order by table_sort_order, column_sort_order) x;
  
  * To generate the SQL that will assist you in doing the value mapping, run the script 
  * generate_value_mapping_sql.py. Set the following variables before running the script:
  
 ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+control_id = 20                 # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
@@ -455,7 +455,7 @@ overwrite_existing = False      # Boolean, defaults to False. Set to True to ove
  * Set these variables in the script:
  
 ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+control_id = 20                 # Enter an integer that is the ust_control_id or release_control_id
   
  * To see the crosswalk views after running the script:
 
@@ -476,7 +476,7 @@ and table_name like '%_xwalk' order by 1;
  * Set these variables in the script:
 
 ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
-control_id = ZZ                  # Enter an integer that is the release_control_id
+control_id = 20                  # Enter an integer that is the release_control_id
 drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
@@ -494,7 +494,7 @@ overwrite_sql_file = False       # Boolean, defaults to False. Set to True to ov
 select epa_table_name, epa_column_name, organization_table_name 
 from public.v_release_element_mapping a join public.ust_template_data_tables b 
 	on a.epa_table_name = b.table_name 
-where release_control_id = ZZ and organization_table_name like 'erg%'
+where release_control_id = 20 and organization_table_name like 'erg%'
 order by sort_order;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -520,7 +520,7 @@ order by sort_order;
 
 --Remind yourself if there are any state-level business rules you need to take into consideration
 --when writing the views (such as excluding AST, for example).
-select comments from public.release_control where release_control_id = ZZ;
+select comments from public.release_control where release_control_id = 20;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -533,7 +533,7 @@ select comments from public.release_control where release_control_id = ZZ;
  * Set these variables in the script:
 
 ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
-control_id = ZZ                  # Enter an integer that is the release_control_id
+control_id = 20                  # Enter an integer that is the release_control_id
 
  * This script will check the views you just created in the state schema for the following:
  * 1) Missing views - will check that if you created a child view (for example, v_ust_release_substance), that the parent view(s) 
@@ -577,14 +577,14 @@ control_id = ZZ                  # Enter an integer that is the release_control_
  * Set these variables in the script: 
  
 ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
-control_id = ZZ                  # Enter an integer that is the release_control_id
+control_id = 20                  # Enter an integer that is the release_control_id
 delete_existing = False 		 # can set to True if there is existing UST data you need to delete before inserting new
 
  * Do a quick sanity check of number of rows inserted:
 */
 select table_name, num_rows 
 from v_release_table_row_count
-where release_control_id = ZZ
+where release_control_id = 20
 order by sort_order;
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -599,7 +599,7 @@ order by sort_order;
  * Set these variables in the script: 
 
 ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+control_id = 20                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
  * This script will output an Excel file (located by default in the repo at 
@@ -619,7 +619,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * Set these variables in the script: 
 
 ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+control_id = 20                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
  * This script will output an Excel file (located by default in the repo at 
@@ -691,7 +691,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * Set these variables in the script: 
  * 
 ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+control_id = 20                 # Enter an integer that is the ust_control_id or release_control_id
 all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those referenced in ust_element_mapping or release_element_mapping.
 tables_to_exclude = []          # Python list of strings; defaults to empty list. Populate with table names in the organization schema that should be excluded from the export. (NOTE: ERG-created tables will not be exported regardless of the values in this list.)
 empty_export_dir = True         # Boolean, defaults to True. If True, will delete all files in the export directory before proceeding. If False, will not delete any files, but will overwrite any that have the same name as the generated file name. 
