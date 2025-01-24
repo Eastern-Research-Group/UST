@@ -11,7 +11,6 @@ from python.util.logger_factory import logger
 
 
 
-
 def main():
 	conn = utils.connect_db()
 	cur = conn.cursor()

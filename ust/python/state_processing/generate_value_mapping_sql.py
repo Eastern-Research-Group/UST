@@ -72,6 +72,18 @@ class ValueMapper:
 				msql = msql + f'/*\n{self.dataset.organization_id} does not report at the Compartment level, but CompartmentStatus is required.\n'
 				msql = msql + f'\nCopy the tank status mapping down to the compartment!\n'
 				msql = msql + 'The lookup tables for compartment_statuses and tank_stasuses are the same.\n */\n\n'
+
+			if epa_column_name == 'tank_status_id' and self.organization_compartment_flag == 'Y':
+				sql = f"""select count(*) from public.ust_element_mapping a join public.ust_element_mapping b on a.ust_control_id = b.ust_control_id 
+						and a.epa_column_name = 'tank_status_id' and b.epa_column_name = 'compartment_status_id'
+						and a.organization_table_name = b.organization_table_name and a.organization_column_name = b.organization_column_name
+						and (lower(b.organization_table_name) like '%%comp%%' or lower(b.organization_column_name) like '%%comp%%')
+						and a.ust_control_id = %s"""
+				cur.execute(sql, (self.dataset.control_id,))
+				if cur.fetchone()[0] > 0:
+					msql = msql + f'/*\nIt looks like it is possible that {self.dataset.organization_id} has compartment statuses but not tank statuses.\n'
+					msql = msql + '\nTo roll the compartment status up to the tank level, see the status_hierarchy and status_comment columns of the compartment_statuses lookup table.'
+					msql = msql +  '\nUse the SQL MIN() function on the status_hierarchy column to get the status for the tank, but also see the status_comment to rule out "impossible" scenarios\n */\n\n'
 				
 			sql2 = f"""select {self.dataset.ust_or_release}_element_mapping_id, organization_table_name, organization_column_name, deagg_table_name, deagg_column_name 
 					from public.{self.dataset.ust_or_release}_element_mapping 

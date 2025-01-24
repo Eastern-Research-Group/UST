@@ -16,12 +16,13 @@ table_name = None 		# If None, will check all tables in the specified schema. Se
 
 def check_table(schema, table_name, cur):
 	sql = "select column_name from (\n"
-	sql2 = f"""select 'select ' || ordinal_position || ' as sort_order,''' || column_name || ''' as column_name, count(*) from {schema}.' || 
-				table_name || ' where "' || column_name || '" is not null union' as vsql 
+	sql2 = f"""select 'select ' || ordinal_position || ' as sort_order,''' || column_name || ''' as column_name, count(*) from {schema}."' || 
+				table_name || '" where "' || column_name || '" is not null union' as vsql 
 			from information_schema.columns 
-			where lower(table_schema) = lower(%s) and lower(table_name) = %s
+			where lower(table_schema) = lower(%s) and lower(table_name) = lower(%s)
 			order by ordinal_position"""
 	cur.execute(sql2, (schema, table_name))
+	# utils.pretty_print_query(cur)
 	rows = cur.fetchall()
 	if not rows:
 		logger.warning('No columns exist in table %s.%s', schema, table_name)

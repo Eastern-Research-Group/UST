@@ -135,22 +135,24 @@ def get_today_string():
     return datetime.today().strftime('%Y-%m-%d')
 
 
-def get_control_id(ust_or_lust, organization_id):
+def get_control_id(ust_or_release, organization_id):
+    ust_or_release = ust_or_release.lower()
+
     conn = connect_db()
     cur = conn.cursor()
 
-    sql = "select count(*) from " + ust_or_lust.lower() + '_control where organization_id = %s'
+    sql = f"select count(*) from public.{ust_or_release}_control where organization_id = %s"
     cur.execute(sql, (organization_id, ))
     cnt = cur.fetchone()[0]
     if cnt == 0:
-        logger.error('No data in %s_control; unable to proceed.', ust_or_lust.lower())
+        logger.error('No data in %s_control; unable to proceed.',{ust_or_release})
         exit()
-    sql = "select max(control_id) from " + ust_or_lust.lower() + '_control where organization_id = %s'
+    sql = f"select max({ust_or_release}_control_id) from public.{ust_or_release}_control where organization_id = %s"
     cur.execute(sql, (organization_id, ))
     control_id = cur.fetchone()[0]
 
     if cnt > 1:
-        logger.info('Found multiple Control IDs in %s_control; using newest one (%s)', ust_or_lust.lower(), str(control_id) )
+        logger.info('Found multiple Control IDs in %s_control; using newest one (%s)', {ust_or_release}, str(control_id) )
     else:
         logger.info('Setting Control ID to %s', str(control_id))
 

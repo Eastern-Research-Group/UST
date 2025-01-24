@@ -12,6 +12,7 @@ from python.util import config, utils
 from python.util.logger_factory import logger
 
 
+
 class DatabaseImporter:
     def __init__(self, organization_id, ust_or_release, file_path, overwrite_table=True):
         self.organization_id = organization_id
