@@ -66,12 +66,12 @@ class deaggRows:
 
 	def create_deagg_rows_table(self):
 		sql = "select count(*) from information_schema.tables where table_schema = %s and table_name = %s"
-		self.cur.execute(sql, (self.dataset.schema, self.data_deagg_table_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.data_deagg_table_name))
 		cnt = self.cur.fetchone()[0]
 		if cnt > 0:
 			if self.drop_existing:
 				sql2 = f'drop table {self.dataset.schema}."{self.data_deagg_table_name}"'
-				self.cur.execute(sql2)
+				utils.process_sql(self.conn, self.cur, sql2)
 			else:
 				logger.warning('Table %s.%s already exists but drop_existing flag is False. Set drop_existing to True to continue. Exiting...', self.dataset.schema, self.data_deagg_table_name)
 				exit()
@@ -85,13 +85,13 @@ class deaggRows:
 		sql = f"""select {col_str} cast(null as varchar(400)) as "{self.data_deagg_column_name}" 
 		          into {self.dataset.schema}."{self.data_deagg_table_name}" 
 		          from {self.dataset.schema}."{self.data_table_name}" where 1=2""" 
-		self.cur.execute(sql)
+		utils.process_sql(self.conn, self.cur, sql)
 
 		sql = f"""select distinct {col_str} "{self.data_deagg_column_name}" 
 		          from {self.dataset.schema}."{self.data_table_name}" 
                   where "{self.data_deagg_column_name}" is not null
 		          order by 1, 2""" 
-		self.cur.execute(sql)
+		utils.process_sql(self.conn, self.cur, sql)
 		rows = self.cur.fetchall()
 		for row in rows: 
 			i = len(row)-1
@@ -105,32 +105,32 @@ class deaggRows:
 				if i == 1:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s)"""
-					self.cur.execute(sql2, (row[0], part))
+					utils.process_sql(self.conn, self.cur, sql2, params=(row[0], part))
 					logger.info('Inserted %s, %s into %s.%s', row[0], part, self.dataset.schema, self.data_deagg_table_name)
 				elif i == 2:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s, %s)"""
-					self.cur.execute(sql2, (row[0], row[1], part))
+					utils.process_sql(self.conn, self.cur, sql2, params=(row[0], row[1], part))
 					logger.info('Inserted %s, %s, %s into %s.%s', row[0], row[1], part, self.dataset.schema, self.data_deagg_table_name)
 				elif i == 3:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s, %s, %s)"""
-					self.cur.execute(sql2, (row[0], row[1], row[2], part))
+					utils.process_sql(self.conn, self.cur, sql2, params=(row[0], row[1], row[2], part))
 					logger.info('Inserted %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], part, self.dataset.schema, self.data_deagg_table_name)
 				elif i == 4:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s, %s, %s, %s)"""
-					self.cur.execute(sql2, (row[0], row[1], row[2], row[3], part))
+					utils.process_sql(self.conn, self.cur, sql2, params=row[3], part))
 					logger.info('Inserted %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], part, self.dataset.schema, self.data_deagg_table_name)
 				elif i == 5:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s, %s, %s, %s, %s)"""
-					self.cur.execute(sql2, (row[0], row[1], row[2], row[3], row[4], part))
+					utils.process_sql(self.conn, self.cur, sql2, params= (row[0], row[1], row[2], row[3], row[4], part))
 					logger.info('Inserted %s, %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], row[4], part, self.dataset.schema, self.data_deagg_table_name)
 				elif i == 6:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s, %s, %s, %s, %s, %s)"""
-					self.cur.execute(sql2, (row[0], row[1], row[2], row[3], row[4], row[5], part))
+					utils.process_sql(self.conn, self.cur, sql2, params=(row[0], row[1], row[2], row[3], row[4], row[5], part))
 					logger.info('Inserted %s, %s, %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], row[4], row[5], part, self.dataset.schema, self.data_deagg_table_name)
 				else:
 					logger.critical('There are more grouped by/pk columns (%s) in data_table_pk_cols (%s) than this script has been coded to handle. Update the loop that does the deagg.', i, self.data_table_pk_cols)
@@ -144,7 +144,7 @@ class deaggRows:
 				  set deagg_table_name = %s
 		          where {self.dataset.ust_or_release}_control_id = %s 
 		          and deagg_table_name = %s"""
-		self.cur.execute(sql, (self.data_deagg_table_name, self.dataset.control_id, self.deagg_table_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.data_deagg_table_name, self.dataset.control_id, self.deagg_table_name))
 		self.conn.commit()
 		logger.info('Updated element mapping for %s in %s', self.data_deagg_table_name, self.element_mapping_table)
 

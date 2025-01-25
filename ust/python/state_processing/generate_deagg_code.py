@@ -46,7 +46,7 @@ class DeaggCode:
 		if self.only_incomplete:
 			sql = sql + " and mapping_complete = 'N'"
 		sql = sql + " order by sort_order, epa_column_name"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		rows = cur.fetchall()
 		for row in rows:
 			epa_table_name = row[0]
@@ -58,7 +58,7 @@ class DeaggCode:
 	
 			sql2 = f"""select distinct "{org_column_name}" from {self.dataset.schema}."{org_table_name}" where "{org_column_name}" is not null order by 1"""
 
-			cur.execute(sql2)
+			utils.process_sql(conn, cur, sql2)
 			rows2 = cur.fetchall()
 			deagg_flag = False
 			delimiter = None 

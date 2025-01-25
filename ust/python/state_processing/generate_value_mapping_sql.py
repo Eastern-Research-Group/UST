@@ -43,7 +43,7 @@ class ValueMapper:
 			conn = utils.connect_db()
 			cur = conn.cursor()
 			sql = "select organization_compartment_flag from public.ust_control where ust_control_id = %s"
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			self.organization_compartment_flag = cur.fetchone()[0]
 			cur.close()
 			conn.close()
@@ -58,7 +58,7 @@ class ValueMapper:
 				from public.v_{self.dataset.ust_or_release}_needed_mapping 
 				where {self.dataset.ust_or_release}_control_id = %s """
 		sql = sql + "order by table_sort_order, column_sort_order) x"
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		rows = cur.fetchall()
 		for row in rows:
 			epa_table_name = row[0]
@@ -79,7 +79,7 @@ class ValueMapper:
 						and a.organization_table_name = b.organization_table_name and a.organization_column_name = b.organization_column_name
 						and (lower(b.organization_table_name) like '%%comp%%' or lower(b.organization_column_name) like '%%comp%%')
 						and a.ust_control_id = %s"""
-				cur.execute(sql, (self.dataset.control_id,))
+				utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 				if cur.fetchone()[0] > 0:
 					msql = msql + f'/*\nIt looks like it is possible that {self.dataset.organization_id} has compartment statuses but not tank statuses.\n'
 					msql = msql + '\nTo roll the compartment status up to the tank level, see the status_hierarchy and status_comment columns of the compartment_statuses lookup table.'
@@ -88,7 +88,7 @@ class ValueMapper:
 			sql2 = f"""select {self.dataset.ust_or_release}_element_mapping_id, organization_table_name, organization_column_name, deagg_table_name, deagg_column_name 
 					from public.{self.dataset.ust_or_release}_element_mapping 
 					where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s"""
-			cur.execute(sql2, (self.dataset.control_id, epa_column_name))
+			utils.process_sql(conn, cur, sql2, params=(self.dataset.control_id, epa_column_name))
 			row2 = cur.fetchone()
 			element_mapping_id = row2[0]
 			org_table_name = row2[1]
@@ -104,7 +104,7 @@ class ValueMapper:
 
 			sql3 = f"""select distinct "{select_col}" from {self.dataset.schema}."{select_table}" where "{select_col}" is not null order by 1"""
 			msql = msql + '--' + sql3 + ';\n/* Organization values are:\n\n'
-			cur.execute(sql3)
+			utils.process_sql(conn, cur, sql3)
 			rows3 = cur.fetchall()
 			for row3 in rows3:
 				org_value = row3[0]
@@ -116,7 +116,7 @@ class ValueMapper:
 			sql4 = f"""select database_lookup_table, database_lookup_column 
 						from public.{self.dataset.ust_or_release}_element_mapping a join public.{self.dataset.ust_or_release}_elements b on a.epa_column_name = b.database_column_name 
 						where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s"""
-			cur.execute(sql4, (self.dataset.control_id, epa_column_name))
+			utils.process_sql(conn, cur, sql4, params=(self.dataset.control_id, epa_column_name))
 			row4 = cur.fetchone()
 			db_lookup_table = row4[0]
 			db_lookup_col = row4[1]	
@@ -128,7 +128,7 @@ class ValueMapper:
 						where {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and epa_column_name = '{epa_column_name}'
 						and organization_value is not null) """
 			sql4 = sql4 + "order by 1"	
-			cur.execute(sql4)
+			utils.process_sql(conn, cur, sql4)
 			rows4 = cur.fetchall()
 			if not rows4:
 				logger.info('No unmapped organization values for EPA table %s, column %s in organization table and column %s.%s', epa_table_name, epa_column_name, select_table, select_col)
@@ -138,7 +138,7 @@ class ValueMapper:
 			for row4 in rows4:
 				org_value = row4[0]
 				sql5 = f"""select {db_lookup_col} from public.{db_lookup_table} where replace(lower({db_lookup_col}),'-',' ') = %s"""
-				cur.execute(sql5, (org_value.lower().replace('-',' '),))
+				utils.process_sql(conn, cur, sql5, params=(org_value.lower().replace('-',' '),))
 				try:
 					epa_value = cur.fetchone()[0]
 				except:
@@ -146,7 +146,7 @@ class ValueMapper:
 
 				if not epa_value and epa_column_name == 'substance_id':
 					sql5 = f"select count(*) from public.v_hazardous_substances where lower(substance) = lower({repr(org_value)})"
-					cur.execute(sql5)
+					utils.process_sql(conn, cur, sql5)
 					if cur.fetchone()[0] > 0:
 						epa_value = 'Hazardous substance'
 
@@ -162,7 +162,7 @@ class ValueMapper:
 				sql6 = f"""select {db_lookup_col} from public.{db_lookup_table}"""
 
 			self.value_mapping_sql = self.value_mapping_sql + f'\n--{sql6};\n/* Valid EPA values are:\n\n'
-			cur.execute(sql6)
+			utils.process_sql(conn, cur, sql6)
 			rows6 = cur.fetchall()
 			for row6 in rows6:
 				epa_val = row6[0]
@@ -231,7 +231,7 @@ and not exists
 				where ust_control_id = %s
 				and epa_table_name = 'ust_piping' and epa_column_name like 'piping%%'
 				order by 1"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql2, params=(self.dataset.control_id,))
 		rows = cur.fetchall()
 		if rows:
 			self.value_mapping_sql = self.value_mapping_sql + "\n/* There is no generated query we can run to automatically infer Piping corrosion protection, so the following"
@@ -245,7 +245,7 @@ and not exists
 						from {self.dataset.schema}."{table_name}" 
 						where lower("{column_name}") like '%cp%' or lower("{column_name}") like '%cor%pro%'
 						order by 1"""
-				cur.execute(sql)
+				utils.process_sql(conn, cur, sql)
 				rows2 = cur.fetchall()
 				for row2 in rows2:
 					value = row2[0]

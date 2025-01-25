@@ -82,7 +82,7 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()
 		sql = f"select * from public.v_{self.dataset.ust_or_release}_elements"	
-		cur.execute(sql)
+		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
 			for colno, cell_value in enumerate(row, start=1):
@@ -222,7 +222,7 @@ class Template:
 		cur = conn.cursor()	
 		
 		sql = f"select {lookup_column_name} from public.{lookup_table_name} order by 1"
-		cur.execute(sql)
+		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
 			for colno, cell_value in enumerate(row, start=1):
@@ -251,7 +251,7 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 		sql = f"select substance_group, substance from public.substances order by 1, 2"
-		cur.execute(sql)
+		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
 			for colno, cell_value in enumerate(row, start=1):
@@ -285,7 +285,7 @@ class Template:
 					and lower(a.table_name) = lower(b.organization_table_name) 
 					and lower(a.column_name) = lower(b.organization_column_name))
 				order by 1, 2"""
-		cur.execute(sql, (self.dataset.schema, self.dataset.control_id))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.schema, self.dataset.control_id))
 		data = cur.fetchall()	
 		for rowno, row in enumerate(data, start=2):
 			for colno, cell_value in enumerate(row, start=1):
@@ -305,7 +305,7 @@ class Template:
 		sql = f"""select epa_table_name, epa_column_name, database_lookup_table, database_lookup_column   
 				from public.v_{self.dataset.ust_or_release}_available_mapping
 				where {self.dataset.ust_or_release}_control_id = %s order by 1, 2"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		rows = cur.fetchall()
 		cur.close()
 		conn.close()
@@ -353,7 +353,7 @@ class Template:
 		cur = conn.cursor()	
 
 		sql = f"select {database_lookup_column} from {database_lookup_table} order by 1"
-		cur.execute(sql)
+		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
 			for colno, cell_value in enumerate(row, start=1):
@@ -363,7 +363,7 @@ class Template:
 				from public.v_{self.dataset.ust_or_release}_element_mapping 
 				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s
 				order by 1, 2"""
-		cur.execute(sql, (self.dataset.control_id, mapping_column_name))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id, mapping_column_name))
 
 		if cur.rowcount > 0:
 			cell = ws.cell(row=1, column=3)
@@ -405,7 +405,7 @@ class Template:
 				from public.v_{self.dataset.ust_or_release}_element_mapping 
 				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'
 				order by 1, 2"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 
 		if cur.rowcount > 0:
 			cell = ws.cell(row=1, column=4)
@@ -479,7 +479,7 @@ class Template:
 			conn = utils.connect_db()
 			cur = conn.cursor()
 			sql = f"select * from public.{view_name} where {self.dataset.ust_or_release}_control_id = %s"
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=1):

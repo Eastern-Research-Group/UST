@@ -604,3 +604,15 @@ def get_join_tables(dataset, epa_table_name, schema='public'):
 
     # TODO: add deagg joins  
     return joins 
+
+
+def process_sql(conn, cur, sql, params=None):
+    try: 
+        cur.execute(sql, params)
+    except Exception as e:
+        logger.error('Error processing SQL: %s', e)
+        utils.pretty_print_query(cur)
+        conn.rollback()
+        cur.close()
+        conn.close()        
+        exit()  
