@@ -229,7 +229,7 @@ and not exists
 		sql = """select distinct organization_table_name, organization_column_name   
 				from public.ust_element_mapping 
 				where ust_control_id = %s
-				and epa_table_name = 'ust_piping' and epa_column_name like 'piping%%'
+				and epa_table_name = 'ust_piping' and epa_column_name like 'piping%%' and epa_column_name <> 'piping_id'
 				order by 1"""
 		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		rows = cur.fetchall()
@@ -244,7 +244,7 @@ and not exists
 				sql = f"""select distinct "{column_name}" 
 						from {self.dataset.schema}."{table_name}" 
 						where lower("{column_name}") like '%cp%' or lower("{column_name}") like '%cor%pro%'
-						order by 1"""
+						order by 1;"""
 				utils.process_sql(conn, cur, sql)
 				rows2 = cur.fetchall()
 				for row2 in rows2:

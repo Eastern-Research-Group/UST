@@ -609,9 +609,12 @@ def process_sql(conn, cur, sql, params=None):
     try: 
         cur.execute(sql, params)
     except Exception as e:
-        error_logger.error('Error processing SQL: %s', e)
-        pretty_print_query(cur)
+        error_logger.error('Error processing SQL: %s', e, stack_info=True, exc_info=True)
+        q = get_pretty_query(cur)
+        error_logger.error(q)
         conn.rollback()
         cur.close()
-        conn.close()        
+        conn.close()     
+        error_logger.error('\n\nEXITING DUE TO ERROR....\n\n')  
         exit()  
+
