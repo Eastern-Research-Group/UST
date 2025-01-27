@@ -23,7 +23,7 @@ def main(dataset):
 			from public.v_{dataset.ust_or_release}_table_population 
 			where {dataset.ust_or_release}_control_id = %s and database_lookup_table is not null
 			order by table_sort_order, column_sort_order"""
-	utils.process_sql(conn, cur, sql, params=(control_id, ))
+	utils.process_sql(conn, cur, sql, params=(control_id,))
 	rows = cur.fetchall()
 	for row in rows:
 		epa_column_name = row[0]

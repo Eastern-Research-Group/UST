@@ -1,5 +1,5 @@
 create or replace view "public"."v_ust_tank" as
- SELECT c.ust_control_id,
+ SELECT DISTINCT c.ust_control_id,
     c.facility_id AS "FacilityID",
     b.tank_id AS "TankID",
     b.tank_name AS "TankName",
@@ -26,7 +26,8 @@ create or replace view "public"."v_ust_tank" as
     b.tank_corrosion_protection_unknown AS "TankCorrosionProtectionUnknown",
     tc.tank_secondary_containment AS "TankSecondaryContainment",
     ci.cert_of_installation AS "CertOfInstallation",
-    b.cert_of_installation_other AS "CertOfInstallationOther"
+    b.cert_of_installation_other AS "CertOfInstallationOther",
+    b.tank_comment AS "TankComment"
    FROM (((((((ust_tank b
      JOIN ust_facility c ON ((b.ust_facility_id = c.ust_facility_id)))
      LEFT JOIN tank_locations tl ON ((b.tank_location_id = tl.tank_location_id)))

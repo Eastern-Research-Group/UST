@@ -131,7 +131,7 @@ class ValueMapper:
 			utils.process_sql(conn, cur, sql4)
 			rows4 = cur.fetchall()
 			if not rows4:
-				logger.info('No unmapped organization values for EPA table %s, column %s in organization table and column %s.%s', epa_table_name, epa_column_name, select_table, select_col)
+				logger.info('No unmapped organization values for EPA table %s, column %s in organization table and column "%s"."%s"', epa_table_name, epa_column_name, select_table, select_col)
 				continue
 			logger.info('Generating mapping SQL for %s', epa_column_name)	
 			self.value_mapping_sql = self.value_mapping_sql + msql
@@ -231,7 +231,7 @@ and not exists
 				where ust_control_id = %s
 				and epa_table_name = 'ust_piping' and epa_column_name like 'piping%%'
 				order by 1"""
-		utils.process_sql(conn, cur, sql2, params=(self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		rows = cur.fetchall()
 		if rows:
 			self.value_mapping_sql = self.value_mapping_sql + "\n/* There is no generated query we can run to automatically infer Piping corrosion protection, so the following"

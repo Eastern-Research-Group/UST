@@ -191,8 +191,6 @@ class IdColumns:
 			comment = 'Row inserted automatically to map a required field from a child table.'
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name, column_name, self.erg_table_name, column_name, 
 						  comment, org_join_table, org_join_col, org_join_fk, org_join_col2, org_join_fk2, org_join_col3, org_join_fk3))
-		# if column_name == 'compartment_id':
-		# 	utils.pretty_print_query(self.cur)
 		logger.info('Inserted mapping from %s.%s to %s.%s', table_name, column_name, self.erg_table_name, column_name)
 		self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 		self.conn.commit()
@@ -222,7 +220,6 @@ class IdColumns:
 			cnt = self.cur.fetchone()[0]
 			if cnt == 0:
 				self.record_element_mapping(self.table_name, 'compartment_id')
-
 
 
 	def get_join_table(self, col_name, table_name=None):
@@ -342,9 +339,6 @@ class IdColumns:
 			compartment_table_name = self.table_name
 			if self.compartment_flag == 'N':
 				compartment_table_name = self.get_tank_table_name()
-
-
-			# print('compartment_table_name = ' + compartment_table_name)
 
 			v_sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name, tank_id, compartment_name)\nselect distinct "
 			select_cols = ''
@@ -524,8 +518,6 @@ class IdColumns:
 				else: 
 					select_cols = select_cols + ", null"
 				v_sql = v_sql + select_cols + ' from ' + self.dataset.schema + '.' + compartment_table
-			print(v_sql)
-			exit()
 			utils.process_sql(self.conn, self.cur, v_sql)
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
@@ -548,7 +540,6 @@ def get_tables_with_missing_cols(dataset):
 				where {dataset.ust_or_release}_control_id = %s and a.table_name = c.epa_table_name))
 			order by sort_order"""
 	utils.process_sql(conn, cur, sql, params=(dataset.control_id, dataset.control_id))
-	# utils.pretty_print_query(cur)
 	rows = cur.fetchall()
 	cur.close()
 	conn.close()

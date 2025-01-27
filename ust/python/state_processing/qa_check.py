@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 31              	# Enter an integer that is the ust_control_id or release_control_id
 
 # These variables can usually be left unset. This script will general an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -219,8 +219,8 @@ class QualityCheck:
 		for row in rows:
 			col_name = row[0]
 			sql2 = """select count(*) from information_schema.columns 
-			         where table_schema = %s and table_name = %s
-			         and column_name = %s"""
+					 where table_schema = %s and table_name = %s
+					 and column_name = %s"""
 			utils.process_sql(self.conn, self.cur, sql2, params=(self.dataset.schema, self.view_name, col_name))
 			cnt = self.cur.fetchone()[0]
 			if cnt < 1:
@@ -239,7 +239,7 @@ class QualityCheck:
 	def check_duplicate_rows(self):
 		# check for rows that have duplicate key columns
 		sql = f"""select column_name from public.{self.dataset.ust_or_release}_view_key_columns 
-		          where view_name = %s order by sort_order"""
+				  where view_name = %s order by sort_order"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.view_name,))
 		key_cols = [r[0] for r in self.cur.fetchall()]
 		key_col_str = ''
@@ -250,7 +250,7 @@ class QualityCheck:
 		key_col_str = key_col_str[:-2]
 		join = join[:-4]
 		sql = f"""select {key_col_str}, count(*) num_rows from {self.dataset.schema}.{self.view_name} 
-		          group by {key_col_str} having count(*) > 1"""
+				  group by {key_col_str} having count(*) > 1"""
 		utils.process_sql(self.conn, self.cur, sql)
 		num_rows = self.cur.rowcount
 		self.error_cnt_dict['Number of duplicated key columns in ' + self.dataset.schema + '.' + self.view_name + ' (' + key_col_str + ')'] = num_rows
@@ -337,10 +337,10 @@ class QualityCheck:
 	def check_extraneous_cols(self):
 		# check for columns in the state schema view that don't correspond to columns in the EPA template 
 		sql = """select column_name from information_schema.columns 
-		     	where table_schema = %s and table_name = %s and column_name not in 
-		     		(select column_name from information_schema.columns 
-		     		where table_schema = 'public' and table_name = %s)
-		     	order by column_name"""
+				where table_schema = %s and table_name = %s and column_name not in 
+					(select column_name from information_schema.columns 
+					where table_schema = 'public' and table_name = %s)
+				order by column_name"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.view_name, self.table_name))
 		rows = self.cur.fetchall()
 		for row in rows:
@@ -376,9 +376,16 @@ class QualityCheck:
 			check_clause = row[1]
 			sql2 = f"select * from {self.dataset.schema}.{self.view_name} where not {check_clause}"
 			try:
-				utils.process_sql(self.conn, self.cur, sql2)
+				self.cur.execute(sql2)
 			except psycopg2.errors.UndefinedColumn:
 				continue 
+			except Exception as e:
+				logger.error('Error processing SQL: %s', e)
+				utils.pretty_print_query(self.cur)
+				self.conn.rollback()
+				self.cur.close()
+				self.conn.close()        
+				exit()  
 			data = self.cur.fetchall()
 			num_rows = self.cur.rowcount 
 			self.error_cnt_dict['failed check constraint ' + self.dataset.schema + '.' + constraint_name] = num_rows
@@ -507,8 +514,8 @@ class QualityCheck:
 
 def main(ust_or_release, control_id=None, export_file_name=None, export_file_dir=None, export_file_path=None):
 	dataset = Dataset(ust_or_release=ust_or_release,
-				 	  control_id=control_id, 
-				 	  base_file_name='QAQC_' + utils.get_timestamp_str() + '.xlsx',
+					  control_id=control_id, 
+					  base_file_name='QAQC_' + utils.get_timestamp_str() + '.xlsx',
 					  export_file_name=export_file_name,
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)

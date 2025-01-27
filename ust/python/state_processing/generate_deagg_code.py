@@ -57,7 +57,6 @@ class DeaggCode:
 			logger.info('Checking %s."%s"."%s" to see if it may need to be deaggregated', self.dataset.schema, org_table_name, org_column_name)
 	
 			sql2 = f"""select distinct "{org_column_name}" from {self.dataset.schema}."{org_table_name}" where "{org_column_name}" is not null order by 1"""
-
 			utils.process_sql(conn, cur, sql2)
 			rows2 = cur.fetchall()
 			deagg_flag = False
@@ -89,7 +88,7 @@ class DeaggCode:
 
 			if deagg_flag:
 				self.deagg_sql = self.deagg_sql + '------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n'
-				logger.info("It appears possible we may need to deaggregate the organization values for %s; generating deagg code...\n", epa_column_name)
+				logger.info("It appears possible we may need to deaggregate the organization values for "%s"; generating deagg code...\n", epa_column_name)
 
 				self.deagg_sql = self.deagg_sql + f'/* ORGANIZATION VALUES MAY NEED TO BE DEAGGREGATED for {epa_table_name}.{epa_column_name}!\n * \n'
 				self.deagg_sql = self.deagg_sql + f' * Schema = "{self.dataset.schema}"\n'

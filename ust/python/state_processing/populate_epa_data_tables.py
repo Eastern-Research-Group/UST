@@ -144,7 +144,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
 										join ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id"""
 				# print(insert_sql)
-				utils.process_sql(conn, cur, insertsql, params=(control_id, ))
+				utils.process_sql(conn, cur, insertsql, params=(control_id,))
 
 			rows_inserted = cur.rowcount
 			conn.commit()
