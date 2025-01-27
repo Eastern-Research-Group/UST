@@ -615,6 +615,6 @@ def process_sql(conn, cur, sql, params=None):
         conn.rollback()
         cur.close()
         conn.close()     
-        error_logger.error('\n\nEXITING DUE TO ERROR....\n\n')  
+        error_logger.error('\n\nEXITING DUE TO SQL ERROR....\n\n')  
         exit()  
 
