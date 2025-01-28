@@ -125,7 +125,7 @@ class NewColumn:
 
 	def check_existing(self):
 		sql = "select count(*) from information_schema.columns where table_schema = %s and table_name = %s and table_schema = %s"
-		self.cur.execute(sql, (self.schema, self.table_name, self.new_column_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.schema, self.table_name, self.new_column_name))
 		cnt = self.cur.fetchone()[0]
 		if cnt > 0:
 			logger.error('Column %s already exists on table %s.%s; exiting.', self.new_column_name, self.schema, self.table_name)
@@ -142,13 +142,13 @@ class NewColumn:
 
 	def set_ust_or_release(self):
 		sql = "select count(*) from public.ust_template_data_tables where table_name = %s"
-		self.cur.execute(sql, (self.table_name,))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.table_name,))
 		cnt = self.cur.fetchone()[0]
 		if cnt > 0:
 			self.ust_or_release = 'ust'
 		else:
 			sql = "select count(*) from public.release_template_data_tables where table_name = %s"
-			self.cur.execute(sql, (self.table_name,))
+			utils.process_sql(self.conn, self.cur, sql, params=(self.table_name,))
 			cnt = self.cur.fetchone()[0]
 			if cnt > 0:
 				self.ust_or_release = 'release'
@@ -177,7 +177,7 @@ class NewColumn:
 
 		sql =  f'alter table {self.schema}."{self.table_name}" add "{self.new_column_name}" {self.data_type};'
 		if not self.sql_only:
-			self.cur.execute(sql)
+			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Added column %s to table %s.%s', self.new_column_name, self.schema, self.table_name)
 
 		self.sql = self.sql + sql + '\n\n'		
@@ -228,7 +228,7 @@ class NewColumn:
 				  returning element_id;"""
 
 		if not self.sql_only:
-			self.cur.execute(sql)
+			utils.process_sql(self.conn, self.cur, sql)
 			self.element_id = self.cur.fetchone()[0]
 			logger.info('Inserted a row into %s_elements, returning new element_id %s', self.ust_or_release, self.element_id)
 		else:
@@ -241,7 +241,7 @@ class NewColumn:
 		if not self.column_sort_order:
 			sql = f"""select max(sort_order) + 1 from {self.schema}.{self.ust_or_release}_elements_tables 
 					  where table_name = %s"""
-			self.cur.execute(sql, (self.table_name,))
+			utils.process_sql(self.conn, self.cur, sql, params=(self.table_name,))
 			self.column_sort_order = self.cur.fetchone()[0]
 			logger.info('Set column sort order to %s', self.column_sort_order)
 
@@ -251,7 +251,7 @@ class NewColumn:
 				  returning element_table_id;"""
 
 		if not self.sql_only:
-			self.cur.execute(sql)
+			utils.process_sql(self.conn, self.cur, sql)
 			self.element_table_id = self.cur.fetchone()[0]
 			logger.info('Inserted a row into %s_element_tables, returning new element_table_id %s', self.ust_or_release, self.element_table_id)
 
@@ -274,7 +274,7 @@ class NewColumn:
 
 		if not self.sql_only:
 			try:
-				self.cur.execute(new_view_sql)
+				utils.process_sql(self.conn, self.cur, new_view_sql)
 			except psycopg2.errors.DuplicateColumn:
 				logger.warning('Column %s already exists in %s.%s', self.template_element_name, self.schema, self.view_name)
 				return 

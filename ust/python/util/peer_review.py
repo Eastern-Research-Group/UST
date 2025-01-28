@@ -58,7 +58,7 @@ class PeerReview:
 
 	def get_view_names(self):
 		sql = f"select view_name from public.{self.dataset.ust_or_release}_template_data_tables order by sort_order"
-		self.cur.execute(sql)
+		utils.process_sql(self.conn, self.cur, sql)
 		rows = self.cur.fetchall()
 		views = [r[0] for r in rows]
 		return views 
@@ -69,7 +69,7 @@ class PeerReview:
 					from information_schema.tables a join public.{self.dataset.ust_or_release}_template_data_tables b on a.table_name = b.view_name 
 					where a.table_schema = %s
 					order by b.sort_order"""
-		self.cur.execute(sql, (self.dataset.schema,))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema,))
 		rows = self.cur.fetchall()		
 		self.views_to_review = [r[0] for r in rows]
 
@@ -82,10 +82,10 @@ class PeerReview:
 	def compare_row_counts(self):
 		for view in self.views_to_review:
 			sql = f"select count(*) from {self.dataset.schema}.{view}"
-			self.cur.execute(sql)
+			utils.process_sql(self.conn, self.cur, sql)
 			view_rows = self.cur.fetchone()[0]
 			sql = f"select count(*) from public.{view} where {self.dataset.ust_or_release}_control_id = %s"
-			self.cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 			table_rows = self.cur.fetchone()[0]
 			if view_rows == table_rows:
 				logger.info('Row counts match between %s.%s and public.%s: (%s)', {self.dataset.schema}, view, view.replace('v_',''), table_rows)
@@ -96,10 +96,9 @@ class PeerReview:
 	def set_table_counts(self):
 		for view in self.views_to_review:
 			sql = f"select count(*) from public.{view} where {self.dataset.ust_or_release}_control_id = %s"
-			self.cur.execute(sql)
+			utils.process_sql(self.conn, self.cur, sql)
 			num_rows = self.cur.fetchone()[0]
 			self.view_counts[view_name] = num_rows			
-
 
 
 

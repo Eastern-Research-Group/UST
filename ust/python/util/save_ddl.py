@@ -24,7 +24,7 @@ def main(schema, object_name=None):
 	sql = """select table_name from information_schema.tables
 			where table_schema = %s and table_type = 'VIEW'
 			order by 1"""
-	cur.execute(sql, (schema,))
+	utils.process_sql(conn, cur, sql, params=(schema,))
 	rows = cur.fetchall()
 	for row in rows:
 		view_name = row[0]
@@ -32,7 +32,7 @@ def main(schema, object_name=None):
 		file_path = export_path + 'view/' + file_name
 		ddl_sql = 'create or replace view "' + schema + '"."' + view_name + '" as\n'
 		sql2 = f"""select pg_get_viewdef('"{schema}"."{view_name}"')"""
-		cur.execute(sql2)
+		utils.process_sql(conn, cur, sql2)
 		ddl_sql = ddl_sql + cur.fetchone()[0]
 		with open(file_path, 'w') as f:
 			f.write(ddl_sql)
@@ -42,14 +42,14 @@ def main(schema, object_name=None):
 	sql = """select table_name from information_schema.tables
 			where table_schema = %s and table_type like '%%TABLE'
 			order by 1"""
-	cur.execute(sql, (schema,))
+	utils.process_sql(conn, cur, sql, params=(schema,))
 	rows = cur.fetchall()
 	for row in rows:
 		table_name = row[0]
 		file_name = table_name + '.sql'
 		file_path = export_path + 'table/' + file_name
 		sql2 = f"""select generate_create_table_statement('{schema}','{table_name}')"""
-		cur.execute(sql2)
+		utils.process_sql(conn, cur, sql2)
 		ddl_sql = cur.fetchone()[0]
 
 		# constraints
@@ -57,7 +57,7 @@ def main(schema, object_name=None):
 					join pg_catalog.pg_class rel on rel.oid = con.conrelid
 					join pg_catalog.pg_namespace nsp on nsp.oid = connamespace
 				where nsp.nspname = 'public' and rel.relname = %s"""
-		cur.execute(sql2, (table_name,))
+		utils.process_sql(conn, cur, sql2, params=(table_name,))
 		rows2 = cur.fetchall()
 		for row2 in rows2:
 			constraint_name = row2[0]
@@ -67,7 +67,7 @@ def main(schema, object_name=None):
 							conname,
 							pg_get_constraintdef(oid))
 					from pg_constraint where conname = %s"""
-			cur.execute(sql3, (constraint_name,))
+			utils.process_sql(conn, cur, sql3, params=(constraint_name,))
 			rows3 = cur.fetchall()
 			for row3 in rows3:
 				ddl_sql = ddl_sql + '\n\n' + row3[0]
@@ -75,7 +75,7 @@ def main(schema, object_name=None):
 		# indexes 
 		sql3 = """select indexdef from pg_indexes
 				where schemaname = 'public' and tablename = %s"""
-		cur.execute(sql3, (table_name,))
+		utils.process_sql(conn, cur, sql3, params=(table_name,))
 		rows2 = cur.fetchall()
 		for row2 in rows2:
 			ddl_sql = ddl_sql + '\n\n' + row2[0]
@@ -89,7 +89,7 @@ def main(schema, object_name=None):
 			from pg_proc p join pg_namespace ns on (p.pronamespace = ns.oid)
 			where ns.nspname = %s
 			order by 1"""
-	cur.execute(sql, (schema,))
+	utils.process_sql(conn, cur, sql, params=(schema,))
 	rows = cur.fetchall()
 	for row in rows:
 		function_name = row[0]
@@ -98,7 +98,7 @@ def main(schema, object_name=None):
 		file_path = export_path + 'function/' + file_name
 		ddl_sql = 'create or replace function "' + schema + '"."' + function_name + '" as\n'
 		sql2 = f"""select pg_get_functiondef({oid})"""
-		cur.execute(sql2)
+		utils.process_sql(conn, cur, sql2)
 		ddl_sql = ddl_sql + cur.fetchone()[0]
 		with open(file_path, 'w') as f:
 			f.write(ddl_sql)

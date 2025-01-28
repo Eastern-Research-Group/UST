@@ -96,7 +96,7 @@ class SourceData:
 			          	where a.table_name = b.table_name 
 			          	and b.{self.dataset.ust_or_release}_control_id = {self.dataset.control_id})
 			          order by 1"""			
-		self.cur.execute(sql, (self.dataset.schema,))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema,))
 		# utils.pretty_print_query(self.cur)
 		self.table_list = [r[0] for r in self.cur.fetchall()]
 		if not self.table_list:
