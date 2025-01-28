@@ -67,7 +67,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 				select_column_list = org_column_list.replace(ust_or_release + '_control_id', str(control_id))
 				insert_sql = f"""insert into public.{table_name} ({org_column_list}) 
 								select {select_column_list} from {schema}.{view_name}"""
-				utils.process_sql(conn, cur, insertsql)
+				utils.process_sql(conn, cur, insert_sql)
 			else: 
 				if ust_or_release == 'release':
 					column_list = 'ust_release_id, ' + org_column_list[:-2]
