@@ -57,7 +57,7 @@ class Summary:
 				from public.v_{self.dataset.ust_or_release}_control_summary
 				where {self.dataset.ust_or_release}_control_id = %s
 				order by sort_order"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		data = cur.fetchall()
 		cur.close()
 		conn.close()
@@ -86,7 +86,7 @@ class Summary:
 				from public.v_{self.dataset.ust_or_release}_row_count_summary
 				where {self.dataset.ust_or_release}_control_id = %s
 				order by sort_order"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		data = cur.fetchall()
 		cur.close()
 		conn.close()
@@ -117,7 +117,7 @@ class Summary:
 					from public.v_ust_performance_measures
 					where organization_id = %s
 					order by sort_order"""
-			cur.execute(sql, (self.dataset.organization_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.organization_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=1):
@@ -139,7 +139,7 @@ class Summary:
 
 			sql = """select "CompartmentStatus", count(*) from public.v_ust_compartment
 					where ust_control_id = %s group by "CompartmentStatus" """
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=rowno+1):
 				for colno, cell_value in enumerate(row, start=1):
@@ -149,7 +149,7 @@ class Summary:
 
 			rowno = rowno + 1
 			sql = "select count(*) from public.v_ust_compartment where ust_control_id = %s" 
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total UST EPA Template'
 			ws.cell(row=rowno, column=1).font = Font(bold=True)
@@ -170,7 +170,7 @@ class Summary:
 					from public.v_release_performance_measures
 					where organization_id = %s
 					order by sort_order"""
-			cur.execute(sql, (self.dataset.organization_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.organization_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=1):
@@ -191,7 +191,7 @@ class Summary:
 			ws.cell(row=rowno, column=2).font = Font(bold=True)
 			sql = f"""select "USTReleaseStatus", count(*) from public.v_ust_release
 					where release_control_id = %s group by "USTReleaseStatus" """
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=rowno+1):
 				for colno, cell_value in enumerate(row, start=1):
@@ -201,7 +201,7 @@ class Summary:
 
 			rowno = rowno + 1			
 			sql = "select count(*) from public.v_ust_release where release_control_id = %s" 
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total Releases EPA Template'
 			ws.cell(row=rowno, column=1).font = Font(bold=True)
@@ -243,7 +243,7 @@ class Summary:
 				from public.v_{self.dataset.ust_or_release}_element_mapping_for_export
 				where {self.dataset.ust_or_release}_control_id = %s
 				order by table_sort_order, column_sort_order"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=start):
 			for colno, cell_value in enumerate(row, start=1):
@@ -266,7 +266,6 @@ class Summary:
 				and not (template_tab_name in ('Substance','Source','Cause','Corrective Action Strategy') and element_name = 'ReleaseID')
 				and element_name not like '%%Comment'
 				order by table_sort_order, column_sort_order"""
-		cur.execute(sql, (self.dataset.control_id,))
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=start):
 			for colno, cell_value in enumerate(row, start=4):
