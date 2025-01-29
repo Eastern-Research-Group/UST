@@ -266,6 +266,7 @@ class Summary:
 				and not (template_tab_name in ('Substance','Source','Cause','Corrective Action Strategy') and element_name = 'ReleaseID')
 				and element_name not like '%%Comment'
 				order by table_sort_order, column_sort_order"""
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=start):
 			for colno, cell_value in enumerate(row, start=4):
