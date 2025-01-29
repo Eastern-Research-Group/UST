@@ -510,12 +510,17 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_compartment','tank_subpart_k_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment','tank_other_release_detection','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+
+--ust_compartment_substance: This table is OPTIONAL and should only be mapped if the state reports at the compartment level 
+--AND there is a 1:1 relationship between compartment and substance. Otherwise, use only the ust_tank_substance table. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment_substance','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment_substance','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment_substance','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
 --ust_piping: This table is OPTIONAL, do not map if there is no piping data in the source data
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
