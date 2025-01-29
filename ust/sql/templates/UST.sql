@@ -437,9 +437,6 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_tank_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank_substance','substance_casno','ORG_TAB_NAME','ORG_COL_NAME',null,null);
---NOTE: States that report at the compartment level will likely have substance data at the compartment level
---This will be tracked in table ust_compartment_substance, but all of the columns in that table will be mapped elsewhere
---so there is no mapping required for that table. 
 
 --ust_compartment: This table is REQUIRED. 
 --If the state does not report compartment data, we will be creating a Compartment ID for it in a later step. 
@@ -511,18 +508,23 @@ values (ZZ,'ust_compartment','tank_subpart_k_other','ORG_TAB_NAME','ORG_COL_NAME
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment','tank_other_release_detection','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
---ust_compartment_substance: This table is OPTIONAL and should only be mapped if the state reports at the compartment level 
---AND there is a 1:1 relationship between compartment and substance. Otherwise, use only the ust_tank_substance table. 
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+--ust_comparment_substance is OPTIONAL; this table should ONLY be mapped/populated for states that report substance data at the compartment level,
+--and where there is an obvious 1:1 relationship between compartment and substance. 
+--Note that in the EPA data tables, this table is a child of ust_tank_substance: there is no substance ID in public.ust_compartment_substance!
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic)
 values (ZZ,'ust_compartment_substance','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment_substance','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment_substance','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','compartment_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
---ust_piping: This table is OPTIONAL, do not map if there is no piping data in the source data
+--ust_piping: This table is OPTIONAL; do not map if there is no piping data in the source data
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_piping','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
