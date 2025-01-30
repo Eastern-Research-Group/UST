@@ -81,6 +81,7 @@ class QualityCheck:
 			self.check_bad_datatypes()
 			self.check_failed_constraints()
 			self.check_missing_mapping()
+			self.check_wrong_mapping_cols()
 			self.check_bad_mapping()
 			if self.dataset.ust_or_release == 'ust':
 				self.check_compartment_data_flag()
@@ -416,6 +417,27 @@ class QualityCheck:
 			unmapped_cols = unmapped_cols[:-2]
 			self.error_dict['Unmapped elements in ' + self.view_name] = unmapped_cols 
 			logger.warning('Unmapped elements in %s: %s', self.view_name, unmapped_cols)
+			
+
+	def check_wrong_mapping_cols(self):
+		# check for mapping of description column names instead of ID column names (e.g. "substance" instead of "substance_id")
+		sql = f"""select epa_table_name, epa_column_name  
+				from public.{self.dataset.ust_or_release}_element_mapping a
+				where {self.dataset.ust_or_release}_control_id = %s
+				and epa_column_name not in ('tank_name','compartment_name') 
+				and not exists 
+					(select 1 from public.v_{self.dataset.ust_or_release}_element_metadata b
+					where a.epa_table_name = b.table_name and a.epa_column_name = b.column_name)
+				order by 1, 2"""
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
+		rows = self.cur.fetchall()
+		num_rows = self.cur.rowcount
+		self.error_cnt_dict['Wrong elements mapped in ' + self.dataset.ust_or_release + '_element_mapping'] = num_rows
+		for row in rows:
+			table = row[0]
+			col = row[1]
+			self.error_dict['Wrong element mapped in table ' + table + '; perhaps you meant to map ' + col + '_id?'] = col 
+			logger.warning('Wrong element %s mapped for table %s; perhaps you meant to map %s_id?', col, table, col)
 			
 
 	def check_bad_mapping(self):
