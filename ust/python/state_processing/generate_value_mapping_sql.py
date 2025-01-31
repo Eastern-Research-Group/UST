@@ -145,10 +145,13 @@ class ValueMapper:
 					epa_value = None
 
 				if not epa_value and epa_column_name == 'substance_id':
-					sql5 = f"select count(*) from public.v_hazardous_substances where lower(substance) = lower({repr(org_value)})"
-					utils.process_sql(conn, cur, sql5)
-					if cur.fetchone()[0] > 0:
-						epa_value = 'Hazardous substance'
+					if lower(org_value) == 'jet fuel':
+						epa_value = 'Jet fuel A'
+					else:
+						sql5 = f"select count(*) from public.v_hazardous_substances where lower(substance) = lower({repr(org_value)})"
+						utils.process_sql(conn, cur, sql5)
+						if cur.fetchone()[0] > 0:
+							epa_value = 'Hazardous substance'
 
 				self.value_mapping_sql = self.value_mapping_sql + f'insert into public.{self.dataset.ust_or_release}_element_value_mapping ({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments)\n'
 				if epa_value:
