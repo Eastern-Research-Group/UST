@@ -304,7 +304,9 @@ class Template:
 		cur = conn.cursor()	
 		sql = f"""select epa_table_name, epa_column_name, database_lookup_table, database_lookup_column   
 				from public.v_{self.dataset.ust_or_release}_available_mapping
-				where {self.dataset.ust_or_release}_control_id = %s order by 1, 2"""
+				where {self.dataset.ust_or_release}_control_id = %s 
+				and epa_table_name <> 'ust_compartment_substance'
+				order by table_sort_order, column_sort_order"""
 		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		rows = cur.fetchall()
 		cur.close()
