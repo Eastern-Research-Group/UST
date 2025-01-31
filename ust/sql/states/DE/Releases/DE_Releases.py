@@ -277,113 +277,91 @@ order by 1, 2, 3, 4, 5;
 
  */
 
---ust_release: This table is REQUIRED
+#---ust_release: This table is REQUIRED
 #insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 #values (20,'ust_release','facility_id','Template','FacilityID',null,null);
-
---NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
---(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
---and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
+#--NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
+#--(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
+#--and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
 #insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 #values (20,'ust_release','release_id','Template','LUSTID',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','federally_reportable_release','Template','FederallyReportableRelease',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','site_name','Template','SiteName',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','site_address','Template','SiteAddress',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','site_address2','Template','SiteAddress2',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','site_city','Template','SiteCity',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','zipcode','Template','Zipcode',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','state','Template','State',null,null);
---NOTE: EPA region is rarely populated in the state data, other than TrUSTD (the tribal database)
---so it won't often be mapped here, but it will be added to view v_ust_release later. 
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','epa_region','Template','EPARegion',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','facility_type_id','Template','FacilityType',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','tribal_site','Template','TribalSite',null,null);
-
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','latitude','Template','Latitude',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','longitude','Template','Longitude',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','coordinate_source_id','Template','CoordinateSource',null,null);
---NOTE: release_status_id is a required field. If no such element exists in the source data, have Victoria ask the state to supply it.
---You can continue mapping while waiting for a response from the state, but you won't be able to do the final insert into the EPA tables
---until we receive the additional information.
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','release_status_id','Template','LUSTStatus',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','federally_reportable_release','Template','FederallyReportableRelease',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','site_name','Template','SiteName',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','site_address','Template','SiteAddress',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','site_address2','Template','SiteAddress2',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','zipcode','Template','Zipcode',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','state','Template','State',null,null);
+# --NOTE: EPA region is rarely populated in the state data, other than TrUSTD (the tribal database)
+# --so it won't often be mapped here, but it will be added to view v_ust_release later. 
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','epa_region','Template','EPARegion',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','facility_type_id','Template','FacilityType',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','tribal_site','Template','TribalSite',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','latitude','Template','Latitude',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','longitude','Template','Longitude',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','coordinate_source_id','Template','CoordinateSource',null,null);
+# --NOTE: release_status_id is a required field. If no such element exists in the source data, have Victoria ask the state to supply it.
+# --You can continue mapping while waiting for a response from the state, but you won't be able to do the final insert into the EPA tables
+# --until we receive the additional information.
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','release_status_id','Template','LUSTStatus',null,null);
 # insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 # values (20,'ust_release','reported_date','Template','ReportedDate',null,null);
 # insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 # values (20,'ust_release','nfa_date','Template','NFADate',null,null);
 # insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 # values (20,'ust_release','media_impacted_soil','Template','MediaImpactedSoil',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','media_impacted_groundwater','Template','MediaImpactedGroundwater',null,null);
-
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','release_discovered_id','Template','HowReleaseDetected',null,null);
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-#values (20,'ust_release','closed_with_contamination','Template','ClosedWithContamination',null,null);
-
-#insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release','military_dod_site','Template','MilitaryDoDSite',null,null);
-
---ust_release_substance: This table is OPTIONAL, do not map if there is no substance data in the source data
---NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
---(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
---and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_substance','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
---NOTE: If you are populating this table, substance_id is a required field. 
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_substance','quantity_released','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_substance','unit','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-
---ust_release_source: This table is OPTIONAL, do not map if there is no source data in the source data
---NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
---(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
---and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_source','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
---NOTE: If you are populating this table, source_id is a required field. 
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_source','source_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-
---ust_release_cause: This table is OPTIONAL, do not map if there is no cause data in the source data
---NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
---(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
---and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_cause','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
---NOTE: If you are populating this table, cause_id is a required field. 
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_cause','cause_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-
---ust_release_corrective_action_strategy: This table is OPTIONAL, do not map if there is no corrective action strategy data in the source data
---NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
---(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
---and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_corrective_action_strategy','release_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
---NOTE: If you are populating this table, corrective_action_strategy_id is a required field. 
-insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (20,'ust_release_corrective_action_strategy','corrective_action_strategy_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','media_impacted_groundwater','Template','MediaImpactedGroundwater',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','release_discovered_id','Template','HowReleaseDetected',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','closed_with_contamination','Template','ClosedWithContamination',null,null);
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release','military_dod_site','Template','MilitaryDoDSite',null,null);
+# --ust_release_source: This table is OPTIONAL, do not map if there is no source data in the source data
+# --NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
+# --(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
+# --and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release_source','release_id','Template','LUSTID',null,null);
+# --NOTE: If you are populating this table, source_id is a required field. 
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release_source','source_id','Template','SourceOfRelease1',null,null);
+# --ust_release_cause: This table is OPTIONAL, do not map if there is no cause data in the source data
+# --NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
+# --(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
+# --and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release_cause','release_id','ORG_TAB_NAME','LUSTID',null,null);
+# --NOTE: If you are populating this table, cause_id is a required field. 
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release_cause','cause_id','ORG_TAB_NAME','CauseOfRelease1',null,null);
+# --ust_release_corrective_action_strategy: This table is OPTIONAL, do not map if there is no corrective action strategy data in the source data
+# --NOTE: release_id is a required field. If Release ID does not exist in the source data, STOP and talk to the state. 
+# --(Note: it is OK to combine multiple fields to create a unique Release ID if necessary. To do so, create a view that concatenates the columns
+# --and then replace ORG_TAB_NAME below with the view name and ORG_COL_NAME with the concatenated column name.)
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release_corrective_action_strategy','release_id','Template','LUSTID',null,null);
+# --NOTE: If you are populating this table, corrective_action_strategy_id is a required field. 
+# insert into public.release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+# values (20,'ust_release_corrective_action_strategy','corrective_action_strategy_id','Template','CorrectiveActionStrategy1',null,null);
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --Step 5: Check for lookup data that needs to be deaggregated 
 
 /* 
