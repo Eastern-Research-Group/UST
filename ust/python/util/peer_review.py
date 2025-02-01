@@ -13,9 +13,11 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0 	           		# Enter an integer that is the ust_control_id or release_control_id
+control_id = 31 	           		# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 display_bad_data = True  		# Boolean; defaults to True. Set to False to suppress printing bad data to the console.
+overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/sql/states.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -40,9 +42,11 @@ class PeerReview:
 
 	def __init__(self, 
 				 dataset,
-				 display_bad_data=True):
+				 display_bad_data=True,
+				 overwrite_existing=False):
 		self.dataset = dataset
 		self.display_bad_data = display_bad_data
+		self.overwrite_existing = overwrite_existing
 		self.connect_db()
 		self.set_views()
 		self.set_tables()
@@ -166,13 +170,16 @@ class PeerReview:
 
 
 	def write_sql(self):
-		with open(self.dataset.export_file_path, 'w', encoding='utf-8') as f:
+		wora = 'a'
+		if self.overwrite_existing:
+			wora = 'w'
+		with open(self.dataset.export_file_path, wora, encoding='utf-8') as f:
 			f.write(self.vsql)
 		logger.info('SQL exported to %s', self.dataset.export_file_path)
 
 
 
-def main(ust_or_release, control_id=None, organization_id=None, display_bad_data=True):
+def main(ust_or_release, control_id=None, organization_id=None, display_bad_data=True, overwrite_existing=False):
 	if not control_id and not organization_id:
 		logger.error('Please pass either control_id or organization_id')
 		exit()
@@ -186,11 +193,12 @@ def main(ust_or_release, control_id=None, organization_id=None, display_bad_data
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
 
-	review = PeerReview(dataset=dataset, display_bad_data=display_bad_data)
+	review = PeerReview(dataset=dataset, display_bad_data=display_bad_data, overwrite_existing=overwrite_existing)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id, 
 		 organization_id=organization_id,
-		 display_bad_data=display_bad_data)
+		 display_bad_data=display_bad_data,
+		 overwrite_existing=overwrite_existing)
