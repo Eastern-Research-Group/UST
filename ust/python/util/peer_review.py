@@ -17,7 +17,7 @@ control_id = 0 	           		# Enter an integer that is the ust_control_id or re
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 display_bad_data = True  		# Boolean; defaults to True. Set to False to suppress printing bad data to the console.
 
-# These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/epa_templates.
+# These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/sql/states.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
 export_file_path = None
 export_file_dir = None
