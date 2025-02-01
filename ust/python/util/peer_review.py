@@ -100,9 +100,9 @@ class PeerReview:
 			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 			table_rows = self.cur.fetchone()[0]
 			if view_rows == table_rows:
-				logger.info('Row counts match between %s.%s and public.%s: (%s)', {self.dataset.schema}, view, view.replace('v_',''), table_rows)
+				logger.info('Row counts match between %s.%s and public.%s: (%s)', self.dataset.schema, view, view.replace('v_',''), table_rows)
 			else:
-				logger.warning('Mismatch of row counts between  %s.%s (%s) and public.%s (%s)!!!',  self.dataset.schema, view, view_rows, view.replace('v_',''), table_rows)
+				logger.warning('Mismatch of row counts between  %s.%s (%s) and public.%s (%s)!!!', self.dataset.schema, view, view_rows, view.replace('v_',''), table_rows)
 				self.error_tables.append(view)
 
 
