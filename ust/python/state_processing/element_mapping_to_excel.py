@@ -56,6 +56,10 @@ def build_ws(dataset, ws, admin=False):
 		for colno, cell_value in enumerate(row, start=1):
 			ws.cell(row=rowno, column=colno).value = cell_value
 	utils.autowidth(ws)
+	ws.column_dimensions['E'].width = 50
+	ws.column_dimensions['F'].width = 50
+	ws.column_dimensions['G'].width = 50
+	ws.column_dimensions['H'].width = 50
 
 	logger.info('Finshed Element Mapping tab')
 	return ws

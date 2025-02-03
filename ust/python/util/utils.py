@@ -618,3 +618,6 @@ def process_sql(conn, cur, sql, params=None):
         error_logger.error('\n\nEXITING DUE TO SQL ERROR....\n\n')  
         exit()  
 
+
+def pretty_print_df(df):
+    print(df.to_markdown()) 

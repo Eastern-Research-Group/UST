@@ -67,6 +67,7 @@ class Summary:
 				if colno == 2 and ws.cell(row=rowno, column=colno-1).value == 'organization_compartment_flag' and ws.cell(row=rowno, column=colno).value == None:
 					 ws.cell(row=rowno, column=colno).fill = utils.get_fill_gen(yellow_cell_fill)
 		utils.autowidth(ws)
+		ws.column_dimensions['B'].width = 50
 		logger.info('Exported %s_control_table summary for control_id %s to %s', self.dataset.ust_or_release, self.dataset.control_id, self.dataset.export_file_path)
 
 
