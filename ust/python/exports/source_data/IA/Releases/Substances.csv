@@ -1,0 +1,51 @@
+Substance Group,Substance,Federally Regulated
+Aviation,Aviation biofuel,Y
+Aviation,Aviation gasoline,Y
+Aviation,Biojet (diesel),Y
+Aviation,Jet fuel A,Y
+Aviation,Jet fuel B,Y
+Aviation,Sustainable aviation fuel/aviation fuel blend,Y
+Aviation,Unknown aviation gas or jet fuel,Y
+Diesel,100% biodiesel (not federally regulated),N
+Diesel,"80% renewable diesel, 20% biodiesel",Y
+Diesel,"95% renewable diesel, 5% biodiesel",Y
+Diesel,"99.9 percent renewable diesel, 0.01% biodiesel",Y
+Diesel,ASTM D975 diesel (known 100% renewable diesel),Y
+Diesel,Diesel blend containing 99% to less than 100% biodiesel,Y
+Diesel,Diesel blend containing greater than 20% and less than 99% biodiesel,Y
+Diesel,Diesel blends containing greater than 5% and up to 20% or less biodiesel,Y
+Diesel,"Diesel fuel (ASTM D975), can contain 0-5% biodiesel",Y
+Diesel,Diesel fuel (b-unknown),Y
+Diesel,Diesel fuel (known to contain 0% biodiesel),Y
+Diesel,Off-road diesel/dyed diesel,Y
+Diesel,"Other unlisted blend containing any other mixture of diesel, renewable diesel, or 20% biodiesel or less",Y
+Diesel,"Other unlisted blend containing any other mixture of diesel, renewable diesel, or more than 20% biodiesel",Y
+Gasoline,E-85/Flex Fuel (E51-E83),Y
+Gasoline,Ethanol blend gasoline (e-unknown),Y
+Gasoline,Gasoline (non-ethanol),Y
+Gasoline,Gasoline (unknown type),Y
+Gasoline,Gasoline E-10 (E1-E10),Y
+Gasoline,Gasoline E-15 (E-11-E15),Y
+Gasoline,Gasoline/ethanol blends E16-E50,Y
+Gasoline,Gasoline/ethanol blend containing more than 83% and less than 98% ethanol,Y
+Gasoline,Racing fuel,Y
+Heating,Biofuel/bioheat,Y
+Heating,Heating oil/fuel oil 1,Y
+Heating,Heating oil/fuel oil 2,Y
+Heating,Heating oil/fuel oil 3,Y
+Heating,Heating oil/fuel oil 4,Y
+Heating,Heating oil/fuel oil 5,Y
+Heating,Heating/fuel oil # unknown,Y
+Oil,Lube/motor oil (new),Y
+Oil,Used oil/waste oil,Y
+Other,Antifreeze,Y
+Other,Denatured ethanol (98%),Y
+Other,"Diesel exhaust fluid (DEF, not federally regulated)",N
+Other,Hazardous substance,Y
+Other,Kerosene,Y
+Other,Marine fuel,Y
+Other,Non-federally regulated substance (general),N
+Other,Petroleum product,Y
+Other,Solvent,Y
+Other,Other,Y
+Other,Unknown,Y

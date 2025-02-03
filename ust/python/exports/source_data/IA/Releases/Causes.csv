@@ -1,0 +1,21 @@
+Cause,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17
+Corrosion,,Other,Dispenser,,,,,,Dispenser,Dispenser,,,,,,,Dispenser
+Damage to dispenser,,Other,Failed Containment,,,,,,Other,Failed Containment,,,,,,,Piping
+Damage to dispenser hose,,Flex connector failure,Failure of flex connector,,,,,,Dispenser,Failure of flex connector,,,,,,,Submersible turbine pump
+Delivery overfill,,Other,Fuel deposit in groundwater monitoring well,,,,,,Other,Fuel deposit in groundwater monitoring well,,,,,,,Tank
+Delivery problem,,Piping failure,Line corrosion,,,,,,Piping,Line corrosion,,,,,,,Other
+Dispenser spill,,Piping failure,Line joint corrosion failure,,,,,,Piping,Line joint corrosion failure,,,,,,,Unknown
+Dope/sealant,,Piping failure,Loose fittings in line,,,,,,Piping,Loose fittings in line,,,,,,,
+Flex connector failure,,Other,Mechanical failure - dispenser pump,,,,,,Dispenser,Mechanical failure - dispenser pump,,,,,,,
+Human error,,Other,Mechanical failure - line leak detector,,,,,,Piping,Mechanical failure - line leak detector,,,,,,,
+Motor vehicle accident,,Other,Mechanical failure - submersible pump,,,,,,Submersible turbine pump,Mechanical failure - submersible pump,,,,,,,
+Overfill (general),,Other,Other,,,,,,Other,Other,,,,,,,
+Piping failure,,Other,Puncture of line during construction,,,,,,Piping,Puncture of line during construction,,,,,,,
+Shear valve failure,,Tank damage,Puncture of tank during construction,,,,,,Tank,Puncture of tank during construction,,,,,,,
+Spill bucket failure,,Other,Spill,,,,,,Other,Spill,,,,,,,
+Tank corrosion,,Spill bucket failure,Spill Bucket,,,,,,Other,Spill Bucket,,,,,,,
+Tank damage,,Piping failure,Stress crack in line,,,,,,Piping,Stress crack in line,,,,,,,
+Tank removal,,Tank corrosion,Tank corrosion (perforations) bare steel tank,,,,,,Tank,Tank corrosion (perforations) bare steel tank,,,,,,,
+"Weather/natural disaster (i.e., hurricane, flooding, fire, earthquake)",,Tank corrosion,Tank corrosion Stip3 tank,,,,,,Tank,Tank corrosion Stip3 tank,,,,,,,
+Other,,Overfill (general),Tank overfill,,,,,,Tank,Tank overfill,,,,,,,
+Unknown,,Other,Unknown,,,,,,,Unknown,,,,,,,

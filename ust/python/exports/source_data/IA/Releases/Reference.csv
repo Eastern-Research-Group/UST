@@ -1,0 +1,102 @@
+Element Name,Element Description,Element Type,Size,Required,"Allowed
+ Values",Business Rule,NOTES
+FacilityID,Facility ID,string,30.0,,,,
+TankIDAssociatedwithRelease,Tank ID associated with release,string,50.0,,,,
+LUSTID,LUST/release ID,string,50.0,Y,,,
+FederallyReportableRelease,Is this a federally reportable UST system release?,string,7.0,,Y,"Yes
+No
+Unknown",
+SiteName,LUST site name,string,200.0,,,,
+SiteAddress,Site address,string,100.0,,,,
+SiteAddress2,Site address 2,string,100.0,,,,
+SiteCity,Site city,string,100.0,,,,
+Zipcode,Zip code,string,10.0,,,,
+County,County,string,100.0,,,,
+State,State,string,2.0,,Y,[See States tab],
+EPARegion,EPA region,integer,2.0,,Y,"1
+2
+3
+4
+5
+6
+7
+8
+9
+10",
+FacilityType,Facility type,string,50.0,,Y,[See Facility Type Tab],
+TribalSite,Is this release on federally recognized tribal land?,string,7.0,,Y,"Yes
+No
+Unknown",
+Tribe,Tribe name,string,50.0,,,,"Conditionally required if ""Is this release on federally recognized tribal land"" is ""Yes""."
+Latitude,Latitude,decimal,9.0,,,,
+Longitude,Longitude,decimal,9.0,,,,
+CoordinateSource,Coordinate source,string,17.0,,Y,"Map Interpolation
+GPS
+PLSS
+Geocode
+Other
+Unknown",
+LUSTStatus,LUST status,string,35.0,Y,Y,"Active: general
+Active: post CorrectiveAction monitoring
+Active: CorrectiveAction
+Active: site investigation
+Active: stalled
+No further action
+Unknown
+Other
+",
+ReportedDate,Reported date (if no reported date then discovered date),date,,,,,
+NFADate,No further action/site closure date,date,,,,,
+MediaImpactedSoil,Media impacted: soil,string,3.0,,Y,"Yes
+No",
+MediaImpactedGroundwater,Media impacted: groundwater,string,3.0,,Y,"Yes
+No",
+MediaImpactedSurfaceWater,Media impacted: surface water,string,3.0,,Y,"Yes
+No",
+SubstanceReleased1,Substance released,string,105.0,,Y,[See Substances tab],
+QuantityReleased1,Quantity released 1,decimal,9.0,,,,
+Unit1,Quantity released unit (e.g. gallons) 1,string,20.0,,,,
+SubstanceReleased2,Substance released 2,string,105.0,,Y,[See Substances tab],
+QuantityReleased2,Quantity released  2,decimal,9.0,,,,
+Unit2,Quantity released unit (e.g. gallons) 2,string,20.0,,,,
+SubstanceReleased3,Substance released 3,string,105.0,,Y,[See Substances tab],
+QuantityReleased3,Quantity released 3,decimal,9.0,,,,
+Unit3,Quantity released unit (e.g. gallons) 3,string,20.0,,,,
+SubstanceReleased4,Substance released 4,string,105.0,,Y,[See Substances tab],
+QuantityReleased4,Quantity released 4,decimal,9.0,,,,
+Unit4,Quantity released unit (e.g. gallons) 4,string,20.0,,,,
+SubstanceReleased5,Substance released 5,string,105.0,,Y,[See Substances tab],
+QuantityReleased5,Quantity released 5,decimal,9.0,,,,
+Unit5,Quantity released unit (e.g. gallons) 5,string,20.0,,,,
+SourceOfRelease1,Source of release 1,string,15.0,,Y,[See Sources tab],
+CauseOfRelease1,Cause of release 1,string,70.0,,Y,[See Causes tab],
+SourceOfRelease2,Source of release 2,string,15.0,,Y,[See Sources tab],
+CauseOfRelease2,Cause of release 2,string,70.0,,Y,[See Causes tab],
+SourceOfRelease3,Source of release 3,string,15.0,,Y,[See Sources tab],
+CauseOfRelease3,Cause of release 3,string,70.0,,Y,[See Causes tab],
+HowReleaseDetected,How was the release detected?,string,47.0,,Y,"At tank removal
+GW monitoring well
+Inspection
+Interstial monitor
+Overfill alarm
+Statistical Inventory Reconciliation (SIR)
+Tank tightness testing
+Third party (well water, vapor intrusion, etc.) 
+Vapor monitoring
+Visual (overfill)
+Other
+Unknown
+",
+CorrectiveActionStrategy1,Corrective action strategy 1,string,43.0,,Y,[See Corrective Action Strategies tab],
+CorrectiveActionStrategy1StartDate,Corrective action strategy 1 start date,date,,,,,
+CorrectiveActionStrategy2,Corrective action strategy 2,string,43.0,,Y,[See Corrective Action Strategies tab],
+CorrectiveActionStrategy2StartDate,Corrective action strategy start date 2,date,,,,,
+CorrectiveActionStrategy3,Corrective action strategy 3,string,43.0,,Y,[See Corrective Action Strategies tab],
+CorrectiveActionStrategy3StartDate,Corrective action strategy 3 start date,date,,,,,
+ClosedWithContamination,Was the site closed/NFA with contamination in place?,string,7.0,,Y,"Yes
+No
+Unknown",
+NoFurtherActionLetterURL,No further action letter (tribal only),string,2000.0,,,,Only applicable if TribalSite = 'Yes'
+MilitaryDoDSite,Is this release or associated facility at a DoD/military site?,string,7.0,,Y,"Yes
+No
+Unknown",
