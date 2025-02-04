@@ -64,7 +64,7 @@ class QualityCheck:
 			logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
 			logger.info('Views this script looks for: %s', self.get_view_names())
 			self.disconnect_db()
-			exit()
+			sys.exit()
 		self.wb = op.Workbook()	
 		self.check_missing_views()
 		self.set_view_counts()
