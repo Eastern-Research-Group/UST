@@ -11,7 +11,6 @@ class ImportService:
     
     def import_ust(self, organization_id, file_path, overwrite_table=True):
         importer = DatabaseImporter(organization_id, 'ust', file_path, overwrite_table)
-        print(importer)
         importer.print_self()
         importer.save_files_to_db()
 

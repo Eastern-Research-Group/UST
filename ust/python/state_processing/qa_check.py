@@ -19,7 +19,7 @@ from python.util.logger_factory import logger
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
 
-# These variables can usually be left unset. This script will general an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
+# These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
 export_file_path = None
 export_file_dir = None
@@ -534,7 +534,7 @@ class QualityCheck:
 
 
 
-def main(ust_or_release, control_id=None, export_file_name=None, export_file_dir=None, export_file_path=None):
+def main(ust_or_release, control_id, export_file_name=None, export_file_dir=None, export_file_path=None):
 	dataset = Dataset(ust_or_release=ust_or_release,
 					  control_id=control_id, 
 					  base_file_name='QAQC_' + utils.get_timestamp_str() + '.xlsx',
