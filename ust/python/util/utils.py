@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 import string
 
 from python.util import config
-from python.util.logger_factory import logger
+from python.util.logger_factory import logger, error_logger
 
 
 def connect_db(db_name=config.db_name, schema='public'):
@@ -48,7 +48,7 @@ def get_view_sql(view_name):
     conn = connect_db()
     cur = conn.cursor()
     sql = f"select pg_get_viewdef('{view_name}', true)"
-    cur.execute(sql)
+    process_sql(conn, cur, sql)
     view_sql =  cur.fetchone()[0]
     cur.close()
     conn.close()
@@ -135,22 +135,23 @@ def get_today_string():
     return datetime.today().strftime('%Y-%m-%d')
 
 
-def get_control_id(ust_or_lust, organization_id):
+def get_control_id(ust_or_release, organization_id):
+    ust_or_release = ust_or_release.lower()
     conn = connect_db()
     cur = conn.cursor()
 
-    sql = "select count(*) from " + ust_or_lust.lower() + '_control where organization_id = %s'
-    cur.execute(sql, (organization_id, ))
+    sql = f"select count(*) from public.{ust_or_release}_control where organization_id = %s"
+    process_sql(conn, cur, sql, params=(organization_id, ))
     cnt = cur.fetchone()[0]
     if cnt == 0:
-        logger.error('No data in %s_control; unable to proceed.', ust_or_lust.lower())
+        logger.error('No data in %s_control; unable to proceed.',{ust_or_release})
         exit()
-    sql = "select max(control_id) from " + ust_or_lust.lower() + '_control where organization_id = %s'
-    cur.execute(sql, (organization_id, ))
+    sql = f"select max({ust_or_release}_control_id) from public.{ust_or_release}_control where organization_id = %s"
+    process_sql(conn, cur, sql, params=(organization_id, ))
     control_id = cur.fetchone()[0]
 
     if cnt > 1:
-        logger.info('Found multiple Control IDs in %s_control; using newest one (%s)', ust_or_lust.lower(), str(control_id) )
+        logger.info('Found multiple Control IDs in %s_control; using newest one (%s)', {ust_or_release}, str(control_id) )
     else:
         logger.info('Setting Control ID to %s', str(control_id))
 
@@ -189,7 +190,7 @@ def get_org_from_control_id(control_id, ust_or_release):
     table_name = ust_or_release.lower() + '_control'
     column_name = table_name + '_id'
     sql = f"select organization_id from {table_name} where {column_name} = %s"
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     ok = True
     org = None 
     try:
@@ -211,26 +212,26 @@ def delete_all_release_data(control_id):
 
     sql = """delete from public.ust_release_corrective_action_strategy 
             where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_release_corrective_action_strategy', cur.rowcount)
 
     sql = """delete from public.ust_release_cause 
             where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_release_cause', cur.rowcount)
 
     sql = """delete from public.ust_release_source 
             where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_release_source', cur.rowcount)
 
     sql = """delete from public.ust_release_substance 
             where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_release_substance', cur.rowcount)
 
     sql = """delete from public.ust_release where release_control_id = %s"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_release', cur.rowcount)
 
     conn.commit()
@@ -249,7 +250,7 @@ def delete_all_ust_data(control_id):
                     (select ust_tank_id from public.ust_tank 
                     where ust_facility_id in
                         (select ust_facility_id from public.ust_facility where ust_control_id = %s)))"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_compartment_dispenser', cur.rowcount)
 
     sql = """delete from public.ust_piping 
@@ -259,7 +260,7 @@ def delete_all_ust_data(control_id):
                     (select ust_tank_id from public.ust_tank 
                     where ust_facility_id in
                         (select ust_facility_id from public.ust_facility where ust_control_id = %s)))"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_piping', cur.rowcount)
 
     sql = """delete from public.ust_compartment_substance
@@ -269,7 +270,7 @@ def delete_all_ust_data(control_id):
                     (select ust_tank_id from public.ust_tank 
                     where ust_facility_id in
                         (select ust_facility_id from public.ust_facility where ust_control_id = %s)))"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_compartment_substance', cur.rowcount)
 
     sql = """delete from ust_compartment
@@ -277,7 +278,7 @@ def delete_all_ust_data(control_id):
                 (select ust_tank_id from public.ust_tank 
                 where ust_facility_id in
                      (select ust_facility_id from public.ust_facility where ust_control_id = %s))"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_compartment', cur.rowcount)
 
     sql = """delete from ust_tank_dispenser
@@ -285,7 +286,7 @@ def delete_all_ust_data(control_id):
                 (select ust_tank_id from public.ust_tank 
                 where ust_facility_id in
                      (select ust_facility_id from public.ust_facility where ust_control_id = %s))"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_tank_dispenser', cur.rowcount)
 
     sql = """delete from ust_tank_substance 
@@ -293,23 +294,23 @@ def delete_all_ust_data(control_id):
                 (select ust_tank_id from public.ust_tank 
                 where ust_facility_id in
                      (select ust_facility_id from public.ust_facility where ust_control_id = %s))"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_tank_substance', cur.rowcount)
 
     sql = """delete from ust_tank 
              where ust_facility_id in
                  (select ust_facility_id from public.ust_facility where ust_control_id = %s)"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_tank', cur.rowcount)
 
     sql = """delete from ust_facility_dispenser
              where ust_facility_id in
                  (select ust_facility_id from public.ust_facility where ust_control_id = %s)"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_facility_dispenser', cur.rowcount)
 
     sql = """delete from ust_facility where ust_control_id = %s"""
-    cur.execute(sql, (control_id,))
+    process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_facility', cur.rowcount)
 
     conn.commit()
@@ -334,7 +335,7 @@ def get_lookup_tabs(ust_or_release='ust'):
     sql = f"""select table_name, desc_column_name, id_column_name  
             from {ust_or_release}_template_lookup_tables
             order by sort_order"""
-    cur.execute(sql)
+    process_sql(conn, cur, sql)
     rows = cur.fetchall()
     cur.close()
     conn.close()
@@ -351,7 +352,7 @@ def get_data_tabs(ust_or_release='ust'):
     sql = f"""select view_name, template_tab_name  
             from {ust_or_release}_template_data_tables
             order by sort_order"""
-    cur.execute(sql)
+    process_sql(conn, cur, sql)
     rows = cur.fetchall()
     cur.close()
     conn.close()
@@ -364,7 +365,7 @@ def get_headers(table_name, schema='public'):
     sql = """select column_name from information_schema.columns
              where table_schema = %s and table_name = %s
              order by ordinal_position"""
-    cur.execute(sql, (schema, table_name))
+    process_sql(conn, cur, sql, params=(schema, table_name))
     headers = [x[0] for x in cur.fetchall()]
     cur.close()
     conn.close()
@@ -391,7 +392,7 @@ def get_table_values(table_name, column_name, schema='public'):
     conn = connect_db()
     cur = conn.cursor() 
     sql = f'select distinct "{column_name}" from "{schema}"."{table_name}" order by 1' 
-    cur.execute(sql)
+    process_sql(conn, cur, sql)
     values = [r[0] for r in cur.fetchall()]
     cur.close()
     conn.close()    
@@ -435,7 +436,7 @@ def get_epa_region(organization_id):
     conn = connect_db()
     cur = conn.cursor()
     sql = "select epa_region from public.epa_regions where organization_id = %s"
-    cur.execute(sql, (organization_id,))
+    process_sql(conn, cur, sql, params=(organization_id,))
     try:
         epa_region =  cur.fetchone()[0]
     except:
@@ -515,7 +516,7 @@ def get_join_info(dataset, epa_table_name, wheresql, schema='public'):
                     organization_join_column2, organization_join_fk2,
                     organization_join_column3, organization_join_fk3"""
     sql = sql + "\norder by 9"
-    cur.execute(sql, (dataset.control_id, epa_table_name))
+    process_sql(conn, cur, sql, params=(dataset.control_id, epa_table_name))
     for row in cur.fetchall():
         join_info['organization_table_name'] = row[0]
         join_info['organization_join_table'] = row[1]
@@ -539,7 +540,7 @@ def get_lookup_info(dataset, epa_table_name, schema='public'):
             from {schema}.v_{dataset.ust_or_release}_element_mapping_joins
             where {dataset.ust_or_release}_control_id = %s and epa_table_name = %s
             and database_lookup_table is not null order by 1"""
-    cur.execute(sql, (dataset.control_id, epa_table_name))
+    process_sql(conn, cur, sql, params=(dataset.control_id, epa_table_name))
     i = 1
     for row in cur.fetchall():
         join_info = {}
@@ -602,3 +603,21 @@ def get_join_tables(dataset, epa_table_name, schema='public'):
 
     # TODO: add deagg joins  
     return joins 
+
+
+def process_sql(conn, cur, sql, params=None):
+    try: 
+        cur.execute(sql, params)
+    except Exception as e:
+        error_logger.error('Error processing SQL: %s', e, stack_info=True, exc_info=True)
+        q = get_pretty_query(cur)
+        error_logger.error(q)
+        conn.rollback()
+        cur.close()
+        conn.close()     
+        error_logger.error('\n\nEXITING DUE TO SQL ERROR....\n\n')  
+        exit()  
+
+
+def pretty_print_df(df):
+    print(df.to_markdown()) 

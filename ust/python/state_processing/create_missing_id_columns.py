@@ -12,7 +12,7 @@ from python.util.logger_factory import logger
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = 0                   # Enter an integer that is the ust_control_id
 table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
-drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -82,7 +82,7 @@ class IdColumns:
 	def get_column_name(self):
 		sql = f"""select column_name from public.{self.dataset.ust_or_release}_required_view_columns 
 				  where auto_create = 'Y' and table_name = %s"""
-		self.cur.execute(sql, (self.table_name,))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.table_name,))
 		return self.cur.fetchone()[0]
 
 
@@ -90,7 +90,7 @@ class IdColumns:
 		if self.dataset.ust_or_release == 'release':
 			return None 
 		sql = "select organization_compartment_flag from public.ust_control where ust_control_id = %s"
-		self.cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 		return self.cur.fetchone()[0]
 
 
@@ -106,7 +106,7 @@ class IdColumns:
 
 	def check_existing(self, schema, table_name):
 		sql = f"select count(*) from information_schema.tables where table_schema = %s and table_name = %s"
-		self.cur.execute(sql, (schema, table_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(schema, table_name))
 		return self.cur.fetchone()[0]
 
 
@@ -114,7 +114,7 @@ class IdColumns:
 		cnt = self.check_existing(self.dataset.schema, self.erg_table_name)
 		if cnt > 0 and self.drop_existing == True:
 			sql = f"drop table {self.dataset.schema}.{self.erg_table_name}"
-			self.cur.execute(sql)
+			utils.process_sql(self.conn, self.cur, sql)
 		elif cnt > 0 and self.drop_existing == False:
 			logger.error('Table %s.%s already exists and drop_existing is set to False', self.dataset.schema, self.erg_table_name)
 			sys.exit()
@@ -125,7 +125,7 @@ class IdColumns:
 				  from public.{self.dataset.ust_or_release}_element_mapping 
 				  where {self.dataset.ust_or_release}_control_id = %s 
 				  and epa_table_name = %s and epa_column_name = %s"""
-		self.cur.execute(sql, (self.dataset.control_id, table_name, column_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name, column_name))
 		return self.cur.fetchone()
 
 
@@ -135,7 +135,7 @@ class IdColumns:
 					on a.epa_table_name = b.table_name
 				where ust_control_id = %s and epa_column_name in ('tank_id','tank_name')
 				order by epa_column_name desc, b.sort_order """
-		self.cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 		return self.cur.fetchone()[1]
 
 
@@ -144,7 +144,7 @@ class IdColumns:
 				  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s """
 		if column_name:
 			sql = sql + f" and epa_column_name = '{column_name}'"
-		self.cur.execute(sql, (self.dataset.control_id, table_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name))
 		return self.cur.fetchone()[0]
 
 
@@ -158,7 +158,7 @@ class IdColumns:
 			logger.warning('A mapping already existed for table %s, column %s; it will be deleted and replaced with the ERG-created table', table_name, column_name)
 			sql = f"""delete from public.{self.dataset.ust_or_release}_element_mapping
 					  where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
-			self.cur.execute(sql, (self.dataset.control_id, table_name, column_name))
+			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name, column_name))
 			logger.info('Deleted mapping info for table %s, column %s from public.%s_element_mapping', table_name, column_name, self.dataset.ust_or_release)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 		
@@ -189,11 +189,8 @@ class IdColumns:
 			comment = 'This required field is not present in the source data. Table ' + self.erg_table_name + ' was created by ERG so the data can conform to the EPA template structure.'
 		else:
 			comment = 'Row inserted automatically to map a required field from a child table.'
-		self.cur.execute(sql, 
-						 (self.dataset.control_id, table_name, column_name, self.erg_table_name, column_name, 
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name, column_name, self.erg_table_name, column_name, 
 						  comment, org_join_table, org_join_col, org_join_fk, org_join_col2, org_join_fk2, org_join_col3, org_join_fk3))
-		# if column_name == 'compartment_id':
-		# 	utils.pretty_print_query(self.cur)
 		logger.info('Inserted mapping from %s.%s to %s.%s', table_name, column_name, self.erg_table_name, column_name)
 		self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 		self.conn.commit()
@@ -212,18 +209,17 @@ class IdColumns:
 
 		if self.table_name in ['ust_compartment','ust_tank_substance', 'ust_tank_dispenser']:
 			sql = f"select count(*) from public.{self.dataset.ust_or_release}_element_mapping where epa_table_name = %s and epa_column_name = %s"
-			self.cur.execute(sql, (self.table_name, 'tank_id'))
+			utils.process_sql(self.conn, self.cur, sql, params=(self.table_name, 'tank_id'))
 			cnt = self.cur.fetchone()[0]
 			if cnt == 0:
 				self.record_element_mapping(self.table_name, 'tank_id')
 
 		if self.table_name in ['ust_piping','ust_compartment_dispenser']:
 			sql = f"select count(*) from public.{self.dataset.ust_or_release}_element_mapping where epa_table_name = %s and epa_column_name = %s"
-			self.cur.execute(sql, (self.table_name, 'compartment_id'))
+			utils.process_sql(self.conn, self.cur, sql, params= (self.table_name, 'compartment_id'))
 			cnt = self.cur.fetchone()[0]
 			if cnt == 0:
 				self.record_element_mapping(self.table_name, 'compartment_id')
-
 
 
 	def get_join_table(self, col_name, table_name=None):
@@ -231,7 +227,7 @@ class IdColumns:
 			table_name = self.table_name
 		sql = f"""select distinct organization_table_name from public.{self.dataset.ust_or_release}_element_mapping
 		          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
-		self.cur.execute(sql, (self.dataset.control_id, table_name, col_name))      
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name, col_name))     
 		utils.pretty_print_query(self.cur)    
 		try:
 			return self.cur.fetchone()[0]
@@ -244,7 +240,7 @@ class IdColumns:
 			table_name = self.table_name
 		sql = f"""select distinct organization_column_name from public.{self.dataset.ust_or_release}_element_mapping
 		          where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
-		self.cur.execute(sql, (self.dataset.control_id, table_name, col_name))          
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name, col_name))  
 		try:
 			return self.cur.fetchone()[0]
 		except:
@@ -263,7 +259,7 @@ class IdColumns:
 				where  {self.dataset.ust_or_release}_control_id = %s 
 				and epa_table_name = %s and epa_column_name in ({epa_col_name})
 				order by epa_column_name desc"""
-		self.cur.execute(sql, (self.dataset.control_id, table_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name))
 		# utils.pretty_print_query(self.cur)
 		row = self.cur.fetchone()	
 		join_info = {}	
@@ -288,7 +284,7 @@ class IdColumns:
 				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int generated always as identity)"
 			else:
 				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), dispenser_id int generated always as identity)"
-			self.cur.execute(sql)
+			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Created table %s.%s', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
@@ -310,7 +306,7 @@ class IdColumns:
 			else: 
 				select_cols = select_cols + ", null"
 			sql = sql + select_cols + '\nfrom ' + self.dataset.schema + '.' + facility_id_table
-			self.cur.execute(sql) 
+			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n'
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
@@ -336,7 +332,7 @@ class IdColumns:
 				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), compartment_id int generated always as identity)"
 			else:
 				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), dispenser_id int generated always as identity)"
-			self.cur.execute(sql)
+			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Created table %s.%s', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
@@ -349,18 +345,22 @@ class IdColumns:
 
 			sql = f"""select count(*) from public.ust_element_mapping 
 					  where ust_control_id = %s and organization_table_name = 'erg_tank_id'"""
-			self.cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 			cnt = self.cur.fetchone()[0]
-
 			if cnt > 0: # We already created erg_tank_id; use it for the select columns instead of the source table
 				# next, figure out if compartment_name is in source_data
 				compartment_name_info = self.get_org_col_name('ust_compartment', 'compartment_name')
+
 				if compartment_name_info: # get the organization column names to build the join
 					facility_id_info = self.get_org_col_name('ust_compartment', 'facility_id')
 					tank_id_info = self.get_org_col_name('ust_compartment', 'tank_id')
+
+					# print('facility_id_info = ' + str(facility_id_info))
+					# print('tank_id_info = ' + str(tank_id_info))
+
 					v_sql = v_sql + 'a.facility_id, a.tank_name, a.tank_id, b.compartment_name\nfrom ' 
 					v_sql = v_sql + self.dataset.schema + '.erg_tank_id a left join ' + self.dataset.schema + '.' + compartment_name_info[0] + ' b '
-					v_sql = v_sql + ' on a.facility_id = b.' + facility_id_info[1] + ' and a.tank_id = b.' + tank_id_info[1]
+					v_sql = v_sql + ' on a.facility_id = b."' + facility_id_info[1] + '" and a.tank_id = b."' + tank_id_info[1] + '"'
 				else: # just enter null for compartment name because it's not in the source data 
 					v_sql = v_sql + 'facility_id, tank_name, tank_id, null\nfrom ' + self.dataset.schema + '.erg_tank_id'
 
@@ -381,6 +381,7 @@ class IdColumns:
 				tank_name_info = self.get_org_col_name(compartment_table_name, 'tank_name')
 				tank_id_info = self.get_org_col_name(compartment_table_name, 'tank_id')
 				compartment_name_info = self.get_org_col_name(compartment_table_name, 'compartment_name')
+
 				if facility_id_info:
 					facility_id_table = '"' + facility_id_info[0] + '"'
 					facility_id_col = '"' + facility_id_info[1] + '"'					
@@ -422,7 +423,8 @@ class IdColumns:
 				if self.table_name == 'ust_compartment' and compartment_name_info:
 					self.organization_join_fk3 = 'compartment_name'
 
-			self.cur.execute(v_sql) 
+			# print(v_sql)
+			utils.process_sql(self.conn, self.cur, v_sql)
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
@@ -434,8 +436,8 @@ class IdColumns:
 				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), compartment_id int, piping_id int generated always as identity)"
 			else: 
 				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), compartment_id int, dispenser_id int generated always as identity)"
-			self.cur.execute(sql)
-			logger.info('Created table %s.%s', self.dataset.schema, self.erg_table_name)
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Created table %s.%)', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
 			compartment_table_name = self.table_name
@@ -447,7 +449,7 @@ class IdColumns:
 
 			sql = f"""select count(*) from public.ust_element_mapping 
 					  where ust_control_id = %s and organization_table_name = 'erg_compartment_id'"""
-			self.cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 			cnt = self.cur.fetchone()[0]
 
 			if cnt > 0: # We already created erg_compartment_id; use it for the select columns instead of the source table
@@ -459,8 +461,8 @@ class IdColumns:
 					compartment_id_info = self.get_org_col_name('ust_compartment', 'compartment_id')
 					v_sql = v_sql + 'a.facility_id, a.tank_name, a.tank_id, b.compartment_name, b.compartment_id from ' 
 					v_sql = v_sql + self.dataset.schema + '.erg_tank_id a left join ' + self.dataset.schema + '.' + compartment_name_info[0] + ' b '
-					v_sql = v_sql + ' on a.facility_id = b.' + facility_id_info[1] + ' and a.tank_id = b.' + tank_id_info[1]
-					v_sql = v_sql + ' and a.compartment_id = b.' + compartment_id_info[1]
+					v_sql = v_sql + ' on a.facility_id = b."' + facility_id_info[1] + '" and a.tank_id = b."' + tank_id_info[1] + '"'
+					v_sql = v_sql + ' and a.compartment_id = b."' + compartment_id_info[1] + '"'
 				else: # just enter null for compartment name because it's not in the source data 
 					v_sql = v_sql + 'facility_id, tank_name, tank_id, null, compartment_id from ' + self.dataset.schema + '.erg_compartment_id'
 
@@ -516,7 +518,7 @@ class IdColumns:
 				else: 
 					select_cols = select_cols + ", null"
 				v_sql = v_sql + select_cols + ' from ' + self.dataset.schema + '.' + compartment_table
-			self.cur.execute(v_sql) 
+			utils.process_sql(self.conn, self.cur, v_sql)
 			logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + '--Populate table ' + self.dataset.schema + '.' + self.erg_table_name + '\n\n'
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
@@ -537,8 +539,7 @@ def get_tables_with_missing_cols(dataset):
 				(select 1 from public.{dataset.ust_or_release}_element_mapping c
 				where {dataset.ust_or_release}_control_id = %s and a.table_name = c.epa_table_name))
 			order by sort_order"""
-	cur.execute(sql, (dataset.control_id, dataset.control_id))
-	# utils.pretty_print_query(cur)
+	utils.process_sql(conn, cur, sql, params=(dataset.control_id, dataset.control_id))
 	rows = cur.fetchall()
 	cur.close()
 	conn.close()
@@ -546,6 +547,8 @@ def get_tables_with_missing_cols(dataset):
 
 
 def drop_table(dataset, table_name, cursor=None):
+	import psycopg2
+
 	if cursor:
 		cur = cursor
 	else:
@@ -554,12 +557,15 @@ def drop_table(dataset, table_name, cursor=None):
 
 	sql = f"""delete from public.{dataset.ust_or_release}_element_mapping
 	           where organization_table_name = %s"""
-	cur.execute(sql, (table_name,))
+	utils.process_sql(conn, cur, sql, params=(table_name,))
 	logger.info('Deleted %s rows from %s.%s_element_mapping where organization_table_name = %s', cur.rowcount, dataset.schema, dataset.ust_or_release, table_name)
 	conn.commit()
 
 	sql = f"drop table {dataset.schema}.{table_name}"
-	cur.execute(sql)
+	try:
+		cur.execute(sql)
+	except psycopg2.errors.UndefinedTable:
+		pass
 	logger.info('Dropped table %s.%s', dataset.schema, table_name)
 
 	if not cursor:
@@ -578,7 +584,7 @@ def drop_tables(dataset, table_name=None):
 	sql = """select table_name from information_schema.tables 
 			where table_schema = %s and table_name like 'erg%%id'
 			order by 1"""
-	cur.execute(sql, (dataset.schema,))
+	utils.process_sql(conn, cur, sql, params=(dataset.schema,))
 	rows = cur.fetchall()
 	for row in rows:
 		drop_table(dataset, row[0])

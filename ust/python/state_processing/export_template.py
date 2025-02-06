@@ -58,6 +58,7 @@ class Template:
 			self.make_lookup_tabs()
 			if not self.template_only:
 				element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=False)
+				self.make_unmapped_tab()
 				self.make_mapping_tabs()
 		self.make_data_tabs()	
 		self.cleanup_wb()
@@ -81,7 +82,7 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()
 		sql = f"select * from public.v_{self.dataset.ust_or_release}_elements"	
-		cur.execute(sql)
+		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
 			for colno, cell_value in enumerate(row, start=1):
@@ -221,7 +222,7 @@ class Template:
 		cur = conn.cursor()	
 		
 		sql = f"select {lookup_column_name} from public.{lookup_table_name} order by 1"
-		cur.execute(sql)
+		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
 			for colno, cell_value in enumerate(row, start=1):
@@ -250,7 +251,7 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 		sql = f"select substance_group, substance from public.substances order by 1, 2"
-		cur.execute(sql)
+		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
 			for colno, cell_value in enumerate(row, start=1):
@@ -261,13 +262,52 @@ class Template:
 		conn.close()
 
 
+	def make_unmapped_tab(self):
+		logger.info('Working on the Unmapped Source Elements tab')
+		ws = self.wb.create_sheet('Unmapped Source Elements')
+
+		cell = ws.cell(row=1, column=1)
+		cell.value = 'Organization Table Name'
+		cell.font = Font(bold=True)
+		cell = ws.cell(row=1, column=2)
+		cell.value = 'Organization Column Name'
+		cell.font = Font(bold=True)
+
+		conn = utils.connect_db()
+		cur = conn.cursor()	
+		sql = f"""select a.table_name, a.column_name
+				from information_schema.columns a join information_schema.tables t 
+					on a.table_schema = t.table_schema and a.table_name = t.table_name
+				where a.table_schema = %s and a.table_name not like 'erg_%%'
+				and table_type = 'BASE TABLE' and not exists 
+					(select 1 from public.{self.dataset.ust_or_release}_element_mapping b
+					where {self.dataset.ust_or_release}_control_id = %s 
+					and lower(a.table_name) = lower(b.organization_table_name) 
+					and lower(a.column_name) = lower(b.organization_column_name))
+				order by 1, 2"""
+		utils.process_sql(conn, cur, sql, params=(self.dataset.schema, self.dataset.control_id))
+		data = cur.fetchall()	
+		for rowno, row in enumerate(data, start=2):
+			for colno, cell_value in enumerate(row, start=1):
+				ws.cell(row=rowno, column=colno).value = cell_value		
+
+		utils.autowidth(ws)
+
+		cur.close()
+		conn.close()
+
+		logger.info('Created Unmapped Source Elements tab')
+
+
 	def get_mapping_tabs(self):
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 		sql = f"""select epa_table_name, epa_column_name, database_lookup_table, database_lookup_column   
 				from public.v_{self.dataset.ust_or_release}_available_mapping
-				where {self.dataset.ust_or_release}_control_id = %s order by 1, 2"""
-		cur.execute(sql, (self.dataset.control_id,))
+				where {self.dataset.ust_or_release}_control_id = %s 
+				and epa_table_name <> 'ust_compartment_substance'
+				order by table_sort_order, column_sort_order"""
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		rows = cur.fetchall()
 		cur.close()
 		conn.close()
@@ -302,6 +342,8 @@ class Template:
 			pretty_name = 'Pipe Top Sump Wall Type'
 		elif pretty_name == 'Corrective Action Strategies':
 			pretty_name = 'Corrective Actions'
+		if len(pretty_name) > 31:
+			pretty_name = pretty_name[:-31]
 
 		ws = self.wb.create_sheet(pretty_name + ' mapping')
 
@@ -313,7 +355,7 @@ class Template:
 		cur = conn.cursor()	
 
 		sql = f"select {database_lookup_column} from {database_lookup_table} order by 1"
-		cur.execute(sql)
+		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
 			for colno, cell_value in enumerate(row, start=1):
@@ -323,7 +365,7 @@ class Template:
 				from public.v_{self.dataset.ust_or_release}_element_mapping 
 				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s
 				order by 1, 2"""
-		cur.execute(sql, (self.dataset.control_id, mapping_column_name))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id, mapping_column_name))
 
 		if cur.rowcount > 0:
 			cell = ws.cell(row=1, column=3)
@@ -365,7 +407,7 @@ class Template:
 				from public.v_{self.dataset.ust_or_release}_element_mapping 
 				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'
 				order by 1, 2"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 
 		if cur.rowcount > 0:
 			cell = ws.cell(row=1, column=4)
@@ -439,7 +481,7 @@ class Template:
 			conn = utils.connect_db()
 			cur = conn.cursor()
 			sql = f"select * from public.{view_name} where {self.dataset.ust_or_release}_control_id = %s"
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=1):

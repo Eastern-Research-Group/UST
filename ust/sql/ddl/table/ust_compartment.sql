@@ -46,6 +46,8 @@ ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_prevention_o
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_spill_prevention_not_required_chk CHECK (((spill_prevention_not_required)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying])::text[])));
 
+ALTER TABLE public.ust_compartment ADD CONSTRAINT ust_compartment_factankcompid_unique UNIQUE (ust_tank_id, compartment_id);
+
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_prevention_ball_float_valve_chk CHECK (((overfill_prevention_ball_float_valve)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_compartment ADD CONSTRAINT compartment_overfill_prevention_flow_shutoff_device_chk CHECK (((overfill_prevention_flow_shutoff_device)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
@@ -89,3 +91,5 @@ CREATE INDEX ust_compartment_compartment_status_id_idx ON public.ust_compartment
 CREATE INDEX ust_compartment_spill_bucket_wall_type_id_idx ON public.ust_compartment USING btree (spill_bucket_wall_type_id)
 
 CREATE INDEX ust_compartment_ust_tank_id_idx ON public.ust_compartment USING btree (ust_tank_id)
+
+CREATE UNIQUE INDEX ust_compartment_factankcompid_unique ON public.ust_compartment USING btree (ust_tank_id, compartment_id)

@@ -382,6 +382,9 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_tank','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','tank_location_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+--NOTE: tank_status_id is required. 
+--If it doesn't exist but Compartment Status exists, map tank_status_id to the organization's compartment status field. 
+--If neither status exists, talk to the state before proceeding. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','tank_status_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
@@ -419,7 +422,7 @@ values (ZZ,'ust_tank','tank_corrosion_protection_unknown','ORG_TAB_NAME','ORG_CO
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','tank_secondary_containment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_tank','cert_of_installation','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (ZZ,'ust_tank','cert_of_installation_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','cert_of_installation_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
@@ -434,9 +437,6 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_tank_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank_substance','substance_casno','ORG_TAB_NAME','ORG_COL_NAME',null,null);
---NOTE: States that report at the compartment level will likely have substance data at the compartment level
---This will be tracked in table ust_compartment_substance, but all of the columns in that table will be mapped elsewhere
---so there is no mapping required for that table. 
 
 --ust_compartment: This table is REQUIRED. 
 --If the state does not report compartment data, we will be creating a Compartment ID for it in a later step. 
@@ -507,14 +507,27 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_compartment','tank_subpart_k_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment','tank_other_release_detection','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_compartment_substance','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_compartment_substance','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_compartment_substance','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
---ust_piping: This table is OPTIONAL, do not map if there is no piping data in the source data
+--ust_comparment_substance is OPTIONAL; this table should ONLY be mapped/populated for states that report substance data at the compartment level,
+--and where there is an obvious 1:1 relationship between compartment and substance. 
+--Note that in the EPA data tables, this table is a child of ust_tank_substance: there is no substance ID in public.ust_compartment_substance!
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic)
+values (ZZ,'ust_compartment_substance','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','compartment_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+--NOTE: substance_id is not in EPA table public.ust_compartment_substance, however, this element must be mapped if you are mapping this table, 
+--and the mapped column MUST included in the v_ust_compartment_substance view in the state schema as a not null column. 
+--Additionally, the facility/tank/substance combination MUST also exist in the v_ust_tank_substance view, which is a parent of this table. 
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+
+--ust_piping: This table is OPTIONAL; do not map if there is no piping data in the source data
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_piping','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
@@ -698,7 +711,7 @@ select epa_column_name from
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
-overwrite_existing = False      # boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
  * /ust/sql/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console 
@@ -812,7 +825,8 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
  *    if the length of the state value is too long to fit into the EPA column. If the data is too long to fit in the EPA column, this may indicate 
  *    an error in your code or mapping, OR it may mean you need to truncate the state's value to fit the EPA format. 
  * 9) Failed check constraints. 
- * 10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
+ * 10) Columns that exist in the view that were not mapped in ust_element_mapping. 
+ * 11) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
  *     and ensure the epa_value exists in the associated lookup table. 
  *
  * The script will also provide the counts of rows in v_ust_facility, v_ust_tank, v_ust_compartment, and v_ust_piping (if these views exist) -
@@ -948,7 +962,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * tables from the ERG database to CSV files and upload them to the EPA Teams site at
  * Documents > General > 01 - UST Source Data > XX > ERG Source Data folder. 
  * 
- * To export the source data from the databaes, run script export_source_data.py
+ * To export the source data from the database, run script export_source_data.py
  * 
  * Set these variables in the script: 
  * 
