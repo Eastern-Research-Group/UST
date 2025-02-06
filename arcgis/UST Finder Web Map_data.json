@@ -1,0 +1,2299 @@
+{
+    "operationalLayers": [
+        {
+            "id": "MSBFP2_5327",
+            "showLegend": false,
+            "opacity": 0.51,
+            "title": "Microsoft Building Footprints - Features",
+            "url": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/MSBFP2/FeatureServer/0",
+            "visibility": false,
+            "itemId": "bb69f10baf334d4c935a0fb23d758f38",
+            "layerType": "ArcGISFeatureLayer",
+            "layerDefinition": {
+                "minScale": 68106,
+                "maxScale": 0
+            },
+            "popupInfo": {
+                "popupElements": [
+                    {
+                        "type": "fields"
+                    },
+                    {
+                        "type": "attachments",
+                        "displayType": "auto"
+                    }
+                ],
+                "showAttachments": true,
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "tooltip": "",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "BlockgroupID",
+                        "isEditable": true,
+                        "label": "BlockGroupID",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "StateAbbrev",
+                        "isEditable": true,
+                        "label": "State Abbreviation",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Shape__Area",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Shape__Area",
+                        "tooltip": "",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "Shape__Length",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Shape__Length",
+                        "tooltip": "",
+                        "visible": false
+                    }
+                ],
+                "title": "MSBFP: {BlockgroupID}"
+            }
+        },
+        {
+            "id": "UST_Finder_Feature_Layer_2021_5820",
+            "showLegend": true,
+            "opacity": 1,
+            "title": "Releases by County",
+            "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/3",
+            "visibility": false,
+            "itemId": "5a3ae0ed53564b6fa519f08e30e79e93",
+            "layerType": "ArcGISFeatureLayer",
+            "layerDefinition": {
+                "minScale": 0,
+                "maxScale": 3101120,
+                "drawingInfo": {
+                    "renderer": {
+                        "authoringInfo": {
+                            "visualVariables": [
+                                {
+                                    "maxSliderValue": 9811,
+                                    "minSliderValue": 0,
+                                    "theme": "high-to-low",
+                                    "type": "colorInfo"
+                                }
+                            ]
+                        },
+                        "type": "classBreaks",
+                        "visualVariables": [
+                            {
+                                "type": "colorInfo",
+                                "field": "Release_Count",
+                                "stops": [
+                                    {
+                                        "color": [
+                                            254,
+                                            240,
+                                            217,
+                                            255
+                                        ],
+                                        "label": "< 0",
+                                        "value": 0
+                                    },
+                                    {
+                                        "color": [
+                                            253,
+                                            204,
+                                            138,
+                                            255
+                                        ],
+                                        "value": 125
+                                    },
+                                    {
+                                        "color": [
+                                            252,
+                                            141,
+                                            89,
+                                            255
+                                        ],
+                                        "label": "250",
+                                        "value": 250
+                                    },
+                                    {
+                                        "color": [
+                                            227,
+                                            74,
+                                            51,
+                                            255
+                                        ],
+                                        "value": 375
+                                    },
+                                    {
+                                        "color": [
+                                            179,
+                                            0,
+                                            0,
+                                            255
+                                        ],
+                                        "label": "> 500",
+                                        "value": 500
+                                    }
+                                ]
+                            }
+                        ],
+                        "classBreakInfos": [
+                            {
+                                "classMaxValue": 9007199254740991,
+                                "symbol": {
+                                    "type": "esriSFS",
+                                    "color": [
+                                        170,
+                                        170,
+                                        170,
+                                        255
+                                    ],
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "color": [
+                                            194,
+                                            194,
+                                            194,
+                                            64
+                                        ],
+                                        "width": 0.75,
+                                        "style": "esriSLSSolid"
+                                    },
+                                    "style": "esriSFSSolid"
+                                }
+                            }
+                        ],
+                        "field": "Release_Count",
+                        "minValue": -9007199254740991
+                    }
+                }
+            },
+            "popupInfo": {
+                "popupElements": [
+                    {
+                        "type": "fields"
+                    }
+                ],
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "County",
+                        "isEditable": true,
+                        "label": "County",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "label": "State",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Population",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Population",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Release_Count",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Release Count",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Open_Count",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Open Count",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "No_Further_Action_Count",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "No Further Action Count",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Shape__Area",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Shape__Area",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "Shape__Length",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Shape__Length",
+                        "visible": false
+                    }
+                ],
+                "title": ""
+            }
+        },
+        {
+            "id": "UST_Finder_Feature_Layer_2021_6711",
+            "opacity": 1,
+            "title": "Facilities by County",
+            "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/2",
+            "visibility": true,
+            "itemId": "5a3ae0ed53564b6fa519f08e30e79e93",
+            "layerType": "ArcGISFeatureLayer",
+            "layerDefinition": {
+                "minScale": 0,
+                "maxScale": 4053359,
+                "drawingInfo": {
+                    "renderer": {
+                        "authoringInfo": {
+                            "visualVariables": [
+                                {
+                                    "maxSliderValue": 8077,
+                                    "minSliderValue": 0,
+                                    "theme": "high-to-low",
+                                    "type": "colorInfo"
+                                }
+                            ]
+                        },
+                        "type": "classBreaks",
+                        "visualVariables": [
+                            {
+                                "type": "colorInfo",
+                                "field": "Facility_Count",
+                                "stops": [
+                                    {
+                                        "color": [
+                                            255,
+                                            252,
+                                            212,
+                                            255
+                                        ],
+                                        "label": "< 0",
+                                        "value": 0
+                                    },
+                                    {
+                                        "color": [
+                                            177,
+                                            205,
+                                            194,
+                                            255
+                                        ],
+                                        "value": 162
+                                    },
+                                    {
+                                        "color": [
+                                            98,
+                                            158,
+                                            176,
+                                            255
+                                        ],
+                                        "label": "325",
+                                        "value": 325
+                                    },
+                                    {
+                                        "color": [
+                                            56,
+                                            98,
+                                            122,
+                                            255
+                                        ],
+                                        "value": 487
+                                    },
+                                    {
+                                        "color": [
+                                            13,
+                                            38,
+                                            68,
+                                            255
+                                        ],
+                                        "label": "> 650",
+                                        "value": 650
+                                    }
+                                ]
+                            }
+                        ],
+                        "classBreakInfos": [
+                            {
+                                "classMaxValue": 9007199254740991,
+                                "symbol": {
+                                    "type": "esriSFS",
+                                    "color": [
+                                        170,
+                                        170,
+                                        170,
+                                        255
+                                    ],
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "color": [
+                                            194,
+                                            194,
+                                            194,
+                                            64
+                                        ],
+                                        "width": 0.375,
+                                        "style": "esriSLSSolid"
+                                    },
+                                    "style": "esriSFSSolid"
+                                }
+                            }
+                        ],
+                        "field": "Facility_Count",
+                        "minValue": -9007199254740991
+                    }
+                }
+            },
+            "popupInfo": {
+                "popupElements": [
+                    {
+                        "type": "fields"
+                    }
+                ],
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "County",
+                        "isEditable": true,
+                        "label": "County",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "label": "State",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Population",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Population",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Facility_Count",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Facility Count",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Open_USTs",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Open USTs",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Closed_USTs",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Closed USTs",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "TOS_USTs",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Temporarily Out of Service USTs",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Shape__Area",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Shape__Area",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "Shape__Length",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Shape__Length",
+                        "visible": false
+                    }
+                ],
+                "title": ""
+            }
+        },
+        {
+            "id": "USA_Wildfires_v1_7328",
+            "showLegend": false,
+            "opacity": 1,
+            "title": "Current Wildfires - Incidents",
+            "url": "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/USA_Wildfires_v1/FeatureServer/0",
+            "visibility": false,
+            "itemId": "d957997ccee7408287a963600a77f61f",
+            "layerType": "ArcGISFeatureLayer"
+        },
+        {
+            "id": "USA_Wildfires_v1_309",
+            "showLegend": false,
+            "opacity": 1,
+            "title": "Current Wildfires - Perimeters",
+            "url": "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/USA_Wildfires_v1/FeatureServer/1",
+            "visibility": false,
+            "itemId": "d957997ccee7408287a963600a77f61f",
+            "layerType": "ArcGISFeatureLayer"
+        },
+        {
+            "id": "1939d19f635-layer-19",
+            "title": "States",
+            "url": "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2023/FeatureServer/1",
+            "layerType": "ArcGISFeatureLayer",
+            "popupInfo": {
+                "popupElements": [
+                    {
+                        "type": "fields"
+                    },
+                    {
+                        "type": "attachments",
+                        "displayType": "auto"
+                    }
+                ],
+                "showAttachments": true,
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "POP20_SQMI",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": true,
+                        "label": "2020 Populaton Density",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "POPULATION_2020",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "2020 Total Population",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "POP_SQMI",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": true,
+                        "label": "2023 People per square mile",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "POPULATION",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "2023 Total Population",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "SQMI",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": true,
+                        "label": "Area in Square Miles",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Shape__Area",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Shape__Area",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Shape__Length",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Shape__Length",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "STATE_ABBR",
+                        "isEditable": true,
+                        "label": "State Abbreviation",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "STATE_FIPS",
+                        "isEditable": true,
+                        "label": "State FIPS Code",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "STATE_NAME",
+                        "isEditable": true,
+                        "label": "State Name",
+                        "visible": true
+                    }
+                ],
+                "title": "USA Boundaries 2023 - USA State: {STATE_NAME}"
+            },
+            "layerDefinition": {
+                "drawingInfo": {
+                    "renderer": {
+                        "type": "simple",
+                        "symbol": {
+                            "type": "esriSFS",
+                            "color": [
+                                66,
+                                188,
+                                0,
+                                0
+                            ],
+                            "outline": {
+                                "type": "esriSLS",
+                                "color": [
+                                    133,
+                                    133,
+                                    133,
+                                    255
+                                ],
+                                "width": 0.998,
+                                "style": "esriSLSSolid"
+                            },
+                            "style": "esriSFSSolid"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "UST_Finder_Feature_Layer_2021_2157",
+            "opacity": 0.89,
+            "title": "Releases",
+            "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/1",
+            "visibility": false,
+            "itemId": "5a3ae0ed53564b6fa519f08e30e79e93",
+            "layerType": "ArcGISFeatureLayer",
+            "layerDefinition": {
+                "minScale": 4802802,
+                "maxScale": 0,
+                "drawingInfo": {
+                    "labelingInfo": [
+                        {
+                            "labelExpression": "[Name]",
+                            "labelExpressionInfo": {
+                                "expression": "$feature[\"Name\"]"
+                            },
+                            "labelPlacement": "esriServerPointLabelPlacementAboveRight",
+                            "maxScale": 0,
+                            "minScale": 5794,
+                            "repeatLabel": true,
+                            "symbol": {
+                                "type": "esriTS",
+                                "color": [
+                                    178,
+                                    34,
+                                    34,
+                                    255
+                                ],
+                                "font": {
+                                    "family": "Arial",
+                                    "size": 9.75,
+                                    "weight": "bold"
+                                },
+                                "horizontalAlignment": "center",
+                                "kerning": true,
+                                "haloColor": [
+                                    255,
+                                    255,
+                                    255,
+                                    255
+                                ],
+                                "haloSize": 0.75,
+                                "rightToLeft": false,
+                                "rotated": false,
+                                "text": "",
+                                "verticalAlignment": "baseline",
+                                "xoffset": 0,
+                                "yoffset": 0,
+                                "angle": 0
+                            },
+                            "useCodedValues": true
+                        }
+                    ],
+                    "renderer": {
+                        "type": "uniqueValue",
+                        "field1": "Status",
+                        "uniqueValueGroups": [
+                            {
+                                "classes": [
+                                    {
+                                        "label": "No Further Action",
+                                        "symbol": {
+                                            "type": "esriSMS",
+                                            "color": [
+                                                252,
+                                                149,
+                                                149,
+                                                255
+                                            ],
+                                            "angle": 0,
+                                            "xoffset": 0,
+                                            "yoffset": 0,
+                                            "size": 4.5,
+                                            "style": "esriSMSCircle",
+                                            "outline": {
+                                                "type": "esriSLS",
+                                                "color": [
+                                                    92,
+                                                    92,
+                                                    92,
+                                                    134
+                                                ],
+                                                "width": 0.75,
+                                                "style": "esriSLSSolid"
+                                            }
+                                        },
+                                        "values": [
+                                            [
+                                                "No Further Action"
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "label": "Open",
+                                        "symbol": {
+                                            "type": "esriSMS",
+                                            "color": [
+                                                230,
+                                                0,
+                                                0,
+                                                255
+                                            ],
+                                            "angle": 0,
+                                            "xoffset": 0,
+                                            "yoffset": 0,
+                                            "size": 4.5,
+                                            "style": "esriSMSCircle",
+                                            "outline": {
+                                                "type": "esriSLS",
+                                                "color": [
+                                                    92,
+                                                    92,
+                                                    92,
+                                                    137
+                                                ],
+                                                "width": 0.75,
+                                                "style": "esriSLSSolid"
+                                            }
+                                        },
+                                        "values": [
+                                            [
+                                                "Open"
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "label": "Unkown",
+                                        "symbol": {
+                                            "type": "esriSMS",
+                                            "color": [
+                                                133,
+                                                133,
+                                                133,
+                                                255
+                                            ],
+                                            "angle": 0,
+                                            "xoffset": 0,
+                                            "yoffset": 0,
+                                            "size": 4.5,
+                                            "style": "esriSMSCircle",
+                                            "outline": {
+                                                "type": "esriSLS",
+                                                "color": [
+                                                    92,
+                                                    92,
+                                                    92,
+                                                    131
+                                                ],
+                                                "width": 0.75,
+                                                "style": "esriSLSSolid"
+                                            }
+                                        },
+                                        "values": [
+                                            [
+                                                "Unkown"
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "uniqueValueInfos": [
+                            {
+                                "label": "No Further Action",
+                                "symbol": {
+                                    "type": "esriSMS",
+                                    "color": [
+                                        252,
+                                        149,
+                                        149,
+                                        255
+                                    ],
+                                    "angle": 0,
+                                    "xoffset": 0,
+                                    "yoffset": 0,
+                                    "size": 4.5,
+                                    "style": "esriSMSCircle",
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "color": [
+                                            92,
+                                            92,
+                                            92,
+                                            134
+                                        ],
+                                        "width": 0.75,
+                                        "style": "esriSLSSolid"
+                                    }
+                                },
+                                "value": "No Further Action"
+                            },
+                            {
+                                "label": "Open",
+                                "symbol": {
+                                    "type": "esriSMS",
+                                    "color": [
+                                        230,
+                                        0,
+                                        0,
+                                        255
+                                    ],
+                                    "angle": 0,
+                                    "xoffset": 0,
+                                    "yoffset": 0,
+                                    "size": 4.5,
+                                    "style": "esriSMSCircle",
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "color": [
+                                            92,
+                                            92,
+                                            92,
+                                            137
+                                        ],
+                                        "width": 0.75,
+                                        "style": "esriSLSSolid"
+                                    }
+                                },
+                                "value": "Open"
+                            },
+                            {
+                                "label": "Unkown",
+                                "symbol": {
+                                    "type": "esriSMS",
+                                    "color": [
+                                        133,
+                                        133,
+                                        133,
+                                        255
+                                    ],
+                                    "angle": 0,
+                                    "xoffset": 0,
+                                    "yoffset": 0,
+                                    "size": 4.5,
+                                    "style": "esriSMSCircle",
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "color": [
+                                            92,
+                                            92,
+                                            92,
+                                            131
+                                        ],
+                                        "width": 0.75,
+                                        "style": "esriSLSSolid"
+                                    }
+                                },
+                                "value": "Unkown"
+                            }
+                        ]
+                    }
+                }
+            },
+            "showLabels": true,
+            "popupInfo": {
+                "popupElements": [
+                    {
+                        "type": "fields"
+                    }
+                ],
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "Facility_ID",
+                        "isEditable": true,
+                        "label": "Facility ID",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "LUST_ID",
+                        "isEditable": true,
+                        "label": "LUST ID",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Name",
+                        "isEditable": true,
+                        "label": "Name",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Address",
+                        "isEditable": true,
+                        "label": "Address",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "City",
+                        "isEditable": true,
+                        "label": "City",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "County",
+                        "isEditable": true,
+                        "label": "County",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Zip_Code",
+                        "isEditable": true,
+                        "label": "Zip Code",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "label": "State",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Latitude",
+                        "format": {
+                            "digitSeparator": false,
+                            "places": 4
+                        },
+                        "isEditable": true,
+                        "label": "Latitude",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Longitude",
+                        "format": {
+                            "digitSeparator": false,
+                            "places": 4
+                        },
+                        "isEditable": true,
+                        "label": "Longitude",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Coordinate_Source",
+                        "isEditable": true,
+                        "label": "Coordinate Source",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Address_Match_Type",
+                        "isEditable": true,
+                        "label": "Address Match Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Reported_Date",
+                        "format": {
+                            "dateFormat": "shortDate",
+                            "digitSeparator": false
+                        },
+                        "isEditable": true,
+                        "label": "Reported Date",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Status",
+                        "isEditable": true,
+                        "label": "Status",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Substance",
+                        "isEditable": true,
+                        "label": "Substance",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Population_within_1500ft",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Estimated Population within 1500ft",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "DomesticWells_within_1500ft",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Estimated Private Domestic Wells within 1500ft",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "LandUse",
+                        "isEditable": true,
+                        "label": "Land Use",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Within_SPA",
+                        "isEditable": true,
+                        "label": "Within Source Water Protection Area (SPA)",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "SPA_PWS_FacilityID",
+                        "isEditable": true,
+                        "label": "SPA Public Water System and Facility ID",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "SPA_Water_Type",
+                        "isEditable": true,
+                        "label": "SPA Water Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "SPA_Facility_Type",
+                        "isEditable": true,
+                        "label": "SPA Facility Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "SPA_HUC12",
+                        "isEditable": true,
+                        "label": "SPA HUC12",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Within_WHPA",
+                        "isEditable": true,
+                        "label": "Within Groundwater Wellhead Protection Area (WHPA)",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "WHPA_PWS_FacilityID",
+                        "isEditable": true,
+                        "label": "WHPA Public Water System and Facility ID",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "WHPA_Water_Type",
+                        "isEditable": true,
+                        "label": "WHPA Water Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "WHPA_Facility_Type",
+                        "isEditable": true,
+                        "label": "WHPA Facility Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "WHPA_HUC12",
+                        "isEditable": true,
+                        "label": "WHPA HUC12",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Within_100yr_Floodplain",
+                        "isEditable": true,
+                        "label": "Within Estimated 100-year Floodplain",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Closed_With_Residual_Contaminat",
+                        "isEditable": true,
+                        "label": "Closed with Residual Contamination (Tribal Lands Only)",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "EPA_Region",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "EPA Region",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Tribe",
+                        "isEditable": true,
+                        "label": "Tribe",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "NFA_Letter_1",
+                        "isEditable": true,
+                        "label": "NFA Letter 1 (Tribal Lands Only)",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "NFA_Letter_2",
+                        "isEditable": true,
+                        "label": "NFA Letter 2 (Tribal Lands Only)",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "NFA_Letter_3",
+                        "isEditable": true,
+                        "label": "NFA Letter 3 (Tribal Lands Only)",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "NFA_Letter_4",
+                        "isEditable": true,
+                        "label": "NFA Letter 4 (Tribal Lands Only)",
+                        "visible": true
+                    }
+                ],
+                "title": "{Name}"
+            }
+        },
+        {
+            "id": "UST_Finder_Feature_Layer_2021_4032",
+            "opacity": 0.93,
+            "title": "Facilities",
+            "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/0",
+            "visibility": true,
+            "itemId": "5a3ae0ed53564b6fa519f08e30e79e93",
+            "layerType": "ArcGISFeatureLayer",
+            "layerDefinition": {
+                "minScale": 4418138,
+                "maxScale": 0,
+                "drawingInfo": {
+                    "labelingInfo": [
+                        {
+                            "labelExpression": "[Name]",
+                            "labelExpressionInfo": {
+                                "expression": "$feature[\"Name\"]"
+                            },
+                            "labelPlacement": "esriServerPointLabelPlacementAboveRight",
+                            "maxScale": 0,
+                            "minScale": 4806,
+                            "repeatLabel": true,
+                            "symbol": {
+                                "type": "esriTS",
+                                "color": [
+                                    0,
+                                    0,
+                                    255,
+                                    255
+                                ],
+                                "font": {
+                                    "family": "Arial",
+                                    "size": 9.75,
+                                    "weight": "bold"
+                                },
+                                "horizontalAlignment": "center",
+                                "kerning": true,
+                                "haloColor": [
+                                    255,
+                                    255,
+                                    255,
+                                    255
+                                ],
+                                "haloSize": 0.75,
+                                "rightToLeft": false,
+                                "rotated": false,
+                                "text": "",
+                                "verticalAlignment": "baseline",
+                                "xoffset": 0,
+                                "yoffset": 0,
+                                "angle": 0
+                            },
+                            "useCodedValues": true
+                        }
+                    ],
+                    "renderer": {
+                        "type": "uniqueValue",
+                        "field1": "Facility_Status",
+                        "uniqueValueGroups": [
+                            {
+                                "classes": [
+                                    {
+                                        "label": "Closed UST(s)",
+                                        "symbol": {
+                                            "type": "esriSMS",
+                                            "color": [
+                                                140,
+                                                190,
+                                                252,
+                                                232
+                                            ],
+                                            "angle": 0,
+                                            "xoffset": 0,
+                                            "yoffset": 0,
+                                            "size": 4.5,
+                                            "style": "esriSMSCircle",
+                                            "outline": {
+                                                "type": "esriSLS",
+                                                "color": [
+                                                    92,
+                                                    92,
+                                                    92,
+                                                    185
+                                                ],
+                                                "width": 0.75,
+                                                "style": "esriSLSSolid"
+                                            }
+                                        },
+                                        "values": [
+                                            [
+                                                "Closed UST(s)"
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "label": "Open UST(s)",
+                                        "symbol": {
+                                            "type": "esriSMS",
+                                            "color": [
+                                                0,
+                                                92,
+                                                230,
+                                                234
+                                            ],
+                                            "angle": 0,
+                                            "xoffset": 0,
+                                            "yoffset": 0,
+                                            "size": 4.5,
+                                            "style": "esriSMSCircle",
+                                            "outline": {
+                                                "type": "esriSLS",
+                                                "color": [
+                                                    92,
+                                                    92,
+                                                    92,
+                                                    183
+                                                ],
+                                                "width": 0.75,
+                                                "style": "esriSLSSolid"
+                                            }
+                                        },
+                                        "values": [
+                                            [
+                                                "Open UST(s)"
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "label": "Unknown",
+                                        "symbol": {
+                                            "type": "esriSMS",
+                                            "color": [
+                                                133,
+                                                133,
+                                                133,
+                                                237
+                                            ],
+                                            "angle": 0,
+                                            "xoffset": 0,
+                                            "yoffset": 0,
+                                            "size": 4.5,
+                                            "style": "esriSMSCircle",
+                                            "outline": {
+                                                "type": "esriSLS",
+                                                "color": [
+                                                    26,
+                                                    26,
+                                                    26,
+                                                    229
+                                                ],
+                                                "width": 0.75,
+                                                "style": "esriSLSSolid"
+                                            }
+                                        },
+                                        "values": [
+                                            [
+                                                "Unknown"
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "uniqueValueInfos": [
+                            {
+                                "label": "Closed UST(s)",
+                                "symbol": {
+                                    "type": "esriSMS",
+                                    "color": [
+                                        140,
+                                        190,
+                                        252,
+                                        232
+                                    ],
+                                    "angle": 0,
+                                    "xoffset": 0,
+                                    "yoffset": 0,
+                                    "size": 4.5,
+                                    "style": "esriSMSCircle",
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "color": [
+                                            92,
+                                            92,
+                                            92,
+                                            185
+                                        ],
+                                        "width": 0.75,
+                                        "style": "esriSLSSolid"
+                                    }
+                                },
+                                "value": "Closed UST(s)"
+                            },
+                            {
+                                "label": "Open UST(s)",
+                                "symbol": {
+                                    "type": "esriSMS",
+                                    "color": [
+                                        0,
+                                        92,
+                                        230,
+                                        234
+                                    ],
+                                    "angle": 0,
+                                    "xoffset": 0,
+                                    "yoffset": 0,
+                                    "size": 4.5,
+                                    "style": "esriSMSCircle",
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "color": [
+                                            92,
+                                            92,
+                                            92,
+                                            183
+                                        ],
+                                        "width": 0.75,
+                                        "style": "esriSLSSolid"
+                                    }
+                                },
+                                "value": "Open UST(s)"
+                            },
+                            {
+                                "label": "Unknown",
+                                "symbol": {
+                                    "type": "esriSMS",
+                                    "color": [
+                                        133,
+                                        133,
+                                        133,
+                                        237
+                                    ],
+                                    "angle": 0,
+                                    "xoffset": 0,
+                                    "yoffset": 0,
+                                    "size": 4.5,
+                                    "style": "esriSMSCircle",
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "color": [
+                                            26,
+                                            26,
+                                            26,
+                                            229
+                                        ],
+                                        "width": 0.75,
+                                        "style": "esriSLSSolid"
+                                    }
+                                },
+                                "value": "Unknown"
+                            }
+                        ]
+                    }
+                }
+            },
+            "showLabels": true,
+            "popupInfo": {
+                "popupElements": [
+                    {
+                        "type": "fields"
+                    },
+                    {
+                        "type": "media",
+                        "mediaInfos": [
+                            {
+                                "caption": "",
+                                "title": "Tank Capacities",
+                                "type": "columnchart",
+                                "value": {
+                                    "fields": [
+                                        "relationships/0/Capacity"
+                                    ],
+                                    "tooltipField": "relationships/0/Tank_ID"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "mediaInfos": [
+                    {
+                        "caption": "",
+                        "title": "Tank Capacities",
+                        "type": "columnchart",
+                        "value": {
+                            "fields": [
+                                "relationships/0/Capacity"
+                            ],
+                            "tooltipField": "relationships/0/Tank_ID"
+                        }
+                    }
+                ],
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "Facility_ID",
+                        "isEditable": true,
+                        "label": "Facility ID",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Name",
+                        "isEditable": true,
+                        "label": "Name",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Address",
+                        "isEditable": true,
+                        "label": "Address",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "City",
+                        "isEditable": true,
+                        "label": "City",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "County",
+                        "isEditable": true,
+                        "label": "County",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "label": "State",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Zip_Code",
+                        "isEditable": true,
+                        "label": "Zip Code",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Latitude",
+                        "format": {
+                            "digitSeparator": false,
+                            "places": 4
+                        },
+                        "isEditable": true,
+                        "label": "Latitude",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Longitude",
+                        "format": {
+                            "digitSeparator": false,
+                            "places": 4
+                        },
+                        "isEditable": true,
+                        "label": "Longitude",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Coordinate_Source",
+                        "isEditable": true,
+                        "label": "Coordinate Source",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Address_Match_Type",
+                        "isEditable": true,
+                        "label": "Address Match Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Open_USTs",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Open USTs",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Closed_USTs",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Closed USTs",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "TOS_USTs",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Temporarily Out of Service USTs",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Facility_Status",
+                        "isEditable": true,
+                        "label": "Facility Status",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "LandUse",
+                        "isEditable": true,
+                        "label": "Land Use",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Population_1500ft",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Estimated Population within 1500ft",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Private_Wells_1500ft",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Estimated Private Domestic Wells within 1500ft",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Within_SPA",
+                        "isEditable": true,
+                        "label": "Within Source Water Protection Area (SPA)",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "SPA_PWS_FacilityID",
+                        "isEditable": true,
+                        "label": "SPA Public Water System and Facility ID",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "SPA_Water_Type",
+                        "isEditable": true,
+                        "label": "SPA Water Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "SPA_Facility_Type",
+                        "isEditable": true,
+                        "label": "SPA Facility Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "SPA_HUC12",
+                        "isEditable": true,
+                        "label": "SPA HUC12",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Within_WHPA",
+                        "isEditable": true,
+                        "label": "Within Groundwater Wellhead Protection Area (WHPA)",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "WHPA_PWS_FacilityID",
+                        "isEditable": true,
+                        "label": "WHPA Public Water System and Facility ID",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "WHPA_Water_Type",
+                        "isEditable": true,
+                        "label": "WHPA Water Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "WHPA_Facility_Type",
+                        "isEditable": true,
+                        "label": "WHPA Facility Type",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "WHPA_HUC12",
+                        "isEditable": true,
+                        "label": "WHPA HUC12",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Within_100yr_Floodplain",
+                        "isEditable": true,
+                        "label": "Within 100-year Floodplain",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "relationships/0/OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/State",
+                        "isEditable": false,
+                        "label": "State",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Facility_ID",
+                        "isEditable": false,
+                        "label": "Facility ID",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Tank_ID",
+                        "isEditable": false,
+                        "label": "Tank ID",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Tank_Status",
+                        "isEditable": false,
+                        "label": "Tank Status",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Installation_Date",
+                        "format": {
+                            "dateFormat": "shortDate",
+                            "digitSeparator": false
+                        },
+                        "isEditable": false,
+                        "label": "Installation Date",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Removal_Date",
+                        "format": {
+                            "dateFormat": "shortDate",
+                            "digitSeparator": false
+                        },
+                        "isEditable": false,
+                        "label": "Removal Date",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Capacity",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Capacity",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Substances",
+                        "isEditable": false,
+                        "label": "Substances",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Tank_Wall_Type",
+                        "isEditable": false,
+                        "label": "Tank Wall Type",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "Date_of_Last_Inspection",
+                        "isEditable": true,
+                        "label": " Date of Last Inspection (Tribal Lands Only)",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "EPA_Region",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "EPA Region",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Tribe",
+                        "isEditable": true,
+                        "label": "Tribe",
+                        "visible": true
+                    }
+                ],
+                "title": "{Name}"
+            }
+        }
+    ],
+    "tables": [
+        {
+            "id": "UST_Finder_Feature_Layer_2_4355",
+            "title": "USTs",
+            "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/4",
+            "itemId": "5a3ae0ed53564b6fa519f08e30e79e93",
+            "popupInfo": {
+                "popupElements": [
+                    {
+                        "type": "fields"
+                    },
+                    {
+                        "type": "attachments",
+                        "displayType": "auto"
+                    }
+                ],
+                "showAttachments": true,
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "tooltip": "",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "label": "State",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Facility_ID",
+                        "isEditable": true,
+                        "label": "Facility ID",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Tank_ID",
+                        "isEditable": true,
+                        "label": "Tank ID",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Tank_Status",
+                        "isEditable": true,
+                        "label": "Tank Status",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Installation_Date",
+                        "format": {
+                            "dateFormat": "shortDate",
+                            "digitSeparator": false
+                        },
+                        "isEditable": true,
+                        "label": "Installation Date",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Removal_Date",
+                        "format": {
+                            "dateFormat": "shortDate",
+                            "digitSeparator": false
+                        },
+                        "isEditable": true,
+                        "label": "Removal Date",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Capacity",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": true,
+                        "label": "Capacity",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Substances",
+                        "isEditable": true,
+                        "label": "Substances",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Tank_Wall_Type",
+                        "isEditable": true,
+                        "label": "Tank Wall Type",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "relationships/0/OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Facility_ID",
+                        "isEditable": false,
+                        "label": "Facility ID",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Name",
+                        "isEditable": false,
+                        "label": "Name",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Address",
+                        "isEditable": false,
+                        "label": "Address",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/City",
+                        "isEditable": false,
+                        "label": "City",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/County",
+                        "isEditable": false,
+                        "label": "County",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/State",
+                        "isEditable": false,
+                        "label": "State",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Zip_Code",
+                        "isEditable": false,
+                        "label": "Zip Code",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Latitude",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Latitude",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Longitude",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": false,
+                        "label": "Longitude",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Coordinate_Source",
+                        "isEditable": false,
+                        "label": "Coordinate Source",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Address_Match_Type",
+                        "isEditable": false,
+                        "label": "Address Match Type",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Open_USTs",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": false,
+                        "label": "Open USTs",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Closed_USTs",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": false,
+                        "label": "Closed USTs",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/TOS_USTs",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": false,
+                        "label": "Temporarily Out of Service USTs",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Population_1500ft",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": false,
+                        "label": "Estimated Population within 1500ft",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Private_Wells_1500ft",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": false,
+                        "label": "Estimated Private Domestic Wells wihtin 1500ft",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Within_100yr_Floodplain",
+                        "isEditable": false,
+                        "label": "Within 100-year Floodplain",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/LandUse",
+                        "isEditable": false,
+                        "label": "Land Use",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Within_SPA",
+                        "isEditable": false,
+                        "label": "Within Source Water Protection Area (SPA)",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/SPA_PWS_FacilityID",
+                        "isEditable": false,
+                        "label": "SPA Public Water System and Facility ID",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/SPA_Water_Type",
+                        "isEditable": false,
+                        "label": "SPA Water Type",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/SPA_Facility_Type",
+                        "isEditable": false,
+                        "label": "SPA Facility Type",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/SPA_HUC12",
+                        "isEditable": false,
+                        "label": "SPA HUC12",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Within_WHPA",
+                        "isEditable": false,
+                        "label": "Within Groundwater Wellhead Protection Area (WHPA)",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/WHPA_PWS_FacilityID",
+                        "isEditable": false,
+                        "label": "WHPA Public Water System and Facility ID",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/WHPA_Water_Type",
+                        "isEditable": false,
+                        "label": "WHPA Water Type",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/WHPA_Facility_Type",
+                        "isEditable": false,
+                        "label": "WHPA Facility Type",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/WHPA_HUC12",
+                        "isEditable": false,
+                        "label": "WHPA HUC12",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Facility_Status",
+                        "isEditable": false,
+                        "label": "Facility Status",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Date_of_Last_Inspection",
+                        "isEditable": false,
+                        "label": "Date_of_Last_Inspection",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/EPA_Region",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 0
+                        },
+                        "isEditable": false,
+                        "label": "EPA Region",
+                        "statisticType": "count",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "relationships/0/Tribe",
+                        "isEditable": false,
+                        "label": "Tribe",
+                        "statisticType": "count",
+                        "visible": false
+                    }
+                ],
+                "title": "USTs: {State}"
+            }
+        },
+        {
+            "id": "EJ_5070",
+            "title": "Open USTs",
+            "url": "https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/EJ/FeatureServer/10",
+            "itemId": "cf178c5a885d45deb246d0971e689599",
+            "popupInfo": {
+                "popupElements": [
+                    {
+                        "type": "fields"
+                    },
+                    {
+                        "type": "attachments",
+                        "displayType": "auto"
+                    }
+                ],
+                "showAttachments": true,
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "label": "OBJECTID",
+                        "tooltip": "",
+                        "visible": false
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "label": "State",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Facility_ID",
+                        "isEditable": true,
+                        "label": "Facility ID",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Tank_ID",
+                        "isEditable": true,
+                        "label": "Tank ID",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Tank_Status",
+                        "isEditable": true,
+                        "label": "Tank Status",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Installation_Date",
+                        "format": {
+                            "dateFormat": "shortDateShortTime",
+                            "digitSeparator": false
+                        },
+                        "isEditable": true,
+                        "label": "Installation Date",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Removal_Date",
+                        "format": {
+                            "dateFormat": "shortDateShortTime",
+                            "digitSeparator": false
+                        },
+                        "isEditable": true,
+                        "label": "Removal Date",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Capacity",
+                        "format": {
+                            "digitSeparator": true,
+                            "places": 2
+                        },
+                        "isEditable": true,
+                        "label": "Capacity",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Substances",
+                        "isEditable": true,
+                        "label": "Substances",
+                        "tooltip": "",
+                        "visible": true
+                    },
+                    {
+                        "fieldName": "Tank_Wall_Type",
+                        "isEditable": true,
+                        "label": "Tank Wall Type",
+                        "tooltip": "",
+                        "visible": true
+                    }
+                ],
+                "title": "USTs: {State}"
+            }
+        }
+    ],
+    "baseMap": {
+        "baseMapLayers": [
+            {
+                "id": "World_Hillshade_3689",
+                "opacity": 1,
+                "title": "World Hillshade",
+                "url": "https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer",
+                "visibility": true,
+                "layerType": "ArcGISTiledMapServiceLayer"
+            },
+            {
+                "id": "VectorTile_6451",
+                "opacity": 1,
+                "title": "World Topographic Map",
+                "visibility": true,
+                "layerType": "VectorTileLayer",
+                "styleUrl": "https://cdn.arcgis.com/sharing/rest/content/items/7dc6cea0b1764a1f9af2e679f642f0f5/resources/styles/root.json"
+            }
+        ],
+        "title": "Topographic"
+    },
+    "applicationProperties": {
+        "viewing": {}
+    },
+    "authoringApp": "ArcGISMapViewer",
+    "authoringAppVersion": "2024.2",
+    "initialState": {
+        "viewpoint": {
+            "targetGeometry": {
+                "spatialReference": {
+                    "latestWkid": 3857,
+                    "wkid": 102100
+                },
+                "xmin": -14054517.597486611,
+                "ymin": 2553138.199612065,
+                "xmax": -7019865.010347139,
+                "ymax": 6902099.360924297
+            }
+        }
+    },
+    "spatialReference": {
+        "latestWkid": 3857,
+        "wkid": 102100
+    },
+    "timeZone": "system",
+    "version": "2.32",
+    "widgets": {
+        "timeSlider": {
+            "properties": {
+                "endTime": 1692680460000,
+                "startTime": -1834732800000,
+                "numberOfStops": 10,
+                "thumbCount": 2,
+                "thumbMovingRate": 2000
+            }
+        }
+    }
+}
