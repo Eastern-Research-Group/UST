@@ -1,8 +1,8 @@
 CREATE TABLE public.ust_compartment_substance (
-    ust_compartment_substance_id integer  NOT NULL generated always as identity,
-    ust_tank_substance_id integer  NOT NULL ,
-    ust_compartment_id integer  NOT NULL ,
-    substance_comment character varying(4000)  NULL );
+    "ust_compartment_substance_id" integer  NOT NULL generated always as identity,
+    "ust_tank_substance_id" integer  NOT NULL ,
+    "ust_compartment_id" integer  NOT NULL ,
+    "substance_comment" character varying(4000)  NULL );
 
 ALTER TABLE public.ust_compartment_substance ADD CONSTRAINT ust_compartment_substance_pkey PRIMARY KEY (ust_compartment_substance_id);
 

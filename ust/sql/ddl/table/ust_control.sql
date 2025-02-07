@@ -1,11 +1,11 @@
 CREATE TABLE public.ust_control (
-    ust_control_id integer  NOT NULL generated always as identity,
-    organization_id character varying(10)  NULL ,
-    date_received date  NULL ,
-    date_processed date  NULL ,
-    data_source text  NULL ,
-    comments text  NULL ,
-    organization_compartment_flag character varying(1)  NULL );
+    "ust_control_id" integer  NOT NULL generated always as identity,
+    "organization_id" character varying(10)  NULL ,
+    "date_received" date  NULL ,
+    "date_processed" date  NULL ,
+    "data_source" text  NULL ,
+    "comments" text  NULL ,
+    "organization_compartment_flag" character varying(1)  NULL );
 
 ALTER TABLE archive."archive.ust_control" ADD CONSTRAINT ust_control_pkey PRIMARY KEY (control_id);
 

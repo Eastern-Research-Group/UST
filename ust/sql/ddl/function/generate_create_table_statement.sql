@@ -32,7 +32,7 @@ BEGIN
               FROM pg_catalog.pg_class c
                    LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
               WHERE c.relname ~ ('^(' || p_table_name || ')$')
-                AND pg_catalog.pg_table_is_visible(c.oid)
+                --AND pg_catalog.pg_table_is_visible(c.oid)
               ORDER BY 2, 3) b ON a.attrelid = b.oid
             INNER JOIN 
              (SELECT a.attrelid, max(a.attnum) as max_attnum
@@ -54,8 +54,8 @@ BEGIN
         END IF;
 
         IF column_record.attnum <= column_record.max_attnum THEN
-          v_table_ddl := v_table_ddl || chr(10) || '    ' || 
-          				 column_record.column_name || ' ' || 
+          v_table_ddl := v_table_ddl || chr(10) || '    "' || 
+          				 column_record.column_name || '" ' || 
                      	 column_record.column_type || ' ' || 
                      	 column_record.column_default_value || ' ' ||
                      	 column_record.column_not_null || ' ' ||
