@@ -34,7 +34,7 @@ class RowCounts:
 		self.ust_orgs = self.get_orgs('ust')
 		self.wb = op.Workbook()
 		self.process('release')
-		# self.process('ust')
+		self.process('ust')
 		self.cleanup_wb()
 		logger.info('Spreadsheet exported to %s', self.export_file_path)
 
