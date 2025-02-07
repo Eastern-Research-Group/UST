@@ -145,7 +145,7 @@ class ValueMapper:
 					epa_value = None
 
 				if not epa_value and epa_column_name == 'substance_id':
-					if lower(org_value) == 'jet fuel':
+					if org_value.lower() == 'jet fuel':
 						epa_value = 'Jet fuel A'
 					else:
 						sql5 = f"select count(*) from public.v_hazardous_substances where lower(substance) = lower({repr(org_value)})"
@@ -246,7 +246,7 @@ and not exists
 				column_name = row[1]
 				sql = f"""select distinct "{column_name}" 
 						from {self.dataset.schema}."{table_name}" 
-						where lower("{column_name}") like '%cp%' or lower("{column_name}") like '%cor%pro%'
+						where lower("{column_name}"::text) like '%cp%' or lower("{column_name}"::text) like '%cor%pro%'
 						order by 1;"""
 				utils.process_sql(conn, cur, sql)
 				rows2 = cur.fetchall()
