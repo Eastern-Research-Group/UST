@@ -1,10 +1,10 @@
 CREATE TABLE public.ust_release_substance (
-    ust_release_substance_id integer  NOT NULL generated always as identity,
-    ust_release_id integer  NOT NULL ,
-    substance_id integer  NOT NULL ,
-    quantity_released double precision  NULL ,
-    unit character varying(20)  NULL ,
-    substance_comment character varying(4000)  NULL );
+    "ust_release_substance_id" integer  NOT NULL generated always as identity,
+    "ust_release_id" integer  NOT NULL ,
+    "substance_id" integer  NOT NULL ,
+    "quantity_released" double precision  NULL ,
+    "unit" character varying(20)  NULL ,
+    "substance_comment" character varying(4000)  NULL );
 
 ALTER TABLE public.ust_release_substance ADD CONSTRAINT ust_release_substance_pkey PRIMARY KEY (ust_release_substance_id);
 

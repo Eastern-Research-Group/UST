@@ -1,6 +1,6 @@
 CREATE TABLE public.owner_types (
-    owner_type_id integer  NOT NULL generated always as identity,
-    owner_type character varying(100)  NOT NULL );
+    "owner_type_id" integer  NOT NULL generated always as identity,
+    "owner_type" character varying(100)  NOT NULL );
 
 ALTER TABLE public.owner_types ADD CONSTRAINT owner_types_pkey PRIMARY KEY (owner_type_id);
 
