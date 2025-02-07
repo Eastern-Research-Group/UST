@@ -596,6 +596,7 @@ def process_sql(conn, cur, sql, params=None):
     except Exception as e:
         error_logger.error('Error processing SQL: %s', e, stack_info=True, exc_info=True)
         q = get_pretty_query(cur)
+        error_logger.error('\n\nBad SQL:\n')
         error_logger.error(q)
         conn.rollback()
         cur.close()

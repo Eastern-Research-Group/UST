@@ -107,7 +107,7 @@ class ValueMapper:
 			utils.process_sql(conn, cur, sql3)
 			rows3 = cur.fetchall()
 			for row3 in rows3:
-				org_value = row3[0]
+				org_value = str(row3[0])
 				msql = msql + org_value + '\n'			
 			msql = msql + ' */\n\n'
 			msql = msql + '/*\n * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.\n'
@@ -123,7 +123,7 @@ class ValueMapper:
 
 			sql4 = f"""select distinct "{select_col}" from {self.dataset.schema}."{select_table}" where "{select_col}" is not null """
 			if self.only_incomplete:
-				sql4 = sql4 + f"""and "{select_col}" not in
+				sql4 = sql4 + f"""and "{select_col}"::varchar not in
 						(select organization_value from public.v_{self.dataset.ust_or_release}_element_mapping
 						where {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and epa_column_name = '{epa_column_name}'
 						and organization_value is not null) """
@@ -136,7 +136,7 @@ class ValueMapper:
 			logger.info('Generating mapping SQL for %s', epa_column_name)	
 			self.value_mapping_sql = self.value_mapping_sql + msql
 			for row4 in rows4:
-				org_value = row4[0]
+				org_value = str(row4[0])
 				sql5 = f"""select {db_lookup_col} from public.{db_lookup_table} where replace(lower({db_lookup_col}),'-',' ') = %s"""
 				utils.process_sql(conn, cur, sql5, params=(org_value.lower().replace('-',' '),))
 				try:
