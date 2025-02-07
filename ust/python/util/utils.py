@@ -94,41 +94,26 @@ def get_select_cols(sql):
     return cols
 
 
-# def get_view_info(state, ust_or_lust, view):
-#     schema = get_schema_name(state, ust_or_lust)
-#     view_name = '"' + schema + '"."' + view + '"'
-#     view_sql = get_view_sql(view_name)
-#     view_sql = process_view_sql(view_sql)
-#     from_sql = view_sql[1]
-#     cols = get_select_cols(view_sql[0])
-#     return cols, from_sql 
-
-
-# def get_schema_name(state, ust_or_lust):
-#     return state.upper() + '_' + ust_or_lust.upper() 
-
-
-# def get_view_name(state, ust_or_lust, view_name=None):
-#     schema = get_schema_name(state, ust_or_lust)    
-#     if view_name:
-#         view = '"' + schema + '".' + view_name
-#     else:
-#         view = '"' + schema + '".v_' + ust_or_lust.lower() + '_base'
-#     return view
-
-
 def autowidth(worksheet):
     for col in worksheet.columns:
-         max_length = 0
-         column = col[0].column_letter # Get the column name
-         for cell in col:
-             try: # Necessary to avoid error on empty cells
-                 if len(str(cell.value)) > max_length:
-                     max_length = len(str(cell.value))
-             except:
-                 pass
-         adjusted_width = (max_length + 2) * 1.2
-         worksheet.column_dimensions[column].width = adjusted_width
+         autowidth_column(worksheet, col)
+
+
+def autowidth_column(worksheet, column):
+    max_length = 0
+    column_letter = column[0].column_letter # get the column name
+    for cell in column:
+        try: # necessary to avoid error on empty cells
+            if len(str(cell.value)) > max_length:
+                max_length = len(str(cell.value))
+        except:
+            pass
+        adjusted_width = (max_length + 2) * 1.2
+        worksheet.column_dimensions[column_letter].width = adjusted_width    
+
+def add_ws_filter(worksheet):
+    worksheet.auto_filter.ref = worksheet.dimensions
+    return worksheet
 
 
 def get_today_string():
