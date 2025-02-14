@@ -21,21 +21,22 @@
  * Step 3: Get an overview of the source data and prepare it for processing
  * Step 4: Map the source data elements to the EPA template elements 
  * Step 5: Check for lookup data that needs to be deaggregated 
- * Step 6: Map the source data values to EPA values 
- * Step 7: Create the value mapping crosswalk views
- * Step 8: Create unique identifiers if they don't exist
- * Step 9: Write the views that convert the source data to the EPA format
- * Step 10: QA the views
- * Step 11: Insert data into the EPA schema 
- * Step 12: Export populated EPA template 
- * Step 13: Export control table summary
- * Step 14: Upload exported files to EPA Teams
- * Step 15: Request peer review and make any suggested changes
- * Step 16: Export source data (if necessary)
- * Step 17: Request OUST review
- * Step 18: Respond to OUST comments 
- * Step 19: State review 
- * Step 20: GIS processing (coming soon)
+ * Step 6: Map the source data values to EPA values
+ * Step 7: Send the substance mapping for review by an ERG chemical expert  
+ * Step 8: Create the value mapping crosswalk views
+ * Step 9: Create unique identifiers if they don't exist
+ * Step 10: Write the views that convert the source data to the EPA format
+ * Step 11: QA the views
+ * Step 12: Insert data into the EPA schema 
+ * Step 13: Export populated EPA template 
+ * Step 14: Export control table summary
+ * Step 15: Upload exported files to EPA Teams
+ * Step 16: Request peer review and make any suggested changes
+ * Step 17: Export source data (if necessary)
+ * Step 18: Request OUST review
+ * Step 19: Respond to OUST comments 
+ * Step 20: State review 
+ * Step 21: GIS processing (coming soon)
  * 
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -721,7 +722,33 @@ overwrite_existing = False      # Boolean, defaults to False. Set to True to ove
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 7: Create the value mapping crosswalk views
+--Step 7: Send the substance mapping (if it exists) for review by an ERG chemical expert 
+
+/*
+ * Run script export_substance_mapping.py to export the substance mapping and email it to John Wilhelmi,
+ * who will send it along to a chemical expert at ERG to review it for possible hazardous substances.  
+ * The script will automatically send the email through Outlook if you are on an ERG computer and
+ * have the python module pypiwin32 installed in your environment. 
+ * (Note: If the script is unable to send the email automatically (check your Sent folder), please
+ * manually attach the file (located at /ust/python/exports/mapping/XX/UST/) and send an email 
+ * to John.Wilhelmi@erg.com, CCing Victoria and Renae. 
+ * 
+ * Set these variables in the script: 
+ 
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+
+# These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
+# This file directory and its contents are excluded from pushes to the repo by .gitignore.
+export_file_path = None
+export_file_dir = None
+export_file_name = None
+
+*/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Step 8: Create the value mapping crosswalk views
 
 /* 
  * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
@@ -741,7 +768,7 @@ and table_name like '%_xwalk' order by 1;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 8: Create unique identifiers if they don't exist
+--Step 9: Create unique identifiers if they don't exist
 
 /* 
  * Run script create_missing_id_columns.py to identify if any required columns (e.g. Tank ID, Compartment ID, etc.)
@@ -773,7 +800,7 @@ order by sort_order;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 9: Write the views that convert the source data to the EPA format
+--Step 10: Write the views that convert the source data to the EPA format
 
 /** THIS SECTION UNDER CONSTRUCTION!!! 
  * 
@@ -798,7 +825,7 @@ select comments from public.ust_control where ust_control_id = ZZ;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 10: QA the views 
+--Step 11: QA the views 
 
 /* 
  * Run script qa_check.py to check that the views you have written to populate the main data tables
@@ -842,7 +869,7 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 11: Insert data into the EPA schema 
+--Step 12: Insert data into the EPA schema 
 
 /*
  * Run script populate_epa_data_tables.py to insert data into the main data tables in the public schema 
@@ -866,7 +893,7 @@ order by sort_order;
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 12: Export populated EPA template
+--Step 13: Export populated EPA template
 
 /*
  * Run script export_template.py to generate a populated EPA template that will be sent first to OUST
@@ -887,7 +914,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 13: Export control table summary
+--Step 14: Export control table summary
 
 /*
  * Run script control_table_summary.py to generate a high-level overview of the data for OUST's review. 
@@ -907,7 +934,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 14: Upload exported files to EPA Teams
+--Step 15: Upload exported files to EPA Teams
 
 /* 
  * Upload the following three files to the appropriate state folder on the EPA Teams site at 
@@ -923,7 +950,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 15: Request peer review and make any suggested changes
+--Step 16: Request peer review and make any suggested changes
 
 /* 
  * All templates must be peer reviewed before sending to OUST. Currently Renae and Jim are available for peer reviews.
@@ -950,7 +977,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 16: Export source data (if necessary)
+--Step 17: Export source data (if necessary)
 
 /* 
  * OUST has requested that ERG make all source data available to them to assist in their review. If the 
@@ -983,7 +1010,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 17: Request OUST review
+--Step 18: Request OUST review
 
 /* 
  * Sit back and relax, your work here is done for the time being! Or rather, sit back and start another ticket! 
@@ -1000,7 +1027,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 18: Respond to OUST comments 
+--Step 19: Respond to OUST comments 
 
 /* 
  * When OUST completes their review, they will email us. An updated version of the populated template will be 
@@ -1019,7 +1046,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 19: State review 
+--Step 20: State review 
 
 /* 
  * We haven't gotten this far yet, but this process will be very similar to the OUST review process. 
@@ -1030,7 +1057,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 20: GIS processing (coming soon)
+--Step 21: GIS processing (coming soon)
 
 /* 
  * For any facilities the state did not submit coordinates for, or for coordinates less than 3 decimal 

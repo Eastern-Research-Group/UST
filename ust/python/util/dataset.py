@@ -54,6 +54,8 @@ class Dataset:
 					folder = 'QAQC/'
 				elif 'template' in self.base_file_name:
 					folder = 'epa_templates/'
+				elif 'substance' in self.base_file_name:
+					folder = 'substance_mapping/'
 				else:
 					folder = 'other/'
 				if self.organization_id:
