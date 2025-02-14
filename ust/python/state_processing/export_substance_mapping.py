@@ -17,6 +17,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+send_email = True				# Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -26,8 +27,9 @@ export_file_name = None
 
 
 class SubstanceMapping:
-	def __init__(self, dataset):
+	def __init__(self, dataset, send_email=True):
 		self.dataset = dataset
+		self.send_email = send_email
 		self.export_exists = False 
 		
 
@@ -57,7 +59,7 @@ class SubstanceMapping:
 
 
 	def email(self):
-		if self.export_exists:	
+		if self.send_email and self.export_exists:	
 			greeting_name = utils.get_first_name_from_erg_email(config.hazsub_email)
 			outlook_info = utils.get_outlook_info()
 			if outlook_info:
@@ -82,13 +84,13 @@ Thank you,
 				body=email_body,
 				attachment_path=os.path.abspath(self.dataset.export_file_path))
 			emailer.email()
-		else:
+		elif self.send_email:
 			logger.warning('Nothing to email because no export file was created.')
 			return 
 		
 
 
-def main(ust_or_release, control_id=None, export_file_name=None, export_file_dir=None, export_file_path=None):
+def main(ust_or_release, control_id=None, send_email=True, export_file_name=None, export_file_dir=None, export_file_path=None):
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id, 
 				 	  base_file_name='substance_mapping_' + utils.get_timestamp_str() + '.xlsx',
@@ -98,12 +100,14 @@ def main(ust_or_release, control_id=None, export_file_name=None, export_file_dir
 
 	template = SubstanceMapping(dataset=dataset)
 	template.export()
-	template.email()
+	if send_email:
+		template.email()
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id, 
+		 send_email=send_email,
 		 export_file_name=export_file_name,
 		 export_file_dir=export_file_dir,
 		 export_file_path=export_file_path)

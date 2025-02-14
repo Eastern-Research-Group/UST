@@ -737,6 +737,7 @@ overwrite_existing = False      # Boolean, defaults to False. Set to True to ove
  
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+send_email = True				# Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.

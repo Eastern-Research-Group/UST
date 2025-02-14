@@ -609,7 +609,6 @@ def pretty_print_df(df):
     print(df.to_markdown()) 
 
 
-
 def string_to_list(string):
     if isinstance(string, list):
         return string
