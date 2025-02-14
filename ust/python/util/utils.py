@@ -607,3 +607,68 @@ def process_sql(conn, cur, sql, params=None):
 
 def pretty_print_df(df):
     print(df.to_markdown()) 
+
+
+
+def string_to_list(string):
+    if isinstance(string, list):
+        return string
+    list_of_str = []
+    list_of_str.append(string)
+    return list_of_str
+
+
+def list_to_quoted_string(list_of_strings, delimiter=', '):
+    """
+    Takes a list of strings and returns a string with each list element quoted in single quotes.
+    """
+    if isinstance(list_of_strings, str):
+        list_of_strings = string_to_list(list_of_strings)
+    string = ''
+    if list_of_strings and (type(list_of_strings) == list or type(list_of_strings) == tuple):
+        string =  delimiter.join("'" + x + "'" for x in list_of_strings)
+    elif list_of_strings:
+        string = "'" + list_of_strings + "'"
+    string = string.replace("''","'")
+    if string == '':
+        string = None
+    return string    
+
+
+def list_to_string(list_of_strings, delimiter=', '):
+    """
+    Takes a list of strings and returns a string without internal quotes.
+    """    
+    if isinstance(list_of_strings, str):
+        return list_of_strings
+    string = ''
+    if list_of_strings and (type(list_of_strings) == list or type(list_of_strings) == tuple):
+        string =  delimiter.join(x for x in list_of_strings)
+    if string == '':
+        string = None
+    return string    
+
+
+def get_first_name_from_erg_email(email_address):
+    i = email_address.find('.')
+    return email_address[:i].title()
+
+
+def get_last_name_from_erg_email(email_address):
+    i = email_address.find('.')+1
+    i2 = email_address.find('@')
+    return email_address[i:i2].title()
+
+
+def get_outlook_info():
+    import win32com.client
+
+    outlook = win32com.client.Dispatch('Outlook.Application')
+    mapi = outlook.GetNameSpace('MAPI')
+    outlook_info = {}
+    outlook_info['email'] = mapi.Accounts[0].SmtpAddress
+    outlook_info['first_name'] = get_first_name_from_erg_email(outlook_info['email'])
+    outlook_info['last_name'] = get_last_name_from_erg_email(outlook_info['email'])
+    outlook_info['display_name'] = mapi.Accounts[0].DisplayName
+    return outlook_info
+
