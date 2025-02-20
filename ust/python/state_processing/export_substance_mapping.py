@@ -78,7 +78,7 @@ Thank you,
 {sender_email}
 """
 			emailer = Emailer(recipient=config.hazsub_email,
-				cc=config.hazsub_email,
+				cc=config.hazsub_cc,
 				bcc=None,
 				subject=f'Substance mapping for {self.dataset.organization_id} {utils.get_pretty_ust_or_release(self.dataset.ust_or_release)}',
 				body=email_body,
