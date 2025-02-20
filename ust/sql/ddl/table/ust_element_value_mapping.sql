@@ -9,6 +9,8 @@ CREATE TABLE public.ust_element_value_mapping (
     "organization_comments" text  NULL ,
     "exclude_from_query" character varying(1)  NULL );
 
+ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_value_map_no_empty_strings_chk CHECK (((epa_value)::text <> ''::text));
+
 ALTER TABLE public.ust_element_value_mapping ADD CONSTRAINT ust_element_mapping_value_unique UNIQUE (ust_element_mapping_id, organization_value);
 
 ALTER TABLE example."example.ust_element_value_mapping" ADD CONSTRAINT ust_element_value_mapping_pkey PRIMARY KEY (ust_element_value_mapping_id);
