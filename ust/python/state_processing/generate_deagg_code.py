@@ -88,7 +88,7 @@ class DeaggCode:
 
 			if deagg_flag:
 				self.deagg_sql = self.deagg_sql + '------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n'
-				logger.info("It appears possible we may need to deaggregate the organization values for "%s"; generating deagg code...\n", epa_column_name)
+				logger.info('It appears possible we may need to deaggregate the organization values for "%s"; generating deagg code...\n', epa_column_name)
 
 				self.deagg_sql = self.deagg_sql + f'/* ORGANIZATION VALUES MAY NEED TO BE DEAGGREGATED for {epa_table_name}.{epa_column_name}!\n * \n'
 				self.deagg_sql = self.deagg_sql + f' * Schema = "{self.dataset.schema}"\n'
