@@ -6,12 +6,17 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+from datetime import datetime
 import openpyxl as op
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.borders import Border, Side
 
 from python.util import utils, config
+from python.util.emailer import Emailer 
 from python.util.logger_factory import logger
+
+
+send_email = True		# Boolean; defaults to True. If True, will use Outlook to automatically email the generated file to the user(s) identified in the config file. 
 
 
 gray_cell_fill = 'C9C9C9' # gray
@@ -25,7 +30,8 @@ center_align = Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 
 class RowCounts:	
-	def __init__(self):
+	def __init__(self, send_email=True):
+		self.send_email = send_email
 		self.export_file_name = 'Element_row_counts_' + utils.get_timestamp_str() + '.xlsx'
 		self.export_file_dir = '../../python/exports/other/'
 		Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
@@ -37,6 +43,8 @@ class RowCounts:
 		self.process('ust')
 		self.cleanup_wb()
 		logger.info('Spreadsheet exported to %s', self.export_file_path)
+		if self.send_email:
+			self.email()
 
 
 	def cleanup_wb(self):
@@ -153,11 +161,42 @@ class RowCounts:
 		conn.close()
 
 
+	def email(self):
+		today = datetime.today().strftime('%Y-%m-%d')
+		if self.send_email:	
+			greeting_name = utils.get_first_name_from_erg_email(config.element_row_counts_email)
+			outlook_info = utils.get_outlook_info()
+			if outlook_info:
+				sender_name = outlook_info['first_name']
+				sender_email = outlook_info['email']
+			else:
+				sender_name = ''
+				sender_email = ''
+				
+			email_body = f"""Hi {greeting_name},
 
+Attached please find the coverage spreadsheet generated on {today}.
 
-def main():
-	row_counts = RowCounts()
+Thank you,
+{sender_name}
+{sender_email}
+"""
+			emailer = Emailer(recipient=config.element_row_counts_email,
+				cc=config.element_row_counts_cc,
+				bcc=None,
+				subject=f'Coverage spreadsheet for {today}',
+				body=email_body,
+				attachment_path=os.path.abspath(self.export_file_path))
+			try:
+				emailer.email()
+			except Exception as e:
+				logger.error('Unable to email %s to %s', self.export_file_path, config.element_row_counts_email)
+
+		
+
+def main(send_email=True):
+	row_counts = RowCounts(send_email=send_email)
 
 
 if __name__ == '__main__':   
-	main()
+	main(send_email=send_email)
