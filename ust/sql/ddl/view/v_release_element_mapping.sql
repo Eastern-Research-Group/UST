@@ -19,7 +19,11 @@ create or replace view "public"."v_release_element_mapping" as
     a.organization_join_column3,
     a.organization_join_fk,
     a.organization_join_fk2,
-    a.organization_join_fk3
-   FROM ((release_element_mapping a
+    a.organization_join_fk3,
+    d.table_sort_order,
+    d.column_sort_order,
+    a.query_logic
+   FROM (((release_element_mapping a
      LEFT JOIN release_element_value_mapping b ON ((a.release_element_mapping_id = b.release_element_mapping_id)))
-     JOIN release_control c ON ((a.release_control_id = c.release_control_id)));
+     JOIN release_control c ON ((a.release_control_id = c.release_control_id)))
+     LEFT JOIN v_release_element_metadata d ON ((((a.epa_table_name)::text = (d.table_name)::text) AND ((a.epa_column_name)::text = (d.column_name)::text))));
