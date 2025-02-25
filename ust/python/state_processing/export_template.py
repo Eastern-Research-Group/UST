@@ -47,10 +47,12 @@ class Template:
 	def __init__(self, 
 				 dataset,
 				 data_only=False,
-				 template_only=False):
+				 template_only=False,
+				 substance_mapping_only=False):
 		self.dataset = dataset
 		self.data_only = data_only		
 		self.template_only = template_only
+		self.substance_mapping_only = substance_mapping_only
 		self.wb = op.Workbook()
 		self.wb.save(self.dataset.export_file_path)
 		if not self.data_only:
@@ -60,7 +62,10 @@ class Template:
 				element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=False)
 				self.make_unmapped_tab()
 				self.make_mapping_tabs()
-		self.make_data_tabs()	
+		if not self.substance_mapping_only:
+			self.make_data_tabs()	
+		else:
+			self.make_substance_mapping_tab()
 		self.cleanup_wb()
 		logger.info('Template exported to %s', self.dataset.export_file_path)
 
@@ -419,17 +424,27 @@ class Template:
 			cell = ws.cell(row=1, column=6)
 			cell.value = 'Programmer Comments'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=7)
-			cell.value = 'EPA Comments'
-			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=8)
-			cell.value = 'Organization Comments'
-			cell.font = Font(bold=True)
+			if self.substance_mapping_only:
+				cell = ws.cell(row=1, column=7)
+				cell.value = 'ERG Reviewer Comments'
+				cell.font = Font(bold=True)
+			else:
+				cell = ws.cell(row=1, column=7)
+				cell.value = 'EPA Comments'
+				cell.font = Font(bold=True)
+				cell = ws.cell(row=1, column=8)
+				cell.value = 'Organization Comments'
+				cell.font = Font(bold=True)
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=4):
-					ws.cell(row=rowno, column=colno).value = cell_value		
+					if colno > 6 and self.substance_mapping_only:
+						pass 
+					else:
+						ws.cell(row=rowno, column=colno).value = cell_value		
 		utils.autowidth(ws)
+		ws.column_dimensions['A'].width = 16  
+		ws.column_dimensions['B'].width = 95  
 
 		cur.close()
 		conn.close()

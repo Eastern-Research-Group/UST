@@ -15,7 +15,7 @@ from python.util.logger_factory import logger
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0 	           		# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
-display_bad_data = True  		# Boolean; defaults to True. Set to False to suppress printing bad data to the console.
+display_bad_data = False  		# Boolean; defaults to False. Set to True to print bad data to the console (note: if there are a lot of rows, this may be very slow).
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
 
 
@@ -42,7 +42,7 @@ class PeerReview:
 
 	def __init__(self, 
 				 dataset,
-				 display_bad_data=True,
+				 display_bad_data=False,
 				 overwrite_existing=False):
 		self.dataset = dataset
 		self.display_bad_data = display_bad_data
@@ -106,7 +106,7 @@ class PeerReview:
 			if view_rows == table_rows:
 				logger.info('Row counts match between %s.%s and public.%s: (%s)', self.dataset.schema, view, view.replace('v_',''), table_rows)
 			else:
-				logger.warning('Mismatch of row counts between  %s.%s (%s) and public.%s (%s)!!!', self.dataset.schema, view, view_rows, view.replace('v_',''), table_rows)
+				logger.warning('Mismatch of row counts between %s.%s (%s) and public.%s (%s)!!!', self.dataset.schema, view, view_rows, view.replace('v_',''), table_rows)
 				self.error_tables.append(view)
 
 
@@ -179,7 +179,7 @@ class PeerReview:
 
 
 
-def main(ust_or_release, control_id=None, organization_id=None, display_bad_data=True, overwrite_existing=False):
+def main(ust_or_release, control_id=None, organization_id=None, display_bad_data=False, overwrite_existing=False):
 	if not control_id and not organization_id:
 		logger.error('Please pass either control_id or organization_id')
 		exit()

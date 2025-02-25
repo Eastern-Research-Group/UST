@@ -1,8 +1,8 @@
 CREATE TABLE public.ust_release_source (
-    ust_release_source_id integer  NOT NULL generated always as identity,
-    ust_release_id integer  NOT NULL ,
-    source_id integer  NOT NULL ,
-    source_comment character varying(4000)  NULL );
+    "ust_release_source_id" integer  NOT NULL generated always as identity,
+    "ust_release_id" integer  NOT NULL ,
+    "source_id" integer  NOT NULL ,
+    "source_comment" character varying(4000)  NULL );
 
 ALTER TABLE public.ust_release_source ADD CONSTRAINT ust_release_source_pkey PRIMARY KEY (ust_release_source_id);
 

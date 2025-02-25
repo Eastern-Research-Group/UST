@@ -1,8 +1,8 @@
 CREATE TABLE public.ust_release_cause (
-    ust_release_cause_id integer  NOT NULL generated always as identity,
-    ust_release_id integer  NOT NULL ,
-    cause_id integer  NOT NULL ,
-    cause_comment character varying(4000)  NULL );
+    "ust_release_cause_id" integer  NOT NULL generated always as identity,
+    "ust_release_id" integer  NOT NULL ,
+    "cause_id" integer  NOT NULL ,
+    "cause_comment" character varying(4000)  NULL );
 
 ALTER TABLE public.ust_release_cause ADD CONSTRAINT ust_release_cause_pkey PRIMARY KEY (ust_release_cause_id);
 

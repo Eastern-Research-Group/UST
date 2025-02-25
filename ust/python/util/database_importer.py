@@ -41,7 +41,7 @@ class DatabaseImporter:
         cur = conn.cursor()
         try:
             sql = 'create schema "' + self.schema + '" AUTHORIZATION ' + config.db_user
-            utils.process_sql(conn, cur, sql)
+            cur.execute(sql)
             logger.info('Created schema %s', self.schema)
         except DuplicateSchema:
             logger.info('Schema %s already exists', self.schema)

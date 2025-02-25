@@ -1,6 +1,6 @@
 CREATE TABLE public.dispenser_udc_wall_types (
-    dispenser_udc_wall_type_id integer  NOT NULL generated always as identity,
-    dispenser_udc_wall_type character varying(20)  NOT NULL );
+    "dispenser_udc_wall_type_id" integer  NOT NULL generated always as identity,
+    "dispenser_udc_wall_type" character varying(20)  NOT NULL );
 
 ALTER TABLE public.dispenser_udc_wall_types ADD CONSTRAINT dispenser_udc_wall_types_pkey PRIMARY KEY (dispenser_udc_wall_type_id);
 
