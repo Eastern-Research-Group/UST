@@ -16,12 +16,13 @@ upload_file_path = r""			# Path to Excel, CSV, or text file to upload.
 schema = 'public'				# Schema to upload to. 
 table_name = None  				# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
 overwrite_table = False       	# Boolean. Set to True to overwrite table(s) if exists. 
+excel_tabs = None               # For multi-tab Excel files, enter a string or list containing the sheet names to export. Leave as None to export all tabs.
 
 
 class Importer:
 	existing_tables = None 
 
-	def __init__(self, upload_file_path, schema='public', table_name=None, overwrite_table=False):
+	def __init__(self, upload_file_path, schema='public', table_name=None, overwrite_table=False, excel_tabs=None):
 		self.upload_file_path = upload_file_path
 		self.schema = schema
 		if table_name:
@@ -29,6 +30,10 @@ class Importer:
 		else:
 			self.table_name = self.get_table_name_from_file_name()
 		self.overwrite_table = overwrite_table
+		if excel_tabs:
+			self.excel_tabs = utils.string_to_list(excel_tabs)
+		else:
+			self.excel_tabs = []
 		self.set_existing_tables()
 
 
@@ -66,15 +71,21 @@ class Importer:
 				logger.error('Unable to load table %s; adding to bad_file_list: %s: %s', new_table_name, e)
 		return True
 
+
 	def save_file_to_db(self):
 		if utils.is_excel(self.upload_file_path):
 			xls = pd.ExcelFile(self.upload_file_path)
 			sheet_names = xls.sheet_names
 			if len(sheet_names) > 1:
 				for sheet_name in sheet_names:
-					df = pd.read_excel(self.upload_file_path, sheet_name=sheet_name)
-					logger.debug('%s, worksheet %s read into dataframe', file_path, sheet_name)
-					self.save_table_to_db(df, new_table_name=sheet_name)
+					if not self.excel_tabs or sheet_name in self.excel_tabs:
+						df = pd.read_excel(self.upload_file_path, sheet_name=sheet_name)
+						logger.debug('%s, worksheet %s read into dataframe', self.upload_file_path, sheet_name)
+						if len(self.excel_tabs) == 1 and self.table_name:
+							new_table_name = self.table_name
+						else:
+							new_table_name = sheet_name 
+						self.save_table_to_db(df, new_table_name=new_table_name)
 			else:
 				try:
 					df = pd.read_excel(self.upload_file_path)   
@@ -100,10 +111,10 @@ class Importer:
 
 
 
-def main(upload_file_path, schema='public', table_name=None, overwrite_table=False):
-	t = Importer(upload_file_path, schema=schema, table_name=table_name, overwrite_table=overwrite_table)
+def main(upload_file_path, schema='public', table_name=None, overwrite_table=False, excel_tabs=None):
+	t = Importer(upload_file_path, schema=schema, table_name=table_name, overwrite_table=overwrite_table, excel_tabs=excel_tabs)
 	t.save_file_to_db()
 
 
 if __name__ == '__main__':  
-	main(upload_file_path=upload_file_path, schema=schema, table_name=table_name, overwrite_table=overwrite_table)
+	main(upload_file_path=upload_file_path, schema=schema, table_name=table_name, overwrite_table=overwrite_table, excel_tabs=excel_tabs)

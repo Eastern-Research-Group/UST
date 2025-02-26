@@ -612,9 +612,9 @@ def pretty_print_df(df):
 def string_to_list(string):
     if isinstance(string, list):
         return string
-    list_of_str = []
-    list_of_str.append(string)
-    return list_of_str
+    string = string.replace("'",'')
+    str_list = string.split(', ')
+    return str_list
 
 
 def list_to_quoted_string(list_of_strings, delimiter=', '):
@@ -646,6 +646,19 @@ def list_to_string(list_of_strings, delimiter=', '):
     if string == '':
         string = None
     return string    
+
+
+def list_nums_to_string(list_of_nums):
+    if isinstance(list_of_nums, str):
+        return list_of_nums
+    string = ''
+    if list_of_nums and (type(list_of_nums) == list or type(list_of_nums) == tuple):
+        string =  ', '.join(str(x) for x in list_of_nums)
+    elif list_of_nums:
+        string = list_of_nums
+    if string == '':
+        string = None
+    return string
 
 
 def get_first_name_from_erg_email(email_address):
