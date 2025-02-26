@@ -136,11 +136,11 @@ class Template:
 			element_name_range = ws["B2:B200"]
 			green_cells = ['FacilityID','TankID','CompartmentID','PipingID']
 			for row in element_name_range:
-			    for cell in row:
-			        if cell.value in green_cells:
-			        	cell.fill = utils.get_fill_gen(green_cell_fill)
-			        	if cell.value != 'FacilityID':
-				        	cell.offset(row=0, column=1).fill = utils.get_fill_gen(yellow_cell_fill)
+				for cell in row:
+					if cell.value in green_cells:
+						cell.fill = utils.get_fill_gen(green_cell_fill)
+						if cell.value != 'FacilityID':
+							cell.offset(row=0, column=1).fill = utils.get_fill_gen(yellow_cell_fill)
 			ws.column_dimensions['A'].width = 14
 			ws.column_dimensions['B'].width = 69
 			ws.column_dimensions['B'].font = Font(bold=True)
@@ -503,7 +503,20 @@ class Template:
 					ws.cell(row=rowno, column=colno).value = cell_value
 			cur.close()
 			conn.close()
+
+			if view_name == 'v_ust_facility':
+				for c3, c38 in zip(ws.iter_rows(min_col=3, max_col=3), ws.iter_rows(min_col=38, max_col=38)):
+					if c38[0].value == 'Y':
+						c3[0].fill = utils.get_fill_gen(yellow_cell_fill)
+				ws.delete_cols(38)
+			elif view_name == 'v_ust_release':
+				for c6, c31 in zip(ws.iter_rows(min_col=6, max_col=6), ws.iter_rows(min_col=31, max_col=31)):
+					if c31[0].value == 'Y':
+						c6[0].fill = utils.get_fill_gen(yellow_cell_fill)
+				ws.delete_cols(31)
+
 		ws.delete_cols(1)
+
 		utils.autowidth(ws)
 		ws.freeze_panes = ws['A2']
 		logger.info('Created %s tab', tab_name)
@@ -515,8 +528,8 @@ def main(ust_or_release, control_id=None, data_only=False, template_only=False, 
 		control_id = 1
 
 	dataset = Dataset(ust_or_release=ust_or_release,
-				 	  control_id=control_id, 
-				 	  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx',
+					  control_id=control_id, 
+					  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx',
 					  export_file_name=export_file_name,
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
