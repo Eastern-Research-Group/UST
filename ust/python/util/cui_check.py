@@ -26,7 +26,7 @@ maybe_as_true = True            # Boolean. Set to True to mark stopwords with th
 # upload_excel_tabs = ['Facility']     
 
 upload_file_path = r""				# Path to Excel, CSV, or text file to upload. 
-upload_schema = 'public'			# Schema to upload to. 
+upload_schema = ''			        # Schema to upload to. 
 upload_table_name = None  			# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
 upload_overwrite_table = False      # Boolean. Set to True to overwrite table(s) if exists. 
 upload_excel_tabs = None            # For multi-tab Excel files, enter a string or list containing the sheet names to export. Leave as None to export all tabs.
@@ -47,7 +47,8 @@ class CuiCheck:
 				 upload_schema = None,
 				 upload_table_name = None,
 				 upload_overwrite_table = False,
-				 upload_excel_tabs = None):
+				 upload_excel_tabs = None,
+				 perform_check=True):
 		self.schema = schema
 		self.table_name = table_name 
 		self.column_names = column_names
@@ -64,15 +65,28 @@ class CuiCheck:
 		self.new_table_name = 'erg_' + self.table_name + '_clean_cui'
 		self.file_name='CUI_check_' + self.schema + '_' + self.table_name  + '.xlsx'
 		self.export_dir = '../../python/exports/cui/'
-		os.makedirs(self.export_dir, exist_ok=True)
 		self.export_file_path = self.export_dir + self.file_name
-		self.duplicate_table()
-		self.eliminate_nonchars()
-		self.eliminate_multihyphen()
-		self.eliminate_stopwords()
-		self.eliminate_spaces()
-		self.write_data()
+		if self.perform_check:
+			self.process()
 		self.disconnect_db()
+
+
+	def print_self(self):
+		print('schema = ' + schema)
+		print('table_name = ' + table_name)
+		print('column_names = ' + str(column_names))
+		print('drop_existing = ' + str(drop_existing))
+		print('maybe_as_true = ' + str(maybe_as_true))
+		print('upload_file_path = ' + upload_file_path)
+		print('upload_schema = ' + upload_schema)
+		print('upload_table_name = ' + upload_table_name)
+		print('upload_overwrite_table = ' + str(upload_overwrite_table))
+		print('upload_excel_tabs = ' + str(upload_excel_tabs))
+		print('new_table_name = ' + new_table_name)
+		print('file_name = ' + file_name)
+		print('export_dir = ' + export_dir)
+		print('export_file_path = ' + export_file_path)
+		print('perform_check = ' + str(perform_check))
 
 
 	def clean_variables(self):
@@ -244,6 +258,16 @@ class CuiCheck:
 				if col[0].value in columns_to_adjust:
 					utils.autowidth_column(ws, col)
 		logger.info('Wrote %s rows to %s', len(df), self.export_file_path)
+
+
+	def process(self):
+		os.makedirs(self.export_dir, exist_ok=True)
+		self.duplicate_table()
+		self.eliminate_nonchars()
+		self.eliminate_multihyphen()
+		self.eliminate_stopwords()
+		self.eliminate_spaces()
+		self.write_data()
 
 
 	def connect_db(self):

@@ -159,6 +159,10 @@ class ValueMapper:
 						epa_value = 'Hazardous substance'
 					elif 'other' in org_value.lower():
 						epa_value = 'Other or mixture'
+					elif 'asphalt' in org_value.lower():
+						epa_value = 'Petroleum product'
+					elif 'not listed' in org_value.lower():
+						epa_value = 'Other or mixture'
 					else:
 						sql5 = f"select count(*) from public.v_hazardous_substances where lower(substance) = lower({repr(org_value)})"
 						utils.process_sql(conn, cur, sql5)
