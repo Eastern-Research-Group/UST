@@ -48,7 +48,7 @@ class Cui:
 
 	def process(self):
 		CuiImport(schema=self.schema, upload_file_path=self.upload_file_path)
-		CuiUpdate(ust_or_release=self.ust_or_release, control_id=self.control_id)
+		CuiUpdate(ust_or_release=self.ust_or_release, control_id=self.control_id).process()
 		dataset = Dataset(ust_or_release=self.ust_or_release,
 						  control_id=self.control_id, 
 						  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx')

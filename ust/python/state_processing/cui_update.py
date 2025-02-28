@@ -20,6 +20,8 @@ organization_id = ''            # State code. Required if control_id is None or 
 class CuiUpdate:
 	conn = None 
 	cur = None 
+	cui_column_name = None 
+	fac_name_column = None 
 	data_table_name = None 
 	data_column_name = None 
 
@@ -28,19 +30,21 @@ class CuiUpdate:
 				 control_id):
 		self.ust_or_release = ust_or_release.lower()
 		self.control_id = control_id 
-		logger.info('organization_id is %s', utils.get_org_from_control_id(self.control_id, self.ust_or_release))
+		# logger.info('organization_id is %s', utils.get_org_from_control_id(self.control_id, self.ust_or_release))
 		self.schema = utils.get_schema_from_control_id(self.control_id, self.ust_or_release)
-		logger.info('Schema is %s', self.schema)
-		self.connect_db()
+		# logger.info('Schema is %s', self.schema)
 		self.cui_table_name = 'erg_' + self.schema + '_clean_cui'
-		self.check_for_cui_table()
-		self.set_data_table_info()
-		self.check_for_table_population()
-		self.cui_column_name = self.get_cui_column_name()
-		self.fac_name_column = self.cui_column_name.replace('_cui','')
-		self.update_data_table()
-		self.disconnect_db()
 
+
+	def process(self):
+		self.connect_db()
+		if self.check_for_cui_table():
+			if self.set_data_table_info():
+				if self.check_for_table_population()
+					self.cui_column_name = self.get_cui_column_name()
+					self.fac_name_column = self.cui_column_name.replace('_cui','')
+					self.update_data_table()
+		self.disconnect_db()
 
 		
 	def check_for_cui_table(self):
@@ -48,8 +52,8 @@ class CuiUpdate:
 		utils.process_sql(self.conn, self.cur, sql, params=(self.schema, self.cui_table_name))
 		if self.cur.fetchone()[0] == 0:
 			logger.warning('No table %s exists in schema %s, exiting...', self.cui_table_name, self.schema)
-			self.disconnect_db()
-			exit()
+			return False 
+		return True
 
 
 	def set_data_table_info(self):
@@ -61,8 +65,8 @@ class CuiUpdate:
 			self.data_column_name = 'site_name'
 		else:
 			logger.warning('Invalid value for ust_or_release: %s', self.ust_or_release)
-			self.disconnect_db()
-			exit()
+			return False 
+		return True
 
 
 	def check_for_table_population(self):
@@ -70,8 +74,8 @@ class CuiUpdate:
 		utils.process_sql(self.conn, self.cur, sql, params=(self.control_id,))
 		if self.cur.fetchone()[0] == 0:
 			logger.warning('No rows exist for %s_control_id in table %s; nothing to update so exiting...', self.ust_or_release, self.data_table_name)
-			self.disconnect_db()
-			exit()
+			return False 
+		return True
 
 
 	def get_cui_column_name(self):
@@ -101,7 +105,6 @@ class CuiUpdate:
 					where a.{self.data_column_name} = b."{self.fac_name_column}" and b."{self.cui_column_name}" is false)"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.control_id,))
 		logger.info('Set cui_flag in table %s to N for %s rows due to lack of CUI', self.data_table_name, self.cur.rowcount)
-
 		self.conn.commit()
 
 
@@ -119,9 +122,6 @@ class CuiUpdate:
 
 
 
-
-
-
 def main(ust_or_release, 
      	 control_id=None,
      	 organization_id=None):
@@ -132,8 +132,7 @@ def main(ust_or_release,
 		control_id = utils.get_control_id(ust_or_release, organization_id)
 		logger.info('control_id set to %s', control_id)
 
-	cui = CuiUpdate(ust_or_release=ust_or_release,
-				   control_id=control_id)
+	CuiUpdate(ust_or_release=ust_or_release, control_id=control_id)
 
 
 if __name__ == '__main__':   
