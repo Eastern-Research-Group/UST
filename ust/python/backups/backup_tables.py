@@ -1,5 +1,3 @@
-from datetime import date
-import ntpath
 import os
 from pathlib import Path
 import sys  
@@ -112,6 +110,7 @@ class Backup:
 				logger.error('Invalid table type in table_types_to_process: %s; exiting', table_type)
 				exit()
 		return True 
+
 
 	def backup(self):
 		for table_type in self.table_types_to_process:

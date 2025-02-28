@@ -37,8 +37,8 @@ class Cui:
 
 
 	def get_ust_or_release(self):
-		i = schema.find('_')
-		return schema[i+1:]
+		i = schema.find('_') + 1
+		return schema[i:]
 
 
 	def get_organization(self):
