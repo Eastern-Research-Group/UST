@@ -437,7 +437,7 @@ class IdColumns:
 			else: 
 				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), compartment_id int, dispenser_id int generated always as identity)"
 			utils.process_sql(self.conn, self.cur, sql)
-			logger.info('Created table %s.%)', self.dataset.schema, self.erg_table_name)
+			logger.info('Created table %s.%s)', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
 			compartment_table_name = self.table_name
