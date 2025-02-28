@@ -16,6 +16,7 @@ object_name = None # If None, will export all tables, views, and functions
 export_path = '../../sql/ddl/'
 
 
+
 def main(schema, object_name=None):
 	conn = utils.connect_db()
 	cur = conn.cursor()
@@ -56,8 +57,8 @@ def main(schema, object_name=None):
 		sql2 = """select con.conname from pg_catalog.pg_constraint con
 					join pg_catalog.pg_class rel on rel.oid = con.conrelid
 					join pg_catalog.pg_namespace nsp on nsp.oid = connamespace
-				where nsp.nspname = 'public' and rel.relname = %s"""
-		utils.process_sql(conn, cur, sql2, params=(table_name,))
+				where nsp.nspname = %s and rel.relname = %s"""
+		utils.process_sql(conn, cur, sql2, params=(schema, table_name))
 		rows2 = cur.fetchall()
 		for row2 in rows2:
 			constraint_name = row2[0]
@@ -74,8 +75,8 @@ def main(schema, object_name=None):
 
 		# indexes 
 		sql3 = """select indexdef from pg_indexes
-				where schemaname = 'public' and tablename = %s"""
-		utils.process_sql(conn, cur, sql3, params=(table_name,))
+				where schemaname = %s and tablename = %s"""
+		utils.process_sql(conn, cur, sql3, params=(schema, table_name))
 		rows2 = cur.fetchall()
 		for row2 in rows2:
 			ddl_sql = ddl_sql + '\n\n' + row2[0]

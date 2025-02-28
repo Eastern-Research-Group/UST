@@ -14,21 +14,21 @@ from python.util.logger_factory import logger
 schema = ''              	# Enter the schema name
 table_name = ''             # Enter the table name 
 column_names = []           # Optional. Enter a list of column names to select. If empty list, all columns will be selected.
-
+export_dir = None           # Optional. Defaults to '../../python/exports/other/'
 
 class ExportTable:
 	def __init__(self, 
 				 schema,
 				 table_name,
-				 column_names=None):
+				 column_names=None,
+				 export_dir='../../python/exports/other/'):
 		self.schema = schema
 		self.table_name = table_name 
 		self.column_names = column_names
-		self.file_name=self.schema + '.' + self.table_name  + '.xlsx'
-		self.export_dir = '../../python/exports/other/'
+		self.file_name = self.schema + '.' + self.table_name  + '.xlsx'
+		self.export_dir = export_dir
 		os.makedirs(self.export_dir, exist_ok=True)
 		self.export_file_path = self.export_dir + self.file_name
-		self.export()
 
 
 	def export(self):
@@ -46,13 +46,15 @@ class ExportTable:
 
 
 
-def main(schema, table_name, column_names=None):
-	e = ExportTable(schema=schema, 
-				   table_name=table_name, 
-				   column_names=column_names)
+def main(schema, table_name, column_names=None, export_dir=None):
+	ExportTable(schema=schema, 
+	     	    table_name=table_name, 
+				column_names=column_names,
+				export_dir=export_dir).export()
 
 
 if __name__ == '__main__':   
 	main(schema=schema,
 		 table_name=table_name,
-		 column_names=column_names)		
+		 column_names=column_names,
+		 export_dir=export_dir)		

@@ -14,6 +14,7 @@ from python.util.upload_general_file import Importer
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+organization_id = ''            # State code. Required if control_id is None or 0; ignored otherwise. 
 
 
 class CuiUpdate:
@@ -27,7 +28,9 @@ class CuiUpdate:
 				 control_id):
 		self.ust_or_release = ust_or_release.lower()
 		self.control_id = control_id 
+		logger.info('organization_id is %s', utils.get_org_from_control_id(self.control_id, self.ust_or_release))
 		self.schema = utils.get_schema_from_control_id(self.control_id, self.ust_or_release)
+		logger.info('Schema is %s', self.schema)
 		self.connect_db()
 		self.cui_table_name = 'erg_' + self.schema + '_clean_cui'
 		self.check_for_cui_table()
@@ -46,6 +49,7 @@ class CuiUpdate:
 		if self.cur.fetchone()[0] == 0:
 			logger.warning('No table %s exists in schema %s, exiting...', self.cui_table_name, self.schema)
 			self.disconnect_db()
+			exit()
 
 
 	def set_data_table_info(self):
@@ -58,6 +62,7 @@ class CuiUpdate:
 		else:
 			logger.warning('Invalid value for ust_or_release: %s', self.ust_or_release)
 			self.disconnect_db()
+			exit()
 
 
 	def check_for_table_population(self):
@@ -66,6 +71,7 @@ class CuiUpdate:
 		if self.cur.fetchone()[0] == 0:
 			logger.warning('No rows exist for %s_control_id in table %s; nothing to update so exiting...', self.ust_or_release, self.data_table_name)
 			self.disconnect_db()
+			exit()
 
 
 	def get_cui_column_name(self):
@@ -77,6 +83,7 @@ class CuiUpdate:
 		except:
 			logger.warning('No CUI column found in %s.%s; exiting', self.schema, self.cui_table_name)
 			self.disconnect_db()
+			exit()
 		return cui_column_name
 
 
@@ -109,17 +116,27 @@ class CuiUpdate:
 		self.cur.close()
 		self.conn.close()
 		logger.info('Disconnected from database')
-		exit()
+
+
 
 
 
 
 def main(ust_or_release, 
-     	 control_id):
+     	 control_id=None,
+     	 organization_id=None):
+	if (control_id == 0 or not control_id) and not organization_id:
+		logger.errror('Either control_id or organization_id is required; exiting')
+		exit()
+	if not control_id:
+		control_id = utils.get_control_id(ust_or_release, organization_id)
+		logger.info('control_id set to %s', control_id)
+
 	cui = CuiUpdate(ust_or_release=ust_or_release,
 				   control_id=control_id)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
-	 	 control_id=control_id)		
+	 	 control_id=control_id,
+	 	 organization_id=organization_id)		
