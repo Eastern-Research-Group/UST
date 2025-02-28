@@ -36,7 +36,7 @@ class CuiImport:
 		try:
 			table_name = self.cur.fetchone()[0]
 			logger.info('A clean_cui table, %s, already exists in schema %s and will be dropped', table_name, self.schema)
-			sql = f'drop table {self.schema}.{table_name}'
+			sql = f'drop table {self.schema}."{table_name}"'
 			utils.process_sql(self.conn, self.cur, sql)
 			self.conn.commit()
 			logger.info('Table %s.%s dropped', self.schema, table_name)
