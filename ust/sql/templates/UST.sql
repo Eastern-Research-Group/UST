@@ -715,7 +715,7 @@ only_incomplete = True   		# Boolean, defaults to True. Set to False to output m
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
- * /ust/sql/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console 
+ * /ust/sql/states/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console
  * and step through it.  
  * 
  */
