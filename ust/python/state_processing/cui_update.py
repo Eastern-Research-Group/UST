@@ -40,7 +40,7 @@ class CuiUpdate:
 		self.connect_db()
 		if self.check_for_cui_table():
 			if self.set_data_table_info():
-				if self.check_for_table_population()
+				if self.check_for_table_population():
 					self.cui_column_name = self.get_cui_column_name()
 					self.fac_name_column = self.cui_column_name.replace('_cui','')
 					self.update_data_table()
