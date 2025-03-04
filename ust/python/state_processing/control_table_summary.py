@@ -120,13 +120,19 @@ class Summary:
 					order by sort_order"""
 			utils.process_sql(conn, cur, sql, params=(self.dataset.organization_id,))
 			data = cur.fetchall()
-			for rowno, row in enumerate(data, start=2):
-				for colno, cell_value in enumerate(row, start=1):
-					ws.cell(row=rowno, column=colno).value = cell_value
-					if colno == 2:
-						ws.cell(row=rowno, column=colno).number_format = '#,##0'
-			ws.cell(row=rowno, column=1).font = Font(bold=True)			
-			ws.cell(row=rowno, column=2).font = Font(bold=True)		
+			if not data:
+				ws.cell(row=2, column=1).value = 'No performance measure data available for ' + self.dataset.organization_id
+				ws.cell(row=2, column=1).font = Font(italic=True)		
+				rowno = 2
+			else:
+				for rowno, row in enumerate(data, start=2):
+					for colno, cell_value in enumerate(row, start=1):
+						ws.cell(row=rowno, column=colno).value = cell_value
+						if colno == 2:
+							ws.cell(row=rowno, column=colno).number_format = '#,##0'
+			
+				ws.cell(row=rowno, column=1).font = Font(bold=True)			
+				ws.cell(row=rowno, column=2).font = Font(bold=True)		
 
 			rowno = rowno + 2			
 			ws.cell(row=rowno, column=1).value = 'EPA Template'		
@@ -137,6 +143,7 @@ class Summary:
 			ws.cell(row=rowno, column=1).font = Font(bold=True)
 			ws.cell(row=rowno, column=2).value = 'Total UST'		
 			ws.cell(row=rowno, column=2).font = Font(bold=True)
+
 
 			sql = """select "CompartmentStatus", count(*) from public.v_ust_compartment
 					where ust_control_id = %s group by "CompartmentStatus" """

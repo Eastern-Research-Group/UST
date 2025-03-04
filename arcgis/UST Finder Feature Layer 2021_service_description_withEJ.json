@@ -1,0 +1,81 @@
+{
+    "id": "beaadc9d955542d3ab1e7131a3a4b66e",
+    "owner": "jchilton_EPA8",
+    "created": 1738871546000,
+    "isOrgItem": true,
+    "modified": 1738871546000,
+    "guid": null,
+    "name": null,
+    "title": "UST Finder Web Map_2- backup02062025",
+    "type": "Web Map",
+    "typeKeywords": [
+        "ArcGIS API for JavaScript",
+        "ArcGIS Online",
+        "Explorer Web Map",
+        "Map",
+        "Online Map",
+        "Web Map"
+    ],
+    "description": null,
+    "tags": [
+        "UST",
+        "LUST",
+        "Leaking Underground Storage Tanks",
+        "Underground Storage Tanks",
+        "Groundwater Vulnerability",
+        "groundwater",
+        "Vapor Intrusion",
+        "drinking water"
+    ],
+    "snippet": "UST Finder map of leaking underground storage tanks, underground storage tank facilities, and underground storage tanks.",
+    "thumbnail": "thumbnail/ago_downloaded.png",
+    "documentation": null,
+    "extent": [
+        [
+            -126.25387968749,
+            22.346170498505934
+        ],
+        [
+            -63.060520312506775,
+            52.560428182481154
+        ]
+    ],
+    "categories": [
+        "and Cleanup",
+        "/Categories/Water",
+        "Waste",
+        "/Categories/Land"
+    ],
+    "spatialReference": null,
+    "accessInformation": null,
+    "licenseInfo": null,
+    "culture": "en-us",
+    "properties": null,
+    "advancedSettings": null,
+    "url": null,
+    "proxyFilter": null,
+    "access": "private",
+    "size": 38951,
+    "subInfo": 0,
+    "appCategories": [],
+    "industries": [],
+    "languages": [],
+    "largeThumbnail": null,
+    "banner": null,
+    "screenshots": [],
+    "listed": false,
+    "ownerFolder": "bd64e7372f774243bad1f81be1b30fc1",
+    "protected": false,
+    "commentsEnabled": true,
+    "numComments": 0,
+    "numRatings": 0,
+    "avgRating": 0,
+    "numViews": 3,
+    "itemControl": "admin",
+    "scoreCompleteness": 66,
+    "groupDesignations": null,
+    "apiToken1ExpirationDate": -1,
+    "apiToken2ExpirationDate": -1,
+    "contentOrigin": "self",
+    "lastViewed": 1738868400000
+}
