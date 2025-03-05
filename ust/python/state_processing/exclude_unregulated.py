@@ -13,10 +13,10 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 8                  # Enter an integer that is the ust_control_id or release_control_id
-find_regulated = False           # Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
-execute_sql = True              # Boolean; defaults to True. Set to False to export the new view SQL to file without executing it in the database. 
-export_sql = False              # Boolean; defaults to False. If True, will export the new view definitions to a SQL file. 
+control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+find_regulated = True          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
+execute_sql = False            	# Boolean; defaults to False. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
+export_sql = True              	# Boolean; defaults to True. If True will generate a SQL file containing the 'create or replace view' statements.
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None
@@ -28,17 +28,17 @@ class Exclude:
 	cur = None 
 	df = None 
 	view_def = None 
-	value_mapping_sql = '------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n'
+	value_mapping_sql = '------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 	facility_id_column = None 
-	tank_id_column = None 
+	child_id_column = None 
 	facility_table_alias = None 
-	tank_table_alias = None 	
+	child_table_alias = None 	
 
 	def __init__(self, 
 				 dataset,
 				 find_regulated=True,
-				 execute_sql=True,
-				 export_sql=False):
+				 execute_sql=False,
+				 export_sql=True):
 		self.dataset = dataset
 		self.find_regulated = find_regulated
 		self.execute_sql = execute_sql
@@ -73,7 +73,7 @@ class Exclude:
 				 from public.{self.dataset.ust_or_release}_element_mapping a left join information_schema.columns b 
 					on lower(a.organization_table_name) = lower(b.table_name) and lower(a.organization_column_name) = lower(b.column_name)
 					left join public.v_{self.dataset.ust_or_release}_element_metadata c on a.epa_table_name = c.table_name and a.epa_column_name = c.column_name
-				 where b.table_schema = '{self.dataset.schema}' and a.epa_column_name in ('facility_id','tank_id')
+				 where b.table_schema = '{self.dataset.schema}' and a.epa_column_name in ('facility_id','tank_id','release_id')
 				 order by c.table_sort_order, c.column_sort_order"""
 		df = pd.read_sql(sql, con=utils.get_engine())
 		return df 
@@ -82,7 +82,7 @@ class Exclude:
 	def get_view_def(self, view_name):
 		sql = "select public.get_view_def(%s, %s)"
 		utils.process_sql(self.conn, self.cur, sql, params=(view_name, self.dataset.schema))
-		view_def = f'create or replace view {self.dataset.schema}.{view_name} as\n' 
+		view_def = f'\n\ncreate or replace view {self.dataset.schema}.{view_name} as\n' 
 		view_def = view_def + self.cur.fetchone()[0].replace(';','')
 		return view_def
 
@@ -94,27 +94,39 @@ class Exclude:
 			view_def = view_def + '\n and '
 		else:
 			view_def = view_def + '\n where '
-		if view_name == 'v_ust_facility':
-			filtered_df = self.df.query("epa_table_name == 'ust_facility' & epa_column_name == 'facility_id'")
+		filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'facility_id'")
+		if view_name == 'v_ust_facility' or view_name == 'v_ust_release':
+			# filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'facility_id'")
 			self.facility_id_column = filtered_df['column_name'].iloc[0]
 			from_table = self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
 			self.facility_table_alias = get_table_alias(self.get_view_def(view_name), from_table)
 			view_def = view_def + f'{self.facility_table_alias}."{self.facility_id_column}"::varchar(50) not in (select facility_id from {self.dataset.schema}.erg_unregulated_facilities)'
 		else:
-			filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'facility_id'")
+			# filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'facility_id'")
 			if len(filtered_df) > 0:
 				self.facility_id_column = filtered_df['column_name'].iloc[0]
 				from_table =  self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
 				self.facility_table_alias = get_table_alias(self.get_view_def(view_name), from_table)
 			
-			filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'tank_id'")
+			if self.dataset.ust_or_release == 'ust':
+				epa_column_name = 'tank_id'
+				type = 'tanks'
+				data_type = 'int'
+			else:
+				epa_column_name = 'release_id'
+				type = 'releases'
+				data_type = 'varchar(50)'
+			filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == '{epa_column_name}'")
 			if len(filtered_df) > 0:
-				self.tank_id_column = filtered_df['column_name'].iloc[0]
+				self.child_id_column = filtered_df['column_name'].iloc[0]
 				from_table = self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
-				self.tank_table_alias = get_table_alias(self.get_view_def(view_name), from_table)		
+				self.child_table_alias = get_table_alias(self.get_view_def(view_name), from_table)		
 				
-			view_def = view_def + f"not exists\n\t(select 1 from {self.dataset.schema}.erg_unregulated_tanks unreg"
-			view_def = view_def + f'\n\twhere {self.facility_table_alias}."{self.facility_id_column}"::varchar(50) = unreg.facility_id and {self.tank_table_alias}."{self.tank_id_column}"::int = unreg.tank_id)'
+			view_def = view_def + f"not exists\n\t(select 1 from {self.dataset.schema}.erg_unregulated_{type} unreg"
+			view_def = view_def + f'\n\twhere {self.facility_table_alias}."{self.facility_id_column}"::varchar(50) = unreg.facility_id and {self.child_table_alias}."{self.child_id_column}"::{data_type} = unreg.{epa_column_name})'
+		if view_def[:-1] != ';':
+			view_def = view_def + ';'
+
 		return view_def   
 
 
@@ -156,8 +168,8 @@ def get_table_alias(view_def, from_table):
 def main(ust_or_release, 
 		 control_id, 
 		 find_regulated=True, 
-		 execute_sql=True,
-		 export_sql=False,
+		 execute_sql=False,
+		 export_sql=True,
 		 export_file_path=None, 
 		 export_file_dir=None,
 		 export_file_name=None):
