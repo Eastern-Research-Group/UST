@@ -96,13 +96,11 @@ class Exclude:
 			view_def = view_def + '\n where '
 		filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'facility_id'")
 		if view_name == 'v_ust_facility' or view_name == 'v_ust_release':
-			# filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'facility_id'")
 			self.facility_id_column = filtered_df['column_name'].iloc[0]
 			from_table = self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
 			self.facility_table_alias = get_table_alias(self.get_view_def(view_name), from_table)
 			view_def = view_def + f'{self.facility_table_alias}."{self.facility_id_column}"::varchar(50) not in (select facility_id from {self.dataset.schema}.erg_unregulated_facilities)'
 		else:
-			# filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'facility_id'")
 			if len(filtered_df) > 0:
 				self.facility_id_column = filtered_df['column_name'].iloc[0]
 				from_table =  self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
@@ -146,7 +144,6 @@ class Exclude:
 		self.cur.close()
 		self.conn.close()
 		logger.info('Disconnected from database')
-
 
 
 
