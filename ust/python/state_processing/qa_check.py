@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 8              	# Enter an integer that is the ust_control_id or release_control_id
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -85,6 +85,7 @@ class QualityCheck:
 			self.check_bad_mapping()
 			if self.dataset.ust_or_release == 'ust':
 				self.check_compartment_data_flag()
+		self.check_heating_oil()
 		self.write_overview()
 		element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=True)
 		self.cleanup_wb()
@@ -461,6 +462,49 @@ class QualityCheck:
 			if cnt < 1:
 				self.error_dict['invalid EPA value in ' + epa_column_name] = epa_value 
 				logger.warning('Invalid EPA value for %s.%s: %s', self.table_name, epa_column_name, cnt)
+
+
+	def check_heating_oil(self):
+		# check for inclusion of tanks that are unregulated due to heating oil
+
+		if self.dataset.ust_or_release == 'ust':
+			sql = f"""select distinct facility_id, tank_id 
+					from 
+						(select ts.facility_id, tank_id 
+						from {self.dataset.schema}.v_ust_tank_substance ts join public.substances s on ts.substance_id = s.substance_id 
+							join (select distinct facility_id from 
+									(select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.v_ust_facility ) x 
+								  where facility_type_id <> 2) f on ts.facility_id = f.facility_id
+						where s.substance like 'Heating%'
+						union all 
+						select x.facility_id, tank_id 
+						from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
+							  from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x 
+							join (select distinct facility_id from 
+									(select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.v_ust_facility ) x 
+								  where facility_type_id in (1,12)) f on x.facility_id = f.facility_id	  
+						where tank_capacity_gallons <1100) a
+					order by 1, 2"""
+		else:
+			sql = f"""select distinct facility_id, release_id
+					from 
+						(select ts.release_id, f.facility_id 
+						from {self.dataset.schema}.v_ust_release_substance ts join public.substances s on ts.substance_id = s.substance_id 
+							join (select distinct release_id, facility_id from 
+									(select release_id, facility_id, facility_type_id from {self.dataset.schema}.v_ust_release ) x 
+								  where facility_type_id <> 2) f on ts.release_id = f.release_id
+						where s.substance like 'Heating%') a
+					order by 1, 2"""
+		utils.process_sql(self.conn, self.cur, sql)
+		num_rows = self.cur.rowcount
+		self.error_cnt_dict['Rows that need to be excluded related to unregulated heating oil'] = num_rows
+		if self.dataset.ust_or_release == 'ust':
+			row_type = 'tanks'
+		else:
+			row_type = 'releases'
+		if num_rows > 0:
+			logger.warning('There are %s %s that need to be excluded due to unregulated heating oil. Run script exclude_unregulated.py and rebuild the data views.', num_rows, row_type)
+			self.error_dict[f'Number of {row_type} that need to be excluded due to unregulated heating oil. Run script exclude_unregulated.py and rebuild the data views.'] = num_rows
 
 
 	def check_compartment_data_flag(self):

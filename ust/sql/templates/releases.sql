@@ -546,6 +546,22 @@ order by sort_order;
  * 
 */
 
+/** NOTE! Releases involving heating oil should only be included in UST Finder if the Facility Type =
+ * 'Bulk plant storage/petroleum distributor', however, you should not exclude heating oil releases
+ * if Facility Type is not populated. 
+ * 
+ * You can run script find_unrequlated.py to build tables erg_unregulated_facilities and 
+ * erg_unregulated_releases and then use these tables to exclude the necessary facilities and releases 
+ * while writing your views, however, the QAQC script that you run in the next step will check for  
+ * the existence of these unregulated facilities, and if applicable, will suggest that you run script 
+ * exclude_unregulated.py, which will both identify the unregulated facilities/releases and generate 
+ * the SQL for you to update your views after writing them. In most cases, it may be easier to 
+ * not worry about these unregulated facilities/releases in this step and just take care of the 
+ * issue during the QAQC step below if necessary. 
+ * 
+ * 
+*/
+
 --Remind yourself if there are any state-level business rules you need to take into consideration
 --when writing the views (such as excluding AST, for example).
 select comments from public.release_control where release_control_id = ZZ;
@@ -581,6 +597,8 @@ control_id = ZZ                  # Enter an integer that is the release_control_
  * 9) Columns that exist in the view that were not mapped in release_element_mapping. 
  * 10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.release_element_value_mapping 
  *     and ensure the epa_value exists in the associated lookup table. 
+ * 11) Unregulated facility/release data related to heating oil in certain facility types. To resolve these issues, run script
+ *     exclude_unregulated.py, which will identify the unregulated facilities and tanks and will generate SQL to help you rewrite your views.
  *
  * The script will also provide the counts of rows in v_ust_release, v_ust_release_substance, v_ust_release_source, v_ust_release_cause,
  * and v_ust_release_corrective_action_strategy (if these views exist) - ensure these counts make sense! 

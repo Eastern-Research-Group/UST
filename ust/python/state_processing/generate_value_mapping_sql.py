@@ -147,6 +147,22 @@ class ValueMapper:
 				if not epa_value and epa_column_name == 'substance_id':
 					if org_value.lower() == 'jet fuel':
 						epa_value = 'Jet fuel A'
+					elif org_value.lower() == 'empty' or 'unknown' in org_value.lower():
+						epa_value = 'Unknown'
+					elif 'emergency gen' in org_value.lower():
+						epa_value = 'Diesel fuel (b-unknown)'
+					elif 'regular' in org_value.lower() or 'super' in org_value.lower() or 'ultra' in org_value.lower() or 'midgrade' in org_value.lower():
+						epa_value = 'Gasoline (unknown type)'
+					elif 'used' in org_value.lower() or 'waste' in org_value.lower():
+						epa_value = 'Used oil/waste oil'
+					elif 'hazard' in org_value.lower():
+						epa_value = 'Hazardous substance'
+					elif 'other' in org_value.lower():
+						epa_value = 'Other or mixture'
+					elif 'asphalt' in org_value.lower():
+						epa_value = 'Petroleum product'
+					elif 'not listed' in org_value.lower():
+						epa_value = 'Other or mixture'
 					else:
 						sql5 = f"select count(*) from public.v_hazardous_substances where lower(substance) = lower({repr(org_value)})"
 						utils.process_sql(conn, cur, sql5)

@@ -715,7 +715,7 @@ only_incomplete = True   		# Boolean, defaults to True. Set to False to output m
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
- * /ust/sql/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console 
+ * /ust/sql/states/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console
  * and step through it.  
  * 
  */
@@ -819,6 +819,23 @@ order by sort_order;
  * 
 */
 
+/** NOTE! Tanks containing heating oil should only be included in UST Finder if the Facility Type =
+ * 'Bulk plant storage/petroleum distributor', however, you should not exclude heating oil tanks
+ * if Facility Type is not populated. Also, tanks <1100 gallons should be excluded if the 
+ * Facility Type is populated and is equal to 'Agricultural/farm' or 'Residential. 
+ * 
+ * You can run script find_unrequlated.py to build tables erg_unregulated_facilities and 
+ * erg_unregulated_tanks and then use these tables to exclude the necessary facilities and tanks 
+ * while writing your views, however, the QAQC script that you run in the next step will check for  
+ * the existence of these unregulated tanks, and if applicable, will suggest that you run script 
+ * exclude_unregulated.py, which will both identify the unregulated facilities/tanks and generate 
+ * the SQL for you to update your views after writing them. In most cases, it may be easier to 
+ * not worry about these unregulated facilities/tanks in this step and just take care of the 
+ * issue during the QAQC step below if necessary. 
+ * 
+ * 
+*/
+
 --Remind yourself if there are any state-level business rules you need to take into consideration
 --when writing the views (such as excluding AST, for example).
 select comments from public.ust_control where ust_control_id = ZZ;
@@ -856,6 +873,9 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
  * 10) Columns that exist in the view that were not mapped in ust_element_mapping. 
  * 11) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
  *     and ensure the epa_value exists in the associated lookup table. 
+ * 12) Unregulated facility/tank data related to heating oil and small tank capacities in certain facility types. To resolve these issues, 
+ *     run script exclude_unregulated.py, which will identify the unregulated facilities and tanks and will generate SQL to help you rewrite 
+ *     your views. 
  *
  * The script will also provide the counts of rows in v_ust_facility, v_ust_tank, v_ust_compartment, and v_ust_piping (if these views exist) -
  * ensure these counts make sense! 

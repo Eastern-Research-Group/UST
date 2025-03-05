@@ -129,14 +129,14 @@ def get_control_id(ust_or_release, organization_id):
     process_sql(conn, cur, sql, params=(organization_id, ))
     cnt = cur.fetchone()[0]
     if cnt == 0:
-        logger.error('No data in %s_control; unable to proceed.',{ust_or_release})
+        logger.error('No data in %s_control; unable to proceed.',ust_or_release)
         exit()
     sql = f"select max({ust_or_release}_control_id) from public.{ust_or_release}_control where organization_id = %s"
     process_sql(conn, cur, sql, params=(organization_id, ))
     control_id = cur.fetchone()[0]
 
     if cnt > 1:
-        logger.info('Found multiple Control IDs in %s_control; using newest one (%s)', {ust_or_release}, str(control_id) )
+        logger.info('Found multiple Control IDs in %s_control; using newest one (%s)', ust_or_release, str(control_id) )
     else:
         logger.info('Setting Control ID to %s', str(control_id))
 
@@ -612,9 +612,9 @@ def pretty_print_df(df):
 def string_to_list(string):
     if isinstance(string, list):
         return string
-    list_of_str = []
-    list_of_str.append(string)
-    return list_of_str
+    string = string.replace("'",'')
+    str_list = string.split(', ')
+    return str_list
 
 
 def list_to_quoted_string(list_of_strings, delimiter=', '):
@@ -646,6 +646,19 @@ def list_to_string(list_of_strings, delimiter=', '):
     if string == '':
         string = None
     return string    
+
+
+def list_nums_to_string(list_of_nums):
+    if isinstance(list_of_nums, str):
+        return list_of_nums
+    string = ''
+    if list_of_nums and (type(list_of_nums) == list or type(list_of_nums) == tuple):
+        string =  ', '.join(str(x) for x in list_of_nums)
+    elif list_of_nums:
+        string = list_of_nums
+    if string == '':
+        string = None
+    return string
 
 
 def get_first_name_from_erg_email(email_address):

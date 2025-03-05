@@ -11,12 +11,21 @@ from python.util import utils
 from python.util.logger_factory import logger
 
 
-query = """select distinct a."FacilityID", "FacilityName", "FacilityType1", "TankID", "TankStatus",
-	case when b."FacilityID" is null then 'Yes' else 'No' end as "Orphaned Tank"
-from hi_ust.tank a left join hi_ust.facility b on a."FacilityID" = b."FacilityID" 
-where "FederallyRegulated" = True 
-order by 1, 3;""" 		# Text of query to be exported, Parameters are not accepted. 
-export_file_name = 'hi_ust_federally_regulated_tanks.xlsx'		# Optional. If None, file name will be 'query_output_YYYY-MM-DD.xlsx'
+query = """select ust_element_value_mapping_id, 
+ust_element_mapping_id, 
+ust_control_id, 
+organization_id, 
+epa_table_name, 
+epa_column_name, 
+organization_value, 
+epa_value, 
+programmer_comments, 
+epa_comments, 
+organization_comments, 
+exclude_from_query
+from public.v_base_ust_element_value_mapping
+order by organization_id, table_sort_order, column_sort_order, organization_value;""" 		# Text of query to be exported, Parameters are not accepted. 
+export_file_name = 'ust_element_value_mapping.xlsx'		# Optional. If None, file name will be 'query_output_YYYY-MM-DD.xlsx'
 
 
 class ExportQuery:
