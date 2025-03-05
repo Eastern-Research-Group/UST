@@ -11,9 +11,9 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True  		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
-overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+overwrite_existing = True      	# Boolean, defaults to True. If True, will overwrite an existing file. Set to False to append to an existing file. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None
@@ -28,7 +28,7 @@ class ValueMapper:
 	def __init__(self, 
 				 dataset, 
 				 only_incomplete=True,
-				 overwrite_existing=False):
+				 overwrite_existing=True):
 		self.dataset = dataset
 		self.only_incomplete = only_incomplete
 		self.overwrite_existing = overwrite_existing
@@ -63,10 +63,10 @@ class ValueMapper:
 		for row in rows:
 			epa_table_name = row[0]
 			epa_column_name = row[1]
-			logger.info('Working on %s', epa_column_name)
+			logger.info('Working on %s.%s', epa_table_name, epa_column_name)
 
 			msql =  '------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n'
-			msql = msql + '--' + epa_column_name + '\n\n'
+			msql = msql + '--' + epa_table_name + '.' + epa_column_name + '\n\n'
 		
 			if epa_column_name == 'compartment_status_id' and self.organization_compartment_flag == 'N':
 				msql = msql + f'/*\n{self.dataset.organization_id} does not report at the Compartment level, but CompartmentStatus is required.\n'
@@ -87,8 +87,8 @@ class ValueMapper:
 				
 			sql2 = f"""select {self.dataset.ust_or_release}_element_mapping_id, organization_table_name, organization_column_name, deagg_table_name, deagg_column_name 
 					from public.{self.dataset.ust_or_release}_element_mapping 
-					where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s"""
-			utils.process_sql(conn, cur, sql2, params=(self.dataset.control_id, epa_column_name))
+					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
+			utils.process_sql(conn, cur, sql2, params=(self.dataset.control_id, epa_table_name, epa_column_name))
 			row2 = cur.fetchone()
 			element_mapping_id = row2[0]
 			org_table_name = row2[1]
