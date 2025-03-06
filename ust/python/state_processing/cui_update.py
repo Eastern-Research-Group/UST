@@ -73,7 +73,7 @@ class CuiUpdate:
 		sql = f"select count(*) from {self.data_table_name} where {self.ust_or_release}_control_id = %s"
 		utils.process_sql(self.conn, self.cur, sql, params=(self.control_id,))
 		if self.cur.fetchone()[0] == 0:
-			logger.warning('No rows exist for %s_control_id in table %s; nothing to update so exiting...', self.ust_or_release, self.data_table_name)
+			logger.warning('No rows exist for %s_control_id in table %s; no CUI flags to update.', self.ust_or_release, self.data_table_name)
 			return False 
 		return True
 
