@@ -113,6 +113,9 @@ set material = trim(material);
 update spill_reports_all
 set cause_type = trim(cause_type);
 
+
+select * from spill_reports_all;
+site_type = ATP, sor_type = UST, regulated = TRUE, cause_type = No Release. 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
 Generate SQL statements to do the inserts into release_element_mapping. 
@@ -225,7 +228,12 @@ insert into release_element_value_mapping (release_element_mapping_id, organizat
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (219, 'Unknown(See Case File)', 'Unknown', null);
 
 
+select * from public.facility_types ft 
 
+update release_element_value_mapping
+set epa_value = 'State/local government'
+where organization_value = 'Public'
+and release_element_mapping_id = 219;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --release_status_id
@@ -260,6 +268,30 @@ insert into release_element_value_mapping (release_element_mapping_id, organizat
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (222, 'O', 'Other', 'Please verify');
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (222, 'T', 'Other', 'Please verify');
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (222, 'W', 'Other', 'Please verify');
+
+
+update release_element_value_mapping
+set epa_value = 'No further action', organization_comments = 'State provided mapping', epa_comments = 'Check with state',programmer_comments = null
+where release_element_mapping_id = 222
+and epa_value = 'Other'
+
+
+update release_element_value_mapping
+set epa_value = 'Active: corrective action', organization_comments = 'State provided mapping', epa_comments = 'Check with state',programmer_comments = null
+where release_element_mapping_id = 222
+and organization_value in ('O');
+
+select * from release_element_value_mapping where  release_element_mapping_id = 222 and epa_value = 'Other';
+
+M  
+Active: post corrective action monitoring 
+
+O  
+
+Active: corrective action 
+
+
+
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -437,7 +469,26 @@ insert into release_element_value_mapping (release_element_mapping_id, organizat
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (226, 'Waste Oil and TCE', 'Used oil/waste oil', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (226, 'Waste/Motor Oil', 'Used oil/waste oil', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (226, 'white gasoline', 'Petroleum product', null);
+More likely denatured ethanol?
 
+
+
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (226, 'Gasoline, unleaded', 'Gasoline (unknown type)', null);
+
+
+select * from release_element_value_mapping where release_element_mapping_id =226 and organization_value= 'Gasoline, unleaded';
+
+
+
+ select * from public.substances s where lower(substance) like ('%leaded gasoline%')
+
+select * from release_element_value_mapping where release_element_mapping_id = 226 and organization_value = 'Ethanol';
+
+update release_element_value_mapping 
+set epa_value = 'Leaded gasoline',epa_comments='Leaded gasoline',programmer_comments=null
+where release_element_mapping_id = 226 and organization_value in ('Gasoline Leaded');
+
+select * from release_element_value_mapping where release_element_mapping_id = 226 and programmer_comments is not null;
 
 /*!!! WARNING! Some of the lookups have changed for the new template format, so if you used the 
 archive.v_ust_element_mapping and/or archive.v_lust_element_mapping views and copied values 
@@ -450,7 +501,7 @@ order by 1;
 --Other
 
 --Get the updated value from the current lookup:
-select * from substances where lower(substance) like lower('%Hazardous Substance%');
+select * from substances where lower(substance) like lower('%MTBE%');
 /*
 Other unlisted blend containing any other mixture of diesel, renewable diesel, or 20% biodiesel or less
 Other unlisted blend containing any other mixture of diesel, renewable diesel, or more than 20% biodiesel
@@ -476,6 +527,8 @@ where release_control_id = 4 and epa_column_name = 'cause_id';
 --so we have already deagged this table when we did the sources above
 select distinct "cause_type" from "spill_reports_all" order by 1;
 
+select * from public.causes c where lower(cause) like '%hist%';
+
 
 /*generate generic sql to insert value mapping rows into release_element_value_mapping, 
 then modify the generated sql with the mapped EPA values 
@@ -495,10 +548,20 @@ where sor_type = 'UST'
 order by 1;
 
 
-select * from public.causes order by 2;
-
 
 select * from public.causes where lower(cause) like lower('%Vent%') order by 2;
+
+select * from release_element_value_mapping where release_element_mapping_id = 230 and organization_value = 'Accident';
+
+
+select
+
+update release_element_value_mapping
+set epa_value ='Physical/mechanical damage', programmer_comments=null
+where release_element_mapping_id = 230
+ and organization_value = 'Damage';
+
+
  insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (230, 'Accident', 'Other', 'Please verify');
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (230, 'Broken Pipe ', 'Piping failure', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (230, 'corrosion', 'Corrosion', null);
@@ -546,9 +609,23 @@ insert into release_element_value_mapping (release_element_mapping_id, organizat
 
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (230, 'Unsecured Valve', 'Other', 'Please verify');
 
-select * from release_element_value_mapping;
+delete from release_element_value_mapping where release_element_mapping_id= 230
+and organization_value in ('no Release','No Release','No Tank Found');
 
 
+select * from release_element_value_mapping where release_element_mapping_id= '230' and organization_value = 'Historical';
+
+
+
+
+select count(*) from spill_reports_all where cause_type  in ('Spillage') and sor_type = 'UST';
+
+select * from public.causes where lower(cause) like '%general%' order by 2;
+
+update  release_element_value_mapping
+set epa_value = 'General spill', programmer_comments=null,epa_comments = 'Other  nothing to indicate it is a dispenser spill - didnt we add a general spill category?'
+where release_element_mapping_id= 230
+and organization_value in ('Spillage');
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -657,7 +734,9 @@ left join sd_release.v_release_status_xwalk	rs on x."status" = rs.organization_v
 left join sd_release.v_facility_type_xwalk	ft on x."proptype" = ft.organization_value 
 where  sor_type = 'UST';
 
+select count(*) from v_ust_release ;
 
+select count(*) from spill_reports_all where sor_type = 'UST';
 
 
 select * from spill_reports_all where id='89.225';
@@ -795,10 +874,9 @@ delete_existing = False # can set to True if there is existing release data you 
 --Quick sanity check of number of rows inserted:
 select table_name, num_rows from v_release_table_row_count
 where release_control_id = 4 order by sort_order;
-ust_release	7177
-ust_release_substance	4711
-ust_release_cause	7117
-
+ust_release	3579
+ust_release_substance	3070
+ust_release_cause	3069
 
 --------------------------------------------------------------------------------------------------------------------------
 --export template
