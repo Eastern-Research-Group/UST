@@ -33,7 +33,7 @@ netsh int ip reset
 ### 4) Copy relevant tables into UGSTank database. 
 
 1. If it doesn't exist, create the state schema in the ERG postgres database. 
-2. In the Database Navigator, in the state database, select the tables you want to copy into the ERG database. If the state database is not huge, you can select all tables and worry about figuring out which ones you need later. If the state database if very large, you can do some querying first to decide which tables are relevant and limit your selection to those. 
+2. In the Database Navigator in DBeaver, in the state database, select the tables you want to copy into the ERG database. If the state database is not huge, you can select all tables and worry about figuring out which ones you need later. If the state database if very large, you can do some querying first to decide which tables are relevant and limit your selection to those. 
 3. Right click on the table(s) to export in the state database and select Export Data.
 4. For the Export Target, select Database | Database table(s) and click Next. 
 5. Click on the Choose button to the right of the Target Container field. Find the UGSTank database connection and then the state schema you wish to import into, then click OK. Verify that the Target Container correctly identifies the UGSTank database and the schema you want. Click Next. 
