@@ -1,0 +1,15 @@
+CREATE TABLE md_release.erg_md_release_clean_cui (
+    "CASE_NO" text  NULL ,
+    "COUNTY" text  NULL ,
+    "DATE_OPEN" timestamp without time zone  NULL ,
+    "SPILL_LOC" text  NULL ,
+    "SPILL_LOC_cui" boolean  NULL ,
+    "ADDRESS" text  NULL ,
+    "CITY" text  NULL ,
+    "ZIP" text  NULL ,
+    "RELEASE" text  NULL ,
+    "CLEANUP" text  NULL ,
+    "CODE" text  NULL ,
+    "STATUS" text  NULL ,
+    "DT_CLOSED" timestamp without time zone  NULL ,
+    "REG_NUMBER" text  NULL );
