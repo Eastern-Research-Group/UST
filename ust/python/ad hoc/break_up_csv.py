@@ -9,7 +9,7 @@ import pandas as pd
 from python.util import utils
 from python.util.logger_factory import logger
 
-path_to_csv = r'C:\Users\renae\Downloads/USTs_5.csv'
+path_to_csv = r"C:\Users\erguser\Downloads\Facilities.csv"
 
 
 def main():
@@ -19,7 +19,8 @@ def main():
 	# print(df.columns)
 	df.sort_values(by=['State'], inplace=True)
 	states = df['State'].unique().tolist()
-	# print(states)
+	print(states)
+	exit()
 	i = int(len(states)/3)
 	# print(i)
 	group1 = states[:i]

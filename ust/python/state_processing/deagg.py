@@ -72,16 +72,17 @@ class deagg:
 		control_column_name = control_table_name + '_id'
 		sql = f"""select organization_id from {self.dataset.view_name}.{control_table_name} 
 				 where {control_column_name} = %s"""
-		self.cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 		logger.info('Deagg table name = %s', self.deagg_table_name)
 
 		sql = """select count(*) from information_schema.tables 
 		         where table_schema = %s and table_name = %s"""
-		self.cur.execute(sql, (self.dataset.schema, self.deagg_table_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.deagg_table_name))
+
 		cnt =  self.cur.fetchone()[0]
 		if cnt > 0 and self.drop_existing:
 			sql = f"drop table {self.dataset.schema}.{self.deagg_table_name}"
-			self.cur.execute(sql)
+			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Dropped existing table %s', self.deagg_table_name)
 		elif cnt > 0 and not self.drop_existing:
 			logger.warning('Table %s.%s already exists. To drop and replace, pass drop_existing=True to this function. Exiting...', self.dataset.schema, self.deagg_table_name)
@@ -92,12 +93,12 @@ class deagg:
 			 ({self.id_column_name} int not null generated always as identity primary key,
 			 "{self.column_name}" text,
 			 constraint {self.deagg_table_name}_unique unique ("{self.column_name}"))"""
-		self.cur.execute(sql)
+		utils.process_sql(self.conn, self.cur, sql)
 		logger.info('Created table %s.%s with primary key %s', self.dataset.schema, self.deagg_table_name, self.id_column_name) 
 
 		sql = f"""select distinct "{self.column_name}" from {self.dataset.schema}."{self.data_table_name}" 
 		          where "{self.column_name}" is not null order by 1"""
-		self.cur.execute(sql)
+		utils.process_sql(self.conn, self.cur, sql)
 		rows = self.cur.fetchall()
 		for row in rows:
 			col_text = row[0]
@@ -107,7 +108,7 @@ class deagg:
 			for part in parts:
 				sql2 = f"""insert into {self.dataset.schema}.{self.deagg_table_name} ("{self.column_name}") 
 				           values (%s) on conflict("{self.column_name}") do nothing"""
-				self.cur.execute(sql2, (part,))
+				utils.process_sql(self.conn, self.cur, sql2, params=(part,))
 
 		logger.info('Finished deagging %s."%s"."%s" into %s', self.dataset.schema, self.data_table_name, self.column_name, self.deagg_table_name)
 		
@@ -117,7 +118,7 @@ class deagg:
 				  set deagg_table_name = %s, deagg_column_name = %s
 		          where {self.dataset.ust_or_release}_control_id = %s 
 		          and organization_table_name = %s and organization_column_name = %s"""
-		self.cur.execute(sql, (self.deagg_table_name, self.column_name, self.dataset.control_id, self.data_table_name, self.column_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.deagg_table_name, self.column_name, self.dataset.control_id, self.data_table_name, self.column_name))
 		self.conn.commit()
 		logger.info('Updated %s_element_mapping; set deagg_table_name to %s, deagg_column_name to %s for %s.%s', self.dataset.ust_or_release, self.deagg_table_name, self.column_name, self.data_table_name, self.column_name)
 
@@ -130,14 +131,14 @@ class deagg:
 				from {self.dataset.schema}.{self.dataset.ust_or_release}_element_mapping 
 				where {self.dataset.ust_or_release}_control_id = %s
 				and organization_table_name = %s and organization_column_name = %s"""
-		self.cur.execute(sql, (self.dataset.control_id, self.data_table_name, self.column_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.data_table_name, self.column_name))
 		epa_table_name = self.cur.fetchone()[0]
 
 		sql = f"""select organization_column_name
 				from {self.dataset.schema}.{self.dataset.ust_or_release}_element_mapping  
 				where epa_table_name = %s
 				and organization_column_name <> %s and organization_table_name = %s"""
-		self.cur.execute(sql, (epa_table_name, self.column_name, self.data_table_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(epa_table_name, self.column_name, self.data_table_name))
 		rows = self.cur.fetchall()
 		data_table_pk_cols = [r[0] for r in rows]
 		
