@@ -30,7 +30,31 @@ class Unregulated:
 			self.unreg_table = 'erg_unregulated_releases'
 
 
+	def check_for_substances(self):
+		self.connect_db()
+
+		if self.dataset.ust_or_release == 'ust':
+			view_name = 'v_ust_tank_substance'
+		else:
+			view_name = 'v_ust_release_substance'
+
+		sql = """select count(*) from information_schema.tables 
+		         where table_schema = %s and table_type = 'VIEW' and table_name = %s"""
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, view_name))
+		cnt = self.cur.fetchone()[0]
+		
+		self.disconnect_db()		
+
+		if cnt > 0:
+			return True 
+		return False 
+
+
 	def execute(self):
+		if not self.check_for_substances():
+			logger.info('No substance data for %s %s, no need to check for unregulated %s.', self.dataset.organization_id, utils.get_pretty_ust_or_release(self.dataset.ust_or_release), self.data_type)
+			exit()
+
 		self.connect_db()
 
 		if self.drop_existing:
@@ -153,11 +177,13 @@ class Unregulated:
 			facility_type_sql = self.build_facility_type_sql('farm/residence')
 
 			sql = f"""insert into {self.dataset.schema}.{self.unreg_table}
-					select x.facility_id, tank_id 
+					select x.facility_id, x.tank_id 
 					from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
 						  from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x 
 						join {facility_type_sql} on x.facility_id = f.facility_id	  
-					where tank_capacity_gallons < 1100
+						join {self.dataset.schema}.v_ust_tank_substance s on x.facility_id = s.facility_id and x.tank_id = s.tank_id 
+						join public.substances sub on s.substance_id = sub.substance_id
+					where tank_capacity_gallons < 1100 and substance_group in ('Diesel','Gasoline')
 					on conflict do nothing"""
 			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Inserted %s rows into %s.%s due to tank capacity <1100 gallones in a farm or residence facility', self.cur.rowcount, self.dataset.schema, self.unreg_table)
