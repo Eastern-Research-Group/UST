@@ -1,11 +1,15 @@
-import sys
 import os
-sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util.logger_factory import logger
-from ust.python.util import utils
+from pathlib import Path
+import sys  
+ROOT_PATH = Path(__file__).parent.parent.parent
+sys.path.append(os.path.join(ROOT_PATH, ''))
+
 import pandas as pd
 
-path_to_csv = r'C:\Users\renae\Downloads/USTs_5.csv'
+from python.util import utils
+from python.util.logger_factory import logger
+
+path_to_csv = r"C:\Users\erguser\Downloads\Facilities.csv"
 
 
 def main():
@@ -15,7 +19,8 @@ def main():
 	# print(df.columns)
 	df.sort_values(by=['State'], inplace=True)
 	states = df['State'].unique().tolist()
-	# print(states)
+	print(states)
+	exit()
 	i = int(len(states)/3)
 	# print(i)
 	group1 = states[:i]

@@ -1,0 +1,16 @@
+CREATE TABLE mp_ust.erg_mp_ust_tanks (
+    "deq_id" text  NULL ,
+    "tank_size" double precision  NULL ,
+    "tank_contents" text  NULL ,
+    "tank_type" text  NULL ,
+    "tank_install_date" text  NULL ,
+    "active_tank_count" bigint  NULL ,
+    "total_tanks_at_site" bigint  NULL ,
+    "COMPARTMENT_TK" text  NULL ,
+    "tanks_status_notes" text  NULL ,
+    "leak_detection_tank_equipment" text  NULL ,
+    "leak_detection_piping" text  NULL ,
+    "spill_overflow_corrosion_protection" text  NULL ,
+    "status" text  NULL ,
+    "tank_id" integer  NULL ,
+    "secondary_containment" text  NULL );

@@ -3,37 +3,33 @@ from pathlib import Path
 import sys  
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
-from datetime import datetime
 
-from python.util.logger_factory import logger
 from python.util import utils
+from python.util.dataset import Dataset 
+from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' # valid values are 'ust' or 'release'
-control_id = 14
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 
 
-def main(control_id, ust_or_release):
-	ust_or_release = ust_or_release.lower()
-	schema = utils.get_schema_from_control_id(control_id, ust_or_release)
-
+def main(dataset):
 	conn = utils.connect_db()
 	cur = conn.cursor()
+	logger.info('Connected to database')
 
-	pop_view_name = 'v_' + ust_or_release.lower() + '_table_population '
-	control_id_col = ust_or_release.lower() + '_control_id'
 	sql = f"""select epa_column_name, organization_table_name, organization_column_name,
 					database_lookup_table, database_lookup_column 
-			from {pop_view_name} 
-			where {control_id_col} = %s and database_lookup_table is not null
+			from public.v_{dataset.ust_or_release}_table_population 
+			where {dataset.ust_or_release}_control_id = %s and database_lookup_table is not null
 			order by table_sort_order, column_sort_order"""
-	cur.execute(sql, (control_id, ))
+	utils.process_sql(conn, cur, sql, params=(control_id,))
 	rows = cur.fetchall()
 	for row in rows:
 		epa_column_name = row[0]
 		database_lookup_table = row[3]
 		database_lookup_column = row[4]
-		view_name = schema + '.v_' + database_lookup_column + '_xwalk'
+		view_name = dataset.schema + '.v_' + database_lookup_column + '_xwalk'
 		if epa_column_name == 'facility_type1' or epa_column_name == 'facility_type2':
 			epa_column_name2 = 'facility_type_id'
 		else:
@@ -46,8 +42,8 @@ def main(control_id, ust_or_release):
 
 		sql = f"""create or replace view {view_name} as 
 				select a.organization_value, a.epa_value, b.{epa_column_name2}
-				from v_{ust_or_release}_element_mapping a left join {database_lookup_table} b on a.epa_value = b.{database_lookup_column}
-				where a.{control_id_col} = %s and a.epa_column_name = %s"""
+				from public.v_{dataset.ust_or_release}_element_mapping a left join {database_lookup_table} b on a.epa_value = b.{database_lookup_column}
+				where a.{dataset.ust_or_release}_control_id = %s and a.epa_column_name = %s"""
 		# print(sql)
 		try:
 			cur.execute(sql, (control_id, epa_column_name))
@@ -60,8 +56,16 @@ def main(control_id, ust_or_release):
 
 	cur.close()
 	conn.close()
+	logger.info('Disconnected from database')
 
 
-if __name__ == '__main__':
-	main(control_id, ust_or_release)
+
+
+if __name__ == '__main__':   
+	dataset = Dataset(ust_or_release=ust_or_release,
+				 	  control_id=control_id,
+				 	  requires_export=False)
+
+	main(dataset)
+
 	

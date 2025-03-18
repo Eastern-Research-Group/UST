@@ -4,28 +4,26 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+from python.util import utils
 from python.util.import_service import ImportService
+from python.util.logger_factory import logger
 
-organization_id = 'AZ' 
-# Enter a directory (NOT a path to a specific file) for ust_path and release_path
-# Set to None if not applicable
-ust_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\State Data\AZ\UST'
-# ust_path = None
-# release_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\State Data\AZ\Release' 
-release_path = None 
-overwrite_table = False 
+
+ust_or_release = 'ust'          # Valid values are 'ust' or 'release'
+organization_id = 'WA'            # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
+path = r"C:\Users\erguser\Downloads\WA"                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
+overwrite_table = False         # Boolean, defaults to False; set to True if you are replacing existing data in the schema
+
 
 import_service = ImportService()
 
-def import_files(organization_id, ust_path=None, release_path=None, overwrite_table=False):
-    if ust_path:
-        import_service.import_data(organization_id, 'ust', ust_path,  overwrite_table=overwrite_table)
-    if release_path:
-        import_service.import_data(organization_id, 'release', release_path, overwrite_table=overwrite_table)
-
+def import_files(ust_or_release, organization_id, path, overwrite_table=False):
+    ust_or_release = utils.verify_ust_or_release(ust_or_release)
+    import_service.import_data(organization_id, ust_or_release, path, overwrite_table=overwrite_table)
+   
     
 if __name__ == '__main__':       
-    import_files(organization_id, ust_path, release_path, overwrite_table=False)
+    import_files(ust_or_release, organization_id, path, overwrite_table=overwrite_table)
 
 
 
