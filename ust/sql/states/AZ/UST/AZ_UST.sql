@@ -834,3 +834,11 @@ export_file_name = None		# If export_file_path and export_file_dir/export_file_n
 
 --------------------------------------------------------------------------------------------------------------------------
 
+select organization_value, epa_value, ust_element_value_mapping_id 
+from v_ust_element_mapping where organization_id = 'AZ' and epa_column_name = 'substance_id'
+order by 1;
+
+
+select * from substances;
+
+update ust_element_value_mapping set epa_value = 'Leaded gasoline' where ust_element_value_mapping_id = 673;

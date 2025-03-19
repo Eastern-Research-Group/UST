@@ -4,6 +4,8 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+import psycopg2
+
 from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
@@ -16,6 +18,7 @@ drop_existing = True            # Boolean; defaults to True. If True, will drop 
 class Unregulated:
 	conn = None 
 	cur = None 
+	tables_exist = False
 
 	def __init__(self, 
 				 dataset,
@@ -66,7 +69,9 @@ class Unregulated:
 				self.disconnect_db()
 				exit()
 
-		self.create_tables()
+		if not self.tables_exist:
+			self.create_tables()
+	
 		self.insert_heating_oil()
 		self.insert_small_tank()
 		self.insert_facilities()
@@ -75,10 +80,25 @@ class Unregulated:
 
 
 	def drop_existing_tables(self):
-		sql = f"drop table if exists {self.dataset.schema}.{self.unreg_table}"
-		utils.process_sql(self.conn, self.cur, sql)
-		sql = f"drop table if exists {self.dataset.schema}.{self.unreg_fac_table}"
-		utils.process_sql(self.conn, self.cur, sql)
+		try:
+			sql = f"drop table if exists {self.dataset.schema}.{self.unreg_table}"
+			self.cur.execute(sql)
+		except psycopg2.errors.DependentObjectsStillExist as e:
+			logger.warning('Table %s.%s exists but the views that depend on it have already been written, so truncating it instead of creating it.', self.dataset.schema, self.unreg_table)
+			sql = f"truncate table {self.dataset.schema}.{self.unreg_table}"
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Truncated table %s.%s', self.dataset.schema, self.unreg_table)
+			self.tables_exist = True 
+
+		try:
+			sql = f"drop table if exists {self.dataset.schema}.{self.unreg_fac_table}"
+			self.cur.execute(sql)
+		except psycopg2.errors.DependentObjectsStillExist as e:
+			logger.warning('Table %s.%s exists but the views that depend on it have already been written, so truncating it instead of creating it.', self.dataset.schema, self.unreg_fac_table)
+			sql = f"truncate table {self.dataset.schema}.{self.unreg_fac_table}"
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Truncated table %s.%s', self.dataset.schema, self.unreg_fac_table)
+			self.tables_exist = True 
 
 
 	def get_existing_tables(self):
