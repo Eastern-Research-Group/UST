@@ -6,6 +6,7 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+from python.state_processing.cui_update import CuiUpdate 
 from python.util import utils, config
 from python.util.logger_factory import logger
 
@@ -35,7 +36,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 			table_name = 'ust_facility'
 
 		sql = f"select count(*) from public.{table_name} where {ust_or_release}_control_id = %s"
-		cur.execute(sql, (control_id,))
+		utils.process_sql(conn, cur, sql, params=(control_id,))
 		cnt = cur.fetchone()[0]
 		if cnt > 0:
 			logger.warning('Data found in %s for %s_control_id %s. To proceed, set the delete_existing variable to True.', table_name, ust_or_release, control_id)
@@ -45,7 +46,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 	sql = f"""select table_name, view_name, sort_order
 			from {table_name}
 			order by sort_order"""
-	cur.execute(sql)
+	utils.process_sql(conn, cur, sql)
 	rows = cur.fetchall()
 	for row in rows:
 		org_column_list = ''
@@ -57,7 +58,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 		sql2 = f"""select column_name from information_schema.columns 
 				where table_schema = %s and table_name = %s 
 				order by ordinal_position"""
-		cur.execute(sql2, (schema, view_name))
+		utils.process_sql(conn, cur, sql2, params=(schema, view_name))
 		rows2 = cur.fetchall()
 		for row2 in rows2:
 			org_column_list = org_column_list + row2[0] + ', '
@@ -67,7 +68,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 				select_column_list = org_column_list.replace(ust_or_release + '_control_id', str(control_id))
 				insert_sql = f"""insert into public.{table_name} ({org_column_list}) 
 								select {select_column_list} from {schema}.{view_name}"""
-				cur.execute(insert_sql)
+				utils.process_sql(conn, cur, insert_sql)
 			else: 
 				if ust_or_release == 'release':
 					column_list = 'ust_release_id, ' + org_column_list[:-2]
@@ -114,7 +115,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 					column_list = 'ust_tank_substance_id, ust_compartment_id'
 					sql2 = """select count(*) from information_schema.columns 
 					          where table_schema = %s and table_name = 'v_ust_compartment_substance' and column_name = 'substance_comment'"""
-					cur.execute(sql2, (schema,))
+					utils.process_sql(conn, cur, sql2, params=(schema,))
 					cnt = cur.fetchone()[0]
 					if cnt > 0:
 						column_list = column_list + ', substance_comment'
@@ -144,7 +145,7 @@ def main(control_id, ust_or_release, delete_existing=False):
 										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
 										join ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id"""
 				# print(insert_sql)
-				cur.execute(insert_sql, (control_id, ))
+				utils.process_sql(conn, cur, insert_sql, params=(control_id,))
 
 			rows_inserted = cur.rowcount
 			conn.commit()
@@ -153,6 +154,8 @@ def main(control_id, ust_or_release, delete_existing=False):
 	cur.close()
 	conn.close()
 	logger.info('Disconnected from database')
+
+	CuiUpdate(ust_or_release=ust_or_release, control_id=control_id).process()
 
 
 if __name__ == '__main__':   

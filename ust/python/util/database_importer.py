@@ -40,14 +40,14 @@ class DatabaseImporter:
         conn = utils.connect_db(config.db_name)
         cur = conn.cursor()
         try:
-            cur.execute('create schema "' + self.schema + '" AUTHORIZATION ' + config.db_user)
+            sql = 'create schema "' + self.schema + '" AUTHORIZATION ' + config.db_user
+            cur.execute(sql)
             logger.info('Created schema %s', self.schema)
         except DuplicateSchema:
             logger.info('Schema %s already exists', self.schema)
 
         sql = f'grant all on schema "{self.schema}" TO {config.db_user}'
-        cur.execute(sql)
-
+        utils.process_sql(conn, cur, sql)
         cur.close()
         conn.close()
 
@@ -55,15 +55,12 @@ class DatabaseImporter:
     def set_existing_tables(self):
         conn = utils.connect_db(config.db_name)
         cur = conn.cursor()
-
         sql = "select table_name from information_schema.tables where lower(table_schema) = lower(%s) order by 1"
-        cur.execute(sql, (self.schema,))
+        utils.process_sql(conn, cur, sql, params=(self.schema,))
         rows = cur.fetchall()
         self.existing_tables = [row[0] for row in rows]
-
         cur.close()
         conn.close()
-
         logger.info('The following tables already exist in schema %s: %s', self.schema, self.existing_tables)
         
         
