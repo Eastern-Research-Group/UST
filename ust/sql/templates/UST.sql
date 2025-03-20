@@ -21,21 +21,22 @@
  * Step 3: Get an overview of the source data and prepare it for processing
  * Step 4: Map the source data elements to the EPA template elements 
  * Step 5: Check for lookup data that needs to be deaggregated 
- * Step 6: Map the source data values to EPA values 
- * Step 7: Create the value mapping crosswalk views
- * Step 8: Create unique identifiers if they don't exist
- * Step 9: Write the views that convert the source data to the EPA format
- * Step 10: QA the views
- * Step 11: Insert data into the EPA schema 
- * Step 12: Export populated EPA template 
- * Step 13: Export control table summary
- * Step 14: Upload exported files to EPA Teams
- * Step 15: Request peer review and make any suggested changes
- * Step 16: Export source data (if necessary)
- * Step 17: Request OUST review
- * Step 18: Respond to OUST comments 
- * Step 19: State review 
- * Step 20: GIS processing (coming soon)
+ * Step 6: Map the source data values to EPA values
+ * Step 7: Send the substance mapping for review by an ERG chemical expert  
+ * Step 8: Create the value mapping crosswalk views
+ * Step 9: Create unique identifiers if they don't exist
+ * Step 10: Write the views that convert the source data to the EPA format
+ * Step 11: QA the views
+ * Step 12: Insert data into the EPA schema 
+ * Step 13: Export populated EPA template 
+ * Step 14: Export control table summary
+ * Step 15: Upload exported files to EPA Teams
+ * Step 16: Request peer review and make any suggested changes
+ * Step 17: Export source data (if necessary)
+ * Step 18: Request OUST review
+ * Step 19: Respond to OUST comments 
+ * Step 20: State review 
+ * Step 21: GIS processing (coming soon)
  * 
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -382,6 +383,9 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_tank','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','tank_location_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+--NOTE: tank_status_id is required. 
+--If it doesn't exist but Compartment Status exists, map tank_status_id to the organization's compartment status field. 
+--If neither status exists, talk to the state before proceeding. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank','tank_status_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
@@ -434,9 +438,6 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_tank_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_tank_substance','substance_casno','ORG_TAB_NAME','ORG_COL_NAME',null,null);
---NOTE: States that report at the compartment level will likely have substance data at the compartment level
---This will be tracked in table ust_compartment_substance, but all of the columns in that table will be mapped elsewhere
---so there is no mapping required for that table. 
 
 --ust_compartment: This table is REQUIRED. 
 --If the state does not report compartment data, we will be creating a Compartment ID for it in a later step. 
@@ -507,14 +508,27 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (ZZ,'ust_compartment','tank_subpart_k_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_compartment','tank_other_release_detection','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_compartment_substance','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_compartment_substance','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (ZZ,'ust_compartment_substance','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 
---ust_piping: This table is OPTIONAL, do not map if there is no piping data in the source data
+--ust_comparment_substance is OPTIONAL; this table should ONLY be mapped/populated for states that report substance data at the compartment level,
+--and where there is an obvious 1:1 relationship between compartment and substance. 
+--Note that in the EPA data tables, this table is a child of ust_tank_substance: there is no substance ID in public.ust_compartment_substance!
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic)
+values (ZZ,'ust_compartment_substance','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','compartment_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+--NOTE: substance_id is not in EPA table public.ust_compartment_substance, however, this element must be mapped if you are mapping this table, 
+--and the mapped column MUST included in the v_ust_compartment_substance view in the state schema as a not null column. 
+--Additionally, the facility/tank/substance combination MUST also exist in the v_ust_tank_substance view, which is a parent of this table. 
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (ZZ,'ust_compartment_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+
+--ust_piping: This table is OPTIONAL; do not map if there is no piping data in the source data
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (ZZ,'ust_piping','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
@@ -701,14 +715,41 @@ only_incomplete = True   		# Boolean, defaults to True. Set to False to output m
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
- * /ust/sql/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console 
+ * /ust/sql/states/XX/UST/XX_UST_value_mapping.sql). Open the generated file in your database console
  * and step through it.  
  * 
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 7: Create the value mapping crosswalk views
+--Step 7: Send the substance mapping (if it exists) for review by an ERG chemical expert 
+
+/*
+ * Run script export_substance_mapping.py to export the substance mapping and email it to John Wilhelmi,
+ * who will send it along to a chemical expert at ERG to review it for possible hazardous substances.  
+ * The script will automatically send the email through Outlook if you are on an ERG computer and
+ * have the python module pypiwin32 installed in your environment. 
+ * (Note: If the script is unable to send the email automatically (check your Sent folder), please
+ * manually attach the file (located at /ust/python/exports/mapping/XX/UST/) and send an email 
+ * to John.Wilhelmi@erg.com, CCing Victoria and Renae. 
+ * 
+ * Set these variables in the script: 
+ 
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+send_email = True				# Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
+
+# These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
+# This file directory and its contents are excluded from pushes to the repo by .gitignore.
+export_file_path = None
+export_file_dir = None
+export_file_name = None
+
+*/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Step 8: Create the value mapping crosswalk views
 
 /* 
  * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
@@ -728,7 +769,7 @@ and table_name like '%_xwalk' order by 1;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 8: Create unique identifiers if they don't exist
+--Step 9: Create unique identifiers if they don't exist
 
 /* 
  * Run script create_missing_id_columns.py to identify if any required columns (e.g. Tank ID, Compartment ID, etc.)
@@ -760,7 +801,7 @@ order by sort_order;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 9: Write the views that convert the source data to the EPA format
+--Step 10: Write the views that convert the source data to the EPA format
 
 /** THIS SECTION UNDER CONSTRUCTION!!! 
  * 
@@ -778,6 +819,23 @@ order by sort_order;
  * 
 */
 
+/** NOTE! Tanks containing heating oil should only be included in UST Finder if the Facility Type =
+ * 'Bulk plant storage/petroleum distributor', however, you should not exclude heating oil tanks
+ * if Facility Type is not populated. Also, tanks <1100 gallons should be excluded if the 
+ * Facility Type is populated and is equal to 'Agricultural/farm' or 'Residential. 
+ * 
+ * You can run script find_unrequlated.py to build tables erg_unregulated_facilities and 
+ * erg_unregulated_tanks and then use these tables to exclude the necessary facilities and tanks 
+ * while writing your views, however, the QAQC script that you run in the next step will check for  
+ * the existence of these unregulated tanks, and if applicable, will suggest that you run script 
+ * exclude_unregulated.py, which will both identify the unregulated facilities/tanks and generate 
+ * the SQL for you to update your views after writing them. In most cases, it may be easier to 
+ * not worry about these unregulated facilities/tanks in this step and just take care of the 
+ * issue during the QAQC step below if necessary. 
+ * 
+ * 
+*/
+
 --Remind yourself if there are any state-level business rules you need to take into consideration
 --when writing the views (such as excluding AST, for example).
 select comments from public.ust_control where ust_control_id = ZZ;
@@ -785,7 +843,7 @@ select comments from public.ust_control where ust_control_id = ZZ;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 10: QA the views 
+--Step 11: QA the views 
 
 /* 
  * Run script qa_check.py to check that the views you have written to populate the main data tables
@@ -815,6 +873,9 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
  * 10) Columns that exist in the view that were not mapped in ust_element_mapping. 
  * 11) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.ust_element_value_mapping 
  *     and ensure the epa_value exists in the associated lookup table. 
+ * 12) Unregulated facility/tank data related to heating oil and small tank capacities in certain facility types. To resolve these issues, 
+ *     run script exclude_unregulated.py, which will identify the unregulated facilities and tanks and will generate SQL to help you rewrite 
+ *     your views. 
  *
  * The script will also provide the counts of rows in v_ust_facility, v_ust_tank, v_ust_compartment, and v_ust_piping (if these views exist) -
  * ensure these counts make sense! 
@@ -829,7 +890,7 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 11: Insert data into the EPA schema 
+--Step 12: Insert data into the EPA schema 
 
 /*
  * Run script populate_epa_data_tables.py to insert data into the main data tables in the public schema 
@@ -853,7 +914,7 @@ order by sort_order;
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 12: Export populated EPA template
+--Step 13: Export populated EPA template
 
 /*
  * Run script export_template.py to generate a populated EPA template that will be sent first to OUST
@@ -874,7 +935,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 13: Export control table summary
+--Step 14: Export control table summary
 
 /*
  * Run script control_table_summary.py to generate a high-level overview of the data for OUST's review. 
@@ -894,7 +955,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 14: Upload exported files to EPA Teams
+--Step 15: Upload exported files to EPA Teams
 
 /* 
  * Upload the following three files to the appropriate state folder on the EPA Teams site at 
@@ -910,7 +971,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 15: Request peer review and make any suggested changes
+--Step 16: Request peer review and make any suggested changes
 
 /* 
  * All templates must be peer reviewed before sending to OUST. Currently Renae and Jim are available for peer reviews.
@@ -937,7 +998,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 16: Export source data (if necessary)
+--Step 17: Export source data (if necessary)
 
 /* 
  * OUST has requested that ERG make all source data available to them to assist in their review. If the 
@@ -970,7 +1031,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 17: Request OUST review
+--Step 18: Request OUST review
 
 /* 
  * Sit back and relax, your work here is done for the time being! Or rather, sit back and start another ticket! 
@@ -987,7 +1048,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 18: Respond to OUST comments 
+--Step 19: Respond to OUST comments 
 
 /* 
  * When OUST completes their review, they will email us. An updated version of the populated template will be 
@@ -1006,7 +1067,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 19: State review 
+--Step 20: State review 
 
 /* 
  * We haven't gotten this far yet, but this process will be very similar to the OUST review process. 
@@ -1017,7 +1078,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 20: GIS processing (coming soon)
+--Step 21: GIS processing (coming soon)
 
 /* 
  * For any facilities the state did not submit coordinates for, or for coordinates less than 3 decimal 
