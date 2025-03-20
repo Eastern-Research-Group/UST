@@ -241,7 +241,7 @@ No further action
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (474, 'Active: general', '', null);
+values (474, 'Active: general', 'Active: general / open release', 'Mapped by ERG');
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (474, 'No further action', 'No further action', null);
 
@@ -301,9 +301,9 @@ values (480, 'Kerosene', 'Kerosene', null);
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (480, 'Unknown', 'Unknown', null);
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (480, 'Wast/Used Oil', '', null);
+values (480, 'Wast/Used Oil', 'Used oil/waste oil', 'Mapped by ERG');
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (480, 'Waste/Used Oil', '', null);
+values (480, 'Waste/Used Oil', 'Used oil/waste oil', 'Mapped by ERG');
 
 --select substance from public.substances order by substance_group, substance;
 /* Valid EPA values are:
