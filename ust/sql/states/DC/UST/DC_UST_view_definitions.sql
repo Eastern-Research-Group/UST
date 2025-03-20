@@ -203,5 +203,6 @@ create or replace view dc_ust.v_ust_facility_dispenser as
     x."Dispenser ID" AS dispenser_id,
     max(x."Dispenser UDC") AS dispenser_udc
    FROM dc_ust.dispenser x
+   where x."FacilityID"::varchar(50) not in (select facility_id from dc_ust.erg_unregulated_facilities)
   GROUP BY x."FacilityID", x."Dispenser ID"
- where x."FacilityID"::varchar(50) not in (select facility_id from dc_ust.erg_unregulated_facilities);
+;

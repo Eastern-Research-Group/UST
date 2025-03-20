@@ -465,9 +465,9 @@ Single wall
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2308, 'Double-Walled', '', null);
+values (2308, 'Double-Walled', 'Double wall', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2308, 'Excavation liner ', '', null);
+values (2308, 'Excavation liner ', 'Excavation liner', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2308, 'Single wall', 'Single wall', null);
 
@@ -527,7 +527,7 @@ values (2309, 'Installer certified by tank and piping manufacturers', 'Installer
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2309, 'Installer certified or licensed by the implementing agency', 'Installer certified or licensed by the implementing agency', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2309, "Manufacturer's installation checklists aave been completed", '', null);
+values (2309, 'Manufacturer"s installation checklists aave been completed', 'Manufacturer"s installation checklists have been completed', 'Mapped by ERG');
 
 --select cert_of_installation from public.cert_of_installations;
 /* Valid EPA values are:
@@ -794,7 +794,7 @@ values (2383, 'Double walled', 'Double walled', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2383, 'Single walled', 'Single walled', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2383, 'Unknown', '', null);
+values (2383, 'Unknown', 'Other', 'Mapped by ERG');
 
 --select piping_wall_type from public.piping_wall_types;
 /* Valid EPA values are:
@@ -818,3 +818,4 @@ order by 1, 2;
  */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
