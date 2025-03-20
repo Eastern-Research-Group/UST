@@ -60,7 +60,7 @@ def insert_ust(csv_path):
 	conn = utils.connect_db()
 	cur = conn.cursor()
 	sql = "delete from public.performance_measures_ust"
-	cur.execute(sql)
+	utils.process_sql(conn, cur, sql)
 	logger.info('Deleted %s rows from performance_measures_ust', cur.rowcount)
 
 	i = 0
@@ -75,7 +75,7 @@ def insert_ust(csv_path):
 		total_ust = total_active_ust + total_closed_ust
 
 		sql = "insert into public.performance_measures_ust values (%s, %s, %s, %s, %s, %s, %s, %s)"
-		cur.execute(sql, (organization_id, num_active_petroleum_ust, num_closed_petroleum_ust, 
+		utils.process_sql(conn, cur, sql, params=(organization_id, num_active_petroleum_ust, num_closed_petroleum_ust, 
 						  num_active_hazmat_ust, num_closed_hazmat_ust, total_active_ust, total_closed_ust, total_ust))
 		i += 1
 
@@ -99,7 +99,7 @@ def insert_releases(csv_path):
 	conn = utils.connect_db()
 	cur = conn.cursor()
 	sql = "delete from public.performance_measures_release"
-	cur.execute(sql)
+	utils.process_sql(conn, cur, sql)
 	logger.info('Deleted %s rows from performance_measures_release', cur.rowcount)
 
 	i = 0
@@ -111,7 +111,7 @@ def insert_releases(csv_path):
 		num_cleanups_backlog = convert_int(row['num_cleanups_backlog'])
 
 		sql = "insert into public.performance_measures_release values (%s, %s, %s, %s, %s)"
-		cur.execute(sql, (organization_id, num_cumulative_releases, num_cumulative_initiated_cleanups, 
+		utils.process_sql(conn, cur, sql, params=(organization_id, num_cumulative_releases, num_cumulative_initiated_cleanups, 
 						  num_cumulative_completed_cleanups, num_cleanups_backlog))
 		i += 1
 

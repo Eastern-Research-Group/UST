@@ -46,7 +46,7 @@ def build_ws(dataset, ws, admin=False):
 			from public.v_{dataset.ust_or_release}_element_mapping_for_export
 			where {dataset.ust_or_release}_control_id = %s
 			order by table_sort_order, column_sort_order"""
-	cur.execute(sql, (dataset.control_id,))
+	utils.process_sql(conn, cur, sql, params=(dataset.control_id,))
 	data = cur.fetchall()
 	cur.close()
 	conn.close()
@@ -56,6 +56,10 @@ def build_ws(dataset, ws, admin=False):
 		for colno, cell_value in enumerate(row, start=1):
 			ws.cell(row=rowno, column=colno).value = cell_value
 	utils.autowidth(ws)
+	ws.column_dimensions['E'].width = 50
+	ws.column_dimensions['F'].width = 50
+	ws.column_dimensions['G'].width = 50
+	ws.column_dimensions['H'].width = 50
 
 	logger.info('Finshed Element Mapping tab')
 	return ws

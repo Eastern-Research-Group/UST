@@ -57,7 +57,7 @@ class Summary:
 				from public.v_{self.dataset.ust_or_release}_control_summary
 				where {self.dataset.ust_or_release}_control_id = %s
 				order by sort_order"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		data = cur.fetchall()
 		cur.close()
 		conn.close()
@@ -67,6 +67,7 @@ class Summary:
 				if colno == 2 and ws.cell(row=rowno, column=colno-1).value == 'organization_compartment_flag' and ws.cell(row=rowno, column=colno).value == None:
 					 ws.cell(row=rowno, column=colno).fill = utils.get_fill_gen(yellow_cell_fill)
 		utils.autowidth(ws)
+		ws.column_dimensions['B'].width = 50
 		logger.info('Exported %s_control_table summary for control_id %s to %s', self.dataset.ust_or_release, self.dataset.control_id, self.dataset.export_file_path)
 
 
@@ -86,7 +87,7 @@ class Summary:
 				from public.v_{self.dataset.ust_or_release}_row_count_summary
 				where {self.dataset.ust_or_release}_control_id = %s
 				order by sort_order"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		data = cur.fetchall()
 		cur.close()
 		conn.close()
@@ -117,15 +118,21 @@ class Summary:
 					from public.v_ust_performance_measures
 					where organization_id = %s
 					order by sort_order"""
-			cur.execute(sql, (self.dataset.organization_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.organization_id,))
 			data = cur.fetchall()
-			for rowno, row in enumerate(data, start=2):
-				for colno, cell_value in enumerate(row, start=1):
-					ws.cell(row=rowno, column=colno).value = cell_value
-					if colno == 2:
-						ws.cell(row=rowno, column=colno).number_format = '#,##0'
-			ws.cell(row=rowno, column=1).font = Font(bold=True)			
-			ws.cell(row=rowno, column=2).font = Font(bold=True)		
+			if not data:
+				ws.cell(row=2, column=1).value = 'No performance measure data available for ' + self.dataset.organization_id
+				ws.cell(row=2, column=1).font = Font(italic=True)		
+				rowno = 2
+			else:
+				for rowno, row in enumerate(data, start=2):
+					for colno, cell_value in enumerate(row, start=1):
+						ws.cell(row=rowno, column=colno).value = cell_value
+						if colno == 2:
+							ws.cell(row=rowno, column=colno).number_format = '#,##0'
+			
+				ws.cell(row=rowno, column=1).font = Font(bold=True)			
+				ws.cell(row=rowno, column=2).font = Font(bold=True)		
 
 			rowno = rowno + 2			
 			ws.cell(row=rowno, column=1).value = 'EPA Template'		
@@ -137,9 +144,10 @@ class Summary:
 			ws.cell(row=rowno, column=2).value = 'Total UST'		
 			ws.cell(row=rowno, column=2).font = Font(bold=True)
 
+
 			sql = """select "CompartmentStatus", count(*) from public.v_ust_compartment
 					where ust_control_id = %s group by "CompartmentStatus" """
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=rowno+1):
 				for colno, cell_value in enumerate(row, start=1):
@@ -149,7 +157,7 @@ class Summary:
 
 			rowno = rowno + 1
 			sql = "select count(*) from public.v_ust_compartment where ust_control_id = %s" 
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total UST EPA Template'
 			ws.cell(row=rowno, column=1).font = Font(bold=True)
@@ -170,7 +178,7 @@ class Summary:
 					from public.v_release_performance_measures
 					where organization_id = %s
 					order by sort_order"""
-			cur.execute(sql, (self.dataset.organization_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.organization_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=1):
@@ -191,7 +199,7 @@ class Summary:
 			ws.cell(row=rowno, column=2).font = Font(bold=True)
 			sql = f"""select "USTReleaseStatus", count(*) from public.v_ust_release
 					where release_control_id = %s group by "USTReleaseStatus" """
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=rowno+1):
 				for colno, cell_value in enumerate(row, start=1):
@@ -201,7 +209,7 @@ class Summary:
 
 			rowno = rowno + 1			
 			sql = "select count(*) from public.v_ust_release where release_control_id = %s" 
-			cur.execute(sql, (self.dataset.control_id,))
+			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			cnt = cur.fetchone()[0]
 			ws.cell(row=rowno, column=1).value = 'Total Releases EPA Template'
 			ws.cell(row=rowno, column=1).font = Font(bold=True)
@@ -243,7 +251,7 @@ class Summary:
 				from public.v_{self.dataset.ust_or_release}_element_mapping_for_export
 				where {self.dataset.ust_or_release}_control_id = %s
 				order by table_sort_order, column_sort_order"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=start):
 			for colno, cell_value in enumerate(row, start=1):
@@ -266,7 +274,7 @@ class Summary:
 				and not (template_tab_name in ('Substance','Source','Cause','Corrective Action Strategy') and element_name = 'ReleaseID')
 				and element_name not like '%%Comment'
 				order by table_sort_order, column_sort_order"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=start):
 			for colno, cell_value in enumerate(row, start=4):
