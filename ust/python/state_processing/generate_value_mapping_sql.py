@@ -11,9 +11,9 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True  		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
-overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+overwrite_existing = True      	# Boolean, defaults to True. If True, will overwrite an existing file. Set to False to append to an existing file. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None
@@ -28,7 +28,7 @@ class ValueMapper:
 	def __init__(self, 
 				 dataset, 
 				 only_incomplete=True,
-				 overwrite_existing=False):
+				 overwrite_existing=True):
 		self.dataset = dataset
 		self.only_incomplete = only_incomplete
 		self.overwrite_existing = overwrite_existing
@@ -63,10 +63,10 @@ class ValueMapper:
 		for row in rows:
 			epa_table_name = row[0]
 			epa_column_name = row[1]
-			logger.info('Working on %s', epa_column_name)
+			logger.info('Working on %s.%s', epa_table_name, epa_column_name)
 
 			msql =  '------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n'
-			msql = msql + '--' + epa_column_name + '\n\n'
+			msql = msql + '--' + epa_table_name + '.' + epa_column_name + '\n\n'
 		
 			if epa_column_name == 'compartment_status_id' and self.organization_compartment_flag == 'N':
 				msql = msql + f'/*\n{self.dataset.organization_id} does not report at the Compartment level, but CompartmentStatus is required.\n'
@@ -87,8 +87,8 @@ class ValueMapper:
 				
 			sql2 = f"""select {self.dataset.ust_or_release}_element_mapping_id, organization_table_name, organization_column_name, deagg_table_name, deagg_column_name 
 					from public.{self.dataset.ust_or_release}_element_mapping 
-					where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s"""
-			utils.process_sql(conn, cur, sql2, params=(self.dataset.control_id, epa_column_name))
+					where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
+			utils.process_sql(conn, cur, sql2, params=(self.dataset.control_id, epa_table_name, epa_column_name))
 			row2 = cur.fetchone()
 			element_mapping_id = row2[0]
 			org_table_name = row2[1]
@@ -107,7 +107,7 @@ class ValueMapper:
 			utils.process_sql(conn, cur, sql3)
 			rows3 = cur.fetchall()
 			for row3 in rows3:
-				org_value = row3[0]
+				org_value = str(row3[0])
 				msql = msql + org_value + '\n'			
 			msql = msql + ' */\n\n'
 			msql = msql + '/*\n * Go through each of the following SQL statements and insert the value for the epa_value column, then run all of the SQL to peform the inserts.\n'
@@ -123,7 +123,7 @@ class ValueMapper:
 
 			sql4 = f"""select distinct "{select_col}" from {self.dataset.schema}."{select_table}" where "{select_col}" is not null """
 			if self.only_incomplete:
-				sql4 = sql4 + f"""and "{select_col}" not in
+				sql4 = sql4 + f"""and "{select_col}"::varchar not in
 						(select organization_value from public.v_{self.dataset.ust_or_release}_element_mapping
 						where {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and epa_column_name = '{epa_column_name}'
 						and organization_value is not null) """
@@ -136,7 +136,7 @@ class ValueMapper:
 			logger.info('Generating mapping SQL for %s', epa_column_name)	
 			self.value_mapping_sql = self.value_mapping_sql + msql
 			for row4 in rows4:
-				org_value = row4[0]
+				org_value = str(row4[0])
 				sql5 = f"""select {db_lookup_col} from public.{db_lookup_table} where replace(lower({db_lookup_col}),'-',' ') = %s"""
 				utils.process_sql(conn, cur, sql5, params=(org_value.lower().replace('-',' '),))
 				try:
@@ -145,8 +145,24 @@ class ValueMapper:
 					epa_value = None
 
 				if not epa_value and epa_column_name == 'substance_id':
-					if lower(org_value) == 'jet fuel':
+					if org_value.lower() == 'jet fuel':
 						epa_value = 'Jet fuel A'
+					elif org_value.lower() == 'empty' or 'unknown' in org_value.lower():
+						epa_value = 'Unknown'
+					elif 'emergency gen' in org_value.lower():
+						epa_value = 'Diesel fuel (b-unknown)'
+					elif 'regular' in org_value.lower() or 'super' in org_value.lower() or 'ultra' in org_value.lower() or 'midgrade' in org_value.lower():
+						epa_value = 'Gasoline (unknown type)'
+					elif 'used' in org_value.lower() or 'waste' in org_value.lower():
+						epa_value = 'Used oil/waste oil'
+					elif 'hazard' in org_value.lower():
+						epa_value = 'Hazardous substance'
+					elif 'other' in org_value.lower():
+						epa_value = 'Other or mixture'
+					elif 'asphalt' in org_value.lower():
+						epa_value = 'Petroleum product'
+					elif 'not listed' in org_value.lower():
+						epa_value = 'Other or mixture'
 					else:
 						sql5 = f"select count(*) from public.v_hazardous_substances where lower(substance) = lower({repr(org_value)})"
 						utils.process_sql(conn, cur, sql5)
@@ -246,7 +262,7 @@ and not exists
 				column_name = row[1]
 				sql = f"""select distinct "{column_name}" 
 						from {self.dataset.schema}."{table_name}" 
-						where lower("{column_name}") like '%cp%' or lower("{column_name}") like '%cor%pro%'
+						where lower("{column_name}"::text) like '%cp%' or lower("{column_name}"::text) like '%cor%pro%'
 						order by 1;"""
 				utils.process_sql(conn, cur, sql)
 				rows2 = cur.fetchall()

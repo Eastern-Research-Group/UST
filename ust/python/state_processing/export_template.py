@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 29                  # Enter an integer that is the ust_control_id or release_control_id
+control_id =  0                 # Enter an integer that is the ust_control_id or release_control_id
 
 data_only = False				# Boolean; defaults to False. Set to True to generate a populated template that does not include the Reference and Lookup tabs.
 template_only = False			# Boolean; defaults to False. Set to True to generate an blank template with no data.
@@ -47,10 +47,12 @@ class Template:
 	def __init__(self, 
 				 dataset,
 				 data_only=False,
-				 template_only=False):
+				 template_only=False,
+				 substance_mapping_only=False):
 		self.dataset = dataset
 		self.data_only = data_only		
 		self.template_only = template_only
+		self.substance_mapping_only = substance_mapping_only
 		self.wb = op.Workbook()
 		self.wb.save(self.dataset.export_file_path)
 		if not self.data_only:
@@ -60,7 +62,10 @@ class Template:
 				element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=False)
 				self.make_unmapped_tab()
 				self.make_mapping_tabs()
-		self.make_data_tabs()	
+		if not self.substance_mapping_only:
+			self.make_data_tabs()	
+		else:
+			self.make_substance_mapping_tab()
 		self.cleanup_wb()
 		logger.info('Template exported to %s', self.dataset.export_file_path)
 
@@ -131,11 +136,11 @@ class Template:
 			element_name_range = ws["B2:B200"]
 			green_cells = ['FacilityID','TankID','CompartmentID','PipingID']
 			for row in element_name_range:
-			    for cell in row:
-			        if cell.value in green_cells:
-			        	cell.fill = utils.get_fill_gen(green_cell_fill)
-			        	if cell.value != 'FacilityID':
-				        	cell.offset(row=0, column=1).fill = utils.get_fill_gen(yellow_cell_fill)
+				for cell in row:
+					if cell.value in green_cells:
+						cell.fill = utils.get_fill_gen(green_cell_fill)
+						if cell.value != 'FacilityID':
+							cell.offset(row=0, column=1).fill = utils.get_fill_gen(yellow_cell_fill)
 			ws.column_dimensions['A'].width = 14
 			ws.column_dimensions['B'].width = 69
 			ws.column_dimensions['B'].font = Font(bold=True)
@@ -419,17 +424,27 @@ class Template:
 			cell = ws.cell(row=1, column=6)
 			cell.value = 'Programmer Comments'
 			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=7)
-			cell.value = 'EPA Comments'
-			cell.font = Font(bold=True)
-			cell = ws.cell(row=1, column=8)
-			cell.value = 'Organization Comments'
-			cell.font = Font(bold=True)
+			if self.substance_mapping_only:
+				cell = ws.cell(row=1, column=7)
+				cell.value = 'ERG Reviewer Comments'
+				cell.font = Font(bold=True)
+			else:
+				cell = ws.cell(row=1, column=7)
+				cell.value = 'EPA Comments'
+				cell.font = Font(bold=True)
+				cell = ws.cell(row=1, column=8)
+				cell.value = 'Organization Comments'
+				cell.font = Font(bold=True)
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
 				for colno, cell_value in enumerate(row, start=4):
-					ws.cell(row=rowno, column=colno).value = cell_value		
+					if colno > 6 and self.substance_mapping_only:
+						pass 
+					else:
+						ws.cell(row=rowno, column=colno).value = cell_value		
 		utils.autowidth(ws)
+		ws.column_dimensions['A'].width = 16  
+		ws.column_dimensions['B'].width = 95  
 
 		cur.close()
 		conn.close()
@@ -488,7 +503,20 @@ class Template:
 					ws.cell(row=rowno, column=colno).value = cell_value
 			cur.close()
 			conn.close()
+
+			if view_name == 'v_ust_facility':
+				for c3, c38 in zip(ws.iter_rows(min_col=3, max_col=3), ws.iter_rows(min_col=38, max_col=38)):
+					if c38[0].value == 'Y':
+						c3[0].fill = utils.get_fill_gen(yellow_cell_fill)
+				ws.delete_cols(38)
+			elif view_name == 'v_ust_release':
+				for c6, c31 in zip(ws.iter_rows(min_col=6, max_col=6), ws.iter_rows(min_col=31, max_col=31)):
+					if c31[0].value == 'Y':
+						c6[0].fill = utils.get_fill_gen(yellow_cell_fill)
+				ws.delete_cols(31)
+
 		ws.delete_cols(1)
+
 		utils.autowidth(ws)
 		ws.freeze_panes = ws['A2']
 		logger.info('Created %s tab', tab_name)
@@ -500,8 +528,8 @@ def main(ust_or_release, control_id=None, data_only=False, template_only=False, 
 		control_id = 1
 
 	dataset = Dataset(ust_or_release=ust_or_release,
-				 	  control_id=control_id, 
-				 	  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx',
+					  control_id=control_id, 
+					  base_file_name='template_' + utils.get_timestamp_str() + '.xlsx',
 					  export_file_name=export_file_name,
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)

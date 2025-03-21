@@ -6,6 +6,7 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+from python.state_processing.cui_update import CuiUpdate 
 from python.util import utils, config
 from python.util.logger_factory import logger
 
@@ -153,6 +154,8 @@ def main(control_id, ust_or_release, delete_existing=False):
 	cur.close()
 	conn.close()
 	logger.info('Disconnected from database')
+
+	CuiUpdate(ust_or_release=ust_or_release, control_id=control_id).process()
 
 
 if __name__ == '__main__':   

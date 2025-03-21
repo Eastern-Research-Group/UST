@@ -12,7 +12,7 @@ from python.util.logger_factory import logger
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = 0                   # Enter an integer that is the ust_control_id
 table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
-drop_existing = True 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -437,7 +437,7 @@ class IdColumns:
 			else: 
 				sql = f"create table {self.dataset.schema}.{self.erg_table_name} (facility_id varchar(50), tank_name varchar(50), tank_id int, compartment_name varchar(50), compartment_id int, dispenser_id int generated always as identity)"
 			utils.process_sql(self.conn, self.cur, sql)
-			logger.info('Created table %s.%)', self.dataset.schema, self.erg_table_name)
+			logger.info('Created table %s.%s)', self.dataset.schema, self.erg_table_name)
 			self.sql_text = self.sql_text + utils.get_pretty_query(self.cur) + '\n\n' 
 
 			compartment_table_name = self.table_name
