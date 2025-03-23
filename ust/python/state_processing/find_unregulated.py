@@ -11,7 +11,7 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 14                  # Enter an integer that is the ust_control_id or release_control_id
 drop_existing = True            # Boolean; defaults to True. If True, will drop existing erg_ unregulated table(s). 
 
 

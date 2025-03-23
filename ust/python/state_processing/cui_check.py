@@ -20,7 +20,7 @@ If the data are not already mapped, use the schema/table_name/column_name variab
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 14                 	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
 schema = None              		# Enter the schema name

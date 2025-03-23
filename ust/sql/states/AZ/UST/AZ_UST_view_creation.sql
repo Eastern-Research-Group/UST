@@ -376,3 +376,29 @@ create index temp_state_tankid_idx on temp_state(tank_id);
 create index temp_state_factankid_idx on temp_state(facility_id,tank_id);
 create index temp_state_subid_idx on temp_state(substance_id);
 create index temp_state_factanksubid_idx on temp_state(facility_id,tank_id,substance_id);
+
+
+select *from temp_state a join substances sub on a.substance_id = sub.substance_id 
+where not exists 
+	(select 1 from temp_public b
+	where a.facility_id = b."FacilityID" and a.tank_id = b."TankID" and a.substance_id = b."substance_id")
+order by a.facility_id,a.tank_id,a.substance_id;	
+
+0-010651	3	16	16	Diesel fuel (b-unknown)
+
+
+select * from v_ust_tank 
+where ust_control_id = 14 and "FacilityID" = '0-010651'
+
+select * from az_ust.ust_tank 
+
+
+select * from az_ust.ust_facility where "FacilityID" not in (select "FacilityID" from az_ust.ust_tank)
+
+
+select distinct "FacilityID", "FacilityName" 
+from az_ust.ust_facility where "FacilityID" not in (select "FacilityID" from az_ust.ust_compartment)
+order by 1
+
+
+

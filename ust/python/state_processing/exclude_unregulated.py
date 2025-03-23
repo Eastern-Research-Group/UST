@@ -13,8 +13,8 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
-find_regulated = True          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
+control_id = 14              	# Enter an integer that is the ust_control_id or release_control_id
+find_regulated = False          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
 execute_sql = False            	# Boolean; defaults to False. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
 export_sql = True              	# Boolean; defaults to True. If True will generate a SQL file containing the 'create or replace view' statements.
 view_name = None                # String; defaults to None. To limit output to a single view, enter view name (e.g. "v_ust_tank_substance").
