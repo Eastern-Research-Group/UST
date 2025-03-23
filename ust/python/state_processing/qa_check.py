@@ -494,7 +494,7 @@ class QualityCheck:
 						from {self.dataset.schema}.v_ust_release_substance ts join public.substances s on ts.substance_id = s.substance_id 
 							join (select distinct release_id, facility_id from 
 									(select release_id, facility_id, facility_type_id from {self.dataset.schema}.v_ust_release ) x 
-								  where facility_type_id <> 2) f on ts.release_id = f.release_id
+								  where facility_type_id <> 4) f on ts.release_id = f.release_id
 						where s.substance like 'Heating%') a
 					order by 1, 2"""
 		utils.process_sql(self.conn, self.cur, sql)
