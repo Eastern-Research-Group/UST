@@ -842,3 +842,77 @@ order by 1;
 select * from substances;
 
 update ust_element_value_mapping set epa_value = 'Leaded gasoline' where ust_element_value_mapping_id = 673;
+
+
+select 
+
+
+select distinct ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name,
+	table_sort_order, column_sort_order
+from v_ust_element_mapping 
+where organization_id = 'AZ'
+and epa_table_name = 'ust_tank'
+order by table_sort_order, column_sort_order;
+
+select * from v_ust_element_metadata
+where table_name = 'ust_tank' and column_name not in 
+	(select epa_column_name from v_ust_element_mapping where ust_control_id = 14)
+and element_name not in ('TankID',
+'MultipleTanks',
+'TankCorrosionProtectionCathodicNotRequired',
+'TankCorrosionProtectionOther',
+'TankCorrosionProtectionUnknown',
+'CertOfInstallation',
+'CertOfInstallationOther',
+'DispenserID',
+'DispenserUDC',
+'DispenserUDCWallType')
+order by column_sort_order 
+
+
+select count(*) from az_ust.ust_tank;
+29982
+select count(*) from az_ust."ust_tank_OLD";
+29853
+
+select distinct "FacilityType1" from az_ust.ust_facility order by 1;
+
+insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
+values (14,'ust_facility','facility_type1','ust_facility','FacilityType1',null,null);
+
+
+
+
+select column_name from information_schema.columns 
+				where table_schema = 'az_ust' and table_name = 'v_ust_piping' and column_name not in 
+					(select column_name from information_schema.columns 
+					where table_schema = 'public' and table_name = 'ust_piping')
+				order by column_name
+				
+				
+select * from az_ust.v_ust_tank_substance a
+where not exists
+	(select 1 from public.v_ust_tank_substance b join public.substances c on b."Substance" = c.substance
+	where a.facility_id = b."FacilityID" and a.tank_id = b."TankID" and a.substance_id = c."substance_id")
+order by a.facility_id,a.tank_id,a.substance_id;	
+
+
+select * 
+into temp_state
+from az_ust.v_ust_tank_substance 
+
+
+select * from public.v_ust_tank_substance
+
+select * 
+into temp_public
+from public.v_ust_tank_substance b join public.substances  c on b."Substance" = c.substance
+
+create index temp_public_subid_idx on temp_public(substance_id);
+create index temp_public_facid_idx on temp_public(facility_id);
+create index temp_public_tankid_idx on temp_public(tank_id);;
+create index temp_public_factankid_idx on temp_public(facility_id,tank_id);
+
+
+create index substances_desc_idx on substances(substance);
+

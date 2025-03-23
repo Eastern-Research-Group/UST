@@ -23,9 +23,9 @@ ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
-schema = ''              		# Enter the schema name
-table_name = ''             	# Enter the table name that contains the column(s) with possible CUI
-column_names = ['']         	# Enter a list of column names that contain possible CUI    
+schema = None              		# Enter the schema name
+table_name = None             	# Enter the table name that contains the column(s) with possible CUI
+column_names = []         	# Enter a list of column names that contain possible CUI    
 
 drop_existing = True            # Boolean; defaults to True. If True, will drop the erg_%_clean_cui table if it exists. 
 maybe_as_true = True            # Boolean. Set to True to mark stopwords with the "maybe flag" to TRUE instead of MAYBE

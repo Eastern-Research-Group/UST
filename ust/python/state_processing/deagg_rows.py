@@ -119,7 +119,7 @@ class deaggRows:
 				elif i == 4:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s, %s, %s, %s)"""
-					utils.process_sql(self.conn, self.cur, sql2, params=row[3], part))
+					utils.process_sql(self.conn, self.cur, sql2, params=(row[3], part))
 					logger.info('Inserted %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], part, self.dataset.schema, self.data_deagg_table_name)
 				elif i == 5:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 

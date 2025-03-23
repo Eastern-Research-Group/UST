@@ -159,7 +159,7 @@ class Unregulated:
 			else:
 				fsql = f'\n\t(select distinct facility_id, release_id, facility_type_id from {self.dataset.schema}.{view_name} '
 		if fac_type == 'heating oil':
-			fsql = fsql + "where facility_id is not null and facility_type_id <> 2) f\n"
+			fsql = fsql + "where facility_id is not null and facility_type_id <> 4) f\n"
 		else:
 			fsql = fsql + "where facility_id is not null and facility_type_id in (1,12)) f\n"
 		return fsql 

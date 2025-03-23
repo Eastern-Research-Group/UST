@@ -474,7 +474,7 @@ class QualityCheck:
 						from {self.dataset.schema}.v_ust_tank_substance ts join public.substances s on ts.substance_id = s.substance_id 
 							join (select distinct facility_id from 
 									(select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.v_ust_facility ) x 
-								  where facility_type_id <> 2) f on ts.facility_id = f.facility_id
+								  where facility_type_id <> 4) f on ts.facility_id = f.facility_id
 						where s.substance like 'Heating%'
 						union all 
 						select x.facility_id, x.tank_id 

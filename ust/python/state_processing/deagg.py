@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 # THAT USE THE TABLES THIS SCRIPT CREATES
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 0                 # Enter an integer that is the ust_control_id or release_control_id
 data_table_name = '' 			# Enter a string containing organization table name
 column_name = ''				# Enter a string containing organization column name
 delimiter = ', ' 				# Defaults to ','; delimiter from the column beging deaggregated in the state table. Use '\n' for hard returns.
