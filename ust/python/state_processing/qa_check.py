@@ -474,16 +474,18 @@ class QualityCheck:
 						from {self.dataset.schema}.v_ust_tank_substance ts join public.substances s on ts.substance_id = s.substance_id 
 							join (select distinct facility_id from 
 									(select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.v_ust_facility ) x 
-								  where facility_type_id <> 2) f on ts.facility_id = f.facility_id
+								  where facility_type_id <> 4) f on ts.facility_id = f.facility_id
 						where s.substance like 'Heating%'
 						union all 
-						select x.facility_id, tank_id 
+						select x.facility_id, x.tank_id 
 						from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
 							  from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x 
 							join (select distinct facility_id from 
 									(select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.v_ust_facility ) x 
 								  where facility_type_id in (1,12)) f on x.facility_id = f.facility_id	  
-						where tank_capacity_gallons <1100) a
+							join {self.dataset.schema}.v_ust_tank_substance ts on x.facility_id = ts.facility_id and x.tank_id = ts.tank_id
+							join public.substances s on ts.substance_id = s.substance_id
+						where tank_capacity_gallons <1100 and s.substance_group in ('Diesel','Gasoline')) a
 					order by 1, 2"""
 		else:
 			sql = f"""select distinct facility_id, release_id
@@ -492,7 +494,7 @@ class QualityCheck:
 						from {self.dataset.schema}.v_ust_release_substance ts join public.substances s on ts.substance_id = s.substance_id 
 							join (select distinct release_id, facility_id from 
 									(select release_id, facility_id, facility_type_id from {self.dataset.schema}.v_ust_release ) x 
-								  where facility_type_id <> 2) f on ts.release_id = f.release_id
+								  where facility_type_id <> 4) f on ts.release_id = f.release_id
 						where s.substance like 'Heating%') a
 					order by 1, 2"""
 		utils.process_sql(self.conn, self.cur, sql)

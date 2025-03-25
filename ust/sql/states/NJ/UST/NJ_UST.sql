@@ -134,6 +134,7 @@ select max(ust_control_id) from ust_control where organization_id = 'NJ';
  * Do a global replace in this script from 36 to the new ust_control_id.
  */
 select * from ust_control;
+select max(ust_control_id) from ust_control where organization_id = 'NJ';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -273,7 +274,7 @@ order by 1, 2, 3, 4, 5;
  * The SQL statements below also assume the state's data is stored with a single value per cell. 
  * Sometimes states stored multiple values in a single cell, separated by a comma or other separator (if you're lucky...)
  * When examining the state's data with this query:
-
+ 
 select distinct "ORG_COL_NAME"
 from NJ_ust."ORG_TAB_NAME"
 order by 1;
@@ -295,6 +296,15 @@ order by 1, 2, 3, 4, 5;
 
  */
 
+select id_column_name, database_lookup_table
+from ust_element_lookup_tables order by 1;
+
+select table_name, column_name
+from information_schema.columns 
+where table_schema = 'nj_ust' 
+and lower(column_name) like lower('<%epa_column_name%>')
+order by 1, 2;
+
 --ust_facility: This table is REQUIRED
 --NOTE: facility_id is a required field. If Facility ID does not exist in the source data, STOP and talk to the state. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
@@ -305,8 +315,6 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (36,'ust_facility','owner_type_id','EPA_Transfer_Facility','OwnerType',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_facility','facility_type1','EPA_Transfer_Facility','FacilityType1',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility','facility_type2','EPA_Transfer_Facility','FacilityType2',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_facility','facility_address1','EPA_Transfer_Facility','FacilityAddress1',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
@@ -322,20 +330,15 @@ values (36,'ust_facility','facility_zip_code','EPA_Transfer_Facility','FacilityZ
 --in a later step if it is not mapped here
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_facility','facility_state','EPA_Transfer_Facility','FacilityState',null,null);
+
 --NOTE: EPA region is rarely populated in the state data, other than TrUSTD (the tribal database)
 --so it won't often be mapped here, but it will be added to view v_ust_facility later. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_facility','facility_epa_region','EPA_Transfer_Facility','FacilityEPARegion',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility','facility_tribal_site','EPA_Transfer_Facility','FacilityTribalSite',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility','facility_tribe','EPA_Transfer_Facility','FacilityTribe',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_facility','facility_latitude','EPA_Transfer_Facility','FacilityLatitude',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_facility','facility_longitude','EPA_Transfer_Facility','FacilityLongitude',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility','coordinate_source_id','EPA_Transfer_Facility','FacilityCoordinateSource',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_facility','facility_owner_company_name','EPA_Transfer_Facility','FacilityOwnerCompanyName',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
@@ -364,15 +367,11 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (36,'ust_facility','financial_responsibility_trust_fund','EPA_Transfer_Facility','FinancialResponsibilityTrustFund',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_facility','financial_responsibility_other_method','EPA_Transfer_Facility','FinancialResponsibilityOtherMethod',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility','ust_reported_release','EPA_Transfer_Facility','USTReportedRelease',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility','associated_ust_release_id','EPA_Transfer_Facility','AssociatedLUSTID',null,null);
 
 --ust_tank: This table is REQUIRED.
 --At a mimimum we need a Tank ID (or Tank Name) and Tank Status. If these fields don't exist in the source data, stop and talk to EPA and/or the state. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank','facility_id','EPA_Transfer_Tank','FacilityID',,null);
+values (36,'ust_tank','facility_id','EPA_Transfer_Tank','FacilityID',null,null);
 --NOTE: Tank ID is required, but we can create it in a later step as long as Tank Name exists in the source data.
 --Tank ID must be an INTEGER (or able to be converted to an integer). 
 --If the source data contains a column called Tank ID but it contains alphanumeric values, map it to EPA column tank_name instead of tank_id.
@@ -382,8 +381,6 @@ values (36,'ust_tank','tank_id','EPA_Transfer_Tank','TankID',null,null);
 --regardless of the state's column names.
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_tank','tank_name','EPA_Transfer_Tank','TankName',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank','tank_location_id','EPA_Transfer_Tank','TankLocation',null,null);
 --NOTE: tank_status_id is required. 
 --If it doesn't exist but Compartment Status exists, map tank_status_id to the organization's compartment status field. 
 --If neither status exists, talk to the state before proceeding. 
@@ -392,13 +389,7 @@ values (36,'ust_tank','tank_status_id','EPA_Transfer_Tank','TankStatus',null,nul
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_tank','federally_regulated','EPA_Transfer_Tank','FederallyRegulated',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank','field_constructed','EPA_Transfer_Tank','FieldConstructed',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_tank','emergency_generator','EPA_Transfer_Tank','EmergencyGenerator',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank','airport_hydrant_system','EPA_Transfer_Tank','AirportHydrantSystem',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank','multiple_tanks','EPA_Transfer_Tank','MultipleTanks',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_tank','tank_closure_date','EPA_Transfer_Tank','TankClosureDate',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
@@ -423,22 +414,19 @@ insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_colu
 values (36,'ust_tank','tank_corrosion_protection_unknown','EPA_Transfer_Tank','TankCorrosionProtectionUnknown',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_tank','tank_secondary_containment_id','EPA_Transfer_Tank','TankSecondaryContainment',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank','cert_of_installation_id','EPA_Transfer_Tank','CertOfInstallation',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank','cert_of_installation_other','EPA_Transfer_Tank','CertOfInstallationOther',null,null);
 
 --ust_tank_substance: This table is OPTIONAL (but most states will have data)
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_substance','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_tank_substance','facility_id','EPA_Transfer_Compartment','FacilityID',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_substance','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_tank_substance','tank_id','EPA_Transfer_Compartment','TankID',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_substance','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_tank_substance','tank_name','EPA_Transfer_Compartment','TankName',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_tank_substance','substance_id','EPA_Transfer_Compartment','CompartmentSubstanceStored',
+'No tank substance ID column. Mapped to CompartmentSubstanceStored in EPA_Transfer_Compartment. Waiting to hear back from state what _Check_TANK_CONTENTS column is.',null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_substance','substance_casno','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_tank_substance','substance_casno','EPA_Transfer_Compartment','CompartmentSubstanceCASNO',null,null);
 
 --ust_compartment: This table is REQUIRED. 
 --If the state does not report compartment data, we will be creating a Compartment ID for it in a later step. 
@@ -455,9 +443,6 @@ values (36,'ust_compartment','tank_name','EPA_Transfer_Compartment','TankName',n
 --If the source data contains a column called Compartment ID but it contains alphanumeric values, map it to EPA column compartment_name instead of compartment_id.
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_compartment','compartment_id','EPA_Transfer_Compartment','CompartmentID',null,null);
---NOTE: Use compartment_id for numeric fields and compartment_name for alphanumeric/text fields. 
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment','compartment_name','EPA_Transfer_Compartment','CompartmentName',null,null);
 --NOTE: Compartment Status is a required field. If the state does not report compartments, use the same element mapping as Tank Status
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_compartment','compartment_status_id','EPA_Transfer_Compartment','CompartmentStatus',null,null);
@@ -478,14 +463,6 @@ values (36,'ust_compartment','overfill_prevention_not_required','EPA_Transfer_Co
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_compartment','spill_bucket_installed','EPA_Transfer_Compartment','SpillBucketInstalled',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment','concrete_berm_installed','EPA_Transfer_Compartment','ConcreteBermInstalled',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment','spill_prevention_other','EPA_Transfer_Compartment','SpillPreventionOther',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment','spill_prevention_not_required','EPA_Transfer_Compartment','SpillPreventionNotRequired',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment','spill_bucket_wall_type_id','EPA_Transfer_Compartment','SpillBucketWallType',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_compartment','tank_interstitial_monitoring','EPA_Transfer_Compartment','TankInterstitialMonitoring',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_compartment','tank_automatic_tank_gauging_release_detection','EPA_Transfer_Compartment','TankAutomaticTankGaugingReleaseDetection',null,null);
@@ -504,164 +481,84 @@ values (36,'ust_compartment','tank_groundwater_monitoring','EPA_Transfer_Compart
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_compartment','tank_vapor_monitoring','EPA_Transfer_Compartment','TankVaporMonitoring',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment','tank_subpart_k_tightness_testing','EPA_Transfer_Compartment','TankSubpartKTightnessTesting',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment','tank_subpart_k_other','EPA_Transfer_Compartment','TankSubpartKOther',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
 values (36,'ust_compartment','tank_other_release_detection','EPA_Transfer_Compartment','TankOtherReleaseDetection',null,null);
 
 --ust_comparment_substance is OPTIONAL; this table should ONLY be mapped/populated for states that report substance data at the compartment level,
 --and where there is an obvious 1:1 relationship between compartment and substance. 
 --Note that in the EPA data tables, this table is a child of ust_tank_substance: there is no substance ID in public.ust_compartment_substance!
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic)
-values (36,'ust_compartment_substance','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_substance','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_substance','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_substance','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_substance','compartment_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
---NOTE: substance_id is not in EPA table public.ust_compartment_substance, however, this element must be mapped if you are mapping this table, 
---and the mapped column MUST included in the v_ust_compartment_substance view in the state schema as a not null column. 
---Additionally, the facility/tank/substance combination MUST also exist in the v_ust_tank_substance view, which is a parent of this table. 
-insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_substance','substance_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+
+--3/24/2025 DSH- Initially included mappings but then deleted, as no compartment substance data reported (or any compartment data).
 
 --ust_piping: This table is OPTIONAL; do not map if there is no piping data in the source data
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','facility_id','EPA_Transfer_Piping','FacilityID',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','tank_id','EPA_Transfer_Piping','TankID',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','tank_name','EPA_Transfer_Piping','TankName',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','compartment_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','compartment_id','EPA_Transfer_Piping','CompartmentID',null,null);
 --NOTE: Unlike TankID and CompartmentID, PipingID is a string in the EPA template, so it is OK to map an alphanumeric
 --column in the source data to piping_id here. However, if there is no unique identifier for PipingID in the source 
 --data, we will be creating one in a separate step. 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_id','EPA_Transfer_Piping','PipingID',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_style_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_style_id','EPA_Transfer_Piping','PipingStyle',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','safe_suction','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','safe_suction','EPA_Transfer_Piping','SafeSuction',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','american_suction','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','american_suction','EPA_Transfer_Piping','AmericanSuction',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','high_pressure_or_bulk_piping','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','high_pressure_or_bulk_piping','EPA_Transfer_Piping','HighPressureOrBulkPiping',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_material_frp','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_material_frp','EPA_Transfer_Piping','PipingMaterialFRP',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_material_gal_steel','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_material_gal_steel','EPA_Transfer_Piping','PipingMaterialGalSteel',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_material_stainless_steel','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_material_stainless_steel','EPA_Transfer_Piping','PipingMaterialStainlessSteel',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_material_steel','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_material_steel','EPA_Transfer_Piping','PipingMaterialSteel',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_material_copper','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_material_copper','EPA_Transfer_Piping','PipingMaterialCopper',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_material_flex','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_material_flex','EPA_Transfer_Piping','PipingMaterialFlex',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_material_no_piping','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_material_no_piping','EPA_Transfer_Piping','PipingMaterialNoPiping',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_material_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_material_other','EPA_Transfer_Piping','PipingMaterialOther',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_material_unknown','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_material_unknown','EPA_Transfer_Piping','PipingMaterialUnknown',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_flex_connector','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_corrosion_protection_sacrificial_anode','EPA_Transfer_Piping','PipingCorrosionProtectionSacrificialAnode',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_corrosion_protection_sacrificial_anode','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_corrosion_protection_impressed_current','EPA_Transfer_Piping','PipingCorrosionProtectionImpressedCurrent',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_corrosion_protection_impressed_current','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_corrosion_protection_cathodic_not_required','EPA_Transfer_Piping','PipingCorrosionProtectionCathodicNotRequired',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_corrosion_protection_cathodic_not_required','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_corrosion_protection_other','EPA_Transfer_Piping','PipingCorrosionProtectionOther',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_corrosion_protection_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_corrosion_protection_unknown','EPA_Transfer_Piping','PipingCorrosionProtectionUnknown',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_corrosion_protection_unknown','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_line_leak_detector','EPA_Transfer_Piping','PipingLineLeakDetector',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_line_leak_detector','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_automated_intersticial_monitoring','EPA_Transfer_Piping','PipingAutomatedIntersticialMonitoring',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_automated_intersticial_monitoring','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_line_test_annual','EPA_Transfer_Piping','PipingLineTestAnnual',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_line_test_annual','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_line_test3yr','EPA_Transfer_Piping','PipingLineTest3yr',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_line_test3yr','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_groundwater_monitoring','EPA_Transfer_Piping','PipingGroundwaterMonitoring',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_groundwater_monitoring','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_vapor_monitoring','EPA_Transfer_Piping','PipingVaporMonitoring',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_vapor_monitoring','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_interstitial_monitoring','EPA_Transfer_Piping','PipingInterstitialMonitoring',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_interstitial_monitoring','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_statistical_inventory_reconciliation','EPA_Transfer_Piping','PipingStatisticalInventoryReconciliation',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_statistical_inventory_reconciliation','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_release_detection_other','EPA_Transfer_Piping','PipingReleaseDetectionOther',null,null);
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_release_detection_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_subpart_k_line_test','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_subpart_k_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','pipe_tank_top_sump','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','pipe_tank_top_sump_wall_type_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','piping_wall_type_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','pipe_trench_liner','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','pipe_secondary_containment_other','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_piping','pipe_secondary_containment_unknown','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-
---ust_facility_dispenser: Map and populate this table only if the state stores dispenser data at the Facility level.
---Dispenser data is OPTIONAL.
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility_dispenser','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility_dispenser','dispenser_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility_dispenser','dispenser_udc','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_facility_dispenser','dispenser_udc_wall_type','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-
---ust_tank_dispenser: Map and populate this table only if the state stores dispenser data at the Tank level.
---Dispenser data is OPTIONAL.
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_dispenser','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_dispenser','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_dispenser','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_dispenser','dispenser_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_dispenser','dispenser_udc','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_tank_dispenser','dispenser_udc_wall_type','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-
---ust_compartment_dispenser: Map and populate this table only if the state stores dispenser data at the Compartment level.
---Dispenser data is OPTIONAL.
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_dispenser','facility_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_dispenser','tank_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_dispenser','tank_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_dispenser','compartment_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_dispenser','compartment_name','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_dispenser','dispenser_id','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_dispenser','dispenser_udc','ORG_TAB_NAME','ORG_COL_NAME',null,null);
-insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
-values (36,'ust_compartment_dispenser','dispenser_udc_wall_type','ORG_TAB_NAME','ORG_COL_NAME',null,null);
+values (36,'ust_piping','piping_wall_type_id','EPA_Transfer_Piping','PipingWallType',null,null);
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
