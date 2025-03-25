@@ -487,7 +487,7 @@ values (36,'ust_compartment','tank_other_release_detection','EPA_Transfer_Compar
 --and where there is an obvious 1:1 relationship between compartment and substance. 
 --Note that in the EPA data tables, this table is a child of ust_tank_substance: there is no substance ID in public.ust_compartment_substance!
 
---3/24/2025 DSH- Initially included mappings but then deleted, as no compartment substance data reported (or any compartment data).
+--3/24/2025 DSH- Initially included mappings but then deleted, as no compartment substance data reported (or any compartment data, instead it is just a copy of tank data).
 
 --ust_piping: This table is OPTIONAL; do not map if there is no piping data in the source data
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments, query_logic) 
