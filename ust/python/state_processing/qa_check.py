@@ -468,6 +468,14 @@ class QualityCheck:
 		# check for inclusion of tanks that are unregulated due to heating oil
 
 		if self.dataset.ust_or_release == 'ust':
+			sql = f"""select count(*) from information_schema.columns 
+			          where table_schema = %s and table_name = %s and column_name like 'facility_type%%'"""
+			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_facility'))
+			cnt = self.cur.fetchone()[0]
+			if cnt == 0:
+				logger.info('No facility type column in %s.v_ust_facility so not performating heating oil tank check', self.dataset.schema)
+				return 
+
 			sql = f"""select distinct facility_id, tank_id 
 					from 
 						(select ts.facility_id, tank_id 
@@ -488,6 +496,22 @@ class QualityCheck:
 						where tank_capacity_gallons <1100 and s.substance_group in ('Diesel','Gasoline')) a
 					order by 1, 2"""
 		else:
+			sql = f"""select count(*) from information_schema.columns 
+			          where table_schema = %s and table_name = %s and column_name like 'facility_type%%'"""
+			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_release'))
+			cnt = self.cur.fetchone()[0]
+			if cnt == 0:
+				logger.info('No facility type column in %s.v_ust_release so not performating heating oil tank check', self.dataset.schema)
+				return 
+
+			sql = f"""select count(*) from information_schema.columns 
+			          where table_schema = %s and table_name = %s"""
+			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_release_substance', 'substance_id'))
+			cnt = self.cur.fetchone()[0]
+			if cnt == 0:
+				logger.info('No view %s.v_ust_release_substance so not performating heating oil tank check', self.dataset.schema)
+				return 
+
 			sql = f"""select distinct facility_id, release_id
 					from 
 						(select ts.release_id, f.facility_id 
