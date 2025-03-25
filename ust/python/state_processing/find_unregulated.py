@@ -12,6 +12,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+organization_id = None          # Optional; if control_id = 0 or None, will find the most recent control_id
 drop_existing = True            # Boolean; defaults to True. If True, will drop existing erg_ unregulated table(s). 
 
 
@@ -245,7 +246,10 @@ class Unregulated:
 
 
 
-def main(ust_or_release, control_id, drop_existing=True):
+def main(ust_or_release, control_id=0, organization_id=None, drop_existing=True):
+	if not control_id or control_id == 0:
+		control_id = utils.get_control_id(ust_or_release, organization_id)
+
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id,
 				 	  requires_export=False)
@@ -257,5 +261,6 @@ def main(ust_or_release, control_id, drop_existing=True):
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
+		 organization_id=organization_id,
 		 drop_existing=drop_existing)
 
