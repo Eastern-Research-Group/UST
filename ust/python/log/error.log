@@ -7108,3 +7108,398 @@ EXITING DUE TO SQL ERROR....
 EXITING DUE TO SQL ERROR....
 
 
+2025-03-24 14:29:28 - ERROR - utils.process_sql:597 - Error processing SQL: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Traceback (most recent call last):
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 595, in process_sql
+    cur.execute(sql, params)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Stack (most recent call last):
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 198, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 88, in _run_code
+    exec(code, run_globals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\__main__.py", line 24, in <module>
+    start.main()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\start.py", line 331, in main
+    kernel.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelapp.py", line 701, in start
+    self.io_loop.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\tornado\platform\asyncio.py", line 205, in start
+    self.asyncio_loop.run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\windows_events.py", line 322, in run_forever
+    super().run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 641, in run_forever
+    self._run_once()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 1986, in _run_once
+    handle._run()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 534, in dispatch_queue
+    await self.process_one()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 523, in process_one
+    await dispatch(*args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 429, in dispatch_shell
+    await result
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 767, in execute_request
+    reply_content = await reply_content
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\ipkernel.py", line 429, in do_execute
+    res = shell.run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\zmqshell.py", line 549, in run_cell
+    return super().run_cell(*args, **kwargs)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3075, in run_cell
+    result = self._run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3130, in _run_cell
+    result = runner(coro)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\async_helpers.py", line 128, in _pseudo_sync_runner
+    coro.send(None)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3334, in run_cell_async
+    has_raised = await self.run_ast_nodes(code_ast.body, cell_name,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3517, in run_ast_nodes
+    if await self.run_code(code, result, async_=asy):
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3577, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "C:\Users\cpitkins\AppData\Local\Temp\ipykernel_33224\2321444638.py", line 1, in <module>
+    runfile('C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing/control_table_summary.py', wdir='C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing')
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 528, in runfile
+    return _exec_file(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 615, in _exec_file
+    exec_code(file_code, filename, ns_globals, ns_locals,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 473, in exec_code
+    exec_fun(compile(ast_code, filename, 'exec'), ns_globals, ns_locals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\py3compat.py", line 356, in compat_exec
+    exec(code, globals, locals)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 302, in <module>
+    main(ust_or_release=ust_or_release,
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 298, in main
+    template = Summary(dataset=dataset)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 38, in __init__
+    self.performance_measure_comparison()
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 160, in performance_measure_comparison
+    utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 597, in process_sql
+    error_logger.error('Error processing SQL: %s', e, stack_info=True, exc_info=True)
+2025-03-24 14:29:28 - ERROR - utils.process_sql:597 - Error processing SQL: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Traceback (most recent call last):
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 595, in process_sql
+    cur.execute(sql, params)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Stack (most recent call last):
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 198, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 88, in _run_code
+    exec(code, run_globals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\__main__.py", line 24, in <module>
+    start.main()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\start.py", line 331, in main
+    kernel.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelapp.py", line 701, in start
+    self.io_loop.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\tornado\platform\asyncio.py", line 205, in start
+    self.asyncio_loop.run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\windows_events.py", line 322, in run_forever
+    super().run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 641, in run_forever
+    self._run_once()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 1986, in _run_once
+    handle._run()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 534, in dispatch_queue
+    await self.process_one()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 523, in process_one
+    await dispatch(*args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 429, in dispatch_shell
+    await result
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 767, in execute_request
+    reply_content = await reply_content
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\ipkernel.py", line 429, in do_execute
+    res = shell.run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\zmqshell.py", line 549, in run_cell
+    return super().run_cell(*args, **kwargs)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3075, in run_cell
+    result = self._run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3130, in _run_cell
+    result = runner(coro)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\async_helpers.py", line 128, in _pseudo_sync_runner
+    coro.send(None)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3334, in run_cell_async
+    has_raised = await self.run_ast_nodes(code_ast.body, cell_name,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3517, in run_ast_nodes
+    if await self.run_code(code, result, async_=asy):
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3577, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "C:\Users\cpitkins\AppData\Local\Temp\ipykernel_33224\2321444638.py", line 1, in <module>
+    runfile('C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing/control_table_summary.py', wdir='C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing')
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 528, in runfile
+    return _exec_file(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 615, in _exec_file
+    exec_code(file_code, filename, ns_globals, ns_locals,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 473, in exec_code
+    exec_fun(compile(ast_code, filename, 'exec'), ns_globals, ns_locals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\py3compat.py", line 356, in compat_exec
+    exec(code, globals, locals)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 302, in <module>
+    main(ust_or_release=ust_or_release,
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 298, in main
+    template = Summary(dataset=dataset)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 38, in __init__
+    self.performance_measure_comparison()
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 160, in performance_measure_comparison
+    utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 597, in process_sql
+    error_logger.error('Error processing SQL: %s', e, stack_info=True, exc_info=True)
+2025-03-24 14:29:28 - ERROR - utils.process_sql:597 - Error processing SQL: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Traceback (most recent call last):
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 595, in process_sql
+    cur.execute(sql, params)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Stack (most recent call last):
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 198, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 88, in _run_code
+    exec(code, run_globals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\__main__.py", line 24, in <module>
+    start.main()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\start.py", line 331, in main
+    kernel.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelapp.py", line 701, in start
+    self.io_loop.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\tornado\platform\asyncio.py", line 205, in start
+    self.asyncio_loop.run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\windows_events.py", line 322, in run_forever
+    super().run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 641, in run_forever
+    self._run_once()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 1986, in _run_once
+    handle._run()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 534, in dispatch_queue
+    await self.process_one()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 523, in process_one
+    await dispatch(*args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 429, in dispatch_shell
+    await result
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 767, in execute_request
+    reply_content = await reply_content
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\ipkernel.py", line 429, in do_execute
+    res = shell.run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\zmqshell.py", line 549, in run_cell
+    return super().run_cell(*args, **kwargs)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3075, in run_cell
+    result = self._run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3130, in _run_cell
+    result = runner(coro)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\async_helpers.py", line 128, in _pseudo_sync_runner
+    coro.send(None)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3334, in run_cell_async
+    has_raised = await self.run_ast_nodes(code_ast.body, cell_name,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3517, in run_ast_nodes
+    if await self.run_code(code, result, async_=asy):
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3577, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "C:\Users\cpitkins\AppData\Local\Temp\ipykernel_33224\2321444638.py", line 1, in <module>
+    runfile('C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing/control_table_summary.py', wdir='C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing')
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 528, in runfile
+    return _exec_file(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 615, in _exec_file
+    exec_code(file_code, filename, ns_globals, ns_locals,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 473, in exec_code
+    exec_fun(compile(ast_code, filename, 'exec'), ns_globals, ns_locals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\py3compat.py", line 356, in compat_exec
+    exec(code, globals, locals)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 302, in <module>
+    main(ust_or_release=ust_or_release,
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 298, in main
+    template = Summary(dataset=dataset)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 38, in __init__
+    self.performance_measure_comparison()
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 160, in performance_measure_comparison
+    utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 597, in process_sql
+    error_logger.error('Error processing SQL: %s', e, stack_info=True, exc_info=True)
+2025-03-24 14:29:28 - ERROR - utils.process_sql:597 - Error processing SQL: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Traceback (most recent call last):
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 595, in process_sql
+    cur.execute(sql, params)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Stack (most recent call last):
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 198, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 88, in _run_code
+    exec(code, run_globals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\__main__.py", line 24, in <module>
+    start.main()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\start.py", line 331, in main
+    kernel.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelapp.py", line 701, in start
+    self.io_loop.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\tornado\platform\asyncio.py", line 205, in start
+    self.asyncio_loop.run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\windows_events.py", line 322, in run_forever
+    super().run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 641, in run_forever
+    self._run_once()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 1986, in _run_once
+    handle._run()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 534, in dispatch_queue
+    await self.process_one()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 523, in process_one
+    await dispatch(*args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 429, in dispatch_shell
+    await result
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 767, in execute_request
+    reply_content = await reply_content
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\ipkernel.py", line 429, in do_execute
+    res = shell.run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\zmqshell.py", line 549, in run_cell
+    return super().run_cell(*args, **kwargs)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3075, in run_cell
+    result = self._run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3130, in _run_cell
+    result = runner(coro)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\async_helpers.py", line 128, in _pseudo_sync_runner
+    coro.send(None)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3334, in run_cell_async
+    has_raised = await self.run_ast_nodes(code_ast.body, cell_name,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3517, in run_ast_nodes
+    if await self.run_code(code, result, async_=asy):
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3577, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "C:\Users\cpitkins\AppData\Local\Temp\ipykernel_33224\2321444638.py", line 1, in <module>
+    runfile('C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing/control_table_summary.py', wdir='C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing')
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 528, in runfile
+    return _exec_file(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 615, in _exec_file
+    exec_code(file_code, filename, ns_globals, ns_locals,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 473, in exec_code
+    exec_fun(compile(ast_code, filename, 'exec'), ns_globals, ns_locals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\py3compat.py", line 356, in compat_exec
+    exec(code, globals, locals)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 302, in <module>
+    main(ust_or_release=ust_or_release,
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 298, in main
+    template = Summary(dataset=dataset)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 38, in __init__
+    self.performance_measure_comparison()
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 160, in performance_measure_comparison
+    utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 597, in process_sql
+    error_logger.error('Error processing SQL: %s', e, stack_info=True, exc_info=True)
+2025-03-24 14:29:28 - ERROR - utils.process_sql:597 - Error processing SQL: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Traceback (most recent call last):
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 595, in process_sql
+    cur.execute(sql, params)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Stack (most recent call last):
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 198, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\ProgramData\anaconda3\Lib\runpy.py", line 88, in _run_code
+    exec(code, run_globals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\__main__.py", line 24, in <module>
+    start.main()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\console\start.py", line 331, in main
+    kernel.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelapp.py", line 701, in start
+    self.io_loop.start()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\tornado\platform\asyncio.py", line 205, in start
+    self.asyncio_loop.run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\windows_events.py", line 322, in run_forever
+    super().run_forever()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 641, in run_forever
+    self._run_once()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\base_events.py", line 1986, in _run_once
+    handle._run()
+  File "C:\ProgramData\anaconda3\Lib\asyncio\events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 534, in dispatch_queue
+    await self.process_one()
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 523, in process_one
+    await dispatch(*args)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 429, in dispatch_shell
+    await result
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\kernelbase.py", line 767, in execute_request
+    reply_content = await reply_content
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\ipkernel.py", line 429, in do_execute
+    res = shell.run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\ipykernel\zmqshell.py", line 549, in run_cell
+    return super().run_cell(*args, **kwargs)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3075, in run_cell
+    result = self._run_cell(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3130, in _run_cell
+    result = runner(coro)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\async_helpers.py", line 128, in _pseudo_sync_runner
+    coro.send(None)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3334, in run_cell_async
+    has_raised = await self.run_ast_nodes(code_ast.body, cell_name,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3517, in run_ast_nodes
+    if await self.run_code(code, result, async_=asy):
+  File "C:\ProgramData\anaconda3\Lib\site-packages\IPython\core\interactiveshell.py", line 3577, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "C:\Users\cpitkins\AppData\Local\Temp\ipykernel_33224\2321444638.py", line 1, in <module>
+    runfile('C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing/control_table_summary.py', wdir='C:/Users/cpitkins/Documents/GitHub/UST2/ust/python/state_processing')
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 528, in runfile
+    return _exec_file(
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 615, in _exec_file
+    exec_code(file_code, filename, ns_globals, ns_locals,
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\customize\spydercustomize.py", line 473, in exec_code
+    exec_fun(compile(ast_code, filename, 'exec'), ns_globals, ns_locals)
+  File "C:\ProgramData\anaconda3\Lib\site-packages\spyder_kernels\py3compat.py", line 356, in compat_exec
+    exec(code, globals, locals)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 302, in <module>
+    main(ust_or_release=ust_or_release,
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 298, in main
+    template = Summary(dataset=dataset)
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 38, in __init__
+    self.performance_measure_comparison()
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\state_processing\control_table_summary.py", line 160, in performance_measure_comparison
+    utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
+  File "c:\users\cpitkins\documents\github\ust2\ust\python\util\utils.py", line 597, in process_sql
+    error_logger.error('Error processing SQL: %s', e, stack_info=True, exc_info=True)
+2025-03-24 14:29:28 - ERROR - utils.process_sql:599 - 
+
+Bad SQL:
+
+2025-03-24 14:29:28 - ERROR - utils.process_sql:599 - 
+
+Bad SQL:
+
+2025-03-24 14:29:28 - ERROR - utils.process_sql:599 - 
+
+Bad SQL:
+
+2025-03-24 14:29:28 - ERROR - utils.process_sql:599 - 
+
+Bad SQL:
+
+2025-03-24 14:29:28 - ERROR - utils.process_sql:599 - 
+
+Bad SQL:
+
+2025-03-24 14:29:28 - ERROR - utils.process_sql:600 - select count(*) from public.v_ust_compartment where ust_control_id = 26;
+2025-03-24 14:29:28 - ERROR - utils.process_sql:600 - select count(*) from public.v_ust_compartment where ust_control_id = 26;
+2025-03-24 14:29:28 - ERROR - utils.process_sql:600 - select count(*) from public.v_ust_compartment where ust_control_id = 26;
+2025-03-24 14:29:28 - ERROR - utils.process_sql:600 - select count(*) from public.v_ust_compartment where ust_control_id = 26;
+2025-03-24 14:29:28 - ERROR - utils.process_sql:600 - select count(*) from public.v_ust_compartment where ust_control_id = 26;
