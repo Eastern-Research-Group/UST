@@ -3,7 +3,7 @@
 
 
 /*********** v_ust_piping ***********/
---There are 31 rows in de_ust.v_ust_piping that do not exist in public.v_ust_piping
+--There are 9176 rows in de_ust.v_ust_piping that do not exist in public.v_ust_piping
 
 select * from de_ust.v_ust_piping a
 where not exists
@@ -13,8 +13,8 @@ order by a.facility_id,a.tank_id,a.compartment_id,a.piping_id;
 
 --View definition for de_ust.v_ust_piping:
  SELECT DISTINCT x."FacilityID" AS facility_id,
-    (c."TankID")::integer AS tank_id,
-    (c."CompartmentID")::integer AS compartment_id,
+    (x."TankID")::integer AS tank_id,
+    (x."CompartmentID")::integer AS compartment_id,
     (t.piping_id)::text AS piping_id,
     ps.piping_style_id,
     x."SafeSuction" AS safe_suction,
