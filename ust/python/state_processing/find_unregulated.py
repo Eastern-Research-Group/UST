@@ -4,18 +4,22 @@ import sys
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
+import psycopg2
+
 from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+organization_id = None          # Optional; if control_id = 0 or None, will find the most recent control_id
 drop_existing = True            # Boolean; defaults to True. If True, will drop existing erg_ unregulated table(s). 
 
 
 class Unregulated:
 	conn = None 
 	cur = None 
+	tables_exist = False
 
 	def __init__(self, 
 				 dataset,
@@ -30,7 +34,31 @@ class Unregulated:
 			self.unreg_table = 'erg_unregulated_releases'
 
 
+	def check_for_substances(self):
+		self.connect_db()
+
+		if self.dataset.ust_or_release == 'ust':
+			view_name = 'v_ust_tank_substance'
+		else:
+			view_name = 'v_ust_release_substance'
+
+		sql = """select count(*) from information_schema.tables 
+		         where table_schema = %s and table_type = 'VIEW' and table_name = %s"""
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, view_name))
+		cnt = self.cur.fetchone()[0]
+		
+		self.disconnect_db()		
+
+		if cnt > 0:
+			return True 
+		return False 
+
+
 	def execute(self):
+		if not self.check_for_substances():
+			logger.info('No substance data for %s %s, no need to check for unregulated %s.', self.dataset.organization_id, utils.get_pretty_ust_or_release(self.dataset.ust_or_release), self.data_type)
+			exit()
+
 		self.connect_db()
 
 		if self.drop_existing:
@@ -42,7 +70,9 @@ class Unregulated:
 				self.disconnect_db()
 				exit()
 
-		self.create_tables()
+		if not self.tables_exist:
+			self.create_tables()
+	
 		self.insert_heating_oil()
 		self.insert_small_tank()
 		self.insert_facilities()
@@ -51,10 +81,25 @@ class Unregulated:
 
 
 	def drop_existing_tables(self):
-		sql = f"drop table if exists {self.dataset.schema}.{self.unreg_table}"
-		utils.process_sql(self.conn, self.cur, sql)
-		sql = f"drop table if exists {self.dataset.schema}.{self.unreg_fac_table}"
-		utils.process_sql(self.conn, self.cur, sql)
+		try:
+			sql = f"drop table if exists {self.dataset.schema}.{self.unreg_table}"
+			self.cur.execute(sql)
+		except psycopg2.errors.DependentObjectsStillExist as e:
+			logger.warning('Table %s.%s exists but the views that depend on it have already been written, so truncating it instead of creating it.', self.dataset.schema, self.unreg_table)
+			sql = f"truncate table {self.dataset.schema}.{self.unreg_table}"
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Truncated table %s.%s', self.dataset.schema, self.unreg_table)
+			self.tables_exist = True 
+
+		try:
+			sql = f"drop table if exists {self.dataset.schema}.{self.unreg_fac_table}"
+			self.cur.execute(sql)
+		except psycopg2.errors.DependentObjectsStillExist as e:
+			logger.warning('Table %s.%s exists but the views that depend on it have already been written, so truncating it instead of creating it.', self.dataset.schema, self.unreg_fac_table)
+			sql = f"truncate table {self.dataset.schema}.{self.unreg_fac_table}"
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Truncated table %s.%s', self.dataset.schema, self.unreg_fac_table)
+			self.tables_exist = True 
 
 
 	def get_existing_tables(self):
@@ -115,7 +160,7 @@ class Unregulated:
 			else:
 				fsql = f'\n\t(select distinct facility_id, release_id, facility_type_id from {self.dataset.schema}.{view_name} '
 		if fac_type == 'heating oil':
-			fsql = fsql + "where facility_id is not null and facility_type_id <> 2) f\n"
+			fsql = fsql + "where facility_id is not null and facility_type_id <> 4) f\n"
 		else:
 			fsql = fsql + "where facility_id is not null and facility_type_id in (1,12)) f\n"
 		return fsql 
@@ -153,11 +198,13 @@ class Unregulated:
 			facility_type_sql = self.build_facility_type_sql('farm/residence')
 
 			sql = f"""insert into {self.dataset.schema}.{self.unreg_table}
-					select x.facility_id, tank_id 
+					select x.facility_id, x.tank_id 
 					from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
 						  from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x 
 						join {facility_type_sql} on x.facility_id = f.facility_id	  
-					where tank_capacity_gallons < 1100
+						join {self.dataset.schema}.v_ust_tank_substance s on x.facility_id = s.facility_id and x.tank_id = s.tank_id 
+						join public.substances sub on s.substance_id = sub.substance_id
+					where tank_capacity_gallons < 1100 and substance_group in ('Diesel','Gasoline')
 					on conflict do nothing"""
 			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Inserted %s rows into %s.%s due to tank capacity <1100 gallones in a farm or residence facility', self.cur.rowcount, self.dataset.schema, self.unreg_table)
@@ -199,7 +246,10 @@ class Unregulated:
 
 
 
-def main(ust_or_release, control_id, drop_existing=True):
+def main(ust_or_release, control_id=0, organization_id=None, drop_existing=True):
+	if not control_id or control_id == 0:
+		control_id = utils.get_control_id(ust_or_release, organization_id)
+
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id,
 				 	  requires_export=False)
@@ -211,5 +261,6 @@ def main(ust_or_release, control_id, drop_existing=True):
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
+		 organization_id=organization_id,
 		 drop_existing=drop_existing)
 

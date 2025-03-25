@@ -11,9 +11,22 @@ from python.util import utils
 from python.util.logger_factory import logger
 from python.util.upload_general_file import Importer
 
+'''
+This script runs several checks against a specified database column in an attempt to identify rows that are likely NOT CUI. 
+If the data have already been mapped, you can just set the ust_or_release, and control_id or organization_id variables and 
+the script will use the mapping tables to identify the column to check. 
+If the data are not already mapped, use the schema/table_name/column_name variables. 
+'''
+
+
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
+
 schema = ''              		# Enter the schema name
 table_name = ''             	# Enter the table name that contains the column(s) with possible CUI
 column_names = ['']         	# Enter a list of column names that contain possible CUI    
+
 drop_existing = True            # Boolean; defaults to True. If True, will drop the erg_%_clean_cui table if it exists. 
 maybe_as_true = True            # Boolean. Set to True to mark stopwords with the "maybe flag" to TRUE instead of MAYBE
 
@@ -38,9 +51,12 @@ class CuiCheck:
 	cur = None 
 
 	def __init__(self, 
-				 schema,
-				 table_name,
-				 column_names,	   
+			     ust_or_release=None,
+			     control_id=None,
+			     organization_id=None,
+				 schema=None,
+				 table_name=None,
+				 column_names=None,	   
 	     		 drop_existing=True,  
 				 maybe_as_true=False,
 				 upload_file_path = None,
@@ -49,6 +65,9 @@ class CuiCheck:
 				 upload_overwrite_table = False,
 				 upload_excel_tabs = None,
 				 perform_check=True):
+		self.ust_or_release = ust_or_release
+		self.control_id = control_id
+		self.organization_id = organization_id
 		self.schema = schema
 		self.table_name = table_name 
 		self.column_names = column_names
@@ -59,6 +78,7 @@ class CuiCheck:
 		self.upload_table_name = upload_table_name
 		self.upload_overwrite_table = upload_overwrite_table
 		self.upload_excel_tabs = upload_excel_tabs
+		self.parameter_check()
 		self.upload_file()
 		self.connect_db()
 		self.clean_variables()
@@ -66,27 +86,57 @@ class CuiCheck:
 		self.file_name='CUI_check_' + self.schema + '_' + self.table_name  + '.xlsx'
 		self.export_dir = '../../python/exports/cui/'
 		self.export_file_path = self.export_dir + self.file_name
+		self.perform_check = perform_check
+		self.print_self()
 		if self.perform_check:
 			self.process()
 		self.disconnect_db()
 
 
+	def parameter_check(self):
+		if not self.control_id and not self.organization_id and not self.schema:
+			logger.warning('Either control_id/organization_id or schema/table_name/column_name need to be passed; exiting...')
+			exit()
+		elif self.control_id and self.organization_id:
+			if self.control_id != utils.get_control_id(self.ust_or_release, self.organization_id):
+				logger.warning('%s_control_id %s for organization %s is %s in the database, but %s was passed.', self.ust_or_release, self.organization_id, utils.get_control_id(self.ust_or_release, self.organization_id), self.control_id)
+				exit()
+		elif self.control_id and not self.organization_id:
+			self.organization_id = utils.get_org_from_control_id(self.control_id, self.ust_or_release)
+		elif self.organization_id and not self.control_id:
+			self.control_id = utils.get_control_id(self.ust_or_release, self.organization_id)
+
+		if not self.schema or not self.table_name or not self.column_names:
+			self.connect_db()
+			sql = """select table_schema, organization_table_name, organization_column_name
+					from public.v_cui_data_elements
+					where ust_or_release = %s and control_id = %s"""
+			utils.process_sql(self.conn, self.cur, sql, params=(self.ust_or_release, self.control_id))
+			row = self.cur.fetchone()
+			self.schema = row[0]
+			self.table_name = row[1]
+			self.column_names = [row[2]]
+
+
 	def print_self(self):
-		print('schema = ' + schema)
-		print('table_name = ' + table_name)
-		print('column_names = ' + str(column_names))
-		print('drop_existing = ' + str(drop_existing))
-		print('maybe_as_true = ' + str(maybe_as_true))
-		print('upload_file_path = ' + upload_file_path)
-		print('upload_schema = ' + upload_schema)
-		print('upload_table_name = ' + upload_table_name)
-		print('upload_overwrite_table = ' + str(upload_overwrite_table))
-		print('upload_excel_tabs = ' + str(upload_excel_tabs))
-		print('new_table_name = ' + new_table_name)
-		print('file_name = ' + file_name)
-		print('export_dir = ' + export_dir)
-		print('export_file_path = ' + export_file_path)
-		print('perform_check = ' + str(perform_check))
+		print('ust_or_release = ' + str(self.ust_or_release))
+		print('control_id = ' + str(self.control_id))
+		print('organization_id = ' + str(self.organization_id))
+		print('schema = ' +  str(self.schema))
+		print('table_name = ' +  str(self.table_name))
+		print('column_names = ' + str( self.column_names))
+		print('drop_existing = ' + str( self.drop_existing))
+		print('maybe_as_true = ' + str( self.maybe_as_true))
+		print('upload_file_path = ' +  str(self.upload_file_path))
+		print('upload_schema = ' +  str(self.upload_schema))
+		print('upload_table_name = ' +  str(self.upload_table_name))
+		print('upload_overwrite_table = ' + str( self.upload_overwrite_table))
+		print('upload_excel_tabs = ' + str( self.upload_excel_tabs))
+		print('new_table_name = ' +  str(self.new_table_name))
+		print('file_name = ' +  str(self.file_name))
+		print('export_dir = ' +  str(self.export_dir))
+		print('export_file_path = ' +  str(self.export_file_path))
+		print('perform_check = ' + str( self.perform_check))
 
 
 	def clean_variables(self):
@@ -271,16 +321,18 @@ class CuiCheck:
 
 
 	def connect_db(self):
-		self.conn = utils.connect_db()
-		self.cur = self.conn.cursor()
-		logger.info('Connected to database')
+		if not self.conn:
+			self.conn = utils.connect_db()
+			self.cur = self.conn.cursor()
+			logger.info('Connected to database')
 		
 
 	def disconnect_db(self):
-		self.conn.commit()
-		self.cur.close()
-		self.conn.close()
-		logger.info('Disconnected from database')
+		if self.conn:
+			self.conn.commit()
+			self.cur.close()
+			self.conn.close()
+			logger.info('Disconnected from database')
 
 
 	def upload_file(self):
@@ -293,9 +345,12 @@ class CuiCheck:
 			t.save_file_to_db()		
 
 
-def main(schema, 
-	     table_name, 
-	     column_names, 
+def main(ust_or_release=None,
+		 control_id=None,
+		 organization_id=None,
+		 schema=None, 
+	     table_name=None, 
+	     column_names=None, 
 	     drop_existing=True,
 	     maybe_as_true=False,
 	     upload_file_path=None, 
@@ -303,7 +358,10 @@ def main(schema,
 	     upload_table_name=None, 
 	     upload_overwrite_table=False,
 	     upload_excel_tabs=None):
-	cui = CuiCheck(schema=schema, 
+	cui = CuiCheck(ust_or_release=ust_or_release,
+				   control_id=control_id,
+				   organization_id=organization_id,
+				   schema=schema, 
 				   table_name=table_name, 
 				   column_names=column_names,
 				   drop_existing=drop_existing,
@@ -316,7 +374,10 @@ def main(schema,
 
 
 if __name__ == '__main__':   
-	main(schema=schema,
+	main(ust_or_release=ust_or_release,
+	     control_id=control_id,
+		 organization_id=organization_id,
+		 schema=schema,
 		 table_name=table_name,
 		 column_names=column_names,
 		 drop_existing=drop_existing,

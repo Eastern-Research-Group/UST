@@ -13,10 +13,12 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
+organization_id = None          # Optional; if control_id = 0 or None, will find the most recent control_id
 find_regulated = True          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
 execute_sql = False            	# Boolean; defaults to False. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
 export_sql = True              	# Boolean; defaults to True. If True will generate a SQL file containing the 'create or replace view' statements.
+view_name = None                # String; defaults to None. To limit output to a single view, enter view name (e.g. "v_ust_tank_substance").
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None
@@ -38,18 +40,20 @@ class Exclude:
 				 dataset,
 				 find_regulated=True,
 				 execute_sql=False,
-				 export_sql=True):
+				 export_sql=True,
+				 view_name=None):
 		self.dataset = dataset
 		self.find_regulated = find_regulated
 		self.execute_sql = execute_sql
 		self.export_sql = export_sql
+		self.view_name = view_name
 
 
 	def execute(self):
-		self.connect_db()
-
 		if self.find_regulated:
 			Unregulated(self.dataset, drop_existing=True).execute()
+
+		self.connect_db()
 
 		self.df = self.get_columns()
 		views = ['v_' + v for v in self.df['epa_table_name'].unique()]
@@ -73,8 +77,11 @@ class Exclude:
 				 from public.{self.dataset.ust_or_release}_element_mapping a left join information_schema.columns b 
 					on lower(a.organization_table_name) = lower(b.table_name) and lower(a.organization_column_name) = lower(b.column_name)
 					left join public.v_{self.dataset.ust_or_release}_element_metadata c on a.epa_table_name = c.table_name and a.epa_column_name = c.column_name
-				 where b.table_schema = '{self.dataset.schema}' and a.epa_column_name in ('facility_id','tank_id','release_id')
-				 order by c.table_sort_order, c.column_sort_order"""
+				 where a.{self.dataset.ust_or_release}_control_id = {self.dataset.control_id} 
+				 and b.table_schema = '{self.dataset.schema}' and a.epa_column_name in ('facility_id','tank_id','release_id') """
+		if self.view_name:
+			sql = sql + f""" and epa_table_name = '{self.view_name.replace("v_","")}' """
+		sql = sql + " order by c.table_sort_order, c.column_sort_order"
 		df = pd.read_sql(sql, con=utils.get_engine())
 		return df 
 
@@ -95,6 +102,7 @@ class Exclude:
 		else:
 			view_def = view_def + '\n where '
 		filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'facility_id'")
+
 		if view_name == 'v_ust_facility' or view_name == 'v_ust_release' or view_name == 'v_ust_facility_dispenser':
 			self.facility_id_column = filtered_df['column_name'].iloc[0]
 			from_table = self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
@@ -115,10 +123,12 @@ class Exclude:
 				type = 'releases'
 				data_type = 'varchar(50)'
 			filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == '{epa_column_name}'")
+
 			if len(filtered_df) > 0:
 				self.child_id_column = filtered_df['column_name'].iloc[0]
 				from_table = self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
 				self.child_table_alias = get_table_alias(self.get_view_def(view_name), from_table)		
+
 				
 			view_def = view_def + f"not exists\n\t(select 1 from {self.dataset.schema}.erg_unregulated_{type} unreg"
 			view_def = view_def + f'\n\twhere {self.facility_table_alias}."{self.facility_id_column}"::varchar(50) = unreg.facility_id and {self.child_table_alias}."{self.child_id_column}"::{data_type} = unreg.{epa_column_name})'
@@ -164,12 +174,16 @@ def get_table_alias(view_def, from_table):
 
 def main(ust_or_release, 
 		 control_id, 
+		 organization_id=None,
 		 find_regulated=True, 
 		 execute_sql=False,
 		 export_sql=True,
 		 export_file_path=None, 
 		 export_file_dir=None,
-		 export_file_name=None):
+		 export_file_name=None,
+		 view_name=None):
+	if not control_id or control_id == 0:
+		control_id = utils.get_control_id(ust_or_release, organization_id)
 	dataset = Dataset(ust_or_release=ust_or_release,
 					  control_id=control_id,
 					  requires_export=True,
@@ -178,16 +192,19 @@ def main(ust_or_release,
 					  export_file_dir=export_file_dir,
 					  export_file_name=export_file_name)
 
-	Exclude(dataset, find_regulated=find_regulated, execute_sql=execute_sql, export_sql=export_sql).execute()
+	e = Exclude(dataset, find_regulated=find_regulated, execute_sql=execute_sql, export_sql=export_sql, view_name=view_name)
+	e.execute()
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
+		 organization_id=organization_id,
 		 find_regulated=find_regulated,
 		 execute_sql=execute_sql,
 		 export_sql=export_sql,
 		 export_file_path=export_file_path,
 		 export_file_dir=export_file_dir,
-		 export_file_name=export_file_name)
+		 export_file_name=export_file_name,
+		 view_name=view_name)
 
