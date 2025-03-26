@@ -8,7 +8,7 @@ create or replace view me_ust.v_ust_facility as
             tanks."TANK STATUS DATE",
             tanks."LATITUDE",
             tanks."LONGITUDE",
-            row_number() OVER (PARTITION BY (tanks."REGISTRATION NUMBER")::text ORDER BY tanks."TANK STATUS DATE" DESC, tanks."LATITUDE" DESC) AS row_num
+            row_number() OVER (PARTITION BY (tanks."REGISTRATION NUMBER")::text ORDER BY tanks."TANK STATUS DATE" DESC, tanks."LATITUDE" desc nulls last) AS row_num
            FROM me_ust.tanks
         )
  SELECT DISTINCT (x."REGISTRATION NUMBER")::text AS facility_id,
@@ -25,7 +25,7 @@ create or replace view me_ust.v_ust_facility as
    FROM ((me_ust.tanks x
      JOIN latest_tank_status lt ON ((((x."REGISTRATION NUMBER")::text = lt.facility_id) AND (lt.row_num = 1))))
      LEFT JOIN me_ust.v_facility_type_xwalk ft ON ((x."FACILITY USE CODE" = (ft.organization_value)::text)))
- where ."REGISTRATION NUMBER"::varchar(50) not in (select facility_id from me_ust.erg_unregulated_facilities);
+ where x."REGISTRATION NUMBER"::varchar(50) not in (select facility_id from me_ust.erg_unregulated_facilities);
 
 
 
@@ -60,20 +60,18 @@ create or replace view me_ust.v_ust_tank as
 	where x."REGISTRATION NUMBER"::varchar(50) = unreg.facility_id and x."TANK NUMBER"::int = unreg.tank_id);
 
 
-
-create or replace view me_ust.v_ust_tank_substance as
- SELECT DISTINCT (x."REGISTRATION NUMBER")::text AS facility_id,
-    (x."TANK NUMBER")::integer AS tank_id,
-        CASE
-            WHEN (s.substance_id IS NULL) THEN 47
-            ELSE s.substance_id
-        END AS substance_id
-   FROM (me_ust.tanks x
-     LEFT JOIN me_ust.v_substance_xwalk s ON ((x."PRODUCT STORED" = (s.organization_value)::text)))
- where not exists
-	(select 1 from me_ust.erg_unregulated_tanks unreg
-	where x."REGISTRATION NUMBER"::varchar(50) = unreg.facility_id and x."TANK NUMBER"::int = unreg.tank_id);
-
+CREATE OR REPLACE VIEW me_ust.v_ust_tank_substance AS
+SELECT DISTINCT 
+    x."REGISTRATION NUMBER"::character varying(50)  AS facility_id,
+    x."TANK NUMBER"::integer AS tank_id,
+    s.substance_id
+FROM me_ust.tanks x
+    JOIN me_ust.v_substance_xwalk s ON x."PRODUCT STORED" = s.organization_value
+WHERE s.substance_id is not null 
+AND x."TANK STATUS" not in ('ACTIVE_NON_REGULATED', 'NEVER_INSTALLED', 'PLANNED', 'TRANSFER')
+AND NOT EXISTS 
+  (SELECT 1 FROM me_ust.erg_unregulated_tanks unreg
+   WHERE x."REGISTRATION NUMBER"::character varying(50) = unreg.facility_id AND x."TANK NUMBER"::integer = unreg.tank_id);   
 
 
 create or replace view me_ust.v_ust_compartment as
@@ -142,6 +140,20 @@ create or replace view me_ust.v_ust_compartment as
 	(select 1 from me_ust.erg_unregulated_tanks unreg
 	where x."REGISTRATION NUMBER"::varchar(50) = unreg.facility_id and x."TANK NUMBER"::int = unreg.tank_id);
 
+CREATE OR REPLACE VIEW me_ust.v_ust_compartment_substance AS
+SELECT DISTINCT 
+    x."REGISTRATION NUMBER"::character varying(50)  AS facility_id,
+    x."TANK NUMBER"::integer AS tank_id,
+    x."CHAMBER ID"::integer as compartment_id,
+    s.substance_id
+FROM me_ust.tanks x
+    JOIN me_ust.v_substance_xwalk s ON x."PRODUCT STORED" = s.organization_value
+WHERE s.substance_id is not null 
+AND x."TANK STATUS" not in ('ACTIVE_NON_REGULATED', 'NEVER_INSTALLED', 'PLANNED', 'TRANSFER')
+AND NOT EXISTS 
+  (SELECT 1 FROM me_ust.erg_unregulated_tanks unreg
+   WHERE x."REGISTRATION NUMBER"::character varying(50) = unreg.facility_id AND x."TANK NUMBER"::integer = unreg.tank_id);   
+
 
 
 create or replace view me_ust.v_ust_piping as
@@ -206,6 +218,7 @@ create or replace view me_ust.v_ust_piping as
    FROM ((me_ust.tanks x
      JOIN me_ust.erg_piping_id t ON ((((x."REGISTRATION NUMBER")::text = (t.facility_id)::text) AND ((x."TANK NUMBER")::text = (t.tank_id)::text) AND ((x."CHAMBER ID")::text = (t.compartment_id)::text))))
      LEFT JOIN me_ust.v_piping_style_xwalk ps ON ((x."CHAMBER_PUMP_TYPE_LABEL" = (ps.organization_value)::text)))
- where not exists
+ where x."TANK STATUS" not in ('ACTIVE_NON_REGULATED', 'NEVER_INSTALLED', 'PLANNED', 'TRANSFER')
+ and not exists
 	(select 1 from me_ust.erg_unregulated_tanks unreg
 	where x."REGISTRATION NUMBER"::varchar(50) = unreg.facility_id and x."TANK NUMBER"::int = unreg.tank_id);

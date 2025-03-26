@@ -29,39 +29,39 @@ WHOLESALE OIL
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'AGGREGATE MINING', '', null);
+values (2546, 'AGGREGATE MINING', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'CHEMICAL STORAGE', '', null);
+values (2546, 'CHEMICAL STORAGE', 'Bulk plant storage/petroleum distributor', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'COMBINED FILE', '', null);
+values (2546, 'COMBINED FILE', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2546, 'COMMERCIAL', 'Commercial', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'FARM', '', null);
+values (2546, 'FARM', 'Agricultural/farm', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'FEDERAL FACILITY', '', null);
+values (2546, 'FEDERAL FACILITY', 'Federal government, non-military', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'HYDRAULIC LIFTS', '', null);
+values (2546, 'HYDRAULIC LIFTS', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2546, 'INDUSTRIAL', 'Industrial', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'MULTIPLE RESIDENCE', '', null);
+values (2546, 'MULTIPLE RESIDENCE', 'Residential', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'PRIVATE FUELING  ', '', null);
+values (2546, 'PRIVATE FUELING  ', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'PUBLIC FACILITY', '', null);
+values (2546, 'PUBLIC FACILITY', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'RETAIL OIL', '', null);
+values (2546, 'RETAIL OIL', 'Retail fuel sales (non-marina)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'SINGLE RESIDENCE', '', null);
+values (2546, 'SINGLE RESIDENCE', 'Residential', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'STATE FACILITY', '', null);
+values (2546, 'STATE FACILITY', 'State/local government', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'TOWN "&" SCHOOL', '', null);
+values (2546, 'TOWN "&" SCHOOL', 'School', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'UNKNOWN ADDRESS', '', null);
+values (2546, 'UNKNOWN ADDRESS', 'Unknown', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2546, 'WHOLESALE OIL', '', null);
+values (2546, 'WHOLESALE OIL', 'Wholesale', 'Please Verify; Mapped by ERG');
 
 --select facility_type from public.facility_types;
 /* Valid EPA values are:
@@ -119,9 +119,9 @@ BELOWGROUND
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2557, 'ABOVEGROUND', '', null);
+values (2557, 'ABOVEGROUND', 'Aboveground (tank bottom abovegrade)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2557, 'BELOWGROUND', '', null);
+values (2557, 'BELOWGROUND', 'Underground (entirely buried)', 'mapped by ERG');
 
 --select tank_location from public.tank_locations;
 /* Valid EPA values are:
@@ -171,27 +171,27 @@ TRANSFER
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'ABANDONED_IN_PLACE', '', null);
+values (2558, 'ABANDONED_IN_PLACE', 'Abandoned', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'ACTIVE', '', null);
+values (2558, 'ACTIVE', 'Currently in use', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'ACTIVE_NON_REGULATED', '', null);
+values (2558, 'ACTIVE_NON_REGULATED', 'Currently in use', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'COMBINED_FILE', '', null);
+values (2558, 'COMBINED_FILE', 'Other', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'NEVER_INSTALLED', '', null);
+values (2558, 'NEVER_INSTALLED', 'Other', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'OUT_OF_SERVICE', '', null);
+values (2558, 'OUT_OF_SERVICE', 'Closed (general)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'PLANNED', '', null);
+values (2558, 'PLANNED', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'PLANNED_FOR_ABANDONMENT', '', null);
+values (2558, 'PLANNED_FOR_ABANDONMENT', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'PLANNED_FOR_REMOVAL', '', null);
+values (2558, 'PLANNED_FOR_REMOVAL', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'REMOVED', '', null);
+values (2558, 'REMOVED', 'Closed (removed from ground)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2558, 'TRANSFER', '', null);
+values (2558, 'TRANSFER', 'Other', 'Please Verify; Mapped by ERG');
 
 --select tank_status from public.tank_statuses;
 /* Valid EPA values are:
@@ -255,51 +255,51 @@ STEEL WITH SECONDARY CONTAINMENT.
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'BLACK STEEL', '', null);
+values (2565, 'BLACK STEEL', 'Asphalt coated or bare steel', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'COMPOSITE - F/GLASS - BONDED TO STEEL', '', null);
+values (2565, 'COMPOSITE - F/GLASS - BONDED TO STEEL', 'Composite/clad (steel w/fiberglass reinforced plastic)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'COMPOSITE - SECONDARY CONTAINMENT', '', null);
+values (2565, 'COMPOSITE - SECONDARY CONTAINMENT', 'Composite/clad (steel w/fiberglass reinforced plastic)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'COMPOSITE WITH CATHODIC PROTECTION', '', null);
+values (2565, 'COMPOSITE WITH CATHODIC PROTECTION', 'Cathodically protected steel (without coating)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2565, 'CONCRETE', 'Concrete', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'COPPER', '', null);
+values (2565, 'COPPER', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'DOUBLE-WALLED CP STEEL', '', null);
+values (2565, 'DOUBLE-WALLED CP STEEL', 'Cathodically protected steel (without coating)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'F/GLASS - PETROLEUM', '', null);
+values (2565, 'F/GLASS - PETROLEUM', 'Fiberglass reinforced plastic', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'F/GLASS - SEC CONTAIN - PETRO & ALCOHOL', '', null);
+values (2565, 'F/GLASS - SEC CONTAIN - PETRO & ALCOHOL', 'Fiberglass reinforced plastic', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'F/GLASS - SEC CONTAINMENT - PETRO ONLY', '', null);
+values (2565, 'F/GLASS - SEC CONTAINMENT - PETRO ONLY', 'Fiberglass reinforced plastic', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'F/GLASS SINGLE-WALLED', '', null);
+values (2565, 'F/GLASS SINGLE-WALLED', 'Fiberglass reinforced plastic', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'FLEXIBLE DOUBLE-WALLED PIPING', '', null);
+values (2565, 'FLEXIBLE DOUBLE-WALLED PIPING', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'FLEXIBLE SINGLE-WALLED PIPING', '', null);
+values (2565, 'FLEXIBLE SINGLE-WALLED PIPING', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'HYDRAULIC', '', null);
+values (2565, 'HYDRAULIC', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'JACKETED TANK - DOUBLE-WALLED', '', null);
+values (2565, 'JACKETED TANK - DOUBLE-WALLED', 'Jacketed steel', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'NONE', '', null);
+values (2565, 'NONE', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'PVC', '', null);
+values (2565, 'PVC', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'STAINLESS STEEL', '', null);
+values (2565, 'STAINLESS STEEL', 'Steel (NEC)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'STEEL - BARE OR ASPHALT COATED.', '', null);
+values (2565, 'STEEL - BARE OR ASPHALT COATED.', 'Asphalt coated or bare steel', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'STEEL - BARE WITH INTERNAL LINING.', '', null);
+values (2565, 'STEEL - BARE WITH INTERNAL LINING.', 'Asphalt coated or bare steel', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'STEEL - COATED', '', null);
+values (2565, 'STEEL - COATED', 'Coated and cathodically protected steel', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'STEEL WITH CATHODIC PROTECTION.', '', null);
+values (2565, 'STEEL WITH CATHODIC PROTECTION.', 'Cathodically protected steel (without coating)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2565, 'STEEL WITH SECONDARY CONTAINMENT.', '', null);
+values (2565, 'STEEL WITH SECONDARY CONTAINMENT.', 'Steel (NEC)', 'Please Verify; Mapped by ERG');
 
 --select tank_material_description from public.tank_material_descriptions;
 /* Valid EPA values are:
@@ -392,103 +392,103 @@ WATER STORAGE
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, '#1 FUEL OIL - KEROSENE', '', null);
+values (2568, '#1 FUEL OIL - KEROSENE', 'Kerosene', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, '#2 FUEL OIL', '', null);
+values (2568, '#2 FUEL OIL', 'Heating oil/fuel oil 2', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, '#4 FUEL OIL', '', null);
+values (2568, '#4 FUEL OIL', 'Heating oil/fuel oil 4', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, '#5 FUEL OIL', '', null);
+values (2568, '#5 FUEL OIL', 'Heating oil/fuel oil 5', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, '#6 FUEL OIL', '', null);
+values (2568, '#6 FUEL OIL', 'Heating oil/fuel oil 6', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'ANIMAL FATS/REMAINS', '', null);
+values (2568, 'ANIMAL FATS/REMAINS', 'Other or mixture', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'ANTI-FREEZE', '', null);
+values (2568, 'ANTI-FREEZE', 'Antifreeze', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'ASPHALT', '', null);
+values (2568, 'ASPHALT', 'Petroleum product', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2568, 'AVIATION GASOLINE', 'Aviation gasoline', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'BIO 1-74', '', null);
+values (2568, 'BIO 1-74', 'Diesel fuel (b-unknown)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'BIO 100', '', null);
+values (2568, 'BIO 100', '100% biodiesel (B100, not federally regulated)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'BIO 75-99', '', null);
+values (2568, 'BIO 75-99', 'Diesel fuel (b-unknown)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'CHEMICAL', '', null);
+values (2568, 'CHEMICAL', 'Other or mixture', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'CORROSIVE', '', null);
+values (2568, 'CORROSIVE', 'Other or mixture', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'CRUDE OIL', '', null);
+values (2568, 'CRUDE OIL', 'Petroleum product', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'DIESEL', '', null);
+values (2568, 'DIESEL', 'Diesel fuel (b-unknown)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'E-100', '', null);
+values (2568, 'E-100', 'Denatured ethanol (98%)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'E-85', '', null);
+values (2568, 'E-85', 'E-85/Flex Fuel (E51-E83)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'GASOLINE UNSPECIFIED', '', null);
+values (2568, 'GASOLINE UNSPECIFIED', 'Gasoline (unknown type)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'GLYCEROL', '', null);
+values (2568, 'GLYCEROL', 'Solvent', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'HAZARDOUS CHEMICAL - SPECIFIED IN REPORT', '', null);
+values (2568, 'HAZARDOUS CHEMICAL - SPECIFIED IN REPORT', 'Hazardous substance', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'HAZARDOUS CHEMICAL - UNSPECIFIED', '', null);
+values (2568, 'HAZARDOUS CHEMICAL - UNSPECIFIED', 'Hazardous substance', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2568, 'HYDRAULIC OIL', 'Hydraulic oil', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'JET FUEL', '', null);
+values (2568, 'JET FUEL', 'Unknown aviation gas or jet fuel', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'JP1', '', null);
+values (2568, 'JP1', 'Unknown aviation gas or jet fuel', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'JP4', '', null);
+values (2568, 'JP4', 'Unknown aviation gas or jet fuel', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2568, 'LEADED GASOLINE', 'Leaded gasoline', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'LUBE OIL', '', null);
+values (2568, 'LUBE OIL', 'Lube/motor oil (new)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2568, 'METHANOL', 'Hazardous substance', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'NON-CHEMICAL NON-OIL SPECIFIED IN REPORT', '', null);
+values (2568, 'NON-CHEMICAL NON-OIL SPECIFIED IN REPORT', 'Other or mixture', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'NON-CHEMICAL NON-OIL UNSPECIFIED', '', null);
+values (2568, 'NON-CHEMICAL NON-OIL UNSPECIFIED', 'Other or mixture', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'NON-HAZARDOUS CHEMICAL - SPECIFIED IN REPORT', '', null);
+values (2568, 'NON-HAZARDOUS CHEMICAL - SPECIFIED IN REPORT', 'Other or mixture', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'NON-HAZARDOUS CHEMICAL - UNSPECIFIED', '', null);
+values (2568, 'NON-HAZARDOUS CHEMICAL - UNSPECIFIED', 'Other or mixture', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2568, 'NONE', '', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'OIL - OTHER - SPECIFIED IN REPORT', '', null);
+values (2568, 'OIL - OTHER - SPECIFIED IN REPORT', 'Other or mixture', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'PETROLEUM CONTAMINATED WASTEWATER', '', null);
+values (2568, 'PETROLEUM CONTAMINATED WASTEWATER', 'Other or mixture', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'PREMIUM UNLEADED', '', null);
+values (2568, 'PREMIUM UNLEADED', 'Gasoline (unknown type)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'REGULAR GASOLINE', '', null);
+values (2568, 'REGULAR GASOLINE', 'Gasoline (unknown type)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'TRANSFORMER OIL', '', null);
+values (2568, 'TRANSFORMER OIL', 'Lube/motor oil (new)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'TRANSMISSION OIL', '', null);
+values (2568, 'TRANSMISSION OIL', 'Lube/motor oil (new)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'UNKNOWN SUBSTANCE', '', null);
+values (2568, 'UNKNOWN SUBSTANCE', 'Unknown', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'UNLEADED GASOLINE', '', null);
+values (2568, 'UNLEADED GASOLINE', 'Gasoline (unknown type)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'UNLEADED PLUS', '', null);
+values (2568, 'UNLEADED PLUS', 'Gasoline (unknown type)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'UNSPECIFIED FUEL OIL', '', null);
+values (2568, 'UNSPECIFIED FUEL OIL', 'Heating/fuel oil # unknown', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'UNSPECIFIED MOTOR FUEL', '', null);
+values (2568, 'UNSPECIFIED MOTOR FUEL', 'Heating/fuel oil # unknown', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'UNSPECIFIED OIL', '', null);
+values (2568, 'UNSPECIFIED OIL', 'Heating/fuel oil # unknown', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'WASTE OIL (AS HAZ CHEM)', '', null);
+values (2568, 'WASTE OIL (AS HAZ CHEM)', 'Used oil/waste oil', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'WASTE OIL/USED MOTOR OIL', '', null);
+values (2568, 'WASTE OIL/USED MOTOR OIL', 'Used oil/waste oil', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2568, 'WATER STORAGE', '', null);
+values (2568, 'WATER STORAGE', 'Other or mixture', null);
 
 --select substance from public.substances order by substance_group, substance;
 /* Valid EPA values are:
@@ -588,27 +588,27 @@ TRANSFER
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'ABANDONED IN PLACE', '', null);
+values (2572, 'ABANDONED IN PLACE', 'Abandoned', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'ACTIVE', '', null);
+values (2572, 'ACTIVE', 'Currently in use', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'ACTIVE NON-REGULATED', '', null);
+values (2572, 'ACTIVE NON-REGULATED', 'Currently in use', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'COMBINED FILE', '', null);
+values (2572, 'COMBINED FILE', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'NEVER INSTALLED', '', null);
+values (2572, 'NEVER INSTALLED', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'OUT OF SERVICE', '', null);
+values (2572, 'OUT OF SERVICE', 'Closed (general)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'PLANNED FOR ABANDONMENT', '', null);
+values (2572, 'PLANNED FOR ABANDONMENT', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'PLANNED FOR INSTALLATION', '', null);
+values (2572, 'PLANNED FOR INSTALLATION', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'PLANNED FOR REMOVAL', '', null);
+values (2572, 'PLANNED FOR REMOVAL', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'REMOVED', '', null);
+values (2572, 'REMOVED', 'Closed (removed from ground)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2572, 'TRANSFER', '', null);
+values (2572, 'TRANSFER', 'Other', 'Please Verify; Mapped by ERG');
 
 --select compartment_status from public.compartment_statuses;
 /* Valid EPA values are:
@@ -656,17 +656,17 @@ UNKNOWN
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2583, 'NONE', '', null);
+values (2583, 'NONE', 'No piping', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2583, 'PRESSURIZED', '', null);
+values (2583, 'PRESSURIZED', 'Pressure', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2583, 'SIPHON', '', null);
+values (2583, 'SIPHON', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2583, 'SUCTION', 'Suction', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2583, 'SUCTION & RETURN', '', null);
+values (2583, 'SUCTION & RETURN', 'Suction', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2583, 'TANK MOUNTED', '', null);
+values (2583, 'TANK MOUNTED', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2583, 'UNKNOWN', 'Unknown', null);
 
