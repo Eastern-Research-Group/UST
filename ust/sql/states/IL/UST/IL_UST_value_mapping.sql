@@ -25,7 +25,7 @@ values (1958, 'Military', 'Military', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1958, 'Private', 'Private', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1958, 'State Government', '', null);
+values (1958, 'State Government', 'State Government - Non Military', 'Mapped by ERG');
 
 --select owner_type from public.owner_types;
 /* Valid EPA values are:
@@ -194,61 +194,61 @@ Utility
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Airport', '', null);
+values (1960, 'Airport', 'Aviation/airport (non-rental car)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Attended Self-Service Station', '', null);
+values (1960, 'Attended Self-Service Station', 'Retail fuel sales (non-marina)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Attended Self-Service/Unattended Self-Service', '', null);
+values (1960, 'Attended Self-Service/Unattended Self-Service', 'Retail fuel sales (non-marina)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Auto Dealer', '', null);
+values (1960, 'Auto Dealer', 'Auto dealership/auto maintenance & repair', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Bulk / Unattended Self-Service', '', null);
+values (1960, 'Bulk / Unattended Self-Service', 'Retail fuel sales (non-marina)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Bulk Plant', '', null);
+values (1960, 'Bulk Plant', 'Bulk plant storage/petroleum distributor', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'City / Town', '', null);
+values (1960, 'City / Town', 'State/local government', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Commercial / Retail', '', null);
+values (1960, 'Commercial / Retail', 'Commercial', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Construction', '', null);
+values (1960, 'Construction', 'Contractor', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'County', '', null);
+values (1960, 'County', 'State/local government', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Farm', '', null);
+values (1960, 'Farm', 'Agricultural/farm', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Federal (Military)', '', null);
+values (1960, 'Federal (Military)', 'Military', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Federal (Non-Military)', '', null);
+values (1960, 'Federal (Non-Military)', 'Federal government, non-military', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Fire Department', '', null);
+values (1960, 'Fire Department', 'Other', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Full Service Station', '', null);
+values (1960, 'Full Service Station', 'Retail fuel sales (non-marina)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Golf Course', '', null);
+values (1960, 'Golf Course', 'Other', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Hospital', '', null);
+values (1960, 'Hospital', 'Hospital (or other medical)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Industrial / Manufacturing', '', null);
+values (1960, 'Industrial / Manufacturing', 'Industrial', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Landfill', '', null);
+values (1960, 'Landfill', 'Other', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1960, 'Marina', 'Marina', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Nuclear Power Station', '', null);
+values (1960, 'Nuclear Power Station', 'Utility', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Petroleum Distributor', '', null);
+values (1960, 'Petroleum Distributor', 'Bulk plant storage/petroleum distributor', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Private Institution', '', null);
+values (1960, 'Private Institution', 'Other', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Railway', '', null);
+values (1960, 'Railway', 'Railroad', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'School/College', '', null);
+values (1960, 'School/College', 'School', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'State', '', null);
+values (1960, 'State', 'State/local government', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Trucking Company', '', null);
+values (1960, 'Trucking Company', 'Trucking/transport/fleet operation', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1960, 'Unattended Self-Service Station', '', null);
+values (1960, 'Unattended Self-Service Station', 'Retail fuel sales (non-marina)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (1960, 'Utility', 'Utility', null);
 
@@ -442,9 +442,9 @@ Underground
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1989, 'Aboveground', '', null);
+values (1989, 'Aboveground', 'Aboveground (tank bottom abovegrade)', 'Please Verify; Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (1989, 'Underground', '', null);
+values (1989, 'Underground', 'Underground (entirely buried)', 'Mapped by ERG');
 
 --select tank_location from public.tank_locations;
 /* Valid EPA values are:
@@ -553,7 +553,7 @@ values (2042, 'Cathodically protected steel (without coating)', 'Cathodically pr
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2042, 'Coated and cathodically protected steel', 'Coated and cathodically protected steel', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2042, 'Composite/clad(steel w/fiberglass reinforced plastic)', '', null);
+values (2042, 'Composite/clad(steel w/fiberglass reinforced plastic)', 'Composite/clad (steel w/fiberglass reinforced plastic)', 'Mapped by ERG');
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2042, 'Fiberglass reinforced plastic', 'Fiberglass reinforced plastic', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -613,7 +613,7 @@ values (2049, 'Other', 'Other', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2049, 'Single Wall', 'Single wall', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2049, 'Tank-within-a-tank retrofit (UL standard 1856', '', null);
+values (2049, 'Tank-within-a-tank retrofit (UL standard 1856', 'Tank-within-a-tank retrofit (UL standard 1856)', 'Mapped by ERG');
 
 --select tank_secondary_containment from public.tank_secondary_containments;
 /* Valid EPA values are:
@@ -1075,7 +1075,7 @@ values (2121, 'Double walled', 'Double walled', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (2121, 'Single walled', 'Single walled', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (2121, 'Unknown', '', null);
+values (2121, 'Unknown', 'Other', 'Mapped by ERG');
 
 --select piping_wall_type from public.piping_wall_types;
 /* Valid EPA values are:
