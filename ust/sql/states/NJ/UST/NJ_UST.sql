@@ -133,8 +133,6 @@ select max(ust_control_id) from ust_control where organization_id = 'NJ';
 
  * Do a global replace in this script from 36 to the new ust_control_id.
  */
-select * from ust_control;
-select max(ust_control_id) from ust_control where organization_id = 'NJ';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -295,15 +293,6 @@ where deagg_table_name is not null
 order by 1, 2, 3, 4, 5;
 
  */
-
-select id_column_name, database_lookup_table
-from ust_element_lookup_tables order by 1;
-
-select table_name, column_name
-from information_schema.columns 
-where table_schema = 'nj_ust' 
-and lower(column_name) like lower('<%epa_column_name%>')
-order by 1, 2;
 
 --ust_facility: This table is REQUIRED
 --NOTE: facility_id is a required field. If Facility ID does not exist in the source data, STOP and talk to the state. 
