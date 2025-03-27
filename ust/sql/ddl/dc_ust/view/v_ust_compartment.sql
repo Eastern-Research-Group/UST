@@ -25,4 +25,7 @@ create or replace view "dc_ust"."v_ust_compartment" as
     x."TankOtherReleaseDetection" AS tank_other_release_detection
    FROM ((dc_ust.compartment x
      JOIN dc_ust.tank t ON ((((x."FacilityID")::text = (t."FacilityID")::text) AND (x."TankID" = t."TankID"))))
-     LEFT JOIN dc_ust.v_compartment_status_xwalk cs ON ((x."CompartmentStatus" = (cs.organization_value)::text)));
+     LEFT JOIN dc_ust.v_compartment_status_xwalk cs ON ((x."CompartmentStatus" = (cs.organization_value)::text)))
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM dc_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((t."TankName")::integer = unreg.tank_id)))));

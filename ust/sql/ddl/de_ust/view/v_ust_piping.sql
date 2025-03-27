@@ -22,7 +22,7 @@ create or replace view "de_ust"."v_ust_piping" as
     x."PipingCorrosionProtectionOther" AS piping_corrosion_protection_other,
     x."PipingCorrosionProtectionUnknown" AS piping_corrosion_protection_unknown,
     x."PipingLineLeakDetector" AS piping_line_leak_detector,
-    x."PipingAutomatedIntersticialMonitoring" AS piping_automated_intersticial_monitoring,
+    x."PipingAutomatedIntersticialMonitoring" AS piping_automated_interstitial_monitoring,
     x."PipingLineTestAnnual" AS piping_line_test_annual,
     x."PipingGroundwaterMonitoring" AS piping_groundwater_monitoring,
     x."PipingVaporMonitoring" AS piping_vapor_monitoring,
@@ -39,4 +39,7 @@ create or replace view "de_ust"."v_ust_piping" as
      JOIN de_ust.compartment c ON (((((x."FacilityID")::character varying(50))::text = ((c."FacilityID")::character varying(50))::text) AND (x."TankName" = c."TankName"))))
      JOIN de_ust.erg_piping_id t ON (((((x."FacilityID")::character varying(50))::text = (t.facility_id)::text) AND (((x."TankName")::character varying(50))::text = (t.tank_name)::text) AND ((x."CompartmentID")::text = (t.compartment_id)::text))))
      LEFT JOIN de_ust.v_piping_style_xwalk ps ON ((x."PipingStyle" = (ps.organization_value)::text)))
-     LEFT JOIN de_ust.v_piping_wall_type_xwalk wt ON ((x."PipingWallType" = (wt.organization_value)::text)));
+     LEFT JOIN de_ust.v_piping_wall_type_xwalk wt ON ((x."PipingWallType" = (wt.organization_value)::text)))
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM de_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((c."TankID")::integer = unreg.tank_id)))));

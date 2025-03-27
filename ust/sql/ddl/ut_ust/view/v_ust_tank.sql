@@ -31,4 +31,6 @@ create or replace view "ut_ust"."v_ust_tank" as
      LEFT JOIN ut_ust.erg_substance esm ON (((esm.facility_id = x.facility_id) AND (esm.tank_id = x.tank_id))))
   WHERE ((x."FEDERALREG" = 'Yes'::text) AND (x."TANKSTATUS" <> 'Install in Process'::text) AND (x.facility_id IN ( SELECT y.facility_id
            FROM ut_ust.ut_facility y
-          WHERE ((y."TANK" = 1) AND (y."OPENREGAST" = 0) AND (y."REGAST" = 0)))));
+          WHERE ((y."TANK" = 1) AND (y."OPENREGAST" = 0) AND (y."REGAST" = 0)))) AND (NOT (EXISTS ( SELECT 1
+           FROM ut_ust.erg_unregulated_tanks unreg
+          WHERE ((((x.facility_id)::character varying(50))::text = (unreg.facility_id)::text) AND ((x.tank_id)::integer = unreg.tank_id))))));

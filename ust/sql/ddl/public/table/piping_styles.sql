@@ -7,3 +7,5 @@ ALTER TABLE public.piping_styles ADD CONSTRAINT piping_styles_pkey PRIMARY KEY (
 CREATE UNIQUE INDEX piping_styles_pkey ON public.piping_styles USING btree (piping_style_id)
 
 CREATE INDEX piping_styles_idx ON public.piping_styles USING btree (piping_style)
+
+CREATE INDEX piping_styles_desc_idx ON public.piping_styles USING btree (piping_style)

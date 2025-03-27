@@ -109,7 +109,9 @@ create or replace view "va_ust"."v_ust_piping" as
     c.piping_wall_type_id
    FROM ((((va_ust.ustpipematerials a
      JOIN va_ust.tanks z ON ((((a.tank_facility_id)::text = (z.tank_facility_id)::text) AND ((a.tank_number)::text = (z.tank_number)::text) AND ((a.tank_owner_id)::text = (z.tank_owner_id)::text))))
-     JOIN va_ust.usttankpipereleasedetection y ON ((((a.tank_facility_id)::text = (y.tank_facility_id)::text) AND ((a.tank_number)::text = (y.tank_number)::text) AND ((a.tank_owner_id)::text = (y.tank_owner_id)::text))))
+     LEFT JOIN va_ust.usttankpipereleasedetection y ON ((((a.tank_facility_id)::text = (y.tank_facility_id)::text) AND ((a.tank_number)::text = (y.tank_number)::text) AND ((a.tank_owner_id)::text = (y.tank_owner_id)::text))))
      LEFT JOIN va_ust.v_piping_style_xwalk b ON (((a.piping_type)::text = (b.organization_value)::text)))
      LEFT JOIN va_ust.v_piping_wall_type_xwalk c ON (((y.pipe_rd_im_double_walled_tank)::text = (c.organization_value)::text)))
-  WHERE (((a.tank_type)::text = 'UST'::text) AND ((z.federally_regulated_tank)::text = 'Yes'::text));
+  WHERE ((y.index IS NOT NULL) AND (((a.tank_type)::text = 'UST'::text) AND ((z.federally_regulated_tank)::text = 'Yes'::text)) AND (NOT (EXISTS ( SELECT 1
+           FROM va_ust.erg_unregulated_tanks unreg
+          WHERE ((((a.tank_facility_id)::character varying(50))::text = (unreg.facility_id)::text) AND ((z.index)::integer = unreg.tank_id))))));

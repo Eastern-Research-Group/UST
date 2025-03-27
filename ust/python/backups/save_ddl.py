@@ -23,7 +23,8 @@ class Ddl:
 				 export_path='../../sql/ddl',
 				 object_name=None):
 		self.schema = schema
-
+		if not export_path:
+			export_path = '../../sql/ddl'
 		if object_name:
 			self.object_type = self.get_object_type(object_name)
 			if not self.object_type:
@@ -55,7 +56,7 @@ class Ddl:
 		self.export_views()
 		self.export_tables()
 		self.export_functions()
-		self.disconnect_db(msg="export_all")
+		self.disconnect_db()
 
 
 	def export_views(self):

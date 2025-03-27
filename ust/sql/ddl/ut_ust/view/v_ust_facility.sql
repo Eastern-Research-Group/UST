@@ -42,5 +42,6 @@ create or replace view "ut_ust"."v_ust_facility" as
      LEFT JOIN ut_ust.v_facility_type_xwalk a ON (((a.organization_value)::text = x."FACILITYDE")))
      LEFT JOIN ut_ust.v_coordinate_source_xwalk b ON (((b.organization_value)::text = x."UTMDESC")))
      JOIN ut_ust.ut_tank c ON (((c.facility_id = x.facility_id) AND ((c."OTHERTYPE" IS NOT NULL) OR (c."PST_FUND" IS NOT NULL)))))
-  WHERE ((x."TANK" = 1) AND (x."OPENREGAST" = 0) AND (x."REGAST" = 0))
+  WHERE ((x."TANK" = 1) AND (x."OPENREGAST" = 0) AND (x."REGAST" = 0) AND (NOT (((x.facility_id)::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM ut_ust.erg_unregulated_facilities))))
   GROUP BY x.facility_id, x."LOCNAME", a.facility_type_id, x."LOCSTR", x."LOCCITY", x."LOCCOUNTY", x."LOCZIP", x."DDLat", x."DDLon", b.coordinate_source_id, x."OWNERNAME", x."RELEASE";

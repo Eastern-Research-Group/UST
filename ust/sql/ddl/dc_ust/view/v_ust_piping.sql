@@ -21,7 +21,7 @@ create or replace view "dc_ust"."v_ust_piping" as
     x."Piping Corrosion Protection Other" AS piping_corrosion_protection_other,
     x."Piping Corrosion Protection Unknown" AS piping_corrosion_protection_unknown,
     x."Piping Line Leak Detector" AS piping_line_leak_detector,
-    x."Piping Automated Intersticial Monitoring" AS piping_automated_intersticial_monitoring,
+    x."Piping Automated Intersticial Monitoring" AS piping_automated_interstitial_monitoring,
     x."Piping Line Test Annual" AS piping_line_test_annual,
     x."Piping Line Test3yr" AS piping_line_test3yr,
     x."Piping Groundwater Monitoring" AS piping_groundwater_monitoring,
@@ -40,4 +40,7 @@ create or replace view "dc_ust"."v_ust_piping" as
      JOIN dc_ust.tank t ON ((((x."FacilityID")::text = (t."FacilityID")::text) AND (x."TankID" = t."TankID"))))
      JOIN dc_ust.compartment c ON ((((x."FacilityID")::text = (c."FacilityID")::text) AND (x."CompartmentID" = c."CompartmentID"))))
      LEFT JOIN dc_ust.v_piping_style_xwalk ps ON ((x."Piping Style" = (ps.organization_value)::text)))
-     LEFT JOIN dc_ust.v_piping_wall_type_xwalk pw ON ((x."Piping Wall Type" = (pw.organization_value)::text)));
+     LEFT JOIN dc_ust.v_piping_wall_type_xwalk pw ON ((x."Piping Wall Type" = (pw.organization_value)::text)))
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM dc_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((t."TankName")::integer = unreg.tank_id)))));

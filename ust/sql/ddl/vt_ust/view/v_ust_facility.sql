@@ -10,11 +10,11 @@ create or replace view "vt_ust"."v_ust_facility" as
     s.facility_state,
     (x."FacilityEPARegion")::integer AS facility_epa_region,
         CASE
-            WHEN (l."FacilityID" IS NOT NULL) THEN l."Actual Lat"
+            WHEN (ll."Actual Lat" IS NOT NULL) THEN ll."Actual Lat"
             ELSE x."FacilityLatitude"
         END AS facility_latitude,
         CASE
-            WHEN (l."FacilityID" IS NOT NULL) THEN l."Actual Long"
+            WHEN (ll."Actual Long" IS NOT NULL) THEN ll."Actual Long"
             ELSE x."FacilityLongitude"
         END AS facility_longitude,
     (x."FacilityOwnerCompanyName")::character varying(100) AS facility_owner_company_name,
@@ -31,7 +31,10 @@ create or replace view "vt_ust"."v_ust_facility" as
     x."FinancialResponsibilityTrustFund" AS financial_responsibility_trust_fund,
     x."USTReportedRelease" AS ust_reported_release
    FROM ((((vt_ust.facility x
-     LEFT JOIN vt_ust.v_facility_type_xwalk ft ON ((x."FacilityType1" = (ft.organization_value)::text)))
-     LEFT JOIN vt_ust.v_owner_type_xwalk ot ON ((x."OwnerType" = (ot.organization_value)::text)))
+     LEFT JOIN vt_ust.latlong ll ON ((x."FacilityID" = ll."FacilityID")))
+     LEFT JOIN vt_ust.v_facility_type_xwalk ft ON ((x."OwnerType" = (ft.organization_value)::text)))
+     LEFT JOIN vt_ust.v_owner_type_xwalk ot ON ((x."FacilityType1" = (ot.organization_value)::text)))
      LEFT JOIN vt_ust.v_state_xwalk s ON ((x."FacilityState" = (s.organization_value)::text)))
-     LEFT JOIN vt_ust.latlong l ON ((x."FacilityID" = l."FacilityID")));
+  WHERE ((x."FacilityType1" <> 'Wombat'::text) AND (NOT (((x."FacilityID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM vt_ust.erg_unregulated_facilities))) AND (NOT (((x."FacilityID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM vt_ust.erg_unregulated_facilities))));
