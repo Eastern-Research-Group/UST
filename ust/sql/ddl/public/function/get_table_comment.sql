@@ -1,5 +1,5 @@
 create or replace function "public"."get_table_comment" as
-CREATE OR REPLACE FUNCTION public.get_table_comment(p_relname text, p_schemaname text DEFAULT NULL::text)
+CREATE OR REPLACE FUNCTION public.get_table_comment(p_table_name text, p_schema_name text DEFAULT NULL::text)
  RETURNS text
  LANGUAGE sql
 AS $function$

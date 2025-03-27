@@ -23,12 +23,16 @@ create or replace view "vt_ust"."v_ust_piping" as
             WHEN (x."PipingLineLeakDetector" IS NOT NULL) THEN 'Yes'::text
             ELSE 'Unknown'::text
         END AS piping_line_leak_detector,
-    x."PipingAutomatedIntersticialMonitoring" AS piping_automated_intersticial_monitoring,
+    x."PipingAutomatedIntersticialMonitoring" AS piping_automated_interstitial_monitoring,
     x."PipingLineTestAnnual" AS piping_line_test_annual,
     x."PipingLineTest3yr" AS piping_line_test3yr,
     x."PipingInterstitialMonitoring" AS piping_interstitial_monitoring,
     x."PipeTankTopSump" AS pipe_tank_top_sump
-   FROM (vt_ust.piping x
+   FROM ((vt_ust.piping x
+     LEFT JOIN vt_ust.facility f ON ((x."FacilityID" = f."FacilityID")))
      LEFT JOIN vt_ust.v_piping_style_xwalk ps ON ((x."PipingStyle" = (ps.organization_value)::text)))
-  WHERE (x."FacilityID" IN ( SELECT f."FacilityID"
-           FROM vt_ust.facility f));
+  WHERE ((NOT (EXISTS ( SELECT 1
+           FROM vt_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))) AND (f."FacilityType1" <> 'Wombat'::text) AND (NOT (EXISTS ( SELECT 1
+           FROM vt_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))));

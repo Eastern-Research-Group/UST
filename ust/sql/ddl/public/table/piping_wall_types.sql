@@ -7,3 +7,5 @@ ALTER TABLE public.piping_wall_types ADD CONSTRAINT piping_wall_types_pkey PRIMA
 CREATE UNIQUE INDEX piping_wall_types_pkey ON public.piping_wall_types USING btree (piping_wall_type_id)
 
 CREATE INDEX piping_wall_types_idx ON public.piping_wall_types USING btree (piping_wall_type)
+
+CREATE INDEX piping_wall_types_desc_idx ON public.piping_wall_types USING btree (piping_wall_type)

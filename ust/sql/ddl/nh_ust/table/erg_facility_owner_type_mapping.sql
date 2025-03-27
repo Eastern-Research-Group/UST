@@ -1,0 +1,9 @@
+CREATE TABLE nh_ust.erg_facility_owner_type_mapping (
+    "FACILITY_ID" bigint  NULL ,
+    "SITE_NUMBER" bigint  NULL ,
+    "FACILITY_TYPE" text  NULL ,
+    "OWNER_NAME" text  NULL ,
+    "REGISTERED_NAME" text  NULL ,
+    "OWNER_TYPE" text  NULL ,
+    "facility_type_data" text  NULL ,
+    "owner_type_data" text  NULL );

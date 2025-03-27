@@ -27,4 +27,9 @@ create or replace view "il_ust"."v_ust_compartment" as
     x."TankOtherReleaseDetection" AS tank_other_release_detection
    FROM ((il_ust.compartment x
      LEFT JOIN il_ust.v_compartment_status_xwalk cs ON ((x."CompartmentStatus" = (cs.organization_value)::text)))
-     LEFT JOIN il_ust.v_spill_bucket_wall_type_xwalk sbw ON ((x."SpillBucketWallType" = (sbw.organization_value)::text)));
+     LEFT JOIN il_ust.v_spill_bucket_wall_type_xwalk sbw ON ((x."SpillBucketWallType" = (sbw.organization_value)::text)))
+  WHERE ((NOT (EXISTS ( SELECT 1
+           FROM il_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))) AND (NOT (EXISTS ( SELECT 1
+           FROM il_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))));

@@ -7,3 +7,5 @@ ALTER TABLE public.tank_material_descriptions ADD CONSTRAINT tank_material_descr
 CREATE UNIQUE INDEX tank_material_descriptions_pkey ON public.tank_material_descriptions USING btree (tank_material_description_id)
 
 CREATE INDEX tank_material_descriptions_idx ON public.tank_material_descriptions USING btree (tank_material_description)
+
+CREATE INDEX tank_material_descriptions_desc_idx ON public.tank_material_descriptions USING btree (tank_material_description)

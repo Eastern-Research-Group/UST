@@ -1,9 +1,11 @@
 create or replace view "ok_ust"."v_ust_compartment" as
- SELECT DISTINCT (x."FacilityID")::character varying(50) AS facility_id,
-    (x."TankNumber")::integer AS tank_id,
-    (x."CompartmentNumber")::integer AS compartment_id,
-    vtsx.compartment_status_id,
-    (x."Capacity")::integer AS compartment_capacity_gallons
-   FROM ((ok_ust.erg_compartments_deduplicated x
-     JOIN ok_ust.v_compartment_status_xwalk vtsx ON (((vtsx.organization_value)::text = x."CompartmentStatus")))
-     JOIN ok_ust."OK_UST_Data" b ON (((b."FacilityID" = x."FacilityID") AND (b.tank_name = x."TankNumber"))));
+ SELECT DISTINCT (a."FacilityID")::character varying(50) AS facility_id,
+    (a."TankNumber")::integer AS tank_id,
+    (a."CompartmentNumber")::integer AS compartment_id,
+    b.compartment_status_id,
+    (a."Capacity")::integer AS compartment_capacity_gallons
+   FROM (ok_ust.erg_compartments_deduplicated a
+     LEFT JOIN ok_ust.v_compartment_status_xwalk b ON ((a."CompartmentStatus" = (b.organization_value)::text)))
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM ok_ust.erg_unregulated_tanks unreg
+          WHERE ((((a."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((a."TankNumber")::integer = unreg.tank_id)))));

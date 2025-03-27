@@ -7,3 +7,5 @@ ALTER TABLE public.coordinate_sources ADD CONSTRAINT coordinate_sources_pkey PRI
 CREATE UNIQUE INDEX coordinate_sources_pkey ON public.coordinate_sources USING btree (coordinate_source_id)
 
 CREATE INDEX coordinate_sources_idx ON public.coordinate_sources USING btree (coordinate_source)
+
+CREATE INDEX coordinate_sources_desc_idx ON public.coordinate_sources USING btree (coordinate_source)

@@ -4,4 +4,4 @@ create or replace view "hi_ust"."v_piping_wall_type_xwalk" as
     b.piping_wall_type_id
    FROM (v_ust_element_mapping a
      LEFT JOIN piping_wall_types b ON (((a.epa_value)::text = (b.piping_wall_type)::text)))
-  WHERE ((a.ust_control_id = 24) AND ((a.epa_column_name)::text = 'piping_wall_type_id'::text));
+  WHERE ((a.ust_control_id = 37) AND ((a.epa_column_name)::text = 'piping_wall_type_id'::text));

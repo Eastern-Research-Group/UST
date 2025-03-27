@@ -7,3 +7,5 @@ ALTER TABLE public.owner_types ADD CONSTRAINT owner_types_pkey PRIMARY KEY (owne
 CREATE UNIQUE INDEX owner_types_pkey ON public.owner_types USING btree (owner_type_id)
 
 CREATE INDEX owner_types_idx ON public.owner_types USING btree (owner_type)
+
+CREATE INDEX owner_types_desc_idx ON public.owner_types USING btree (owner_type)

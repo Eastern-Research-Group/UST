@@ -78,4 +78,6 @@ create or replace view "de_ust"."v_ust_facility" as
      LEFT JOIN de_ust.v_owner_type_xwalk ot ON ((x."OwnerType" = (ot.organization_value)::text)))
      LEFT JOIN de_ust.v_facility_type_xwalk ft ON ((x."FacilityType1" = (ft.organization_value)::text)))
      LEFT JOIN de_ust.v_state_xwalk s ON ((x."FacilityState" = (s.organization_value)::text)))
-     LEFT JOIN de_ust.v_coordinate_source_xwalk cs ON ((x."FacilityCoordinateSource" = (cs.organization_value)::text)));
+     LEFT JOIN de_ust.v_coordinate_source_xwalk cs ON ((x."FacilityCoordinateSource" = (cs.organization_value)::text)))
+  WHERE (NOT (((x."FacilityID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM de_ust.erg_unregulated_facilities)));

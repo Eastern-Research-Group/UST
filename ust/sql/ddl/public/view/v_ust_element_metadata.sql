@@ -9,7 +9,8 @@ create or replace view "public"."v_ust_element_metadata" as
     a.database_lookup_table,
     a.element_name,
     c.sort_order AS table_sort_order,
-    b.sort_order AS column_sort_order
+    b.sort_order AS column_sort_order,
+    a.in_use
    FROM ((ust_elements a
      JOIN ust_elements_tables b ON ((a.element_id = b.element_id)))
      JOIN ust_template_data_tables c ON (((b.table_name)::text = (c.table_name)::text)))

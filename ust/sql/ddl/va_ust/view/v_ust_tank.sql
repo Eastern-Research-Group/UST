@@ -33,4 +33,6 @@ create or replace view "va_ust"."v_ust_tank" as
      LEFT JOIN va_ust.v_tank_material_description_xwalk c ON ((z.tank_material_description = (c.organization_value)::text)))
      LEFT JOIN va_ust.v_tank_secondary_containment_xwalk d ON ((y.secondary_containment = (d.organization_value)::text)))
      LEFT JOIN va_ust.v_tank_status_xwalk e ON (((a.tank_status)::text = (e.organization_value)::text)))
-  WHERE (((a.tank_type)::text = 'UST'::text) AND ((a.federally_regulated_tank)::text = 'Yes'::text));
+  WHERE (((a.tank_type)::text = 'UST'::text) AND ((a.federally_regulated_tank)::text = 'Yes'::text) AND (NOT (EXISTS ( SELECT 1
+           FROM va_ust.erg_unregulated_tanks unreg
+          WHERE ((((a.tank_facility_id)::character varying(50))::text = (unreg.facility_id)::text) AND ((a.index)::integer = unreg.tank_id))))));

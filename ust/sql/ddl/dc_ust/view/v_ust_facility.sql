@@ -13,7 +13,10 @@ create or replace view "dc_ust"."v_ust_facility" as
     cs.coordinate_source_id,
     x."FacilityOwnerCompanyName" AS facility_owner_company_name,
     x."FacilityOperatorCompanyName" AS facility_operator_company_name,
-    x."FinancialResponsibilityObtained" AS financial_responsibility_obtained,
+        CASE
+            WHEN ((x."FacilityType1" = 'Federal Government - Non Military'::text) AND (x."FinancialResponsibilitySelfInsuranceFinancialTest" = 'Yes'::text)) THEN 'N/A'::text
+            ELSE x."FinancialResponsibilityObtained"
+        END AS financial_responsibility_obtained,
     x."FinancialResponsibilityBondRatingTest" AS financial_responsibility_bond_rating_test,
     x."FinancialResponsibilityCommercialInsurance" AS financial_responsibility_commercial_insurance,
     x."FinancialResponsibilityGuarantee" AS financial_responsibility_guarantee,
@@ -31,4 +34,6 @@ create or replace view "dc_ust"."v_ust_facility" as
      LEFT JOIN dc_ust.v_owner_type_xwalk ot ON ((x."OwnerType" = (ot.organization_value)::text)))
      LEFT JOIN dc_ust.v_facility_type_xwalk ft ON ((x."FacilityType1" = (ft.organization_value)::text)))
      LEFT JOIN dc_ust.v_state_xwalk s ON ((x."FacilityState" = (s.organization_value)::text)))
-     LEFT JOIN dc_ust.v_coordinate_source_xwalk cs ON ((x."FacilityCoordinateSource" = (cs.organization_value)::text)));
+     LEFT JOIN dc_ust.v_coordinate_source_xwalk cs ON ((x."FacilityCoordinateSource" = (cs.organization_value)::text)))
+  WHERE (NOT (((x."FACILITYID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM dc_ust.erg_unregulated_facilities)));

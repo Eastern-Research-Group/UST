@@ -7,3 +7,5 @@ ALTER TABLE public.tank_secondary_containments ADD CONSTRAINT tank_secondary_con
 CREATE UNIQUE INDEX tank_secondary_containments_pkey ON public.tank_secondary_containments USING btree (tank_secondary_containment_id)
 
 CREATE INDEX tank_secondary_containments_idx ON public.tank_secondary_containments USING btree (tank_secondary_containment)
+
+CREATE INDEX tank_secondary_containments_desc_idx ON public.tank_secondary_containments USING btree (tank_secondary_containment)

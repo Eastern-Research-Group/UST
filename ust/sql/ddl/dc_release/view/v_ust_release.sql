@@ -10,6 +10,7 @@ create or replace view "dc_release"."v_ust_release" as
     x."Site City" AS site_city,
     (x."Zipcode")::text AS zipcode,
     s.state,
+    ft.facility_type_id,
     (x."EPARegion")::integer AS epa_region,
     x."Latitude" AS latitude,
     x."Longitude" AS longitude,
@@ -21,7 +22,9 @@ create or replace view "dc_release"."v_ust_release" as
     x."Media Impacted Groundwater" AS media_impacted_groundwater,
     x."Media Impacted Surface Water" AS media_impacted_surface_water,
     x."Military Do DSite" AS military_dod_site
-   FROM (((dc_release.release x
+   FROM (((((dc_release.release x
      LEFT JOIN dc_release.v_state_xwalk s ON ((x."State" = (s.organization_value)::text)))
+     LEFT JOIN dc_release.erg_facility_types eft ON (((x."Facility ID")::text = (eft.facility_id)::text)))
+     LEFT JOIN dc_release.v_facility_type_xwalk ft ON ((eft.facility_type1 = (ft.organization_value)::text)))
      LEFT JOIN dc_release.v_coordinate_source_xwalk cs ON ((x."Coordinate Source" = (cs.organization_value)::text)))
      LEFT JOIN dc_release.v_release_status_xwalk rs ON ((x."LUSTStatus" = (rs.organization_value)::text)));
