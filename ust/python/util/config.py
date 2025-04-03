@@ -1,8 +1,8 @@
-db_user='ugst_ergone'
-db_password='Sunday1234'
-db_ip='4.36.57.13'
+db_user=None
+db_password=None
+db_ip=None
 db_connection_string = f'postgresql://{db_user}:{db_password}@{db_ip}:5432/'
-db_name='UGSTank'
+db_name=None
 
 hazsub_email = 'John.Wilhelmi@erg.com'
 hazsub_cc = 'victoria.andrews@erg.com; renae.myers@erg.com'
