@@ -70,7 +70,7 @@ class deagg:
 			
 		control_table_name = self.dataset.ust_or_release.lower() + '_control'
 		control_column_name = control_table_name + '_id'
-		sql = f"""select organization_id from {self.dataset.view_name}.{control_table_name} 
+		sql = f"""select organization_id from public.{control_table_name} 
 				 where {control_column_name} = %s"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 		logger.info('Deagg table name = %s', self.deagg_table_name)
@@ -114,7 +114,7 @@ class deagg:
 		
 
 	def update_element_mapping(self):
-		sql = f"""update {self.dataset.view_name}.{self.dataset.ust_or_release}_element_mapping 
+		sql = f"""update public.{self.dataset.ust_or_release}_element_mapping 
 				  set deagg_table_name = %s, deagg_column_name = %s
 		          where {self.dataset.ust_or_release}_control_id = %s 
 		          and organization_table_name = %s and organization_column_name = %s"""
