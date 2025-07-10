@@ -77,7 +77,7 @@ class deaggRows:
 
 		# convert list of columns into a string and wrap each one in quotes 
 		col_str = ''  
-		for col in data_table_pk_cols:
+		for col in self.data_table_pk_cols:
 			col_str = col_str + '"' + col + '",' 
 		
 		# create _datarows_deagg table with empty column for deagged values 
@@ -119,13 +119,13 @@ class deaggRows:
 				elif i == 4:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s, %s, %s, %s)"""
-					utils.process_sql(self.conn, self.cur, sql2, params=row[3], part))
+					utils.process_sql(self.conn, self.cur, sql2, params=(row[3], part))
 					logger.info('Inserted %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], part, self.dataset.schema, self.data_deagg_table_name)
 				elif i == 5:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s, %s, %s, %s, %s)"""
 					utils.process_sql(self.conn, self.cur, sql2, params= (row[0], row[1], row[2], row[3], row[4], part))
-					logger.info('Inserted %s, %s, %s, %s, %s, %s into %s.%s', (row[0], row[1], row[2], row[3], row[4], part, self.dataset.schema, self.data_deagg_table_name)
+					logger.info('Inserted %s, %s, %s, %s, %s, %s into %s.%s', row[0], row[1], row[2], row[3], row[4], part, self.dataset.schema, self.data_deagg_table_name)
 				elif i == 6:
 					sql2 = f"""insert into {self.dataset.schema}.{self.data_deagg_table_name} ({col_str} "{self.data_deagg_column_name}") 
 					           values (%s, %s, %s, %s, %s, %s, %s)"""
