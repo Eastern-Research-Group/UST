@@ -32,11 +32,11 @@ maybe_as_true = True            # Boolean. Set to True to mark stopwords with th
 
 
 # Set the following variables if the data to be checked for CUI is not yet in the database and you need to upload a file first:
-# upload_file_path = r"C:\Users\erguser\Downloads\MD_UST_template_20240925160404_OUST notes_10-18-24.xlsx"			# Path to Excel, CSV, or text file to upload. 
-# upload_schema = 'md_ust'		# Schema to upload the file to. 
-# upload_table_name = 'erg_facility'  		# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
+# upload_file_path = r""			# Path to Excel, CSV, or text file to upload. 
+# upload_schema = ''		# Schema to upload the file to. 
+# upload_table_name = ''  		# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
 # upload_overwrite_table = False  # Boolean. Set to True to overwrite table(s) if exists. 
-# upload_excel_tabs = ['Facility']     
+# upload_excel_tabs = ['']     
 
 upload_file_path = r""				# Path to Excel, CSV, or text file to upload. 
 upload_schema = ''			        # Schema to upload to. 
