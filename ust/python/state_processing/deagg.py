@@ -128,14 +128,14 @@ class deagg:
 			return
 
 		sql = f"""select distinct epa_table_name
-				from {self.dataset.schema}.{self.dataset.ust_or_release}_element_mapping 
+				from public.{self.dataset.ust_or_release}_element_mapping 
 				where {self.dataset.ust_or_release}_control_id = %s
 				and organization_table_name = %s and organization_column_name = %s"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.data_table_name, self.column_name))
 		epa_table_name = self.cur.fetchone()[0]
 
 		sql = f"""select organization_column_name
-				from {self.dataset.schema}.{self.dataset.ust_or_release}_element_mapping  
+				from public.{self.dataset.ust_or_release}_element_mapping  
 				where epa_table_name = %s
 				and organization_column_name <> %s and organization_table_name = %s"""
 		utils.process_sql(self.conn, self.cur, sql, params=(epa_table_name, self.column_name, self.data_table_name))
