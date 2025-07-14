@@ -10,9 +10,12 @@ create or replace view gu_ust.v_ust_facility as
     x."City" AS facility_city,
     'GU'::text AS facility_state,
     9 AS facility_epa_region,
+    l."Latitude" AS facility_latitude,
+    l."Longitude" AS facility_longitude,
     x."Owner" AS facility_owner_company_name
-   FROM (gu_ust."Facility" x
+   FROM ((gu_ust."Facility" x
      LEFT JOIN gu_ust.v_facility_type_xwalk f ON ((x."Facility Description" = (f.organization_value)::text)))
+     LEFT JOIN gu_ust.lat_long l ON ((x."Permit Number" = l."AltFacilityID")))
  where x."Permit Number"::varchar(50) not in (select facility_id from gu_ust.erg_unregulated_facilities);
 
 
