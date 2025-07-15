@@ -590,7 +590,7 @@ def get_join_tables(dataset, epa_table_name, schema='public'):
     return joins 
 
 
-def process_sql(conn, cur, sql, params=None):
+def process_sql(conn, cur, sql, params=None, exit_on_fail=True):
     try: 
         cur.execute(sql, params)
     except Exception as e:
@@ -599,10 +599,11 @@ def process_sql(conn, cur, sql, params=None):
         error_logger.error('\n\nBad SQL:\n')
         error_logger.error(q)
         conn.rollback()
-        cur.close()
-        conn.close()     
-        error_logger.error('\n\nEXITING DUE TO SQL ERROR....\n\n')  
-        exit()  
+        if exit_on_fail:
+            cur.close()
+            conn.close()     
+            error_logger.error('\n\nEXITING DUE TO SQL ERROR....\n\n')  
+            exit()  
 
 
 def pretty_print_df(df):
