@@ -16,10 +16,10 @@ from python.util.logger_factory import logger
 # USE deagg_rows.py TO CREATE DEAGG TABLES AT THE FACILITY/TANK/COMPARTMENT LEVEL
 # THAT USE THE TABLES THIS SCRIPT CREATES
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
-data_table_name = '' 			# Enter a string containing organization table name
-column_name = ''				# Enter a string containing organization column name
+ust_or_release = 'release' 			# Valid values are 'ust' or 'release'
+control_id = 23                  # Enter an integer that is the ust_control_id or release_control_id
+data_table_name = 'v_release_cause' 			# Enter a string containing organization table name
+column_name = 'cause'				# Enter a string containing organization column name
 delimiter = ', ' 				# Defaults to ','; delimiter from the column beging deaggregated in the state table. Use '\n' for hard returns.
 drop_existing = False 			# Boolean, defaults to False; if True will drop existing deagg table with the same name
 deagg_rows = True				# Boolean, defaults to True. If True will automatically execute the deagg_rows.py scripts after executing this script.
