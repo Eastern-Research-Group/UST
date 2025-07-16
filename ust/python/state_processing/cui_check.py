@@ -28,19 +28,19 @@ table_name = ''             	# Enter the table name that contains the column(s) 
 column_names = ['']         	# Enter a list of column names that contain possible CUI    
 
 drop_existing = True            # Boolean; defaults to True. If True, will drop the erg_%_clean_cui table if it exists. 
-maybe_as_true = True            # Boolean. Set to True to mark stopwords with the "maybe flag" to TRUE instead of MAYBE
+maybe_as_true = True            # Boolean; defaults to True. Set to True to mark stopwords with the "maybe flag" to TRUE instead of MAYBE.
 
 
 # Set the following variables if the data to be checked for CUI is not yet in the database and you need to upload a file first:
 # upload_file_path = r""			# Path to Excel, CSV, or text file to upload. 
-# upload_schema = ''		# Schema to upload the file to. 
-# upload_table_name = ''  		# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
-# upload_overwrite_table = False  # Boolean. Set to True to overwrite table(s) if exists. 
+# upload_schema = ''				# Schema to upload the file to. 
+# upload_table_name = ''  			# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
+# upload_overwrite_table = False  	# Boolean. Set to True to overwrite table(s) if exists. 
 # upload_excel_tabs = ['']     
 
-upload_file_path = r""				# Path to Excel, CSV, or text file to upload. 
-upload_schema = ''			        # Schema to upload to. 
-upload_table_name = None  			# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
+upload_file_path = None				# Path to Excel, CSV, or text file to upload. 
+upload_schema = None		        # Schema to upload to. 
+upload_table_name = None 			# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
 upload_overwrite_table = False      # Boolean. Set to True to overwrite table(s) if exists. 
 upload_excel_tabs = None            # For multi-tab Excel files, enter a string or list containing the sheet names to export. Leave as None to export all tabs.
 
