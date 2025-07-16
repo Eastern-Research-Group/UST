@@ -52,16 +52,18 @@ class deagg:
 
 
 	def connect_db(self):
-		self.conn = utils.connect_db()
-		self.cur = self.conn.cursor()
-		logger.info('Connected to database')
+		if not self.conn:
+			self.conn = utils.connect_db()
+			self.cur = self.conn.cursor()
+			logger.info('Connected to database')
 
 
 	def disconnect_db(self):
-		self.conn.commit()
-		self.cur.close()
-		self.conn.close()
-		logger.info('Disconnected from database')
+		if self.conn:
+			self.conn.commit()
+			self.cur.close()
+			self.conn.close()
+			logger.info('Disconnected from database')
 
 
 	def create_deagg_table(self):
