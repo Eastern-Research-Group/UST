@@ -68,6 +68,7 @@ class CuiImport:
 			self.conn.commit()
 			self.cur.close()
 			self.conn.close()
+			self.conn = None 
 			logger.info('Disconnected from database')
 
 

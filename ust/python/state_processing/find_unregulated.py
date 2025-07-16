@@ -244,6 +244,7 @@ class Unregulated:
 		if self.conn:
 			self.cur.close()
 			self.conn.close()
+			self.conn = None 
 			logger.info('Disconnected from database')
 
 
