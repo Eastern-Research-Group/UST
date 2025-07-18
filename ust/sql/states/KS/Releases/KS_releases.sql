@@ -375,7 +375,8 @@ select
 	"Storage Tank Details - Cleanup Completed Date"::text as nfa_date
 from ks_release.historical_releases;	 
 	
-create view ks_release.v_release_substance as
+create or replace view ks_release.v_release_substance as
+select * from (
 select 
 	"Number" as release_id,  
 	"Leak and Additional Information - Material leaked" as substance, 
@@ -391,18 +392,18 @@ select
 		else "Inspection Details - Material Leaked" end as substance, 
 	null as quantity_released, 
 	null as unit
-from ks_release.historical_releases;
+from ks_release.historical_releases) a where substance is not null;
 
 
-
-
-create view ks_release.v_release_cause as
+create or replace view ks_release.v_release_cause as
 select 
 	"Number" as release_id,  
 	"Leak and Additional Information - Cause of leak" as cause	
-from ks_release.releases;
+from ks_release.releases
+where "Leak and Additional Information - Cause of leak" is not null;
 
 create or replace view ks_release.v_release_source as 
+select * from (
 select 
 	"Number" as release_id,  
 	case when "Leak and Additional Information - Leak type" is null then 'Other' 
@@ -413,7 +414,7 @@ select
 	"Number" as release_id,  
 	case when "Inspection Details - Leak Type" is null then 'Other' 
 		else "Inspection Details - Leak Type" end as source
-from ks_release.historical_releases;
+from ks_release.historical_releases) a where source is not null;
 
 
 select * from release_element_mapping 
@@ -1108,6 +1109,16 @@ select distinct substance from ks_release.v_release_substance
 where substance not in 
 	(select organization_value from oust_release_value_mapping
 	where release_control_id = 23 and organization_column_name = 'substance');
+
+
+select distinct substance from ks_release.erg_substance_datarows_deagg  
+where substance not in 
+	(select organization_value from oust_release_value_mapping
+	where release_control_id = 23 and organization_column_name = 'substance');
+
+select * from oust_release_value_mapping
+where release_control_id = 23 and organization_column_name = 'substance'
+
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------

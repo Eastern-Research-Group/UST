@@ -10,10 +10,10 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
-control_id = 23                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
-overwrite_existing = True      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+only_incomplete = True  		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+overwrite_existing = True      	# Boolean, defaults to True. If True, will overwrite an existing file. Set to False to append to an existing file. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None
