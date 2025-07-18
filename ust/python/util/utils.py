@@ -613,6 +613,8 @@ def pretty_print_df(df):
 def string_to_list(string):
     if isinstance(string, list):
         return string
+    if string == ', ':
+        return[string]
     string = string.replace("'",'')
     str_list = string.split(', ')
     return str_list
@@ -684,4 +686,3 @@ def get_outlook_info():
     outlook_info['last_name'] = get_last_name_from_erg_email(outlook_info['email'])
     outlook_info['display_name'] = mapi.Accounts[0].DisplayName
     return outlook_info
-
