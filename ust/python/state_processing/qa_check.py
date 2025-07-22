@@ -185,6 +185,7 @@ class QualityCheck:
 
 
 	def write_to_ws(self, data, ws_name):
+		ws_name = ws_name[:31]
 		if data:
 			ws = self.wb.create_sheet(ws_name)
 			headers = utils.get_headers(self.view_name, self.dataset.schema)
