@@ -903,6 +903,7 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
  
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the ust_control_id
+organization_id = ''      		# Optional; if control_id = 0 or None, will find the most recent control_id
 delete_existing = False 		 # can set to True if there is existing UST data you need to delete before inserting new
 
  * Do a quick sanity check of number of rows inserted:
