@@ -509,7 +509,7 @@ class QualityCheck:
 				return 
 
 			sql = f"""select count(*) from information_schema.columns 
-			          where table_schema = %s and table_name = %s"""
+			          where table_schema = %s and table_name = %s and column_name = %s""""
 			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_release_substance', 'substance_id'))
 			cnt = self.cur.fetchone()[0]
 			if cnt == 0:
