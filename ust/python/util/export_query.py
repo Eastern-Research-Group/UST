@@ -11,21 +11,8 @@ from python.util import utils
 from python.util.logger_factory import logger
 
 
-query = """select ust_element_value_mapping_id, 
-ust_element_mapping_id, 
-ust_control_id, 
-organization_id, 
-epa_table_name, 
-epa_column_name, 
-organization_value, 
-epa_value, 
-programmer_comments, 
-epa_comments, 
-organization_comments, 
-exclude_from_query
-from public.v_base_ust_element_value_mapping
-order by organization_id, table_sort_order, column_sort_order, organization_value;""" 		# Text of query to be exported, Parameters are not accepted. 
-export_file_name = 'ust_element_value_mapping.xlsx'		# Optional. If None, file name will be 'query_output_YYYY-MM-DD.xlsx'
+query = """select distinct "FAC_ID", "F_NAME", "F_NAME_cui" from pa_ust.erg_active_usts_clean_cui""" 		# Text of query to be exported, Parameters are not accepted. 
+export_file_name = 'pa_ust_cui.xlsx'		# Optional. If None, file name will be 'query_output_YYYY-MM-DD.xlsx'
 
 
 class ExportQuery:

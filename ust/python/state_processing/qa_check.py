@@ -16,8 +16,8 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
+ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+control_id = 23                  # Enter an integer that is the release_control_id
 organization_id = None			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
@@ -186,6 +186,7 @@ class QualityCheck:
 
 	def write_to_ws(self, data, ws_name):
 		if data:
+			ws_name = ws_name[:31]
 			ws = self.wb.create_sheet(ws_name)
 			headers = utils.get_headers(self.view_name, self.dataset.schema)
 			for colno, header in enumerate(headers, start=1):
@@ -360,6 +361,7 @@ class QualityCheck:
 		# check for non-unique (repeating) rows	
 		sql = f"select {self.view_col_str}, count(*) from {self.dataset.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
 		utils.process_sql(self.conn, self.cur, sql)
+		# utils.pretty_print_query(self.cur)
 		data = self.cur.fetchall()
 		num_rows = self.cur.rowcount 
 		self.error_cnt_dict['nonunique rows in ' + self.dataset.schema + '.' + self.view_name] = num_rows
