@@ -511,6 +511,7 @@ class QualityCheck:
 				return 
 
 			sql = f"""select count(*) from information_schema.columns 
+<<<<<<< HEAD
 			          where table_schema = %s and table_name = %s and column_name = 'facility_id'"""
 			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_release'))
 			cnt = self.cur.fetchone()[0]
@@ -520,6 +521,9 @@ class QualityCheck:
 
 			sql = f"""select count(*) from information_schema.columns 
 			          where table_schema = %s and table_name = %s and column_name = %s"""
+=======
+			          where table_schema = %s and table_name = %s and column_name = %s""""
+>>>>>>> 01ad4694b43763e629b1d4888bf4ee0bec98bd3a
 			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_release_substance', 'substance_id'))
 			cnt = self.cur.fetchone()[0]
 			if cnt == 0:
