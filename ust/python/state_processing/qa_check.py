@@ -16,8 +16,9 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
+
+ust_or_release = 'ust' 		 	# Valid values are 'ust' or 'release' 
+control_id = 0                  # Enter an integer that is the release_control_id
 organization_id = None			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
@@ -186,6 +187,7 @@ class QualityCheck:
 
 	def write_to_ws(self, data, ws_name):
 		if data:
+			ws_name = ws_name[:31]
 			ws = self.wb.create_sheet(ws_name)
 			headers = utils.get_headers(self.view_name, self.dataset.schema)
 			for colno, header in enumerate(headers, start=1):
@@ -509,7 +511,15 @@ class QualityCheck:
 				return 
 
 			sql = f"""select count(*) from information_schema.columns 
-			          where table_schema = %s and table_name = %s"""
+			          where table_schema = %s and table_name = %s and column_name = 'facility_id'"""
+			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_release'))
+			cnt = self.cur.fetchone()[0]
+			if cnt == 0:
+				logger.info('No Facility ID column in %s.v_ust_release so not performating heating oil tank check', self.dataset.schema)
+				return 
+
+			sql = f"""select count(*) from information_schema.columns 
+			          where table_schema = %s and table_name = %s and column_name = %s"""
 			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_release_substance', 'substance_id'))
 			cnt = self.cur.fetchone()[0]
 			if cnt == 0:
