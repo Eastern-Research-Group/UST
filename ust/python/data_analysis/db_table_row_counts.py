@@ -12,7 +12,7 @@ from python.util import utils, config
 from python.util.logger_factory import logger
 
 
-schema_names = ['or_ust','or_release']
+schema_names = None
 include_views = False 
 export_file_name =  None
 export_file_dir = None
