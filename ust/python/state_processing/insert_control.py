@@ -9,13 +9,13 @@ from python.util import utils
 from python.util.logger_factory import logger
 
 
-organization_id = 'XX'                  # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
+organization_id = 'NM'                  # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
 ust_or_release = 'ust'                  # Valid values are 'ust' or 'release'
-data_source = ''                        # Describe in detail where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
-date_received = 'YYYY-MM-DD'            # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
+data_source = 'NM API, downloaded by OUST and given to us in two csv files, one with the facility information, and one with all of the other information.'                        # Describe in detail where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
+date_received = '2025-05-12'            # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 date_processed = None                   # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
 comments = ''                           # Top-level comments on the dataset. An example would be "Exclude Aboveground Storage Tanks".
-organization_compartment_flag = None    # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. You can set this later if you don't know.
+organization_compartment_flag = 'N'    # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. You can set this later if you don't know.
 
 
 class ControlTable:

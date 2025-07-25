@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 39              	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = None			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
@@ -65,7 +65,7 @@ class QualityCheck:
 			logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
 			logger.info('Views this script looks for: %s', self.get_view_names())
 			self.disconnect_db()
-			exit()
+			sys.exit()
 		self.wb = op.Workbook()	
 		self.check_missing_views()
 		self.set_view_counts()

@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 39                 	# Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True  		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = True      	# Boolean, defaults to True. If True, will overwrite an existing file. Set to False to append to an existing file. 
 
