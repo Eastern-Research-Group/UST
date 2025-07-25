@@ -44,6 +44,22 @@ def get_engine(db_name=config.db_name, schema=None):
         logger.error('Error creating database engine: %s', e)
 
 
+def get_sqlserver_connection_string(host, db, user, passwd, driver = 'ODBC Driver 18 for SQL Server'):
+    return f"DRIVER={{{driver}}};SERVER={host};DATABASE={db};uid={user};pwd={passwd};TrustServerCertificate=yes;Encrypt=no;"
+
+
+def connect_sqlserver_db():
+    conn_str = get_sqlserver_connection_string()
+    conn =  pyodbc.connect(conn_str) 
+    logger.info('Connected to %s', or_db)
+    return conn
+
+
+def get_sqlserver_engine():
+    conn_str = get_sqlserver_connection_string()
+    return create_engine(f"mssql+pyodbc:///?odbc_connect={conn_str}", fast_executemany=True)    
+
+
 def get_view_sql(view_name):
     conn = connect_db()
     cur = conn.cursor()
@@ -613,6 +629,8 @@ def pretty_print_df(df):
 def string_to_list(string):
     if isinstance(string, list):
         return string
+    if string == ', ':
+        return[string]
     string = string.replace("'",'')
     str_list = string.split(', ')
     return str_list
@@ -684,4 +702,3 @@ def get_outlook_info():
     outlook_info['last_name'] = get_last_name_from_erg_email(outlook_info['email'])
     outlook_info['display_name'] = mapi.Accounts[0].DisplayName
     return outlook_info
-

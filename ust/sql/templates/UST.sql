@@ -778,6 +778,7 @@ and table_name like '%_xwalk' order by 1;
 
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the ust_control_id
+table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
 drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
@@ -902,6 +903,7 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
  
 ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the ust_control_id
+organization_id = ''      		# Optional; if control_id = 0 or None, will find the most recent control_id
 delete_existing = False 		 # can set to True if there is existing UST data you need to delete before inserting new
 
  * Do a quick sanity check of number of rows inserted:

@@ -11,8 +11,8 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True   		# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None         
@@ -111,7 +111,8 @@ class DeaggCode:
 				script_params = script_params + f"control_id = {self.dataset.control_id}                  # Enter an integer that is the ust_control_id or release_control_id\n"
 				script_params = script_params + f"data_table_name = '{org_table_name}' 			# Enter a string containing organization table name\n"
 				script_params = script_params + f"column_name = '{org_column_name}'				# Enter a string containing organization column name\n"
-				script_params = script_params + f"delimiter = {repr(delimiter)} 				" + "# Defaults to ','; delimiter from the column beging deaggregated in the state table. Use '\n' for hard returns.".encode("unicode_escape").decode("utf-8") + '\n'
+				script_params = script_params + f"delimiters = [{repr(delimiter)}] 		" + "List of delimiters; defaults to [', ']. Put the most prevelant first. Put characters padded by spaces in list before those without spaces. Use '\n' for hard returns.".encode("unicode_escape").decode("utf-8") + '\n'
+				script_params = script_params + f"exclude_values = []			    # Python list. Values that contain the delimiter but should not be deaggregated\n"
 				script_params = script_params + f"drop_existing = False 			# Boolean, defaults to False; if True will drop existing deagg table with the same name\n"
 				script_params = script_params + f"deagg_rows = True				# Boolean, defaults to True. If True will automatically execute the deagg_rows.py scripts after executing this script.\n"
 				self.deagg_sql = self.deagg_sql + script_params + '\n\n'

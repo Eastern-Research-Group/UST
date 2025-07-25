@@ -185,6 +185,7 @@ class QualityCheck:
 
 
 	def write_to_ws(self, data, ws_name):
+		ws_name = ws_name[:31]
 		if data:
 			ws = self.wb.create_sheet(ws_name)
 			headers = utils.get_headers(self.view_name, self.dataset.schema)
@@ -509,7 +510,7 @@ class QualityCheck:
 				return 
 
 			sql = f"""select count(*) from information_schema.columns 
-			          where table_schema = %s and table_name = %s"""
+			          where table_schema = %s and table_name = %s and column_name = %s"""
 			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_release_substance', 'substance_id'))
 			cnt = self.cur.fetchone()[0]
 			if cnt == 0:
