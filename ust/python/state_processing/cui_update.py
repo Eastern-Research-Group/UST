@@ -135,7 +135,7 @@ def main(ust_or_release,
 		control_id = utils.get_control_id(ust_or_release, organization_id)
 		logger.info('control_id set to %s', control_id)
 
-	CuiUpdate(ust_or_release=ust_or_release, control_id=control_id)
+	CuiUpdate(ust_or_release=ust_or_release, control_id=control_id).process()
 
 
 if __name__ == '__main__':   
