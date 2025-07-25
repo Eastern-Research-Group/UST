@@ -18,7 +18,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
-organization_id = None			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
+organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -488,8 +488,14 @@ class QualityCheck:
 							join (select distinct facility_id from 
 									(select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.v_ust_facility ) x 
 								  where facility_type_id <> 4) f on ts.facility_id = f.facility_id
-						where s.substance like 'Heating%'
-						union all 
+						where s.substance like 'Heating%'"""
+			sql2 = """select count(*) from information_schema.columns 
+			          where table_schema = %s and table_name = 'v_ust_compartment' 
+			          and column_name = 'compartment_capacity_gallons' """
+			utils.process_sql(self.conn, self.cur, sql2, params=(self.dataset.schema,))
+			cnt = self.cur.fetchone()[0]
+			if cnt > 0:
+				sql = sql + f"""\nunion all 
 						select x.facility_id, x.tank_id 
 						from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
 							  from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x 
@@ -498,7 +504,8 @@ class QualityCheck:
 								  where facility_type_id in (1,12)) f on x.facility_id = f.facility_id	  
 							join {self.dataset.schema}.v_ust_tank_substance ts on x.facility_id = ts.facility_id and x.tank_id = ts.tank_id
 							join public.substances s on ts.substance_id = s.substance_id
-						where tank_capacity_gallons <1100 and s.substance_group in ('Diesel','Gasoline')) a
+						where tank_capacity_gallons <1100 and s.substance_group in ('Diesel','Gasoline') """
+			sql = sql + """) a
 					order by 1, 2"""
 		else:
 			sql = f"""select count(*) from information_schema.columns 
