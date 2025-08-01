@@ -11,7 +11,7 @@ from python.util.logger_factory import logger
 
 ust_or_release = 'ust'          # Valid values are 'ust' or 'release'
 organization_id = 'GU'            # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
-path = r"C:\Users\cpitkins\Desktop\UST\Guam_latlong"                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
+path = r"C:\Users\cpitkins\Desktop\UST\Guam"                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
 overwrite_table = False         # Boolean, defaults to False; set to True if you are replacing existing data in the schema
 
 
