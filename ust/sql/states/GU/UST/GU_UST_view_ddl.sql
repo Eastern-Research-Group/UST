@@ -21,7 +21,7 @@
   WHERE (NOT (((x."Permit Number")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
            FROM gu_ust.erg_unregulated_facilities)));;
 
-
+select * from gu_ust."Facility"
 
 
 /*********** v_ust_tank ***********/
@@ -70,7 +70,7 @@
           WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))));;
 
 
-
+select * from gu_ust."Tank"
 
 /*********** v_ust_tank_substance ***********/
 
@@ -89,11 +89,18 @@
            FROM gu_ust.erg_unregulated_tanks unreg
           WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))));;
 
+select * from substances where substance_id = 47;
 
+select distinct "CompartmentSubstanceStored"  from gu_ust."Compartment" order by 1;
+
+select * from gu_ust.v_ust_tank_substance where substance_id = 47;
 
 
 /*********** v_ust_compartment ***********/
 
+select * From compartment_statuses 
+
+select * from gu_ust.v_ust_compartment where compartment_status_id = 8;
 
 --View definition for gu_ust.v_ust_compartment:
  SELECT DISTINCT TRIM(BOTH FROM x."FacilityID") AS facility_id,
@@ -172,7 +179,7 @@
            FROM gu_ust.erg_unregulated_tanks unreg
           WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))));;
 
-
+select * from gu_ust."Compartment";
 
 
 /*********** v_ust_compartment_substance ***********/
