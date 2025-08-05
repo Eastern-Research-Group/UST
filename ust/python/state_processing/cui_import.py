@@ -12,7 +12,7 @@ from python.util.logger_factory import logger
 from python.util.upload_general_file import Importer
 
 schema = ''              			# Enter the schema name
-upload_file_path = r""				# Path to CUI check spreadsheet.  
+upload_file_path = r""				# Enter the path to the CUI check file
 
 
 class CuiImport:

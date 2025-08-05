@@ -25,6 +25,7 @@ class Importer:
 	def __init__(self, upload_file_path, schema='public', table_name=None, overwrite_table=False, excel_tabs=None):
 		self.upload_file_path = upload_file_path
 		self.schema = schema
+		self.validate_schema()
 		if table_name:
 			self.table_name = table_name  
 		else:
@@ -35,6 +36,20 @@ class Importer:
 		else:
 			self.excel_tabs = []
 		self.set_existing_tables()
+
+
+	def validate_schema(self):
+		conn = utils.connect_db()
+		cur = conn.cursor()
+		sql = "select count(*) from information_schema.schemata where schema_name = %s"
+		utils.process_sql(conn, cur, sql, params=(self.schema,))
+		cnt = cur.fetchone()[0]
+		if cnt < 1:
+			sql = f"create schema {self.schema}"
+			utils.process_sql(conn, cur, sql)
+			logger.info('Created schema %s', self.schema)
+		cur.close()
+		conn.close()
 
 
 	def get_table_name_from_file_name(self):
@@ -66,7 +81,7 @@ class Importer:
 			try:
 				df.to_sql(new_table_name, engine, index=False)
 				logger.info('Created table %s', new_table_name)       
-			except error as e:
+			except Exception as e:
 				self.bad_file_list.append(new_table_name)
 				logger.error('Unable to load table %s; adding to bad_file_list: %s: %s', new_table_name, e)
 		return True
