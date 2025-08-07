@@ -204,7 +204,7 @@ def get_org_from_control_id(control_id, ust_or_release):
     if ok:
         return org  
     else:
-        exit()
+        sys.exit()
 
 
 def delete_all_release_data(control_id):
