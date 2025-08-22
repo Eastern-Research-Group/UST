@@ -5,35 +5,10 @@
 
 
 --View definition for nm_ust.v_ust_facility:
- WITH usage_f AS (
-         SELECT x_1."FACILITY_ID",
-            u_1."TANK_DETAIL_DESCRIPTION",
-            row_number() OVER (PARTITION BY x_1."FACILITY_ID" ORDER BY u_1."TANK_DETAIL_CODE" DESC) AS row_num
-           FROM (nm_ust."Info" x_1
-             LEFT JOIN nm_ust.v_erg_usage u_1 ON (((x_1."TANK_ID")::double precision = u_1."TANK_ID")))
-        ), facility_operator AS (
-         SELECT x_1."FACILITY_ID",
-            x_1."OPERATOR_NAME",
-            row_number() OVER (PARTITION BY x_1."FACILITY_ID" ORDER BY x_1."OPERATOR_NAME" DESC NULLS LAST) AS row_num
-           FROM nm_ust."Info" x_1
-        ), facility_owner AS (
-         SELECT x_1."FACILITY_ID",
-            x_1."OWNER_NAME",
-            row_number() OVER (PARTITION BY x_1."FACILITY_ID" ORDER BY x_1."OWNER_NAME" DESC NULLS LAST) AS row_num
-           FROM nm_ust."Info" x_1
-        ), lat_long AS (
-         SELECT x_1."FACILITY_ID",
-            x_1."FACILITY_LATITUDE",
-            x_1."FACILITY_LONGITUDE",
-            row_number() OVER (PARTITION BY x_1."FACILITY_ID" ORDER BY x_1."FACILITY_LATITUDE" DESC NULLS LAST) AS row_num
-           FROM nm_ust."Info" x_1
-        )
  SELECT DISTINCT (x."FACILITY_ID")::character varying AS facility_id,
     x."FACILITY_NAME" AS facility_name,
-        CASE
-            WHEN (u."TANK_DETAIL_DESCRIPTION" = ANY (ARRAY['EMERGENCY GENERATOR'::text, 'WASTE STORAGE'::text])) THEN NULL::integer
-            ELSE ft.facility_type_id
-        END AS facility_type1,
+    ft1.facility_type_id AS facility_type1,
+    ft2.facility_type_id AS facility_type2,
     x."FACILITY_ADDRESS_1" AS facility_address1,
     x."FACILITY_ADDRESS_2" AS facility_address2,
     x."FACILITY_CITY" AS facility_city,
@@ -45,18 +20,24 @@
             WHEN (x."TRIBAL_SITE" = 'Y'::text) THEN 'Yes'::text
             ELSE NULL::text
         END AS facility_tribal_site,
-    ll."FACILITY_LATITUDE" AS facility_latitude,
-    ll."FACILITY_LONGITUDE" AS facility_longitude,
-    own."OWNER_NAME" AS facility_owner_company_name,
-    fo_agg."OPERATOR_NAME" AS facility_operator_company_name
-   FROM (((((((nm_ust."Info" x
-     LEFT JOIN usage_f u ON (((x."FACILITY_ID" = u."FACILITY_ID") AND (u.row_num = 1))))
-     LEFT JOIN facility_operator fo_agg ON (((x."FACILITY_ID" = fo_agg."FACILITY_ID") AND (fo_agg.row_num = 1))))
-     LEFT JOIN facility_owner own ON (((x."FACILITY_ID" = own."FACILITY_ID") AND (own.row_num = 1))))
-     LEFT JOIN lat_long ll ON (((x."FACILITY_ID" = ll."FACILITY_ID") AND (ll.row_num = 1))))
-     LEFT JOIN nm_ust.v_facility_type_xwalk ft ON ((u."TANK_DETAIL_DESCRIPTION" = (ft.organization_value)::text)))
+    x."FACILITY_LATITUDE" AS facility_latitude,
+    x."FACILITY_LONGITUDE" AS facility_longitude,
+    x."OWNER_NAME" AS facility_owner_company_name,
+    x."OPERATOR_NAME" AS facility_operator_company_name
+   FROM (((((nm_ust.vw_facility_info x
+     LEFT JOIN ( SELECT vw_facility_types_numbered."FACILITY_ID",
+            vw_facility_types_numbered."FACILITY_TYPE"
+           FROM nm_ust.vw_facility_types_numbered
+          WHERE (vw_facility_types_numbered.facility_type_number = 1)) f1 ON ((f1."FACILITY_ID" = x."FACILITY_ID")))
+     LEFT JOIN ( SELECT vw_facility_types_numbered."FACILITY_ID",
+            vw_facility_types_numbered."FACILITY_TYPE"
+           FROM nm_ust.vw_facility_types_numbered
+          WHERE (vw_facility_types_numbered.facility_type_number = 2)) f2 ON ((f2."FACILITY_ID" = x."FACILITY_ID")))
+     LEFT JOIN nm_ust.v_facility_type_xwalk ft1 ON ((f1."FACILITY_TYPE" = (ft1.organization_value)::text)))
+     LEFT JOIN nm_ust.v_facility_type_xwalk ft2 ON ((f2."FACILITY_TYPE" = (ft2.organization_value)::text)))
      LEFT JOIN nm_ust.v_state_xwalk s ON ((x."FACILITY_STATE" = (s.organization_value)::text)))
-     JOIN nm_ust.v_tanks t ON ((x."FACILITY_ID" = t."FACILITY_ID")));;
+  WHERE (NOT (x."FACILITY_ID" IN ( SELECT vw_ast_facilities."FACILITY_ID"
+           FROM nm_ust.vw_ast_facilities)));;
 
 
 
@@ -118,9 +99,9 @@
            FROM nm_ust.v_erg_tank_detail td
         ), tank_sc AS (
          SELECT sc_1."TANK_ID",
-            sc_1."TANK_DETAIL_DESCRIPTION",
-            row_number() OVER (PARTITION BY sc_1."TANK_ID" ORDER BY sc_1."TANK_DETAIL_DESCRIPTION" DESC NULLS LAST) AS row_num
+            sc_1."TANK_DETAIL_DESCRIPTION"
            FROM nm_ust.v_erg_secondary_containment sc_1
+          WHERE (sc_1."TANK_DETAIL_DESCRIPTION" = ANY (ARRAY['DOUBLE WALLED TANK'::text, 'APPROVED ALTERNATE METHOD - TANK'::text]))
         )
  SELECT DISTINCT (x."FACILITY_ID")::character varying AS facility_id,
     (x."TANK_ID")::integer AS tank_id,
@@ -143,7 +124,7 @@
     cp_agg.tank_corrosion_protection_other,
     cp_agg.tank_corrosion_protection_unknown,
     tsc.tank_secondary_containment_id
-   FROM ((((((((((nm_ust."Info" x
+   FROM (((((((((nm_ust."Info" x
      LEFT JOIN nm_ust.v_tank_location_xwalk tl ON ((x."TANK_TYPE" = (tl.organization_value)::text)))
      LEFT JOIN nm_ust.v_tank_status_xwalk ts ON ((x."TANK_STATUS" = (ts.organization_value)::text)))
      LEFT JOIN tank_corrosion_protection cp_agg ON (((x."TANK_ID")::double precision = cp_agg."TANK_ID")))
@@ -151,9 +132,10 @@
      LEFT JOIN em_gen e ON (((x."TANK_ID")::double precision = e."TANK_ID")))
      LEFT JOIN tank_material tm ON ((((x."TANK_ID")::double precision = tm."TANK_ID") AND (tm.row_num = 1))))
      LEFT JOIN nm_ust.v_tank_material_description_xwalk tmd ON ((tm."TANK_DETAIL_DESCRIPTION" = (tmd.organization_value)::text)))
-     LEFT JOIN tank_sc sc ON ((((x."TANK_ID")::double precision = sc."TANK_ID") AND (sc.row_num = 1))))
+     LEFT JOIN tank_sc sc ON (((x."TANK_ID")::double precision = sc."TANK_ID")))
      LEFT JOIN nm_ust.v_tank_secondary_containment_xwalk tsc ON ((sc."TANK_DETAIL_DESCRIPTION" = (tsc.organization_value)::text)))
-     JOIN nm_ust.v_tanks t ON (((x."FACILITY_ID" = t."FACILITY_ID") AND (x."TANK_ID" = t."TANK_ID"))));;
+  WHERE (NOT ((x."TANK_ID")::double precision IN ( SELECT vw_ast_tanks."TANK_ID"
+           FROM nm_ust.vw_ast_tanks)));;
 
 
 
@@ -165,11 +147,11 @@
  SELECT DISTINCT (x."FACILITY_ID")::character varying AS facility_id,
     (x."TANK_ID")::integer AS tank_id,
     s.substance_id
-   FROM (((nm_ust."Info" x
+   FROM ((nm_ust."Info" x
      LEFT JOIN nm_ust.v_erg_contents c ON (((x."TANK_ID")::double precision = c."TANK_ID")))
      LEFT JOIN nm_ust.v_substance_xwalk s ON ((c."TANK_DETAIL_DESCRIPTION" = (s.organization_value)::text)))
-     JOIN nm_ust.v_tanks t ON (((x."FACILITY_ID" = t."FACILITY_ID") AND (x."TANK_ID" = t."TANK_ID"))))
-  WHERE (s.substance_id IS NOT NULL);;
+  WHERE ((s.substance_id IS NOT NULL) AND (NOT ((x."TANK_ID")::double precision IN ( SELECT vw_ast_tanks."TANK_ID"
+           FROM nm_ust.vw_ast_tanks))));;
 
 
 
@@ -305,12 +287,13 @@
     rd_agg.tank_groundwater_monitoring,
     rd_agg.tank_vapor_monitoring,
     rd_agg.tank_other_release_detection
-   FROM (((((nm_ust."Info" x
+   FROM ((((nm_ust."Info" x
      LEFT JOIN nm_ust.erg_compartment_id c ON ((((x."FACILITY_ID")::text = (c.facility_id)::text) AND (x."TANK_ID" = c.tank_id))))
      LEFT JOIN nm_ust.v_compartment_status_xwalk cs ON ((x."TANK_STATUS" = (cs.organization_value)::text)))
      LEFT JOIN tank_spill_prevention sp_agg ON (((x."TANK_ID")::double precision = sp_agg."TANK_ID")))
      LEFT JOIN tank_release_detection rd_agg ON (((x."TANK_ID")::double precision = rd_agg."TANK_ID")))
-     JOIN nm_ust.v_tanks t ON (((x."FACILITY_ID" = t."FACILITY_ID") AND (x."TANK_ID" = t."TANK_ID"))));;
+  WHERE (NOT ((x."TANK_ID")::double precision IN ( SELECT vw_ast_tanks."TANK_ID"
+           FROM nm_ust.vw_ast_tanks)));;
 
 
 
@@ -487,7 +470,7 @@
             WHEN (sc_agg."TANK_DETAIL_DESCRIPTION" = 'APPROVED ALTERNATE METHOD - PIPING'::text) THEN 'Yes'::text
             ELSE NULL::text
         END AS pipe_secondary_containment_other
-   FROM ((((((((((nm_ust."Info" x
+   FROM (((((((((nm_ust."Info" x
      LEFT JOIN nm_ust.erg_compartment_id c ON ((((x."FACILITY_ID")::text = (c.facility_id)::text) AND (x."TANK_ID" = c.tank_id))))
      LEFT JOIN nm_ust.erg_piping_id pi ON ((((x."FACILITY_ID")::text = (pi.facility_id)::text) AND (x."TANK_ID" = pi.tank_id) AND (c.compartment_id = pi.compartment_id))))
      LEFT JOIN piping p_agg ON (((x."TANK_ID")::double precision = p_agg."TANK_ID")))
@@ -497,5 +480,6 @@
      LEFT JOIN piping_release_detection rd_agg ON (((x."TANK_ID")::double precision = rd_agg."TANK_ID")))
      LEFT JOIN sec_contain sc_agg ON ((((x."TANK_ID")::double precision = sc_agg."TANK_ID") AND (sc_agg.row_num = 1))))
      LEFT JOIN nm_ust.v_piping_wall_type_xwalk pwt ON ((sc_agg."TANK_DETAIL_DESCRIPTION" = (pwt.organization_value)::text)))
-     JOIN nm_ust.v_tanks t ON (((x."FACILITY_ID" = t."FACILITY_ID") AND (x."TANK_ID" = t."TANK_ID"))));;
+  WHERE (NOT ((x."TANK_ID")::double precision IN ( SELECT vw_ast_tanks."TANK_ID"
+           FROM nm_ust.vw_ast_tanks)));;
 

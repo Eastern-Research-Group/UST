@@ -16,8 +16,8 @@ from python.util.logger_factory import logger
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 39 	           		# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
-display_bad_data = False  		# Boolean; defaults to False. Set to True to print bad data to the console (note: if there are a lot of rows, this may be very slow).
-overwrite_existing = False      # Boolean; defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+display_bad_data = True  		# Boolean; defaults to False. Set to True to print bad data to the console (note: if there are a lot of rows, this may be very slow).
+overwrite_existing = True      # Boolean; defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
 export_view_ddl = True          # Boolean; defaults to True. If True, will export the data population view DDL to a SQL file for easy review.  
 
 
