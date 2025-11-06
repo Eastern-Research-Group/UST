@@ -14,8 +14,8 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 17                  # Enter an integer that is the ust_control_id or release_control_id
-table_name = 'ust_tank'       		# Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+table_name = None       		# Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 
 overwrite_sql_file = False      # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. 
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
@@ -61,16 +61,19 @@ class ViewSql:
 
 
 	def connect_db(self):
-		self.conn = utils.connect_db()
-		self.cur = self.conn.cursor()
-		logger.info('Connected to database')
+		if not self.conn:
+			self.conn = utils.connect_db()
+			self.cur = self.conn.cursor()
+			logger.info('Connected to database')
 
 
 	def disconnect_db(self):
-		self.conn.commit()
-		self.cur.close()
-		self.conn.close()
-		logger.info('Disconnected from database')
+		if self.conn:
+			self.conn.commit()
+			self.cur.close()
+			self.conn.close()
+			self.conn = None 
+			logger.info('Disconnected from database')
 
 
 	def show_existing_cols(self):

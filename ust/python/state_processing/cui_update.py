@@ -109,16 +109,19 @@ class CuiUpdate:
 
 
 	def connect_db(self):
-		self.conn = utils.connect_db()
-		self.cur = self.conn.cursor()
-		logger.info('Connected to database')
+		if not self.conn:
+			self.conn = utils.connect_db()
+			self.cur = self.conn.cursor()
+			logger.info('Connected to database')
 		
 
 	def disconnect_db(self):
-		self.conn.commit()
-		self.cur.close()
-		self.conn.close()
-		logger.info('Disconnected from database')
+		if self.conn:
+			self.conn.commit()
+			self.cur.close()
+			self.conn.close()
+			self.conn = None 
+			logger.info('Disconnected from database')
 
 
 
@@ -132,7 +135,7 @@ def main(ust_or_release,
 		control_id = utils.get_control_id(ust_or_release, organization_id)
 		logger.info('control_id set to %s', control_id)
 
-	CuiUpdate(ust_or_release=ust_or_release, control_id=control_id)
+	CuiUpdate(ust_or_release=ust_or_release, control_id=control_id).process()
 
 
 if __name__ == '__main__':   

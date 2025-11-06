@@ -4,4 +4,4 @@ create or replace view "hi_ust"."v_state_xwalk" as
     b.facility_state
    FROM (v_ust_element_mapping a
      LEFT JOIN states b ON (((a.epa_value)::text = (b.state)::text)))
-  WHERE ((a.ust_control_id = 24) AND ((a.epa_column_name)::text = 'facility_state'::text));
+  WHERE ((a.ust_control_id = 37) AND ((a.epa_column_name)::text = 'facility_state'::text));
