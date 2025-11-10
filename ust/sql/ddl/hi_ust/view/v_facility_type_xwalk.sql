@@ -4,4 +4,4 @@ create or replace view "hi_ust"."v_facility_type_xwalk" as
     b.facility_type_id
    FROM (v_ust_element_mapping a
      LEFT JOIN facility_types b ON (((a.epa_value)::text = (b.facility_type)::text)))
-  WHERE ((a.ust_control_id = 24) AND ((a.epa_column_name)::text = 'facility_type1'::text));
+  WHERE ((a.ust_control_id = 37) AND ((a.epa_column_name)::text = 'facility_type1'::text));

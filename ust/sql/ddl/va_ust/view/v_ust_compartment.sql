@@ -5,15 +5,15 @@ create or replace view "va_ust"."v_ust_compartment" as
     c.compartment_status_id,
     (b.capacity)::integer AS compartment_capacity_gallons,
         CASE
-            WHEN ((a.overfill_type)::text = ANY ((ARRAY['ALARM-BALL FLOAT'::character varying, 'BALL FLOAT'::character varying, 'AUTOMATIC SHUTOFF-BALL FLOAT'::character varying])::text[])) THEN 'Yes'::text
+            WHEN ((a.overfill_type)::text = ANY (ARRAY[('ALARM-BALL FLOAT'::character varying)::text, ('BALL FLOAT'::character varying)::text, ('AUTOMATIC SHUTOFF-BALL FLOAT'::character varying)::text])) THEN 'Yes'::text
             ELSE NULL::text
         END AS overfill_prevention_ball_float_valve,
         CASE
-            WHEN ((a.overfill_type)::text = ANY ((ARRAY['AUTOMATIC SHUTOFF'::character varying, 'AUTOMATIC SHUTOFF-BALL FLOAT'::character varying])::text[])) THEN 'Yes'::text
+            WHEN ((a.overfill_type)::text = ANY (ARRAY[('AUTOMATIC SHUTOFF'::character varying)::text, ('AUTOMATIC SHUTOFF-BALL FLOAT'::character varying)::text])) THEN 'Yes'::text
             ELSE NULL::text
         END AS overfill_prevention_flow_shutoff_device,
         CASE
-            WHEN ((a.overfill_type)::text = ANY ((ARRAY['ALARM-BALL FLOAT'::character varying, 'ALARM'::character varying, 'ALARM-AUTOMATIC SHUTOFF'::character varying])::text[])) THEN 'Yes'::text
+            WHEN ((a.overfill_type)::text = ANY (ARRAY[('ALARM-BALL FLOAT'::character varying)::text, ('ALARM'::character varying)::text, ('ALARM-AUTOMATIC SHUTOFF'::character varying)::text])) THEN 'Yes'::text
             ELSE NULL::text
         END AS overfill_prevention_high_level_alarm,
         CASE
@@ -35,7 +35,7 @@ create or replace view "va_ust"."v_ust_compartment" as
             ELSE NULL::text
         END AS spill_prevention_other,
         CASE
-            WHEN ((a.overfill_other_specify)::text = ANY ((ARRAY['Not Required'::character varying, 'Not required'::character varying])::text[])) THEN 'Yes'::text
+            WHEN ((a.overfill_other_specify)::text = ANY (ARRAY[('Not Required'::character varying)::text, ('Not required'::character varying)::text])) THEN 'Yes'::text
             ELSE 'No'::text
         END AS spill_prevention_not_required,
     d.spill_bucket_wall_type_id,
@@ -89,4 +89,6 @@ create or replace view "va_ust"."v_ust_compartment" as
      LEFT JOIN va_ust.erg_tank_spill_bucket_wall z ON ((((a.index)::text = (z.index)::text) AND ((a.tank_number)::text = (z.tank_number)::text) AND ((a.tank_facility_id)::text = (z.tank_facility_id)::text))))
      LEFT JOIN va_ust.v_compartment_status_xwalk c ON (((a.tank_status)::text = (c.organization_value)::text)))
      LEFT JOIN va_ust.v_spill_bucket_wall_type_xwalk d ON ((z.tank_spill_bucket_wall = (d.organization_value)::text)))
-  WHERE (((a.tank_type)::text = 'UST'::text) AND ((b.federally_regulated_tank)::text = 'Yes'::text));
+  WHERE (((a.tank_type)::text = 'UST'::text) AND ((b.federally_regulated_tank)::text = 'Yes'::text) AND (NOT (EXISTS ( SELECT 1
+           FROM va_ust.erg_unregulated_tanks unreg
+          WHERE ((((a.tank_facility_id)::character varying(50))::text = (unreg.facility_id)::text) AND ((b.index)::integer = unreg.tank_id))))));

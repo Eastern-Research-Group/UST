@@ -23,4 +23,6 @@ create or replace view "me_ust"."v_ust_tank" as
      LEFT JOIN me_ust.v_tank_location_xwalk tl ON ((x."TANK ABOVE BELOW" = (tl.organization_value)::text)))
      LEFT JOIN me_ust.v_tank_status_xwalk ts ON ((x."TANK STATUS" = (ts.organization_value)::text)))
      LEFT JOIN me_ust.v_tank_material_description_xwalk tm ON ((x."TANK MATERIAL LABEL" = (tm.organization_value)::text)))
-  WHERE (x."TANK STATUS" <> ALL (ARRAY['ACTIVE_NON_REGULATED'::text, 'NEVER_INSTALLED'::text, 'PLANNED'::text, 'TRANSFER'::text]));
+  WHERE ((x."TANK STATUS" <> ALL (ARRAY['ACTIVE_NON_REGULATED'::text, 'NEVER_INSTALLED'::text, 'PLANNED'::text, 'TRANSFER'::text])) AND (NOT (EXISTS ( SELECT 1
+           FROM me_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."REGISTRATION NUMBER")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TANK NUMBER")::integer = unreg.tank_id))))));

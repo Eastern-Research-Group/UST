@@ -7,3 +7,5 @@ ALTER TABLE public.facility_types ADD CONSTRAINT facility_types_pkey PRIMARY KEY
 CREATE UNIQUE INDEX facility_types_pkey ON public.facility_types USING btree (facility_type_id)
 
 CREATE INDEX facility_types_idx ON public.facility_types USING btree (facility_type)
+
+CREATE INDEX facility_types_desc_idx ON public.facility_types USING btree (facility_type)
