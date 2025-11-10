@@ -120,16 +120,18 @@ create or replace view hi_ust.v_ust_facility as
         END AS ust_reported_release,
     r."AltEventId" AS associated_ust_release_id
    FROM (((((((((hi_ust."tblFacility" x
-     JOIN owner_type o ON (((x."FacilityID" = o.facility_id) AND (o.row_num = 1))))
+     LEFT JOIN owner_type o ON (((x."FacilityID" = o.facility_id) AND (o.row_num = 1))))
      LEFT JOIN hi_ust.v_owner_type_xwalk ot ON ((o."Owner Type:" = (ot.organization_value)::text)))
      LEFT JOIN hi_ust.v_facility_type_xwalk ft ON ((x."Facility Description" = (ft.organization_value)::text)))
      LEFT JOIN hi_ust."tlkpZIP" z ON ((x."ZIP Linkage" = (z."ZIP ID")::double precision)))
      LEFT JOIN hi_ust.v_state_xwalk s ON ((z."State" = (s.organization_value)::text)))
      LEFT JOIN hi_ust."tblContactOrganization" co ON ((x."Owner ID" = (co."OwnerId")::double precision)))
      LEFT JOIN financial_responsibility fr_agg ON ((x."FacilityID" = fr_agg."FacilityID")))
-     JOIN release_id r ON (((x."FacilityID" = r.facility_id) AND (r.row_num = 1))))
+     LEFT JOIN release_id r ON (((x."FacilityID" = r.facility_id) AND (r.row_num = 1))))
      LEFT JOIN hi_ust.v_coordinate_source_xwalk cs ON ((x."HorizontalCollectionMethodName" = (cs.organization_value)::text)))
- where FR."FacilityID"::varchar(50) not in (select facility_id from hi_ust.erg_unregulated_facilities);
+  WHERE (NOT (((x."FacilityID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM hi_ust.erg_unregulated_facilities)))
+ and FR."FacilityID"::varchar(50) not in (select facility_id from hi_ust.erg_unregulated_facilities);
 
 
 
@@ -189,7 +191,10 @@ create or replace view hi_ust.v_ust_tank as
           GROUP BY "tblTank"."FacilityID") mt ON ((x."FacilityID" = mt."FacilityID")))
      LEFT JOIN hi_ust.v_tank_material_description_xwalk tm ON ((x."TankMatDesc" = (tm.organization_value)::text)))
      LEFT JOIN hi_ust.v_tank_secondary_containment_xwalk sc ON ((x."TankModsDesc" = (sc.organization_value)::text)))
- where not exists
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM hi_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))))
+ and not exists
 	(select 1 from hi_ust.erg_unregulated_tanks unreg
 	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
 
@@ -198,14 +203,16 @@ create or replace view hi_ust.v_ust_tank as
 create or replace view hi_ust.v_ust_tank_substance as
  SELECT DISTINCT (x."FacilityID")::text AS facility_id,
     (x."TankID")::integer AS tank_id,
-    x."AltTankID" AS tank_name,
         CASE
             WHEN (s.substance_id IS NULL) THEN 47
             ELSE s.substance_id
         END AS substance_id
    FROM (hi_ust."tblTank" x
      LEFT JOIN hi_ust.v_substance_xwalk s ON ((x."SubstanceDesc" = (s.organization_value)::text)))
- where not exists
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM hi_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))))
+ and not exists
 	(select 1 from hi_ust.erg_unregulated_tanks unreg
 	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
 
@@ -285,7 +292,10 @@ create or replace view hi_ust.v_ust_compartment as
    FROM ((hi_ust."tblTank" x
      JOIN hi_ust.erg_compartment_id c ON ((((x."FacilityID")::text = (c.facility_id)::text) AND ((x."TankID")::text = (c.tank_id)::text) AND (x."AltTankID" = (c.tank_name)::text))))
      LEFT JOIN hi_ust.v_compartment_status_xwalk cs ON ((x."TankStatusDesc" = (cs.organization_value)::text)))
- where not exists
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM hi_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))))
+ and not exists
 	(select 1 from hi_ust.erg_unregulated_tanks unreg
 	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
 
@@ -399,6 +409,9 @@ create or replace view hi_ust.v_ust_piping as
      JOIN hi_ust.erg_piping_id p ON ((((x."FacilityID")::text = (c.facility_id)::text) AND ((x."TankID")::text = (c.tank_id)::text) AND (x."AltTankID" = (c.tank_name)::text) AND ((c.compartment_id)::text = (p.compartment_id)::text))))
      LEFT JOIN hi_ust.v_piping_style_xwalk ps ON ((x."PipeTypeDesc" = (ps.organization_value)::text)))
      LEFT JOIN hi_ust.v_piping_wall_type_xwalk pwt ON ((x."PipeModDesc" = (pwt.organization_value)::text)))
- where not exists
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM hi_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))))
+ and not exists
 	(select 1 from hi_ust.erg_unregulated_tanks unreg
 	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
