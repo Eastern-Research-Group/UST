@@ -1,8 +1,10 @@
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
-create or replace view il_ust.v_ust_facility as
+/*********** v_ust_facility ***********/
+
+
+--View definition for il_ust.v_ust_facility:
  SELECT DISTINCT (x."FacilityID")::character varying(50) AS facility_id,
         CASE
             WHEN (x."FacilityID" = '2005219'::bigint) THEN 'Int"l Bank of Chicago, an Illinois Banking Corp., as Trustee under Trust No 2011'::text
@@ -45,13 +47,17 @@ create or replace view il_ust.v_ust_facility as
      LEFT JOIN il_ust.v_owner_type_xwalk ot ON ((x."OwnerType" = (ot.organization_value)::text)))
      LEFT JOIN il_ust.v_state_xwalk s ON ((x." FacilityState" = (s.organization_value)::text)))
      LEFT JOIN il_ust.v_coordinate_source_xwalk cs ON ((x."FacilityCoordinateSource" = (cs.organization_value)::text)))
-  WHERE (NOT (((x."FacilityID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
-           FROM il_ust.erg_unregulated_facilities)))
- and x."FacilityID"::varchar(50) not in (select facility_id from il_ust.erg_unregulated_facilities);
+  WHERE ((NOT (((x."FacilityID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM il_ust.erg_unregulated_facilities))) AND (NOT (((x."FacilityID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM il_ust.erg_unregulated_facilities))));;
 
 
 
-create or replace view il_ust.v_ust_tank as
+
+/*********** v_ust_tank ***********/
+
+
+--View definition for il_ust.v_ust_tank:
  SELECT DISTINCT (x."FacilityID")::text AS facility_id,
     (x."TankID")::integer AS tank_id,
     (x."TankName")::character varying(50) AS tank_name,
@@ -77,32 +83,38 @@ create or replace view il_ust.v_ust_tank as
      LEFT JOIN il_ust.v_tank_material_description_xwalk tm ON ((x."TankMaterialDescription" = (tm.organization_value)::text)))
      LEFT JOIN il_ust.v_tank_secondary_containment_xwalk tsc ON ((x."TankSecondaryContainment" = (tsc.organization_value)::text)))
      LEFT JOIN il_ust.v_cert_of_installation_xwalk coi ON ((x."CertOfInstallation" = (coi.organization_value)::text)))
-  WHERE (NOT (EXISTS ( SELECT 1
+  WHERE ((NOT (EXISTS ( SELECT 1
            FROM il_ust.erg_unregulated_tanks unreg
-          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))))
- and not exists
-	(select 1 from il_ust.erg_unregulated_tanks unreg
-	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))) AND (NOT (EXISTS ( SELECT 1
+           FROM il_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))));;
 
 
 
-create or replace view il_ust.v_ust_tank_substance as
+
+/*********** v_ust_tank_substance ***********/
+
+
+--View definition for il_ust.v_ust_tank_substance:
  SELECT DISTINCT (x."FacilityID")::text AS facility_id,
     x."TankID" AS tank_id,
     s.substance_id,
     x."CompartmentSubstanceCASNO" AS substance_casno
    FROM (il_ust.compartment x
      LEFT JOIN il_ust.v_substance_xwalk s ON ((x."CompartmentSubstanceStored" = (s.organization_value)::text)))
-  WHERE (NOT (EXISTS ( SELECT 1
+  WHERE ((NOT (EXISTS ( SELECT 1
            FROM il_ust.erg_unregulated_tanks unreg
-          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankName")::integer = unreg.tank_id)))))
- and not exists
-	(select 1 from il_ust.erg_unregulated_tanks unreg
-	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankName")::integer = unreg.tank_id))))) AND (NOT (EXISTS ( SELECT 1
+           FROM il_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))));;
 
 
 
-create or replace view il_ust.v_ust_compartment as
+
+/*********** v_ust_compartment ***********/
+
+
+--View definition for il_ust.v_ust_compartment:
  SELECT DISTINCT (x."FacilityID")::character varying(50) AS facility_id,
     (x."TankID")::integer AS tank_id,
     (x."CompartmentID")::integer AS compartment_id,
@@ -132,32 +144,38 @@ create or replace view il_ust.v_ust_compartment as
    FROM ((il_ust.compartment x
      LEFT JOIN il_ust.v_compartment_status_xwalk cs ON ((x."CompartmentStatus" = (cs.organization_value)::text)))
      LEFT JOIN il_ust.v_spill_bucket_wall_type_xwalk sbw ON ((x."SpillBucketWallType" = (sbw.organization_value)::text)))
-  WHERE (NOT (EXISTS ( SELECT 1
+  WHERE ((NOT (EXISTS ( SELECT 1
            FROM il_ust.erg_unregulated_tanks unreg
-          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))))
- and not exists
-	(select 1 from il_ust.erg_unregulated_tanks unreg
-	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))) AND (NOT (EXISTS ( SELECT 1
+           FROM il_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))));;
 
 
 
-create or replace view il_ust.v_ust_compartment_substance as
+
+/*********** v_ust_compartment_substance ***********/
+
+
+--View definition for il_ust.v_ust_compartment_substance:
  SELECT DISTINCT (x."FacilityID")::character varying(50) AS facility_id,
     x."TankID" AS tank_id,
     x."CompartmentID" AS compartment_id,
     s.substance_id
    FROM (il_ust.compartment x
      LEFT JOIN il_ust.v_substance_xwalk s ON ((x."CompartmentSubstanceStored" = (s.organization_value)::text)))
-  WHERE (NOT (EXISTS ( SELECT 1
+  WHERE ((NOT (EXISTS ( SELECT 1
            FROM il_ust.erg_unregulated_tanks unreg
-          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))))
- and not exists
-	(select 1 from il_ust.erg_unregulated_tanks unreg
-	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))) AND (NOT (EXISTS ( SELECT 1
+           FROM il_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))));;
 
 
 
-create or replace view il_ust.v_ust_piping as
+
+/*********** v_ust_piping ***********/
+
+
+--View definition for il_ust.v_ust_piping:
  SELECT DISTINCT (x."FacilityID")::text AS facility_id,
     x."TankID" AS tank_id,
     (x."CompartmentID")::integer AS compartment_id,
@@ -204,21 +222,25 @@ create or replace view il_ust.v_ust_piping as
      LEFT JOIN il_ust.v_piping_style_xwalk ps ON ((x."PipingStyle" = (ps.organization_value)::text)))
      LEFT JOIN il_ust.v_pipe_tank_top_sump_wall_type_xwalk tt ON ((x."PipeTankTopSumpWallType" = (tt.organization_value)::text)))
      LEFT JOIN il_ust.v_piping_wall_type_xwalk wt ON ((x."PipingWallType" = (wt.organization_value)::text)))
-  WHERE (NOT (EXISTS ( SELECT 1
+  WHERE ((NOT (EXISTS ( SELECT 1
            FROM il_ust.erg_unregulated_tanks unreg
-          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankName")::integer = unreg.tank_id)))))
- and not exists
-	(select 1 from il_ust.erg_unregulated_tanks unreg
-	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankName")::integer = unreg.tank_id))))) AND (NOT (EXISTS ( SELECT 1
+           FROM il_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))));;
 
 
 
-create or replace view il_ust.v_ust_facility_dispenser as
+
+/*********** v_ust_facility_dispenser ***********/
+
+
+--View definition for il_ust.v_ust_facility_dispenser:
  SELECT DISTINCT (x."FacilityID")::character varying(50) AS facility_id,
     x."DispenserID" AS dispenser_id,
     x."DispenserUDC" AS dispenser_udc
    FROM il_ust.facility_dispenser x
-  WHERE (NOT (EXISTS ( SELECT 1
+  WHERE ((NOT (EXISTS ( SELECT 1
            FROM il_ust.erg_unregulated_tanks unreg
-          WHERE (((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text))))
- and x."FacilityID"::varchar(50) not in (select facility_id from il_ust.erg_unregulated_facilities);
+          WHERE (((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text)))) AND (NOT (((x."FacilityID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM il_ust.erg_unregulated_facilities))));;
+
