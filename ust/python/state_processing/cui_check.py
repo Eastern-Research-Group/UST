@@ -20,7 +20,7 @@ If the data are not already mapped, use the schema/table_name/column_name variab
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 9                 	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
 schema = ''              		# Enter the schema name
@@ -278,6 +278,14 @@ class CuiCheck:
 			logger.info('Eliminated %s rows due to a stopword', self.cur.rowcount)
 			self.conn.commit()
 
+			sql = f"""update "{self.schema}"."{self.new_table_name}" a
+			        set "{new_colname}" = 'FALSE'
+			        where "{new_colname}" is null and trim("{colname}") ilike 'camp %%'"""
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Eliminated %s rows because they begin with the word "Camp"', self.cur.rowcount)
+			self.conn.commit()
+
+
 
 	def eliminate_spaces(self):
 		for colname in self.column_names:
@@ -286,7 +294,7 @@ class CuiCheck:
 			sql = f"""update "{self.schema}"."{self.new_table_name}" a
 					set "{new_colname}" = 'FALSE' 
 					where "{new_colname}" is null 
-					and (char_length("{colname}") - char_length(replace("{colname}", ' ', ''))) / char_length(' ') not in (1,2,3)"""
+					and (char_length(trim("{colname}")) - char_length(replace(trim("{colname}"), ' ', ''))) / char_length(' ') not in (1,2,3)"""
 			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Eliminated %s rows due to too many or too few spaces', self.cur.rowcount)
 			self.conn.commit()

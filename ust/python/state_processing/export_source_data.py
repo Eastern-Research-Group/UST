@@ -44,7 +44,6 @@ class SourceData:
 		self.export_file_dir = export_file_dir	
 		if not self.export_file_dir:
 			self.set_export_file_dir()
-		Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)	
 		if self.empty_export_dir:
 			self.clean_export_dir()	
 		self.connect_db()
@@ -59,6 +58,7 @@ class SourceData:
 			export_file_dir = export_file_dir + utils.get_pretty_ust_or_release(self.dataset.ust_or_release) + '/'
 			self.export_file_dir = export_file_dir
 			logger.info('Export directory set to %s', self.export_file_dir)
+			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)	
 
 
 	def connect_db(self):
