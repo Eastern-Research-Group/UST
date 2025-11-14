@@ -10,8 +10,8 @@ from python.util import utils, config
 from python.util.logger_factory import logger
 
 
-ust_control_ids = [16] 			# List of ust_control_id's to include in export. Can be empty if release_control_ids is not empty. 
-release_control_ids = [8,13]	# List of release_control_id's to include in export. Can be empty if release_control_ids is not empty. 
+ust_control_ids = [] 			# List of ust_control_id's to include in export. Can be empty if release_control_ids is not empty. 
+release_control_ids = []		# List of release_control_id's to include in export. Can be empty if release_control_ids is not empty. 
 
 
 
