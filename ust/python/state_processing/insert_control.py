@@ -53,13 +53,13 @@ class ControlTable:
                         (organization_id, date_received, date_processed, data_source, comments, organization_compartment_flag)
                       values (%s, %s, %s, %s, %s, %s)
                       returning {self.ust_or_release}_control_id"""
-            cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments, self.organization_compartment_flag))
+            utils.process_sql(conn, cur, sql, params=(self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments, self.organization_compartment_flag))
         else:
             sql = f"""insert into {self.ust_or_release}_control 
                         (organization_id, date_received, date_processed, data_source, comments)
                       values (%s, %s, %s, %s, %s)
                       returning {self.ust_or_release}_control_id"""
-            cur.execute(sql, (self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments))
+            utils.process_sql(conn, cur, sql, params=(self.organization_id, self.date_received, self.date_processed, self.data_source, self.comments))
         control_id = cur.fetchone()[0]
         self.control_id = control_id
         logger.info('Inserted into %s_control; %s_control_id = %s', self.ust_or_release, self.ust_or_release, control_id)

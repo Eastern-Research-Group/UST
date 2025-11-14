@@ -1,0 +1,2109 @@
+{
+    "layers": [
+        {
+            "id": 0,
+            "blendMode": "normal",
+            "layerDefinition": {
+                "drawingInfo": {
+                    "renderer": {
+                        "type": "simple",
+                        "symbol": {
+                            "type": "CIMSymbolReference",
+                            "symbol": {
+                                "type": "CIMPointSymbol",
+                                "symbolLayers": [
+                                    {
+                                        "type": "CIMVectorMarker",
+                                        "enable": true,
+                                        "anchorPoint": {
+                                            "x": 0,
+                                            "y": 0
+                                        },
+                                        "anchorPointUnits": "Relative",
+                                        "dominantSizeAxis3D": "Z",
+                                        "size": 4,
+                                        "billboardMode3D": "FaceNearPlane",
+                                        "frame": {
+                                            "xmin": -2,
+                                            "ymin": -2,
+                                            "xmax": 2,
+                                            "ymax": 2
+                                        },
+                                        "markerGraphics": [
+                                            {
+                                                "type": "CIMMarkerGraphic",
+                                                "geometry": {
+                                                    "rings": [
+                                                        [
+                                                            [
+                                                                0,
+                                                                2
+                                                            ],
+                                                            [
+                                                                0.35,
+                                                                1.97
+                                                            ],
+                                                            [
+                                                                0.68,
+                                                                1.88
+                                                            ],
+                                                            [
+                                                                1,
+                                                                1.73
+                                                            ],
+                                                            [
+                                                                1.29,
+                                                                1.53
+                                                            ],
+                                                            [
+                                                                1.53,
+                                                                1.29
+                                                            ],
+                                                            [
+                                                                1.73,
+                                                                1
+                                                            ],
+                                                            [
+                                                                1.88,
+                                                                0.68
+                                                            ],
+                                                            [
+                                                                1.97,
+                                                                0.35
+                                                            ],
+                                                            [
+                                                                2,
+                                                                0
+                                                            ],
+                                                            [
+                                                                1.97,
+                                                                -0.35
+                                                            ],
+                                                            [
+                                                                1.88,
+                                                                -0.68
+                                                            ],
+                                                            [
+                                                                1.73,
+                                                                -1
+                                                            ],
+                                                            [
+                                                                1.53,
+                                                                -1.29
+                                                            ],
+                                                            [
+                                                                1.29,
+                                                                -1.53
+                                                            ],
+                                                            [
+                                                                1,
+                                                                -1.73
+                                                            ],
+                                                            [
+                                                                0.68,
+                                                                -1.88
+                                                            ],
+                                                            [
+                                                                0.35,
+                                                                -1.97
+                                                            ],
+                                                            [
+                                                                0,
+                                                                -2
+                                                            ],
+                                                            [
+                                                                -0.35,
+                                                                -1.97
+                                                            ],
+                                                            [
+                                                                -0.68,
+                                                                -1.88
+                                                            ],
+                                                            [
+                                                                -1,
+                                                                -1.73
+                                                            ],
+                                                            [
+                                                                -1.29,
+                                                                -1.53
+                                                            ],
+                                                            [
+                                                                -1.53,
+                                                                -1.29
+                                                            ],
+                                                            [
+                                                                -1.73,
+                                                                -1
+                                                            ],
+                                                            [
+                                                                -1.88,
+                                                                -0.68
+                                                            ],
+                                                            [
+                                                                -1.97,
+                                                                -0.35
+                                                            ],
+                                                            [
+                                                                -2,
+                                                                0
+                                                            ],
+                                                            [
+                                                                -1.97,
+                                                                0.35
+                                                            ],
+                                                            [
+                                                                -1.88,
+                                                                0.68
+                                                            ],
+                                                            [
+                                                                -1.73,
+                                                                1
+                                                            ],
+                                                            [
+                                                                -1.53,
+                                                                1.29
+                                                            ],
+                                                            [
+                                                                -1.29,
+                                                                1.53
+                                                            ],
+                                                            [
+                                                                -1,
+                                                                1.73
+                                                            ],
+                                                            [
+                                                                -0.68,
+                                                                1.88
+                                                            ],
+                                                            [
+                                                                -0.35,
+                                                                1.97
+                                                            ],
+                                                            [
+                                                                0,
+                                                                2
+                                                            ]
+                                                        ]
+                                                    ]
+                                                },
+                                                "symbol": {
+                                                    "type": "CIMPolygonSymbol",
+                                                    "symbolLayers": [
+                                                        {
+                                                            "type": "CIMSolidStroke",
+                                                            "enable": true,
+                                                            "capStyle": "Round",
+                                                            "joinStyle": "Round",
+                                                            "lineStyle3D": "Strip",
+                                                            "miterLimit": 10,
+                                                            "width": 0.7,
+                                                            "height3D": 1,
+                                                            "anchor3D": "Center",
+                                                            "color": [
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                255
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "CIMSolidFill",
+                                                            "enable": true,
+                                                            "color": [
+                                                                83,
+                                                                173,
+                                                                104,
+                                                                255
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "angleAlignment": "Map"
+                                                }
+                                            }
+                                        ],
+                                        "scaleSymbolsProportionally": true,
+                                        "respectFrame": true
+                                    }
+                                ],
+                                "haloSize": 1,
+                                "scaleX": 1,
+                                "angleAlignment": "Display"
+                            }
+                        }
+                    },
+                    "scaleSymbols": true
+                }
+            },
+            "disablePopup": false,
+            "popupInfo": {
+                "title": "{Name}",
+                "mediaInfos": [],
+                "popupElements": [
+                    {
+                        "fieldInfos": [
+                            {
+                                "fieldName": "OBJECTID",
+                                "isEditable": false,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "OBJECTID"
+                            },
+                            {
+                                "fieldName": "Facility_ID",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Facility ID"
+                            },
+                            {
+                                "fieldName": "Name",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Name"
+                            },
+                            {
+                                "fieldName": "Address",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Address"
+                            },
+                            {
+                                "fieldName": "City",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "City"
+                            },
+                            {
+                                "fieldName": "County",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "County"
+                            },
+                            {
+                                "fieldName": "State",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "State"
+                            },
+                            {
+                                "fieldName": "Zip_Code",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Zip Code"
+                            },
+                            {
+                                "fieldName": "Latitude",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 6,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Latitude"
+                            },
+                            {
+                                "fieldName": "Longitude",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 6,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Longitude"
+                            },
+                            {
+                                "fieldName": "Coordinate_Source",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Coordinate Source"
+                            },
+                            {
+                                "fieldName": "Address_Match_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Address Match Type"
+                            },
+                            {
+                                "fieldName": "Open_USTs",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Open USTs"
+                            },
+                            {
+                                "fieldName": "Closed_USTs",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Closed USTs"
+                            },
+                            {
+                                "fieldName": "TOS_USTs",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Temporarily Out of Service USTs"
+                            },
+                            {
+                                "fieldName": "Population_1500ft",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Estimated Population within 1500ft"
+                            },
+                            {
+                                "fieldName": "Private_Wells_1500ft",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Estimated Private Domestic Wells wihtin 1500ft"
+                            },
+                            {
+                                "fieldName": "Within_100yr_Floodplain",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Within 100-year Floodplain"
+                            },
+                            {
+                                "fieldName": "LandUse",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Land Use"
+                            },
+                            {
+                                "fieldName": "Within_SPA",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Within Source Water Protection Area (SPA)"
+                            },
+                            {
+                                "fieldName": "SPA_PWS_FacilityID",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "SPA Public Water System and Facility ID"
+                            },
+                            {
+                                "fieldName": "SPA_Water_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "SPA Water Type"
+                            },
+                            {
+                                "fieldName": "SPA_Facility_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "SPA Facility Type"
+                            },
+                            {
+                                "fieldName": "SPA_HUC12",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "SPA HUC12"
+                            },
+                            {
+                                "fieldName": "Within_WHPA",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Within Groundwater Wellhead Protection Area (WHPA)"
+                            },
+                            {
+                                "fieldName": "WHPA_PWS_FacilityID",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "WHPA Public Water System and Facility ID"
+                            },
+                            {
+                                "fieldName": "WHPA_Water_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "WHPA Water Type"
+                            },
+                            {
+                                "fieldName": "WHPA_Facility_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "WHPA Facility Type"
+                            },
+                            {
+                                "fieldName": "WHPA_HUC12",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "WHPA HUC12"
+                            },
+                            {
+                                "fieldName": "Facility_Status",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Facility Status"
+                            },
+                            {
+                                "fieldName": "Date_of_Last_Inspection",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Date_of_Last_Inspection"
+                            },
+                            {
+                                "fieldName": "EPA_Region",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "EPA Region"
+                            },
+                            {
+                                "fieldName": "Tribe",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Tribe"
+                            }
+                        ],
+                        "type": "fields"
+                    }
+                ],
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "OBJECTID"
+                    },
+                    {
+                        "fieldName": "Facility_ID",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Facility ID"
+                    },
+                    {
+                        "fieldName": "Name",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Name"
+                    },
+                    {
+                        "fieldName": "Address",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Address"
+                    },
+                    {
+                        "fieldName": "City",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "City"
+                    },
+                    {
+                        "fieldName": "County",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "County"
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "State"
+                    },
+                    {
+                        "fieldName": "Zip_Code",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Zip Code"
+                    },
+                    {
+                        "fieldName": "Latitude",
+                        "isEditable": true,
+                        "format": {
+                            "places": 6,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Latitude"
+                    },
+                    {
+                        "fieldName": "Longitude",
+                        "isEditable": true,
+                        "format": {
+                            "places": 6,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Longitude"
+                    },
+                    {
+                        "fieldName": "Coordinate_Source",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Coordinate Source"
+                    },
+                    {
+                        "fieldName": "Address_Match_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Address Match Type"
+                    },
+                    {
+                        "fieldName": "Open_USTs",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Open USTs"
+                    },
+                    {
+                        "fieldName": "Closed_USTs",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Closed USTs"
+                    },
+                    {
+                        "fieldName": "TOS_USTs",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Temporarily Out of Service USTs"
+                    },
+                    {
+                        "fieldName": "Population_1500ft",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Estimated Population within 1500ft"
+                    },
+                    {
+                        "fieldName": "Private_Wells_1500ft",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Estimated Private Domestic Wells wihtin 1500ft"
+                    },
+                    {
+                        "fieldName": "Within_100yr_Floodplain",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Within 100-year Floodplain"
+                    },
+                    {
+                        "fieldName": "LandUse",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Land Use"
+                    },
+                    {
+                        "fieldName": "Within_SPA",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Within Source Water Protection Area (SPA)"
+                    },
+                    {
+                        "fieldName": "SPA_PWS_FacilityID",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "SPA Public Water System and Facility ID"
+                    },
+                    {
+                        "fieldName": "SPA_Water_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "SPA Water Type"
+                    },
+                    {
+                        "fieldName": "SPA_Facility_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "SPA Facility Type"
+                    },
+                    {
+                        "fieldName": "SPA_HUC12",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "SPA HUC12"
+                    },
+                    {
+                        "fieldName": "Within_WHPA",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Within Groundwater Wellhead Protection Area (WHPA)"
+                    },
+                    {
+                        "fieldName": "WHPA_PWS_FacilityID",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "WHPA Public Water System and Facility ID"
+                    },
+                    {
+                        "fieldName": "WHPA_Water_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "WHPA Water Type"
+                    },
+                    {
+                        "fieldName": "WHPA_Facility_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "WHPA Facility Type"
+                    },
+                    {
+                        "fieldName": "WHPA_HUC12",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "WHPA HUC12"
+                    },
+                    {
+                        "fieldName": "Facility_Status",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Facility Status"
+                    },
+                    {
+                        "fieldName": "Date_of_Last_Inspection",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Date_of_Last_Inspection"
+                    },
+                    {
+                        "fieldName": "EPA_Region",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "EPA Region"
+                    },
+                    {
+                        "fieldName": "Tribe",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Tribe"
+                    }
+                ],
+                "expressionInfos": []
+            }
+        },
+        {
+            "id": 1,
+            "blendMode": "normal",
+            "layerDefinition": {
+                "drawingInfo": {
+                    "renderer": {
+                        "type": "simple",
+                        "symbol": {
+                            "type": "CIMSymbolReference",
+                            "symbol": {
+                                "type": "CIMPointSymbol",
+                                "symbolLayers": [
+                                    {
+                                        "type": "CIMVectorMarker",
+                                        "enable": true,
+                                        "anchorPoint": {
+                                            "x": 0,
+                                            "y": 0
+                                        },
+                                        "anchorPointUnits": "Relative",
+                                        "dominantSizeAxis3D": "Z",
+                                        "size": 4,
+                                        "billboardMode3D": "FaceNearPlane",
+                                        "frame": {
+                                            "xmin": -2,
+                                            "ymin": -2,
+                                            "xmax": 2,
+                                            "ymax": 2
+                                        },
+                                        "markerGraphics": [
+                                            {
+                                                "type": "CIMMarkerGraphic",
+                                                "geometry": {
+                                                    "rings": [
+                                                        [
+                                                            [
+                                                                0,
+                                                                2
+                                                            ],
+                                                            [
+                                                                0.35,
+                                                                1.97
+                                                            ],
+                                                            [
+                                                                0.68,
+                                                                1.88
+                                                            ],
+                                                            [
+                                                                1,
+                                                                1.73
+                                                            ],
+                                                            [
+                                                                1.29,
+                                                                1.53
+                                                            ],
+                                                            [
+                                                                1.53,
+                                                                1.29
+                                                            ],
+                                                            [
+                                                                1.73,
+                                                                1
+                                                            ],
+                                                            [
+                                                                1.88,
+                                                                0.68
+                                                            ],
+                                                            [
+                                                                1.97,
+                                                                0.35
+                                                            ],
+                                                            [
+                                                                2,
+                                                                0
+                                                            ],
+                                                            [
+                                                                1.97,
+                                                                -0.35
+                                                            ],
+                                                            [
+                                                                1.88,
+                                                                -0.68
+                                                            ],
+                                                            [
+                                                                1.73,
+                                                                -1
+                                                            ],
+                                                            [
+                                                                1.53,
+                                                                -1.29
+                                                            ],
+                                                            [
+                                                                1.29,
+                                                                -1.53
+                                                            ],
+                                                            [
+                                                                1,
+                                                                -1.73
+                                                            ],
+                                                            [
+                                                                0.68,
+                                                                -1.88
+                                                            ],
+                                                            [
+                                                                0.35,
+                                                                -1.97
+                                                            ],
+                                                            [
+                                                                0,
+                                                                -2
+                                                            ],
+                                                            [
+                                                                -0.35,
+                                                                -1.97
+                                                            ],
+                                                            [
+                                                                -0.68,
+                                                                -1.88
+                                                            ],
+                                                            [
+                                                                -1,
+                                                                -1.73
+                                                            ],
+                                                            [
+                                                                -1.29,
+                                                                -1.53
+                                                            ],
+                                                            [
+                                                                -1.53,
+                                                                -1.29
+                                                            ],
+                                                            [
+                                                                -1.73,
+                                                                -1
+                                                            ],
+                                                            [
+                                                                -1.88,
+                                                                -0.68
+                                                            ],
+                                                            [
+                                                                -1.97,
+                                                                -0.35
+                                                            ],
+                                                            [
+                                                                -2,
+                                                                0
+                                                            ],
+                                                            [
+                                                                -1.97,
+                                                                0.35
+                                                            ],
+                                                            [
+                                                                -1.88,
+                                                                0.68
+                                                            ],
+                                                            [
+                                                                -1.73,
+                                                                1
+                                                            ],
+                                                            [
+                                                                -1.53,
+                                                                1.29
+                                                            ],
+                                                            [
+                                                                -1.29,
+                                                                1.53
+                                                            ],
+                                                            [
+                                                                -1,
+                                                                1.73
+                                                            ],
+                                                            [
+                                                                -0.68,
+                                                                1.88
+                                                            ],
+                                                            [
+                                                                -0.35,
+                                                                1.97
+                                                            ],
+                                                            [
+                                                                0,
+                                                                2
+                                                            ]
+                                                        ]
+                                                    ]
+                                                },
+                                                "symbol": {
+                                                    "type": "CIMPolygonSymbol",
+                                                    "symbolLayers": [
+                                                        {
+                                                            "type": "CIMSolidStroke",
+                                                            "enable": true,
+                                                            "capStyle": "Round",
+                                                            "joinStyle": "Round",
+                                                            "lineStyle3D": "Strip",
+                                                            "miterLimit": 10,
+                                                            "width": 0.7,
+                                                            "height3D": 1,
+                                                            "anchor3D": "Center",
+                                                            "color": [
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                255
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "CIMSolidFill",
+                                                            "enable": true,
+                                                            "color": [
+                                                                96,
+                                                                77,
+                                                                171,
+                                                                255
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "angleAlignment": "Map"
+                                                }
+                                            }
+                                        ],
+                                        "scaleSymbolsProportionally": true,
+                                        "respectFrame": true
+                                    }
+                                ],
+                                "haloSize": 1,
+                                "scaleX": 1,
+                                "angleAlignment": "Display"
+                            }
+                        }
+                    },
+                    "scaleSymbols": true
+                }
+            },
+            "disablePopup": false,
+            "popupInfo": {
+                "title": "{Name}",
+                "mediaInfos": [],
+                "popupElements": [
+                    {
+                        "fieldInfos": [
+                            {
+                                "fieldName": "OBJECTID",
+                                "isEditable": false,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "OBJECTID"
+                            },
+                            {
+                                "fieldName": "Facility_ID",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Facility_ID"
+                            },
+                            {
+                                "fieldName": "LUST_ID",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "LUST_ID"
+                            },
+                            {
+                                "fieldName": "Name",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Name"
+                            },
+                            {
+                                "fieldName": "Address",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Address"
+                            },
+                            {
+                                "fieldName": "City",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "City"
+                            },
+                            {
+                                "fieldName": "County",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "County"
+                            },
+                            {
+                                "fieldName": "Zip_Code",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Zip_Code"
+                            },
+                            {
+                                "fieldName": "State",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "State"
+                            },
+                            {
+                                "fieldName": "Latitude",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 6,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Latitude"
+                            },
+                            {
+                                "fieldName": "Longitude",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 6,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Longitude"
+                            },
+                            {
+                                "fieldName": "Coordinate_Source",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Coordinate_Source"
+                            },
+                            {
+                                "fieldName": "Address_Match_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Address_Match_Type"
+                            },
+                            {
+                                "fieldName": "Reported_Date",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Reported_Date"
+                            },
+                            {
+                                "fieldName": "Status",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Status"
+                            },
+                            {
+                                "fieldName": "Substance",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Substance"
+                            },
+                            {
+                                "fieldName": "Population_within_1500ft",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Population_within_1500ft"
+                            },
+                            {
+                                "fieldName": "DomesticWells_within_1500ft",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "DomesticWells_within_1500ft"
+                            },
+                            {
+                                "fieldName": "LandUse",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "LandUse"
+                            },
+                            {
+                                "fieldName": "Within_SPA",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Within_SPA"
+                            },
+                            {
+                                "fieldName": "SPA_PWS_FacilityID",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "SPA_PWS_FacilityID"
+                            },
+                            {
+                                "fieldName": "SPA_Water_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "SPA_Water_Type"
+                            },
+                            {
+                                "fieldName": "SPA_Facility_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "SPA_Facility_Type"
+                            },
+                            {
+                                "fieldName": "SPA_HUC12",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "SPA_HUC12"
+                            },
+                            {
+                                "fieldName": "Within_WHPA",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Within_WHPA"
+                            },
+                            {
+                                "fieldName": "WHPA_PWS_FacilityID",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "WHPA_PWS_FacilityID"
+                            },
+                            {
+                                "fieldName": "WHPA_Water_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "WHPA_Water_Type"
+                            },
+                            {
+                                "fieldName": "WHPA_Facility_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "WHPA_Facility_Type"
+                            },
+                            {
+                                "fieldName": "WHPA_HUC12",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "WHPA_HUC12"
+                            },
+                            {
+                                "fieldName": "Within_100yr_Floodplain",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Within_100yr_Floodplain"
+                            },
+                            {
+                                "fieldName": "Tribe",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Tribe"
+                            },
+                            {
+                                "fieldName": "EPA_Region",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "EPA_Region"
+                            },
+                            {
+                                "fieldName": "NFA_Letter_1",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "NFA_Letter_1"
+                            },
+                            {
+                                "fieldName": "NFA_Letter_2",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "NFA_Letter_2"
+                            },
+                            {
+                                "fieldName": "NFA_Letter_3",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "NFA_Letter_3"
+                            },
+                            {
+                                "fieldName": "NFA_Letter_4",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "NFA_Letter_4"
+                            },
+                            {
+                                "fieldName": "Closed_With_Residual_Contaminat",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Closed With Residual Contamination (Tribal Only)"
+                            }
+                        ],
+                        "type": "fields"
+                    }
+                ],
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "OBJECTID"
+                    },
+                    {
+                        "fieldName": "Facility_ID",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Facility_ID"
+                    },
+                    {
+                        "fieldName": "LUST_ID",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "LUST_ID"
+                    },
+                    {
+                        "fieldName": "Name",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Name"
+                    },
+                    {
+                        "fieldName": "Address",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Address"
+                    },
+                    {
+                        "fieldName": "City",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "City"
+                    },
+                    {
+                        "fieldName": "County",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "County"
+                    },
+                    {
+                        "fieldName": "Zip_Code",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Zip_Code"
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "State"
+                    },
+                    {
+                        "fieldName": "Latitude",
+                        "isEditable": true,
+                        "format": {
+                            "places": 6,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Latitude"
+                    },
+                    {
+                        "fieldName": "Longitude",
+                        "isEditable": true,
+                        "format": {
+                            "places": 6,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Longitude"
+                    },
+                    {
+                        "fieldName": "Coordinate_Source",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Coordinate_Source"
+                    },
+                    {
+                        "fieldName": "Address_Match_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Address_Match_Type"
+                    },
+                    {
+                        "fieldName": "Reported_Date",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Reported_Date"
+                    },
+                    {
+                        "fieldName": "Status",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Status"
+                    },
+                    {
+                        "fieldName": "Substance",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Substance"
+                    },
+                    {
+                        "fieldName": "Population_within_1500ft",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Population_within_1500ft"
+                    },
+                    {
+                        "fieldName": "DomesticWells_within_1500ft",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "DomesticWells_within_1500ft"
+                    },
+                    {
+                        "fieldName": "LandUse",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "LandUse"
+                    },
+                    {
+                        "fieldName": "Within_SPA",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Within_SPA"
+                    },
+                    {
+                        "fieldName": "SPA_PWS_FacilityID",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "SPA_PWS_FacilityID"
+                    },
+                    {
+                        "fieldName": "SPA_Water_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "SPA_Water_Type"
+                    },
+                    {
+                        "fieldName": "SPA_Facility_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "SPA_Facility_Type"
+                    },
+                    {
+                        "fieldName": "SPA_HUC12",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "SPA_HUC12"
+                    },
+                    {
+                        "fieldName": "Within_WHPA",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Within_WHPA"
+                    },
+                    {
+                        "fieldName": "WHPA_PWS_FacilityID",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "WHPA_PWS_FacilityID"
+                    },
+                    {
+                        "fieldName": "WHPA_Water_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "WHPA_Water_Type"
+                    },
+                    {
+                        "fieldName": "WHPA_Facility_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "WHPA_Facility_Type"
+                    },
+                    {
+                        "fieldName": "WHPA_HUC12",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "WHPA_HUC12"
+                    },
+                    {
+                        "fieldName": "Within_100yr_Floodplain",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Within_100yr_Floodplain"
+                    },
+                    {
+                        "fieldName": "Tribe",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Tribe"
+                    },
+                    {
+                        "fieldName": "EPA_Region",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "EPA_Region"
+                    },
+                    {
+                        "fieldName": "NFA_Letter_1",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "NFA_Letter_1"
+                    },
+                    {
+                        "fieldName": "NFA_Letter_2",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "NFA_Letter_2"
+                    },
+                    {
+                        "fieldName": "NFA_Letter_3",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "NFA_Letter_3"
+                    },
+                    {
+                        "fieldName": "NFA_Letter_4",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "NFA_Letter_4"
+                    },
+                    {
+                        "fieldName": "Closed_With_Residual_Contaminat",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Closed With Residual Contamination (Tribal Only)"
+                    }
+                ],
+                "expressionInfos": []
+            }
+        },
+        {
+            "id": 2,
+            "blendMode": "normal",
+            "layerDefinition": {
+                "drawingInfo": {
+                    "renderer": {
+                        "type": "simple",
+                        "symbol": {
+                            "type": "CIMSymbolReference",
+                            "symbol": {
+                                "type": "CIMPolygonSymbol",
+                                "symbolLayers": [
+                                    {
+                                        "type": "CIMSolidStroke",
+                                        "enable": true,
+                                        "capStyle": "Round",
+                                        "joinStyle": "Round",
+                                        "lineStyle3D": "Strip",
+                                        "miterLimit": 10,
+                                        "width": 0.7,
+                                        "height3D": 1,
+                                        "anchor3D": "Center",
+                                        "color": [
+                                            110,
+                                            110,
+                                            110,
+                                            255
+                                        ]
+                                    },
+                                    {
+                                        "type": "CIMSolidFill",
+                                        "enable": true,
+                                        "color": [
+                                            243,
+                                            252,
+                                            204,
+                                            255
+                                        ]
+                                    }
+                                ],
+                                "angleAlignment": "Map"
+                            }
+                        }
+                    },
+                    "scaleSymbols": true
+                }
+            },
+            "disablePopup": false,
+            "popupInfo": {
+                "title": "{NAME}",
+                "mediaInfos": [],
+                "popupElements": [
+                    {
+                        "fieldInfos": [
+                            {
+                                "fieldName": "OBJECTID",
+                                "isEditable": false,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "OBJECTID"
+                            },
+                            {
+                                "fieldName": "Facility_Count",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Facility Count"
+                            },
+                            {
+                                "fieldName": "NAME",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "County Name"
+                            },
+                            {
+                                "fieldName": "State",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "State"
+                            },
+                            {
+                                "fieldName": "POPULATION",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Population"
+                            },
+                            {
+                                "fieldName": "Open_USTs",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Open USTs"
+                            },
+                            {
+                                "fieldName": "Closed_USTs",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Closed USTs"
+                            },
+                            {
+                                "fieldName": "TOS_USTs",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Temporarily Out of Service USTs"
+                            },
+                            {
+                                "fieldName": "Shape__Area",
+                                "isEditable": false,
+                                "format": {
+                                    "places": 6,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Shape__Area"
+                            },
+                            {
+                                "fieldName": "Shape__Length",
+                                "isEditable": false,
+                                "format": {
+                                    "places": 6,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Shape__Length"
+                            }
+                        ],
+                        "type": "fields"
+                    }
+                ],
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "OBJECTID"
+                    },
+                    {
+                        "fieldName": "Facility_Count",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Facility Count"
+                    },
+                    {
+                        "fieldName": "NAME",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "County Name"
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "State"
+                    },
+                    {
+                        "fieldName": "POPULATION",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Population"
+                    },
+                    {
+                        "fieldName": "Open_USTs",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Open USTs"
+                    },
+                    {
+                        "fieldName": "Closed_USTs",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Closed USTs"
+                    },
+                    {
+                        "fieldName": "TOS_USTs",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Temporarily Out of Service USTs"
+                    },
+                    {
+                        "fieldName": "Shape__Area",
+                        "isEditable": false,
+                        "format": {
+                            "places": 6,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Shape__Area"
+                    },
+                    {
+                        "fieldName": "Shape__Length",
+                        "isEditable": false,
+                        "format": {
+                            "places": 6,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Shape__Length"
+                    }
+                ],
+                "expressionInfos": []
+            }
+        },
+        {
+            "id": 3,
+            "blendMode": "normal",
+            "layerDefinition": {
+                "drawingInfo": {
+                    "renderer": {
+                        "type": "simple",
+                        "symbol": {
+                            "type": "CIMSymbolReference",
+                            "symbol": {
+                                "type": "CIMPolygonSymbol",
+                                "symbolLayers": [
+                                    {
+                                        "type": "CIMSolidStroke",
+                                        "enable": true,
+                                        "capStyle": "Round",
+                                        "joinStyle": "Round",
+                                        "lineStyle3D": "Strip",
+                                        "miterLimit": 10,
+                                        "width": 0.7,
+                                        "height3D": 1,
+                                        "anchor3D": "Center",
+                                        "color": [
+                                            110,
+                                            110,
+                                            110,
+                                            255
+                                        ]
+                                    },
+                                    {
+                                        "type": "CIMSolidFill",
+                                        "enable": true,
+                                        "color": [
+                                            204,
+                                            252,
+                                            205,
+                                            255
+                                        ]
+                                    }
+                                ],
+                                "angleAlignment": "Map"
+                            }
+                        }
+                    },
+                    "scaleSymbols": true
+                }
+            },
+            "disablePopup": false,
+            "popupInfo": {
+                "title": "{County}",
+                "mediaInfos": [],
+                "popupElements": [
+                    {
+                        "fieldInfos": [
+                            {
+                                "fieldName": "OBJECTID",
+                                "isEditable": false,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "OBJECTID"
+                            },
+                            {
+                                "fieldName": "Release_Count",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Release Count"
+                            },
+                            {
+                                "fieldName": "County",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "County"
+                            },
+                            {
+                                "fieldName": "State",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "State"
+                            },
+                            {
+                                "fieldName": "POPULATION",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Population"
+                            },
+                            {
+                                "fieldName": "Open_Count",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Open Count"
+                            },
+                            {
+                                "fieldName": "No_Further_Action_Count",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "No Further Action Count"
+                            },
+                            {
+                                "fieldName": "Shape__Area",
+                                "isEditable": false,
+                                "format": {
+                                    "places": 6,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Shape__Area"
+                            },
+                            {
+                                "fieldName": "Shape__Length",
+                                "isEditable": false,
+                                "format": {
+                                    "places": 6,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Shape__Length"
+                            }
+                        ],
+                        "type": "fields"
+                    }
+                ],
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "OBJECTID"
+                    },
+                    {
+                        "fieldName": "Release_Count",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Release Count"
+                    },
+                    {
+                        "fieldName": "County",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "County"
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "State"
+                    },
+                    {
+                        "fieldName": "POPULATION",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Population"
+                    },
+                    {
+                        "fieldName": "Open_Count",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Open Count"
+                    },
+                    {
+                        "fieldName": "No_Further_Action_Count",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "No Further Action Count"
+                    },
+                    {
+                        "fieldName": "Shape__Area",
+                        "isEditable": false,
+                        "format": {
+                            "places": 6,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Shape__Area"
+                    },
+                    {
+                        "fieldName": "Shape__Length",
+                        "isEditable": false,
+                        "format": {
+                            "places": 6,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Shape__Length"
+                    }
+                ],
+                "expressionInfos": []
+            }
+        }
+    ],
+    "tables": [
+        {
+            "id": 4,
+            "popupInfo": {
+                "title": "{State}",
+                "mediaInfos": [],
+                "popupElements": [
+                    {
+                        "fieldInfos": [
+                            {
+                                "fieldName": "OBJECTID",
+                                "isEditable": false,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "OBJECTID"
+                            },
+                            {
+                                "fieldName": "State",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "State"
+                            },
+                            {
+                                "fieldName": "Facility_ID",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Facility_ID"
+                            },
+                            {
+                                "fieldName": "Tank_ID",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Tank_ID"
+                            },
+                            {
+                                "fieldName": "Tank_Status",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Tank_Status"
+                            },
+                            {
+                                "fieldName": "Installation_Date",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Installation_Date"
+                            },
+                            {
+                                "fieldName": "Removal_Date",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Removal_Date"
+                            },
+                            {
+                                "fieldName": "Capacity",
+                                "isEditable": true,
+                                "format": {
+                                    "places": 0,
+                                    "digitSeparator": false
+                                },
+                                "visible": true,
+                                "label": "Capacity"
+                            },
+                            {
+                                "fieldName": "Substances",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Substances"
+                            },
+                            {
+                                "fieldName": "Tank_Wall_Type",
+                                "isEditable": true,
+                                "visible": true,
+                                "label": "Tank_Wall_Type"
+                            }
+                        ],
+                        "type": "fields"
+                    }
+                ],
+                "fieldInfos": [
+                    {
+                        "fieldName": "OBJECTID",
+                        "isEditable": false,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "OBJECTID"
+                    },
+                    {
+                        "fieldName": "State",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "State"
+                    },
+                    {
+                        "fieldName": "Facility_ID",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Facility_ID"
+                    },
+                    {
+                        "fieldName": "Tank_ID",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Tank_ID"
+                    },
+                    {
+                        "fieldName": "Tank_Status",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Tank_Status"
+                    },
+                    {
+                        "fieldName": "Installation_Date",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Installation_Date"
+                    },
+                    {
+                        "fieldName": "Removal_Date",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Removal_Date"
+                    },
+                    {
+                        "fieldName": "Capacity",
+                        "isEditable": true,
+                        "format": {
+                            "places": 0,
+                            "digitSeparator": false
+                        },
+                        "visible": true,
+                        "label": "Capacity"
+                    },
+                    {
+                        "fieldName": "Substances",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Substances"
+                    },
+                    {
+                        "fieldName": "Tank_Wall_Type",
+                        "isEditable": true,
+                        "visible": true,
+                        "label": "Tank_Wall_Type"
+                    }
+                ],
+                "expressionInfos": []
+            }
+        }
+    ]
+}

@@ -17,11 +17,11 @@ ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those referenced in ust_element_mapping or release_element_mapping.
 tables_to_exclude = []          # Python list of strings; defaults to empty list. Populate with table names in the organization schema that should be excluded from the export. (NOTE: ERG-created tables will not be exported regardless of the values in this list.)
-empty_export_dir = True         # Boolen, defaults to True. If True, will delete all files in the export directory before proceeding. If False, will not delete any files, but will overwrite any that have the same name as the generated file name. 
+empty_export_dir = True         # Boolean, defaults to True. If True, will delete all files in the export directory before proceeding. If False, will not delete any files, but will overwrite any that have the same name as the generated file name. 
 
 # This variable can usually be left unset. This script will generate CSV files named with the table name, in the appropriate state folder in the repo under /ust/python/exports/source_data/. 
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
-# You are responsible for uploading the exported files to the "Documents / General / 01 - UST Source Data" folder of the EPA Teams site: 
+# You are responsible for uploading the exported files to the "Documents > General > 01 - UST Source Data" folder of the EPA Teams site: 
 # https://usepa.sharepoint.com/:f:/r/sites/USTFinder2ASTSWMO/Shared%20Documents/General/01%20-%20UST%20Source%20Data?csf=1&web=1&e=7GtcsH
 export_file_dir = None
 
@@ -44,7 +44,6 @@ class SourceData:
 		self.export_file_dir = export_file_dir	
 		if not self.export_file_dir:
 			self.set_export_file_dir()
-		Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)	
 		if self.empty_export_dir:
 			self.clean_export_dir()	
 		self.connect_db()
@@ -59,19 +58,23 @@ class SourceData:
 			export_file_dir = export_file_dir + utils.get_pretty_ust_or_release(self.dataset.ust_or_release) + '/'
 			self.export_file_dir = export_file_dir
 			logger.info('Export directory set to %s', self.export_file_dir)
+			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)	
 
 
 	def connect_db(self):
-		self.conn = utils.connect_db()
-		self.cur = self.conn.cursor()
-		logger.info('Connected to database')
+		if not self.conn:
+			self.conn = utils.connect_db()
+			self.cur = self.conn.cursor()
+			logger.info('Connected to database')
 
 
 	def disconnect_db(self):
-		self.conn.commit()
-		self.cur.close()
-		self.conn.close()
-		logger.info('Disconnected from database')
+		if self.conn:
+			self.conn.commit()
+			self.cur.close()
+			self.conn.close()
+			self.conn = None 
+			logger.info('Disconnected from database')
 
 
 	def clean_export_dir(self):
@@ -96,7 +99,7 @@ class SourceData:
 			          	where a.table_name = b.table_name 
 			          	and b.{self.dataset.ust_or_release}_control_id = {self.dataset.control_id})
 			          order by 1"""			
-		self.cur.execute(sql, (self.dataset.schema,))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema,))
 		# utils.pretty_print_query(self.cur)
 		self.table_list = [r[0] for r in self.cur.fetchall()]
 		if not self.table_list:
