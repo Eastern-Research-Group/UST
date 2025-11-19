@@ -7,3 +7,5 @@ ALTER TABLE public.pipe_tank_top_sump_wall_types ADD CONSTRAINT pipe_tank_top_su
 CREATE UNIQUE INDEX pipe_tank_top_sump_wall_types_pkey ON public.pipe_tank_top_sump_wall_types USING btree (pipe_tank_top_sump_wall_type_id)
 
 CREATE INDEX pipe_tank_top_sump_wall_types_idx ON public.pipe_tank_top_sump_wall_types USING btree (pipe_tank_top_sump_wall_type)
+
+CREATE INDEX pipe_tank_top_sump_wall_types_desc_idx ON public.pipe_tank_top_sump_wall_types USING btree (pipe_tank_top_sump_wall_type)

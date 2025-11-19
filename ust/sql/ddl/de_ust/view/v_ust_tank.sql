@@ -28,4 +28,6 @@ create or replace view "de_ust"."v_ust_tank" as
      LEFT JOIN de_ust.v_tank_status_xwalk ts ON ((x."TankStatus" = (ts.organization_value)::text)))
      LEFT JOIN de_ust.v_tank_material_description_xwalk tm ON ((x."TankMaterialDescription" = (tm.organization_value)::text)))
      LEFT JOIN de_ust.v_tank_secondary_containment_xwalk sc ON ((x."TankSecondaryContainment" = (sc.organization_value)::text)))
-  ORDER BY x."TankID", COALESCE(x."TankClosureDate", '1970-01-01 00:00:00'::timestamp without time zone) DESC, COALESCE(x."TankInstallationDate", '1970-01-01 00:00:00'::timestamp without time zone) DESC;
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM de_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id)))));

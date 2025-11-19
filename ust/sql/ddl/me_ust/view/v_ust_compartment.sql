@@ -3,6 +3,7 @@ create or replace view "me_ust"."v_ust_compartment" as
     (x."TANK NUMBER")::integer AS tank_id,
     (x."CHAMBER ID")::integer AS compartment_id,
     cs.compartment_status_id,
+    (x."VOLUME IN GALLONS")::integer AS compartment_capacity_gallons,
         CASE
             WHEN (x."TANK LEAK DETECTION" = 'AUTOMATIC_TANK_GAUGE'::text) THEN 'Yes'::text
             ELSE NULL::text
@@ -58,4 +59,6 @@ create or replace view "me_ust"."v_ust_compartment" as
         END AS overfill_prevention_other
    FROM (me_ust.tanks x
      LEFT JOIN me_ust.v_compartment_status_xwalk cs ON ((x."TANK STATUS LABEL" = (cs.organization_value)::text)))
-  WHERE (x."TANK STATUS LABEL" <> ALL (ARRAY['ACTIVE NON-REGULATED'::text, 'NEVER INSTALLED'::text, 'PLANNED FOR INSTALLATION'::text, 'TRANSFER'::text]));
+  WHERE ((x."TANK STATUS LABEL" <> ALL (ARRAY['ACTIVE NON-REGULATED'::text, 'NEVER INSTALLED'::text, 'PLANNED FOR INSTALLATION'::text, 'TRANSFER'::text])) AND (NOT (EXISTS ( SELECT 1
+           FROM me_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."REGISTRATION NUMBER")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TANK NUMBER")::integer = unreg.tank_id))))));
