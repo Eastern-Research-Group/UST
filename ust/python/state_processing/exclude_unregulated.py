@@ -13,7 +13,8 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
+organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 find_regulated = True          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
 execute_sql = False            	# Boolean; defaults to False. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
 export_sql = True              	# Boolean; defaults to True. If True will generate a SQL file containing the 'create or replace view' statements.
@@ -49,10 +50,10 @@ class Exclude:
 
 
 	def execute(self):
-		self.connect_db()
-
 		if self.find_regulated:
 			Unregulated(self.dataset, drop_existing=True).execute()
+
+		self.connect_db()
 
 		self.df = self.get_columns()
 		views = ['v_' + v for v in self.df['epa_table_name'].unique()]
@@ -144,15 +145,18 @@ class Exclude:
 
 
 	def connect_db(self):
-		self.conn = utils.connect_db()
-		self.cur = self.conn.cursor()
-		logger.info('Connected to database')
+		if not self.conn:
+			self.conn = utils.connect_db()
+			self.cur = self.conn.cursor()
+			logger.info('Connected to database')
 		
 
 	def disconnect_db(self):
-		self.cur.close()
-		self.conn.close()
-		logger.info('Disconnected from database')
+		if self.conn:
+			self.cur.close()
+			self.conn.close()
+			self.conn = None 
+			logger.info('Disconnected from database')
 
 
 
@@ -173,6 +177,7 @@ def get_table_alias(view_def, from_table):
 
 def main(ust_or_release, 
 		 control_id, 
+		 organization_id=None,
 		 find_regulated=True, 
 		 execute_sql=False,
 		 export_sql=True,
@@ -180,6 +185,8 @@ def main(ust_or_release,
 		 export_file_dir=None,
 		 export_file_name=None,
 		 view_name=None):
+	if not control_id or control_id == 0:
+		control_id = utils.get_control_id(ust_or_release, organization_id)
 	dataset = Dataset(ust_or_release=ust_or_release,
 					  control_id=control_id,
 					  requires_export=True,
@@ -188,12 +195,14 @@ def main(ust_or_release,
 					  export_file_dir=export_file_dir,
 					  export_file_name=export_file_name)
 
-	Exclude(dataset, find_regulated=find_regulated, execute_sql=execute_sql, export_sql=export_sql, view_name=view_name).execute()
+	e = Exclude(dataset, find_regulated=find_regulated, execute_sql=execute_sql, export_sql=export_sql, view_name=view_name)
+	e.execute()
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
+		 organization_id=organization_id,
 		 find_regulated=find_regulated,
 		 execute_sql=execute_sql,
 		 export_sql=export_sql,

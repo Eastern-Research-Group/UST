@@ -27,8 +27,12 @@ create or replace view "vt_ust"."v_ust_compartment" as
         END AS tank_automatic_tank_gauging_release_detection,
     x."TankManualTankGauging" AS tank_manual_tank_gauging,
     x."TankStatisticalInventoryReconciliation" AS tank_statistical_inventory_reconciliation
-   FROM ((vt_ust.compartment x
+   FROM (((vt_ust.compartment x
+     LEFT JOIN vt_ust.facility f ON ((x."FacilityID" = f."FacilityID")))
      LEFT JOIN vt_ust.v_compartment_status_xwalk cs ON ((x."CompartmentStatus" = (cs.organization_value)::text)))
      LEFT JOIN vt_ust.v_spill_bucket_wall_type_xwalk sb ON ((x."SpillBucketWallType" = (sb.organization_value)::text)))
-  WHERE (x."FacilityID" IN ( SELECT f."FacilityID"
-           FROM vt_ust.facility f));
+  WHERE ((NOT (EXISTS ( SELECT 1
+           FROM vt_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))) AND (f."FacilityType1" <> 'Wombat'::text) AND (NOT (EXISTS ( SELECT 1
+           FROM vt_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."FacilityID")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TankID")::integer = unreg.tank_id))))));

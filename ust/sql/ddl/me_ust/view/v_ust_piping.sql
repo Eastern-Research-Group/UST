@@ -59,4 +59,7 @@ create or replace view "me_ust"."v_ust_piping" as
         END AS piping_vapor_monitoring
    FROM ((me_ust.tanks x
      JOIN me_ust.erg_piping_id t ON ((((x."REGISTRATION NUMBER")::text = (t.facility_id)::text) AND ((x."TANK NUMBER")::text = (t.tank_id)::text) AND ((x."CHAMBER ID")::text = (t.compartment_id)::text))))
-     LEFT JOIN me_ust.v_piping_style_xwalk ps ON ((x."CHAMBER_PUMP_TYPE_LABEL" = (ps.organization_value)::text)));
+     LEFT JOIN me_ust.v_piping_style_xwalk ps ON ((x."CHAMBER_PUMP_TYPE_LABEL" = (ps.organization_value)::text)))
+  WHERE ((x."TANK STATUS" <> ALL (ARRAY['ACTIVE_NON_REGULATED'::text, 'NEVER_INSTALLED'::text, 'PLANNED'::text, 'TRANSFER'::text])) AND (NOT (EXISTS ( SELECT 1
+           FROM me_ust.erg_unregulated_tanks unreg
+          WHERE ((((x."REGISTRATION NUMBER")::character varying(50))::text = (unreg.facility_id)::text) AND ((x."TANK NUMBER")::integer = unreg.tank_id))))));

@@ -12,8 +12,8 @@ from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
-schema = ''              			# Enter the schema name
-upload_file_path = r""  			# Path to CUI check spreadsheet.  
+schema = ''              		# Enter the schema name
+upload_file_path = r"" 			# Path to CUI check spreadsheet.  
 
 
 class Cui:

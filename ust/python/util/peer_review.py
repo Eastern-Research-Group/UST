@@ -9,14 +9,16 @@ import pandas as pd
 
 from python.util import utils
 from python.util.dataset import Dataset 
+from python.util.export_view_ddl import ViewDdl
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0 	           		# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 display_bad_data = False  		# Boolean; defaults to False. Set to True to print bad data to the console (note: if there are a lot of rows, this may be very slow).
-overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+overwrite_existing = False      # Boolean; defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+export_view_ddl = True          # Boolean; defaults to True. If True, will export the data population view DDL to a SQL file for easy review.  
 
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/sql/states.
@@ -37,28 +39,18 @@ class PeerReview:
 	error_dict = {}
 	error_cnt_dict = {}
 	error_tables = []
-	vsql = '------------------------------------------------------------------------------------------------------------------------\n'
-
+	vsql = ''
 
 	def __init__(self, 
 				 dataset,
 				 display_bad_data=False,
-				 overwrite_existing=False):
+				 overwrite_existing=False,
+				 export_view_ddl=True):
 		self.dataset = dataset
 		self.display_bad_data = display_bad_data
 		self.overwrite_existing = overwrite_existing
-		self.connect_db()
-		self.set_views()
-		self.set_tables()
-		if not self.views_to_review:
-			logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
-			logger.info('Views this script looks for: %s', self.get_view_names())
-			self.disconnect_db()
-			exit()
-		self.compare_row_counts()
-		self.get_sql()
-		self.disconnect_db()
-		self.write_sql()
+		self.export_view_ddl = export_view_ddl
+
 
 	def connect_db(self):
 		self.conn = utils.connect_db()
@@ -170,16 +162,43 @@ class PeerReview:
 
 
 	def write_sql(self):
-		wora = 'a'
-		if self.overwrite_existing:
-			wora = 'w'
-		with open(self.dataset.export_file_path, wora, encoding='utf-8') as f:
-			f.write(self.vsql)
-		logger.info('SQL exported to %s', self.dataset.export_file_path)
+		if self.vsql:
+			wora = 'a'
+			if self.overwrite_existing:
+				wora = 'w'
+			with open(self.dataset.export_file_path, wora, encoding='utf-8') as f:
+				f.write(self.vsql)
+			logger.info('SQL exported to %s\n\n', self.dataset.export_file_path)
+		else:
+			logger.info('No mismatched counts between the data population views and the EPA data tables; no SQL exported.')
+
+
+	def process(self):
+		# Compare row counts:
+		self.connect_db()
+		self.set_views()
+		self.set_tables()
+		if not self.views_to_review:
+			logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
+			logger.info('Views this script looks for: %s', self.get_view_names())
+			self.disconnect_db()
+			exit()
+		self.compare_row_counts()
+		self.get_sql()
+		self.disconnect_db()
+		self.write_sql()
+
+		if self.export_view_ddl:
+			# Export data population view DDL for review:
+			dataset = Dataset(ust_or_release=self.dataset.ust_or_release,
+					 	 	 control_id=self.dataset.control_id, 
+					 	  	base_file_name='view_ddl.sql')		
+			ddl = ViewDdl(dataset=dataset)
+			ddl.process()
 
 
 
-def main(ust_or_release, control_id=None, organization_id=None, display_bad_data=False, overwrite_existing=False):
+def main(ust_or_release, control_id=None, organization_id=None, display_bad_data=False, overwrite_existing=False, export_view_ddl=True):
 	if not control_id and not organization_id:
 		logger.error('Please pass either control_id or organization_id')
 		exit()
@@ -193,7 +212,8 @@ def main(ust_or_release, control_id=None, organization_id=None, display_bad_data
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
 
-	review = PeerReview(dataset=dataset, display_bad_data=display_bad_data, overwrite_existing=overwrite_existing)
+	review = PeerReview(dataset=dataset, display_bad_data=display_bad_data, overwrite_existing=overwrite_existing, export_view_ddl=export_view_ddl)
+	review.process()
 
 
 if __name__ == '__main__':   
@@ -201,4 +221,5 @@ if __name__ == '__main__':
 		 control_id=control_id, 
 		 organization_id=organization_id,
 		 display_bad_data=display_bad_data,
-		 overwrite_existing=overwrite_existing)
+		 overwrite_existing=overwrite_existing,
+		 export_view_ddl=export_view_ddl)

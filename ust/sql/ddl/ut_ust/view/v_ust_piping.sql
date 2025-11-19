@@ -49,4 +49,6 @@ create or replace view "ut_ust"."v_ust_piping" as
      LEFT JOIN ut_ust.v_piping_wall_type_xwalk s ON (((s.organization_value)::text = c."PIPEMODDES")))
   WHERE ((c."FEDERALREG" = 'Yes'::text) AND (c."TANKSTATUS" <> 'Install in Process'::text) AND (c.facility_id IN ( SELECT y.facility_id
            FROM ut_ust.ut_facility y
-          WHERE ((y."TANK" = 1) AND (y."OPENREGAST" = 0) AND (y."REGAST" = 0)))));
+          WHERE ((y."TANK" = 1) AND (y."OPENREGAST" = 0) AND (y."REGAST" = 0)))) AND (NOT (EXISTS ( SELECT 1
+           FROM ut_ust.erg_unregulated_tanks unreg
+          WHERE ((((c.facility_id)::character varying(50))::text = (unreg.facility_id)::text) AND ((c.tank_id)::integer = unreg.tank_id))))));

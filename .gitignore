@@ -1,6 +1,7 @@
 log
 imports
 exports
+config.py
  
 # Byte-compiled / optimized / DLL files
 __pycache__/
