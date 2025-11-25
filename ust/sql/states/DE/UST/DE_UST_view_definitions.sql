@@ -20,58 +20,44 @@ create or replace view de_ust.v_ust_facility as
     x."FacilityOwnerCompanyName" AS facility_owner_company_name,
     x."FacilityOperatorCompanyName" AS facility_operator_company_name,
         CASE
-            WHEN (max(
-            CASE
-                WHEN (x."FinancialResponsibilityObtained" = 'Yes'::text) THEN 1
-                ELSE 0
-            END) OVER (PARTITION BY x."FacilityID") = 1) THEN 'Yes'::text
-            WHEN (max(
-            CASE
-                WHEN (x."FinancialResponsibilityObtained" = 'No'::text) THEN 1
-                ELSE 0
-            END) OVER (PARTITION BY x."FacilityID") = 1) THEN 'No'::text
-            WHEN (max(
-            CASE
-                WHEN (x."FinancialResponsibilityObtained" = 'Unknown'::text) THEN 1
-                ELSE 0
-            END) OVER (PARTITION BY x."FacilityID") = 1) THEN 'Unknown'::text
-            ELSE 'N/A'::text
+            WHEN ((x."FinancialResponsibilityBondRatingTest" = 'YES'::text) OR (x."FinancialResponsibilityCommercialInsurance" = 'YES'::text) OR (x."FinancialResponsibilityGuarantee" = 'YES'::text) OR (x."FinancialResponsibilityLetterOfCredit" = 'YES'::text) OR (x."FinancialResponsibilityLocalGovernmentFinancialTest" = 'YES'::text) OR (x."FinancialResponsibilitySelfInsuranceFinancialTest" = 'YES'::text) OR (x."FinancialResponsibilityStateFund" = 'Yes'::text) OR (x."FinancialResponsibilitySuretyBond" = 'YES'::text) OR (x."FinancialResponsibilityTrustFund" = 'YES'::text)) THEN 'Yes'::text
+            ELSE NULL::text
         END AS financial_responsibility_obtained,
         CASE
             WHEN (x."FinancialResponsibilityBondRatingTest" = 'YES'::text) THEN 'Yes'::text
-            ELSE 'No'::text
+            ELSE NULL::text
         END AS financial_responsibility_bond_rating_test,
         CASE
             WHEN (x."FinancialResponsibilityCommercialInsurance" = 'YES'::text) THEN 'Yes'::text
-            ELSE 'No'::text
+            ELSE NULL::text
         END AS financial_responsibility_commercial_insurance,
         CASE
             WHEN (x."FinancialResponsibilityGuarantee" = 'YES'::text) THEN 'Yes'::text
-            ELSE 'No'::text
+            ELSE NULL::text
         END AS financial_responsibility_guarantee,
         CASE
             WHEN (x."FinancialResponsibilityLetterOfCredit" = 'YES'::text) THEN 'Yes'::text
-            ELSE 'No'::text
+            ELSE NULL::text
         END AS financial_responsibility_letter_of_credit,
         CASE
             WHEN (x."FinancialResponsibilityLocalGovernmentFinancialTest" = 'YES'::text) THEN 'Yes'::text
-            ELSE 'No'::text
+            ELSE NULL::text
         END AS financial_responsibility_local_government_financial_test,
         CASE
             WHEN (x."FinancialResponsibilitySelfInsuranceFinancialTest" = 'YES'::text) THEN 'Yes'::text
-            ELSE 'No'::text
+            ELSE NULL::text
         END AS financial_responsibility_self_insurance_financial_test,
         CASE
             WHEN (x."FinancialResponsibilityStateFund" = 'Yes'::text) THEN 'Yes'::text
-            ELSE 'No'::text
+            ELSE NULL::text
         END AS financial_responsibility_state_fund,
         CASE
             WHEN (x."FinancialResponsibilitySuretyBond" = 'YES'::text) THEN 'Yes'::text
-            ELSE 'No'::text
+            ELSE NULL::text
         END AS financial_responsibility_surety_bond,
         CASE
             WHEN (x."FinancialResponsibilityTrustFund" = 'YES'::text) THEN 'Yes'::text
-            ELSE 'No'::text
+            ELSE NULL::text
         END AS financial_responsibility_trust_fund,
         CASE
             WHEN (x."USTReportedRelease" = 'Yes'::text) THEN 'Yes'::text
@@ -151,15 +137,12 @@ create or replace view de_ust.v_ust_compartment as
         CASE
             WHEN (x."OverfillPreventionOther" = 'Yes'::text) THEN 'Yes'::text
             WHEN (x."OverfillPreventionOther" = 'No'::text) THEN 'No'::text
-            ELSE 'Unknown'::text
+            ELSE NULL::text
         END AS overfill_prevention_other,
-    x."OverfillPreventionUnknown" AS overfill_prevention_unknown,
-    x."OverfillPreventionNotRequired" AS overfill_prevention_not_required,
         CASE
             WHEN (x."SpillBucketInstalled" = 'Yes'::text) THEN 'Yes'::text
             ELSE 'No'::text
         END AS spill_bucket_installed,
-    x."SpillPreventionNotRequired" AS spill_prevention_not_required,
     x."TankInterstitialMonitoring" AS tank_interstitial_monitoring,
     x."TankAutomaticTankGaugingReleaseDetection" AS tank_automatic_tank_gauging_release_detection,
     x."AutomaticTankGaugingContinuousLeakDetection" AS automatic_tank_gauging_continuous_leak_detection,
@@ -202,7 +185,10 @@ create or replace view de_ust.v_ust_piping as
     ps.piping_style_id,
     x."SafeSuction" AS safe_suction,
     x."AmericanSuction" AS american_suction,
-    x."HighPressureOrBulkPiping" AS high_pressure_or_bulk_piping,
+        CASE
+            WHEN (x."PipingStyle" = 'Pressure'::text) THEN NULL::text
+            ELSE x."HighPressureOrBulkPiping"
+        END AS high_pressure_or_bulk_piping,
     x."PipingMaterialFRP" AS piping_material_frp,
     x."PipingMaterialGalSteel" AS piping_material_gal_steel,
     x."PipingMaterialStainlessSteel" AS piping_material_stainless_steel,
@@ -238,4 +224,4 @@ create or replace view de_ust.v_ust_piping as
      LEFT JOIN de_ust.v_piping_wall_type_xwalk wt ON ((x."PipingWallType" = (wt.organization_value)::text)))
  where not exists
 	(select 1 from de_ust.erg_unregulated_tanks unreg
-	where x."FacilityID"::varchar(50) = unreg.facility_id and x."TankID"::int = unreg.tank_id);
+	where x."FacilityID"::varchar(50) = unreg.facility_id and c."TankID"::int = unreg.tank_id);
