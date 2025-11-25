@@ -4,4 +4,4 @@ create or replace view "hi_ust"."v_tank_material_description_xwalk" as
     b.tank_material_description_id
    FROM (v_ust_element_mapping a
      LEFT JOIN tank_material_descriptions b ON (((a.epa_value)::text = (b.tank_material_description)::text)))
-  WHERE ((a.ust_control_id = 24) AND ((a.epa_column_name)::text = 'tank_material_description_id'::text));
+  WHERE ((a.ust_control_id = 37) AND ((a.epa_column_name)::text = 'tank_material_description_id'::text));

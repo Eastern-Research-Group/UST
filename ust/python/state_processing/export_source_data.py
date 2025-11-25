@@ -44,7 +44,6 @@ class SourceData:
 		self.export_file_dir = export_file_dir	
 		if not self.export_file_dir:
 			self.set_export_file_dir()
-		Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)	
 		if self.empty_export_dir:
 			self.clean_export_dir()	
 		self.connect_db()
@@ -59,19 +58,23 @@ class SourceData:
 			export_file_dir = export_file_dir + utils.get_pretty_ust_or_release(self.dataset.ust_or_release) + '/'
 			self.export_file_dir = export_file_dir
 			logger.info('Export directory set to %s', self.export_file_dir)
+			Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)	
 
 
 	def connect_db(self):
-		self.conn = utils.connect_db()
-		self.cur = self.conn.cursor()
-		logger.info('Connected to database')
+		if not self.conn:
+			self.conn = utils.connect_db()
+			self.cur = self.conn.cursor()
+			logger.info('Connected to database')
 
 
 	def disconnect_db(self):
-		self.conn.commit()
-		self.cur.close()
-		self.conn.close()
-		logger.info('Disconnected from database')
+		if self.conn:
+			self.conn.commit()
+			self.cur.close()
+			self.conn.close()
+			self.conn = None 
+			logger.info('Disconnected from database')
 
 
 	def clean_export_dir(self):

@@ -19,4 +19,8 @@ create or replace view "va_ust"."v_ust_facility" as
    FROM ((va_ust.registered_petroleum_tank_facilities a
      LEFT JOIN va_ust.owner_data od ON (((a."FAC_ID")::text = (od."Fac_Id")::text)))
      LEFT JOIN va_ust.v_facility_type_xwalk c ON (((a."FAC_TYPE")::text = (c.organization_value)::text)))
-  WHERE ((((a."FAC_ACTIVE_UST")::integer > 0) OR ((a."FAC_INACTIVE_UST")::integer > 0)) AND ((a."FAC_FED_REG_YN")::text = 'Y'::text));
+  WHERE ((((a."FAC_ACTIVE_UST")::integer > 0) OR ((a."FAC_INACTIVE_UST")::integer > 0)) AND ((a."FAC_FED_REG_YN")::text = 'Y'::text) AND (NOT (((a."FAC_ID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM va_ust.erg_unregulated_facilities))) AND (NOT (((a."FAC_ID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM va_ust.erg_unregulated_facilities))) AND (NOT (((a."FAC_ID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM va_ust.erg_unregulated_facilities))) AND (NOT (((a."FAC_ID")::character varying(50))::text IN ( SELECT erg_unregulated_facilities.facility_id
+           FROM va_ust.erg_unregulated_facilities))));

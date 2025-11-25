@@ -14,3 +14,5 @@ ALTER TABLE archive."archive.substances" ADD CONSTRAINT substances_pkey PRIMARY 
 CREATE UNIQUE INDEX substances_pkey ON public.substances USING btree (substance_id)
 
 CREATE INDEX substances_idx ON public.substances USING btree (substance)
+
+CREATE INDEX substances_desc_idx ON public.substances USING btree (substance)

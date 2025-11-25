@@ -22,7 +22,7 @@ CREATE TABLE public.ust_piping (
     "piping_corrosion_protection_other" character varying(7)  NULL ,
     "piping_corrosion_protection_unknown" character varying(7)  NULL ,
     "piping_line_leak_detector" character varying(7)  NULL ,
-    "piping_automated_intersticial_monitoring" character varying(7)  NULL ,
+    "piping_automated_interstitial_monitoring" character varying(7)  NULL ,
     "piping_line_test_annual" character varying(7)  NULL ,
     "piping_line_test3yr" character varying(7)  NULL ,
     "piping_groundwater_monitoring" character varying(7)  NULL ,
@@ -82,7 +82,7 @@ ALTER TABLE public.ust_piping ADD CONSTRAINT piping_piping_corrosion_protection_
 
 ALTER TABLE public.ust_piping ADD CONSTRAINT piping_piping_line_leak_detector_chk CHECK (((piping_line_leak_detector)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
-ALTER TABLE public.ust_piping ADD CONSTRAINT piping_piping_automated_intersticial_monitoring_chk CHECK (((piping_automated_intersticial_monitoring)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
+ALTER TABLE public.ust_piping ADD CONSTRAINT piping_piping_automated_intersticial_monitoring_chk CHECK (((piping_automated_interstitial_monitoring)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 
 ALTER TABLE public.ust_piping ADD CONSTRAINT piping_piping_line_test_annual_chk CHECK (((piping_line_test_annual)::text = ANY ((ARRAY['Yes'::character varying, 'No'::character varying, 'Unknown'::character varying])::text[])));
 

@@ -20,7 +20,7 @@ If the data are not already mapped, use the schema/table_name/column_name variab
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 9                 	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
 schema = ''              		# Enter the schema name
@@ -28,19 +28,19 @@ table_name = ''             	# Enter the table name that contains the column(s) 
 column_names = ['']         	# Enter a list of column names that contain possible CUI    
 
 drop_existing = True            # Boolean; defaults to True. If True, will drop the erg_%_clean_cui table if it exists. 
-maybe_as_true = True            # Boolean. Set to True to mark stopwords with the "maybe flag" to TRUE instead of MAYBE
+maybe_as_true = True            # Boolean; defaults to True. Set to True to mark stopwords with the "maybe flag" to TRUE instead of MAYBE.
 
 
 # Set the following variables if the data to be checked for CUI is not yet in the database and you need to upload a file first:
-# upload_file_path = r"C:\Users\erguser\Downloads\MD_UST_template_20240925160404_OUST notes_10-18-24.xlsx"			# Path to Excel, CSV, or text file to upload. 
-# upload_schema = 'md_ust'		# Schema to upload the file to. 
-# upload_table_name = 'erg_facility'  		# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
-# upload_overwrite_table = False  # Boolean. Set to True to overwrite table(s) if exists. 
-# upload_excel_tabs = ['Facility']     
+# upload_file_path = r""			# Path to Excel, CSV, or text file to upload. 
+# upload_schema = ''				# Schema to upload the file to. 
+# upload_table_name = ''  			# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
+# upload_overwrite_table = False  	# Boolean. Set to True to overwrite table(s) if exists. 
+# upload_excel_tabs = ['']     
 
-upload_file_path = r""				# Path to Excel, CSV, or text file to upload. 
-upload_schema = ''			        # Schema to upload to. 
-upload_table_name = None  			# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
+upload_file_path = None				# Path to Excel, CSV, or text file to upload. 
+upload_schema = None		        # Schema to upload to. 
+upload_table_name = None 			# Only used if single tab Excel spreadsheet or CSV. Multi-tab Excel files use tab names as table names.
 upload_overwrite_table = False      # Boolean. Set to True to overwrite table(s) if exists. 
 upload_excel_tabs = None            # For multi-tab Excel files, enter a string or list containing the sheet names to export. Leave as None to export all tabs.
 
@@ -278,6 +278,14 @@ class CuiCheck:
 			logger.info('Eliminated %s rows due to a stopword', self.cur.rowcount)
 			self.conn.commit()
 
+			sql = f"""update "{self.schema}"."{self.new_table_name}" a
+			        set "{new_colname}" = 'FALSE'
+			        where "{new_colname}" is null and trim("{colname}") ilike 'camp %%'"""
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Eliminated %s rows because they begin with the word "Camp"', self.cur.rowcount)
+			self.conn.commit()
+
+
 
 	def eliminate_spaces(self):
 		for colname in self.column_names:
@@ -286,7 +294,7 @@ class CuiCheck:
 			sql = f"""update "{self.schema}"."{self.new_table_name}" a
 					set "{new_colname}" = 'FALSE' 
 					where "{new_colname}" is null 
-					and (char_length("{colname}") - char_length(replace("{colname}", ' ', ''))) / char_length(' ') not in (1,2,3)"""
+					and (char_length(trim("{colname}")) - char_length(replace(trim("{colname}"), ' ', ''))) / char_length(' ') not in (1,2,3)"""
 			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Eliminated %s rows due to too many or too few spaces', self.cur.rowcount)
 			self.conn.commit()
@@ -332,6 +340,7 @@ class CuiCheck:
 			self.conn.commit()
 			self.cur.close()
 			self.conn.close()
+			self.conn = None 
 			logger.info('Disconnected from database')
 
 
