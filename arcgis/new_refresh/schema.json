@@ -1,0 +1,527 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#"
+   ,"title": "Simplified EPA Geoplatform Service Configuration"
+   ,"description": "Configuration used to setup and alter automated Geoplatform ETL and publishing." 
+   ,"type": "object"
+   ,"properties": {
+       "domains": {
+          "title": "Geodatabase Domains"
+         ,"description": "Configuration to setup or alter domains in the geodatabase.  The unique identifier used will apply the domain to schema fields with the matching value."
+         ,"type": "object"
+         ,"patternProperties": {
+             "^.*$": {
+                "type": "object"
+               ,"properties": {
+                   "name": {
+                      "title": "Name of the domain as applied in the geodatabase."
+                     ,"type": "string"
+                   }
+                  ,"description": {
+                      "title": "Optional description of the domain as applied in the geodatabase."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"field_type": {
+                      "title": "Domain field type, see Esri arcpy.management.CreateDomain documentation for more information."
+                     ,"type": "string"
+                     ,"enum": [
+                         "SHORT"
+                        ,"LONG"
+                        ,"BIGINTEGER"
+                        ,"FLOAT"
+                        ,"DOUBLE"
+                        ,"TEXT"
+                        ,"DATE"
+                        ,"DATEONLY"
+                        ,"TIMEONLY"
+                      ]
+                   }
+                  ,"domain_type": {
+                      "title": "Domain type, see Esri arcpy.management.CreateDomain documentation for more information."
+                     ,"type": "string"
+                     ,"enum": [
+                         "CODED"
+                        ,"RANGE"
+                      ]
+                   }
+                  ,"split_policy": {
+                      "title": "Optional domain split policy, see Esri arcpy.management.CreateDomain documentation for more information."
+                     ,"type": "string"
+                     ,"enum": [
+                         "DEFAULT"
+                        ,"DUPLICATE"
+                        ,"GEOMETRY_RATIO"
+                      ]
+                   }
+                  ,"merge_policy": {
+                      "title": "Optional domain merge policy, see Esri arcpy.management.CreateDomain documentation for more information."
+                     ,"type": "string"
+                     ,"enum": [
+                         "DEFAULT"
+                        ,"SUM_VALUES"
+                        ,"AREA_WEIGHTED"
+                      ]
+                   }
+                  ,"coded_values": {
+                      "title": "Domain coded values, see arcpy.management.AddCodedValueToDomain for more information."
+                     ,"type": "array"
+                     ,"items": [
+                         {
+                            "type": "array"
+                           ,"items": [
+                               {
+                                  "title": "Coded value code"
+                                 ,"type": "string"
+                               }
+                              ,{
+                                  "title": "Coded value description"
+                                 ,"type": "string"
+                               }
+                            ]
+                         }
+                      ]
+                   }
+                  ,"range_values": {
+                      "title": "Domain range values, see arcpy.management.SetValueForRangeDomain for more information."
+                     ,"type": "array"
+                     ,"items": [
+                         {
+                            "type": "array"
+                           ,"items": [
+                               {
+                                  "title": "Minimum range value"
+                                 ,"type": "string"
+                               }
+                              ,{
+                                  "title": "Maximum range value"
+                                 ,"type": "string"
+                               }
+                            ]
+                         }
+                      ]
+                   }
+                }
+               ,"required": [
+                   "name"
+                ]
+             }
+          }
+       }
+      ,"maps": {
+          "title": "Configuration Maps definitions"
+         ,"description": "Configuration to define the maps created by the project when initially setup or rebuilt."
+         ,"type": "object"
+         ,"patternProperties": {
+             "^.*$": {
+                "type": "object"
+               ,"properties": {
+                   "mapname": {
+                      "title": "Map name as defined in ArcGIS Pro."
+                     ,"description": "When published to AGO, this value must be unique for the organization."
+                     ,"type": "string"
+                   }
+                  ,"maptitle": {
+                      "title": "Map title applied in ArcGIS Pro metadata and published as the title component to AGO."
+                     ,"type": "string"
+                   }
+                  ,"mapsummary": {
+                      "title": "Map summary applied in ArcGIS Pro metadata and published as the summary component to AGO."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"mapdescription": {
+                      "title": "Map description applied in ArcGIS Pro metadata and published as the description component to AGO."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"mapcredits": {
+                      "title": "Map credits applied in ArcGIS Pro metadata and published as the credits component to AGO."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"maptags": {
+                      "title": "Comma-delimited tags applied in ArcGIS Pro metadata and published as the tags component to AGO."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"mapaccess": {
+                      "title": "Map access applied in ArcGIS Pro metadata and published as the terms of use component to AGO."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"guid": {
+                      "title": "Optional AGO guid for use in publishing actions."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"mapx": {
+                      "title": "Mapx file used to build the map."
+                     ,"description": "File is assumed to be located in the aprx.homeFolder"
+                     ,"type": "string"
+                   }
+                  ,"layers": {
+                      "title": "Configuration Layer Definitions"
+                     ,"type": "object"
+                     ,"patternProperties": {
+                         "^.*$": {
+                            "type": "object"
+                           ,"properties": {
+                               "description": {
+                                  "title": "Layer description as defined in ArcGIS Pro metadata and published as the description component to AGO"
+                                 ,"anyOf": [
+                                     {"type": "string"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,"popupInfoTitle": {
+                                  "title": "Optional Layer Popup Information Title"
+                                 ,"description": "Allows for alteration of the title component of the layer popup.  Used when the source lyrx file is generic but the layer should have specific popup styling."
+                                 ,"anyOf": [
+                                     {"type": "string"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,"symbology_fields": {
+                                  "title": "Optional Layer Symbology Fields"
+                                 ,"description": "Allows for dynamic alteration of layer symbology, see arcpy.management.ApplySymbologyFromLayer."
+                                 ,"anyOf": [
+                                     {"type": "null"}
+                                    ,{
+                                        "type": "string"
+                                       ,"enum": [
+                                           "VALUE_FIELD"
+                                          ,"NORMALIZATION_FIELD"
+                                          ,"EXCLUSION_CLAUSE_FIELD"
+                                          ,"CHART_RENDERER_PIE_SIZE_FIELD"
+                                          ,"ROTATION_XEXPRESSION_FIELD"
+                                          ,"ROTATION_YEXPRESSION_FIELD"
+                                          ,"ROTATION_ZEXPRESSION_FIELD"
+                                          ,"TRANSPARENCY_EXPRESSION_FIELD"
+                                          ,"TRANSPARENCY_NORMALIZATION_FIELD"
+                                          ,"SIZE_EXPRESSION_FIELD"
+                                          ,"COLOR_EXPRESSION_FIELD"
+                                          ,"PRIMITIVE_OVERRIDE_EXPRESSION_FIELD"
+                                        ]
+                                     }
+                                  ]
+                               }
+                              ,"update_symbology": {
+                                  "title": "Optional Layer Update Symbology flag"
+                                 ,"description": "Allows for dynamic alteration of layer symbology, see arcpy.management.ApplySymbologyFromLayer."
+                                 ,"anyOf": [
+                                     {"type": "null"}
+                                    ,{
+                                        "type": "string"
+                                       ,"enum": [
+                                           "DEFAULT"
+                                          ,"UPDATE"
+                                          ,"MAINTAIN"
+                                        ]
+                                     }
+                                  ]
+                               }
+                              ,"visibility": {
+                                  "title": "Switch to control initial layer visibility"
+                                 ,"anyOf": [
+                                     {"type": "boolean"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,"serviceLayerID": {
+                                  "title": "Value to apply to layer id"
+                                 ,"description": "Note this value is not tied to the position in the ArcGIS Pro map.  It might vary though usually does not."
+                                 ,"anyOf": [
+                                     {"type": "integer"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,"cim_fields": {
+                                  "title": "Optional array of CIM fields to apply to layer field definitions"
+                                 ,"description": "This an advanced option for dynamically changing layer field definitions."
+                                 ,"anyOf": [
+                                     {"type": "null"}
+                                    ,{
+                                        "type": "array"
+                                       ,"items": [
+                                           {
+                                              "type": "object"
+                                             ,"properties": {
+                                                 "type": {"type": "string"}
+                                                ,"alias": {"type": "string"}
+                                                ,"fieldName": {"type": "string"}
+                                                ,"numberFormat": {
+                                                    "type": "object"
+                                                   ,"properties": {
+                                                       "type": {"type": "string"}
+                                                      ,"alignmentOption": {"type": "string"}
+                                                      ,"alignmentWidth": {"type": "number"}
+                                                      ,"roundingOption": {"type": "string"}
+                                                      ,"roundingWidth": {"type": "number"}
+                                                    }
+                                                 }
+                                                ,"readOnly": {"type": "boolean"}
+                                                ,"visible": {"type": "boolean"}
+                                                ,"searchMode": {"type": "string"}
+                                              }                              
+                                           }
+                                        ]
+                                    }
+                                  ]
+                               }
+                              ,"position": {
+                                  "title": "Value used to order layers on the ArcGIS Pro map."
+                                 ,"description": "This item is used for layer ordering and related symbology purposes and is not necessarily the same as serviceLayerID.  Though usually it is."
+                                 ,"anyOf": [
+                                     {"type": "integer"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,"schemaid": {
+                                  "title": "Identifier tying layer to underlying data schema configuration" 
+                                 ,"type": "string"
+                               }
+                              ,"lyrx": {
+                                  "title": "Lyrx file used to build the layer."
+                                 ,"description": "File is assumed to be located in the aprx.homeFolder"
+                                 ,"type": "string"
+                               }
+                              ,"searchName": {
+                                  "title": "Lyrx layer name value to use for the layer."
+                                 ,"type": "string"
+                               }
+                              ,"name": {
+                                  "title": "Value to substitute for the searchName in the lyrx."
+                                 ,"description": "Allows for dynamic layer names from the same generic lyrx file."
+                                 ,"type": "string"
+                               }
+                            }
+                           ,"required": [
+                               "schemaid"
+                              ,"lyrx"
+                              ,"searchName"
+                              ,"name"
+                           ]
+                         }
+                      }
+                   }
+                  ,"tables": {
+                      "title": "Configuration Table Definitions"
+                     ,"anyOf": [
+                         {"type": "null"}
+                        ,{
+                            "type": "object"
+                           ,"patternProperties": {
+                               "^.*$": {
+                                  "type": "object"
+                                 ,"properties": {
+                                     "description": {
+                                        "title": "Table description as defined in ArcGIS Pro metadata and published as the description component to AGO"
+                                       ,"anyOf": [
+                                           {"type": "integer"}
+                                          ,{"type": "null"}
+                                        ]
+                                     } 
+                                    ,"schemaid": {
+                                        "title": "Identifier tying table to underlying data schema configuration" 
+                                       ,"type": "string"
+                                     }
+                                    ,"lyrx": {
+                                        "title": "Lyrx file used to build the table."
+                                       ,"description": "File is assumed to be located in the aprx.homeFolder"
+                                       ,"type": "string"
+                                     }
+                                    ,"searchName": {
+                                        "title": "Lyrx table name value to use for the table."
+                                       ,"type": "string"
+                                     }
+                                    ,"name": {
+                                        "title": "Value to substitute for the searchName in the lyrx."
+                                       ,"description": "Allows for dynamic table names from the same generic lyrx file."
+                                       ,"type": "string"
+                                     }
+                                  }
+                                 ,"required": [
+                                     "schemaid"
+                                    ,"lyrx"
+                                    ,"searchName"
+                                    ,"name"
+                                  ]
+                               }
+                            }
+                         }
+                      ]
+                   }
+                }
+             }
+          }
+       }          
+      ,"schemas": {
+          "title": "Configuration Schema definitions"
+         ,"description": "Configuration used to create and rebuild tabular resources in the geodatabase."
+         ,"type": "object"
+         ,"patternProperties": {
+             "^.*$": {
+                "type": "object"
+               ,"properties": {
+                   "geodatabase": {
+                      "title": "Location of the resource geodatabase"
+                     ,"description": "Allows for option relocation of the geodatabase holding the resource.  Use 'default' to use aprx.defaultGeodatabase" 
+                     ,"type": "string"
+                   }
+                  ,"datasource": {
+                      "title": "Filename of the resource geodatabase"
+                     ,"type": "string"
+                   }
+                  ,"geometry_type": {
+                      "title": "Geometry type if applicable for the resource"
+                     ,"description": "See arcpy.management.CreateFeatureclass for more information."
+                     ,"type": "string"
+                     ,"enum": [
+                         "POINT"
+                        ,"MULTIPOINT"
+                        ,"POLYGON"
+                        ,"POLYLINE"
+                        ,"MULTIPATCH"
+                      ]
+                   }
+                  ,"srid": {
+                      "title": "Spatial Reference for layer"
+                     ,"description": "For AGO deployments this should almost always be 3857 for Web Mercator"
+                     ,"type": "integer"
+                   }
+                  ,"has_m": {
+                      "title": "Flag as to whether the layer has measure values"
+                     ,"description": "For AGO deployments, this should almost always be DISABLED"
+                     ,"type": "string"
+                     ,"enum": [
+                         "DISABLED"
+                        ,"ENABLED"
+                        ,"SAME_AS_TEMPLATE"
+                      ]
+                   }
+                  ,"has_z": {
+                     "title": "Flag as to whether the layer has 3D height values"
+                     ,"type": "string"
+                     ,"enum": [
+                         "DISABLED"
+                        ,"ENABLED"
+                        ,"SAME_AS_TEMPLATE"
+                      ]  
+                   }
+                  ,"oid_type": {
+                      "title": "Numeric type used for item objectid"
+                     ,"type": "string"
+                     ,"enum": [
+                         "32_BIT"
+                        ,"64_BIT"
+                        ,"SAME_AS_TEMPLATE"
+                      ]
+                   }
+                  ,"etlsrc": {
+                      "title": "ETL source for refresh activities"
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"flds": {
+                      "title": "Array of field definitions for the schema"
+                     ,"description": "Array generally follows the field description pattern from arcpy.management.AddFields" 
+                     ,"type": "array"
+                     ,"items": [
+                         {
+                            "type": "array"
+                           ,"items": [
+                               {
+                                  "title": "Field Name"
+                                 ,"type": "string"
+                               }
+                              ,{
+                                  "title": "Field Type"
+                                 ,"type": "string"
+                                 ,"enum": [
+                                     "SHORT"
+                                    ,"LONG"
+                                    ,"BIGINTEGER"
+                                    ,"FLOAT"
+                                    ,"DOUBLE"
+                                    ,"TEXT"
+                                    ,"DATE"
+                                    ,"DATEHIGHPRECISION"
+                                    ,"DATEONLY"
+                                    ,"TIMEONLY"
+                                    ,"TIMESTAMPOFFSET"
+                                    ,"BLOB"
+                                    ,"GUID"
+                                    ,"RASTER"
+                                  ]
+                               }
+                              ,{
+                                  "title": "Field Alias"
+                                 ,"type": "string"
+                               }
+                              ,{
+                                  "title": "Field Length"
+                                 ,"anyOf": [
+                                     {"type": "integer"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,{
+                                  "title": "Default Value"
+                                 ,"anyOf": [
+                                     {"type": "string"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,{
+                                  "title": "Field Domain"
+                                 ,"anyOf": [
+                                     {"type": "string"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,{
+                                  "title": "Index Flag"
+                                 ,"description": "Boolean will determine if a given field is indexed."
+                                 ,"type": "boolean"
+                               }
+                              ,{
+                                  "title": "ETL Source Field Name"
+                                 ,"anyOf": [
+                                     {"type": "string"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                            ]
+                         }
+                      ]
+                   }
+                }
+               ,"required": [
+                   "geodatabase"
+                  ,"datasource"
+                  ,"flds"
+                ]
+             }
+          }
+       }
+    }
+   ,"required": [
+      "schemas"
+    ]
+}

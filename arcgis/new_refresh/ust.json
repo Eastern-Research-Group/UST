@@ -21,7 +21,7 @@
                ,"serviceLayerID": 0
                ,"cim_fields": null
                ,"position": 0
-               ,"schema": "facilities"
+               ,"schemaid": "facilities"
                ,"lyrx": "Facilities.lyrx"
                ,"searchName": "Facilities"
                ,"name": "Facilities"
@@ -37,7 +37,7 @@
                ,"position": 1
                ,"schema": "facilities"
                ,"position": 1
-               ,"schema": "releases"
+               ,"schemaid": "releases"
                ,"lyrx": "Releases.lyrx"
                ,"searchName": "Releases"
                ,"name": "Releases"
@@ -54,7 +54,7 @@
                ,"serviceLayerID": 2
                ,"cim_fields": null
                ,"position": 2
-               ,"schema": "facilities_by_county"
+               ,"schemaid": "facilities_by_county"
                ,"lyrx": "Facilities_by_County.lyrx"
                ,"searchName": "Facilities_by_County"
                ,"name": "Facilities_by_County"
@@ -68,7 +68,7 @@
                ,"serviceLayerID": 3
                ,"cim_fields": null
                ,"position": 3
-               ,"schema": "releases_by_county"
+               ,"schemaid": "releases_by_county"
                ,"lyrx": "Releases_by_County.lyrx"
                ,"searchName": "Releases_by_County"
                ,"name": "Releases_by_County"
@@ -77,7 +77,7 @@
          ,"tables": {
              "usts": { 
                 "description": null
-               ,"schema": "usts"
+               ,"schemaid": "usts"
                ,"lyrx": "USTs.lyrx"
                ,"searchName": "USTs"
                ,"name": "USTs"
