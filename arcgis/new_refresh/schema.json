@@ -290,8 +290,8 @@
                                     ,{"type": "null"}
                                   ]
                                }
-                              ,"schemaid": {
-                                  "title": "Identifier tying layer to underlying data schema configuration" 
+                              ,"datasetid": {
+                                  "title": "Identifier tying layer to underlying dataset configuration" 
                                  ,"type": "string"
                                }
                               ,"lyrx": {
@@ -310,7 +310,7 @@
                                }
                             }
                            ,"required": [
-                               "schemaid"
+                               "datasetid"
                               ,"lyrx"
                               ,"searchName"
                               ,"name"
@@ -335,8 +335,8 @@
                                           ,{"type": "null"}
                                         ]
                                      } 
-                                    ,"schemaid": {
-                                        "title": "Identifier tying table to underlying data schema configuration" 
+                                    ,"datasetid": {
+                                        "title": "Identifier tying table to underlying dataset configuration" 
                                        ,"type": "string"
                                      }
                                     ,"lyrx": {
@@ -355,7 +355,7 @@
                                      }
                                   }
                                  ,"required": [
-                                     "schemaid"
+                                     "datasetid"
                                     ,"lyrx"
                                     ,"searchName"
                                     ,"name"
@@ -368,7 +368,45 @@
                 }
              }
           }
-       }          
+       }
+      ,"datasets": {
+          "title": "Configuration Dataset defintions"
+         ,"description": "Configuration tying tabular datasets to schemas" 
+         ,"type": "object"
+         ,"patternProperties": {
+             "^.*$": {
+                "type": "object"
+               ,"properties": {  
+                   "geodatabase": {
+                      "title": "Location of the resource geodatabase"
+                     ,"description": "Allows for option relocation of the geodatabase holding the resource.  Use 'default' to use aprx.defaultGeodatabase" 
+                     ,"type": "string"
+                   }
+                  ,"datasource": {
+                      "title": "Filename of the resource geodatabase"
+                     ,"description": "Use keyword 'default' to reference project default geodatabase"
+                     ,"type": "string"
+                   }
+                   ,"schemaid": {
+                      "title": "Identifier tying layer to underlying data schema configuration" 
+                     ,"type": "string"
+                   }
+                  ,"etlsrc": {
+                      "title": "ETL source for refresh activities"
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                }
+               ,"required": [
+                   "geodatabase"
+                  ,"datasource"
+                  ,"schemaid"
+                ]
+             }
+          }
+       }
       ,"schemas": {
           "title": "Configuration Schema definitions"
          ,"description": "Configuration used to create and rebuild tabular resources in the geodatabase."
@@ -377,50 +415,60 @@
              "^.*$": {
                 "type": "object"
                ,"properties": {
-                   "geodatabase": {
-                      "title": "Location of the resource geodatabase"
-                     ,"description": "Allows for option relocation of the geodatabase holding the resource.  Use 'default' to use aprx.defaultGeodatabase" 
-                     ,"type": "string"
-                   }
-                  ,"datasource": {
-                      "title": "Filename of the resource geodatabase"
-                     ,"type": "string"
-                   }
-                  ,"geometry_type": {
+                   "geometry_type": {
                       "title": "Geometry type if applicable for the resource"
                      ,"description": "See arcpy.management.CreateFeatureclass for more information."
-                     ,"type": "string"
-                     ,"enum": [
-                         "POINT"
-                        ,"MULTIPOINT"
-                        ,"POLYGON"
-                        ,"POLYLINE"
-                        ,"MULTIPATCH"
+                     ,"anyOf": [
+                         {"type": "null"}
+                        ,{
+                            "type": "string"
+                           ,"enum": [
+                               "POINT"
+                              ,"MULTIPOINT"
+                              ,"POLYGON"
+                              ,"POLYLINE"
+                              ,"MULTIPATCH"
+                            ]
+                         }
                       ]
                    }
                   ,"srid": {
                       "title": "Spatial Reference for layer"
                      ,"description": "For AGO deployments this should almost always be 3857 for Web Mercator"
-                     ,"type": "integer"
+                     ,"anyOf": [
+                         {"type": "null"}
+                        ,{"type": "integer"}
+                      ]
                    }
                   ,"has_m": {
                       "title": "Flag as to whether the layer has measure values"
                      ,"description": "For AGO deployments, this should almost always be DISABLED"
-                     ,"type": "string"
-                     ,"enum": [
-                         "DISABLED"
-                        ,"ENABLED"
-                        ,"SAME_AS_TEMPLATE"
+                     ,"anyOf": [
+                         {"type": "null"}
+                        ,{
+                            "type": "string"
+                           ,"enum": [
+                               "DISABLED"
+                              ,"ENABLED"
+                              ,"SAME_AS_TEMPLATE"
+                            ]
+                        }
                       ]
                    }
                   ,"has_z": {
                      "title": "Flag as to whether the layer has 3D height values"
                      ,"type": "string"
-                     ,"enum": [
-                         "DISABLED"
-                        ,"ENABLED"
-                        ,"SAME_AS_TEMPLATE"
-                      ]  
+                     ,"anyOf": [
+                         {"type": "null"}
+                        ,{
+                            "type": "string"
+                           ,"enum": [
+                               "DISABLED"
+                              ,"ENABLED"
+                              ,"SAME_AS_TEMPLATE"
+                            ]
+                        }
+                      ]
                    }
                   ,"oid_type": {
                       "title": "Numeric type used for item objectid"
@@ -429,13 +477,6 @@
                          "32_BIT"
                         ,"64_BIT"
                         ,"SAME_AS_TEMPLATE"
-                      ]
-                   }
-                  ,"etlsrc": {
-                      "title": "ETL source for refresh activities"
-                     ,"anyOf": [
-                         {"type": "string"}
-                        ,{"type": "null"}
                       ]
                    }
                   ,"flds": {
@@ -513,15 +554,14 @@
                    }
                 }
                ,"required": [
-                   "geodatabase"
-                  ,"datasource"
-                  ,"flds"
+                   "flds"
                 ]
              }
           }
        }
     }
    ,"required": [
-      "schemas"
+       "schemas"
+      ,"datasets"
     ]
 }

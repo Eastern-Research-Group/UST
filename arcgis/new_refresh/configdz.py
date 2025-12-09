@@ -33,7 +33,7 @@ class ConfigDZ:
    #...........................................................................
    def datasource(
        self
-      ,p_name
+      ,datasetid
       ,aprx   = None
       ,wrkspc = None
    ):
@@ -49,28 +49,28 @@ class ConfigDZ:
       
       arcpy.env.workspace = wrkspc;
       
-      if p_name not in self.g_config['schemas']:
-         raise Exception(str(p_name) + " schema not found");
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " dataset not found");
          
-      if "geodatabase" not in self.g_config['schemas'][p_name]:
-         raise Exception("geodatabase missing from config schemas");
+      if "geodatabase" not in self.g_config['datasets'][datasetid]:
+         raise Exception("geodatabase missing from config datasets");
          
-      if "datasource" not in self.g_config['schemas'][p_name]:
-         raise Exception("geodatabase missing from config schemas");
+      if "datasource" not in self.g_config['datasets'][datasetid]:
+         raise Exception("geodatabase missing from config datasets");
          
-      if self.g_config['schemas'][p_name]['geodatabase'] == "default":
+      if self.g_config['datasets'][datasetid]['geodatabase'] == "default":
          gd = aprx.defaultGeodatabase;
       else:
-         gd = self.g_config['schemas'][p_name]['geodatabase'];
+         gd = self.g_config['datasets'][datasetid]['geodatabase'];
          
-      df = self.g_config['schemas'][p_name]['datasource'];
+      df = self.g_config['datasets'][datasetid]['datasource'];
       
       return os.path.join(gd,df);
    
    #...........................................................................
    def etlsrc(
        self
-      ,p_name
+      ,datasetid
       ,aprx   = None
       ,wrkspc = None
    ):
@@ -86,18 +86,18 @@ class ConfigDZ:
       
       arcpy.env.workspace = wrkspc;
       
-      if p_name not in self.g_config['schemas']:
-         raise Exception(str(p_name) + " not found");
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
          
-      if "etlsrc" not in self.g_config['schemas'][p_name]:
-         raise Exception("error in config");
+      if "etlsrc" not in self.g_config['datasets'][datasetid]:
+         raise Exception("etlsrc not found in config dataset");
          
-      return self.g_config['schemas'][p_name]["etlsrc"];
+      return self.g_config['datasets'][datasetid]["etlsrc"];
 
    #...........................................................................
    def fld_def(
        self
-      ,p_name
+      ,datasetid
       ,aprx   = None
       ,wrkspc = None
    ):
@@ -113,14 +113,22 @@ class ConfigDZ:
       
       arcpy.env.workspace = wrkspc;
       
-      if p_name not in self.g_config['schemas']:
-         raise Exception(str(p_name) + " not found in config schemas");
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
          
-      if "flds" not in self.g_config['schemas'][p_name]:
-         raise Exception("error in config schemas");
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if "flds" not in self.g_config['schemas'][schemaid]:
+         raise Exception("flds element not found in config schemas");
          
       results = [];
-      for item in self.g_config['schemas'][p_name]["flds"]:
+      for item in self.g_config['schemas'][schemaid]["flds"]:
          
          results.append(item[:6]);
       
@@ -129,7 +137,7 @@ class ConfigDZ:
    #...........................................................................
    def fld_idx(
        self
-      ,p_name
+      ,datasetid
       ,aprx   = None
       ,wrkspc = None
    ):
@@ -145,14 +153,22 @@ class ConfigDZ:
       
       arcpy.env.workspace = wrkspc;
       
-      if p_name not in self.g_config['schemas']:
-         raise Exception(str(p_name) + " not found");
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
          
-      if "flds" not in self.g_config['schemas'][p_name]:
-         raise Exception("error in config schemas");
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if "flds" not in self.g_config['schemas'][schemaid]:
+         raise Exception("flds element not found in config schemas");
          
       results = [];
-      for item in self.g_config['schemas'][p_name]["flds"]:
+      for item in self.g_config['schemas'][schemaid]["flds"]:
       
          if item[6]:
             results.append(item[0]);
@@ -162,7 +178,7 @@ class ConfigDZ:
    #...........................................................................
    def lst_src(
        self
-      ,p_name
+      ,datasetid
       ,aprx   = None
       ,wrkspc = None
    ):
@@ -178,14 +194,22 @@ class ConfigDZ:
       
       arcpy.env.workspace = wrkspc;
       
-      if p_name not in self.g_config['schemas']:
-         raise Exception(str(p_name) + " not found in config schemas");
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
          
-      if "flds" not in self.g_config['schemas'][p_name]:
-         raise Exception("error in config schemas");
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if "flds" not in self.g_config['schemas'][schemaid]:
+         raise Exception("flds element not found in config schemas");
          
       results = [];
-      for item in self.g_config['schemas'][p_name]["flds"]:
+      for item in self.g_config['schemas'][schemaid]["flds"]:
          
          results.append(item[7]);
             
@@ -194,7 +218,7 @@ class ConfigDZ:
    #...........................................................................
    def lst_trg(
        self
-      ,p_name
+      ,datasetid
       ,aprx   = None
       ,wrkspc = None
    ):
@@ -210,14 +234,22 @@ class ConfigDZ:
       
       arcpy.env.workspace = wrkspc;
 
-      if p_name not in self.g_config['schemas']:
-         raise Exception(str(p_name) + " not found in config schemas");
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
          
-      if "flds" not in self.g_config['schemas'][p_name]:
-         raise Exception("error in config schemas");
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if "flds" not in self.g_config['schemas'][schemaid]:
+         raise Exception("flds element not found in config schemas");
          
       results = [];
-      for item in self.g_config['schemas'][p_name]["flds"]:
+      for item in self.g_config['schemas'][schemaid]["flds"]:
       
          results.append(item[0]);
             
@@ -226,7 +258,7 @@ class ConfigDZ:
    #...........................................................................
    def alias_dict(
        self
-      ,p_name
+      ,datasetid
       ,aprx   = None
       ,wrkspc = None
    ):
@@ -242,14 +274,22 @@ class ConfigDZ:
       
       arcpy.env.workspace = wrkspc;
 
-      if p_name not in self.g_config['schemas']:
-         raise Exception(str(p_name) + " not found in config schemas");
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
          
-      if "flds" not in self.g_config['schemas'][p_name]:
-         raise Exception("error in config schemas");
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if "flds" not in self.g_config['schemas'][schemaid]:
+         raise Exception("flds element not found in config schemas");
          
       results = {};
-      for item in self.g_config['schemas'][p_name]["flds"]:
+      for item in self.g_config['schemas'][schemaid]["flds"]:
       
          if item[0].lower() not in ['objectid','globalid','shape']:
             results[item[0]] = item[2];
@@ -286,7 +326,7 @@ class ConfigDZ:
    #...........................................................................
    def cim_flds(
        self
-      ,p_name
+      ,datasetid
       ,aprx   = None
       ,wrkspc = None
    ):
@@ -302,14 +342,22 @@ class ConfigDZ:
       
       arcpy.env.workspace = wrkspc;
 
-      if p_name not in self.g_config['schemas']:
-         raise Exception(str(p_name) + " not found in config schemas");
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
          
-      if "flds" not in self.g_config['schemas'][p_name]:
-         raise Exception("error in config schemas");
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if "flds" not in self.g_config['schemas'][schemaid]:
+         raise Exception("flds element not found in config schemas");
          
       results = [];
-      for item in self.g_config['schemas'][p_name]["flds"]:
+      for item in self.g_config['schemas'][schemaid]["flds"]:
          fld = {
              "type"      : "CIMFieldDescription"
             ,"alias"     : item[2]
@@ -807,13 +855,19 @@ class ConfigDZ:
       if not arcpy.Exists(lyrx):
          raise Exception("lyrx file not found " + str(lyrx));
          
-      if 'schemaid' not in mapobj['layers'][layerid]:
-         raise Exception('schemaid value not found in map layer config');
+      datasetid = mapobj['layers'][layerid]['datasetid'];
       
-      schemaid = mapobj['layers'][layerid]['schemaid'];
-      if schemaid not in self.g_config['schemas']:
-         raise Exception('schemaid ' + str(schemaid) + ' not found in config');
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
          
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+           
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+      
       val_description = None;
       val_popupInfoTitle = None;
       val_symbology_fields = None;
@@ -843,7 +897,7 @@ class ConfigDZ:
       lyr = self.add_lyr_base(
           in_map            = mapobj['map']
          ,in_lyrx           = lyrx
-         ,in_dataset        = self.datasource(schemaid,aprx=aprx,wrkspc=wrkspc)
+         ,in_dataset        = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc)
          ,in_searchName     = lyrobj['searchName']
          ,in_name           = lyrobj['name']
          ,in_description    = val_description
@@ -890,11 +944,17 @@ class ConfigDZ:
       lyrx   = os.path.join(aprx.homeFolder,tblobj['lyrx']);
       if not arcpy.Exists(lyrx):
          raise Exception("lyrx file not found " + str(lyrx));
-
-      if 'schemaid' not in mapobj['tables'][tableid]:
-         raise Exception('schemaid value not found in map table config');
+         
+      datasetid = mapobj['tables'][tableid]['datasetid'];
       
-      schemaid = mapobj['tables'][tableid]['schemaid'];
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
+         
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
       if schemaid not in self.g_config['schemas']:
          raise Exception('schema ' + str(schemaid) + ' not found in config');
            
@@ -909,7 +969,7 @@ class ConfigDZ:
       tbl = self.add_tbl_base(
           in_map            = mapobj['map']
          ,in_lyrx           = lyrx
-         ,in_dataset        = self.datasource(schemaid,aprx=aprx,wrkspc=wrkspc)
+         ,in_dataset        = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc)
          ,in_searchName     = tblobj['searchName']
          ,in_name           = tblobj['name']
          ,in_description    = val_description
@@ -1029,11 +1089,11 @@ class ConfigDZ:
                      ,code               = vals[0]
                      ,code_description   = vals[1]
                   );
-      
+                  
    #...........................................................................
-   def build_feature_class(
+   def build_dataset(
        self
-      ,fc_name
+      ,datasetid
       ,aprx              = None
       ,wrkspc            = None
    ):
@@ -1047,16 +1107,72 @@ class ConfigDZ:
          else:
             wrkspc = self.wrkspc;
       
-      arcpy.env.workspace = wrkspc;  
+      arcpy.env.workspace = wrkspc;
       
-      if fc_name not in self.g_config['schemas']:
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
+         
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if 'geometry_type' in self.g_config['schemas'][schemaid]:
+         if self.g_config['schemas'][schemaid]['geometry_type'] is not None:
+            self.build_feature_class(
+                datasetid = datasetid
+               ,schemaid  = schemaid
+               ,aprx      = aprx
+               ,wrkspc    = wrkspc
+            );
+         
+         else:
+            self.build_table(
+                datasetid = datasetid
+               ,schemaid  = schemaid
+               ,aprx      = aprx
+               ,wrkspc    = wrkspc
+            );
+
+      else:
+         self.build_table(
+             datasetid = datasetid
+            ,schemaid  = schemaid
+            ,aprx      = aprx
+            ,wrkspc    = wrkspc
+         );
+      
+   #...........................................................................
+   def build_feature_class(
+       self
+      ,datasetid
+      ,schemaid
+      ,aprx              = None
+      ,wrkspc            = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;
+
+      if schemaid not in self.g_config['schemas']:
          raise Exception("schema missing from config")
          
-      fc = self.datasource(fc_name,aprx=aprx,wrkspc=wrkspc);
-      ob = self.g_config['schemas'][fc_name];
+      fc = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc);
+      ob = self.g_config['schemas'][schemaid];
       
       if arcpy.Exists(fc):
-         raise Exception("preexisting " + fc_name + " found");
+         raise Exception("preexisting " + datasetid + " found");
 
       arcpy.CreateFeatureclass_management(
           out_path          = os.path.dirname(fc)
@@ -1070,10 +1186,10 @@ class ConfigDZ:
 
       arcpy.management.AddFields(
           in_table          = fc
-         ,field_description = self.fld_def(fc_name)
+         ,field_description = self.fld_def(datasetid)
       );
          
-      for item in self.fld_idx(fc_name):
+      for item in self.fld_idx(datasetid):
          arcpy.management.AddIndex(
              in_table   = fc
             ,fields     = [item]
@@ -1087,7 +1203,8 @@ class ConfigDZ:
    #...........................................................................
    def build_table(
        self
-      ,tb_name
+      ,datasetid
+      ,schemaid
       ,aprx              = None
       ,wrkspc            = None
    ):
@@ -1103,14 +1220,14 @@ class ConfigDZ:
       
       arcpy.env.workspace = wrkspc;  
       
-      if tb_name not in self.g_config['schemas']:
+      if schemaid not in self.g_config['schemas']:
          raise Exception("schema missing from config")
          
-      tb = self.datasource(tb_name,aprx=aprx,wrkspc=wrkspc);
-      ob = self.g_config['schemas'][tb_name];
+      tb = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc);
+      ob = self.g_config['schemas'][schemaid];
       
       if arcpy.Exists(tb):
-         raise Exception("preexisting " + tb_name + " found");
+         raise Exception("preexisting " + datasetid + " found");
 
       arcpy.CreateTable_management(
           out_path          = os.path.dirname(tb)
@@ -1120,10 +1237,10 @@ class ConfigDZ:
 
       arcpy.management.AddFields(
           in_table          = tb
-         ,field_description = self.fld_def(tb_name)
+         ,field_description = self.fld_def(datasetid)
       );
          
-      for item in self.fld_idx(tb_name):
+      for item in self.fld_idx(datasetid):
          arcpy.management.AddIndex(
              in_table   = tb
             ,fields     = [item]
@@ -1152,7 +1269,7 @@ class ConfigDZ:
    #...........................................................................
    def etl_load(
        self
-      ,acronym
+      ,datasetid
       ,boo_testdata
       ,p_truncate
       ,aprx              = None
@@ -1176,8 +1293,8 @@ class ConfigDZ:
       if not arcpy.Exists(self.env['sde_conn']):
          raise Exception('error, sde in .env not found');
       
-      src = os.path.join(self.env['sde_conn'],self.g_config["schemas"][acronym]["etlsrc"]);
-      trg = self.datasource(acronym,aprx=aprx,wrkspc=wrkspc);
+      src = os.path.join(self.env['sde_conn'],self.g_config["datasets"][datasetid]["etlsrc"]);
+      trg = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc);
       
       if boo_testdata:
          arcpy.management.TruncateTable(trg);
@@ -1189,12 +1306,12 @@ class ConfigDZ:
       
       with arcpy.da.InsertCursor(
           in_table     = trg
-         ,field_names  = self.lst_trg(acronym) + ["SHAPE@"]
+         ,field_names  = self.lst_trg(datasetid) + ["SHAPE@"]
       ) as icursor:
          
          with arcpy.da.SearchCursor(
              in_table     = src
-            ,field_names  = self.lst_src(acronym) + ["SHAPE@"]
+            ,field_names  = self.lst_src(datasetid) + ["SHAPE@"]
          ) as scursor:
             
             for row in scursor:

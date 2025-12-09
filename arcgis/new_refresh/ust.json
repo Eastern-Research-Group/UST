@@ -21,7 +21,7 @@
                ,"serviceLayerID": 0
                ,"cim_fields": null
                ,"position": 0
-               ,"schemaid": "facilities"
+               ,"datasetid": "facilities"
                ,"lyrx": "Facilities.lyrx"
                ,"searchName": "Facilities"
                ,"name": "Facilities"
@@ -32,12 +32,10 @@
                ,"symbology_fields": null
                ,"update_symbology": null
                ,"in_visibility": null
-               ,"serviceLayerID": 0
+               ,"serviceLayerID": 1
                ,"cim_fields": null
                ,"position": 1
-               ,"schema": "facilities"
-               ,"position": 1
-               ,"schemaid": "releases"
+               ,"datasetid": "releases"
                ,"lyrx": "Releases.lyrx"
                ,"searchName": "Releases"
                ,"name": "Releases"
@@ -54,7 +52,7 @@
                ,"serviceLayerID": 2
                ,"cim_fields": null
                ,"position": 2
-               ,"schemaid": "facilities_by_county"
+               ,"datasetid": "facilities_by_county"
                ,"lyrx": "Facilities_by_County.lyrx"
                ,"searchName": "Facilities_by_County"
                ,"name": "Facilities_by_County"
@@ -68,7 +66,7 @@
                ,"serviceLayerID": 3
                ,"cim_fields": null
                ,"position": 3
-               ,"schemaid": "releases_by_county"
+               ,"datasetid": "releases_by_county"
                ,"lyrx": "Releases_by_County.lyrx"
                ,"searchName": "Releases_by_County"
                ,"name": "Releases_by_County"
@@ -77,7 +75,7 @@
          ,"tables": {
              "usts": { 
                 "description": null
-               ,"schemaid": "usts"
+               ,"datasetid": "usts"
                ,"lyrx": "USTs.lyrx"
                ,"searchName": "USTs"
                ,"name": "USTs"
@@ -86,11 +84,41 @@
          }
        }
     }
-   ,"schemas": {
+   ,"datasets": {
        "facilities": {
           "geodatabase": "default"
          ,"datasource": "facilities"
-         ,"geometry_type": "POINT"
+         ,"schemaid": "facilities"
+         ,"etlsrc": null
+       }
+      ,"releases": {
+          "geodatabase": "default"
+         ,"datasource": "releases"
+         ,"schemaid": "releases"
+         ,"etlsrc": null
+       }
+      ,"facilities_by_county": {
+          "geodatabase": "default"
+         ,"datasource": "facilities_by_county"
+         ,"schemaid": "facilities_by_county"
+         ,"etlsrc": null
+       }
+      ,"releases_by_county": {
+          "geodatabase": "default"
+         ,"datasource": "releases_by_county"
+         ,"schemaid": "releases_by_county"
+         ,"etlsrc": null
+       }
+      ,"usts": {
+          "geodatabase": "default"
+         ,"datasource": "usts"
+         ,"schemaid": "usts"
+         ,"etlsrc": null
+       }
+    }
+   ,"schemas": {
+       "facilities": {
+          "geometry_type": "POINT"
          ,"srid": 3857
          ,"has_m": "ENABLED"
          ,"has_z": "ENABLED"
@@ -131,9 +159,7 @@
           ]
        }
       ,"releases": {
-          "geodatabase": "default"
-         ,"datasource": "releases"
-         ,"geometry_type": "POINT"
+          "geometry_type": "POINT"
          ,"srid": 3857
          ,"has_m": "ENABLED"
          ,"has_z": "ENABLED"
@@ -178,9 +204,7 @@
           ]
        }
       ,"facilities_by_county": {
-          "geodatabase": "default"
-         ,"datasource": "facilities_by_county"
-         ,"geometry_type": "POLYGON"
+          "geometry_type": "POLYGON"
          ,"srid": 3857
          ,"has_m": "DISABLED"
          ,"has_z": "DISABLED"
@@ -196,9 +220,7 @@
           ]
        }
       ,"releases_by_county": {
-          "geodatabase": "default"
-         ,"datasource": "releases_by_county"
-         ,"geometry_type": "POLYGON"
+          "geometry_type": "POLYGON"
          ,"srid": 3857
          ,"has_m": "DISABLED"
          ,"has_z": "DISABLED"
@@ -213,9 +235,7 @@
           ]
        }
       ,"usts": {
-          "geodatabase": "default"
-         ,"datasource": "usts"
-         ,"oid_type": "32_BIT"
+          "oid_type": "32_BIT"
          ,"flds": [
              ["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,null]
             ,["Facility_ID"                    ,"TEXT"  ,"Facility_ID"                                                 ,8000,null,"",true ,null]
