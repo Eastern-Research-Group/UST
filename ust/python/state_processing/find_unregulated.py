@@ -57,7 +57,7 @@ class Unregulated:
 	def execute(self):
 		if not self.check_for_substances():
 			logger.info('No substance data for %s %s, no need to check for unregulated %s.', self.dataset.organization_id, utils.get_pretty_ust_or_release(self.dataset.ust_or_release), self.data_type)
-			exit()
+			sys.exit()
 
 		self.connect_db()
 

@@ -204,7 +204,7 @@ def get_org_from_control_id(control_id, ust_or_release):
     if ok:
         return org  
     else:
-        exit()
+        sys.exit()
 
 
 def delete_all_release_data(control_id):
@@ -619,7 +619,7 @@ def process_sql(conn, cur, sql, params=None, exit_on_fail=True):
             cur.close()
             conn.close()     
             error_logger.error('\n\nEXITING DUE TO SQL ERROR....\n\n')  
-            exit()  
+            sys.exit()  
 
 
 def pretty_print_df(df):
