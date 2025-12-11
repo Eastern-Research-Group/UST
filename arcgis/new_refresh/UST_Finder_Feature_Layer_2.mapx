@@ -1,0 +1,227 @@
+{
+  "type" : "CIMMapDocument",
+  "version" : "3.5.0",
+  "build" : 57366,
+  "mapDefinition" : {
+    "type" : "CIMMap",
+    "name" : "UST_Finder_Feature_Layer_2",
+    "uRI" : "CIMPATH=Map/Map2.json",
+    "sourceModifiedTime" : {
+      "type" : "TimeInstant",
+      "start" : -62135596800000
+    },
+    "metadataURI" : "CIMPATH=Metadata/2e3d072f34dfaa87631fd607428725e9.xml",
+    "useSourceMetadata" : true,
+    "illumination" : {
+      "type" : "CIMIlluminationProperties",
+      "ambientLight" : 50,
+      "sunPositionX" : -0.61237243569579003,
+      "sunPositionY" : 0.61237243569579003,
+      "sunPositionZ" : 0.5,
+      "illuminationSource" : "AbsoluteSunPosition",
+      "sunAzimuth" : 315,
+      "sunAltitude" : 30,
+      "showStars" : true,
+      "enableAmbientOcclusion" : true,
+      "enableEyeDomeLighting" : true
+    },
+    "defaultViewingMode" : "Map",
+    "mapType" : "Map",
+    "timeSliderSettings" : {
+      "type" : "CIMSliderSettings",
+      "sliderExtent" : {
+        "type" : "CIMRange",
+        "min" : 4333.666666666667,
+        "max" : 45160.208333333336
+      },
+      "sliderExtentLocked" : true,
+      "windowValue" : 4,
+      "windowUnit" : "esriTimeUnitsYears",
+      "stepUsesWindow" : true,
+      "stepIntervalValue" : 4,
+      "stepIntervalUnit" : "esriTimeUnitsYears",
+      "stepCount" : 30,
+      "stepOption" : "Feature",
+      "playWaitSeconds" : 0.29999999999999999,
+      "playForward" : true,
+      "fullExtentOption" : "AllLayers",
+      "interactionMode" : "Slider",
+      "timeSnapMode" : "Single",
+      "singleTimeSnapUnit" : "esriTimeUnitsSeconds",
+      "liveModeOffsetDirection" : "Past"
+    },
+    "groundElevationSurfaceLayer" : "CIMPATH=Map/4ea4e931b4e4409a8bdf04e5dc1ea189.json",
+    "defaultColorVisionDeficiencyMode" : "None",
+    "defaultExtent" : {
+      "xmin" : -21734140.5725234188,
+      "ymin" : -11161446.5023674723,
+      "xmax" : 18035923.7117737047,
+      "ymax" : 17747388.7268752009,
+      "spatialReference" : {
+        "wkid" : 102100,
+        "latestWkid" : 3857,
+        "xyTolerance" : 0.001,
+        "zTolerance" : 0.001,
+        "mTolerance" : 0.001,
+        "falseX" : -20037700,
+        "falseY" : -30241100,
+        "xyUnits" : 10000,
+        "falseZ" : -100000,
+        "zUnits" : 10000,
+        "falseM" : -100000,
+        "mUnits" : 10000
+      }
+    },
+    "generalPlacementProperties" : {
+      "type" : "CIMMaplexGeneralPlacementProperties",
+      "invertedLabelTolerance" : 2,
+      "unplacedLabelColor" : {
+        "type" : "CIMRGBColor",
+        "values" : [
+          255,
+          0,
+          0,
+          100
+        ]
+      },
+      "keyNumberGroups" : [
+        {
+          "type" : "CIMMaplexKeyNumberGroup",
+          "delimiterCharacter" : ".",
+          "horizontalAlignment" : "Left",
+          "maximumNumberOfLines" : 20,
+          "minimumNumberOfLines" : 2,
+          "name" : "Default",
+          "numberResetType" : "None",
+          "keyNumberMethod" : "PreventUnplacedLabels"
+        }
+      ],
+      "placementQuality" : "High"
+    },
+    "snappingProperties" : {
+      "type" : "CIMSnappingProperties",
+      "xYTolerance" : 10,
+      "xYToleranceUnit" : "SnapXYToleranceUnitPixel",
+      "snapToSketchEnabled" : true,
+      "snapRequestType" : "SnapRequestType_GeometricAndVisualSnapping",
+      "isZSnappingEnabled" : true,
+      "snapTipDisplayParts" : 3
+    },
+    "spatialReference" : {
+      "wkid" : 102100,
+      "latestWkid" : 3857,
+      "xyTolerance" : 0.001,
+      "zTolerance" : 0.001,
+      "mTolerance" : 0.001,
+      "falseX" : -20037700,
+      "falseY" : -30241100,
+      "xyUnits" : 10000,
+      "falseZ" : -100000,
+      "zUnits" : 10000,
+      "falseM" : -100000,
+      "mUnits" : 10000
+    },
+    "timeDisplay" : {
+      "type" : "CIMMapTimeDisplay",
+      "currentTimeExtent" : {
+        "type" : "TimeExtent",
+        "TimeReference" : {
+          "type" : "TimeReference",
+          "respectsDaylightSaving" : false,
+          "respectsDynamicAdjustmentRules" : false,
+          "timeZoneIANA" : ""
+        },
+        "start" : -1834732800000,
+        "end" : 1692680400000,
+        "empty" : false
+      },
+      "defaultTimeIntervalUnits" : "esriTimeUnitsUnknown",
+      "timeReference" : {
+        "type" : "TimeReference",
+        "respectsDaylightSaving" : false,
+        "respectsDynamicAdjustmentRules" : false,
+        "timeZoneIANA" : ""
+      },
+      "timeValue" : {
+        "type" : "TimeExtent",
+        "TimeReference" : {
+          "type" : "TimeReference",
+          "respectsDaylightSaving" : false,
+          "respectsDynamicAdjustmentRules" : false,
+          "timeZoneIANA" : ""
+        },
+        "start" : null,
+        "end" : null,
+        "empty" : false
+      },
+      "timeRelation" : "esriTimeRelationOverlaps"
+    },
+    "colorModel" : "RGB",
+    "scaleDisplayFormat" : "Value",
+    "useServiceLayerIDs" : true,
+    "clippingMode" : "None",
+    "nearPlaneClipDistanceMode" : "Automatic",
+    "rGBColorProfile" : "sRGB IEC61966-2.1",
+    "cMYKColorProfile" : "U.S. Web Coated (SWOP) v2",
+    "autoFillFeatureCache" : true,
+    "useMasking" : true
+  },
+  "binaryReferences" : [
+    {
+      "type" : "CIMBinaryReference",
+      "uRI" : "CIMPATH=Metadata/2e3d072f34dfaa87631fd607428725e9.xml",
+      "data" : "<?xml version=\"1.0\"?>\r\n<metadata xml:lang=\"en\"><Esri><CreaDate>20251129</CreaDate><CreaTime>09355700</CreaTime><ArcGISFormat>1.0</ArcGISFormat><SyncOnce>TRUE</SyncOnce></Esri><dataIdInfo><idCitation><resTitle>Map2</resTitle></idCitation></dataIdInfo></metadata>\r\n"
+    }
+  ],
+  "elevationSurfaceLayerDefinitions" : [
+    {
+      "type" : "CIMElevationSurfaceLayer",
+      "name" : "Ground",
+      "uRI" : "CIMPATH=Map/4ea4e931b4e4409a8bdf04e5dc1ea189.json",
+      "sourceModifiedTime" : {
+        "type" : "TimeInstant"
+      },
+      "useSourceMetadata" : true,
+      "description" : "Ground",
+      "expanded" : true,
+      "layer3DProperties" : {
+        "type" : "CIM3DLayerProperties",
+        "castShadows" : true,
+        "isLayerLit" : true,
+        "layerFaceCulling" : "None",
+        "preloadTextureCutoffHigh" : 0.29999999999999999,
+        "preloadTextureCutoffLow" : 0.59999999999999998,
+        "textureCutoffHigh" : 0.29999999999999999,
+        "textureCutoffLow" : 0.59999999999999998,
+        "useCompressedTextures" : true,
+        "verticalExaggeration" : 1,
+        "exaggerationMode" : "ScaleZ",
+        "lighting" : "OneSideDataNormal",
+        "optimizeMarkerTransparency" : true
+      },
+      "layerType" : "Operational",
+      "showLegends" : false,
+      "visibility" : true,
+      "displayCacheType" : "Permanent",
+      "maxDisplayCacheAge" : 5,
+      "showPopups" : true,
+      "serviceLayerID" : -1,
+      "refreshRate" : -1,
+      "refreshRateUnit" : "esriTimeUnitsSeconds",
+      "blendingMode" : "Alpha",
+      "allowDrapingOnIntegratedMesh" : true,
+      "elevationMode" : "BaseGlobeSurface",
+      "verticalExaggeration" : 1,
+      "color" : {
+        "type" : "CIMRGBColor",
+        "values" : [
+          255,
+          255,
+          255,
+          100
+        ]
+      },
+      "surfaceTINShadingMode" : "Smooth"
+    }
+  ]
+}
