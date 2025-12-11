@@ -176,7 +176,47 @@ class ConfigDZ:
       return results;
    
    #...........................................................................
-   def lst_src(
+   def flds(
+       self
+      ,datasetid
+      ,aprx   = None
+      ,wrkspc = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;
+      
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
+         
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if "flds" not in self.g_config['schemas'][schemaid]:
+         raise Exception("flds element not found in config schemas");
+         
+      results = [];
+      for item in self.g_config['schemas'][schemaid]["flds"]:
+         
+         results.append(item[0]);
+            
+      return results;
+      
+   #...........................................................................
+   def etl_flds(
        self
       ,datasetid
       ,aprx   = None
@@ -214,9 +254,9 @@ class ConfigDZ:
          results.append(item[7]);
             
       return results;
-   
+      
    #...........................................................................
-   def lst_trg(
+   def etl_lkup(
        self
       ,datasetid
       ,aprx   = None
@@ -233,7 +273,7 @@ class ConfigDZ:
             wrkspc = self.wrkspc;
       
       arcpy.env.workspace = wrkspc;
-
+      
       if datasetid not in self.g_config['datasets']:
          raise Exception(str(datasetid) + " not found in config datasets");
          
@@ -248,13 +288,15 @@ class ConfigDZ:
       if "flds" not in self.g_config['schemas'][schemaid]:
          raise Exception("flds element not found in config schemas");
          
-      results = [];
+      idx = 0;
+      results = {};
       for item in self.g_config['schemas'][schemaid]["flds"]:
-      
-         results.append(item[0]);
+         
+         results[item[7]] = idx;
+         idx = idx + 1;
             
       return results;
-    
+   
    #...........................................................................
    def alias_dict(
        self
@@ -1306,12 +1348,12 @@ class ConfigDZ:
       
       with arcpy.da.InsertCursor(
           in_table     = trg
-         ,field_names  = self.lst_trg(datasetid) + ["SHAPE@"]
+         ,field_names  = self.flds(datasetid) + ["SHAPE@"]
       ) as icursor:
          
          with arcpy.da.SearchCursor(
              in_table     = src
-            ,field_names  = self.lst_src(datasetid) + ["SHAPE@"]
+            ,field_names  = self.etl_flds(datasetid) + ["SHAPE@"]
          ) as scursor:
             
             for row in scursor:

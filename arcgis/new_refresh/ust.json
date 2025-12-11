@@ -115,6 +115,24 @@
          ,"schemaid": "usts"
          ,"etlsrc": null
        }
+      ,"tribal_fac": {
+          "geodatabase": "default"
+         ,"datasource": "tribal_fac"
+         ,"schemaid": "tribal_fac"
+         ,"etlsrc": null
+       }
+      ,"tribal_rel": {
+          "geodatabase": "default"
+         ,"datasource": "tribal_rel"
+         ,"schemaid": "tribal_rel"
+         ,"etlsrc": null
+       }
+      ,"tribal_usts": {
+          "geodatabase": "default"
+         ,"datasource": "tribal_usts"
+         ,"schemaid": "tribal_usts"
+         ,"etlsrc": null
+       }
     }
    ,"schemas": {
        "facilities": {
@@ -245,7 +263,71 @@
             ,["Removal_Date"                   ,"DATE"  ,"Removal_Date"                                                ,null,null,"",false,null]
             ,["Capacity"                       ,"LONG"  ,"Capacity"                                                    ,null,null,"",false,null]
             ,["Substances"                     ,"TEXT"  ,"Substances"                                                  ,8000,null,"",false,null]
-            ,["Tank_Wall_Type"                 ,"TEXT"  ,"Tank_Wall_Type"                                              ,8000,null,"",false,null]      
+            ,["Tank_Wall_Type"                 ,"TEXT"  ,"Tank_Wall_Type"                                              ,8000,null,"",false,null]
+          ]
+       }
+      ,"tribal_fac": {
+          "oid_type": "32_BIT"
+         ,"flds": [
+             ["Region"                         ,"TEXT"  ,"Region"                                                      ,8000,null,"",true ,"Region"]
+            ,["Land_Location_ID"               ,"TEXT"  ,"Land Location ID"                                            ,8000,null,"",true ,"Land Location ID"]
+            ,["Location_ID"                    ,"TEXT"  ,"Location ID"                                                 ,8000,null,"",true ,"Location ID" ]
+            ,["Tribe"                          ,"TEXT"  ,"Tribe"                                                       ,8000,null,"",true ,"Tribe"]
+            ,["Name"                           ,"TEXT"  ,"Name"                                                        ,8000,null,"",false,"Name"]
+            ,["Address"                        ,"TEXT"  ,"Address"                                                     ,8000,null,"",false,"Address"]
+            ,["City"                           ,"TEXT"  ,"City"                                                        ,8000,null,"",false,"City"]
+            ,["County"                         ,"TEXT"  ,"County"                                                      ,8000,null,"",false,"County"]
+            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",false,"State"]
+            ,["Zip"                            ,"TEXT"  ,"Zip"                                                         ,8000,null,"",false,"Zip"]
+            ,["Latitude"                       ,"TEXT"  ,"Latitude"                                                    ,8000,null,"",false,"Latitude"]
+            ,["Longitude"                      ,"TEXT"  ,"Longitude"                                                   ,8000,null,"",false,"Longitude"]
+            ,["Lat_Lon_Source"                 ,"TEXT"  ,"Lat Lon Source"                                              ,8000,null,"",false,"Lat Lon Source"]
+            ,["Open_USTs"                      ,"TEXT"  ,"Open USTs"                                                   ,8000,null,"",false,"Open USTs"]
+            ,["Closed_USTs"                    ,"TEXT"  ,"Closed USTs"                                                 ,8000,null,"",false,"Closed USTs"]
+            ,["Temporarily_Out_of_Service_USTs","TEXT"  ,"Temporarily Out of Service USTs"                             ,8000,null,"",false,"Temporarily Out of Service USTs"]
+            ,["Abandoned_USTs"                 ,"TEXT"  ,"Abandoned USTs"                                              ,8000,null,"",false,"Abandoned USTs"]
+            ,["Facility_Status"                ,"TEXT"  ,"Facility Status"                                             ,8000,null,"",false,"Facility Status"]
+            ,["Date_of_Last_Inspection"        ,"TEXT"  ,"Date of Last Inspection"                                     ,8000,null,"",false,"Date of Last Inspection"]
+          ]
+       }
+      ,"tribal_rel": {
+          "oid_type": "32_BIT"
+         ,"flds": [
+             ["Region"                         ,"TEXT"  ,"Region"                                                      ,8000,null,"",true ,"Region"]
+            ,["Land_Location_ID"               ,"TEXT"  ,"Land Location ID"                                            ,8000,null,"",true ,"Land Location ID"]
+            ,["Location_ID"                    ,"TEXT"  ,"Location ID"                                                 ,8000,null,"",true ,"Location ID"]
+            ,["Tribe"                          ,"TEXT"  ,"Tribe"                                                       ,8000,null,"",true ,"Tribe"]
+            ,["LUST_ID"                        ,"TEXT"  ,"LUST ID"                                                     ,8000,null,"",true ,"LUST ID"]
+            ,["Name"                           ,"TEXT"  ,"Name"                                                        ,8000,null,"",false,"Name"]
+            ,["Address"                        ,"TEXT"  ,"Address"                                                     ,8000,null,"",false,"Address"]
+            ,["City"                           ,"TEXT"  ,"City"                                                        ,8000,null,"",false,"City"]
+            ,["County"                         ,"TEXT"  ,"County"                                                      ,8000,null,"",false,"County"]
+            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",false,"State"]
+            ,["Zip"                            ,"TEXT"  ,"Zip"                                                         ,8000,null,"",false,"Zip"]
+            ,["Latitude"                       ,"TEXT"  ,"Latitude"                                                    ,8000,null,"",false,"Latitude"]
+            ,["Longitude"                      ,"TEXT"  ,"Longitude"                                                   ,8000,null,"",false,"Longitude"]
+            ,["Lat_Lon_Source"                 ,"TEXT"  ,"Lat Lon Source"                                              ,8000,null,"",false,"Lat Lon Source"]
+            ,["Reported_Date"                  ,"TEXT"  ,"Reported Date"                                               ,8000,null,"",false,"Reported Date"]
+            ,["Status"                         ,"TEXT"  ,"Status"                                                      ,8000,null,"",false,"Status"]
+            ,["Substance"                      ,"TEXT"  ,"Substance"                                                   ,8000,null,"",false,"Substance"]
+            ,["Closed_with_Residual_Contaminat","TEXT"  ,"Closed with Residual Contamination"                          ,8000,null,"",false,"Closed with Residual Contamination"]
+          ]
+       }
+      ,"tribal_usts": {
+          "oid_type": "32_BIT"
+         ,"flds": [
+             ["Region"                         ,"TEXT"  ,"Region"                                                      ,8000,null,"",true ,"Region"]
+            ,["Land_Location_ID"               ,"TEXT"  ,"Land Location ID"                                            ,8000,null,"",true ,"Land Location ID"]
+            ,["Location_ID"                    ,"TEXT"  ,"Location ID"                                                 ,8000,null,"",true ,"Location ID"]
+            ,["Tribe"                          ,"TEXT"  ,"Tribe"                                                       ,8000,null,"",true ,"Tribe"]
+            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",false,"State"]
+            ,["Tank_ID"                        ,"TEXT"  ,"Tank ID"                                                     ,8000,null,"",true ,"Tank ID"]
+            ,["Tank_Status"                    ,"TEXT"  ,"Tank Status"                                                 ,8000,null,"",false,"Tank Status"]
+            ,["Installation_Date"              ,"TEXT"  ,"Installation Date"                                           ,8000,null,"",false,"Installation Date"]
+            ,["Removal_Date"                   ,"TEXT"  ,"Removal Date"                                                ,8000,null,"",false,"Removal Date"]
+            ,["Capacity"                       ,"TEXT"  ,"Capacity"                                                    ,8000,null,"",false,"Capacity"]
+            ,["Substance_Stored"               ,"TEXT"  ,"Substance Stored"                                            ,8000,null,"",false,"Substance Stored"]
+            ,["Tank_Wall_Type"                 ,"TEXT"  ,"Tank Wall Type"                                              ,8000,null,"",false,"Tank Wall Type"]
           ]
        }
     }
