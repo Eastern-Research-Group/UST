@@ -256,6 +256,48 @@ class ConfigDZ:
       return results;
       
    #...........................................................................
+   def fld_lkup(
+       self
+      ,datasetid
+      ,aprx   = None
+      ,wrkspc = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;
+      
+      if datasetid not in self.g_config['datasets']:
+         raise Exception(str(datasetid) + " not found in config datasets");
+         
+      if 'schemaid' not in self.g_config['datasets'][datasetid]:
+         raise Exception("schemaid element not found in config datasets");
+         
+      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if "flds" not in self.g_config['schemas'][schemaid]:
+         raise Exception("flds element not found in config schemas");
+         
+      idx = 0;
+      results = {};
+      for item in self.g_config['schemas'][schemaid]["flds"]:
+         
+         results[item[0]] = idx;
+         idx = idx + 1;
+            
+      return results;
+      
+   #...........................................................................
    def etl_lkup(
        self
       ,datasetid

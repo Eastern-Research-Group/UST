@@ -141,13 +141,14 @@
          ,"has_m": "ENABLED"
          ,"has_z": "ENABLED"
          ,"oid_type": "32_BIT"
+         ,"add_globalids": true
          ,"flds": [
              ["Facility_ID"                    ,"TEXT"  ,"Facility ID"                                                 ,255 ,null,"",true ,null]
             ,["Name"                           ,"TEXT"  ,"Name"                                                        ,255 ,null,"",false,null]
             ,["Address"                        ,"TEXT"  ,"Address"                                                     ,255 ,null,"",false,null]
             ,["City"                           ,"TEXT"  ,"City"                                                        ,255 ,null,"",false,null]
             ,["County"                         ,"TEXT"  ,"County"                                                      ,255 ,null,"",false,null]
-            ,["State"                          ,"TEXT"  ,"State"                                                       ,255 ,null,"",false,null]
+            ,["State"                          ,"TEXT"  ,"State"                                                       ,255 ,null,"",true ,null]
             ,["Zip_Code"                       ,"TEXT"  ,"Zip Code"                                                    ,255 ,null,"",false,null]
             ,["Latitude"                       ,"DOUBLE","Latitude"                                                    ,null,null,"",false,null]
             ,["Longitude"                      ,"DOUBLE","Longitude"                                                   ,null,null,"",false,null]
@@ -182,6 +183,7 @@
          ,"has_m": "ENABLED"
          ,"has_z": "ENABLED"
          ,"oid_type": "32_BIT"
+         ,"add_globalids": true
          ,"flds": [
              ["Facility_ID"                    ,"TEXT"  ,"Facility ID"                                                 ,8000,null,"",true ,null]
             ,["LUST_ID"                        ,"TEXT"  ,"LUST_ID"                                                     ,8000,null,"",true ,null]
@@ -189,7 +191,7 @@
             ,["Address"                        ,"TEXT"  ,"Address"                                                     ,8000,null,"",false,null]
             ,["City"                           ,"TEXT"  ,"City"                                                        ,8000,null,"",false,null]
             ,["County"                         ,"TEXT"  ,"County"                                                      ,8000,null,"",false,null]
-            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",false,null]
+            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,null]
             ,["Zip_Code"                       ,"TEXT"  ,"Zip_Code"                                                    ,8000,null,"",false,null]
             ,["Latitude"                       ,"DOUBLE","Latitude"                                                    ,null,null,"",false,null]
             ,["Longitude"                      ,"DOUBLE","Longitude"                                                   ,null,null,"",false,null]
@@ -227,6 +229,7 @@
          ,"has_m": "DISABLED"
          ,"has_z": "DISABLED"
          ,"oid_type": "32_BIT"
+         ,"add_globalids": true
          ,"flds": [
              ["Facility_Count"                 ,"LONG"  ,"Facility Count"                                              ,null,null,"",false,null]
             ,["NAME"                           ,"TEXT"  ,"County Name"                                                 ,255 ,null,"",true ,null]
@@ -243,6 +246,7 @@
          ,"has_m": "DISABLED"
          ,"has_z": "DISABLED"
          ,"oid_type": "32_BIT"
+         ,"add_globalids": true
          ,"flds": [
              ["Release_Count"                  ,"LONG"  ,"Release Count"                                               ,null,null,"",false,null]
             ,["County"                         ,"TEXT"  ,"County"                                                      ,8000,null,"",true ,null]
@@ -254,11 +258,12 @@
        }
       ,"usts": {
           "oid_type": "32_BIT"
+         ,"add_globalids": true
          ,"flds": [
              ["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,null]
             ,["Facility_ID"                    ,"TEXT"  ,"Facility_ID"                                                 ,8000,null,"",true ,null]
             ,["Tank_ID"                        ,"TEXT"  ,"Tank_ID"                                                     ,8000,null,"",true ,null]
-            ,["Tank_Status"                    ,"TEXT"  ,"Tank_Status"                                                 ,8000,null,"",true ,null]
+            ,["Tank_Status"                    ,"TEXT"  ,"Tank_Status"                                                 ,8000,null,"",false,null]
             ,["Installation_Date"              ,"DATE"  ,"Installation_Date"                                           ,null,null,"",false,null]
             ,["Removal_Date"                   ,"DATE"  ,"Removal_Date"                                                ,null,null,"",false,null]
             ,["Capacity"                       ,"LONG"  ,"Capacity"                                                    ,null,null,"",false,null]
@@ -268,6 +273,7 @@
        }
       ,"tribal_fac": {
           "oid_type": "32_BIT"
+         ,"add_globalids": false
          ,"flds": [
              ["Region"                         ,"TEXT"  ,"Region"                                                      ,8000,null,"",true ,"Region"]
             ,["Land_Location_ID"               ,"TEXT"  ,"Land Location ID"                                            ,8000,null,"",true ,"Land Location ID"]
@@ -277,7 +283,7 @@
             ,["Address"                        ,"TEXT"  ,"Address"                                                     ,8000,null,"",false,"Address"]
             ,["City"                           ,"TEXT"  ,"City"                                                        ,8000,null,"",false,"City"]
             ,["County"                         ,"TEXT"  ,"County"                                                      ,8000,null,"",false,"County"]
-            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",false,"State"]
+            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,"State"]
             ,["Zip"                            ,"TEXT"  ,"Zip"                                                         ,8000,null,"",false,"Zip"]
             ,["Latitude"                       ,"TEXT"  ,"Latitude"                                                    ,8000,null,"",false,"Latitude"]
             ,["Longitude"                      ,"TEXT"  ,"Longitude"                                                   ,8000,null,"",false,"Longitude"]
@@ -292,6 +298,7 @@
        }
       ,"tribal_rel": {
           "oid_type": "32_BIT"
+         ,"add_globalids": false
          ,"flds": [
              ["Region"                         ,"TEXT"  ,"Region"                                                      ,8000,null,"",true ,"Region"]
             ,["Land_Location_ID"               ,"TEXT"  ,"Land Location ID"                                            ,8000,null,"",true ,"Land Location ID"]
@@ -302,7 +309,7 @@
             ,["Address"                        ,"TEXT"  ,"Address"                                                     ,8000,null,"",false,"Address"]
             ,["City"                           ,"TEXT"  ,"City"                                                        ,8000,null,"",false,"City"]
             ,["County"                         ,"TEXT"  ,"County"                                                      ,8000,null,"",false,"County"]
-            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",false,"State"]
+            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,"State"]
             ,["Zip"                            ,"TEXT"  ,"Zip"                                                         ,8000,null,"",false,"Zip"]
             ,["Latitude"                       ,"TEXT"  ,"Latitude"                                                    ,8000,null,"",false,"Latitude"]
             ,["Longitude"                      ,"TEXT"  ,"Longitude"                                                   ,8000,null,"",false,"Longitude"]
@@ -315,12 +322,13 @@
        }
       ,"tribal_usts": {
           "oid_type": "32_BIT"
+         ,"add_globalids": false
          ,"flds": [
              ["Region"                         ,"TEXT"  ,"Region"                                                      ,8000,null,"",true ,"Region"]
             ,["Land_Location_ID"               ,"TEXT"  ,"Land Location ID"                                            ,8000,null,"",true ,"Land Location ID"]
             ,["Location_ID"                    ,"TEXT"  ,"Location ID"                                                 ,8000,null,"",true ,"Location ID"]
             ,["Tribe"                          ,"TEXT"  ,"Tribe"                                                       ,8000,null,"",true ,"Tribe"]
-            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",false,"State"]
+            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,"State"]
             ,["Tank_ID"                        ,"TEXT"  ,"Tank ID"                                                     ,8000,null,"",true ,"Tank ID"]
             ,["Tank_Status"                    ,"TEXT"  ,"Tank Status"                                                 ,8000,null,"",false,"Tank Status"]
             ,["Installation_Date"              ,"TEXT"  ,"Installation Date"                                           ,8000,null,"",false,"Installation Date"]
