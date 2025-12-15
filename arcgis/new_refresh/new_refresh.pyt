@@ -44,6 +44,7 @@ class Toolbox(object):
       self.tools.append(ReloadFromAGOUST);
       self.tools.append(DeduplicateAGOUST);
       self.tools.append(LoadTribalCSVsUST);
+      self.tools.append(ReverseGeocodeTribalUST);
       self.tools.append(UpsertTribalDataUST);
       self.tools.append(RebuildMapsUST);
       
@@ -1358,6 +1359,50 @@ class LoadTribalCSVsUST(object):
                   icursor.insertRow(inrow);
                   
       #########################################################################
+      arcpy.AddMessage("Altering tribal facilities inputs per client requests");
+      with arcpy.da.UpdateCursor(
+          in_table    = trb_fac
+         ,field_names = ['Location_ID','State','Facility_Status']
+      ) as ucursor:
+         
+         for row in ucursor:
+            
+            boo_check = False;
+            if row[2] is None or row[2] == '' or row[2] == ' ':
+               arcpy.AddMessage("Deleting tribal facilities " + str(row[0]) + " " + str(row[1]) + " having blank status");
+               ucursor.deleteRow()
+               
+            else:
+               if row[0].lower() in  ['non-operating','abandoned','operating','temporary closed']:
+                  row[0] == 'Open UST(s)';
+                  boo_check = True;
+               
+               if row[0].lower() in  ['permanent closed']:
+                  row[0] == 'Closed UST(s)';
+                  boo_check = True;               
+               
+               if boo_check:
+                  ucursor.updateRow(row);
+                  
+      #########################################################################
+      arcpy.AddMessage("Altering tribal releasaes inputs per client requests");
+      with arcpy.da.UpdateCursor(
+          in_table    = trb_rel
+         ,field_names = ['Status']
+      ) as ucursor:
+         
+         for row in ucursor:
+            
+            boo_check = False;
+            if row[0] is not None:
+               if row[0].lower() == 'closed':
+                  row[0] == 'No Further Action';
+                  boo_check = True;
+                  
+            if boo_check:
+               ucursor.updateRow(row);
+      
+      #########################################################################
       arcpy.AddMessage("Setting up to dedup tribal CSVs");
       conn    = sqlite3.connect(aprx.defaultGeodatabase);
       cursor  = conn.cursor();
@@ -1909,14 +1954,71 @@ class LoadTribalCSVsUST(object):
             
       #########################################################################
       arcpy.AddMessage("Tribal CSVs loaded.");
-   
+
+###############################################################################
+class ReverseGeocodeTribalUST(object):
+
+   #...........................................................................
+   def __init__(self):
+
+      self.label              = "A5 RGeocode Tribal Data";
+      self.name               = "ReverseGeocodeTribalUST";
+      self.description        = "ReverseGeocodeTribalUST";
+      self.canRunInBackground = False;
+
+   #...........................................................................
+   def getParameterInfo(self):
+      
+      params = [];
+      
+      return params;
+
+   #...........................................................................
+   def isLicensed(self):
+
+      return True;
+
+   #...........................................................................
+   def updateParameters(self,parameters):
+
+      return;
+
+   #...........................................................................
+   def updateMessages(self,parameters):
+
+      return;
+
+   #...........................................................................
+   def execute(self,parameters,messages):
+
+      aprx = g_config.aprx;
+      wrkspc = g_config.wrkspc;
+      arcpy.env.workspace = wrkspc;
+      
+      #########################################################################
+      fac  = g_config.datasource('facilities',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(fac):
+         raise Exception('facilities not found');
+      rel  = g_config.datasource('releases',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(rel):
+         raise Exception('releases not found');
+      fbc  = g_config.datasource('facilities_by_county',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(fbc):
+         raise Exception('facilities by county not found');
+      rbc  = g_config.datasource('releases_by_county',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(rbc):
+         raise Exception('resources not found',aprx=aprx,wrkspc=wrkspc);
+      usts = g_config.datasource('usts',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(usts):
+         raise Exception('usts not found');
+         
 ###############################################################################
 class UpsertTribalDataUST(object):
 
    #...........................................................................
    def __init__(self):
 
-      self.label              = "A5 Upsert Tribal Data";
+      self.label              = "A6 Upsert Tribal Data";
       self.name               = "UpsertTribalDataUST";
       self.description        = "UpsertTribalDataUST";
       self.canRunInBackground = False;
