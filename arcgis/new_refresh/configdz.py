@@ -179,8 +179,9 @@ class ConfigDZ:
    def flds(
        self
       ,datasetid
-      ,aprx   = None
-      ,wrkspc = None
+      ,aprx      = None
+      ,wrkspc    = None
+      ,match_etl = False
    ):
 
       if aprx is None:
@@ -211,7 +212,10 @@ class ConfigDZ:
       results = [];
       for item in self.g_config['schemas'][schemaid]["flds"]:
          
-         results.append(item[0]);
+         if match_etl and item[7] is None:
+            pass;
+         else:
+            results.append(item[0]);
             
       return results;
       
@@ -251,7 +255,8 @@ class ConfigDZ:
       results = [];
       for item in self.g_config['schemas'][schemaid]["flds"]:
          
-         results.append(item[7]);
+         if item[7] is not None:
+            results.append(item[7]);
             
       return results;
       
@@ -334,8 +339,9 @@ class ConfigDZ:
       results = {};
       for item in self.g_config['schemas'][schemaid]["flds"]:
          
-         results[item[7]] = idx;
-         idx = idx + 1;
+         if item[7] is not None:
+            results[item[7]] = idx;
+            idx = idx + 1;
             
       return results;
    
@@ -1390,12 +1396,12 @@ class ConfigDZ:
       
       with arcpy.da.InsertCursor(
           in_table     = trg
-         ,field_names  = self.flds(datasetid) + ["SHAPE@"]
+         ,field_names  = self.flds(datasetid,aprx=aprx,wrkspc=wrkspc,match_etl=True) + ["SHAPE@"]
       ) as icursor:
          
          with arcpy.da.SearchCursor(
              in_table     = src
-            ,field_names  = self.etl_flds(datasetid) + ["SHAPE@"]
+            ,field_names  = self.etl_flds(datasetid,aprx=aprx,wrkspc=wrkspc) + ["SHAPE@"]
          ) as scursor:
             
             for row in scursor:
@@ -1411,5 +1417,45 @@ class ConfigDZ:
       aft_cnt = arcpy.management.GetCount(trg)[0];
       arcpy.AddMessage(".  Target table has " + str(aft_cnt) + " records.");
       if int(bef_cnt) != int(aft_cnt):
-         raise Exception("counts failed to reconcile " + str(bef_cnt) + " <> " + str(aft_cnt)); 
+         raise Exception("counts failed to reconcile " + str(bef_cnt) + " <> " + str(aft_cnt));
+
+   #...........................................................................
+   def coord2shape(
+       p_x
+      ,p_y
+      ,int_srid = 4326
+      ,out_srid = 3857
+   ):
+      
+      if int_srid is None:
+         int_srid = 4326;
+         
+      if out_srid is None:
+         out_srid = 3857;
+         
+      if p_x is None or p_y is None:
+         return None;
+      
+      num_x = None;
+      num_y = None; 
+      
+      try:
+         num_x = float(p_x);
+      except ValueError:
+         return None;
+      
+      try:
+         num_y = float(p_y);
+      except ValueError:
+         return None;
+            
+      if num_x is None or num_y is None:
+         return None;
+         
+      pnt   = arcpy.Point(num_x,num_y);
+      pnt_1 = arcpy.PointGeometry(pnt,arcpy.SpatialReference(int_srid));
+      pnt_2 = pnt_1.projectAs(arcpy.SpatialReference(out_srid));
+      
+      return pnt_2;
+         
       

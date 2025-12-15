@@ -133,6 +133,12 @@
          ,"schemaid": "tribal_usts"
          ,"etlsrc": null
        }
+      ,"tribal_nfa": {
+          "geodatabase": "default"
+         ,"datasource": "tribal_nfa"
+         ,"schemaid": "tribal_nfa"
+         ,"etlsrc": null
+       }
     }
    ,"schemas": {
        "facilities": {
@@ -152,8 +158,8 @@
             ,["Zip_Code"                       ,"TEXT"  ,"Zip Code"                                                    ,255 ,null,"",false,null]
             ,["Latitude"                       ,"DOUBLE","Latitude"                                                    ,null,null,"",false,null]
             ,["Longitude"                      ,"DOUBLE","Longitude"                                                   ,null,null,"",false,null]
-            ,["Coordinate_Source"              ,"TEXT"  ,"Coordinate Source"                                           ,null,null,"",false,null]
-            ,["Address_Match_Type"             ,"TEXT"  ,"Address Match Type"                                          ,null,null,"",false,null]
+            ,["Coordinate_Source"              ,"TEXT"  ,"Coordinate Source"                                           ,255 ,null,"",false,null]
+            ,["Address_Match_Type"             ,"TEXT"  ,"Address Match Type"                                          ,255 ,null,"",false,null]
             ,["Open_USTs"                      ,"LONG"  ,"Open USTs"                                                   ,null,null,"",false,null]
             ,["Closed_USTs"                    ,"LONG"  ,"Closed USTs"                                                 ,null,null,"",false,null]
             ,["TOS_USTs"                       ,"LONG"  ,"Temporarily Out of Service USTs"                             ,null,null,"",false,null]
@@ -195,8 +201,8 @@
             ,["Zip_Code"                       ,"TEXT"  ,"Zip_Code"                                                    ,8000,null,"",false,null]
             ,["Latitude"                       ,"DOUBLE","Latitude"                                                    ,null,null,"",false,null]
             ,["Longitude"                      ,"DOUBLE","Longitude"                                                   ,null,null,"",false,null]
-            ,["Coordinate_Source"              ,"TEXT"  ,"Coordinate Source"                                           ,null,null,"",false,null]
-            ,["Address_Match_Type"             ,"TEXT"  ,"Address Match Type"                                          ,null,null,"",false,null]
+            ,["Coordinate_Source"              ,"TEXT"  ,"Coordinate Source"                                           ,8000,null,"",false,null]
+            ,["Address_Match_Type"             ,"TEXT"  ,"Address Match Type"                                          ,8000,null,"",false,null]
             ,["Reported_Date"                  ,"DATE"  ,"Reported_Date"                                               ,null,null,"",true ,null]
             ,["Status"                         ,"TEXT"  ,"Status"                                                      ,8000,null,"",false,null]
             ,["Substance"                      ,"TEXT"  ,"Substance"                                                   ,8000,null,"",false,null]
@@ -317,7 +323,10 @@
             ,["Reported_Date"                  ,"TEXT"  ,"Reported Date"                                               ,8000,null,"",false,"Reported Date"]
             ,["Status"                         ,"TEXT"  ,"Status"                                                      ,8000,null,"",false,"Status"]
             ,["Substance"                      ,"TEXT"  ,"Substance"                                                   ,8000,null,"",false,"Substance"]
-            ,["Closed_with_Residual_Contaminat","TEXT"  ,"Closed with Residual Contamination"                          ,8000,null,"",false,"Closed with Residual Contamination"]
+            ,["nfa_1"                          ,"TEXT"  ,"NFA URL 1"                                                   ,8000,null,"",false,null]
+            ,["nfa_2"                          ,"TEXT"  ,"NFA URL 2"                                                   ,8000,null,"",false,null]
+            ,["nfa_3"                          ,"TEXT"  ,"NFA URL 3"                                                   ,8000,null,"",false,null]
+            ,["nfa_4"                          ,"TEXT"  ,"NFA URL 4"                                                   ,8000,null,"",false,null]
           ]
        }
       ,"tribal_usts": {
@@ -336,6 +345,34 @@
             ,["Capacity"                       ,"TEXT"  ,"Capacity"                                                    ,8000,null,"",false,"Capacity"]
             ,["Substance_Stored"               ,"TEXT"  ,"Substance Stored"                                            ,8000,null,"",false,"Substance Stored"]
             ,["Tank_Wall_Type"                 ,"TEXT"  ,"Tank Wall Type"                                              ,8000,null,"",false,"Tank Wall Type"]
+          ]
+       }
+      ,"tribal_nfa": {
+          "oid_type": "32_BIT"
+         ,"add_globalids": false
+         ,"flds": [
+             ["Region"                         ,"TEXT"  ,"Region"                                                      ,8000,null,"",true ,"Region"]
+            ,["Location_ID"                    ,"TEXT"  ,"Location ID"                                                 ,8000,null,"",true ,"Location ID"]
+            ,["Location_Name"                  ,"TEXT"  ,"Location Name"                                               ,8000,null,"",false,"Location Name"]
+            ,["Release_Name"                   ,"TEXT"  ,"Release Name"                                                ,8000,null,"",false,"Release Name"]
+            ,["Tribe"                          ,"TEXT"  ,"Tribe"                                                       ,8000,null,"",false,"Tribe"]
+            ,["City"                           ,"TEXT"  ,"City"                                                        ,8000,null,"",true ,"City"]
+            ,["Most_Recent_Source_of_Funding"  ,"TEXT"  ,"Most Recent Source of Funding"                               ,8000,null,"",false,"Most Recent Source of Funding"]
+            ,["Ownership_RP_Type"              ,"TEXT"  ,"Ownership/RP Type"                                           ,8000,null,"",false,"Ownership/RP Type"]
+            ,["Tribal_Ownership"               ,"TEXT"  ,"Tribal Ownership"                                            ,8000,null,"",false,"Tribal Ownership"]
+            ,["LUST_ReleaseType"               ,"TEXT"  ,"LUST ReleaseType"                                            ,8000,null,"",false,"LUST ReleaseType"]
+            ,["LUST_ReleaseStatus"             ,"TEXT"  ,"LUST ReleaseStatus"                                          ,8000,null,"",false,"LUST ReleaseStatus"]
+            ,["ReleaseAge_years"               ,"TEXT"  ,"ReleaseAge(years)"                                           ,8000,null,"",false,"ReleaseAge(years)"]
+            ,["Event_Begin"                    ,"TEXT"  ,"Event Begin"                                                 ,8000,null,"",false,"Event Begin"]
+            ,["Closure_Date"                   ,"TEXT"  ,"Closure Date"                                                ,8000,null,"",false,"Closure Date"]
+            ,["Release_Currently_on_UST_Finder","TEXT"  ,"Release Currently on UST Finder"                             ,8000,null,"",false,"Release Currently on UST Finder"]
+            ,["Release_Status_on_UST_Finder"   ,"TEXT"  ,"Release Status on UST Finder"                                ,8000,null,"",false,"Release Status on UST Finder"]      
+            ,["LUST_ID"                        ,"TEXT"  ,"LUST ID"                                                     ,8000,null,"",true ,"LUST ID"]
+            ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,"State"]
+            ,["nfa_1"                          ,"TEXT"  ,"NFA URL 1"                                                   ,8000,null,"",false,"nfa_1"]
+            ,["nfa_2"                          ,"TEXT"  ,"NFA URL 2"                                                   ,8000,null,"",false,"nfa_2"]
+            ,["nfa_3"                          ,"TEXT"  ,"NFA URL 3"                                                   ,8000,null,"",false,"nfa_3"]
+            ,["nfa_4"                          ,"TEXT"  ,"NFA URL 4"                                                   ,8000,null,"",false,"nfa_4"]
           ]
        }
     }

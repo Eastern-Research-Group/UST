@@ -140,3 +140,4 @@ dmypy.json
 *.geodatabase-shm
 *.geodatabase-wal
 *.csv
+*.xlsx
