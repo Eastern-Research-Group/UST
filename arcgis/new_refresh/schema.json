@@ -161,6 +161,13 @@
                         ,{"type": "null"}
                       ]
                    }
+                  ,"mapthumbnail": {
+                      "title": "Thumbnail URI to apply to map object."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
                   ,"guid": {
                       "title": "Optional AGO guid for use in publishing actions."
                      ,"anyOf": [
@@ -180,7 +187,28 @@
                          "^.*$": {
                             "type": "object"
                            ,"properties": {
-                               "description": {
+                               "displayfield": {
+                                  "title": "Layer Display field, leaving empty will let ArcGIS Pro choose the display field."
+                                 ,"anyOf": [
+                                     {"type": "string"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,"summary": {
+                                  "title": "Layer Summary field."
+                                 ,"anyOf": [
+                                     {"type": "string"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,"copyrighttext": {
+                                  "title": "Layer Copyright Text shown as Credits in metadata views."
+                                 ,"anyOf": [
+                                     {"type": "string"}
+                                    ,{"type": "null"}
+                                  ]
+                               }
+                              ,"description": {
                                   "title": "Layer description as defined in ArcGIS Pro metadata and published as the description component to AGO"
                                  ,"anyOf": [
                                      {"type": "string"}
@@ -328,7 +356,28 @@
                                "^.*$": {
                                   "type": "object"
                                  ,"properties": {
-                                     "description": {
+                                     "displayfield": {
+                                        "title": "Table Display field, leaving empty will let ArcGIS Pro choose the display field."
+                                       ,"anyOf": [
+                                           {"type": "string"}
+                                          ,{"type": "null"}
+                                        ]
+                                     }
+                                    ,"summary": {
+                                        "title": "Table Summary field."
+                                       ,"anyOf": [
+                                           {"type": "string"}
+                                          ,{"type": "null"}
+                                        ]
+                                     }
+                                    ,"copyrighttext": {
+                                        "title": "Table Copyright Text shown as Credits in metadata views."
+                                       ,"anyOf": [
+                                           {"type": "string"}
+                                          ,{"type": "null"}
+                                        ]
+                                     }
+                                    ,"description": {
                                         "title": "Table description as defined in ArcGIS Pro metadata and published as the description component to AGO"
                                        ,"anyOf": [
                                            {"type": "integer"}
@@ -373,6 +422,50 @@
           "title": "Configuration Dataset defintions"
          ,"description": "Configuration tying tabular datasets to schemas" 
          ,"type": "object"
+         ,"anyOf": [
+             {"type": "null"}
+            ,{
+                "type": "object"
+               ,"patternProperties": {
+                   "^.*$": {
+                      "type": "object"
+                     ,"properties": {  
+                         "geodatabase": {
+                            "title": "Location of the resource geodatabase"
+                           ,"description": "Allows for option relocation of the geodatabase holding the resource.  Use 'default' to use aprx.defaultGeodatabase" 
+                           ,"type": "string"
+                         }
+                        ,"datasource": {
+                            "title": "Filename of the resource in the geodatabase"
+                           ,"description": "Value will be used in the creation of the resource"
+                           ,"type": "string"
+                         }
+                         ,"schemaid": {
+                            "title": "Identifier tying layer to underlying data schema configuration" 
+                           ,"type": "string"
+                         }
+                        ,"etlsrc": {
+                            "title": "ETL source for refresh activities"
+                           ,"anyOf": [
+                               {"type": "string"}
+                              ,{"type": "null"}
+                            ]
+                         }
+                      }
+                     ,"required": [
+                         "geodatabase"
+                        ,"datasource"
+                        ,"schemaid"
+                      ]
+                   }
+                }
+             }
+          ]
+       }      
+      ,"relationshipclasses": {
+          "title": "Configuration Relationshipclasses defintions"
+         ,"description": "Configuration for settingup Esri relationship classes between datasets. See Esri documentation on arcpy.management.CreateRelationshipClass for more information." 
+         ,"type": "object"
          ,"patternProperties": {
              "^.*$": {
                 "type": "object"
@@ -383,16 +476,108 @@
                      ,"type": "string"
                    }
                   ,"datasource": {
-                      "title": "Filename of the resource geodatabase"
-                     ,"description": "Use keyword 'default' to reference project default geodatabase"
+                      "title": "Filename of the resource in the geodatabase"
+                     ,"description": "Value will be used in the creation of the resource."
                      ,"type": "string"
                    }
-                   ,"schemaid": {
-                      "title": "Identifier tying layer to underlying data schema configuration" 
+                  ,"origin_datasetid": {
+                      "title": "Origin Dataset Identifier"
+                     ,"description": "Dataset identifier for the origin"
                      ,"type": "string"
                    }
-                  ,"etlsrc": {
-                      "title": "ETL source for refresh activities"
+                  ,"destination_datasetid": {
+                      "title": "Destination Dataset Identifier"
+                     ,"description": "Dataset identifier for the destination"
+                     ,"type": "string"
+                   }
+                  ,"relationship_type": {
+                      "title": "Relationship Type"
+                     ,"description": "Specifies the type of relationship that will be created between the origin and destination tables."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                     ,"enum": [
+                         "SIMPLE"
+                        ,"COMPOSITE"
+                      ]
+                   }
+                  ,"forward_label": {
+                      "title": "Forward Label"
+                     ,"description": "A name to uniquely identify the relationship when navigating from the origin table to the destination table."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"backward_label": {
+                      "title": "Backward Label"
+                     ,"description": "A name to uniquely identify the relationship when navigating from the destination table to the origin table."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"message_direction": {
+                      "title": "Message Direction"
+                     ,"description": "Specifies the direction in which messages will be passed between the origin and destination tables. For example, in a relationship between poles and transformers, when a pole is deleted, a message will be sent to its related transformer objects indicating that it was deleted."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                     ,"enum": [
+                         "FORWARD"
+                        ,"BACKWARD"
+                        ,"BOTH"
+                        ,"NONE"
+                      ]
+                   }
+                  ,"cardinality": {
+                      "title": "Relationship Class Cardinality"
+                     ,"description": "Specifies how many relationships will exist between rows or features in the origin table and rows or features in the destination table."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                     ,"enum": [
+                         "ONE_TO_ONE"
+                        ,"ONE_TO_MANY"
+                        ,"MANY_TO_MANY"
+                      ]
+                   }
+                  ,"attributed": {
+                      "title": "Relationship Class Attributed"
+                     ,"description": "Specifies whether the relationship class will have attributes."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                     ,"enum": [
+                         "NONE"
+                        ,"ATTRIBUTED"
+                      ]
+                   }
+                  ,"origin_primary_key": {
+                      "title": "Relationship Class Origin Primary Key"
+                     ,"description": "For many-to-many or attributed relationship classes, this is the field in the origin table that links to the Origin Foreign Key field in the relationship class table.  For one-to-one or one-to-many relationship classes that are not attributed, this is the field in the origin table that links to the Origin Foreign Key field in the destination table."
+                     ,"type": "string"
+                   }
+                  ,"origin_foreign_key": {
+                      "title": "Relationship Class Origin Foreign Key"
+                     ,"description": "For many-to-many or attributed relationship classes, this is the field in the relationship class table that links to the Origin Primary Key field in the origin table.  For one-to-one or one-to-many relationship classes that are not attributed, this is the field in the destination table that links to the Origin Primary Key field in the origin table."
+                     ,"type": "string"
+                   }
+                  ,"destination_primary_key": {
+                      "title": "Relationship Class Destination Primary Key"
+                     ,"description": "The field in the destination table that links to the Destination Foreign Key field in the relationship class table. This value is required for many-to-many or attributed relationship classes, but should be left empty for one-to-one or one-to-many relationship classes that are not attributed."
+                     ,"anyOf": [
+                         {"type": "string"}
+                        ,{"type": "null"}
+                      ]
+                   }
+                  ,"destination_foreign_key": {
+                      "title": "Relationship Class Destination Foreign Key"
+                     ,"description": "The field in the relationship class table that links to the Destination Primary Key field in the destination table. This value is required for many-to-many or attributed relationship classes, but should be left empty for one-to-one or one-to-many relationship classes that are not attributed."
                      ,"anyOf": [
                          {"type": "string"}
                         ,{"type": "null"}
@@ -402,11 +587,14 @@
                ,"required": [
                    "geodatabase"
                   ,"datasource"
-                  ,"schemaid"
+                  ,"origin_datasetid"
+                  ,"destination_datasetid"
+                  ,"origin_primary_key"
+                  ,"origin_foreign_key"
                 ]
              }
           }
-       }
+       }      
       ,"schemas": {
           "title": "Configuration Schema definitions"
          ,"description": "Configuration used to create and rebuild tabular resources in the geodatabase."
