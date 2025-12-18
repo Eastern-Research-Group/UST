@@ -3,6 +3,8 @@
 import arcpy,os,sys,json,csv,datetime;
 from arcgis.gis import GIS;
 from arcgis.features import FeatureLayerCollection,FeatureLayer;
+from arcgis.geocoding import Geocoder, geocode, batch_geocode,reverse_geocode;
+from arcgis.geometry import Point, filters;
 import pandas as pd;
 import numpy as np;
 from pandas.api.types import is_numeric_dtype;
@@ -13,6 +15,8 @@ g_tribal_fac = 'TrUSTD UST Facilities 11-19-25.csv';
 g_tribal_rel = 'TrUSTD LUST UF1 11-19-25.csv';
 g_tribal_usts = 'TrUSTD USTs UF1 11-19-25.csv';
 g_tribal_nfa  = 'TrUSTD Release Report list for FY25 NFA letter 508 compliance and linking to UF.csv';
+g_epa_gc      = '92c07361d015431f88ec828c08e5c852';
+g_lust_srid   = 4326;
 
 # default zoom is set to Washington, DC
 g_default_zoom = arcpy.Extent(
@@ -22,6 +26,97 @@ g_default_zoom = arcpy.Extent(
    ,YMax =  39.28
    ,spatial_reference = arcpy.SpatialReference(4326)
 ).projectAs(arcpy.SpatialReference(3857));
+
+# CONUS bounding box
+g_conus = arcpy.Polygon( 
+    arcpy.Array([
+       arcpy.Array([
+          arcpy.Point(-128.0,20.2)
+         ,arcpy.Point(-64.0 ,20.2)
+         ,arcpy.Point(-64.0 ,52.0)
+         ,arcpy.Point(-128.0,52.0)
+         ,arcpy.Point(-128.0,20.2)
+       ])
+    ])
+   ,arcpy.SpatialReference(4326)
+);
+
+# Alaska bounding box
+g_alaska = arcpy.Polygon( 
+    arcpy.Array([
+       arcpy.Array([
+          arcpy.Point(-180  ,48)
+         ,arcpy.Point(-128  ,48)
+         ,arcpy.Point(-128  ,90)
+         ,arcpy.Point(-180  ,90)
+         ,arcpy.Point(-180  ,48)
+       ])
+      ,arcpy.Array([
+          arcpy.Point(168  ,48)
+         ,arcpy.Point(180  ,48)
+         ,arcpy.Point(180  ,90)
+         ,arcpy.Point(168  ,90)
+         ,arcpy.Point(168  ,48)
+       ])
+    ])
+   ,arcpy.SpatialReference(4326)
+);
+
+# Hawaii bounding box
+g_hawaii = arcpy.Polygon( 
+    arcpy.Array([
+       arcpy.Array([
+          arcpy.Point(-180.0,10.0)
+         ,arcpy.Point(-146.0,10.0)
+         ,arcpy.Point(-146.0,35.0)
+         ,arcpy.Point(-180.0,35.0)
+         ,arcpy.Point(-180.0,10.0)
+       ])
+    ])
+   ,arcpy.SpatialReference(4326)
+);
+
+# PRVI bounding box
+g_prvi = arcpy.Polygon( 
+    arcpy.Array([
+       arcpy.Array([
+          arcpy.Point(-69.0,16.0)
+         ,arcpy.Point(-63.0,16.0)
+         ,arcpy.Point(-63.0,20.0)
+         ,arcpy.Point(-69.0,20.0)
+         ,arcpy.Point(-69.0,16.0)
+       ])
+    ])
+   ,arcpy.SpatialReference(4326)
+);
+
+# GUMP bounding box
+g_gump = arcpy.Polygon( 
+    arcpy.Array([
+       arcpy.Array([
+          arcpy.Point(136.0,8.0)
+         ,arcpy.Point(154.0,8.0)
+         ,arcpy.Point(154.0,25.0)
+         ,arcpy.Point(136.0,25.0)
+         ,arcpy.Point(136.0,8.0)
+       ])
+    ])
+   ,arcpy.SpatialReference(4326)
+);
+
+# AMSAMOA bounding box
+g_amsamoa = arcpy.Polygon( 
+    arcpy.Array([
+       arcpy.Array([
+          arcpy.Point(-178.0,-20.0)
+         ,arcpy.Point(-163.0,-5.0)
+         ,arcpy.Point(-178.0,-5.0)
+         ,arcpy.Point(-178.0,-20.0)
+         ,arcpy.Point(-178.0,-20.0)
+       ])
+    ])
+   ,arcpy.SpatialReference(4326)
+);
 
 import importlib;
 import configdz;
@@ -44,7 +139,7 @@ class Toolbox(object):
       self.tools.append(ReloadFromAGOUST);
       self.tools.append(DeduplicateAGOUST);
       self.tools.append(LoadTribalCSVsUST);
-      self.tools.append(ReverseGeocodeTribalUST);
+      self.tools.append(GeocodeTribalUST);
       self.tools.append(UpsertTribalDataUST);
       self.tools.append(RebuildMapsUST);
       
@@ -103,6 +198,11 @@ class RebuildSystemUST(object):
              out_folder_path = os.path.dirname(aprx.defaultGeodatabase)
             ,out_name        = os.path.basename(aprx.defaultGeodatabase)
          );
+         
+      #########################################################################
+      relcls = g_config.relationshipclass('facilities_usts',aprx=aprx,wrkspc=wrkspc);
+      if arcpy.Exists(relcls):
+         arcpy.Delete_management(relcls);
          
       #########################################################################
       fac = g_config.datasource('facilities',aprx=aprx,wrkspc=wrkspc);
@@ -321,10 +421,66 @@ class ReloadFromAGOUST(object):
       );
       aft_cnt = arcpy.management.GetCount(usts)[0];
       arcpy.AddMessage(". Target has " + str(aft_cnt) + " records.");
+
+###############################################################################
+class DeduplicateAGOUST(object):
+
+   #...........................................................................
+   def __init__(self):
+
+      self.label              = "A3 Deduplicate AGO";
+      self.name               = "DeduplicateAGOUST";
+      self.description        = "DeduplicateAGOUST";
+      self.canRunInBackground = False;
+
+   #...........................................................................
+   def getParameterInfo(self):
+      
+      params = [];
+      
+      return params;
+
+   #...........................................................................
+   def isLicensed(self):
+
+      return True;
+
+   #...........................................................................
+   def updateParameters(self,parameters):
+
+      return;
+
+   #...........................................................................
+   def updateMessages(self,parameters):
+
+      return;
+
+   #...........................................................................
+   def execute(self,parameters,messages):
+
+      aprx = g_config.aprx;
+      wrkspc = g_config.wrkspc;
+      arcpy.env.workspace = wrkspc;
       
       #########################################################################
-      arcpy.AddMessage("Cleaning up bad keys");
-      
+      fac  = g_config.datasource('facilities',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(fac):
+         raise Exception('facilities not found');
+      rel  = g_config.datasource('releases',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(rel):
+         raise Exception('releases not found');
+      fbc  = g_config.datasource('facilities_by_county',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(fbc):
+         raise Exception('facilities by county not found');
+      rbc  = g_config.datasource('releases_by_county',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(rbc):
+         raise Exception('resources not found',aprx=aprx,wrkspc=wrkspc);
+      usts = g_config.datasource('usts',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(usts):
+         raise Exception('usts not found');
+         
+      #########################################################################
+      arcpy.AddMessage("Cleaning up bad facilities keys");
       with arcpy.da.UpdateCursor(
           in_table     = fac
          ,field_names  = [
@@ -351,6 +507,7 @@ class ReloadFromAGOUST(object):
             ,'whpa_water_type'
             ,'whpa_facility_type'
             ,'whpa_huc12'
+            ,'epa_region'
           ]
       ) as ucursor:
          
@@ -437,6 +594,8 @@ class ReloadFromAGOUST(object):
                ucursor.updateRow(row);
                #arcpy.AddMessage(". bad keys on facilities objectid " + str(row[0]));
                
+      #########################################################################
+      arcpy.AddMessage("Cleaning up bad releases keys");
       with arcpy.da.UpdateCursor(
           in_table     = rel
          ,field_names  = [
@@ -452,6 +611,7 @@ class ReloadFromAGOUST(object):
             
             ,'zip_code'
             ,'address_match_type'
+            ,'epa_region'
           ]
       ) as ucursor:
          
@@ -498,6 +658,8 @@ class ReloadFromAGOUST(object):
                ucursor.updateRow(row);
                #arcpy.AddMessage(". bad keys on releases objectid " + str(row[0]));
                
+      #########################################################################
+      arcpy.AddMessage("Cleaning up bad usts keys");
       with arcpy.da.UpdateCursor(
           in_table     = usts
          ,field_names  = [
@@ -526,63 +688,6 @@ class ReloadFromAGOUST(object):
             if boo_update:
                ucursor.updateRow(row);
                #arcpy.AddMessage(". bad keys on usts objectid " + str(row[0]));
-      
-###############################################################################
-class DeduplicateAGOUST(object):
-
-   #...........................................................................
-   def __init__(self):
-
-      self.label              = "A3 Deduplicate AGO";
-      self.name               = "DeduplicateAGOUST";
-      self.description        = "DeduplicateAGOUST";
-      self.canRunInBackground = False;
-
-   #...........................................................................
-   def getParameterInfo(self):
-      
-      params = [];
-      
-      return params;
-
-   #...........................................................................
-   def isLicensed(self):
-
-      return True;
-
-   #...........................................................................
-   def updateParameters(self,parameters):
-
-      return;
-
-   #...........................................................................
-   def updateMessages(self,parameters):
-
-      return;
-
-   #...........................................................................
-   def execute(self,parameters,messages):
-
-      aprx = g_config.aprx;
-      wrkspc = g_config.wrkspc;
-      arcpy.env.workspace = wrkspc;
-      
-      #########################################################################
-      fac  = g_config.datasource('facilities',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(fac):
-         raise Exception('facilities not found');
-      rel  = g_config.datasource('releases',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(rel):
-         raise Exception('releases not found');
-      fbc  = g_config.datasource('facilities_by_county',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(fbc):
-         raise Exception('facilities by county not found');
-      rbc  = g_config.datasource('releases_by_county',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(rbc):
-         raise Exception('resources not found',aprx=aprx,wrkspc=wrkspc);
-      usts = g_config.datasource('usts',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(usts):
-         raise Exception('usts not found');
       
       #########################################################################      
       arcpy.AddMessage("Checking for bad facilities records with empty keys.");
@@ -639,7 +744,7 @@ class DeduplicateAGOUST(object):
                ucursor.deleteRow();
       
       #########################################################################
-      arcpy.AddMessage("Setting up temp tables.");
+      arcpy.AddMessage("Setting up dups temp tables.");
       
       conn    = sqlite3.connect(aprx.defaultGeodatabase);
       cursor  = conn.cursor();
@@ -1113,7 +1218,7 @@ class DeduplicateAGOUST(object):
       
       del conn;
       
-      arcpy.AddMessage("Deduplication complete.");
+      arcpy.AddMessage("Deduplication cleanup complete.");
               
 ###############################################################################
 class LoadTribalCSVsUST(object):
@@ -1212,23 +1317,6 @@ class LoadTribalCSVsUST(object):
 
    #...........................................................................
    def execute(self,parameters,messages):
-
-      def dznull(cell):       
-         try:
-            if cell is None:
-               return None;
-            elif pd.isnull(cell) or pd.isna(cell):
-               return None;
-            elif is_numeric_dtype(cell):
-               return None
-            elif str(cell) in ['None','NaN','Null','',' ']:
-               return None;
-               
-         except:
-            arcpy.AddMessage("choking on " + str(cell));
-            raise;
-            
-         return cell;
       
       aprx = g_config.aprx;
       wrkspc = g_config.wrkspc;
@@ -1313,6 +1401,8 @@ class LoadTribalCSVsUST(object):
       
       etl_dict = g_config.etl_lkup('tribal_usts',aprx=aprx,wrkspc=wrkspc);
       
+      cnt = 0;
+      filter_cnt = 0;
       with arcpy.da.InsertCursor(
           in_table    = trb_usts
          ,field_names = g_config.flds('tribal_usts',aprx=aprx,wrkspc=wrkspc,match_etl=True)
@@ -1325,12 +1415,24 @@ class LoadTribalCSVsUST(object):
             for row in reader:
                inrow = [None] * len(etl_dict);
               
+               boo_insert = True;
                for item in headers:
               
                   if item in etl_dict:
-                     inrow[etl_dict[item]] = dznull(row[item]);
+                     val = dznull(row[item]);
                      
-               icursor.insertRow(inrow);
+                     if item.lower() == 'tank_status' and val is not None:
+                        if 1==2:
+                           filter_cnt = filter_cnt + 1;
+                           boo_insert = False;
+                           
+                     inrow[etl_dict[item]] = val;
+                     
+               if boo_insert:
+                  icursor.insertRow(inrow);
+                  cnt = cnt + 1;
+                  
+      arcpy.AddMessage(". " + str(cnt) + " loaded with " + str(filter_cnt) + " records removed.");
 
       #########################################################################
       if src_nfa is not None and src_nfa != "":
@@ -1354,7 +1456,11 @@ class LoadTribalCSVsUST(object):
                   for item in headers:
                  
                      if item in etl_dict:
-                        inrow[etl_dict[item]] = dznull(row[item]);
+                        # Force Region back to string
+                        if item == 'Region':
+                           inrow[etl_dict[item]] = str(row[item]);
+                        else:
+                           inrow[etl_dict[item]] = dznull(row[item]);
                         
                   icursor.insertRow(inrow);
                   
@@ -1659,10 +1765,10 @@ class LoadTribalCSVsUST(object):
             ,a.zip
             ,a.status
             ,a.substance
-            ,a.nfa_1
-            ,a.nfa_2
-            ,a.nfa_3
-            ,a.nfa_4
+            ,a.nfa_letter_1
+            ,a.nfa_letter_2
+            ,a.nfa_letter_3
+            ,a.nfa_letter_4
             FROM
             main.tribal_rel a
             WHERE
@@ -1956,14 +2062,14 @@ class LoadTribalCSVsUST(object):
       arcpy.AddMessage("Tribal CSVs loaded.");
 
 ###############################################################################
-class ReverseGeocodeTribalUST(object):
+class GeocodeTribalUST(object):
 
    #...........................................................................
    def __init__(self):
 
-      self.label              = "A5 RGeocode Tribal Data";
-      self.name               = "ReverseGeocodeTribalUST";
-      self.description        = "ReverseGeocodeTribalUST";
+      self.label              = "A5 Geocode Tribal Data";
+      self.name               = "GeocodeTribalUST";
+      self.description        = "GeocodeTribalUST";
       self.canRunInBackground = False;
 
    #...........................................................................
@@ -1996,21 +2102,296 @@ class ReverseGeocodeTribalUST(object):
       arcpy.env.workspace = wrkspc;
       
       #########################################################################
-      fac  = g_config.datasource('facilities',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(fac):
-         raise Exception('facilities not found');
-      rel  = g_config.datasource('releases',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(rel):
-         raise Exception('releases not found');
-      fbc  = g_config.datasource('facilities_by_county',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(fbc):
-         raise Exception('facilities by county not found');
-      rbc  = g_config.datasource('releases_by_county',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(rbc):
-         raise Exception('resources not found',aprx=aprx,wrkspc=wrkspc);
-      usts = g_config.datasource('usts',aprx=aprx,wrkspc=wrkspc);
-      if not arcpy.Exists(usts):
-         raise Exception('usts not found');
+      tribal_fac  = g_config.datasource('tribal_fac',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(tribal_fac):
+         raise Exception('tribal_fac not found');
+      tribal_rel  = g_config.datasource('tribal_rel',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(tribal_rel):
+         raise Exception('tribal_rel not found');
+      
+      #########################################################################
+      result = arcpy.management.GetCount(tribal_fac);
+      fac_count = int(result[0]);
+      
+      result = arcpy.management.GetCount(tribal_rel);
+      rel_count = int(result[0]);
+      
+      if fac_count == 0 and rel_count == 0:
+         arcpy.AddError("no records found to geocode");
+         raise Exception;
+         
+      else:
+         arcpy.AddMessage("tribal facilities have " + str(fac_count) + " total records.");
+         arcpy.AddMessage("tribal releases have " + str(rel_count) + " total records.");
+      
+      #########################################################################
+      portalurl = arcpy.GetActivePortalURL();
+      pi = arcpy.GetPortalInfo(portal_URL=portalurl);
+      
+      # Remove this to allow credits geocoding
+      if 'organization' not in pi or pi['organization'] != 'U.S. EPA':
+         arcpy.AddError("active portal not set to EPA");
+         raise Exception;
+      
+      token = arcpy.GetSigninToken()['token'];
+      
+      gis = GIS(
+          url   = portalurl
+         ,token = token
+      );
+      
+      # Remove the reference to EPA geoportal guid to use credits
+      gs = gis.content.get(g_epa_gc);
+      gc = Geocoder.fromitem(gs);
+      
+      #########################################################################
+      gcnt = 0;
+      with arcpy.da.UpdateCursor(
+          tribal_fac
+         ,[
+             'OID@'
+            ,'longitude'
+            ,'latitude'
+            
+            ,'name'
+            ,'address'
+            ,'city'
+            ,'county'
+            ,'state'
+            ,'zip'
+            ,'address_match_type'
+            ,'lat_lon_source'
+          ]
+      ) as ucursor:
+            
+         for row in ucursor:
+            
+            int_oid          = row[0];
+            preexisting_long = lust_float(row[1]);
+            preexisting_lat  = lust_float(row[2]);
+            str_name         = row[3];
+            str_street       = row[4];
+            str_city         = row[5];
+            str_county       = row[6];
+            str_state        = row[7];
+            str_zip_raw      = str(row[8]);
+            if str_zip_raw.find('-') > 0:
+               (str_zip,str_zip4)  = str_zip_raw.split('-');
+    
+            else:
+               (str_zip,str_zip4)  = (str_zip_raw,None);
+            
+            boo_do_geocode = True;
+            
+            if preexisting_long is None \
+            or preexisting_lat  is None \
+            or preexisting_long == 0    \
+            or preexisting_lat  == 0:
+               boo_do_geocode = True;
+            
+            else:
+               geom_wgs84 = configdz.ConfigDZ.coord2shape(
+                   preexisting_long
+                  ,preexisting_lat
+                  ,g_lust_srid
+                  ,4326
+               );
+            
+               if geom_wgs84.within(g_conus):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_alaska):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_hawaii):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_prvi):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_gump):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_amsamoa):
+                  boo_do_geocode = False;
+            
+            if boo_do_geocode:
+                  
+               address = {};
+                
+               address['OBJECTID'] = int_oid;
+              
+               if str_street is not None:
+                  address['Address'] = str_street;
+
+               if str_name is not None:
+                  address['POI'] = str_name;
+               
+               if str_city is not None:
+                  address['City'] = str_city;
+                  
+               if str_county is not None:
+                  address['Subregion'] = str_county;
+               
+               if str_state is not None:
+                  address['Region'] = str_state;
+                  
+               if str_zip is not None:
+                  address['Postal'] = str_zip;
+                  
+               if str_zip4 is not None:
+                  address['PostalExt'] = str_zip4;
+                  
+               try:
+                  bgc = geocode(
+                      address       = address
+                     ,geocoder      = gc
+                     ,location_type = 'rooftop'
+                  );
+
+               except Exception as e:
+                  
+                  if hasattr(e, 'message'):
+                     arcpy.AddMessage(e.message);
+                  
+                     bgc = geocode(
+                         address       = address
+                        ,geocoder      = gc
+                        ,location_type = 'rooftop'
+                     );
+
+               if bgc is not None:                           
+                  #arcpy.AddMessage(str(bgc));
+                  
+                  row[1]  = bgc[0]['attributes']['DisplayX'];
+                  row[2]  = bgc[0]['attributes']['DisplayY'];
+                  
+                  row[9]  = bgc[0]['attributes']['Addr_type'];
+                  row[10] = 'Geocode';
+                     
+                  ucursor.updateRow(row);
+                  gcnt += 1;
+      
+      arcpy.AddMessage("geocoded tribal facilities updating " + str(gcnt) + " records.");
+      
+      #########################################################################
+      gcnt = 0;
+      with arcpy.da.UpdateCursor(
+          tribal_rel
+         ,[
+             'OID@'
+            ,'longitude'
+            ,'latitude'
+            
+            ,'name'
+            ,'address'
+            ,'city'
+            ,'county'
+            ,'state'
+            ,'zip'
+            ,'address_match_type'
+            ,'lat_lon_source'
+          ]
+      ) as ucursor:
+            
+         for row in ucursor:
+            
+            int_oid          = row[0];
+            preexisting_long = lust_float(row[1]);
+            preexisting_lat  = lust_float(row[2]);
+            name             = row[3];
+            address          = row[4];
+            city             = row[5];
+            county           = row[6];
+            state            = row[7];
+            str_zip_raw      = str(row[8]);
+            if str_zip_raw.find('-') > 0:
+               (str_zip,str_zip4)  = str_zip_raw.split('-');
+    
+            else:
+               (str_zip,str_zip4)  = (str_zip_raw,None);
+            
+            boo_do_geocode = True;
+            
+            if preexisting_long is None \
+            or preexisting_lat  is None \
+            or preexisting_long == 0    \
+            or preexisting_lat  == 0:
+               boo_do_geocode = True;
+            
+            else:
+               geom_wgs84 = configdz.ConfigDZ.coord2shape(
+                   preexisting_long
+                  ,preexisting_lat
+                  ,g_lust_srid
+                  ,4326
+               );
+            
+               if geom_wgs84.within(g_conus):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_alaska):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_hawaii):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_prvi):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_gump):
+                  boo_do_geocode = False;
+               elif geom_wgs84.within(g_amsamoa):
+                  boo_do_geocode = False;
+            
+            if boo_do_geocode:
+                  
+               address = {};
+                
+               address['OBJECTID'] = int_oid;
+              
+               if str_street is not None:
+                  address['Address'] = str_street;
+
+               if str_name is not None:
+                  address['POI'] = str_name;
+               
+               if str_city is not None:
+                  address['City'] = str_city;
+                  
+               if str_county is not None:
+                  address['Subregion'] = str_county;
+               
+               if str_state is not None:
+                  address['Region'] = str_state;
+                  
+               if str_zip is not None:
+                  address['Postal'] = str_zip;
+                  
+               if str_zip4 is not None:
+                  address['PostalExt'] = str_zip4;
+                  
+               try:
+                  bgc = geocode(
+                      address       = address
+                     ,geocoder      = gc
+                     ,location_type = 'rooftop'
+                  );
+
+               except Exception as e:
+                  
+                  if hasattr(e, 'message'):
+                     arcpy.AddMessage(e.message);
+                  
+                     bgc = geocode(
+                         address       = address
+                        ,geocoder      = gc
+                        ,location_type = 'rooftop'
+                     );
+
+               if bgc is not None:
+                  
+                  row[1]  = bgc[0]['attributes']['DisplayX'];
+                  row[2]  = bgc[0]['attributes']['DisplayY'];
+                  
+                  row[9]  = bgc[0]['attributes']['Addr_type'];
+                  row[10] = 'Geocode';
+                     
+                  ucursor.updateRow(row);
+                  gcnt += 1;
+      
+      arcpy.AddMessage("geocoded tribal releases updating " + str(gcnt) + " records.");
          
 ###############################################################################
 class UpsertTribalDataUST(object):
@@ -2264,6 +2645,7 @@ class UpsertTribalDataUST(object):
          ,b.date_of_last_inspection
          ,b.region AS epa_region
          ,b.tribe
+         ,b.address_match_type
          FROM
          main.temp_fac_work a
          JOIN
@@ -2294,7 +2676,7 @@ class UpsertTribalDataUST(object):
                pnt_webmc = None;
                if  x_wgs84 is not None \
                and y_wgs84 is not None \
-               and x_wgs84 != "0"        \
+               and x_wgs84 != "0"      \
                and y_wgs84 != "0":
                   pnt_webmc = configdz.ConfigDZ.coord2shape(
                       p_x = x_wgs84
@@ -2322,6 +2704,7 @@ class UpsertTribalDataUST(object):
                row2[29] = lust_time(row[15]); # Date_of_Last_Inspection
                row2[30] = int(row[16]); # EPA_Region
                row2[31] = lust_trim(row[17],8000); # Tribe
+               row2[32] = lust_trim(row[18],255);
                
                if pnt_webmc is not None:
                   row2[-1] = pnt_webmc;
@@ -2355,10 +2738,11 @@ class UpsertTribalDataUST(object):
          ,b.substance
          ,b.region AS epa_region
          ,b.tribe
-         ,b.nfa_1 AS nfa_letter_1
-         ,b.nfa_2 AS nfa_letter_2
-         ,b.nfa_3 AS nfa_letter_3
-         ,b.nfa_4 AS nfa_letter_4
+         ,b.nfa_letter_1
+         ,b.nfa_letter_2
+         ,b.nfa_letter_3
+         ,b.nfa_letter_4
+         ,b.address_match_type
          FROM
          main.temp_rel_work a
          JOIN
@@ -2390,7 +2774,7 @@ class UpsertTribalDataUST(object):
                pnt_webmc = None;
                if  x_wgs84 is not None \
                and y_wgs84 is not None \
-               and x_wgs84 != "0"        \
+               and x_wgs84 != "0"      \
                and y_wgs84 != "0":
                   pnt_webmc = configdz.ConfigDZ.coord2shape(
                       p_x = x_wgs84
@@ -2416,10 +2800,59 @@ class UpsertTribalDataUST(object):
                
                row2[29] = lust_trim(row[14],8000); # EPA_Region
                row2[30] = lust_trim(row[15],8000); # Tribe
-               row2[31] = lust_trim(row[16],8000); # NFA_Letter_1
-               row2[32] = lust_trim(row[17],8000); # NFA_Letter_2
-               row2[33] = lust_trim(row[18],8000); # NFA_Letter_3
-               row2[34] = lust_trim(row[19],8000); # NFA_Letter_4 
+               
+               cur_nfa_1 = lust_trim(row2[31],8000);
+               cur_nfa_2 = lust_trim(row2[32],8000);
+               cur_nfa_3 = lust_trim(row2[33],8000);
+               cur_nfa_4 = lust_trim(row2[34],8000);
+               
+               new_nfa_1 = lust_trim(row[16],8000);
+               new_nfa_2 = lust_trim(row[17],8000);
+               new_nfa_3 = lust_trim(row[18],8000);
+               new_nfa_4 = lust_trim(row[19],8000);
+               
+               new_nfas = [];
+                  
+               if new_nfa_1 is not None:
+                  new_nfas.append(new_nfa_1);
+               if new_nfa_2 is not None:
+                  new_nfas.append(new_nfa_2);
+               if new_nfa_3 is not None:
+                  new_nfas.append(new_nfa_3);
+               if new_nfa_4 is not None:
+                  new_nfas.append(new_nfa_4);
+               
+               cur_nfas = [];
+                        
+               if cur_nfa_1 is not None:
+                  cur_nfas.append(cur_nfa_1);
+               if cur_nfa_2 is not None:
+                  cur_nfas.append(cur_nfa_2);
+               if cur_nfa_3 is not None:
+                  cur_nfas.append(cur_nfa_3);
+               if cur_nfa_4 is not None:
+                  cur_nfas.append(cur_nfa_4);
+                  
+               merged = new_nfas + list(set(cur_nfas) - set(new_nfas));
+               
+               row2[31] = None;
+               row2[32] = None;
+               row2[33] = None;
+               row2[34] = None; 
+               
+               if len(merged) > 0:
+                  row2[31] = merged[0];
+                  
+               if len(merged) > 1:
+                  row2[32] = merged[1];
+                  
+               if len(merged) > 2:
+                  row2[33] = merged[2];
+                  
+               if len(merged) > 3:
+                  row2[34] = merged[3];
+
+               row2[35] = lust_trim(row[20],255);
                
                if pnt_webmc is not None:
                   row2[-1] = pnt_webmc;
@@ -2502,7 +2935,7 @@ class UpsertTribalDataUST(object):
          ,CAST(b.latitude AS FLOAT) AS latitude
          ,CAST(b.longitude AS FLOAT) AS longitude
          ,b.lat_lon_source AS coordinate_source
-         ,CAST(NULL AS TEXT) AS address_match_type
+         ,b.address_match_type
          ,CAST(b.open_usts AS INTEGER) AS open_usts 
          ,CAST(b.closed_usts AS INTEGER) AS closed_usts
          ,CAST(b.temporarily_out_of_service_usts AS INTEGER) AS tos_usts
@@ -2614,7 +3047,7 @@ class UpsertTribalDataUST(object):
          ,b.latitude
          ,b.longitude
          ,b.lat_lon_source AS coordinate_source     
-         ,CAST(NULL AS TEXT) AS address_match_type
+         ,b.address_match_type
          ,b.reported_date
          ,b.status AS facility_status
          ,b.substance
@@ -2634,10 +3067,10 @@ class UpsertTribalDataUST(object):
          ,CAST(NULL AS TEXT) AS whpa_huc12
          ,b.region AS epa_region
          ,b.tribe
-         ,b.nfa_1 AS nfa_letter_1
-         ,b.nfa_2 AS nfa_letter_2
-         ,b.nfa_3 AS nfa_letter_3
-         ,b.nfa_4 AS nfa_letter_4
+         ,b.nfa_letter_1
+         ,b.nfa_letter_2
+         ,b.nfa_letter_3
+         ,b.nfa_letter_4
          ,CAST(NULL AS TEXT) AS closed_with_residual_contaminat
          FROM
          main.temp_rel_work a
@@ -2777,7 +3210,7 @@ class RebuildMapsUST(object):
    #...........................................................................
    def __init__(self):
 
-      self.label              = "A6 Rebuild Maps";
+      self.label              = "A7 Rebuild Maps";
       self.name               = "RebuildMapsUST";
       self.description        = "RebuildMapsUST";
       self.canRunInBackground = False;
@@ -2829,41 +3262,65 @@ class RebuildMapsUST(object):
          raise Exception('usts not found');
       
       #########################################################################
+      maps = aprx.listMaps('*');
+      for item in maps:
+         aprx.deleteItem(item);
+         
       #########################################################################
+      relcls = g_config.relationshipclass('facilities_usts',aprx=aprx,wrkspc=wrkspc);
+      if arcpy.Exists(relcls):
+         arcpy.Delete_management(relcls);
+      
+      #########################################################################
+      arcpy.AddMessage(". Building fresh map");
       mapobj = g_config.build_map(
           mapid   = 'ust_finder_feature_layer'
          ,aprx    = aprx
          ,wrkspc  = wrkspc
       );
       
+      arcpy.AddMessage(". Adding fresh layers");
       z1 = g_config.add_layer(
           mapobj  = mapobj
          ,layerid = 'facilities'
+         ,aprx    = aprx
          ,wrkspc  = wrkspc
       );
       
       z1 = g_config.add_layer(
           mapobj  = mapobj
          ,layerid = 'releases'
+         ,aprx    = aprx
          ,wrkspc  = wrkspc
       );
       
       z1 = g_config.add_layer(
           mapobj  = mapobj
          ,layerid = 'facilities_by_county'
+         ,aprx    = aprx
          ,wrkspc  = wrkspc
       );
       
       z1 = g_config.add_layer(
           mapobj  = mapobj
          ,layerid = 'releases_by_county'
+         ,aprx    = aprx
          ,wrkspc  = wrkspc
       );
       
+      arcpy.AddMessage(". Adding fresh tables");
       z1 = g_config.add_table(
           mapobj  = mapobj
          ,tableid = 'usts'
+         ,aprx    = aprx
          ,wrkspc  = wrkspc
+      );
+      
+      arcpy.AddMessage(". Rebuilding relationship class between facilities and usts");
+      z1 = g_config.build_relationshipclass(
+          relationshipclassid = 'facilities_usts'
+         ,aprx                = aprx
+         ,wrkspc              = wrkspc
       );
       
       mapobj['map'].defaultCamera.setExtent(g_default_zoom);
@@ -2933,6 +3390,14 @@ class SaveToStash(object):
       rel_stash = rel + '_stash';
       if arcpy.Exists(rel_stash):
          arcpy.management.Delete(rel_stash);
+      
+      fbc_stash = fbc + '_stash';
+      if arcpy.Exists(fbc_stash):
+         arcpy.management.Delete(fbc_stash);
+      rbc_stash = rbc + '_stash';
+      if arcpy.Exists(rbc_stash):
+         arcpy.management.Delete(rbc_stash);      
+         
       usts_stash = usts + '_stash';
       if arcpy.Exists(usts_stash):
          arcpy.management.Delete(usts_stash);
@@ -2942,6 +3407,11 @@ class SaveToStash(object):
       arcpy.conversion.ExportFeatures(fac,fac_stash);
       arcpy.AddMessage("stashing releases");
       arcpy.conversion.ExportFeatures(rel,rel_stash);
+      
+      arcpy.AddMessage("stashing facilities_by_county");
+      arcpy.conversion.ExportFeatures(fbc,fbc_stash);
+      arcpy.AddMessage("stashing releases_by_county");
+      arcpy.conversion.ExportFeatures(rbc,rbc_stash);
       
       arcpy.AddMessage("stashing usts");
       arcpy.conversion.ExportTable(usts,usts_stash);
@@ -3010,12 +3480,24 @@ class RestoreFromStash(object):
       rel_stash = rel + '_stash';
       if not arcpy.Exists(rel_stash):
          raise Exception("releases_stash not found");
+      
+      fbc_stash = fbc + '_stash';
+      if not arcpy.Exists(fbc_stash):
+         raise Exception("facilities_by_county_stash not found");
+      rbc_stash = rbc + '_stash';
+      if not arcpy.Exists(rbc_stash):
+         raise Exception("releases_by_county_stash not found");
+      
       usts_stash = usts + '_stash';
       if not arcpy.Exists(usts_stash):
          raise Exception("usts_stash not found");
       
       arcpy.management.TruncateTable(in_table = fac);
       arcpy.management.TruncateTable(in_table = rel);
+      
+      arcpy.management.TruncateTable(in_table = fbc);
+      arcpy.management.TruncateTable(in_table = rbc);
+      
       arcpy.management.TruncateTable(in_table = usts);
       
       #########################################################################
@@ -3024,8 +3506,43 @@ class RestoreFromStash(object):
       arcpy.AddMessage("restoring releases");
       arcpy.management.Append(rel_stash,rel,'NO_TEST');
       
+      arcpy.AddMessage("restoring facilities_by_county");
+      arcpy.management.Append(fbc_stash,fbc,'NO_TEST');
+      arcpy.AddMessage("restoring releases_by_county");
+      arcpy.management.Append(rbc_stash,rbc,'NO_TEST');
+      
       arcpy.AddMessage("restoring usts");
       arcpy.management.Append(usts_stash,usts,'NO_TEST');
+
+def dznull(cell):    
+         
+   try:
+      if cell is None:
+         return None;
+      elif pd.isnull(cell) or pd.isna(cell):
+         return None;
+      elif is_numeric_dtype(cell):
+         return None
+      elif str(cell) in ['None','NaN','Null']:
+         return None;
+         
+   except:
+      arcpy.AddMessage("choking on " + str(cell));
+      raise;
+      
+   return cell;
+   
+def lust_float(val):
+   
+   if val is None or val == '' or val == ' ':
+      return None;
+      
+   try:
+      rez = float(val);
+   except:
+      return None;
+      
+   return rez;
          
 def lust_time(val):
    

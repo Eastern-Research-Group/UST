@@ -8,12 +8,16 @@
          ,"mapdescription": "This data contains information about, and locations of, leaking underground storage tanks, underground storage tank facilities, and underground storage tanks. Data is current as of 2018-2021. Data was collected from state sources and standardized into a national profile by EPA's Office of Underground Storage Tanks, Office of Research and Development, and the Association of State and Territorial Solid Waste Management Officials."
          ,"mapcredits": "EPA's Office of Underground Storage Tanks EPA's Office of Research and Development The Association of State and Territorial Solid Waste Management Officials"
          ,"maptags": "Underground Storage Tanks,UST,LUST,Groundwater Vulnerability,Vapor Intrusion,Drinking Water,Tanks,Leaking Underground Storage Tanks"
-         ,"mapaccess": null
+         ,"mapaccess": "None"
+         ,"mapthumbnail": "epa.png"
          ,"guid": "5a3ae0ed53564b6fa519f08e30e79e93"
          ,"mapx": "UST_Finder_Feature_Layer_2.mapx"
          ,"layers" : {
-             "facilities": { 
-                "description": null
+             "facilities": {
+                "displayfield": "Name"
+               ,"summary": "Locations of underground storage tank (UST) facilties and count of open, closed, and temporarily out of service USTs in 50 states and Washington, D.C. as of 2019."
+               ,"description": "Underground storage tank (UST) facility locations and information was collected from state agencies and integrated into a national database by EPA's Office of Research and Development, Office of Underground Storage Tanks, and the Association of State and Territorial Solid Waste Management Officials. Tabular information includes the number of open, closed, and temporarily out of service USTs, locational information, estimated private domestic wells within 1,500 feet, estimated population within 1,500 ft, proximity to FEMA’s estimated 100-year floodplain, land-use type, and information on corresponding drinking water source protection areas. This information collected from September 2018 through December 2019 and represents a snapshot of UST facilities at time of data collection."
+               ,"copyrighttext": "Alabama Department of Environmental Management's Groundwater Branch, Alaska's Department of Environmental Conservation's Prevention Preparedness and Response Program, Arizona Department of Environmental Quality's Underground Storage Tank Program, Arkansas Department of Environmental Quality's Regulated Storage Tanks Division, California Environmental Protection Agency's California Environmental Reporting System, Colorado Department of Labor and Employment's Division of Oil and Public Safety, Connecticut Department of Energy and Environmental Protection, Delaware Department of Natural Resources and Environmental Control's Underground Storage Tank Compliance Program, Florida Department of Environmental Protection's Permitting and Compliance Assistance Program, Georgia Environmental Protection Division's Underground Storage Tank Management Program, Hawaii Department of Health's Solid and Hazardous Waste Branch, Idaho Department of Environmental Quality's Waste Management and Remediation Division, Illinois State Fire Marshal's Division of Petroleum and Chemical Safety, Indiana Department of Environmental Management's UST Branch, Iowa Department of Natural Resources' Underground Storage Tanks Section, Kansas Department of Health and Environment's Storage Tank Section, Kentucky Energy and Environment Cabinet's Underground Storage Tank Branch, Louisiana Department of Environmental Quality's Underground Storage Tank Program, Maine Department of Environmental Protection's Underground Storage Tank Program, Maryland Department of the Environment's Oil Control Program, Massachusetts Department of Environmental Protection's Underground Storage Tank Program, Michigan Department of Licensing and Regulatory Affairs' Storage Tank Division, Minnesota Pollution Control Agency's Underground Storage Tank Program, Mississippi Department of Environmental Quality's Underground Storage Tank Program, Missouri Department of Natural Resources’' Environmental Remediation Program, Montana Department of Environmental Quality's Underground Storage Tank Leak Prevention Program, Nebraska State Fire Marshal's Fuels Safety Division, Nevada Division of Environmental Protection's Underground Storage Tank Program, New Hampshire Department of Environmental Services' Underground Storage Tank Program, New Jersey Department of Environmental Protection's Site Remediation Program, New Mexico Environment Department's Petroleum Storage Tank Bureau, New York Department of Environmental Conservation's Chemical Bulk Storage Program, North Carolina Environmental Quality's Underground Storage Tank Section, North Dakota Department of Environmental Quality's Underground Storage Tank Program, Ohio Department of Commerce's Bureau of Underground Storage Tank Regulations, Oklahoma Corporation Commission's Petroleum Storage Tank Division, Oregon Department of Environmental Quality's Underground Storage Tank Program, Pennsylvania Department of Environmental Protection's Division of Storage Tanks, Rhode Island Department of Environmental Management's Underground Storage Tank Management Program, South Carolina Department of Health and Environmental Control's Underground Storage Tanks Program, Tennessee Department of Environment and Conservation's Division of Underground Storage Tanks, Texas Commission on Environmental Quality, Utah Department of Environmental Quality's Underground Storage Tanks Branch, Vermont Department of Environmental Conservation's Waste Management and Prevention Division, Virginia Department of Environmental Quality's Underground Storage Tanks Program, Washington Department of Ecology's Underground Storage Tank Program, District of Columbia Department of Energy and Environment’s Underground Storage Tank Program, West Virginia Department of Environmental Protection's Underground Storage Tank Section, Wisconsin Department of Agriculture's Trade and Consumer Protection's Bureau of Weights and Measures, Wyoming Department of Environmental Quality's Storage Tank Program, EPA’s Office of Ground Water and Drinking Water, EPAs’ EnviroAtlas and EPA’s Office of Research and Development for the Estimated floodplain map for the Conterminous United States, Multi-Resolution Land Characteristics (MRLC) consortium"
                ,"popupInfoTitle": null
                ,"symbology_fields": null
                ,"update_symbology": null
@@ -27,7 +31,10 @@
                ,"name": "Facilities"
              }
             ,"releases": { 
-                "description": null
+                "displayfield": "Name"
+               ,"summary": null
+               ,"description": null
+               ,"copyrighttext": null
                ,"popupInfoTitle": null
                ,"symbology_fields": null
                ,"update_symbology": null
@@ -44,7 +51,10 @@
                 }
              }
             ,"facilities_by_county": { 
-                "description": null
+                "displayfield": "NAME"
+               ,"summary": null
+               ,"description": null
+               ,"copyrighttext": null
                ,"popupInfoTitle": null
                ,"symbology_fields": null
                ,"update_symbology": null
@@ -58,7 +68,10 @@
                ,"name": "Facilities_by_County"
              }
             ,"releases_by_county": { 
-                "description": null
+                "displayfield": "County"
+               ,"summary": null
+               ,"description": null
+               ,"copyrighttext": null
                ,"popupInfoTitle": null
                ,"symbology_fields": null
                ,"update_symbology": null
@@ -73,8 +86,11 @@
              }
          }
          ,"tables": {
-             "usts": { 
-                "description": null
+             "usts": {
+                "displayfield": "Tank_ID"               
+               ,"summary": null
+               ,"description": null
+               ,"copyrighttext": null
                ,"datasetid": "usts"
                ,"lyrx": "USTs.lyrx"
                ,"searchName": "USTs"
@@ -139,6 +155,24 @@
          ,"schemaid": "tribal_nfa"
          ,"etlsrc": null
        }
+    }
+   ,"relationshipclasses": {
+       "facilities_usts": {
+          "geodatabase": "default"
+         ,"datasource": "facilities_usts"
+         ,"origin_datasetid": "facilities"
+         ,"destination_datasetid": "usts"
+         ,"relationship_type": "SIMPLE"
+         ,"forward_label": "usts"
+         ,"backward_label": "facilities"
+         ,"message_direction": "BOTH"
+         ,"cardinality": "ONE_TO_MANY"
+         ,"attributed": "NONE"
+         ,"origin_primary_key": "Facility_ID"
+         ,"origin_foreign_key": "Facility_ID"
+         ,"destination_primary_key": null
+         ,"destination_foreign_key": null
+       }         
     }
    ,"schemas": {
        "facilities": {
@@ -300,6 +334,7 @@
             ,["Abandoned_USTs"                 ,"TEXT"  ,"Abandoned USTs"                                              ,8000,null,"",false,"Abandoned USTs"]
             ,["Facility_Status"                ,"TEXT"  ,"Facility Status"                                             ,8000,null,"",false,"Facility Status"]
             ,["Date_of_Last_Inspection"        ,"TEXT"  ,"Date of Last Inspection"                                     ,8000,null,"",false,"Date of Last Inspection"]
+            ,["Address_Match_Type"             ,"TEXT"  ,"Address Match Type"                                          ,8000,null,"",false,null]
           ]
        }
       ,"tribal_rel": {
@@ -323,10 +358,11 @@
             ,["Reported_Date"                  ,"TEXT"  ,"Reported Date"                                               ,8000,null,"",false,"Reported Date"]
             ,["Status"                         ,"TEXT"  ,"Status"                                                      ,8000,null,"",false,"Status"]
             ,["Substance"                      ,"TEXT"  ,"Substance"                                                   ,8000,null,"",false,"Substance"]
-            ,["nfa_1"                          ,"TEXT"  ,"NFA URL 1"                                                   ,8000,null,"",false,null]
-            ,["nfa_2"                          ,"TEXT"  ,"NFA URL 2"                                                   ,8000,null,"",false,null]
-            ,["nfa_3"                          ,"TEXT"  ,"NFA URL 3"                                                   ,8000,null,"",false,null]
-            ,["nfa_4"                          ,"TEXT"  ,"NFA URL 4"                                                   ,8000,null,"",false,null]
+            ,["nfa_letter_1"                   ,"TEXT"  ,"NFA Letter 1"                                                ,8000,null,"",false,null]
+            ,["nfa_letter_2"                   ,"TEXT"  ,"NFA Letter 2"                                                ,8000,null,"",false,null]
+            ,["nfa_letter_3"                   ,"TEXT"  ,"NFA Letter 3"                                                ,8000,null,"",false,null]
+            ,["nfa_letter_4"                   ,"TEXT"  ,"NFA Letter 4"                                                ,8000,null,"",false,null]
+            ,["Address_Match_Type"             ,"TEXT"  ,"Address Match Type"                                          ,8000,null,"",false,null]
           ]
        }
       ,"tribal_usts": {
@@ -356,7 +392,7 @@
             ,["Location_Name"                  ,"TEXT"  ,"Location Name"                                               ,8000,null,"",false,"Location Name"]
             ,["Release_Name"                   ,"TEXT"  ,"Release Name"                                                ,8000,null,"",false,"Release Name"]
             ,["Tribe"                          ,"TEXT"  ,"Tribe"                                                       ,8000,null,"",false,"Tribe"]
-            ,["City"                           ,"TEXT"  ,"City"                                                        ,8000,null,"",true ,"City"]
+            ,["City"                           ,"TEXT"  ,"City"                                                        ,8000,null,"",false,"City"]
             ,["Most_Recent_Source_of_Funding"  ,"TEXT"  ,"Most Recent Source of Funding"                               ,8000,null,"",false,"Most Recent Source of Funding"]
             ,["Ownership_RP_Type"              ,"TEXT"  ,"Ownership/RP Type"                                           ,8000,null,"",false,"Ownership/RP Type"]
             ,["Tribal_Ownership"               ,"TEXT"  ,"Tribal Ownership"                                            ,8000,null,"",false,"Tribal Ownership"]
@@ -369,10 +405,10 @@
             ,["Release_Status_on_UST_Finder"   ,"TEXT"  ,"Release Status on UST Finder"                                ,8000,null,"",false,"Release Status on UST Finder"]      
             ,["LUST_ID"                        ,"TEXT"  ,"LUST ID"                                                     ,8000,null,"",true ,"LUST ID"]
             ,["State"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,"State"]
-            ,["nfa_1"                          ,"TEXT"  ,"NFA URL 1"                                                   ,8000,null,"",false,"nfa_1"]
-            ,["nfa_2"                          ,"TEXT"  ,"NFA URL 2"                                                   ,8000,null,"",false,"nfa_2"]
-            ,["nfa_3"                          ,"TEXT"  ,"NFA URL 3"                                                   ,8000,null,"",false,"nfa_3"]
-            ,["nfa_4"                          ,"TEXT"  ,"NFA URL 4"                                                   ,8000,null,"",false,"nfa_4"]
+            ,["nfa_letter_1"                   ,"TEXT"  ,"NFA Letter 1"                                                ,8000,null,"",false,"nfa_1"]
+            ,["nfa_letter_2"                   ,"TEXT"  ,"NFA Letter 2"                                                ,8000,null,"",false,"nfa_2"]
+            ,["nfa_letter_3"                   ,"TEXT"  ,"NFA Letter 3"                                                ,8000,null,"",false,"nfa_3"]
+            ,["nfa_letter_4"                   ,"TEXT"  ,"NFA Letter 4"                                                ,8000,null,"",false,"nfa_4"]
           ]
        }
     }

@@ -22,7 +22,7 @@
         "start" : -62135596800000
       },
       "metadataURI" : "CIMPATH=Metadata/bf2f3881762c57fe9c6886e6c5d8fc27.xml",
-      "useSourceMetadata" : true,
+      "useSourceMetadata" : false,
       "displayField" : "State",
       "editable" : true,
       "dataConnection" : {

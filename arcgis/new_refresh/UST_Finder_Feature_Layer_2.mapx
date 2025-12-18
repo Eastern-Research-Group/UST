@@ -11,7 +11,7 @@
       "start" : -62135596800000
     },
     "metadataURI" : "CIMPATH=Metadata/2e3d072f34dfaa87631fd607428725e9.xml",
-    "useSourceMetadata" : true,
+    "useSourceMetadata" : false,
     "illumination" : {
       "type" : "CIMIlluminationProperties",
       "ambientLight" : 50,

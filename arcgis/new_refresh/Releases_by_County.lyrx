@@ -13,7 +13,7 @@
       "sourceModifiedTime" : {
         "type" : "TimeInstant"
       },
-      "useSourceMetadata" : true,
+      "useSourceMetadata" : false,
       "description" : "Releases_by_County",
       "layerElevation" : {
         "type" : "CIMLayerElevationSurface",

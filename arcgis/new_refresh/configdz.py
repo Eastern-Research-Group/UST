@@ -1,4 +1,4 @@
-import arcpy,os,sys,json;
+import arcpy,os,sys,json,shutil;
 
 ###############################################################################
 class ConfigDZ:
@@ -64,6 +64,43 @@ class ConfigDZ:
          gd = self.g_config['datasets'][datasetid]['geodatabase'];
          
       df = self.g_config['datasets'][datasetid]['datasource'];
+      
+      return os.path.join(gd,df);
+      
+   #...........................................................................
+   def relationshipclass(
+       self
+      ,relationshipclassid
+      ,aprx   = None
+      ,wrkspc = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;
+      
+      if relationshipclassid not in self.g_config['relationshipclasses']:
+         raise Exception(str(relationshipclassid) + " relationshipclass not found");
+         
+      if "geodatabase" not in self.g_config['relationshipclasses'][relationshipclassid]:
+         raise Exception("geodatabase missing from config relationshipclasses");
+         
+      if "datasource" not in self.g_config['relationshipclasses'][relationshipclassid]:
+         raise Exception("geodatabase missing from config relationshipclasses");
+         
+      if self.g_config['relationshipclasses'][relationshipclassid]['geodatabase'] == "default":
+         gd = aprx.defaultGeodatabase;
+      else:
+         gd = self.g_config['relationshipclasses'][relationshipclassid]['geodatabase'];
+         
+      df = self.g_config['relationshipclasses'][relationshipclassid]['datasource'];
       
       return os.path.join(gd,df);
    
@@ -543,26 +580,35 @@ class ConfigDZ:
       if not arcpy.Exists(in_mapx):
          raise Exception("mapx not found " + in_mapx);
       
-      md_title = None;
-      md_summary = None;
-      md_description = None;
-      md_credits = None;
-      md_tags = None;
+      md_title             = None;
+      md_summary           = None;
+      md_description       = None;
+      md_credits           = None;
+      md_tags              = None;
       md_accessConstraints = None;
+      md_thumbnail         = None;
       
-      if 'title' in mapobj: 
-         md_title = mapobj['title'];
-      if 'summary' in mapobj:
-         md_summary = mapobj['summary'];
-      if 'description' in mapobj:
-         md_description = mapobj['description'];
-      if 'credits' in mapobj:
-         md_credits = mapobj['credits'];
-      if 'tags' in mapobj:
-         md_tags = mapobj['credits'];
-      if 'accessConstraints' in mapobj:
-         md_accessConstraints = mapobj['accessConstraints'];
-     
+      if 'maptitle' in mapobj: 
+         md_title = mapobj['maptitle'];
+         
+      if 'mapsummary' in mapobj:
+         md_summary = mapobj['mapsummary'];
+         
+      if 'mapdescription' in mapobj:
+         md_description = mapobj['mapdescription'];
+         
+      if 'mapcredits' in mapobj:
+         md_credits = mapobj['mapcredits'];
+         
+      if 'maptags' in mapobj:
+         md_tags = mapobj['maptags'];
+         
+      if 'mapaccess' in mapobj:
+         md_accessConstraints = mapobj['mapaccess'];
+         
+      if 'mapthumbnail' in mapobj:
+         md_thumbnail = mapobj['mapthumbnail'];
+         
       #########################################################################
       ary_maps = aprx.listMaps('*');
       
@@ -606,6 +652,18 @@ class ConfigDZ:
       
       if md_accessConstraints is not None:
          md.accessConstraints = md_accessConstraints;
+     
+      # Weirdly, the thumbnailUri will import and then delete the icon file
+      # So we copy it to temp and let the managling happen on the copy
+      if md_thumbnail is not None:
+         if md_thumbnail.lower()[:4] == 'http':
+            md.thumbnailUri = md_thumbnail;
+         
+         else:
+            icon_scratch = os.path.join(arcpy.env.scratchFolder,md_thumbnail);
+            shutil.copyfile(os.path.join(aprx.homeFolder,md_thumbnail),icon_scratch);
+            
+            md.thumbnailUri = icon_scratch;
       
       md.save();
       
@@ -654,7 +712,9 @@ class ConfigDZ:
       ,dataset
       ,searchName
       ,name             = None
+      ,displayfield     = None
       ,description      = None
+      ,summary          = None
       ,popupInfoTitle   = None
       ,visibility       = None
       ,serviceLayerID   = None
@@ -698,8 +758,14 @@ class ConfigDZ:
                if name is not None:
                   item["name"] = name;
                   
+               if summary is not None:
+                  item["summary"] = summary;
+                  
                if description is not None:
                   item["description"] = description;
+               
+               if displayfield is not None:
+                  item["displayfield"] = displayfield;
                   
                if popupInfoTitle is not None and "popupInfo" in item:
                   item["popupInfo"]["Title"] = popupInfoTitle;
@@ -792,8 +858,14 @@ class ConfigDZ:
                if name is not None:
                   item["name"] = name;
                   
+               if summary is not None:
+                  item["summary"] = summary;
+                  
                if description is not None:
                   item["description"] = description;
+               
+               if displayfield is not None:
+                  item["displayfield"] = displayfield;
                   
                if serviceLayerID is not None:
                   item["serviceTableID"] = serviceLayerID;
@@ -815,8 +887,12 @@ class ConfigDZ:
       ,in_dataset
       ,in_searchName 
       ,in_name
-      ,in_description    = None
+      ,summary           = None
+      ,description       = None
       ,in_popupInfoTitle = None
+      ,displayfield      = None
+      ,copyrighttext     = None
+      ,accessConstraints = None
       ,symbology_fields  = None
       ,update_symbology  = None
       ,visibility        = None
@@ -843,8 +919,10 @@ class ConfigDZ:
          ,dataset          = os.path.basename(in_dataset)
          ,searchName       = in_searchName
          ,name             = in_name
-         ,description      = in_description
+         ,summary          = summary
+         ,description      = description
          ,popupInfoTitle   = in_popupInfoTitle
+         ,displayfield     = displayfield
          ,visibility       = visibility
          ,serviceLayerID   = serviceLayerID
          ,cim_fields       = cim_fields
@@ -854,6 +932,23 @@ class ConfigDZ:
       );
       
       lyr = arcpy.mp.LayerFile(lyrx);
+      
+      md = lyr.metadata;
+      
+      if description is not None:
+         md.description = description;
+         
+      if copyrighttext is not None:
+         md.credits = copyrighttext;
+         
+      if summary is not None:
+         md.summary = summary;
+         
+      if accessConstraints is not None:
+         md.accessConstraints = accessConstraints;
+      
+      md.save();
+      
       z = in_map.addLayer(lyr,'BOTTOM');
       
       ############################################################################
@@ -877,7 +972,11 @@ class ConfigDZ:
       ,in_dataset
       ,in_searchName 
       ,in_name
-      ,in_description    = None
+      ,summary           = None
+      ,description       = None
+      ,displayfield      = None
+      ,copyrighttext     = None
+      ,accessConstraints = None
       ,serviceTableID    = None
       ,aprx              = None
       ,wrkspc            = None
@@ -899,7 +998,9 @@ class ConfigDZ:
          ,dataset          = os.path.basename(in_dataset)
          ,searchName       = in_searchName
          ,name             = in_name
-         ,description      = in_description
+         ,summary          = summary
+         ,description      = description
+         ,displayfield     = displayfield
          ,popupInfoTitle   = None
          ,visibility       = None
          ,serviceLayerID   = serviceTableID
@@ -910,6 +1011,23 @@ class ConfigDZ:
       );
       
       tbl = arcpy.mp.LayerFile(tblx);
+      
+      md = tbl.metadata;
+      
+      if description is not None:
+         md.description = description;
+         
+      if copyrighttext is not None:
+         md.credits = copyrighttext;
+         
+      if summary is not None:
+         md.summary = summary;
+         
+      if accessConstraints is not None:
+         md.accessConstraints = accessConstraints;
+      
+      md.save();
+
       tbl = in_map.addLayer(tbl);
       
       return tbl;
@@ -958,29 +1076,48 @@ class ConfigDZ:
       if schemaid not in self.g_config['schemas']:
          raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
       
+      val_displayfield = None;
       val_description = None;
+      val_copyrighttext = None;
       val_popupInfoTitle = None;
       val_symbology_fields = None;
       val_update_symbology = None;
       val_visibility = None;
       val_serviceLayerID = None;
+      val_accessConstraints = None;
       val_cim_fields = None;
       val_timeEnabled = None;
       
+      if 'displayfield' in lyrobj:
+         val_displayfield = lyrobj['displayfield'];
+         
       if 'description' in lyrobj:
          val_description = lyrobj['description'];
+         
+      if 'copyrighttext' in lyrobj:
+         val_copyrighttext = lyrobj['copyrighttext'];
+         
       if 'popupInfoTitle' in lyrobj:
          val_popupInfoTitle = lyrobj['popupInfoTitle'];
+         
       if 'symbology_fields' in lyrobj:
          val_symbology_fields = lyrobj['symbology_fields'];
+         
       if 'update_symbology' in lyrobj:
          val_update_symbology = lyrobj['update_symbology'];
+         
       if 'visibility' in lyrobj:
          val_visibility = lyrobj['visibility'];
+         
       if 'serviceLayerID' in lyrobj:
          val_serviceLayerID = lyrobj['serviceLayerID'];
+         
+      if 'accessConstraints' in lyrobj:
+         val_accessConstraints = lyrobj['accessConstraints'];
+         
       if 'cim_fields' in lyrobj:
          val_cim_fields = lyrobj['cim_fields'];
+         
       if 'timeEnabled' in lyrobj:
          val_timeEnabled = lyrobj['timeEnabled'];
       
@@ -990,12 +1127,15 @@ class ConfigDZ:
          ,in_dataset        = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc)
          ,in_searchName     = lyrobj['searchName']
          ,in_name           = lyrobj['name']
-         ,in_description    = val_description
+         ,description       = val_description
          ,in_popupInfoTitle = val_popupInfoTitle
+         ,copyrighttext     = val_copyrighttext
+         ,displayfield      = val_displayfield
          ,symbology_fields  = val_symbology_fields
          ,update_symbology  = val_update_symbology
          ,visibility        = val_visibility
          ,serviceLayerID    = val_serviceLayerID
+         ,accessConstraints = val_accessConstraints
          ,cim_fields        = val_cim_fields
          ,timeEnabled       = val_timeEnabled
          ,aprx              = aprx
@@ -1048,13 +1188,25 @@ class ConfigDZ:
       if schemaid not in self.g_config['schemas']:
          raise Exception('schema ' + str(schemaid) + ' not found in config');
            
+      val_displayfield = None;
+      if 'displayfield' in tblobj:
+         val_displayfield = tblobj['displayfield'];
+      
       val_description = None;  
       if 'description' in tblobj:
          val_description = tblobj['description'];
          
+      val_copyrighttext = None;
+      if 'copyrighttext' in tblobj:
+         val_copyrighttext = tblobj['copyrighttext'];
+         
       val_serviceTableID = None;
       if 'serviceTableID' in tblobj:
          val_serviceTableID = tblobj['serviceTableID'];
+         
+      val_accessConstraints = None;
+      if 'accessConstraints' in tblobj:
+         val_accessConstraints = tblobj['accessConstraints'];
          
       tbl = self.add_tbl_base(
           in_map            = mapobj['map']
@@ -1062,7 +1214,10 @@ class ConfigDZ:
          ,in_dataset        = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc)
          ,in_searchName     = tblobj['searchName']
          ,in_name           = tblobj['name']
-         ,in_description    = val_description
+         ,description       = val_description
+         ,displayfield      = val_displayfield
+         ,copyrighttext     = val_copyrighttext
+         ,accessConstraints = val_accessConstraints
          ,serviceTableID    = val_serviceTableID
          ,aprx              = aprx
          ,wrkspc            = wrkspc
@@ -1341,6 +1496,58 @@ class ConfigDZ:
          in_datasets  = tb
       );
       
+   #...........................................................................
+   def build_relationshipclass(
+       self
+      ,relationshipclassid
+      ,aprx              = None
+      ,wrkspc            = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;  
+      
+      if relationshipclassid not in self.g_config['relationshipclasses']:
+         raise Exception("relationshipclass missing from config relationshipclasses");
+         
+      tb = self.relationshipclass(relationshipclassid,aprx=aprx,wrkspc=wrkspc);
+      
+      if arcpy.Exists(tb):
+         raise Exception("preexisting " + str(relationshipclassid) + " found");
+      
+      origin_table = self.datasource(
+          self.g_config['relationshipclasses'][relationshipclassid]['origin_datasetid']
+         ,aprx=aprx,wrkspc=wrkspc
+      );
+      destination_table = self.datasource(
+          self.g_config['relationshipclasses'][relationshipclassid]['destination_datasetid']
+         ,aprx=aprx,wrkspc=wrkspc
+      );
+
+      arcpy.management.CreateRelationshipClass(
+          origin_table            = origin_table
+         ,destination_table       = destination_table
+         ,out_relationship_class  = self.g_config['relationshipclasses'][relationshipclassid]['datasource']
+         ,relationship_type       = self.g_config['relationshipclasses'][relationshipclassid]['relationship_type']
+         ,forward_label           = self.g_config['relationshipclasses'][relationshipclassid]['forward_label']
+         ,backward_label          = self.g_config['relationshipclasses'][relationshipclassid]['backward_label']
+         ,message_direction       = self.g_config['relationshipclasses'][relationshipclassid]['message_direction']
+         ,cardinality             = self.g_config['relationshipclasses'][relationshipclassid]['cardinality']
+         ,attributed              = self.g_config['relationshipclasses'][relationshipclassid]['attributed']
+         ,origin_primary_key      = self.g_config['relationshipclasses'][relationshipclassid]['origin_primary_key']
+         ,origin_foreign_key      = self.g_config['relationshipclasses'][relationshipclassid]['origin_foreign_key']
+         ,destination_primary_key = self.g_config['relationshipclasses'][relationshipclassid]['destination_primary_key']
+         ,destination_foreign_key = self.g_config['relationshipclasses'][relationshipclassid]['destination_foreign_key']
+      );        
+         
    #...........................................................................
    def get_env_data(
        path: str
