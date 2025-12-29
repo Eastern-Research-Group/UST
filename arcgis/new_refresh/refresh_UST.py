@@ -155,7 +155,7 @@ try:
 except(Exception):
    #send error email
    sl.handleExceptionOutput(sys.exc_info(),sender=sl.errorSender, message=extraErrorMessages)
-   #raise;
+   raise;
 
 ###############################################################################
 service_lookup = {

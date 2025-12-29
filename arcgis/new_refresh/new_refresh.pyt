@@ -331,9 +331,6 @@ class ReloadFromAGOUST(object):
       
       if boo_testdata:
          arcpy.AddMessage("*** Extracting with test flag to limit results records ***");
-         str_clause = "objectid <= 150";
-      else:
-         str_clause = None;
       
       gis = GIS();
       gs = gis.content.get(src_guid);
@@ -361,64 +358,148 @@ class ReloadFromAGOUST(object):
       bef_cnt = arcpy.management.GetCount(gs.url + '/0')[0]; 
       arcpy.AddMessage(". AGO has " + str(bef_cnt) + " records.");
       arcpy.management.TruncateTable(in_table = fac);
-      arcpy.management.Append(
-          inputs      = gs.url + '/0'
-         ,target      = fac
-         ,schema_type = 'NO_TEST'
-         ,expression  = str_clause
-      );
+      
+      ins_cnt = 0;
+      fac_flds = g_config.flds('facilities',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
+      with arcpy.da.InsertCursor(
+          in_table    = fac
+         ,field_names = fac_flds
+      ) as outcurs:
+      
+         with arcpy.da.SearchCursor(
+             in_table     = gs.url + '/0'
+            ,field_names  = fac_flds
+         ) as incurs:
+            
+            for row in incurs:
+               
+               if boo_testdata and ins_cnt >= 100:
+                  break;
+                  
+               outcurs.insertRow(row);
+               ins_cnt = ins_cnt + 1;
+               
+      arcpy.AddMessage(". Inserted " + str(ins_cnt) + " records.");
       aft_cnt = arcpy.management.GetCount(fac)[0];
       arcpy.AddMessage(". Target has " + str(aft_cnt) + " records.");      
       
+      #########################################################################
       arcpy.AddMessage("harvesting releases");
       bef_cnt = arcpy.management.GetCount(gs.url + '/1')[0]; 
       arcpy.AddMessage(". AGO has " + str(bef_cnt) + " records.");
       arcpy.management.TruncateTable(in_table = rel);
-      arcpy.management.Append(
-          inputs      = gs.url + '/1'
-         ,target      = rel
-         ,schema_type = 'NO_TEST'
-         ,expression  = str_clause
-      );
+
+      ins_cnt = 0;
+      rel_flds = g_config.flds('releases',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
+      with arcpy.da.InsertCursor(
+          in_table    = rel
+         ,field_names = rel_flds
+      ) as outcurs:
+      
+         with arcpy.da.SearchCursor(
+             in_table     = gs.url + '/1'
+            ,field_names  = rel_flds
+         ) as incurs:
+            
+            for row in incurs:
+               
+               if boo_testdata and ins_cnt >= 100:
+                  break;
+                  
+               outcurs.insertRow(row);
+               ins_cnt = ins_cnt + 1;
+
+      arcpy.AddMessage(". Inserted " + str(ins_cnt) + " records.");
       aft_cnt = arcpy.management.GetCount(rel)[0];
       arcpy.AddMessage(". Target has " + str(aft_cnt) + " records.");
       
+      #########################################################################
       arcpy.AddMessage("harvesting facilities_by_county");
       bef_cnt = arcpy.management.GetCount(gs.url + '/2')[0]; 
       arcpy.AddMessage(". AGO has " + str(bef_cnt) + " records.");
       arcpy.management.TruncateTable(in_table = fbc);
-      arcpy.management.Append(
-          inputs      = gs.url + '/2'
-         ,target      = fbc
-         ,schema_type = 'NO_TEST'
-         ,expression  = str_clause
-      );
+      
+      ins_cnt = 0;
+      fbc_flds = g_config.flds('facilities_by_county',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
+      with arcpy.da.InsertCursor(
+          in_table    = fbc
+         ,field_names = fbc_flds
+      ) as outcurs:
+      
+         with arcpy.da.SearchCursor(
+             in_table     = gs.url + '/2'
+            ,field_names  = fbc_flds
+         ) as incurs:
+            
+            for row in incurs:
+               
+               if boo_testdata and ins_cnt >= 100:
+                  break;
+                  
+               outcurs.insertRow(row);
+               ins_cnt = ins_cnt + 1;
+      
+      arcpy.AddMessage(". Inserted " + str(ins_cnt) + " records.");
       aft_cnt = arcpy.management.GetCount(fbc)[0];
       arcpy.AddMessage(". Target has " + str(aft_cnt) + " records.");
       
+      #########################################################################
       arcpy.AddMessage("harvesting releases_by_county");
       bef_cnt = arcpy.management.GetCount(gs.url + '/3')[0]; 
       arcpy.AddMessage(". AGO has " + str(bef_cnt) + " records.");
       arcpy.management.TruncateTable(in_table = rbc);
-      arcpy.management.Append(
-          inputs      = gs.url + '/3'
-         ,target      = rbc
-         ,schema_type = 'NO_TEST'
-         ,expression  = str_clause
-      );
+      
+      ins_cnt = 0;
+      rbc_flds = g_config.flds('releases_by_county',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
+      with arcpy.da.InsertCursor(
+          in_table    = rbc
+         ,field_names = rbc_flds
+      ) as outcurs:
+      
+         with arcpy.da.SearchCursor(
+             in_table     = gs.url + '/3'
+            ,field_names  = rbc_flds
+         ) as incurs:
+            
+            for row in incurs:
+               
+               if boo_testdata and ins_cnt >= 100:
+                  break;
+                  
+               outcurs.insertRow(row);
+               ins_cnt = ins_cnt + 1;
+      
+      arcpy.AddMessage(". Inserted " + str(ins_cnt) + " records.");
       aft_cnt = arcpy.management.GetCount(rbc)[0];
       arcpy.AddMessage(". Target has " + str(aft_cnt) + " records.");
       
+      #########################################################################
       arcpy.AddMessage("harvesting usts");
       arcpy.management.TruncateTable(in_table = usts);
       bef_cnt = arcpy.management.GetCount(gs.url + '/4')[0]; 
       arcpy.AddMessage(". AGO has " + str(bef_cnt) + " records.");
-      arcpy.management.Append(
-          inputs      = gs.url + '/4'
-         ,target      = usts
-         ,schema_type = 'NO_TEST'
-         ,expression  = str_clause
-      );
+
+      ins_cnt = 0;
+      usts_flds = g_config.flds('usts',aprx=aprx,wrkspc=wrkspc);      
+      with arcpy.da.InsertCursor(
+          in_table    = usts
+         ,field_names = usts_flds
+      ) as outcurs:
+      
+         with arcpy.da.SearchCursor(
+             in_table     = gs.url + '/4'
+            ,field_names  = usts_flds
+         ) as incurs:
+            
+            for row in incurs:
+               
+               if boo_testdata and ins_cnt >= 100:
+                  break;
+                  
+               outcurs.insertRow(row);
+               ins_cnt = ins_cnt + 1;
+      
+      arcpy.AddMessage(". Inserted " + str(ins_cnt) + " records.");
       aft_cnt = arcpy.management.GetCount(usts)[0];
       arcpy.AddMessage(". Target has " + str(aft_cnt) + " records.");
 
@@ -1351,7 +1432,7 @@ class LoadTribalCSVsUST(object):
       #########################################################################
       arcpy.AddMessage("Loading tribal facilities CSV");
       
-      etl_dict = g_config.etl_lkup('tribal_fac',aprx=aprx,wrkspc=wrkspc);
+      etl_dict = g_config.lkup('tribal_fac','etl','etl',aprx=aprx,wrkspc=wrkspc);
       
       with arcpy.da.InsertCursor(
           in_table    = trb_fac
@@ -1375,7 +1456,7 @@ class LoadTribalCSVsUST(object):
       #########################################################################
       arcpy.AddMessage("Loading tribal releases CSV");
       
-      etl_dict = g_config.etl_lkup('tribal_rel',aprx=aprx,wrkspc=wrkspc);
+      etl_dict = g_config.lkup('tribal_rel','etl','etl',aprx=aprx,wrkspc=wrkspc);
       
       with arcpy.da.InsertCursor(
           in_table    = trb_rel
@@ -1399,7 +1480,7 @@ class LoadTribalCSVsUST(object):
       #########################################################################
       arcpy.AddMessage("Loading tribal USTs CSV");
       
-      etl_dict = g_config.etl_lkup('tribal_usts',aprx=aprx,wrkspc=wrkspc);
+      etl_dict = g_config.lkup('tribal_usts','etl','etl',aprx=aprx,wrkspc=wrkspc);
       
       cnt = 0;
       filter_cnt = 0;
@@ -1438,7 +1519,7 @@ class LoadTribalCSVsUST(object):
       if src_nfa is not None and src_nfa != "":
          arcpy.AddMessage("Loading tribal NFA CSV");
          
-         etl_dict = g_config.etl_lkup('tribal_nfa',aprx=aprx,wrkspc=wrkspc);
+         etl_dict = g_config.lkup('tribal_nfa','etl','etl',aprx=aprx,wrkspc=wrkspc);
          #arcpy.AddMessage(str(etl_dict));
          
          with arcpy.da.InsertCursor(
@@ -2798,8 +2879,8 @@ class UpsertTribalDataUST(object):
                row2[13] = lust_trim(row[12],8000); # Status
                row2[14] = lust_trim(row[13],8000); # Substance
                
-               row2[29] = lust_trim(row[14],8000); # EPA_Region
-               row2[30] = lust_trim(row[15],8000); # Tribe
+               row2[29] = lust_trim(row[15],8000); # Tribe
+               row2[30] = lust_int(row[14]); # EPA_Region
                
                cur_nfa_1 = lust_trim(row2[31],8000);
                cur_nfa_2 = lust_trim(row2[32],8000);
@@ -3116,7 +3197,7 @@ class UpsertTribalDataUST(object):
                ,lust_trim(row[3],8000)
                ,lust_trim(row[4],8000)
                ,lust_trim(row[5],8000)
-               ,lust_trim(row[6],8000)
+               ,lust_int(row[6])
                ,lust_trim(row[7],8000)
                ,y_wgs84
                ,x_wgs84
@@ -3139,8 +3220,10 @@ class UpsertTribalDataUST(object):
                ,lust_trim(row[26],8000)
                ,lust_trim(row[27],8000)
                ,lust_trim(row[28],8000)
-               ,int(row[29]) 
-               ,lust_trim(row[30],8000)
+               
+               ,lust_trim(row[29],8000)
+               ,lust_int(row[30])
+               
                ,lust_trim(row[31],8000)
                ,lust_trim(row[32],8000)
                ,lust_trim(row[33],8000)
@@ -3523,7 +3606,7 @@ def dznull(cell):
          return None;
       elif is_numeric_dtype(cell):
          return None
-      elif str(cell) in ['None','NaN','Null']:
+      elif str(cell) in ['None','NaN','Null','',' ']:
          return None;
          
    except:
@@ -3531,6 +3614,18 @@ def dznull(cell):
       raise;
       
    return cell;
+
+def lust_int(val):
+   
+   if val is None or val == '' or val == ' ':
+      return None;
+      
+   try:
+      rez = int(val);
+   except:
+      return None;
+      
+   return rez;
    
 def lust_float(val):
    

@@ -219,6 +219,7 @@ class ConfigDZ:
       ,aprx      = None
       ,wrkspc    = None
       ,match_etl = False
+      ,prefix    = None
    ):
 
       if aprx is None:
@@ -252,7 +253,12 @@ class ConfigDZ:
          if match_etl and item[7] is None:
             pass;
          else:
-            results.append(item[0]);
+            r = item[0];
+            
+            if prefix is not None:
+               r = prefix + '.' + r;   
+            
+            results.append(r);
             
       return results;
       
@@ -298,11 +304,13 @@ class ConfigDZ:
       return results;
       
    #...........................................................................
-   def fld_lkup(
+   def lkup(
        self
       ,datasetid
-      ,aprx   = None
-      ,wrkspc = None
+      ,search     = None
+      ,results    = None
+      ,aprx       = None
+      ,wrkspc     = None
    ):
 
       if aprx is None:
@@ -329,58 +337,42 @@ class ConfigDZ:
          
       if "flds" not in self.g_config['schemas'][schemaid]:
          raise Exception("flds element not found in config schemas");
+      
+      if search is None:
+         search = 'flds';
          
+      if results is None:
+         results = 'flds';
+      
       idx = 0;
-      results = {};
+      rez = {};
+         
       for item in self.g_config['schemas'][schemaid]["flds"]:
          
-         results[item[0]] = idx;
-         idx = idx + 1;
+         if search == 'flds':
+         
+            if results == 'flds':
+               rez[item[0]] = idx;
+               idx = idx + 1;
+               
+            elif results == 'etl':
+               if item[7] is not None:
+                  rez[item[0]] = idx;
+                  idx = idx + 1;
+         
+         elif search == 'etl':
             
-      return results;
-      
-   #...........................................................................
-   def etl_lkup(
-       self
-      ,datasetid
-      ,aprx   = None
-      ,wrkspc = None
-   ):
-
-      if aprx is None:
-         aprx = self.aprx;
-         
-      if wrkspc is None:
-         if self.wrkspc is None:
-            wrkspc = aprx.defaultGeodatabase;
-         else:
-            wrkspc = self.wrkspc;
-      
-      arcpy.env.workspace = wrkspc;
-      
-      if datasetid not in self.g_config['datasets']:
-         raise Exception(str(datasetid) + " not found in config datasets");
-         
-      if 'schemaid' not in self.g_config['datasets'][datasetid]:
-         raise Exception("schemaid element not found in config datasets");
-         
-      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
-      
-      if schemaid not in self.g_config['schemas']:
-         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
-         
-      if "flds" not in self.g_config['schemas'][schemaid]:
-         raise Exception("flds element not found in config schemas");
-         
-      idx = 0;
-      results = {};
-      for item in self.g_config['schemas'][schemaid]["flds"]:
-         
-         if item[7] is not None:
-            results[item[7]] = idx;
-            idx = idx + 1;
-            
-      return results;
+            if results == 'flds':
+               if item[7] is not None:
+                  rez[item[7]] = idx;
+               idx = idx + 1;
+               
+            elif results == 'etl':
+               if item[7] is not None:
+                  rez[item[7]] = idx;
+                  idx = idx + 1;
+                  
+      return rez;
    
    #...........................................................................
    def alias_dict(
@@ -1562,70 +1554,7 @@ class ConfigDZ:
                rez[a] = b;
                
       return rez;
-
-   #...........................................................................
-   def etl_load(
-       self
-      ,datasetid
-      ,boo_testdata
-      ,p_truncate
-      ,aprx              = None
-      ,wrkspc            = None
-   ):
-
-      if aprx is None:
-         aprx = self.aprx;
-         
-      if wrkspc is None:
-         if self.wrkspc is None:
-            wrkspc = aprx.defaultGeodatabase;
-         else:
-            wrkspc = self.wrkspc;
       
-      arcpy.env.workspace = wrkspc;
-
-      if 'sde_conn' not in self.env:
-         raise Exception('error, no sde_conn in .env file');
-         
-      if not arcpy.Exists(self.env['sde_conn']):
-         raise Exception('error, sde in .env not found');
-      
-      src = os.path.join(self.env['sde_conn'],self.g_config["datasets"][datasetid]["etlsrc"]);
-      trg = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc);
-      
-      if boo_testdata:
-         arcpy.management.TruncateTable(trg);
-      
-      cnt_inserted = 0;
-      arcpy.AddMessage("Exporting " + str(src) + "...");
-      bef_cnt = arcpy.management.GetCount(src)[0];     
-      arcpy.AddMessage(".  Database has " + str(bef_cnt) + " records.");
-      
-      with arcpy.da.InsertCursor(
-          in_table     = trg
-         ,field_names  = self.flds(datasetid,aprx=aprx,wrkspc=wrkspc,match_etl=True) + ["SHAPE@"]
-      ) as icursor:
-         
-         with arcpy.da.SearchCursor(
-             in_table     = src
-            ,field_names  = self.etl_flds(datasetid,aprx=aprx,wrkspc=wrkspc) + ["SHAPE@"]
-         ) as scursor:
-            
-            for row in scursor:
-               icursor.insertRow(row);
-               cnt_inserted = cnt_inserted + 1;
-               
-               if boo_testdata and cnt_inserted >= 100:
-                  break;
-               
-      arcpy.AddMessage(".  " + str(cnt_inserted) + " records inserted.");
-      if boo_testdata:
-         bef_cnt = 100;
-      aft_cnt = arcpy.management.GetCount(trg)[0];
-      arcpy.AddMessage(".  Target table has " + str(aft_cnt) + " records.");
-      if int(bef_cnt) != int(aft_cnt):
-         raise Exception("counts failed to reconcile " + str(bef_cnt) + " <> " + str(aft_cnt));
-
    #...........................................................................
    def coord2shape(
        p_x
@@ -1663,6 +1592,102 @@ class ConfigDZ:
       pnt_1 = arcpy.PointGeometry(pnt,arcpy.SpatialReference(int_srid));
       pnt_2 = pnt_1.projectAs(arcpy.SpatialReference(out_srid));
       
-      return pnt_2;
-         
+      return pnt_2;   
       
+   #...........................................................................
+   def etl_load(
+       self
+      ,datasetid
+      ,boo_testdata
+      ,p_truncate
+      ,shape_long        = None
+      ,shape_lat         = None
+      ,shape_in_srid     = None
+      ,shape_out_srid    = None
+      ,aprx              = None
+      ,wrkspc            = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;
+
+      if 'sde_conn' not in self.env:
+         raise Exception('error, no sde_conn in .env file');
+         
+      if not arcpy.Exists(self.env['sde_conn']):
+         raise Exception('error, sde in .env not found');
+      
+      src = os.path.join(self.env['sde_conn'],self.g_config["datasets"][datasetid]["etlsrc"]);
+      trg = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc);
+      
+      if p_truncate:
+         arcpy.management.TruncateTable(trg);
+      
+      cnt_inserted = 0;
+      arcpy.AddMessage("Exporting " + str(src) + "...");
+      bef_cnt = arcpy.management.GetCount(src)[0];     
+      arcpy.AddMessage(".  Database has " + str(bef_cnt) + " records.");
+      
+      etl_dict = self.lkup(datasetid,'etl','etl',aprx=aprx,wrkspc=wrkspc);
+      
+      if shape_long is None:
+         inflds  = self.etl_flds(datasetid,aprx=aprx,wrkspc=wrkspc) + ["SHAPE@"];
+         outflds = self.flds(datasetid,aprx=aprx,wrkspc=wrkspc,match_etl=True) + ["SHAPE@"]
+      else:
+         inflds = self.etl_flds(datasetid,aprx=aprx,wrkspc=wrkspc);
+         outflds = self.flds(datasetid,aprx=aprx,wrkspc=wrkspc,match_etl=True) + ["SHAPE@"];
+      
+      with arcpy.da.InsertCursor(
+          in_table     = trg
+         ,field_names  = outflds
+      ) as icursor:
+         
+         with arcpy.da.SearchCursor(
+             in_table     = src
+            ,field_names  = inflds
+         ) as scursor:
+            
+            for row in scursor:
+               
+               if shape_long is None:      
+                  icursor.insertRow(row);
+                  cnt_inserted = cnt_inserted + 1;
+                  
+                  if boo_testdata and cnt_inserted >= 100:
+                     break;
+                  
+               else:
+                  shape = ConfigDZ.coord2shape(
+                      p_x      = row[etl_dict[shape_long]]
+                     ,p_y      = row[etl_dict[shape_lat]]
+                     ,int_srid = shape_in_srid
+                     ,out_srid = shape_out_srid                  
+                  );
+                  row2 = list(row);
+                  row2.append(shape);
+               
+                  #if shape is not None:
+                  if 1==1:
+                     icursor.insertRow(row2);
+                     cnt_inserted = cnt_inserted + 1;
+                     
+                     if boo_testdata and cnt_inserted >= 100:
+                        break;               
+               
+      arcpy.AddMessage(".  " + str(cnt_inserted) + " records inserted.");
+      if boo_testdata:
+         bef_cnt = 100;
+      aft_cnt = arcpy.management.GetCount(trg)[0];
+      arcpy.AddMessage(".  Target table has " + str(aft_cnt) + " records.");
+      if int(bef_cnt) != int(aft_cnt):
+         raise Exception("counts failed to reconcile " + str(bef_cnt) + " <> " + str(aft_cnt));
+
+   
