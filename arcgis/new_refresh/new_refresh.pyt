@@ -804,7 +804,8 @@ class NormalizeAGOUST(object):
       
       #########################################################################      
       cnt = 0;
-      arcpy.AddMessage("Checking for bad facilities records with empty keys.");
+      key = 1;
+      arcpy.AddMessage("Plugging empty facilities keys with placeholders.");
       with arcpy.da.UpdateCursor(
           in_table     = fac
          ,field_names  = [
@@ -824,16 +825,27 @@ class NormalizeAGOUST(object):
             str_state       = row[0];
             str_facility_id = row[1];
             
-            if str_facility_id is None or str_state is None:
-               arcpy.AddMessage(".   deleting facilities record having empty keys (" + str(row) + ")");
-               ucursor.deleteRow();
+            boo_update = False;
+            if str_facility_id is None:
+               arcpy.AddMessage(".   plugging empty facility id key (" + str(row) + ")");
+               row[1] = "unk_id" + str(key);
+               key = key + 1;
+               boo_update = True;               
+               
+            if str_state is None:
+               arcpy.AddMessage(".   plugging empty state key (" + str(row) + ")");
+               row[0] = 'Unknown';
+               boo_update = True;
+               
+            if boo_update:
+               ucursor.updateRow(row);
                cnt = cnt + 1;
                
-      arcpy.AddMessage(". " + str(cnt) + " facilities records with empty keys deleted.");
+      arcpy.AddMessage(". " + str(cnt) + " facilities records with empty keys updated.");
       
       #########################################################################      
       cnt = 0;
-      arcpy.AddMessage("Checking for bad releases records with empty keys.");
+      arcpy.AddMessage("Plugging empty releases keys with placeholders.");
       with arcpy.da.UpdateCursor(
           in_table     = rel
          ,field_names  = [
@@ -855,16 +867,28 @@ class NormalizeAGOUST(object):
             str_facility_id = row[1];
             str_lust_id     = row[2];
             
-            if (str_facility_id is None and str_lust_id is None) or str_state is None:
-               arcpy.AddMessage(". deleting releases record having no facility or lust id (" + str(row) + ")");
-               ucursor.deleteRow();
+            boo_update = False;
+            
+            if str_lust_id is None:
+               arcpy.AddMessage(".   plugging empty lust id key (" + str(row) + ")");
+               row[2] = "unk_id" + str(key);
+               key = key + 1;
+               boo_update = True;
+               
+            if str_state is None:
+               arcpy.AddMessage(".   plugging empty state key (" + str(row) + ")");
+               row[0] = 'Unknown';
+               boo_update = True;
+               
+            if boo_update:
+               ucursor.updateRow(row);
                cnt = cnt + 1;
                
-      arcpy.AddMessage(". " + str(cnt) + " resources records with empty keys deleted.");
+      arcpy.AddMessage(". " + str(cnt) + " resources records with empty keys updated.");
       
       #########################################################################      
       cnt = 0;
-      arcpy.AddMessage("Checking for bad usts records with empty keys.");
+      arcpy.AddMessage("Plugging empty usts keys with placeholders.");
       with arcpy.da.UpdateCursor(
           in_table     = usts
          ,field_names  = [
@@ -886,12 +910,22 @@ class NormalizeAGOUST(object):
             str_facility_id = row[1];
             str_tank_id     = row[2];
             
-            if str_state is None or str_facility_id is None or str_tank_id is None:
-               arcpy.AddMessage(". deleting usts record having empty keys (" + str(row) + ")");
-               ucursor.deleteRow();
+            if str_tank_id is None:
+               arcpy.AddMessage(".   plugging empty tank id key (" + str(row) + ")");
+               row[2] = "unk_id" + str(key);
+               key = key + 1;
+               boo_update = True;
+            
+            if str_state is None:
+               arcpy.AddMessage(".   plugging empty state key (" + str(row) + ")");
+               row[0] = 'Unknown';
+               boo_update = True;
+               
+            if boo_update:
+               ucursor.updateRow(row);
                cnt = cnt + 1;
                
-      arcpy.AddMessage(". " + str(cnt) + " ust records with empty keys deleted.");
+      arcpy.AddMessage(". " + str(cnt) + " ust records with empty keys updated");
       
       #########################################################################
       arcpy.AddMessage("Setting up dups temp tables.");
