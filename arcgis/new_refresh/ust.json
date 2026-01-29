@@ -155,6 +155,12 @@
          ,"schemaid": "tribal_nfa"
          ,"etlsrc": null
        }
+      ,"relreporting": {
+          "geodatabase": "default"
+         ,"datasource": "releases"
+         ,"schemaid": "releases"
+         ,"etlsrc": null
+       }
     }
    ,"relationshipclasses": {
        "facilities_usts": {

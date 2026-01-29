@@ -109,9 +109,9 @@ try:
    rez = st.execute(parameters,messages);
    
    ###############################################################################
-   sl.logger.info("--- Step 03: Deduplicating UST data");
+   sl.logger.info("--- Step 03: Normalizing UST data");
 
-   st = tlbx_sideloaded.DeduplicateAGOUST();
+   st = tlbx_sideloaded.NormalizeAGOUST();
    parameters = st.getParameterInfo();
    messages = None;
    rez = st.execute(parameters,messages);

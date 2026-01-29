@@ -727,7 +727,15 @@ class ConfigDZ:
             wrkspc = self.wrkspc;
       
       arcpy.env.workspace = wrkspc;
-
+      
+      #........................................................................
+      fldaliashash = {};
+      flds = arcpy.ListFields(dataset);
+      for fld in flds:
+         if not fld.required:
+            fldaliashash[fld.name] = fld.aliasName;      
+      
+      #........................................................................
       with open(in_layerfile,"r") as jsonFile_target:
          data_in = json.load(jsonFile_target);
       
@@ -743,7 +751,13 @@ class ConfigDZ:
                
                item["featureTable"]["dataConnection"]["workspaceConnectionString"] = "DATABASE=" + aprx.defaultGeodatabase;
                item["featureTable"]["dataConnection"]["dataset"] = dataset;
-               
+
+               if "fieldDescriptions" in item["featureTable"]:
+                  for fld in item["featureTable"]["fieldDescriptions"]:
+                     if fld["fieldName"] in fldaliashash:
+                        if fld["alias"] != fldaliashash[fld["fieldName"]]:
+                           fld["alias"] = fldaliashash[fld["fieldName"]];  
+                           
                if workspaceFactory is not None:
                   item["featureTable"]["dataConnection"]["workspaceFactory"] = workspaceFactory;
                
@@ -766,7 +780,7 @@ class ConfigDZ:
                   item["visibility"] = visibility;
                   
                if serviceLayerID is not None:
-                  item["serviceLayerID"] = serviceLayerID;
+                  item["serviceLayerID"] = serviceLayerID;                
                   
                if cim_fields is not None and "featureTable" in item:
                   if "fieldDescriptions" in item["featureTable"]:
@@ -923,9 +937,9 @@ class ConfigDZ:
          ,wrkspc           = wrkspc
       );
       
-      lyr = arcpy.mp.LayerFile(lyrx);
-      
-      md = lyr.metadata;
+      lyrfile = arcpy.mp.LayerFile(lyrx);
+ 
+      md = lyrfile.metadata;
       
       if description is not None:
          md.description = description;
@@ -941,13 +955,12 @@ class ConfigDZ:
       
       md.save();
       
-      z = in_map.addLayer(lyr,'BOTTOM');
+      lyr = in_map.addLayer(lyrfile,'BOTTOM');
       
       ############################################################################
       if symbology_fields is not None: 
-         lyr = in_map.listLayers('*')[0];
          
-         z = arcpy.management.ApplySymbologyFromLayer(
+         lyr = arcpy.management.ApplySymbologyFromLayer(
              in_layer           = lyr
             ,in_symbology_layer = lyrx
             ,symbology_fields   = symbology_fields
@@ -1433,9 +1446,20 @@ class ConfigDZ:
             ,index_name = item + '_idx'
          );
          
-      arcpy.management.AddGlobalIDs(
-         in_datasets  = fc
-      );
+      if 'add_globalids' in ob:
+         if ob['add_globalids']:
+            add_globalids = True;
+            
+         else:
+            add_globalids = False;
+         
+      else:
+         add_globalids = False;
+         
+      if add_globalids:
+         arcpy.management.AddGlobalIDs(
+            in_datasets  = fc
+         );
    
    #...........................................................................
    def build_table(
@@ -1484,9 +1508,20 @@ class ConfigDZ:
             ,index_name = item + '_idx'
          );
          
-      arcpy.management.AddGlobalIDs(
-         in_datasets  = tb
-      );
+      if 'add_globalids' in ob:
+         if ob['add_globalids']:
+            add_globalids = True;
+            
+         else:
+            add_globalids = False;
+         
+      else:
+         add_globalids = False;
+         
+      if add_globalids:
+         arcpy.management.AddGlobalIDs(
+            in_datasets  = tb
+         );
       
    #...........................................................................
    def build_relationshipclass(
@@ -1523,22 +1558,59 @@ class ConfigDZ:
           self.g_config['relationshipclasses'][relationshipclassid]['destination_datasetid']
          ,aprx=aprx,wrkspc=wrkspc
       );
-
-      arcpy.management.CreateRelationshipClass(
-          origin_table            = origin_table
-         ,destination_table       = destination_table
-         ,out_relationship_class  = self.g_config['relationshipclasses'][relationshipclassid]['datasource']
-         ,relationship_type       = self.g_config['relationshipclasses'][relationshipclassid]['relationship_type']
-         ,forward_label           = self.g_config['relationshipclasses'][relationshipclassid]['forward_label']
-         ,backward_label          = self.g_config['relationshipclasses'][relationshipclassid]['backward_label']
-         ,message_direction       = self.g_config['relationshipclasses'][relationshipclassid]['message_direction']
-         ,cardinality             = self.g_config['relationshipclasses'][relationshipclassid]['cardinality']
-         ,attributed              = self.g_config['relationshipclasses'][relationshipclassid]['attributed']
-         ,origin_primary_key      = self.g_config['relationshipclasses'][relationshipclassid]['origin_primary_key']
-         ,origin_foreign_key      = self.g_config['relationshipclasses'][relationshipclassid]['origin_foreign_key']
-         ,destination_primary_key = self.g_config['relationshipclasses'][relationshipclassid]['destination_primary_key']
-         ,destination_foreign_key = self.g_config['relationshipclasses'][relationshipclassid]['destination_foreign_key']
-      );        
+      
+      if 'relationship_table_datasetid' in self.g_config['relationshipclasses'][relationshipclassid]:
+         relationship_table = self.datasource(
+             self.g_config['relationshipclasses'][relationshipclassid]['relationship_table_datasetid']
+            ,aprx=aprx,wrkspc=wrkspc
+         );
+      else:
+         relationship_table = None;
+         
+      if 'attribute_fields' in self.g_config['relationshipclasses'][relationshipclassid]:
+         attribute_fields = self.g_config['relationshipclasses'][relationshipclassid]['attribute_fields'];
+      else:
+         attribute_fields = None;
+         
+      if 'attributed' in self.g_config['relationshipclasses'][relationshipclassid]:
+         attributed = self.g_config['relationshipclasses'][relationshipclassid]['attributed'];
+      else:
+         attributed = None;
+         
+      if relationship_table is not None:
+         arcpy.management.TableToRelationshipClass(
+             origin_table            = origin_table
+            ,destination_table       = destination_table
+            ,out_relationship_class  = tb
+            ,relationship_type       = self.g_config['relationshipclasses'][relationshipclassid]['relationship_type']
+            ,forward_label           = self.g_config['relationshipclasses'][relationshipclassid]['forward_label']
+            ,backward_label          = self.g_config['relationshipclasses'][relationshipclassid]['backward_label']
+            ,message_direction       = self.g_config['relationshipclasses'][relationshipclassid]['message_direction']
+            ,cardinality             = self.g_config['relationshipclasses'][relationshipclassid]['cardinality']
+            ,relationship_table      = relationship_table
+            ,attribute_fields        = attribute_fields
+            ,origin_primary_key      = self.g_config['relationshipclasses'][relationshipclassid]['origin_primary_key']
+            ,origin_foreign_key      = self.g_config['relationshipclasses'][relationshipclassid]['origin_foreign_key']
+            ,destination_primary_key = self.g_config['relationshipclasses'][relationshipclassid]['destination_primary_key']
+            ,destination_foreign_key = self.g_config['relationshipclasses'][relationshipclassid]['destination_foreign_key']
+         );
+         
+      else:      
+         arcpy.management.CreateRelationshipClass(
+             origin_table            = origin_table
+            ,destination_table       = destination_table
+            ,out_relationship_class  = tb
+            ,relationship_type       = self.g_config['relationshipclasses'][relationshipclassid]['relationship_type']
+            ,forward_label           = self.g_config['relationshipclasses'][relationshipclassid]['forward_label']
+            ,backward_label          = self.g_config['relationshipclasses'][relationshipclassid]['backward_label']
+            ,message_direction       = self.g_config['relationshipclasses'][relationshipclassid]['message_direction']
+            ,cardinality             = self.g_config['relationshipclasses'][relationshipclassid]['cardinality']
+            ,attributed              = attributed
+            ,origin_primary_key      = self.g_config['relationshipclasses'][relationshipclassid]['origin_primary_key']
+            ,origin_foreign_key      = self.g_config['relationshipclasses'][relationshipclassid]['origin_foreign_key']
+            ,destination_primary_key = self.g_config['relationshipclasses'][relationshipclassid]['destination_primary_key']
+            ,destination_foreign_key = self.g_config['relationshipclasses'][relationshipclassid]['destination_foreign_key']
+         );        
          
    #...........................................................................
    def get_env_data(
@@ -1595,7 +1667,7 @@ class ConfigDZ:
       return pnt_2;   
       
    #...........................................................................
-   def etl_load(
+   def etl_fc_load(
        self
       ,datasetid
       ,boo_testdata
@@ -1637,7 +1709,7 @@ class ConfigDZ:
       arcpy.AddMessage(".  Database has " + str(bef_cnt) + " records.");
       
       etl_dict = self.lkup(datasetid,'etl','etl',aprx=aprx,wrkspc=wrkspc);
-      
+
       if shape_long is None:
          inflds  = self.etl_flds(datasetid,aprx=aprx,wrkspc=wrkspc) + ["SHAPE@"];
          outflds = self.flds(datasetid,aprx=aprx,wrkspc=wrkspc,match_etl=True) + ["SHAPE@"]
@@ -1690,4 +1762,98 @@ class ConfigDZ:
       if int(bef_cnt) != int(aft_cnt):
          raise Exception("counts failed to reconcile " + str(bef_cnt) + " <> " + str(aft_cnt));
 
-   
+   #...........................................................................
+   def etl_tbl_load(
+       self
+      ,datasetid
+      ,boo_testdata
+      ,p_truncate
+      ,aprx              = None
+      ,wrkspc            = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;
+
+      if 'sde_conn' not in self.env:
+         raise Exception('error, no sde_conn in .env file');
+         
+      if not arcpy.Exists(self.env['sde_conn']):
+         raise Exception('error, sde in .env not found');
+      
+      src = os.path.join(self.env['sde_conn'],self.g_config["datasets"][datasetid]["etlsrc"]);
+      trg = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc);
+      
+      if p_truncate:
+         arcpy.management.TruncateTable(trg);
+      
+      cnt_inserted = 0;
+      arcpy.AddMessage("Exporting " + str(src) + "...");
+      bef_cnt = arcpy.management.GetCount(src)[0];     
+      arcpy.AddMessage(".  Database has " + str(bef_cnt) + " records.");
+      
+      etl_dict = self.lkup(datasetid,'etl','etl',aprx=aprx,wrkspc=wrkspc);
+
+      inflds = self.etl_flds(datasetid,aprx=aprx,wrkspc=wrkspc);
+      outflds = self.flds(datasetid,aprx=aprx,wrkspc=wrkspc,match_etl=True);
+      
+      with arcpy.da.InsertCursor(
+          in_table     = trg
+         ,field_names  = outflds
+      ) as icursor:
+         
+         with arcpy.da.SearchCursor(
+             in_table     = src
+            ,field_names  = inflds
+         ) as scursor:
+            
+            for row in scursor:
+               
+               icursor.insertRow(row);
+               cnt_inserted = cnt_inserted + 1;
+                  
+               if boo_testdata and cnt_inserted >= 100:
+                  break;             
+               
+      arcpy.AddMessage(".  " + str(cnt_inserted) + " records inserted.");
+      if boo_testdata:
+         bef_cnt = 100;
+      aft_cnt = arcpy.management.GetCount(trg)[0];
+      arcpy.AddMessage(".  Target table has " + str(aft_cnt) + " records.");
+      if int(bef_cnt) != int(aft_cnt):
+         raise Exception("counts failed to reconcile " + str(bef_cnt) + " <> " + str(aft_cnt));
+         
+   #...........................................................................
+   def layer_name(
+       self
+      ,mapid
+      ,layerid
+   ):
+      
+      if mapid not in self.g_config['maps']:
+         raise Exception("mapid " + str(mapid) + " not found");
+      
+      if layerid not in self.g_config['maps'][mapid]['layers']:
+         raise Exception("layerid " + str(layerid) + " for mapid " + str(mapid) + " not found");
+         
+      return self.g_config['maps'][mapid]['layers'][layerid]['name'];
+      
+   #...........................................................................
+   def relationshipclass_name(
+       self
+      ,relationshipclassid
+   ):
+      
+      if relationshipclassid not in self.g_config['relationshipclasses']:
+         raise Exception("relationshipclasses " + str(mapid) + " not found");
+
+      return self.g_config['relationshipclasses'][relationshipclassid]['name'];
+      

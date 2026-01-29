@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import arcpy,os,sys,json,csv,datetime;
+import arcpy,os,sys,json,csv,datetime,requests;
+from urllib.parse import urlsplit,urlencode,urlunsplit,parse_qs,quote;
 from arcgis.gis import GIS;
 from arcgis.features import FeatureLayerCollection,FeatureLayer;
 from arcgis.geocoding import Geocoder, geocode, batch_geocode,reverse_geocode;
@@ -11,8 +12,8 @@ from pandas.api.types import is_numeric_dtype;
 import sqlite3;
 
 ##############################################################################
-g_tribal_fac = 'TrUSTD UST Facilities 11-19-25.csv';
-g_tribal_rel = 'TrUSTD LUST UF1 11-19-25.csv';
+g_tribal_fac  = 'TrUSTD UST Facilities 11-19-25.csv';
+g_tribal_rel  = 'TrUSTD LUST UF1 11-19-25.csv';
 g_tribal_usts = 'TrUSTD USTs UF1 11-19-25.csv';
 g_tribal_nfa  = 'TrUSTD Release Report list for FY25 NFA letter 508 compliance and linking to UF.csv';
 g_epa_gc      = '92c07361d015431f88ec828c08e5c852';
@@ -137,7 +138,7 @@ class Toolbox(object):
 
       self.tools.append(RebuildSystemUST);
       self.tools.append(ReloadFromAGOUST);
-      self.tools.append(DeduplicateAGOUST);
+      self.tools.append(NormalizeAGOUST);
       self.tools.append(LoadTribalCSVsUST);
       self.tools.append(GeocodeTribalUST);
       self.tools.append(UpsertTribalDataUST);
@@ -145,6 +146,7 @@ class Toolbox(object):
       
       self.tools.append(SaveToStash);
       self.tools.append(RestoreFromStash);
+      self.tools.append(GenerateStateStats);
       
       
       g_config = configdz.ConfigDZ(
@@ -352,7 +354,7 @@ class ReloadFromAGOUST(object):
       usts = g_config.datasource('usts',aprx=aprx,wrkspc=wrkspc);
       if not arcpy.Exists(usts):
          raise Exception('usts not found');
-
+      
       #########################################################################
       arcpy.AddMessage("harvesting facilities");
       bef_cnt = arcpy.management.GetCount(gs.url + '/0')[0]; 
@@ -389,6 +391,11 @@ class ReloadFromAGOUST(object):
       arcpy.AddMessage(". AGO has " + str(bef_cnt) + " records.");
       arcpy.management.TruncateTable(in_table = rel);
 
+      nfa_letter_1_cnt = 0;
+      nfa_letter_2_cnt = 0;
+      nfa_letter_3_cnt = 0;
+      nfa_letter_4_cnt = 0;
+      
       ins_cnt = 0;
       rel_flds = g_config.flds('releases',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
       with arcpy.da.InsertCursor(
@@ -403,6 +410,15 @@ class ReloadFromAGOUST(object):
             
             for row in incurs:
                
+               if row[31] is not None:
+                  nfa_letter_1_cnt = nfa_letter_1_cnt + 1;
+               if row[32] is not None:
+                  nfa_letter_2_cnt = nfa_letter_2_cnt + 1;
+               if row[33] is not None:
+                  nfa_letter_3_cnt = nfa_letter_3_cnt + 1;
+               if row[34] is not None:
+                  nfa_letter_4_cnt = nfa_letter_4_cnt + 1;
+               
                if boo_testdata and ins_cnt >= 100:
                   break;
                   
@@ -412,6 +428,10 @@ class ReloadFromAGOUST(object):
       arcpy.AddMessage(". Inserted " + str(ins_cnt) + " records.");
       aft_cnt = arcpy.management.GetCount(rel)[0];
       arcpy.AddMessage(". Target has " + str(aft_cnt) + " records.");
+      arcpy.AddMessage(". " + str(nfa_letter_1_cnt) + " records have nfa letter 1 values.");
+      arcpy.AddMessage(". " + str(nfa_letter_2_cnt) + " records have nfa letter 2 values.");
+      arcpy.AddMessage(". " + str(nfa_letter_3_cnt) + " records have nfa letter 3 values.");
+      arcpy.AddMessage(". " + str(nfa_letter_4_cnt) + " records have nfa letter 4 values.");
       
       #########################################################################
       arcpy.AddMessage("harvesting facilities_by_county");
@@ -504,14 +524,14 @@ class ReloadFromAGOUST(object):
       arcpy.AddMessage(". Target has " + str(aft_cnt) + " records.");
 
 ###############################################################################
-class DeduplicateAGOUST(object):
+class NormalizeAGOUST(object):
 
    #...........................................................................
    def __init__(self):
 
-      self.label              = "A3 Deduplicate AGO";
-      self.name               = "DeduplicateAGOUST";
-      self.description        = "DeduplicateAGOUST";
+      self.label              = "A3 Normalize AGO";
+      self.name               = "NormalizeAGOUST";
+      self.description        = "NormalizeAGOUST";
       self.canRunInBackground = False;
 
    #...........................................................................
@@ -561,7 +581,8 @@ class DeduplicateAGOUST(object):
          raise Exception('usts not found');
          
       #########################################################################
-      arcpy.AddMessage("Cleaning up bad facilities keys");
+      cnt = 0;
+      arcpy.AddMessage("Cleaning up facilities changing empty strings to nulls");
       with arcpy.da.UpdateCursor(
           in_table     = fac
          ,field_names  = [
@@ -590,6 +611,7 @@ class DeduplicateAGOUST(object):
             ,'whpa_huc12'
             ,'epa_region'
           ]
+         ,sql_clause = (None,'ORDER BY state')
       ) as ucursor:
          
          for row in ucursor:
@@ -673,10 +695,13 @@ class DeduplicateAGOUST(object):
             
             if boo_update:
                ucursor.updateRow(row);
-               #arcpy.AddMessage(". bad keys on facilities objectid " + str(row[0]));
+               cnt = cnt + 1;
+      
+      arcpy.AddMessage(". " + str(cnt) + " facilities records with empty strings tidied up.");
                
       #########################################################################
-      arcpy.AddMessage("Cleaning up bad releases keys");
+      cnt = 0;
+      arcpy.AddMessage("Cleaning up releases changing empty strings to nulls");
       with arcpy.da.UpdateCursor(
           in_table     = rel
          ,field_names  = [
@@ -694,6 +719,7 @@ class DeduplicateAGOUST(object):
             ,'address_match_type'
             ,'epa_region'
           ]
+         ,sql_clause = (None,'ORDER BY state')
       ) as ucursor:
          
          for row in ucursor:
@@ -737,10 +763,13 @@ class DeduplicateAGOUST(object):
                
             if boo_update:
                ucursor.updateRow(row);
-               #arcpy.AddMessage(". bad keys on releases objectid " + str(row[0]));
+               cnt = cnt + 1;
+               
+      arcpy.AddMessage(". " + str(cnt) + " releases records with empty strings tidied up.");
                
       #########################################################################
-      arcpy.AddMessage("Cleaning up bad usts keys");
+      cnt = 0;
+      arcpy.AddMessage("Cleaning up usts changing empty strings to nulls");
       with arcpy.da.UpdateCursor(
           in_table     = usts
          ,field_names  = [
@@ -749,6 +778,7 @@ class DeduplicateAGOUST(object):
             ,'tank_id'
             ,'state'
           ]
+         ,sql_clause = (None,'ORDER BY state')
       ) as ucursor:
          
          for row in ucursor:
@@ -767,62 +797,101 @@ class DeduplicateAGOUST(object):
                row[3] = None;
                
             if boo_update:
-               ucursor.updateRow(row);
-               #arcpy.AddMessage(". bad keys on usts objectid " + str(row[0]));
+               ucursor.updateRow(row);               
+               cnt = cnt + 1;
+               
+      arcpy.AddMessage(". " + str(cnt) + " usts records with empty strings tidied up.");
       
       #########################################################################      
+      cnt = 0;
       arcpy.AddMessage("Checking for bad facilities records with empty keys.");
       with arcpy.da.UpdateCursor(
           in_table     = fac
          ,field_names  = [
-             'objectid'
+             'state'
             ,'facility_id'
-            ,'state'
+            ,'name'
+            ,'address'
+            ,'city'
+            ,'county'
+            ,'latitude'
+            ,'longitude'
           ]
+         ,sql_clause = (None,'ORDER BY state')
       ) as ucursor:
          
          for row in ucursor:
-            if row[1] is None or row[2] is None:
-               arcpy.AddMessage(". deleting facilities row " + str(row[0]) + " having empty keys");
+            str_state       = row[0];
+            str_facility_id = row[1];
+            
+            if str_facility_id is None or str_state is None:
+               arcpy.AddMessage(".   deleting facilities record having empty keys (" + str(row) + ")");
                ucursor.deleteRow();
+               cnt = cnt + 1;
+               
+      arcpy.AddMessage(". " + str(cnt) + " facilities records with empty keys deleted.");
       
       #########################################################################      
+      cnt = 0;
       arcpy.AddMessage("Checking for bad releases records with empty keys.");
       with arcpy.da.UpdateCursor(
           in_table     = rel
          ,field_names  = [
-             'objectid'
+             'state'
             ,'facility_id'
             ,'lust_id'
-            ,'state'
+            ,'name'
+            ,'address'
+            ,'city'
+            ,'county'
+            ,'latitude'
+            ,'longitude'
           ]
+         ,sql_clause = (None,'ORDER BY state')
       ) as ucursor:
          
          for row in ucursor:
-            if row[1] is None and row[2] is None:
-               arcpy.AddMessage(". deleting releases row " + str(row[0]) + " having no facility or lust id");
+            str_state       = row[0];
+            str_facility_id = row[1];
+            str_lust_id     = row[2];
+            
+            if (str_facility_id is None and str_lust_id is None) or str_state is None:
+               arcpy.AddMessage(". deleting releases record having no facility or lust id (" + str(row) + ")");
                ucursor.deleteRow();
+               cnt = cnt + 1;
                
-            if row[2] is None or row[3] is None:
-               arcpy.AddMessage(". deleting releases row " + str(row[0]) + " having empty keys");
-               ucursor.deleteRow();
+      arcpy.AddMessage(". " + str(cnt) + " resources records with empty keys deleted.");
       
       #########################################################################      
+      cnt = 0;
       arcpy.AddMessage("Checking for bad usts records with empty keys.");
       with arcpy.da.UpdateCursor(
           in_table     = usts
          ,field_names  = [
-             'objectid'
+             'state'
             ,'facility_id'
-            ,'state'
             ,'tank_id'
+            ,'tank_status'
+            ,'installation_date'
+            ,'removal_date'     
+            ,'capacity'       
+            ,'substances'   
+            ,'tank_wall_type'   
           ]
+         ,sql_clause = (None,'ORDER BY state')
       ) as ucursor:
          
          for row in ucursor:
-            if row[1] is None or row[2] is None or row[3] is None:
-               arcpy.AddMessage(". deleting usts row " + str(row[0]) + " having empty keys");
+            str_state       = row[0];
+            str_facility_id = row[1];
+            str_tank_id     = row[2];
+            
+            if str_state is None or str_facility_id is None or str_tank_id is None:
+               arcpy.AddMessage(". deleting usts record having empty keys (" + str(row) + ")");
                ucursor.deleteRow();
+               cnt = cnt + 1;
+               
+      arcpy.AddMessage(". " + str(cnt) + " ust records with empty keys deleted.");
       
       #########################################################################
       arcpy.AddMessage("Setting up dups temp tables.");
@@ -890,6 +959,27 @@ class DeduplicateAGOUST(object):
       """);
       
       cursor.execute("""
+         SELECT
+          a.state
+         ,SUM(a.actual_dups) AS actual_dupcount
+         FROM (
+            SELECT
+             aa.state
+            ,aa.dupcount - 1 AS actual_dups
+            FROM
+            main.temp_fac_dups aa
+         ) a
+         GROUP BY         
+         a.state
+         ORDER BY         
+         a.state
+      """);
+      
+      arcpy.AddMessage(". Facilities dups by state");
+      for row in cursor:
+         arcpy.AddMessage(".    " + row[0] + ": " + str(row[1]));
+      
+      cursor.execute("""
          INSERT INTO main.temp_rel_dups(
              faclust_id
             ,state
@@ -907,6 +997,27 @@ class DeduplicateAGOUST(object):
          HAVING
          COUNT(*) > 1
       """);
+  
+      cursor.execute("""
+         SELECT
+          a.state
+         ,SUM(a.actual_dups) AS actual_dupcount
+         FROM (
+            SELECT
+             aa.state
+            ,aa.dupcount - 1 AS actual_dups
+            FROM
+            main.temp_rel_dups aa
+         ) a
+         GROUP BY         
+         a.state
+         ORDER BY         
+         a.state
+      """);
+      
+      arcpy.AddMessage(". Releases dups by state");
+      for row in cursor:
+         arcpy.AddMessage(".    " + row[0] + ": " + str(row[1]));
       
       cursor.execute("""
          INSERT INTO main.temp_usts_dups(
@@ -930,9 +1041,31 @@ class DeduplicateAGOUST(object):
          COUNT(*) > 1
       """);
       
+      cursor.execute("""
+         SELECT
+          a.state
+         ,SUM(a.actual_dups) AS actual_dupcount
+         FROM (
+            SELECT
+             aa.state
+            ,aa.dupcount - 1 AS actual_dups
+            FROM
+            main.temp_usts_dups aa
+         ) a
+         GROUP BY         
+         a.state
+         ORDER BY         
+         a.state
+      """);
+      
+      arcpy.AddMessage(". USTS dups by state");
+      for row in cursor:
+         arcpy.AddMessage(".    " + row[0] + ": " + str(row[1]));
+      
       conn.commit();
                     
       #########################################################################      
+      cnt = 0;
       arcpy.AddMessage("Scoring and removing facilities dups.");
       facscore = {};
       
@@ -1048,7 +1181,7 @@ class DeduplicateAGOUST(object):
                winner[0] = objectid;
                winner[1] = score;
                
-         arcpy.AddMessage(". examining " + str(row[0]) + " " + str(row[1]) + " having " + str(row[2]) + " dups, keeping " + str(winner[0]) + " with score " + str(winner[1]) + ".");
+         arcpy.AddMessage(". examining " + str(row[1]) + " " + str(row[0]) + " having " + str(row[2]) + " dups, keeping " + str(winner[0]) + " with score " + str(winner[1]) + ".");
          
          cursor2.execute("""
             DELETE FROM main.facilities
@@ -1056,11 +1189,14 @@ class DeduplicateAGOUST(object):
                 facility_id = ?
             AND state       = ?
             AND objectid   != ?
-         """,[row[0],row[1],winner[0]]);  
+         """,[row[0],row[1],winner[0]]);
+         cnt = cnt + row[2] - 1;
       
       conn.commit();
+      arcpy.AddMessage(". removed " + str(cnt) + " facilities dups.");
       
       #########################################################################      
+      cnt = 0;
       arcpy.AddMessage("Scoring and removing releases dups.");
       facscore = {};
       
@@ -1202,11 +1338,14 @@ class DeduplicateAGOUST(object):
                 COALESCE(facility_id,'') || lust_id = ?
             AND state       = ?
             AND objectid   != ?
-         """,[row[0],row[1],winner[0]]);  
+         """,[row[0],row[1],winner[0]]);
+         cnt = cnt + row[2] - 1;
       
       conn.commit();
+      arcpy.AddMessage(". removed " + str(cnt) + " releases dups.");
       
       #########################################################################      
+      cnt = 0;
       arcpy.AddMessage("Scoring and removing usts dups.");
       facscore = {};
       
@@ -1293,14 +1432,73 @@ class DeduplicateAGOUST(object):
             AND state       = ?
             AND tank_id     = ?
             AND objectid   != ?
-         """,[row[0],row[1],row[2],winner[0]]);  
+         """,[row[0],row[1],row[2],winner[0]]); 
+         cnt = cnt + row[3] - 1; 
       
       conn.commit();
       
       del conn;
+      arcpy.AddMessage(". removed " + str(cnt) + " usts dups.");
       
-      arcpy.AddMessage("Deduplication cleanup complete.");
-              
+      #########################################################################      
+      cnt1 = 0;
+      cnt2 = 0;
+      cnt3 = 0;
+      cnt4 = 0;
+      bad1 = 0;
+      bad2 = 0;
+      bad3 = 0;
+      bad4 = 0;
+      arcpy.AddMessage("Checking NFA URL validity.");
+      
+      with arcpy.da.SearchCursor(
+          in_table     = rel
+         ,field_names  = ['lust_id','tribe','nfa_letter_1','nfa_letter_2','nfa_letter_3','nfa_letter_4']
+         ,where_clause = 'nfa_letter_1 IS NOT NULL OR nfa_letter_2 IS NOT NULL OR nfa_letter_3 IS NOT NULL OR nfa_letter_4 IS NOT NULL' 
+      ) as scursor:
+         
+         for row in scursor:
+         
+            lust_id      = row[0];
+            tribe        = row[1];
+            nfa_letter_1 = row[2];
+            nfa_letter_2 = row[3];
+            nfa_letter_3 = row[4];
+            nfa_letter_4 = row[5];
+      
+            if nfa_letter_1 is not None:
+               cnt1 = cnt1 + 1;
+               z = requests.head(nfa_letter_1);
+               if z.status_code != 200:
+                  arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 1 " + nfa_letter_1 + " returned status " + str(z.status_code));
+                  bad1 = bad1 + 1;
+      
+            if nfa_letter_2 is not None:
+               cnt2 = cnt2 + 1;
+               z = requests.head(nfa_letter_2);
+               if z.status_code != 200:
+                  arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 2 " + nfa_letter_2 + " returned status " + str(z.status_code));
+                  bad2 = bad2 + 1;
+                  
+            if nfa_letter_3 is not None:
+               cnt3 = cnt3 + 1;
+               z = requests.head(nfa_letter_3);
+               if z.status_code != 200:
+                  arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 3 " + nfa_letter_3 + " returned status " + str(z.status_code));
+                  bad3 = bad3 + 1;
+                  
+            if nfa_letter_4 is not None:
+               cnt4 = cnt4 + 1;
+               z = requests.head(nfa_letter_4);
+               if z.status_code != 200:
+                  arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 4 " + nfa_letter_4 + " returned status " + str(z.status_code));
+                  bad4 = bad4 + 1;
+      
+      arcpy.AddMessage(". checked " + str(cnt1) + " nfa 1 urls, found " + str(bad1) + " problems.");
+      arcpy.AddMessage(". checked " + str(cnt2) + " nfa 2 urls, found " + str(bad2) + " problems."); 
+      arcpy.AddMessage(". checked " + str(cnt3) + " nfa 3 urls, found " + str(bad3) + " problems.");     
+      arcpy.AddMessage(". checked " + str(cnt4) + " nfa 4 urls, found " + str(bad4) + " problems.");
+      
 ###############################################################################
 class LoadTribalCSVsUST(object):
 
@@ -2057,7 +2255,28 @@ class LoadTribalCSVsUST(object):
       del conn;      
       
       #########################################################################
+      def check_nfa(val,lust_id):
+         
+         if val is None or val == "" or val == " ":
+            return None;
+            
+         pts = urlsplit(val.strip());
+         qps = parse_qs(pts.query,keep_blank_values=True);
+         ep = quote(pts.path);
+         eq = urlencode(qps);
+    
+         eu = urlunsplit((pts.scheme,pts.netloc,ep,eq,pts.fragment));
+         
+         r = requests.head(eu);
+         
+         if r.status_code != 200:
+            arcpy.AddMessage("QA check returned " + r.status_code + " for lust_id " + lust_id + " nfa url " + eu);
+            
+         return eu;
+      
+      #########################################################################
       if src_nfa is not None and src_nfa != "":
+         cnt = 0;
          arcpy.AddMessage("Merging tribal nfa into tribal releases");
          
          with arcpy.da.SearchCursor(
@@ -2070,10 +2289,10 @@ class LoadTribalCSVsUST(object):
                city        = row[5];
                lust_id     = row[16];
                state       = row[17];
-               new_nfa_1   = row[18];
-               new_nfa_2   = row[19];
-               new_nfa_3   = row[20];
-               new_nfa_4   = row[21];
+               new_nfa_1   = check_nfa(row[18],lust_id);
+               new_nfa_2   = check_nfa(row[19],lust_id);
+               new_nfa_3   = check_nfa(row[20],lust_id);
+               new_nfa_4   = check_nfa(row[21],lust_id);
                
                if new_nfa_1 is not None:
                   new_nfas = [];
@@ -2214,7 +2433,11 @@ class GeocodeTribalUST(object):
          arcpy.AddError("active portal not set to EPA");
          raise Exception;
       
-      token = arcpy.GetSigninToken()['token'];
+      signin = arcpy.GetSigninToken();
+      if signin is None:
+         arcpy.AddError("Portal unknown, you may need to log into EPA Geoplatform");
+         
+      token = signin['token'];
       
       gis = GIS(
           url   = portalurl
@@ -2704,7 +2927,7 @@ class UpsertTribalDataUST(object):
       
       #########################################################################
       arcpy.AddMessage("Applying Updates");
-      
+
       cursor.execute("""
          SELECT
           a.facility_id
@@ -2798,8 +3021,9 @@ class UpsertTribalDataUST(object):
             cnt = cnt + 1;
             
       arcpy.AddMessage(". processed " + str(cnt) + " updates for tribal facilities");
-
+      
       #########################################################################
+     
       cursor.execute("""
          SELECT
           a.facility_id
@@ -2913,7 +3137,7 @@ class UpsertTribalDataUST(object):
                   cur_nfas.append(cur_nfa_3);
                if cur_nfa_4 is not None:
                   cur_nfas.append(cur_nfa_4);
-                  
+               
                merged = new_nfas + list(set(cur_nfas) - set(new_nfas));
                
                row2[31] = None;
@@ -2948,6 +3172,7 @@ class UpsertTribalDataUST(object):
       arcpy.AddMessage(". processed " + str(cnt) + " updates for tribal releases");
       
       #########################################################################
+      
       cursor.execute("""
          SELECT
           a.facility_id
@@ -3002,6 +3227,7 @@ class UpsertTribalDataUST(object):
       arcpy.AddMessage(". processed " + str(cnt) + " updates for tribal usts");
       
       #########################################################################
+      
       arcpy.AddMessage("Applying Inserts");
       
       cursor.execute("""
@@ -3596,7 +3822,173 @@ class RestoreFromStash(object):
       
       arcpy.AddMessage("restoring usts");
       arcpy.management.Append(usts_stash,usts,'NO_TEST');
+      
+   ###############################################################################
+class GenerateStateStats(object):
 
+   #...........................................................................
+   def __init__(self):
+
+      self.label              = "U3 Generate State Stats";
+      self.name               = "GenerateStateStats";
+      self.description        = "GenerateStateStats";
+      self.canRunInBackground = False;
+
+   #...........................................................................
+   def getParameterInfo(self):
+      
+      #########################################################################
+      param0 = arcpy.Parameter(
+          displayName   = "AGO GUID"
+         ,name          = "AGOGUID"
+         ,datatype      = "GPString"
+         ,parameterType = "Required"
+         ,direction     = "Input"
+         ,enabled       = True
+         ,multiValue    = False
+      );
+      param0.value = g_config.map_guid('ust_finder_feature_layer');
+      
+      #########################################################################
+      param1 = arcpy.Parameter(
+          displayName   = "Datasets"
+         ,name          = "Datasets"
+         ,datatype      = "GPString"
+         ,parameterType = "Required"
+         ,direction     = "Input"
+         ,enabled       = True
+         ,multiValue    = Tr
+      );
+      param1.value  = "ValueList";
+      param1.filter.list = ["facilities", "resources", "usts"];
+      
+      params = [
+          param0
+         ,param1
+      ];
+      
+      return params;
+
+   #...........................................................................
+   def isLicensed(self):
+
+      return True;
+
+   #...........................................................................
+   def updateParameters(self,parameters):
+
+      return;
+
+   #...........................................................................
+   def updateMessages(self,parameters):
+
+      return;
+
+   #...........................................................................
+   def execute(self,parameters,messages):
+
+      aprx = g_config.aprx;
+      wrkspc = g_config.wrkspc;
+      arcpy.env.workspace = wrkspc;
+      
+      src_guid = parameters[0].valueAsText;
+      ary_data = parameters[1].valueAsText.split(';');
+      
+      gis = GIS();
+      gs = gis.content.get(src_guid);
+      arcpy.AddMessage("Pulling data from " + str(gs.url));
+      
+      conn    = sqlite3.connect(aprx.defaultGeodatabase);
+      cursor  = conn.cursor();
+      
+      if 'releases' in ary_data:
+         relreporting = g_config.datasource('relreporting',aprx=aprx,wrkspc=wrkspc);
+         
+         if arcpy.Exists(relreporting):
+            arcpy.Delete_management(relreporting);
+         
+         g_config.build_dataset('relreporting',aprx=aprx,wrkspc=wrkspc);
+
+
+         bef_cnt = arcpy.management.GetCount(gs.url + '/1')[0]; 
+         arcpy.AddMessage(". AGO has " + str(bef_cnt) + " records.");
+         
+         ins_cnt = 0;
+         relreporting_flds = g_config.flds('relreporting',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
+         with arcpy.da.InsertCursor(
+             in_table    = relreporting
+            ,field_names = relreporting_flds
+         ) as outcurs:
+         
+            with arcpy.da.SearchCursor(
+                in_table     = gs.url + '/1'
+               ,field_names  = relreporting_flds
+            ) as incurs:
+               
+               for row in incurs:
+                     
+                  outcurs.insertRow(row);
+                  ins_cnt = ins_cnt + 1;
+
+         arcpy.AddMessage(". Inserted " + str(ins_cnt) + " records.");
+         aft_cnt = arcpy.management.GetCount(rel)[0];
+
+         cursor.execute("""
+            SELECT
+             a.state
+            ,COUNT(*) AS cnt
+            ,SUM(a.has_nfa1) AS has_nfa1
+            ,SUM(a.has_nfa2) AS has_nfa2
+            ,SUM(a.has_nfa3) AS has_nfa3
+            ,SUM(a.has_nfa4) AS has_nfa4
+            FROM (
+               SELECT
+                aa.state
+               ,CASE
+                WHEN a.nfa_letter_1 IS NOT NULL
+                AND a.nfa_letter_1 != ''
+                THEN
+                  1
+                ELSE
+                  0
+                END has_nfa1
+               ,CASE
+                WHEN a.nfa_letter_2 IS NOT NULL
+                AND a.nfa_letter_2 != ''
+                THEN
+                  1
+                ELSE
+                  0
+                END has_nfa2
+               ,CASE
+                WHEN a.nfa_letter_3 IS NOT NULL
+                AND a.nfa_letter_3 != ''
+                THEN
+                  1
+                ELSE
+                  0
+                END has_nfa3
+               ,CASE
+                WHEN a.nfa_letter_4 IS NOT NULL
+                AND a.nfa_letter_4 != ''
+                THEN
+                  1
+                ELSE
+                  0
+                END has_nfa4
+               FROM
+               main.relreporting aa
+            ) a
+            GROUP BY
+            a.state
+            ORDER BY
+            a.state
+         """);
+         
+         cnt = 0;
+         for row in cursor:
+            None;            
+         
 def dznull(cell):    
          
    try:
