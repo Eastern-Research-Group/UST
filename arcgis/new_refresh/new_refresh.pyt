@@ -375,6 +375,14 @@ class ReloadFromAGOUST(object):
             
             for row in incurs:
                
+               # Trim Facility ID
+               if row[0] is not None;
+                  row[0] = row[0].strip();
+                  
+               # Trim state
+               if row[5] is not None;
+                  row[5] = row[5].strip();
+               
                if boo_testdata and ins_cnt >= 100:
                   break;
                   
@@ -409,6 +417,18 @@ class ReloadFromAGOUST(object):
          ) as incurs:
             
             for row in incurs:
+               
+               # Trim Facility ID
+               if row[0] is not None;
+                  row[0] = row[0].strip();
+                  
+               # Trim Lust ID
+               if row[1] is not None;
+                  row[1] = row[1].strip();
+                  
+               # Trim state
+               if row[7] is not None;
+                  row[7] = row[7].strip();
                
                if row[31] is not None:
                   nfa_letter_1_cnt = nfa_letter_1_cnt + 1;
@@ -512,6 +532,18 @@ class ReloadFromAGOUST(object):
          ) as incurs:
             
             for row in incurs:
+               
+               # Trim facility id
+               if row[0] is not None;
+                  row[0] = row[0].strip();
+                  
+               # Trim tank_id
+               if row[1] is not None;
+                  row[1] = row[1].strip();
+                
+               # Trim state
+               if row[2] is not None;
+                  row[2] = row[2].strip();
                
                if boo_testdata and ins_cnt >= 100:
                   break;
@@ -868,7 +900,6 @@ class NormalizeAGOUST(object):
             str_lust_id     = row[2];
             
             boo_update = False;
-            
             if str_lust_id is None:
                arcpy.AddMessage(".   plugging empty lust id key (" + str(row) + ")");
                row[2] = "unk_id" + str(key);
@@ -910,6 +941,7 @@ class NormalizeAGOUST(object):
             str_facility_id = row[1];
             str_tank_id     = row[2];
             
+            boo_update = False;
             if str_tank_id is None:
                arcpy.AddMessage(".   plugging empty tank id key (" + str(row) + ")");
                row[2] = "unk_id" + str(key);
@@ -1271,6 +1303,8 @@ class NormalizeAGOUST(object):
             WHERE
                 COALESCE(a.facility_id,'') || a.lust_id  = ?
             AND a.state = ?
+            ORDER BY
+            a.reported_date DESC            
          """,[row[0],row[1]]);
          
          for row2 in cursor2:
@@ -1414,7 +1448,9 @@ class NormalizeAGOUST(object):
             WHERE
                 a.facility_id = ?
             AND a.state = ?
-            AND a.tank_id  = ?            
+            AND a.tank_id  = ? 
+            ORDER BY
+            a.removal_date DESC            
          """,[row[0],row[1],row[2]]);
          
          for row2 in cursor2:
