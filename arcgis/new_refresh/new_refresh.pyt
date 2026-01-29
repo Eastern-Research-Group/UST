@@ -376,11 +376,11 @@ class ReloadFromAGOUST(object):
             for row in incurs:
                
                # Trim Facility ID
-               if row[0] is not None;
+               if row[0] is not None:
                   row[0] = row[0].strip();
                   
                # Trim state
-               if row[5] is not None;
+               if row[5] is not None:
                   row[5] = row[5].strip();
                
                if boo_testdata and ins_cnt >= 100:
@@ -419,15 +419,15 @@ class ReloadFromAGOUST(object):
             for row in incurs:
                
                # Trim Facility ID
-               if row[0] is not None;
+               if row[0] is not None:
                   row[0] = row[0].strip();
                   
                # Trim Lust ID
-               if row[1] is not None;
+               if row[1] is not None:
                   row[1] = row[1].strip();
                   
                # Trim state
-               if row[7] is not None;
+               if row[7] is not None:
                   row[7] = row[7].strip();
                
                if row[31] is not None:
@@ -534,15 +534,15 @@ class ReloadFromAGOUST(object):
             for row in incurs:
                
                # Trim facility id
-               if row[0] is not None;
+               if row[0] is not None:
                   row[0] = row[0].strip();
                   
                # Trim tank_id
-               if row[1] is not None;
+               if row[1] is not None:
                   row[1] = row[1].strip();
                 
                # Trim state
-               if row[2] is not None;
+               if row[2] is not None:
                   row[2] = row[2].strip();
                
                if boo_testdata and ins_cnt >= 100:
