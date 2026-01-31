@@ -155,12 +155,6 @@
          ,"schemaid": "tribal_nfa"
          ,"etlsrc": null
        }
-      ,"relreporting": {
-          "geodatabase": "default"
-         ,"datasource": "releases"
-         ,"schemaid": "releases"
-         ,"etlsrc": null
-       }
     }
    ,"relationshipclasses": {
        "facilities_usts": {
@@ -415,6 +409,65 @@
             ,["nfa_letter_2"                   ,"TEXT"  ,"NFA Letter 2"                                                ,8000,null,"",false,"nfa_2"]
             ,["nfa_letter_3"                   ,"TEXT"  ,"NFA Letter 3"                                                ,8000,null,"",false,"nfa_3"]
             ,["nfa_letter_4"                   ,"TEXT"  ,"NFA Letter 4"                                                ,8000,null,"",false,"nfa_4"]
+          ]
+       }
+       ,"facstaterpt": {
+          "oid_type": "32_BIT"
+         ,"add_globalids": false
+         ,"flds": [
+             ["state"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,null]
+            ,["facility_status"                ,"TEXT"  ,"Facility Status"                                             ,8000,null,"",true ,null]
+            ,["cnt"                            ,"LONG"  ,"Count"                                                       ,null,null,"",false,null]
+            ,["tribe_cnt"                      ,"LONG"  ,"Tribes Count"                                                ,null,null,"",false,null]
+            ,["nullgeo_cnt"                    ,"LONG"  ,"Null Geometry Count"                                         ,null,null,"",false,null]
+          ]
+       }
+       ,"relstaterpt": {
+          "oid_type": "32_BIT"
+         ,"add_globalids": false
+         ,"flds": [
+             ["state"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,null]
+            ,["status"                         ,"TEXT"  ,"Status"                                                      ,8000,null,"",true ,null]
+            ,["cnt"                            ,"LONG"  ,"Count"                                                       ,null,null,"",false,null]
+            ,["tribe_cnt"                      ,"LONG"  ,"Tribes Count"                                                ,null,null,"",false,null]
+            ,["nfa_letter_1_cnt"               ,"LONG"  ,"NFA Letter 1 Count"                                          ,null,null,"",false,null]
+            ,["nfa_letter_2_cnt"               ,"LONG"  ,"NFA Letter 2 Count"                                          ,null,null,"",false,null]
+            ,["nfa_letter_3_cnt"               ,"LONG"  ,"NFA Letter 3 Count"                                          ,null,null,"",false,null]
+            ,["nfa_letter_4_cnt"               ,"LONG"  ,"NFA Letter 4 Count"                                          ,null,null,"",false,null]
+            ,["nullgeo_cnt"                    ,"LONG"  ,"Null Geometry Count"                                         ,null,null,"",false,null]
+          ]
+       }
+       ,"factriberpt": {
+          "oid_type": "32_BIT"
+         ,"add_globalids": false
+         ,"flds": [
+             ["tribe"                          ,"TEXT"  ,"Tribe"                                                       ,8000,null,"",true ,null]
+            ,["facility_status"                ,"TEXT"  ,"Facility Status"                                             ,8000,null,"",true ,null]
+            ,["cnt"                            ,"LONG"  ,"Count"                                                       ,null,null,"",false,null]
+            ,["nullgeo_cnt"                    ,"LONG"  ,"Null Geometry Count"                                         ,null,null,"",false,null]
+          ]
+       }
+       ,"reltriberpt": {
+          "oid_type": "32_BIT"
+         ,"add_globalids": false
+         ,"flds": [
+             ["tribe"                          ,"TEXT"  ,"Tribe"                                                       ,8000,null,"",true ,null]
+            ,["status"                         ,"TEXT"  ,"Status"                                                      ,8000,null,"",true ,null]
+            ,["cnt"                            ,"LONG"  ,"Count"                                                       ,null,null,"",false,null]
+            ,["nfa_letter_1_cnt"               ,"LONG"  ,"NFA Letter 1 Count"                                          ,null,null,"",false,null]
+            ,["nfa_letter_2_cnt"               ,"LONG"  ,"NFA Letter 2 Count"                                          ,null,null,"",false,null]
+            ,["nfa_letter_3_cnt"               ,"LONG"  ,"NFA Letter 3 Count"                                          ,null,null,"",false,null]
+            ,["nfa_letter_4_cnt"               ,"LONG"  ,"NFA Letter 4 Count"                                          ,null,null,"",false,null]
+            ,["nullgeo_cnt"                    ,"LONG"  ,"Null Geometry Count"                                         ,null,null,"",false,null]
+          ]
+       }
+       ,"ustsstaterpt": {
+          "oid_type": "32_BIT"
+         ,"add_globalids": false
+         ,"flds": [
+             ["state"                          ,"TEXT"  ,"State"                                                       ,8000,null,"",true ,null]
+            ,["tank_status"                    ,"TEXT"  ,"Tank Status"                                                 ,8000,null,"",true ,null]
+            ,["cnt"                            ,"LONG"  ,"Count"                                                       ,null,null,"",false,null]
           ]
        }
     }

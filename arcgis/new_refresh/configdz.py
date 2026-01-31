@@ -153,10 +153,30 @@ class ConfigDZ:
       if datasetid not in self.g_config['datasets']:
          raise Exception(str(datasetid) + " not found in config datasets");
          
-      if 'schemaid' not in self.g_config['datasets'][datasetid]:
-         raise Exception("schemaid element not found in config datasets");
+      return self.fld_def_from_schema(
+          schemaid = schemaid
+         ,aprx     = aprx
+         ,wrkspc   = wrkspc
+      );
+      
+   #...........................................................................
+   def fld_def_from_schema(
+       self
+      ,schemaid
+      ,aprx   = None
+      ,wrkspc = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
          
-      schemaid = self.g_config['datasets'][datasetid]['schemaid'];
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;
       
       if schemaid not in self.g_config['schemas']:
          raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
@@ -193,11 +213,33 @@ class ConfigDZ:
       if datasetid not in self.g_config['datasets']:
          raise Exception(str(datasetid) + " not found in config datasets");
          
-      if 'schemaid' not in self.g_config['datasets'][datasetid]:
-         raise Exception("schemaid element not found in config datasets");
-         
       schemaid = self.g_config['datasets'][datasetid]['schemaid'];
       
+      return self.fld_idx_from_schema(
+          schemaid = schemaid
+         ,aprx     = aprx
+         ,wrkspc   = wrkspc
+      );
+      
+   #...........................................................................
+   def fld_idx_from_schema(
+       self
+      ,schemaid
+      ,aprx   = None
+      ,wrkspc = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;
+         
       if schemaid not in self.g_config['schemas']:
          raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
          
@@ -241,6 +283,33 @@ class ConfigDZ:
          
       schemaid = self.g_config['datasets'][datasetid]['schemaid'];
       
+      return self.flds_from_schema(
+          schemaid  = schemaid
+         ,aprx      = aprx
+         ,wrkspc    = wrkspc
+         ,match_etl = match_etl
+         ,prefix    = prefix
+      );
+      
+   #...........................................................................
+   def flds_from_schema(
+       self
+      ,schemaid
+      ,aprx      = None
+      ,wrkspc    = None
+      ,match_etl = False
+      ,prefix    = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+        
       if schemaid not in self.g_config['schemas']:
          raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
          
@@ -1339,7 +1408,55 @@ class ConfigDZ:
                      ,code               = vals[0]
                      ,code_description   = vals[1]
                   );
-                  
+   
+   #...........................................................................
+   def build_from_schema(
+       self
+      ,schemaid
+      ,datasetname
+      ,aprx              = None
+      ,wrkspc            = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schemaid " + str(schemaid) + " not found in config schemas");
+         
+      if 'geometry_type' in self.g_config['schemas'][schemaid]:
+         if self.g_config['schemas'][schemaid]['geometry_type'] is not None:
+            self.build_feature_class_from_schema(
+                datasetname = datasetname
+               ,schemaid    = schemaid
+               ,aprx        = aprx
+               ,wrkspc      = wrkspc
+            );
+         
+         else:
+            self.build_table_from_schema(
+                datasetname = datasetname
+               ,schemaid    = schemaid
+               ,aprx        = aprx
+               ,wrkspc      = wrkspc
+            );
+
+      else:
+         self.build_table_from_schema(
+             datasetname = datasetname
+            ,schemaid    = schemaid
+            ,aprx        = aprx
+            ,wrkspc      = wrkspc
+         );
+   
    #...........................................................................
    def build_dataset(
        self
@@ -1418,15 +1535,49 @@ class ConfigDZ:
       if schemaid not in self.g_config['schemas']:
          raise Exception("schema missing from config")
          
-      fc = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc);
       ob = self.g_config['schemas'][schemaid];
       
-      if arcpy.Exists(fc):
-         raise Exception("preexisting " + datasetid + " found");
+      fc = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc);
+         
+      return self.build_feature_class_from_schema(
+          datasetname       = fc
+         ,schemaid          = schemaid
+         ,aprx              = aprx
+         ,wrkspc            = wrkspc
+      );
+         
+   #...........................................................................
+   def build_feature_class_from_schema(
+       self
+      ,datasetname
+      ,schemaid
+      ,aprx              = None
+      ,wrkspc            = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      #arcpy.AddMessage("using workspace: " + str(wrkspc));
+      arcpy.env.workspace = wrkspc;
+
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schema missing from config")
+         
+      ob = self.g_config['schemas'][schemaid];
+         
+      if arcpy.Exists(datasetname):
+         raise Exception("preexisting " + datasetname + " found");
 
       arcpy.CreateFeatureclass_management(
-          out_path          = os.path.dirname(fc)
-         ,out_name          = os.path.basename(fc)
+          out_path          = os.path.dirname(datasetname)
+         ,out_name          = os.path.basename(datasetname)
          ,geometry_type     = ob["geometry_type"]
          ,has_m             = ob["has_m"]
          ,has_z             = ob["has_z"]
@@ -1435,13 +1586,13 @@ class ConfigDZ:
       );
 
       arcpy.management.AddFields(
-          in_table          = fc
-         ,field_description = self.fld_def(datasetid)
+          in_table          = datasetname
+         ,field_description = self.fld_def_from_schema(schemaid)
       );
          
-      for item in self.fld_idx(datasetid):
+      for item in self.fld_idx_from_schema(schemaid):
          arcpy.management.AddIndex(
-             in_table   = fc
+             in_table   = datasetname
             ,fields     = [item]
             ,index_name = item + '_idx'
          );
@@ -1458,7 +1609,7 @@ class ConfigDZ:
          
       if add_globalids:
          arcpy.management.AddGlobalIDs(
-            in_datasets  = fc
+            in_datasets  = datasetname
          );
    
    #...........................................................................
@@ -1484,26 +1635,59 @@ class ConfigDZ:
       if schemaid not in self.g_config['schemas']:
          raise Exception("schema missing from config")
          
-      tb = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc);
       ob = self.g_config['schemas'][schemaid];
       
-      if arcpy.Exists(tb):
-         raise Exception("preexisting " + datasetid + " found");
+      tb = self.datasource(datasetid,aprx=aprx,wrkspc=wrkspc); 
+         
+      return self.build_table_from_schema(
+          datasetname       = tb
+         ,schemaid          = schemaid
+         ,aprx              = aprx
+         ,wrkspc            = wrkspc
+      );
+         
+   #...........................................................................
+   def build_table_from_schema(
+       self
+      ,datasetname
+      ,schemaid
+      ,aprx              = None
+      ,wrkspc            = None
+   ):
+
+      if aprx is None:
+         aprx = self.aprx;
+         
+      if wrkspc is None:
+         if self.wrkspc is None:
+            wrkspc = aprx.defaultGeodatabase;
+         else:
+            wrkspc = self.wrkspc;
+      
+      arcpy.env.workspace = wrkspc;  
+      
+      if schemaid not in self.g_config['schemas']:
+         raise Exception("schema missing from config")
+         
+      ob = self.g_config['schemas'][schemaid]; 
+         
+      if arcpy.Exists(datasetname):
+         raise Exception("preexisting " + datasetname + " found");
 
       arcpy.CreateTable_management(
-          out_path          = os.path.dirname(tb)
-         ,out_name          = os.path.basename(tb)
+          out_path          = os.path.dirname(datasetname)
+         ,out_name          = os.path.basename(datasetname)
          ,oid_type          = ob["oid_type"]
       );
 
       arcpy.management.AddFields(
-          in_table          = tb
-         ,field_description = self.fld_def(datasetid)
+          in_table          = datasetname
+         ,field_description = self.fld_def_from_schema(schemaid)
       );
          
-      for item in self.fld_idx(datasetid):
+      for item in self.fld_idx_from_schema(schemaid):
          arcpy.management.AddIndex(
-             in_table   = tb
+             in_table   = datasetname
             ,fields     = [item]
             ,index_name = item + '_idx'
          );
@@ -1520,7 +1704,7 @@ class ConfigDZ:
          
       if add_globalids:
          arcpy.management.AddGlobalIDs(
-            in_datasets  = tb
+            in_datasets  = datasetname
          );
       
    #...........................................................................

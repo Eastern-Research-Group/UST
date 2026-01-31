@@ -141,3 +141,6 @@ dmypy.json
 *.geodatabase-wal
 *.csv
 *.xlsx
+*.\~lock\.*
+*Index/
+*schema.ini
