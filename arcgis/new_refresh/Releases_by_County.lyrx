@@ -1,7 +1,7 @@
 {
   "type" : "CIMLayerDocument",
-  "version" : "3.5.0",
-  "build" : 57366,
+  "version" : "3.6.0",
+  "build" : 59527,
   "layers" : [
     "CIMPATH=Map/Releases_by_County3.json"
   ],
@@ -13,11 +13,12 @@
       "sourceModifiedTime" : {
         "type" : "TimeInstant"
       },
+      "metadataURI" : "CIMPATH=Metadata/20a4db92690e3a5edd0808cc4517b917.xml",
       "useSourceMetadata" : false,
       "description" : "Releases_by_County",
       "layerElevation" : {
         "type" : "CIMLayerElevationSurface",
-        "elevationSurfaceLayerURI" : "CIMPATH=Map/52adfe8619474d169a7f02172b72154d.json"
+        "elevationSurfaceLayerURI" : "CIMPATH=Map/4ea4e931b4e4409a8bdf04e5dc1ea189.json"
       },
       "expanded" : true,
       "layerType" : "Operational",
@@ -161,7 +162,7 @@
         ]
       },
       "showPopups" : true,
-      "serviceLayerID" : -1,
+      "serviceLayerID" : 3,
       "refreshRate" : -1,
       "refreshRateUnit" : "esriTimeUnitsSeconds",
       "blendingMode" : "Alpha",
@@ -261,16 +262,56 @@
             "searchMode" : "Exact"
           }
         ],
+        "timeFields" : {
+          "type" : "CIMTimeTableDefinition"
+        },
+        "timeDefinition" : {
+          "type" : "CIMTimeDataDefinition",
+          "timeReference" : {
+            "type" : "TimeReference",
+            "timeZone" : "Eastern Standard Time",
+            "respectsDaylightSaving" : true,
+            "respectsDynamicAdjustmentRules" : false,
+            "timeZoneIANA" : "America/New_York"
+          },
+          "customTimeExtent" : {
+            "type" : "TimeExtent",
+            "start" : null,
+            "end" : null,
+            "empty" : false
+          },
+          "applyTimeReferenceToAllFields" : true
+        },
+        "timeDisplayDefinition" : {
+          "type" : "CIMTimeDisplayDefinition",
+          "timeInterval" : 10,
+          "timeIntervalUnits" : "esriTimeUnitsUnknown",
+          "timeOffsetUnits" : "esriTimeUnitsDays"
+        },
+        "timeDimensionFields" : {
+          "type" : "CIMTimeDimensionDefinition"
+        },
         "dataConnection" : {
           "type" : "CIMStandardDataConnection",
           "workspaceConnectionString" : "DATABASE=.\\new_refresh.geodatabase",
           "workspaceFactory" : "SQLite",
-          "dataset" : "Releases_by_County",
+          "dataset" : "releases_by_county",
           "datasetType" : "esriDTFeatureClass"
         },
         "studyAreaSpatialRel" : "esriSpatialRelUndefined",
         "searchOrder" : "esriSearchOrderSpatial"
       },
+      "featureTemplates" : [
+        {
+          "type" : "CIMRowTemplate",
+          "name" : "Releases_by_County",
+          "defaultValues" : {
+            "type" : "PropertySet",
+            "propertySetItems" : [
+            ]
+          }
+        }
+      ],
       "htmlPopupEnabled" : true,
       "selectable" : true,
       "featureCacheType" : "Session",
@@ -547,13 +588,20 @@
       "snappable" : true
     }
   ],
+  "binaryReferences" : [
+    {
+      "type" : "CIMBinaryReference",
+      "uRI" : "CIMPATH=Metadata/20a4db92690e3a5edd0808cc4517b917.xml",
+      "data" : "<?xml version=\"1.0\"?>\r\n<metadata xml:lang=\"en\">\r\n\t<Esri>\r\n\t\t<CreaDate>20260131</CreaDate>\r\n\t\t<CreaTime>12350800</CreaTime>\r\n\t\t<ArcGISFormat>1.0</ArcGISFormat>\r\n\t\t<SyncOnce>TRUE</SyncOnce>\r\n\t</Esri>\r\n\t<dataIdInfo>\r\n\t\t<idCitation>\r\n\t\t\t<resTitle>Releases_by_County</resTitle>\r\n\t\t</idCitation>\r\n\t\t<idAbs>Releases_by_County</idAbs>\r\n\t</dataIdInfo>\r\n</metadata>\r\n"
+    }
+  ],
   "rGBColorProfile" : "sRGB IEC61966-2.1",
   "cMYKColorProfile" : "U.S. Web Coated (SWOP) v2",
   "elevationSurfaceLayerDefinitions" : [
     {
       "type" : "CIMElevationSurfaceLayer",
       "name" : "Ground",
-      "uRI" : "CIMPATH=Map/52adfe8619474d169a7f02172b72154d.json",
+      "uRI" : "CIMPATH=Map/4ea4e931b4e4409a8bdf04e5dc1ea189.json",
       "sourceModifiedTime" : {
         "type" : "TimeInstant"
       },

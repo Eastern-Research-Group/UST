@@ -1,7 +1,7 @@
 {
   "type" : "CIMLayerDocument",
-  "version" : "3.5.0",
-  "build" : 57366,
+  "version" : "3.6.0",
+  "build" : 59527,
   "layers" : [
     "CIMPATH=Map/Releases2.json"
   ],
@@ -13,6 +13,7 @@
       "sourceModifiedTime" : {
         "type" : "TimeInstant"
       },
+      "metadataURI" : "CIMPATH=Metadata/b50da307af29e481e2955216824d65be.xml",
       "useSourceMetadata" : false,
       "description" : "Releases",
       "layerElevation" : {
@@ -355,7 +356,7 @@
         ]
       },
       "showPopups" : true,
-      "serviceLayerID" : -1,
+      "serviceLayerID" : 1,
       "refreshRate" : -1,
       "refreshRateUnit" : "esriTimeUnitsSeconds",
       "blendingMode" : "Alpha",
@@ -384,7 +385,7 @@
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "Facility_ID",
+            "alias" : "Facility ID",
             "fieldName" : "Facility_ID",
             "visible" : true,
             "searchMode" : "Exact"
@@ -454,14 +455,14 @@
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "Coordinate_Source",
+            "alias" : "Coordinate Source",
             "fieldName" : "Coordinate_Source",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "Address_Match_Type",
+            "alias" : "Address Match Type",
             "fieldName" : "Address_Match_Type",
             "visible" : true,
             "searchMode" : "Exact"
@@ -503,84 +504,84 @@
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "LandUse",
+            "alias" : "Land Use",
             "fieldName" : "LandUse",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "Within_SPA",
+            "alias" : "Within Source Water Protection Area (SPA)",
             "fieldName" : "Within_SPA",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "SPA_PWS_FacilityID",
+            "alias" : "SPA Public Water System and Facility ID",
             "fieldName" : "SPA_PWS_FacilityID",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "SPA_Water_Type",
+            "alias" : "SPA Water Type",
             "fieldName" : "SPA_Water_Type",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "SPA_Facility_Type",
+            "alias" : "SPA Facility Type",
             "fieldName" : "SPA_Facility_Type",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "SPA_HUC12",
+            "alias" : "SPA HUC12",
             "fieldName" : "SPA_HUC12",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "Within_WHPA",
+            "alias" : "Within Groundwater Wellhead Protection Area (WHPA)",
             "fieldName" : "Within_WHPA",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "WHPA_PWS_FacilityID",
+            "alias" : "WHPA Public Water System and Facility ID",
             "fieldName" : "WHPA_PWS_FacilityID",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "WHPA_Water_Type",
+            "alias" : "WHPA Water Type",
             "fieldName" : "WHPA_Water_Type",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "WHPA_Facility_Type",
+            "alias" : "WHPA Facility Type",
             "fieldName" : "WHPA_Facility_Type",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "WHPA_HUC12",
+            "alias" : "WHPA HUC12",
             "fieldName" : "WHPA_HUC12",
             "visible" : true,
             "searchMode" : "Exact"
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "Within_100yr_Floodplain",
+            "alias" : "Within 100-year Floodplain",
             "fieldName" : "Within_100yr_Floodplain",
             "visible" : true,
             "searchMode" : "Exact"
@@ -594,7 +595,7 @@
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "EPA_Region",
+            "alias" : "EPA Region",
             "fieldName" : "EPA_Region",
             "visible" : true,
             "searchMode" : "Exact"
@@ -644,34 +645,56 @@
           "useTime" : true,
           "timeReference" : {
             "type" : "TimeReference",
+            "timeZone" : "Eastern Standard Time",
             "respectsDaylightSaving" : true,
-            "respectsDynamicAdjustmentRules" : true,
-            "timeZoneIANA" : "Etc/UTC"
+            "respectsDynamicAdjustmentRules" : false,
+            "timeZoneIANA" : "America/New_York"
           },
           "customTimeExtent" : {
             "type" : "TimeExtent",
+            "TimeReference" : {
+              "type" : "TimeReference",
+              "timeZone" : "Eastern Standard Time",
+              "respectsDaylightSaving" : true,
+              "respectsDynamicAdjustmentRules" : false,
+              "timeZoneIANA" : "America/New_York"
+            },
             "start" : -1834732800000,
-            "end" : 1692680400000,
+            "end" : 1762819200000,
             "empty" : false
           },
           "applyTimeReferenceToAllFields" : false
         },
         "timeDisplayDefinition" : {
           "type" : "CIMTimeDisplayDefinition",
-          "timeInterval" : 0,
+          "timeInterval" : 10,
           "timeIntervalUnits" : "esriTimeUnitsUnknown",
           "timeOffsetUnits" : "esriTimeUnitsCenturies"
+        },
+        "timeDimensionFields" : {
+          "type" : "CIMTimeDimensionDefinition"
         },
         "dataConnection" : {
           "type" : "CIMStandardDataConnection",
           "workspaceConnectionString" : "DATABASE=.\\new_refresh.geodatabase",
           "workspaceFactory" : "SQLite",
-          "dataset" : "Releases",
+          "dataset" : "releases",
           "datasetType" : "esriDTFeatureClass"
         },
         "studyAreaSpatialRel" : "esriSpatialRelUndefined",
         "searchOrder" : "esriSearchOrderSpatial"
       },
+      "featureTemplates" : [
+        {
+          "type" : "CIMRowTemplate",
+          "name" : "Releases",
+          "defaultValues" : {
+            "type" : "PropertySet",
+            "propertySetItems" : [
+            ]
+          }
+        }
+      ],
       "htmlPopupEnabled" : true,
       "selectable" : true,
       "featureCacheType" : "Session",
@@ -1133,6 +1156,13 @@
       },
       "scaleSymbols" : true,
       "snappable" : true
+    }
+  ],
+  "binaryReferences" : [
+    {
+      "type" : "CIMBinaryReference",
+      "uRI" : "CIMPATH=Metadata/b50da307af29e481e2955216824d65be.xml",
+      "data" : "<?xml version=\"1.0\"?>\r\n<metadata xml:lang=\"en\">\r\n\t<Esri>\r\n\t\t<CreaDate>20260131</CreaDate>\r\n\t\t<CreaTime>12350800</CreaTime>\r\n\t\t<ArcGISFormat>1.0</ArcGISFormat>\r\n\t\t<SyncOnce>TRUE</SyncOnce>\r\n\t</Esri>\r\n\t<dataIdInfo>\r\n\t\t<idCitation>\r\n\t\t\t<resTitle>Releases</resTitle>\r\n\t\t</idCitation>\r\n\t\t<idAbs>Releases</idAbs>\r\n\t</dataIdInfo>\r\n</metadata>\r\n"
     }
   ],
   "rGBColorProfile" : "sRGB IEC61966-2.1",

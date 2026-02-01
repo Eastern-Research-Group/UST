@@ -1,7 +1,7 @@
 {
   "type" : "CIMLayerDocument",
-  "version" : "3.5.0",
-  "build" : 57366,
+  "version" : "3.6.0",
+  "build" : 59527,
   "layers" : [
     "CIMPATH=Map/Facilities2.json"
   ],
@@ -14,7 +14,7 @@
         "type" : "TimeInstant",
         "start" : -62135596800000
       },
-      "metadataURI" : "CIMPATH=Metadata/4de9340b4377829525c845f4d78a819e.xml",
+      "metadataURI" : "CIMPATH=Metadata/73c1f879c9bf5f44dc2bddee248cca93.xml",
       "useSourceMetadata" : false,
       "description" : "Underground storage tank (UST) facility locations and information was collected from state agencies and integrated into a national database by EPA's Office of Research and Development, Office of Underground Storage Tanks, and the Association of State and Territorial Solid Waste Management Officials. Tabular information includes the number of open, closed, and temporarily out of service USTs, locational information, estimated private domestic wells within 1,500 feet, estimated population within 1,500 ft, proximity to FEMAâ\u20AC\u2122s estimated 100-year floodplain, land-use type, and information on corresponding drinking water source protection areas. This information collected from September 2018 through December 2019 and represents a snapshot of UST facilities at time of data collection.",
       "layerElevation" : {
@@ -474,7 +474,7 @@
           },
           {
             "type" : "CIMFieldDescription",
-            "alias" : "Estimated Private Domestic Wells wihtin 1500ft",
+            "alias" : "Estimated Private Domestic Wells within 1500ft",
             "fieldName" : "Private_Wells_1500ft",
             "visible" : true,
             "searchMode" : "Exact"
@@ -592,6 +592,35 @@
             "searchMode" : "Exact"
           }
         ],
+        "timeFields" : {
+          "type" : "CIMTimeTableDefinition"
+        },
+        "timeDefinition" : {
+          "type" : "CIMTimeDataDefinition",
+          "timeReference" : {
+            "type" : "TimeReference",
+            "timeZone" : "Eastern Standard Time",
+            "respectsDaylightSaving" : true,
+            "respectsDynamicAdjustmentRules" : false,
+            "timeZoneIANA" : "America/New_York"
+          },
+          "customTimeExtent" : {
+            "type" : "TimeExtent",
+            "start" : null,
+            "end" : null,
+            "empty" : false
+          },
+          "applyTimeReferenceToAllFields" : true
+        },
+        "timeDisplayDefinition" : {
+          "type" : "CIMTimeDisplayDefinition",
+          "timeInterval" : 10,
+          "timeIntervalUnits" : "esriTimeUnitsUnknown",
+          "timeOffsetUnits" : "esriTimeUnitsDays"
+        },
+        "timeDimensionFields" : {
+          "type" : "CIMTimeDimensionDefinition"
+        },
         "dataConnection" : {
           "type" : "CIMStandardDataConnection",
           "workspaceConnectionString" : "DATABASE=.\\new_refresh.geodatabase",
@@ -602,6 +631,17 @@
         "studyAreaSpatialRel" : "esriSpatialRelUndefined",
         "searchOrder" : "esriSearchOrderSpatial"
       },
+      "featureTemplates" : [
+        {
+          "type" : "CIMRowTemplate",
+          "name" : "Facilities",
+          "defaultValues" : {
+            "type" : "PropertySet",
+            "propertySetItems" : [
+            ]
+          }
+        }
+      ],
       "htmlPopupEnabled" : true,
       "selectable" : true,
       "featureCacheType" : "Session",
@@ -1068,8 +1108,8 @@
   "binaryReferences" : [
     {
       "type" : "CIMBinaryReference",
-      "uRI" : "CIMPATH=Metadata/4de9340b4377829525c845f4d78a819e.xml",
-      "data" : "<?xml version=\"1.0\"?>\r\n<metadata xml:lang=\"en\"><Esri><CreaDate>20251218</CreaDate><CreaTime>11175700</CreaTime><ArcGISFormat>1.0</ArcGISFormat><SyncOnce>TRUE</SyncOnce></Esri><dataIdInfo><idCitation><resTitle>Facilities</resTitle></idCitation><idAbs>Underground storage tank (UST) facility locations and information was collected from state agencies and integrated into a national database by EPA's Office of Research and Development, Office of Underground Storage Tanks, and the Association of State and Territorial Solid Waste Management Officials. Tabular information includes the number of open, closed, and temporarily out of service USTs, locational information, estimated private domestic wells within 1,500 feet, estimated population within 1,500 ft, proximity to FEMAÃ¢\u20AC\u2122s estimated 100-year floodplain, land-use type, and information on corresponding drinking water source protection areas. This information collected from September 2018 through December 2019 and represents a snapshot of UST facilities at time of data collection.</idAbs><idCredit>Alabama Department of Environmental Management's Groundwater Branch, Alaska's Department of Environmental Conservation's Prevention Preparedness and Response Program, Arizona Department of Environmental Quality's Underground Storage Tank Program, Arkansas Department of Environmental Quality's Regulated Storage Tanks Division, California Environmental Protection Agency's California Environmental Reporting System, Colorado Department of Labor and Employment's Division of Oil and Public Safety, Connecticut Department of Energy and Environmental Protection, Delaware Department of Natural Resources and Environmental Control's Underground Storage Tank Compliance Program, Florida Department of Environmental Protection's Permitting and Compliance Assistance Program, Georgia Environmental Protection Division's Underground Storage Tank Management Program, Hawaii Department of Health's Solid and Hazardous Waste Branch, Idaho Department of Environmental Quality's Waste Management and Remediation Division, Illinois State Fire Marshal's Division of Petroleum and Chemical Safety, Indiana Department of Environmental Management's UST Branch, Iowa Department of Natural Resources' Underground Storage Tanks Section, Kansas Department of Health and Environment's Storage Tank Section, Kentucky Energy and Environment Cabinet's Underground Storage Tank Branch, Louisiana Department of Environmental Quality's Underground Storage Tank Program, Maine Department of Environmental Protection's Underground Storage Tank Program, Maryland Department of the Environment's Oil Control Program, Massachusetts Department of Environmental Protection's Underground Storage Tank Program, Michigan Department of Licensing and Regulatory Affairs' Storage Tank Division, Minnesota Pollution Control Agency's Underground Storage Tank Program, Mississippi Department of Environmental Quality's Underground Storage Tank Program, Missouri Department of Natural Resources’' Environmental Remediation Program, Montana Department of Environmental Quality's Underground Storage Tank Leak Prevention Program, Nebraska State Fire Marshal's Fuels Safety Division, Nevada Division of Environmental Protection's Underground Storage Tank Program, New Hampshire Department of Environmental Services' Underground Storage Tank Program, New Jersey Department of Environmental Protection's Site Remediation Program, New Mexico Environment Department's Petroleum Storage Tank Bureau, New York Department of Environmental Conservation's Chemical Bulk Storage Program, North Carolina Environmental Quality's Underground Storage Tank Section, North Dakota Department of Environmental Quality's Underground Storage Tank Program, Ohio Department of Commerce's Bureau of Underground Storage Tank Regulations, Oklahoma Corporation Commission's Petroleum Storage Tank Division, Oregon Department of Environmental Quality's Underground Storage Tank Program, Pennsylvania Department of Environmental Protection's Division of Storage Tanks, Rhode Island Department of Environmental Management's Underground Storage Tank Management Program, South Carolina Department of Health and Environmental Control's Underground Storage Tanks Program, Tennessee Department of Environment and Conservation's Division of Underground Storage Tanks, Texas Commission on Environmental Quality, Utah Department of Environmental Quality's Underground Storage Tanks Branch, Vermont Department of Environmental Conservation's Waste Management and Prevention Division, Virginia Department of Environmental Quality's Underground Storage Tanks Program, Washington Department of Ecology's Underground Storage Tank Program, District of Columbia Department of Energy and Environment’s Underground Storage Tank Program, West Virginia Department of Environmental Protection's Underground Storage Tank Section, Wisconsin Department of Agriculture's Trade and Consumer Protection's Bureau of Weights and Measures, Wyoming Department of Environmental Quality's Storage Tank Program, EPA’s Office of Ground Water and Drinking Water, EPAs’ EnviroAtlas and EPA’s Office of Research and Development for the Estimated floodplain map for the Conterminous United States, Multi-Resolution Land Characteristics (MRLC) consortium</idCredit><idPurp></idPurp><resConst><Consts><useLimit></useLimit></Consts></resConst><searchKeys/></dataIdInfo></metadata>\r\n"
+      "uRI" : "CIMPATH=Metadata/73c1f879c9bf5f44dc2bddee248cca93.xml",
+      "data" : "<?xml version=\"1.0\"?>\r\n<metadata xml:lang=\"en\">\r\n\t<Esri>\r\n\t\t<CreaDate>20251218</CreaDate>\r\n\t\t<CreaTime>11175700</CreaTime>\r\n\t\t<ArcGISFormat>1.0</ArcGISFormat>\r\n\t\t<SyncOnce>TRUE</SyncOnce>\r\n\t</Esri>\r\n\t<dataIdInfo>\r\n\t\t<idCitation>\r\n\t\t\t<resTitle>Facilities</resTitle>\r\n\t\t</idCitation>\r\n\t\t<idAbs>Underground storage tank (UST) facility locations and information was collected from state agencies and integrated into a national database by EPA's Office of Research and Development, Office of Underground Storage Tanks, and the Association of State and Territorial Solid Waste Management Officials. Tabular information includes the number of open, closed, and temporarily out of service USTs, locational information, estimated private domestic wells within 1,500 feet, estimated population within 1,500 ft, proximity to FEMAÃƒÂ¢\u20AC\u2122s estimated 100-year floodplain, land-use type, and information on corresponding drinking water source protection areas. This information collected from September 2018 through December 2019 and represents a snapshot of UST facilities at time of data collection.</idAbs>\r\n\t\t<idCredit>Alabama Department of Environmental Management's Groundwater Branch, Alaska's Department of Environmental Conservation's Prevention Preparedness and Response Program, Arizona Department of Environmental Quality's Underground Storage Tank Program, Arkansas Department of Environmental Quality's Regulated Storage Tanks Division, California Environmental Protection Agency's California Environmental Reporting System, Colorado Department of Labor and Employment's Division of Oil and Public Safety, Connecticut Department of Energy and Environmental Protection, Delaware Department of Natural Resources and Environmental Control's Underground Storage Tank Compliance Program, Florida Department of Environmental Protection's Permitting and Compliance Assistance Program, Georgia Environmental Protection Division's Underground Storage Tank Management Program, Hawaii Department of Health's Solid and Hazardous Waste Branch, Idaho Department of Environmental Quality's Waste Management and Remediation Division, Illinois State Fire Marshal's Division of Petroleum and Chemical Safety, Indiana Department of Environmental Management's UST Branch, Iowa Department of Natural Resources' Underground Storage Tanks Section, Kansas Department of Health and Environment's Storage Tank Section, Kentucky Energy and Environment Cabinet's Underground Storage Tank Branch, Louisiana Department of Environmental Quality's Underground Storage Tank Program, Maine Department of Environmental Protection's Underground Storage Tank Program, Maryland Department of the Environment's Oil Control Program, Massachusetts Department of Environmental Protection's Underground Storage Tank Program, Michigan Department of Licensing and Regulatory Affairs' Storage Tank Division, Minnesota Pollution Control Agency's Underground Storage Tank Program, Mississippi Department of Environmental Quality's Underground Storage Tank Program, Missouri Department of Natural Resourcesâ\u20AC\u2122' Environmental Remediation Program, Montana Department of Environmental Quality's Underground Storage Tank Leak Prevention Program, Nebraska State Fire Marshal's Fuels Safety Division, Nevada Division of Environmental Protection's Underground Storage Tank Program, New Hampshire Department of Environmental Services' Underground Storage Tank Program, New Jersey Department of Environmental Protection's Site Remediation Program, New Mexico Environment Department's Petroleum Storage Tank Bureau, New York Department of Environmental Conservation's Chemical Bulk Storage Program, North Carolina Environmental Quality's Underground Storage Tank Section, North Dakota Department of Environmental Quality's Underground Storage Tank Program, Ohio Department of Commerce's Bureau of Underground Storage Tank Regulations, Oklahoma Corporation Commission's Petroleum Storage Tank Division, Oregon Department of Environmental Quality's Underground Storage Tank Program, Pennsylvania Department of Environmental Protection's Division of Storage Tanks, Rhode Island Department of Environmental Management's Underground Storage Tank Management Program, South Carolina Department of Health and Environmental Control's Underground Storage Tanks Program, Tennessee Department of Environment and Conservation's Division of Underground Storage Tanks, Texas Commission on Environmental Quality, Utah Department of Environmental Quality's Underground Storage Tanks Branch, Vermont Department of Environmental Conservation's Waste Management and Prevention Division, Virginia Department of Environmental Quality's Underground Storage Tanks Program, Washington Department of Ecology's Underground Storage Tank Program, District of Columbia Department of Energy and Environmentâ\u20AC\u2122s Underground Storage Tank Program, West Virginia Department of Environmental Protection's Underground Storage Tank Section, Wisconsin Department of Agriculture's Trade and Consumer Protection's Bureau of Weights and Measures, Wyoming Department of Environmental Quality's Storage Tank Program, EPAâ\u20AC\u2122s Office of Ground Water and Drinking Water, EPAsâ\u20AC\u2122 EnviroAtlas and EPAâ\u20AC\u2122s Office of Research and Development for the Estimated floodplain map for the Conterminous United States, Multi-Resolution Land Characteristics (MRLC) consortium</idCredit>\r\n\t</dataIdInfo>\r\n</metadata>\r\n"
     }
   ],
   "rGBColorProfile" : "sRGB IEC61966-2.1",

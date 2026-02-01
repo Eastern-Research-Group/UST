@@ -362,7 +362,7 @@ class ReloadFromAGOUST(object):
       arcpy.management.TruncateTable(in_table = fac);
       
       ins_cnt = 0;
-      fac_flds = g_config.flds('facilities',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
+      fac_flds = g_config.flds('facilities',aprx=aprx,wrkspc=wrkspc,match_etl=True) + ['SHAPE@'];      
       with arcpy.da.InsertCursor(
           in_table    = fac
          ,field_names = fac_flds
@@ -414,7 +414,7 @@ class ReloadFromAGOUST(object):
       nfa_letter_4_cnt = 0;
       
       ins_cnt = 0;
-      rel_flds = g_config.flds('releases',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
+      rel_flds = g_config.flds('releases',aprx=aprx,wrkspc=wrkspc,match_etl=True) + ['SHAPE@'];      
       with arcpy.da.InsertCursor(
           in_table    = rel
          ,field_names = rel_flds
@@ -440,11 +440,6 @@ class ReloadFromAGOUST(object):
                # Trim state
                if row2[7] is not None:
                   row2[7] = row2[7].strip();
-                  
-               # Fix spelling error
-               if row2[13] is not None:
-                  if row2[13].strip() == 'Unkown':
-                     row2[13] = 'Unknown';
                
                if row2[31] is not None:
                   nfa_letter_1_cnt = nfa_letter_1_cnt + 1;
@@ -483,7 +478,7 @@ class ReloadFromAGOUST(object):
       arcpy.management.TruncateTable(in_table = fbc);
       
       ins_cnt = 0;
-      fbc_flds = g_config.flds('facilities_by_county',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
+      fbc_flds = g_config.flds('facilities_by_county',aprx=aprx,wrkspc=wrkspc,match_etl=True) + ['SHAPE@'];      
       with arcpy.da.InsertCursor(
           in_table    = fbc
          ,field_names = fbc_flds
@@ -518,7 +513,7 @@ class ReloadFromAGOUST(object):
       arcpy.management.TruncateTable(in_table = rbc);
       
       ins_cnt = 0;
-      rbc_flds = g_config.flds('releases_by_county',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];      
+      rbc_flds = g_config.flds('releases_by_county',aprx=aprx,wrkspc=wrkspc,match_etl=True) + ['SHAPE@'];      
       with arcpy.da.InsertCursor(
           in_table    = rbc
          ,field_names = rbc_flds
@@ -553,7 +548,7 @@ class ReloadFromAGOUST(object):
       arcpy.AddMessage(". AGO has " + str(bef_cnt) + " records.");
 
       ins_cnt = 0;
-      usts_flds = g_config.flds('usts',aprx=aprx,wrkspc=wrkspc);      
+      usts_flds = g_config.flds('usts',aprx=aprx,wrkspc=wrkspc,match_etl=True);      
       with arcpy.da.InsertCursor(
           in_table    = usts
          ,field_names = usts_flds
@@ -596,6 +591,21 @@ class ReloadFromAGOUST(object):
       
       if bef_cnt != aft_cnt:
          raise Exception("error in download counts");  
+         
+      #########################################################################
+      arcpy.AddMessage("Gathering stats.");
+      conn    = sqlite3.connect(aprx.defaultGeodatabase);
+      cursor  = conn.cursor();
+      
+      cursor.execute("""ANALYZE main.facilities""");
+      cursor.execute("""ANALYZE main.releases""");
+      cursor.execute("""ANALYZE main.facilities_by_county""");
+      cursor.execute("""ANALYZE main.releases_by_county""");
+      cursor.execute("""ANALYZE main.usts""");
+      conn.commit();
+      del conn;
+      
+      arcpy.AddMessage("Refresh from AGO complete.");
 
 ###############################################################################
 class NormalizeAGOUST(object):
@@ -788,8 +798,11 @@ class NormalizeAGOUST(object):
             ,'address'
             ,'city'
             ,'county'
-            
             ,'zip_code'
+            
+            ,'status'
+            ,'substance'
+            
             ,'address_match_type'
             ,'epa_region'
           ]
@@ -799,42 +812,62 @@ class NormalizeAGOUST(object):
          for row in ucursor:
             boo_update = False;
             
+            # Facility ID
             if row[1] == '':
                boo_update = True;
                row[1] = None;
                
+            # LUST ID
             if row[2] == '':
                boo_update = True;
                row[2] = None;
                
+            # State
             if row[3] == '':
                boo_update = True;
                row[3] = None;
                
+            # Name
             if row[4] == '':
                boo_update = True;
                row[4] = None;
                
+            # Address
             if row[5] == '':
                boo_update = True;
                row[5] = None;
                
+            # City
             if row[6] == '':
                boo_update = True;
                row[6] = None;
                
+            # County
             if row[7] == '':
                boo_update = True;
                row[7] = None;
                
-            if row[8] == '':
+            # Push Zip Code Zero to NULL
+            if row[8] in ['','0']:
                boo_update = True;
                row[8] = None;
                
+            # Status
             if row[9] == '':
                boo_update = True;
                row[9] = None;
                
+            # Substance
+            if row[10] == '':
+               boo_update = True;
+               row[10] = None;
+               
+            # Address Match Type
+            if row[11] == '':
+               boo_update = True;
+               row[11] = None;
+               
+            # EPA Region
             if boo_update:
                ucursor.updateRow(row);
                cnt = cnt + 1;
@@ -1998,7 +2031,10 @@ class LoadTribalCSVsUST(object):
                   
             if row[3] is not None:
                if row[3].lower() == 'closed':
-                  row[3] == 'No Further Action';
+                  row[3] = 'No Further Action';
+                  boo_update = True;
+               elif row[3].lower() == 'unkown':
+                  row[3] = 'Unknown';
                   boo_update = True;
                   
             if boo_update:
@@ -3452,6 +3488,7 @@ class UpsertTribalDataUST(object):
             ,b.date_of_last_inspection
             ,b.region AS epa_region
             ,b.tribe
+            ,CAST('I' AS TEXT) AS qa
             FROM
             main.temp_fac_work a
             JOIN
@@ -3514,6 +3551,7 @@ class UpsertTribalDataUST(object):
                ,lust_time(row[29]) 
                ,lust_int(row[30]) 
                ,lust_trim(row[31],8000)
+               ,row[32]
                ,pnt_webmc
             ));
 
@@ -3563,6 +3601,7 @@ class UpsertTribalDataUST(object):
          ,b.nfa_letter_3
          ,b.nfa_letter_4
          ,CAST(NULL AS TEXT) AS closed_with_residual_contaminat
+         ,CAST('I' AS TEXT) AS qa
          FROM
          main.temp_rel_work a
          JOIN
@@ -3638,6 +3677,7 @@ class UpsertTribalDataUST(object):
                ,lust_trim(row[34],8000)
                
                ,lust_trim(row[35],8000)
+               ,row[36]
                ,pnt_webmc
             ));              
 
@@ -3660,6 +3700,7 @@ class UpsertTribalDataUST(object):
          ,b.capacity
          ,b.substance_stored AS substances
          ,b.tank_wall_type
+         ,CAST('I' AS TEXT) AS qa
          FROM
          main.temp_usts_work a
          JOIN
@@ -3690,6 +3731,7 @@ class UpsertTribalDataUST(object):
                ,lust_int(row[6])
                ,lust_trim(row[7],8000)
                ,lust_trim(row[8],8000)
+               ,row[9]
             ));              
 
             if cnt > 0 and cnt % 100 == 0:
@@ -3858,8 +3900,9 @@ class UpsertTribalDataUST(object):
                   
                if len(merged) > 3:
                   row2[34] = merged[3];
-
-               row2[36] = pnt_webmc;
+               
+               row2[36] = 'U'; 
+               row2[37] = pnt_webmc;
   
                ucursor.updateRow(row2);            
 
@@ -3985,7 +4028,9 @@ class UpsertTribalDataUST(object):
                row2[29] = lust_time(row[29]); # Date_of_Last_Inspection
                row2[30] = lust_int(row[30]); # EPA_Region
                row2[31] = lust_trim(row[31],8000); # Tribe
-               row2[32] = pnt_webmc;
+               
+               row2[32] = 'U'; 
+               row2[33] = pnt_webmc;
                   
                ucursor.updateRow(row2);
    
@@ -4060,6 +4105,7 @@ class UpsertTribalDataUST(object):
                row2[6]  = lust_int(row[6]);        # Capacity
                row2[7]  = lust_trim(row[7],8000);  # Substance    
                row2[8]  = lust_trim(row[8],8000);  # Tank_Wall_Type
+               row2[9]  = 'U'; 
                   
                ucursor.updateRow(row2);
                
@@ -4344,17 +4390,17 @@ class SaveToStash(object):
          
       #########################################################################
       arcpy.AddMessage("stashing facilities");
-      arcpy.conversion.CopyFeatures(fac,fac_stash);
+      arcpy.management.CopyFeatures(fac,fac_stash);
       arcpy.AddMessage("stashing releases");
-      arcpy.conversion.CopyFeatures(rel,rel_stash);
+      arcpy.management.CopyFeatures(rel,rel_stash);
       
       arcpy.AddMessage("stashing facilities_by_county");
-      arcpy.conversion.CopyFeatures(fbc,fbc_stash);
+      arcpy.management.CopyFeatures(fbc,fbc_stash);
       arcpy.AddMessage("stashing releases_by_county");
-      arcpy.conversion.CopyFeatures(rbc,rbc_stash);
+      arcpy.management.CopyFeatures(rbc,rbc_stash);
       
       arcpy.AddMessage("stashing usts");
-      arcpy.conversion.CopyRows(usts,usts_stash);
+      arcpy.management.CopyRows(usts,usts_stash);
       
 ###############################################################################
 class RestoreFromStash(object):
@@ -4566,7 +4612,8 @@ class GenerateStateStats(object):
          rel_src  = g_config.datasource('releases',aprx=aprx,wrkspc=wrkspc);
          usts_src = g_config.datasource('usts',aprx=aprx,wrkspc=wrkspc);
          arcpy.AddMessage("Pulling data from pending for " + str(ary_data));
-      
+         boo_match_etl = False;
+         
       else:
          gis = GIS();
          gs = gis.content.get(src_guid);
@@ -4574,10 +4621,12 @@ class GenerateStateStats(object):
          fac_src  = gs.url + '/0';
          rel_src  = gs.url + '/1';
          usts_src = gs.url + '/4';
+         boo_match_etl = True;
       
       conn    = sqlite3.connect(aprx.defaultGeodatabase);
       cursor  = conn.cursor();
       
+      #------------------------------------------------------------------------
       if 'facilities' in ary_data:
          
          facrpt      = os.path.join(aprx.defaultGeodatabase,'facrpt_' + rpt_tag);
@@ -4614,7 +4663,7 @@ class GenerateStateStats(object):
             ,wrkspc            = wrkspc
          );
          
-         facrpt_flds      = g_config.flds_from_schema('facilities',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];
+         facrpt_flds      = g_config.flds_from_schema('facilities' ,aprx=aprx,wrkspc=wrkspc,match_etl=boo_match_etl) + ['SHAPE@'];
          facstaterpt_flds = g_config.flds_from_schema('facstaterpt',aprx=aprx,wrkspc=wrkspc)
          factriberpt_flds = g_config.flds_from_schema('factriberpt',aprx=aprx,wrkspc=wrkspc)
          
@@ -4734,9 +4783,22 @@ class GenerateStateStats(object):
                ins_cnt = ins_cnt + 1;
 
          arcpy.AddMessage(". Inserted " + str(ins_cnt) + " factriberpt records.");
+         conn.commit();
+         
+         ######################################################################
+         facstaterpt_csv = os.path.join(aprx.homeFolder,'facstaterpt_' + rpt_tag + '.csv');
+         if arcpy.Exists(facstaterpt_csv):
+            arcpy.Delete_management(facstaterpt_csv);
+         arcpy.management.CopyRows(facstaterpt,facstaterpt_csv);
+         
+         factriberpt_csv = os.path.join(aprx.homeFolder,'factriberpt_' + rpt_tag + '.csv');
+         if arcpy.Exists(factriberpt_csv):
+            arcpy.Delete_management(factriberpt_csv);
+         arcpy.management.CopyRows(factriberpt,factriberpt_csv);
 
          arcpy.AddMessage("Facilities reports loaded.");
       
+      #------------------------------------------------------------------------
       if 'releases' in ary_data:
          
          relrpt      = os.path.join(aprx.defaultGeodatabase,'relrpt_' + rpt_tag);
@@ -4773,7 +4835,7 @@ class GenerateStateStats(object):
             ,wrkspc            = wrkspc
          );
          
-         relrpt_flds      = g_config.flds_from_schema('releases',aprx=aprx,wrkspc=wrkspc) + ['SHAPE@'];
+         relrpt_flds      = g_config.flds_from_schema('releases'   ,aprx=aprx,wrkspc=wrkspc,match_etl=boo_match_etl) + ['SHAPE@'];
          relstaterpt_flds = g_config.flds_from_schema('relstaterpt',aprx=aprx,wrkspc=wrkspc)
          reltriberpt_flds = g_config.flds_from_schema('reltriberpt',aprx=aprx,wrkspc=wrkspc)
          
@@ -4967,7 +5029,20 @@ class GenerateStateStats(object):
          arcpy.AddMessage(". Inserted " + str(ins_cnt) + " reltriberpt records.");
 
          arcpy.AddMessage("Releases reports loaded.");
+         conn.commit();
          
+         ######################################################################
+         relstaterpt_csv = os.path.join(aprx.homeFolder,'relstaterpt_' + rpt_tag + '.csv');
+         if arcpy.Exists(relstaterpt_csv):
+            arcpy.Delete_management(relstaterpt_csv);
+         arcpy.management.CopyRows(relstaterpt,relstaterpt_csv);
+         
+         reltriberpt_csv = os.path.join(aprx.homeFolder,'reltriberpt_' + rpt_tag + '.csv');
+         if arcpy.Exists(reltriberpt_csv):
+            arcpy.Delete_management(reltriberpt_csv);
+         arcpy.management.CopyRows(reltriberpt,reltriberpt_csv);
+         
+      #------------------------------------------------------------------------
       if 'usts' in ary_data:
          
          ustsrpt      = os.path.join(aprx.defaultGeodatabase,'ustsrpt_' + rpt_tag);
@@ -4993,7 +5068,7 @@ class GenerateStateStats(object):
             ,wrkspc            = wrkspc
          );
          
-         ustsrpt_flds      = g_config.flds_from_schema('usts',aprx=aprx,wrkspc=wrkspc);
+         ustsrpt_flds      = g_config.flds_from_schema('usts'        ,aprx=aprx,wrkspc=wrkspc,match_etl=boo_match_etl);
          ustsstaterpt_flds = g_config.flds_from_schema('ustsstaterpt',aprx=aprx,wrkspc=wrkspc)
          
          bef_cnt = arcpy.management.GetCount(usts_src)[0]; 
@@ -5050,8 +5125,15 @@ class GenerateStateStats(object):
                ins_cnt = ins_cnt + 1;
 
          arcpy.AddMessage(". Inserted " + str(ins_cnt) + " ustsstaterpt records.");
-
+         conn.commit();
+         
          arcpy.AddMessage("USTs reports loaded.");
+         
+         ######################################################################
+         ustsstaterpt_csv = os.path.join(aprx.homeFolder,'ustsstaterpt_' + rpt_tag + '.csv');
+         if arcpy.Exists(ustsstaterpt_csv):
+            arcpy.Delete_management(ustsstaterpt_csv);
+         arcpy.management.CopyRows(ustsstaterpt,ustsstaterpt_csv);
          
       del conn;            
          
