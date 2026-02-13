@@ -382,9 +382,38 @@ class ReloadFromAGOUST(object):
                if row2[0] is not None:
                   row2[0] = row2[0].strip();
                   
+               # Trim Name
+               if row2[1] is not None:
+                  row2[1] = row2[1].strip();
+                  
+               # Trim address
+               if row2[2] is not None:
+                  if row2[2] in ['',' ',';']:
+                     row2[2] = None;
+                  else:
+                     row2[2] = row2[2].strip();
+                  
+               # Trim City
+               if row2[3] is not None:
+                  row2[3] = row2[3].strip();
+                  
+               # Trim County
+               if row2[4] is not None:
+                  if row[4] in ['','0']:
+                     row[4] = None;
+                  else:
+                     row2[4] = row2[4].strip();
+                  
                # Trim state
                if row2[5] is not None:
                   row2[5] = row2[5].strip();
+                  
+               # Trim Zip
+               if row2[6] is not None:
+                  if row[6] in ['','0','99999','999999999']:
+                     row[6] = None;
+                  else:
+                     row2[6] = row2[6].strip();
                
                if boo_testdata and ins_cnt >= 100:
                   break;
@@ -437,6 +466,16 @@ class ReloadFromAGOUST(object):
                # Trim Lust ID
                if row2[1] is not None:
                   row2[1] = row2[1].strip();
+                  
+               # Trim Name
+               if row2[2] is not None:
+                  row2[2] = row2[2].strip();
+                
+               # Trim address
+               if row2[3] is not None:
+                  if row2[3] in ['',' ',';']:
+                     row2[3] = None;
+                  row2[3] = row2[3].strip();
                   
                # Trim state
                if row2[7] is not None:
