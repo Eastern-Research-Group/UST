@@ -133,7 +133,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /arcgis/new_refresh/GpMessages
-*.xml
+*.csv.xml
+*ImportLog
 *.geodatabase-conch
 /arcgis/new_refresh/.backups
 *.geodatabase
