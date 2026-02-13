@@ -146,6 +146,7 @@ class Toolbox(object):
       
       self.tools.append(SaveToStash);
       self.tools.append(RestoreFromStash);
+      self.tools.append(CheckNFALetters);
       self.tools.append(GenerateStateStats);
       
       
@@ -4119,71 +4120,8 @@ class UpsertTribalDataUST(object):
              
       arcpy.AddMessage(". processed " + str(cnt) + " updates for tribal usts");
       
-      #########################################################################      
-      cnt1 = 0;
-      cnt2 = 0;
-      cnt3 = 0;
-      cnt4 = 0;
-      bad1 = 0;
-      bad2 = 0;
-      bad3 = 0;
-      bad4 = 0;
-      arcpy.AddMessage("Checking AFTER NFA URL validity.");
-      
-      cnt = 0;
-      with arcpy.da.SearchCursor(
-          in_table     = rel
-         ,field_names  = ['lust_id','tribe','nfa_letter_1','nfa_letter_2','nfa_letter_3','nfa_letter_4']
-         ,where_clause = 'nfa_letter_1 IS NOT NULL OR nfa_letter_2 IS NOT NULL OR nfa_letter_3 IS NOT NULL OR nfa_letter_4 IS NOT NULL' 
-      ) as scursor:
-         
-         for row in scursor:
-         
-            lust_id      = row[0];
-            tribe        = row[1];
-            nfa_letter_1 = row[2];
-            nfa_letter_2 = row[3];
-            nfa_letter_3 = row[4];
-            nfa_letter_4 = row[5];
-      
-            if nfa_letter_1 is not None:
-               cnt1 = cnt1 + 1;
-               z = requests.head(nfa_letter_1);
-               if z.status_code != 200:
-                  arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 1 " + nfa_letter_1 + " returned status " + str(z.status_code));
-                  bad1 = bad1 + 1;
-      
-            if nfa_letter_2 is not None:
-               cnt2 = cnt2 + 1;
-               z = requests.head(nfa_letter_2);
-               if z.status_code != 200:
-                  arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 2 " + nfa_letter_2 + " returned status " + str(z.status_code));
-                  bad2 = bad2 + 1;
-                  
-            if nfa_letter_3 is not None:
-               cnt3 = cnt3 + 1;
-               z = requests.head(nfa_letter_3);
-               if z.status_code != 200:
-                  arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 3 " + nfa_letter_3 + " returned status " + str(z.status_code));
-                  bad3 = bad3 + 1;
-                  
-            if nfa_letter_4 is not None:
-               cnt4 = cnt4 + 1;
-               z = requests.head(nfa_letter_4);
-               if z.status_code != 200:
-                  arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 4 " + nfa_letter_4 + " returned status " + str(z.status_code));
-                  bad4 = bad4 + 1;
-                  
-            if cnt > 0 and cnt % 1000 == 0:
-               arcpy.AddMessage(". checked " + str(cnt) + " nfa letter sets...");
-            
-            cnt = cnt + 1;
-            
-      
-      arcpy.AddMessage(". AFTER checked " + str(cnt1) + " nfa 1 urls, found " + str(bad1) + " problems.");
-      arcpy.AddMessage(". AFTER checked " + str(cnt2) + " nfa 2 urls, found " + str(bad2) + " problems."); 
-      arcpy.AddMessage(". AFTER checked " + str(cnt3) + " nfa 3 urls, found " + str(bad3) + " problems.");     
-      arcpy.AddMessage(". AFTER checked " + str(cnt4) + " nfa 4 urls, found " + str(bad4) + " problems.");
+      #########################################################################
+      check_nfa_letter_urls(rel);
 
       #########################################################################
       arcpy.AddMessage("Upsert complete");
@@ -4500,13 +4438,65 @@ class RestoreFromStash(object):
       arcpy.AddMessage("restoring usts");
       arcpy.management.CopyRows(usts_stash,usts);
       
-   ###############################################################################
+      
+###############################################################################
+class CheckNFALetters(object):
+
+   #...........................................................................
+   def __init__(self):
+
+      self.label              = "U3 Check NFA Letters";
+      self.name               = "CheckNFALetters";
+      self.description        = "CheckNFALetters";
+      self.canRunInBackground = False;
+
+   #...........................................................................
+   def getParameterInfo(self):
+      
+      params = [];
+      
+      return params;
+
+   #...........................................................................
+   def isLicensed(self):
+
+      return True;
+
+   #...........................................................................
+   def updateParameters(self,parameters):
+
+      return;
+
+   #...........................................................................
+   def updateMessages(self,parameters):
+
+      return;
+
+   #...........................................................................
+   def execute(self,parameters,messages):
+
+      aprx = g_config.aprx;
+      wrkspc = g_config.wrkspc;
+      arcpy.env.workspace = wrkspc;
+      
+      #########################################################################
+      rel  = g_config.datasource('releases',aprx=aprx,wrkspc=wrkspc);
+      if not arcpy.Exists(rel):
+         raise Exception('releases not found');
+         
+      #########################################################################
+      check_nfa_letter_urls(rel);
+      
+      #########################################################################
+      arcpy.AddMessage(". check complete");
+      
+###############################################################################
 class GenerateStateStats(object):
 
    #...........................................................................
    def __init__(self):
 
-      self.label              = "U3 Generate State Stats";
+      self.label              = "U4 Generate State Stats";
       self.name               = "GenerateStateStats";
       self.description        = "GenerateStateStats";
       self.canRunInBackground = False;
@@ -5135,7 +5125,75 @@ class GenerateStateStats(object):
             arcpy.Delete_management(ustsstaterpt_csv);
          arcpy.management.CopyRows(ustsstaterpt,ustsstaterpt_csv);
          
-      del conn;            
+      del conn;
+
+###############################################################################
+def check_nfa_letter_urls(
+    rel
+):
+   cnt1 = 0;
+   cnt2 = 0;
+   cnt3 = 0;
+   cnt4 = 0;
+   bad1 = 0;
+   bad2 = 0;
+   bad3 = 0;
+   bad4 = 0;
+   arcpy.AddMessage("Checking NFA URL validity.");
+   
+   cnt = 0;
+   with arcpy.da.SearchCursor(
+       in_table     = rel
+      ,field_names  = ['lust_id','tribe','nfa_letter_1','nfa_letter_2','nfa_letter_3','nfa_letter_4']
+      ,where_clause = 'nfa_letter_1 IS NOT NULL OR nfa_letter_2 IS NOT NULL OR nfa_letter_3 IS NOT NULL OR nfa_letter_4 IS NOT NULL' 
+   ) as scursor:
+      
+      for row in scursor:
+      
+         lust_id      = row[0];
+         tribe        = row[1];
+         nfa_letter_1 = row[2];
+         nfa_letter_2 = row[3];
+         nfa_letter_3 = row[4];
+         nfa_letter_4 = row[5];
+   
+         if nfa_letter_1 is not None:
+            cnt1 = cnt1 + 1;
+            z = requests.head(nfa_letter_1);
+            if z.status_code != 200:
+               arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 1 " + nfa_letter_1 + " returned status " + str(z.status_code));
+               bad1 = bad1 + 1;
+   
+         if nfa_letter_2 is not None:
+            cnt2 = cnt2 + 1;
+            z = requests.head(nfa_letter_2);
+            if z.status_code != 200:
+               arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 2 " + nfa_letter_2 + " returned status " + str(z.status_code));
+               bad2 = bad2 + 1;
+               
+         if nfa_letter_3 is not None:
+            cnt3 = cnt3 + 1;
+            z = requests.head(nfa_letter_3);
+            if z.status_code != 200:
+               arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 3 " + nfa_letter_3 + " returned status " + str(z.status_code));
+               bad3 = bad3 + 1;
+               
+         if nfa_letter_4 is not None:
+            cnt4 = cnt4 + 1;
+            z = requests.head(nfa_letter_4);
+            if z.status_code != 200:
+               arcpy.AddMessage(". lust id " + lust_id + " for tribe " + tribe + " nfa letter 4 " + nfa_letter_4 + " returned status " + str(z.status_code));
+               bad4 = bad4 + 1;
+               
+         if cnt > 0 and cnt % 1000 == 0:
+            arcpy.AddMessage(". checked " + str(cnt) + " nfa letter sets...");
+         
+         cnt = cnt + 1;
+         
+   arcpy.AddMessage(". checked " + str(cnt1) + " nfa 1 urls, found " + str(bad1) + " problems.");
+   arcpy.AddMessage(". checked " + str(cnt2) + " nfa 2 urls, found " + str(bad2) + " problems."); 
+   arcpy.AddMessage(". checked " + str(cnt3) + " nfa 3 urls, found " + str(bad3) + " problems.");     
+   arcpy.AddMessage(". checked " + str(cnt4) + " nfa 4 urls, found " + str(bad4) + " problems.");      
          
 def dznull(cell):    
          
