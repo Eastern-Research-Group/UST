@@ -11,8 +11,8 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# valid values are 'ust' or 'release'
-control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True   		# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
+only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
 # These variables can usually be left unset. This script will general a SQL file in the appropriate state folder in the repo under /ust/sql/states
 export_file_path = None         
@@ -46,7 +46,7 @@ class DeaggCode:
 		if self.only_incomplete:
 			sql = sql + " and mapping_complete = 'N'"
 		sql = sql + " order by sort_order, epa_column_name"""
-		cur.execute(sql, (self.dataset.control_id,))
+		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 		rows = cur.fetchall()
 		for row in rows:
 			epa_table_name = row[0]
@@ -57,8 +57,7 @@ class DeaggCode:
 			logger.info('Checking %s."%s"."%s" to see if it may need to be deaggregated', self.dataset.schema, org_table_name, org_column_name)
 	
 			sql2 = f"""select distinct "{org_column_name}" from {self.dataset.schema}."{org_table_name}" where "{org_column_name}" is not null order by 1"""
-
-			cur.execute(sql2)
+			utils.process_sql(conn, cur, sql2)
 			rows2 = cur.fetchall()
 			deagg_flag = False
 			delimiter = None 
@@ -89,7 +88,7 @@ class DeaggCode:
 
 			if deagg_flag:
 				self.deagg_sql = self.deagg_sql + '------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n'
-				logger.info("It appears possible we may need to deaggregate the organization values for %s; generating deagg code...\n", epa_column_name)
+				logger.info('It appears possible we may need to deaggregate the organization values for "%s"; generating deagg code...\n', epa_column_name)
 
 				self.deagg_sql = self.deagg_sql + f'/* ORGANIZATION VALUES MAY NEED TO BE DEAGGREGATED for {epa_table_name}.{epa_column_name}!\n * \n'
 				self.deagg_sql = self.deagg_sql + f' * Schema = "{self.dataset.schema}"\n'
@@ -112,7 +111,8 @@ class DeaggCode:
 				script_params = script_params + f"control_id = {self.dataset.control_id}                  # Enter an integer that is the ust_control_id or release_control_id\n"
 				script_params = script_params + f"data_table_name = '{org_table_name}' 			# Enter a string containing organization table name\n"
 				script_params = script_params + f"column_name = '{org_column_name}'				# Enter a string containing organization column name\n"
-				script_params = script_params + f"delimiter = {repr(delimiter)} 				" + "# Defaults to ','; delimiter from the column beging deaggregated in the state table. Use '\n' for hard returns.".encode("unicode_escape").decode("utf-8") + '\n'
+				script_params = script_params + f"delimiters = [{repr(delimiter)}] 		" + "List of delimiters; defaults to [', ']. Put the most prevelant first. Put characters padded by spaces in list before those without spaces. Use '\n' for hard returns.".encode("unicode_escape").decode("utf-8") + '\n'
+				script_params = script_params + f"exclude_values = []			    # Python list. Values that contain the delimiter but should not be deaggregated\n"
 				script_params = script_params + f"drop_existing = False 			# Boolean, defaults to False; if True will drop existing deagg table with the same name\n"
 				script_params = script_params + f"deagg_rows = True				# Boolean, defaults to True. If True will automatically execute the deagg_rows.py scripts after executing this script.\n"
 				self.deagg_sql = self.deagg_sql + script_params + '\n\n'
