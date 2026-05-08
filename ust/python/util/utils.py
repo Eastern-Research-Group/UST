@@ -146,7 +146,7 @@ def get_control_id(ust_or_release, organization_id):
     cnt = cur.fetchone()[0]
     if cnt == 0:
         logger.error('No data in %s_control; unable to proceed.',ust_or_release)
-        exit()
+        sys.exit()
     sql = f"select max({ust_or_release}_control_id) from public.{ust_or_release}_control where organization_id = %s"
     process_sql(conn, cur, sql, params=(organization_id, ))
     control_id = cur.fetchone()[0]
