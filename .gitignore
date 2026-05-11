@@ -1,5 +1,8 @@
 log
-
+imports
+exports
+config.py
+ 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -129,3 +132,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/arcgis/new_refresh/GpMessages
+*.csv.xml
+*ImportLog
+*.geodatabase-conch
+/arcgis/new_refresh/.backups
+*.geodatabase
+*.geodatabase-shm
+*.geodatabase-wal
+*.csv
+*.xlsx
+*.\~lock\.*
+*Index/
+*schema.ini
