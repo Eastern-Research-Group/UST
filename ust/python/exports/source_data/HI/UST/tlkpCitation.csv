@@ -1,0 +1,449 @@
+CitationID,Description,Year,StateSectionNumber,FederalSectionNumber,Section,Units,ExtentofDeviation,PotentialforHarm,SOC,TCR,Penalty,Clerk,Date of Entry
+438.0,Installation of improperly constructed fiberglass-reinforced plastic tank,2000,{2000}  12(1),20(a)(1),System Design & Installation,,,,p,,300.0,,
+439.0,Installation of an improperly designed and constructed steel tank that fails to meet corrosion protection standards,2000,{2000}  12(2),20(a)(2),System Design & Installation,,,,p,,300.0,,
+440.0,Installation of a steel tank with unsuitable dielectric coating,2000,{2000}  12(2)(A),20(a)(2)(I),System Design & Installation,,,,,,150.0,,
+441.0,Installation of an improperly designed cathodic protection system for a steel tank,2000,{2000}  12(2)(B),20(a)(2)(ii),System Design & Installation,,,,,,300.0,,
+442.0,Impressed current system is not designed to allow determination of current operating status,2000,{2000}  12(2)(C),20(a)(2)(iii),System Design & Installation,,,,,,150.0,,
+443.0,Improper operation or maintenance of tank cathodic protection system,2000,{2000}  12(2)(D),20(a)(2)(iv),System Design & Installation,,,,,,150.0,,
+444.0,Installation of an improperly constructed steel-fiberglass-reinforced- plastic tank,2000,{2000}  12(3),20(a)(3),System Design & Installation,,,,p,,300.0,,
+445.0,Installation of improperly constructed fiberglass-reinforced plastic piping,2000,{2000}  13(1),20(b)(1),System Design & Installation,,,,p,,300.0,,
+446.0,Failure to provide any cathodic protection for steel piping,2000,{2000}  13(2),20(b)(2),System Design & Installation,,,,p,,300.0,,
+447.0,Installation of piping with unsuitable dielectric coating,2000,{2000}  13(2)(A),20(b)(2)(I),System Design & Installation,,,,,,150.0,,
+448.0,Installation of improperly designed cathodic protection for steel piping,2000,{2000}  13(2)(B),20(b)(2)(ii),System Design & Installation,,,,,,300.0,,
+449.0,Improper installation of cathodic protection system for piping,2000,{2000}  13(2)(C),20(b)(2)(iii),System Design & Installation,,,,,,150.0,,
+450.0,Impressed current system is not designed to allow determination of current operating status,2000,{2000}  13(2)(D),20(b)(2)(iv),System Design & Installation,,,,,,150.0,,
+451.0,Failure to use a spill prevention system or an overfill prevention system,2000,{2000}  14(a),20( c)(1),System Design & Installation,,,,p,,300.0,,
+452.0,Installation of inadequate spill prevention equipment,2000,{2000}  14(a)(1),20(c )(1)(I),System Design & Installation,,,,p,,150.0,,
+453.0,Installation of inadequate overfill prevention equipment,2000,{2000}  14(a)(2),20( c) (1)(ii),System Design & Installation,,,,p,,150.0,,
+454.0,Failure to provide adequate alarms that are clearly labeled and located where the delivery person can clearly see or hear the alarm,2000,{2000}  14(c),20( c)(1)(ii)(b),System Design & Installation,,,,p,,150.0,,
+455.0,Failure to install tank or piping in accordance with accepted codes and standards,2000,{2000}  15,20(d),System Design & Installation,,,,,,150.0,,
+456.0,Failure to provide adequate certification of UST installation,2000,{2000}  16(a),20(e),System Design & Installation,,,,,,150.0,,
+457.0,Failure to provide installer certification of compliance with installation requirements on notification form,2000,{2000}  16(b),20(e),System Design & Installation,,,,,,150.0,,
+458.0,Failure to provide adequate secondary containment,2000,{2000}  17(a),,System Design & Installation,,,,,,300.0,revised to 17(b),
+459.0,Failure to provide adequate double-walled tank or adequate lining,2000,{2000}  17(b),,System Design & Installation,,,,,,300.0,revised to 17(c ),
+460.0,Failure to provide adequate external liners,2000,{2000}  17(c),,System Design & Installation,,,,,,300.0,revised to 17(d),
+461.0,Failure to provide adequate secondary containment of piping,2000,{2000}  17(d),,System Design & Installation,,,,,,300.0,revised to 17(e),
+462.0,"Failure to perform replacement, upgrade, or closure for existing substandard tank systems",2000,{2000}  18(a),21(a),System Design & Installation,,,,,,300.0,deleted,
+463.0,Failure to meet all tank upgrade standards,2000,{2000}  18(b),21(b),System Design & Installation,,,,p,,300.0,deleted,
+464.0,Improper installation of interior lining for tank upgrade requirements,2000,{2000}  18(b)(1)(A),21(b)(1)(I),System Design & Installation,,,,,,150.0,deleted,
+465.0,Failure to meet interior lining inspection requirements for tank upgrade,2000,{2000}  18(b)(1)(B),21(b)(1)(ii),System Design & Installation,,,,p,,150.0,deleted,
+466.0,Failure to ensure that tank is structurally sound before installing cathodic protection,2000,{2000}  18(b)(2)(A),21(b)(2)(I),System Design & Installation,,,,,,150.0,deleted,
+467.0,Failure to conduct monthly release detection monitoring for upgraded tank under 10 years of age,2000,{2000}  18(b)(2)(B),21(b)(2)(ii),System Design & Installation,,,,,,300.0,deleted,
+468.0,Failure to meet tightness test requirements for a tank upgraded with cathodic protection,2000,{2000}  18(b)(2)(C),21(b)(2)(iii),System Design & Installation,,,,,,150.0,deleted,
+469.0,Failure to meet requirements for testing for corrosion holes for a tank upgraded with cathodic protection,2000,{2000}  18(b)(2)(D),21(b)(2)(iv),System Design & Installation,,,,,,150.0,nbc  deleted,12/30/2006 0:00
+470.0,Failure to meet piping tightness test requirements for metal piping after upgrade with cathodic protection,2000,{2000}  18(c),21(c ),System Design & Installation,,,,p,,150.0,"deleted, SOC same as 13(2)",
+471.0,Failure to provide adequate spill or overfill prevention system for an existing tank,2000,{2000}  18(d),21(d),System Design & Installation,,,,p,,300.0,"deleted, SOC same as 14(a0",
+472.0,Failure to notify director of change in ownership within 30 days,2000,{2000}  21(1),,"Notifiation, Permits",,,,,,150.0,deleted,
+473.0,Failure to notify director of change in operator within 30 days,2000,{2000}  21(2),,"Notifiation, Permits",,,,,,150.0,deleted,
+474.0,Failure to amend notification within proper timeframe,2000,{2000}  21(3),,"Notifiation, Permits",,,,,,50.0,deleted,
+475.0,Failure to apply for a permit,2000,{2000}  23,,"Notifiation, Permits",,,,,,300.0,,
+476.0,Failure to inform the department at least seven days prior to installation,2000,{2000}  25(c),,"Notifiation, Permits",,,,,,150.0,,
+477.0,Failure to inform the department within 30 days after installation,2000,{2000}  25(d),,"Notifiation, Permits",,,,,,150.0,,
+478.0,Failure to renew a permit,2000,{2000}  26,,"Notifiation, Permits",,,,,,150.0,,
+479.0,Failure to apply for the modification of a permit or submit a notice of change,2000,{2000}  29,,"Notifiation, Permits",,,,,,150.0,,
+480.0,Failure to apply for transfer of a permit,2000,{2000}  31,,"Notifiation, Permits",,,,,,150.0,revised to 31(a),
+481.0,Failure to properly maintain a permit or variance,2000,{2000}  34,,"Notifiation, Permits",,,,,,50.0,,
+482.0,Failure to take necessary precautions to prevent overfill or spillage during the transfer of product                                                                                                                                        ,2000,{2000}  41(a),30(a),General Operating Requirements,,,,,,300.0,,
+483.0,Failure to operate or maintain corrosion protection system continuously,2000,{2000}  42(a)(1),31(a),General Operating Requirements,,,,p,,150.0,,
+484.0,Failure to ensure proper operation of cathodic protection system,2000,{2000}  42(a)(2),31(b)(1),General Operating Requirements,,,,p,,150.0,nbc,
+485.0,Failure to inspect impressed current systems every 60 days,2000,{2000}  42(a)(3),31( c),General Operating Requirements,,,,p,,150.0,,
+486.0,Failure to maintain records of cathodic protection inspections,2000,{2000}  42(b),31(d),General Operating Requirements,,,,,,50.0,,
+487.0,Failure to ensure that UST system is made of or lined with materials compatible with substance stored,2000,{2000}  43,32,General Operating Requirements,,,,,,150.0,,
+488.0,Failure to repair UST system in accordance with accepted codes and standards,2000,{2000}  44(b)(1),33(a),General Operating Requirements,,,,,,150.0,,
+489.0,Failure to repair fiberglass-reinforced UST in accordance with accepted codes and standards,2000,{2000}  44(b)(2),33(b),General Operating Requirements,,,,,,150.0,,
+490.0,Failure to replace metal piping which has released product,2000,{2000}  44(b)(3),33( c),General Operating Requirements,,,,,,150.0,deleted,
+491.0,Failure to repair fiberglass-reinforced piping in accordance with manufacturers specifications,2000,{2000}  44(b)(3),33( c),General Operating Requirements,,,,,,150.0,deleted,
+492.0,Failure to ensure that repaired tank systems are tightness tested within 30 days of completion of repair,2000,{2000}  44(b)(4),33(d),General Operating Requirements,,,,p,,300.0,revised to 44(b)(3),
+493.0,Failure to test cathodic protection system within 6 months of repair of an UST system,2000,{2000}  44(b)(5),33(e),General Operating Requirements,,,,p,,150.0,revised to 44(b)(4),
+494.0,Failure to maintain records of each repair to an UST system,2000,{2000}  44(c),33(f),General Operating Requirements,,,,,,50.0,deleted,
+495.0,Failure to maintain analysis of site corrosion potential if corrosion protection equipment is not used or to maintain the records for the required time period,2000,{2000}  45(c)(1),34(b)(1),General Operating Requirements,,,,,,50.0,"nbc, revised to 45(b)(1)",
+496.0,Failure to maintain corrosion protection equipment operation documentation or to maintain the records for the required time period,2000,{2000}  45(c)(2),34(b)(2),General Operating Requirements,,,,,,50.0,"nbc, deleted",
+497.0,Failure to maintain documentation of UST system repairs or to maintain the records for the required time period,2000,{2000}  45(c)(3),34(b)(3),General Operating Requirements,,,,,,50.0,revised to 45(b)(4),
+498.0,Failure to maintain documentation of compliance with release detection requirements or to maintain the records for the required time period,2000,{2000}  45(c)(4),34(b)(4),General Operating Requirements,,,,,,50.0,"nbc, revised to 45(b)(2)",
+499.0,Failure to maintain record of compliance with change-in-service or permanent closure requirements including results of the site assessment or to maintain the records for the required time period,2000,{2000}  45(c)(5),34(b)(5),General Operating Requirements,,,,,,50.0,"nbc, revised to 45(b)(5)",
+500.0,Failure to make records immediately available for inspection by maintaining the records on site or at an alternative site through another method of recordkeeping as approved by the director,2000,{2000}  45(d)(1),34(( c) (1-2),General Operating Requirements,,,,,,50.0,"nbc, revised to 45 (c )(1)",
+501.0,Failure to maintain permanent closure records at a readily available alternative site,2000,{2000}  45(d)(2),34( c)(3),General Operating Requirements,,,,,,50.0,revised to 45(c )(2),
+502.0,Failure to provide adequate release detection method,2000,{2000}  51(a),40(a),Release Detection,,,,d,,300.0,,
+503.0,Failure to close or complete change-in-service for any UST system that cannot meet release detection requirements,2000,{2000}  51(d),40(d),Release Detection,,,,,,300.0,,
+504.0,Failure to monitor tanks at least every 30 days,2000,{2000}  51(e)(1),41(a),Release Detection,,,,d,,300.0,"deleted, SOC moved to 54(a)",
+505.0,Failure to conduct tank tightness testing for the appropriate time period,2000,{2000}  51(e)(1)(A),41(a)(1),Release Detection,,,,d,,300.0,"delelted, SOC for upgraded tanks",
+506.0,Failure to conduct monthly inventory control and tank tightness testing every 12 months,2000,{2000}  51(e)(1)(B),41(a)(2),Release Detection,,,,,,300.0,deleted,
+507.0,Failure to equip pressurized piping with automatic line leak detector,2000,{2000}  51(e)(2)(A)(i),41(b)(1)(I),Release Detection,,,,,,300.0,deleted,
+508.0,Failure to conduct a tank tightness test every 12 months or perform monthly monitoring on pressurized piping,2000,{2000}  51(e)(2)(A)(ii),41(b)(1)(ii),Release Detection,,,,d,,300.0,"deleted, SOC moved to 531(1)(a)",
+509.0,Failure to conduct line tightness test every 12 months or use monthly monitoring on suction piping,2000,{2000}  51(e)(2)(B),41(b)(2),Release Detection,,,,d,,300.0,"deleted, SOC moved to 53(2)(a),(b) and (c )",
+510.0,Failure to conduct adequate monthly inventory control,2000,{2000}  52(1),43(a),Release Detection,,,,,,300.0,,
+511.0,Failure to record inventory volume measurements each operating day,2000,{2000}  52(1)(A)*,43(a)(1),Release Detection,,,,d,,50.0,,
+512.0,Failure to use inventory control equipment capable of measurements to the nearest 1/8th of an inch,2000,{2000}  52(1)(B)*,43(a)(2),Release Detection,,,,d,,50.0,,
+513.0,Failure to take proper readings,2000,{2000}  52(1)(C)*,,Release Detection,,,,,,50.0,,
+514.0,Failure to reconcile product inputs with delivery receipts,2000,{2000}  52(1)(D)*,43(a)(3),Release Detection,,,,d,,50.0,,
+515.0,Failure to use a drop tube that extends to within one foot of the tank bottom,2000,{2000}  52(1)(E)*,43(a)(4),Release Detection,,,,,,50.0,,
+516.0,Failure to perform adequate calibration every 12 months,2000,{2000}  52(1)(F)*,43(a)(5),Release Detection,,,,d,,50.0,,
+517.0,Failure to measure water level to the nearest 1/8th of an inch at least once a month,2000,{2000}  52(1)(G)*,43(a)(6),Release Detection,,,,d,,50.0,,
+518.0,Inadequate operation or maintenance of manual tank gauging (MTG),2000,{2000}  52(2),43(b),Release Detection,,,,,,300.0,,
+519.0,Failure to conduct MTG for the appropriate time period,2000,{2000}  52(2)(A),43(b)(1),Release Detection,,,,d,,50.0,,
+520.0,Failure to take two proper level measurements at the beginning and end of the appropriate MTG time period,2000,{2000}  52(2)(B),43(b)(2),Release Detection,,,,,,50.0,nbc,
+521.0,Failure to use MTG equipment that is capable of measurements to the nearest 1/8th of an inch,2000,{2000}  52(2)(C),43(b)(3),Release Detection,,,,d,,50.0,,
+522.0,Failure to conduct weekly or monthly testing or to conduct testing for the minimum test duration,2000,{2000}  52(2)(D),43(b)(4),Release Detection,,,,d,,50.0,,
+523.0,Failure to take weekly measurements,2000,{2000}  52(2)(E),,Release Detection,,,,,,,,
+524.0,Inadequate operation or maintenance of tank tightness testing,2000,{2000}  52(3),43( c),Release Detection,,,,d,,150.0,,
+525.0,Inadequate operation or maintenance of an automatic tank gauging system,2000,{2000}  52(4),43(d),Release Detection,,,,d,,300.0,,
+526.0,Failure to use an automatic product level monitor test with a 0.2 gallon per hour leak rate threshold,2000,{2000}  52(4)(A),43(d)(1),Release Detection,,,,d,,150.0,,
+527.0,Failure to conduct inventory control or another test of equivalent performance in conjunction with tank tightness testing,2000,{2000}  52(4)(B),43(d)(2),Release Detection,,,,,,150.0,,
+528.0,Inadequate operation or maintenance of a vapor monitoring system,2000,{2000}  52(5),43(e),Release Detection,,,,,,300.0,,
+529.0,Failure to use sufficiently porous backfill,2000,{2000}  52(5)(A)#,43(e)(1),Release Detection,,,,,,150.0,,
+530.0,Failure to use a sufficiently volatile substance or tracer compound in conjunction with vapor monitoring,2000,{2000}  52(5)(B)#,43(e)(2),Release Detection,,,,,,150.0,,
+531.0,Failure to ensure that the measurement of vapors remains operative so that a release could not go undetected for more than 30 days,2000,{2000}  52(5)(C)#,43(e)(3),Release Detection,,,,d,,150.0,,
+532.0,Failure to ensure a level of background contamination to not interfere with release detection by the vapor monitor,2000,{2000}  52(5)(D)#,43(e)(4),Release Detection,,,,,,150.0,,
+533.0,Failure to use a system than can detect any significant increase in vapor levels,2000,{2000}  52(5)(E)#,43(e)(5),Release Detection,,,,,,150.0,,
+534.0,Failure to assess the site with written documentation to ensure compliance with requirements or to properly position monitoring wells,2000,{2000}  52(5)(F)#,43(e)(6),Release Detection,,,,d,,150.0,nbc,
+535.0,Failure to clearly mark or secure monitoring wells for vapor monitoring,2000,{2000}  52(5)(G)#,43(e)(7),Release Detection,,,,,,150.0,nbc,
+536.0,Inadequate operation or maintenance of a ground water monitoring system,2000,{2000}  52(6),43(f),Release Detection,,,,,,300.0,,
+537.0,Failure to use the system on a stored substance that is immiscible in water and has a specific gravity of less than one,2000,{2000}  52(6)(A)@,43(f)(1),Release Detection,,,,,,150.0,,
+538.0,Failure to employ a system with an adequate ground water level and soil conductivity,2000,{2000}  52(6)(B)@,43(f)(2),Release Detection,,,,d,,150.0,,
+539.0,Failure to use an adequate monitoring well casing,2000,{2000}  52(6)(C)@,43(f)(3),Release Detection,,,,,,150.0,,
+540.0,Failure to properly seal monitoring wells,2000,{2000}  52(6)(D)@,43(f)(4),Release Detection,,,,,,150.0,,
+541.0,Failure to use monitoring wells that are as close to the excavation zone as technically feasible,2000,{2000}  52(6)(E)@,43(f)(5),Release Detection,,,,,,150.0,,
+542.0,Failure to use equipment that can detect at least 1/8th of an inch of free product,2000,{2000}  52(6)(F)@,43(f)(6),Release Detection,,,,,,150.0,,
+543.0,Failure to assess the site with written documentation to ensure compliance with the requirements or to properly position monitoring wells,2000,{2000}  52(6)(G)@,43(f)(7),Release Detection,,,,d,,150.0,,
+544.0,Failure to clearly mark or secure monitoring wells,2000,{2000}  52(6)(H)@,43(f)(8),Release Detection,,,,,,150.0,,
+545.0,Inadequate operation or maintenance of interstitial monitoring,2000,{2000}  52(7),43(g),Release Detection,,,,d,,300.0,,
+546.0,Failure to provide any release detection for underground piping,2000,{2000}  53,44,Release Detection,,,,d,,300.0,,
+547.0,Failure to provide adequate line leak detector system for underground piping,2000,{2000}  53(1),44(a),Release Detection,,,,d,,150.0,deleted,
+548.0,Failure to provide adequate line tightness testing system for underground piping system,2000,{2000}  53(2),44(b),Release Detection,,,,,,150.0,deleted,
+549.0,Inappropriate use of tank release detection methods,2000,{2000}  53(3),44( c),Release Detection,,,,,,150.0,deleted,
+550.0,Failure to maintain records of release detection monitoring,2000,{2000}  54(a),45,Release Detection,,,,,,150.0,revised to 54(b),
+551.0,Failure to document all release detection performance claims for the life of the equipment,2000,{2000}  54(b)(1),45(a),Release Detection,,,,,,50.0,deleted,
+552.0,"Failure to maintain results of sampling, testing, or monitoring for release detection for at least 1 year",2000,{2000}  54(b)(2),45(b),Release Detection,,,,,,50.0,deleted,
+553.0,"Failure to document records of calibration, maintenance, or repair of release detection or to maintain records for the required time period",2000,{2000}  54(b)(3),45( c),Release Detection,,,,,,50.0,deleted,
+554.0,Failure to maintain all records for at least the last 12 months of release detection,2000,{2000}  54(b)(4),,Release Detection,,,,,,50.0,deleted,
+555.0,Failure to maintain operating manuals for all currently installed leak detection equipment for the required time period,2000,{2000}  54(b)(5),,Release Detection,,,,,,50.0,deleted,
+556.0,Failure to maintain documentation of the site assessment for three years after change-in-service or permanent closure,2000,{2000}  54(b)(6),,Release Detection,,,,,,50.0,deleted,
+557.0,Failure to continue operation or maintenance of corrosion protection system in a temporarily closed tank system,2000,{2000}  81(b),70(a),Closure and change-in-service,,,,p,,150.0,,
+558.0,Failure to continue operation or maintenance of release detection in a temporarily closed tank system that is not empty,2000,{2000}  81(b)*,70(a),Closure and change-in-service,,,,d,,300.0,,
+559.0,Failure to comply with temporary closure requirements,2000,{2000}  81(d),70(b),Closure and change-in-service,,,,,,300.0,,
+560.0,Failure to leave vent lines open and functioning for a tank system that is temporarily closed for 3 or more months,2000,{2000}  81(d)(1),70(b)(1),Closure and change-in-service,,,,,,150.0,,
+561.0,"Failure to secure all other lines, pumps, manways, and ancillary equipment for a tank system that is temporarily closed for 3 or more months",2000,{2000}  81(d)(2),70(b)(2),Closure and change-in-service,,,,,,150.0,,
+562.0,Failure to permanently close or upgrade a tank system where regulated substances have not been deposited after 12 months,2000,{2000}  81(e),70(c ),Closure and change-in-service,,,,,,300.0,,
+563.0,Failure to notify the department of a closure or change-in- service within 30 days of beginning permanent closure or change-in-service,2000,{2000}  82(b),71(a),Closure and change-in-service,,,,,,300.0,,
+564.0,Failure to notify the department at least 7 days before a permanent closure or change-in-service action,2000,{2000}  82(c),,Closure and change-in-service,,,,,,150.0,,
+565.0,Failure to remove all liquids and sludges for tank closure,2000,{2000}  82(d)(1),71(b),Closure and change-in-service,,,,,,300.0,,
+566.0,Failure to remove closed tank from the ground or fill tank with an inert solid for tank closure,2000,{2000}  82(d)(2),71(b),Closure and change-in-service,,,,,,300.0,,
+567.0,Failure to properly maintain closure or change-in-service,2000,{2000}  85(c),74,Closure and change-in-service,,,,,,300.0,,
+568.0,Failure to meet the requirement for pre-occurrence coverage of insurance,2000,{2000}  94(a)(1)-(2),93(a)(1-2),Financial Responsibility,,,,,,150.0,,
+569.0,Failure to meet the requirement for annual aggregate coverage of insurance,2000,{2000}  94(b)(1)-(2),93(b)(1-2),Financial Responsibility,,,,,,150.0,,
+570.0,Failure to review and adjust financial assurance after acquiring new or additional USTs,2000,{2000}  94(f),93(f),Financial Responsibility,,,,,,150.0,,
+571.0,Use of an unapproved mechanism or combination of mechanisms to demonstrate financial responsibility,2000,{2000}  95,94,Financial Responsibility,,,,,,150.0,,
+572.0,"Failure to report evidence of financial responsibility to the director within 30 days of detecting a known or suspected
+release",2000,{2000}  110(a)(1),166(a0(1),Financial Responsibility,,,,,,150.0,,
+573.0,Failure to report evidence of financial responsibility to the director if the provider becomes incapable of providing financial assurance and the owner or operator is unable to obtain alternate coverage within 30 days,2000,{2000}  110(a)(2),166(a)(2),Financial Responsibility,,,,,,150.0,,
+574.0,Failure to report evidence of financial responsibility to the director when new tanks are installed,2000,{2000}  110(b),166(b),Financial Responsibility,,,,,,150.0,revised to 111(b)(10),
+575.0,"Failure to maintain:  (1) copies of the financial assurance mechanism(s) used to comply with financial responsibility rule, or (2) certification that the mechanism is in compliance with the requirements of the rule or to maintain the records at the UST si",2000,{2000}  111,107,Financial Responsibility,,,,,,150.0,"nbc, delelted",
+576.0,Failure to renew a variance,2000,"{2000}  342L-6(e), HRS",,,,,,,,150.0,,
+577.0,"Failure to notify the department by December 31, 1989, of the existence of a tank",2000,{2000}  342L-30(a),,,,,,,,300.0,,
+578.0,"Failure to notify the department by December 31, 1989, of the existence of a tank taken out of operation between  January 1, 1974, and May 19, 1986",2000,{2000}  342L-30(b),,,,,,,,300.0,,
+579.0,"Failure to notify the department within 30 days after the installation of a tank brought into use after May 19, 1986",2000,{2000}  342L-30(c),,,,,,,,300.0,,
+580.0,"Failure to notify the department within 30 days of June 18, 1992, whether a person who acquires ownership of a tank after December 31, 1989 still owns the tank",2000,{2000}  42L-30(e),,,,,,,,150.0,nbc,
+581.0,Failure to notify tank purchaser of notification requirements,2000,{2000}  342L-30(g),,,,,,,,300.0,,
+582.0,No citation issued,9999,,none,,,,,,,0.0,,
+583.0,"Reviewing the information, Possible Field citation from the desk",9999,To be determine,To be determine,,,,,,,0.0,,
+584.0,"Improper design, construction, or installation of fiberglass-reinforced plastic tank",2013,(2013) 12(1),20(A)(1),"Systen, Design and Installation",,,,P,,300.0,previous citation language modify,10/28/2013 14:10
+585.0,"Improper design, construction or installation of steel tank, or of corrosion protection for steel tank",2013,(2013) 12(2),20(a)(2),"System, Design and Installation",,,,p,,300.0,previous citation language modify,10/28/2013 14:10
+586.0,Installation of a steel tank with unsuitable dielectric coating,2013,(2013)12(2)(A),20(a)(2)(1),"Systen, Design and Installation",,,,,,150.0,,10/28/2013 14:10
+587.0,Field-installed cathodic protection was not designed by a corrosion expert,2013,(2013) 12(2)(B),20(a)(2)(ii),"Systen, Design and Installation",,,,,,300.0,,10/28/2013 14:10
+588.0,Impressed current system is not designed to allow determination of current operating status,2013,(2013) 12(2)(C) ,20(a)(2)(iii),"Systen, Design and Installation",,,,,,150.0,,10/28/2013 14:10
+589.0,Improper operation or maintenance of tank cathodic protection system,2013,(2013) 12(2)(D),20(a)(2)(iv),"Systen, Design and Installation",,,,,,150.0,,10/28/2013 14:10
+590.0,"Improper design, construction or installation of steel-fiberglass-reinforced-plastic composite tank",2013,(2013) 12(3),20(a)(3),"Systen, Design and Installation",,,,p,,300.0,previous citation language modify,10/28/2013 14:10
+591.0,"Failure to have site properly assessed, or to maintain documentation to demonstrate that a metal UST requires no additional corrosion protection measures",2013,(2013) 12(4),,"Systen, Design and Installation",,,,,,150.0,new citation added,10/28/2013 14:10
+592.0,"Improper design, construction or installation of fiberglass-reinforced plastic piping",2013,(2013) 13(1),20(b)(1),"Systen, Design and Installation",,,,p,,300.0,previous citation language modify,10/28/2013 14:10
+593.0,"Improper design, construction or installation of steel piping, or cathodic protection for steel piping",2013,(2013) 13(2),20(b)(2),"Systen, Design and Installation",,,,p,,300.0,previous citation language modify,10/28/2013 14:10
+594.0,Installation of steel piping with unsuitable dielectric coating,2013,(2013) 13(2)(A),20(b)(2)(1),"Systen, Design and Installation",,,,,,150.0,,10/28/2013 14:10
+595.0,Field-installed cathodic protection of steel piping was not designed by a corrosion expert,2013,(2013) 13(2)(B),20(b)(2)(ii),"Systen, Design and Installation",,,,,,300.0,previous citation language modify,10/28/2013 14:10
+596.0,Impressed current system for piping is not designed to allow determination of current operating status,2013,(2013) 13(2)(C),20(b)(2)(iii),"Systen, Design and Installation",,,,,,150.0,previous citation language modify,10/28/2013 14:10
+597.0,Improper operation or maintenance of piping cathodic protection system,2013,(2013) 13(2)(D),20(b)(2)(iv),"Systen, Design and Installation",,,,,,150.0,previous citation language modify,10/28/2013 14:10
+598.0,"Failure to have site properly assessed, or to maintain documentation to demonstrate that metal piping requires no additional corrosion protection measures",2013,(2013) 13(3),,"Systen, Design and Installation",,,,,,150.0,new citation added,10/28/2013 14:10
+599.0,Failure to use a spill prevention system or an overfill prevention system,2013,(2013) 14(a),20( c) (1),"Systen, Design and Installation",,,,p,,300.0,,10/28/2013 14:10
+600.0,Spill prevention equipment will not prevent release of product to environment when transfer hose is detached from fill pipe,2013,(2013) 14(a)(1),20( c) (1)( i),"Systen, Design and Installation",,,,p,,150.0,previous citation language modify,10/28/2013 14:10
+601.0,Overfill prevention equipment does not meet performance standards,2013,(2013) 14(a)(2),20( c) (1)(ii),"Systen, Design and Installation",,,,p,,150.0,previous citation language modify,10/28/2013 14:10
+602.0,Failure to have overfill alarm(s) clearly labeled and located where the delivery person can see and hear the alarm,2013,(2013) 14(c),20( c) (1)(ii)(b),"Systen, Design and Installation",,,,p,,150.0,previous citation language modify,10/28/2013 14:10
+603.0,Failure to install tank or piping in accordance with accepted codes and standards,2013,(2013) 15,20(d),"Systen, Design and Installation",,,,,,150.0,,10/28/2013 14:10
+605.0,"Failure to ensure that a proper method of certification, testing or inspection was used for the UST installation",2013,(2013) 16(a),20(e),"Systen, Design and Installation",,,,,,150.0,previous citation language modify,10/28/2013 14:10
+606.0,Failure to complete or submit proper documentation to certify compliance with tank notification and installation requirements,2013,(2013) 16(b),20(e),"Systen, Design and Installation",,,,,,150.0,previous citation language modify,10/28/2013 14:10
+607.0,"Failure to provide properly designed, constructed or installed secondary containment on new UST or tank system",2013,(2013) 17(a),,"Systen, Design and Installation",,,,,,300.0,new regulation,10/28/2013 14:10
+608.0,"Improper design, construction or installation of secondary containment",2013,(2013) 17(b),,"Systen, Design and Installation",,,,,,300.0,previous citation language modify,10/28/2013 14:10
+609.0,"Improper design, construction or installation of double walled UST",2013,(2013) 17(c),,"Systen, Design and Installation",,,,,,300.0,previous citation language modify,10/28/2013 14:10
+610.0,"Improper design, construction or installation of external liners",2013,(2013) 17(d),,"Systen, Design and Installation",,,,,,300.0,previous citation language modify,10/28/2013 14:10
+611.0,Failure to provide secondary containment for new piping installation,2013,(2013) 17(e),,"Systen, Design and Installation",,,,,,300.0,new regulation,10/28/2013 14:10
+612.0,Failure to provide new or replaced dispenser with under dispenser containment,2013,(2013) 19,,"Systen, Design and Installation",,,,,,300.0,new regulation,10/28/2013 14:10
+613.0,Under dispenser containment is not liquid tight,2013,(2013) 19(1),,"Systen, Design and Installation",,,,,,150.0,new regulation,10/28/2013 14:10
+614.0,Under dispenser containment is not compatible with substance conveyed by piping,2013,(2013) 19(2),,"Systen, Design and Installation",,,,,,150.0,new regulation,10/28/2013 14:10
+615.0,Under dispenser containment does not allow for visual inspection or access to components in containment system,2013,(2013) 19(3),,"Systen, Design and Installation",,,,,,150.0,new regulation,10/28/2013 14:10
+616.0,Failure to monitor under dispenser containment with a sensing device that signals the operator of the presence of regulated substances,2013,(2013) 19(4),,"Systen, Design and Installation",,,,,,300.0,new regulation,10/28/2013 14:10
+617.0,Failure to notify the department of changes in information relating to the UST or tank system,2013,(2013) 21.5(a),,"Notification, permits",,,,,,150.0,new regulation,10/28/2013 14:10
+618.0,Failure to submit notification to the department of changes in information relating to the UST or tank system within 30 days following the change,2013,(2013) 21.5(b),,"Notification, permits",,,,,,50.0,new regulation,10/28/2013 14:10
+619.0,Failure to obtain a permit from the director before installing or operating a UST or UST system,2013,(2013) 23,,"Notification, permits",,,,,,300.0,previous citation language modify,10/28/2013 14:10
+620.0,Failure to inform the department at least 7 days prior to installation,2013,(2013) 25(c),,"Notification, permits",,,,,,150.0,,10/28/2013 14:10
+621.0,Failure to notify the department within 30 days after the installation of the UST system,2013,(2013) 25(d),,"Notification, permits",,,,,,150.0,,10/28/2013 14:10
+622.0,Failure to submit proper documents for a permit renewal within the specified time frame,2013,(2013) 26,,"Notification, permits",,,,,,150.0,previous citation language modify,10/28/2013 14:10
+623.0,Failure to properly apply for the modification of a permit within the specified time frame,2013,(2013) 29,,"Notification, permits",,,,,,150.0,previous citation language modify,10/28/2013 14:10
+624.0,Owner failed to request approval to transfer permit,2013,(2013) 31(a),,"Notification, permits",,,,,,150.0,previous citation language modify,10/28/2013 14:10
+625.0,Failure to apply for the transfer of a permit within the specified time frame,2013,(2013) 31(c),,"Notification, permits",,,,,,50.0,new citation added,10/28/2013 14:10
+626.0,"Failure to properly maintain a permit or variance at the location of the UST or tank system, and to make the document(s) immediately available for inspection upon request",2013,(2013) 34,,"Notification, permits",,,,,,50.0,previous citation language modify,10/28/2013 14:10
+627.0,Failure to prevent overfills or spills during the transfer of product,2013,(2013) 41(a),30(a),General Operating Reqirements,,,,,,300.0,previous citation language modify,10/28/2013 14:10
+628.0,"Failure to maintain spill prevention equipment, containment sumps and under dispenser containment free of regulated substances, water and debris at all times",2013,(2013) 41(c)(1),,General Operating Reqirements,,,,,,50.0,new regualtion,10/28/2013 14:10
+629.0,Failure to properly conduct or pass a test on spill prevention equipment at least every 365 days,2013,(2013) 41(c)(2),,General Operating Reqirements,,,,,,150.0,new regulation,10/28/2013 14:10
+630.0,Failure to maintain the overfill prevention equipment operational at all times,2013,(2013) 41(d),,General Operating Reqirements,,,,,,150.0,new regulation,10/28/2013 14:10
+631.0,Failure to operate or maintain corrosion protection system continuously,2013,(2013) 42(a)(1),31(a),General Operating Reqirements,,,,P,,150.0,,10/28/2013 14:10
+632.0,Failure to perform inspection or testing of cathodic protection system using proper criteria and a qualified tester within specified time frames,2013,(2013) 42(a)(2),31(b)(1),General Operating Reqirements,,,,p,,150.0,previous citation language modify,10/28/2013 14:10
+633.0,Failure to inspect operability of the impressed current cathodic protection systems every 60 days,2013,(2013) 42(a)(3),31 (c ),General Operating Reqirements,,,,p,,150.0,previous citation language modify,10/28/2013 14:10
+634.0,"Failure to maintain required records of cathodic protection operation, inspections and testing",2013,(2013) 42(b),31(d),General Operating Reqirements,,,,,,50.0,previous citation language modify,10/28/2013 14:10
+635.0,Failure to ensure that the UST system is made of or lined with materials compatible with substance stored,2013,(2013) 43,32,General Operating Reqirements,,,,,,150.0,,10/28/2013 14:10
+636.0,Failure to repair UST system in accordance with accepted codes and standards,2013,(2013) 44(b)(1),33(a),General Operating Reqirements,,,,,,150.0,,10/28/2013 14:10
+637.0,"Failure to repair fiberglass-reinforced UST by the manufacturer’s authorized representative, or in accordance with accepted codes and standards",2013,(2013) 44(b)(2),33(b),General Operating Reqirements,,,,,,150.0,previous citation language modify,10/28/2013 14:10
+638.0,"Failure to have repaired UST, piping or containment wall, tightness or integrity tested prior to returning the UST or tank system back into service",2013,(2013) 44(b)(3),33(d),General Operating Reqirements,,,,p,,300.0,new regulation,10/28/2013 14:10
+639.0,Failure to test cathodic protection system within six months of repair of any cathodically protected UST or tank system,2013,(2013) 44(b)(4),33(e),General Operating Reqirements,,,,p,,150.0,previous citation language modify,10/28/2013 14:10
+640.0,Failure to generate and maintain accurate records of compliance with corrosion protection requirements,2013,(2013) 45(b)(1),34(b)(1),General Operating Reqirements,,,,,,50.0,previous citation language modify,10/28/2013 14:10
+641.0,Failure to generate and maintain accurate records of compliance with the release detection requirements for at least 3 years,2013,(2013) 45(b)(2),34(b)(4),General Operating Reqirements,,,,,,50.0,previous citation language modify,10/28/2013 14:10
+642.0,Failure to generate and maintain accurate documentation of maintenance and tests performed on the UST system for at least 3 years,2013,(2013) 45(b)(3),45(c ),General Operating Reqirements,,,,,,50.0,prev citation language modify; move from 54(b)(3),10/28/2013 14:10
+643.0,Failure to generate and maintain accurate documentation of repairs to the UST system for the life of the equipment,2013,(2013) 45(b)(4),34(b)(3),General Operating Reqirements,,,,,,50.0,previous citation language modify,10/28/2013 14:10
+644.0,Failure to generate and maintain accurate records that the monitoring equipment is designed to produce,2013,(2013) 45(b)(5),,General Operating Reqirements,,,,,,50.0,prev citation language modify; move from 54(b)(4),10/28/2013 14:10
+645.0,Failure to maintain all written performance claims for release detection equipment for the life of the equipment,2013,(2013) 45(b)(6),45(a),General Operating Reqirements,,,,,,50.0,prev citation language modify; move from 54(b)(5),10/28/2013 14:10
+646.0,Failure to maintain operating manuals for all currently installed leak detection equipment for the remaining operating life of the UST or UST system,2013,(2013) 45(b)(7),,General Operating Reqirements,,,,,,50.0,previous citation language modify,10/28/2013 14:10
+647.0,Failure to generate and maintain record of compliance with change-in-service or permanent closure requirements including results of the site assessment or to maintain the records for the required time period,2013,(2013) 45(b)(8),34(b)(5),General Operating Reqirements,,,,,,50.0,previous citation language modify,10/28/2013 14:10
+648.0,Failure to maintain record of permit or variance or both,2013,(2013) 45(b)(9),,General Operating Reqirements,,,,,,50.0,previous citation language modify,10/28/2013 14:10
+649.0,Failure to maintain records of proof of current financial assurance mechanism used to demonstrate financial responsibility,2013,(2013) 45(b)(10),,General Operating Reqirements,,,,,,50.0,previous citation language modify,10/28/2013 14:10
+650.0,Failure to make records immediately available for inspection by maintaining the records on site or by using another method approved by the director,2013,(2013) 45(c)(1),34( c)(1-2),General Operating Reqirements,,,,,,50.0,,10/28/2013 14:10
+651.0,"Failure to maintain permanent closure records at a readily available alternative site, or to provide records upon request",2013,(2013) 45(c)(2),34( c)(3),General Operating Reqirements,,,,,,50.0,,10/28/2013 14:10
+652.0,"Failure to designate a trained and certified class A, class B or class C operator, or to designate operators within the specified time frame",2013,(2013) 46(a)(1),,General Operating Reqirements,,,,,,300.0,new regulation,10/28/2013 14:10
+653.0,Failure to have individual trained and certified for the operator class for which he or she is designated,2013,(2013) 46(a)(2),,General Operating Reqirements,,,,,,150.0,new regulation,10/28/2013 14:10
+654.0,"Failure to submit proper written notice to the department with proper class A and class B operator information, or to submit notice within the specified time frame",2013,(2013) 46(a)(3),,General Operating Reqirements,,,,,,50.0,new regulation,10/28/2013 14:10
+655.0,Failure to maintain current copies of all operator training certifications or to make copies immediately available upon request,2013,(2013) 46(a)(4),,General Operating Reqirements,,,,,,50.0,new regulation,10/28/2013 14:10
+656.0,Failure to obtain operator training from a program approved or administered by the department,2013,(2013) 46(c)(1),,General Operating Reqirements,,,,,,50.0,new regulation,10/28/2013 14:10
+657.0,"Failure to retrain and recertify class A or class B operator every five years, or class C operator every 365 days",2013,(2013) 46(c)(3),,General Operating Reqirements,,,,,,150.0,new regulation,10/28/2013 14:10
+658.0,Failure to retrain and recertify class A and class B operators within 90 days after an associated UST system was determined to be out of compliance,2013,(2013) 46(c)(4),,General Operating Reqirements,,,,,,300.0,new regulation,10/28/2013 14:10
+659.0,Failure to provide proper release detection method,2013,(2013) 51(a),40(a),Release Detection,,,,d,,300.0,,10/28/2013 14:10
+660.0,Failure to notify the department of release detection conditions indicating a possible release,2013,(2013) 51(b),,Release Detection,,,,,,150.0,new citation added,10/28/2013 14:10
+661.0,"Failure to properly service or maintain release detection equipment in the time frame specified, or to have service and maintenance of release detection equipment conducted by a technician with current certification or training appropriate to the equipmen",2013,(2013) 51(c),,Release Detection,,,,,,300.0,new regulation,10/28/2013 14:10
+662.0,Failure to close or complete change-in-service for any UST system that cannot meet release detection requirements,2013,(2013) 51(d),40(d),Release Detection,,,,,,300.0,,10/28/2013 14:10
+663.0,Failure to conduct proper inventory control monthly,2013,(2013) 52(1),43(a),Release Detection,,,,,,300.0,,10/28/2013 14:10
+664.0,Failure to record inventory volume measurements each operating day,2013,(2013) 52(1)(A)*,43(a0(1),Release Detection,,,,d,,50.0,,10/28/2013 14:10
+665.0,Failure to use inventory control equipment capable of measurements to the nearest 1/8th of an inch over the full range of the tank’s height,2013,(2013) 52(1)(B)*,43(a)(2),Release Detection,,,,d,,50.0,,10/28/2013 14:10
+666.0,Failure to take proper readings or measurements,2013,(2013) 52(1)(C)*,,Release Detection,,,,,,50.0,,10/28/2013 14:10
+667.0,Failure to reconcile product inputs with delivery receipts by measurement of tank inventory volume before and after deliveries,2013,(2013) 52(1)(D)*,43(a)(3),Release Detection,,,,d,,50.0,,10/28/2013 14:10
+668.0,Failure to make deliveries through a drop tube that extends to within one foot of the tank bottom,2013,(2013) 52(1)(E)*,43(a)(4),Release Detection,,,,,,50.0,,10/28/2013 14:10
+669.0,Failure to have product dispensing equipment properly calibrated every 365 days,2013,(2013) 52(1)(F)*,43(a)(5),Release Detection,,,,d,,50.0,,10/28/2013 14:10
+670.0,Failure to measure water level to the nearest 1/8th of an inch at least once a month,2013,(2013) 52(1)(G)*,43(a)(6),Release Detection,,,,d,,50.0,,10/28/2013 14:10
+671.0,Improper operation or maintenance of manual tank gauging (MTG),2013,(2013) 52(2),43(b),Release Detection,,,,,,300.0,previous citation language modify,10/28/2013 14:10
+672.0,Failure to conduct MTG for the appropriate time period,2013,(2013) 52(2)(A),43(b)(1),Release Detection,,,,d,,50.0,,10/28/2013 14:10
+673.0,Failure to take two proper level measurements at the beginning and end of the appropriate MTG time period,2013,(2013) 52(2)(B),43(b)(2),Release Detection,,,,,,50.0,,10/28/2013 14:10
+674.0,Failure to use MTG equipment that is capable of measurements to the nearest 1/8th of an inch over the full range of the tank’s height,2013,(2013) 52(2)(C),43(b)(3),Release Detection,,,,d,,50.0,,10/28/2013 14:10
+675.0,Variation between beginning and ending measurements exceeded weekly or monthly standard and was not treated as a suspected leak,2013,(2013) 52(2)(D),43(b)(4),Release Detection,,,,d,,50.0,previous citation language modify,10/28/2013 14:10
+676.0,Failure to take weekly measurements,2013,(2013)52(2)(E),,Release Detection,,,,,,50.0,,10/28/2013 14:10
+677.0,Failure to properly conduct tank tightness testing that meets specified requirements,2013,(2013)52(3),43( c),Release Detection,,,,d,,150.0,previous citation language modify,10/28/2013 14:10
+678.0,Failure to use ATG that meets specified requirements,2013,(2013)52(4),43(d),Release Detection,,,,d,,300.0,previous citation language modify,10/28/2013 14:10
+679.0,Failure to use ATG with an automatic product level monitor that can detect a 0.2 gallon per hour leak rate from any portion of the tank that routinely contains product,2013,(2013)52(4)(A),43(d)(1),Release Detection,,,,d,,150.0,previous citation language modify,10/28/2013 14:10
+680.0,Failure to conduct inventory control or another test of equivalent performance when ATG is not third party certified,2013,(2013)52(4)(B),43(d)(2),Release Detection,,,,,,150.0,,10/28/2013 14:10
+681.0,Inadequate testing or monitoring of vapors,2013,(2013)52(5),43(e),Release Detection,,,,,,300.0,,10/28/2013 14:10
+682.0,Failure to use sufficiently porous backfill,2013,(2013)52(5)(A)#,43(e)(1),Release Detection,,,,,,150.0,,10/28/2013 14:10
+683.0,Failure to use a sufficiently volatile substance or tracer compound in conjunction with vapor monitoring devices,2013,(2013)52(5)(B)#,43(e)(2),Release Detection,,,,,,150.0,,10/28/2013 14:10
+684.0,Failure to ensure that the measurement of vapors by the monitoring device remains operative so that a release could not go undetected for more than 30 days,2013,(2013)52(5)(C)#,43(e)(3),Release Detection,,,,d,,150.0,previous citation language modify,10/28/2013 14:10
+685.0,Failure to ensure the level of background contamination does not interfere with the method used to detect releases,2013,(2013)52(5)(D)#,43(e)(4),Release Detection,,,,,,150.0,previous citation language modify,10/28/2013 14:10
+716.0,Failure to permanently close or upgrade a tank system where regulated substances have not been deposited after 365 days,2013,(2013) 81(e),70©,Closure and Change-in-service,,,,,,300.0,,10/28/2013 14:10
+686.0,"Failure to use a vapor monitor that is designed and operated to detect any significant increase in concentration above background of the regulated substance stored, or tracer compound placed in tank system",2013,(2013)52(5)(E)#,43(e)(5),Release Detection,,,,,,150.0,previous citation language modify,10/28/2013 14:10
+687.0,Failure to assess the site with written documentation to ensure compliance with requirements or to properly establish the number and position of monitoring wells,2013,(2013)52(5)(F)#,43(e)(6),Release Detection,,,,d,,150.0,previous citation language modify,10/28/2013 14:10
+688.0,Failure to clearly mark or secure monitoring wells for vapor monitoring,2013,(2013)52(5)(G)#,43(e)(7),Release Detection,,,,,,150.0,previous citation language modify,10/28/2013 14:10
+689.0,Improper testing or monitoring of a ground water monitoring system,2013,(2013)52(6),43(f),Release Detection,,,,,,300.0,previous citation language modify,10/28/2013 14:10
+690.0,Failure to use the system on a stored substance that is immiscible in water and has a specific gravity of less than one,2013,(2013) 52(6)(A)(a),43(f)(1),Release Detection,,,,,,150.0,,10/28/2013 14:10
+691.0,Failure to employ a system with proper ground water level and soil conductivity,2013,(2013) 52(6)(B)(a),43(f)(2),Release Detection,,,,d,,150.0,,10/28/2013 14:10
+692.0,Failure to use proper monitoring well casing,2013,(2013) 52(6)(C)(a),43(f)(3),Release Detection,,,,,,150.0,,10/28/2013 14:10
+693.0,Failure to properly seal monitoring wells ,2013,(2013) 52(6)(D)(a),43(f)(4),Release Detection,,,,,,150.0,,10/28/2013 14:10
+694.0,Failure to use monitoring wells that intercept or are as close to the excavation zone as technically feasible,2013,(2013) 52(6)(E)(a),43(f)(5),Release Detection,,,,,,150.0,,10/28/2013 14:10
+695.0,Failure to use equipment that can detect at least 1/8th of an inch of free product on top of ground water in the monitoring wells,2013,(2013) 52(6)(F)(a),43(f)(6),Release Detection,,,,,,150.0,,10/28/2013 14:10
+696.0,Failure to assess the site with written documentation to ensure compliance with the requirements or to establish the number and position of monitoring wells,2013,(2013) 52(6)(G)(a),43(f)(7),Release Detection,,,,d,,150.0,previous citation language modify,10/28/2013 14:10
+697.0,Failure to clearly mark or secure monitoring wells,2013,(2013) 52(6)(H)(a),43(f)(8),Release Detection,,,,,,150.0,,10/28/2013 14:10
+698.0,"Improper design, construction or installation of interstitial monitoring",2013,(2013) 52(7),43(g),Release Detection,,,,d,,300.0,previous citation language modify,10/28/2013 14:10
+699.0,Failure to provide a method of release detection for underground piping that meets requirements,2013,(2013) 53,44,Release Detection,,,,d,,300.0,previous citation language modify,10/28/2013 14:10
+700.0,Failure to provide automatic line leak detector that meets performance requirements or failure to conduct proper test of operability of line leak detector at least every 365 days  ,2013,(2013) 53(1),,Release Detection,,,,d,,150.0,cx,10/28/2013 14:10
+701.0,"Failure to conduct proper line tightness testing every 365 days, or to conduct proper release detection monitoring on underground pressurized piping system installed before the effective date of these rules",2013,(2013) 53(1)(A),41(b)(1)(ii),Release Detection,,,,d,,300.0,prev citation lang mofify; move and replac 51(e)(2,10/28/2013 14:10
+702.0,Failure to provide interstitial monitoring for pressurized piping installed after the effective date of these rules,2013,(2013) 53(1)(B),,Release Detection,,,,,,300.0,"prev citatin lang modify, moved fromother sec",10/28/2013 14:10
+703.0,Failure to conduct proper line tightness test at least every three years or conduct proper release detection monitoring on suction piping installed prior to the effective date of these rules,2013,(2013) 53(2)(A),41(b)(2),Release Detection,,,,d,,300.0,prev citation lang mofify; move and replac 51(e)(2,10/28/2013 14:10
+704.0,Failure to provide interstitial monitoring for suction piping installed after the effective date of these rules,2013,(2013) 53(2)(B),43(b)(2),Release Detection,,,,d,,300.0,prev citation lang mofify; move and replac 51(e)(2,10/28/2013 14:10
+705.0,Suction piping does not meet all specifications for safe suction,2013,(2013) 53(2)(C),43(b)(2),Release Detection,,,,d,,300.0,prev citation lang mofify; move and replac 51(e)(2,10/28/2013 14:10
+706.0,"Failure to monitor, verify, and generate a record to confirm, at least every 30 days, or as otherwise specified, that the release detection method does not indicate a release",2013,(2013) 54(a),45,Release Detection,,,,d,,300.0,prev citation lang mofify; move and replac 51(e)(1,10/28/2013 14:10
+707.0,Failure to notify the department within 24 hours of evidence of a suspected release,2013,(2013) 61,,"Release Report, Investigation and Confirmation",,,,,,150.0,new citation added,10/28/2013 14:10
+708.0,Failure to meet the requirements of investigating and confirming a suspected release within seven days following discovery,2013,(2013) 63,,"Release Report, Investigation and Confirmation",,,,,,300.0,new citation added,10/28/2013 14:10
+709.0,Failure to properly contain and immediately clean up all spills and overfills,2013,(2013) 64(a),,"Release Report, Investigation and Confirmation",,,,,,300.0,new citation added,10/28/2013 14:10
+710.0,Failure to notify the department within 24 hours and begin release response action as required,2013,(2013) 64(b),,"Release Report, Investigation and Confirmation",,,,,,300.0,new citation added,10/28/2013 14:10
+711.0,Failure to continue operation and/or maintenance of corrosion protection system in a temporarily closed tank system,2013,(2013) 81(b),70(a),Closure and Change-in-service,,,,p,,150.0,,10/28/2013 14:10
+712.0,Failure to continue operation and/or maintenance of release detection in a temporarily closed tank system that is not empty,2013,(2013) 81(b),70(a),Closure and Change-in-service,,,,d,,300.0,,10/28/2013 14:10
+713.0,Failure to comply with temporary closure requirements ,2013,(2013) 81(d),70(b),Closure and Change-in-service,,,,,,300.0,,10/28/2013 14:10
+714.0,Failure to leave vent lines open and functioning for a tank system that is temporarily closed for 90 or more days  ,2013,(2013) 81(d)(1),70(b)(1),Closure and Change-in-service,,,,,,150.0,,10/28/2013 14:10
+715.0,"Failure to cap and secure all other lines, pumps, manways, and ancillary equipment for a tank system that is temporarily closed for 90 or more days ",2013,(2013) 81(d)(2),70(b)(2),Closure and Change-in-service,,,,,,150.0,,10/28/2013 14:10
+717.0,"Failure to notify the department, in writing, at least 30 days before beginning either permanent closure or change-in-service",2013,(2013) 82(b),71(a),Closure and Change-in-service,,,,,,300.0,new regulation,10/28/2013 14:10
+718.0,Failure to notify the department at least 7 days before a permanent closure or change-in-service action,2013,(2013) 82(c),,Closure and Change-in-service,,,,,,150.0,,10/28/2013 14:10
+719.0,Failure to empty the UST and tank system by removing all liquid contents and accumulated sludges for tank closure,2013,(2013) 82(d)(1),71(b),Closure and Change-in-service,,,,,,300.0,prev citaiton lang modify,10/28/2013 14:10
+720.0,Failure to remove closed UST or tank system from the ground or fill closed UST or tank system with an inert solid material ,2013,(2013) 82(d)(2),71(b),Closure and Change-in-service,,,,,,300.0,prev citation lang modify,10/28/2013 14:10
+721.0,Failure to conduct a site assessment of the area beneath and around the closed UST or tank system,2013,(2013) 82(d)(3),,Closure and Change-in-service,,,,,,300.0,new regulation,10/28/2013 14:10
+722.0,Failure to properly maintain closure or change-in-service records,2013,(2013) 85,74,Closure and Change-in-service,,,,,,300.0,,10/28/2013 14:10
+723.0,Failure to meet the financial responsibility requirement for per-occurrence coverage amount,2013,(2013) 94(a),93(a)(1-2),Finanacial Responsibility,,,,,,150.0,,10/28/2013 14:10
+724.0,Failure to meet the financial responsibility requirement for annual aggregate coverage amount,2013,(2013) 94(b),93(b)(1-2),Finanacial Responsibility,,,,,,150.0,,10/28/2013 14:10
+725.0,Failure to review and adjust financial assurance after acquiring new or additional USTs,2013,(2013) 94(f),93(f),Finanacial Responsibility,,,,,,150.0,,10/28/2013 14:10
+726.0,Failure to use an approved mechanism or combination of mechanisms to demonstrate financial responsibility,2013,(2013) 95,94,Finanacial Responsibility,,,,,,150.0,,10/28/2013 14:10
+727.0,Failure to submit evidence of financial responsibility to the director within 30 days of detecting a known or suspected release,2013,(2013) 110(a)(1),166(a)(1),Finanacial Responsibility,,,,,,150.0,,10/28/2013 14:10
+728.0,Failure to report evidence of financial responsibility to the director if the provider becomes incapable of providing financial assurance and the owner or operator is unable to obtain alternate coverage within 30 days,2013,(2013) 110(a)(2),166(a)(2),Finanacial Responsibility,,,,,,150.0,,10/28/2013 14:10
+729.0,Failure to certify that the financial assurance mechanism is in compliance with requirements,2013,(2013) 111(b)(10),116(b),Finanacial Responsibility,,,,,,150.0,used this citation instead of 110(b),10/28/2013 14:10
+730.0,"Regulated substance was delivered, deposited, or accepted into an ineligible UST or UST system",2013,(2013) 129(a),,Delivery Prohibition,,,,,,300.0,new regulation,10/28/2013 14:10
+731.0,"Tag or notice of ineligibility was removed, tampered with, destroyed or damaged",2013,(2013) 129(c),,Delivery Prohibition,,,,,,300.0,new regulation,10/28/2013 14:10
+732.0,Failure to renew a variance,2013,(2013) 342L-6(e),,,,,,,,150.0,,10/28/2013 14:10
+733.0,"Failure to notify the department by December 31, 1989, of the existence of a tank",2013,(2013) 342L-30(a),,,,,,,,300.0,,10/28/2013 14:10
+734.0,"Failure to notify the department by December 31, 1989, of the existence of a tank taken out of operation between January 1, 1974, and May 19, 1986",2013,(2013) 342L-30(b),,,,,,,,300.0,,10/28/2013 14:10
+735.0,"Failure to notify the department within 30 days after the installation of a tank brought into use after May 19, 1986 ",2013,(2013) 342L-30(c),,,,,,,,300.0,,10/28/2013 14:10
+736.0,"Failure to notify the department within 30 days of June 18, 1992, whether a person who acquires ownership of a tank after December 31, 1989 still owns the tank ",2013,(2013) 342L-30(e),,,,,,,,150.0,,10/28/2013 14:10
+737.0,Failure to notify tank purchaser of notification requirements,2013,(2013) 342L-30(g),,,,,,,,300.0,,10/28/2013 14:10
+738.0,"Failure to properly design, construct, install, and protect from corrosion any portion of the tank that is underground and that routinely contains product ",2018,20(b),20(a),"Design, Construction, and Installation",,,,UST-4,UST-9c,400.0,,
+739.0,"Failure to properly design, construct, install, and protect from corrosion any piping that is in contact with the ground and that routinely contains product",2018,20(c),20(b),"Design, Construction, and Installation",,,,UST-4,UST-9c,400.0,,
+740.0,Spill prevention equipment will not prevent release of product to environment when transfer hose is detached from fill pipe ,2018,20(d)(1)(A),20(c)(1)(i),"Design, Construction, and Installation",,,,UST-4,UST-9a,300.0,,
+741.0,Overfill prevention equipment does not meet performance standards ,2018,20(d)(1)(B),20(c)(1)(ii),"Design, Construction, and Installation",,,,UST-4,UST-9b,300.0,,
+742.0,"Improper use of flow restrictor in vent line (overfill prevention installed or replaced after July 15, 2018)",2018,20(d)(3),20(c)(3),"Design, Construction, and Installation",,,,UST-4,UST-9b,300.0,,
+743.0,Failure to have overfill alarm(s) clearly labeled “overfill alarm” and located where the delivery person can see and hear the alarm ,2018,20(d)(4),-,"Design, Construction, and Installation",,,,UST-4,UST-9b,300.0,More stringent state requirement,
+744.0,"Failure to provide dispenser system installed on or after August 9, 2013 with under dispenser containment (UST systems other than those with field-constructed tanks and airport hydrant systems)",2018,25(a),20(f),"Design, Construction, and Installation",,,,,,300.0,,
+745.0,"Failure to provide dispenser system installed on or after July 15, 2018 with under dispenser containment (UST systems with field-constructed tanks and airport hydrant systems)",2018,25(b),20(f),"Design, Construction, and Installation",,,,,,300.0,,
+746.0,Failure to prevent overfills or spills during the transfer of product ,2018,30(a),30(a),General Operating Requirements,,,,,,400.0,,
+747.0,Failure to operate or maintain corrosion protection system continuously ,2018,31(1),31(a),General Operating Requirements,,,,UST-4,UST-9c,400.0,,
+748.0,Failure to perform inspection or testing of cathodic protection system using proper criteria and a qualified tester within specified time frames ,2018,31(2),31(b),General Operating Requirements,,,,UST-4,UST-9c,400.0,,
+749.0,Failure to inspect operability of the impressed current cathodic protection systems every 60 days,2018,31(3),31(c) ,General Operating Requirements,,,,UST-4,UST-9c,200.0,,
+750.0,"Failure to maintain required records of cathodic protection operation, inspections and testing on site or at approved alternate location",2018,31(4),31(d),General Operating Requirements,,,,UST-4,UST-9c,100.0,,
+751.0,Failure to ensure that the UST system is made of or lined with materials compatible with substance stored,2018,32(a),32(a),General Operating Requirements,,,,,,400.0,,
+752.0,Failure to notify the department at least 30 day prior to switching to a regulated substance with greater than 10 percent ethanol or 20 percent biodiesel or any other regulated substance identified by the department,2018,32(b),32(b),General Operating Requirements,,,,,,200.0,,
+753.0,Failure to maintain records demonstrating compatibility,2018,32(c),32(c),General Operating Requirements,,,,,,100.0,,
+754.0,Failure to repair UST system in accordance with accepted codes and standards,2018,33(a)(1),33(a),General Operating Requirements,,,,,,400.0,,
+755.0,"Failure to repair fiberglass-reinforced UST by the manufacturer’s authorized representative, or in accordance with accepted codes and standards ",2018,33(a)(2),33(b),General Operating Requirements,,,,,,400.0,,
+756.0,Failure to replace metal pipe sections or fittings that have released product as a result of corrosion,2018,33(a)(3),33(c) ,General Operating Requirements,,,,,,400.0,,
+757.0,Failure to repair non-corrodible pipes and fittings in accordance with the manufacturer’s specifications,2018,33(a)(3),33(c) ,General Operating Requirements,,,,,,400.0,,
+758.0,Failure to perform tank tightness test on repaired tank prior to return to service ,2018,33(a)(4),33(d),General Operating Requirements,,,,,,400.0,,
+759.0,Failure to perform line tightness test on repaired piping prior to return to service,2018,33(a)(5),33(d),General Operating Requirements,,,,,,400.0,,
+760.0,Failure to integrity test containment sumps used for interstitial monitoring of piping and containment walls after repairs to secondary containment areas prior to return to service,2018,33(a)(6),33(d),General Operating Requirements,,,,UST-5,UST-9d,400.0,More stringent state requirement,
+761.0,Failure to test cathodic protection system within six months of repair of any cathodically protected UST or tank system,2018,33(a)(7),33(e),General Operating Requirements,,,,UST-4,UST-9c,200.0,,
+762.0,Failure to test or inspect repaired spill prevention equipment prior to return to service,2018,33(a)(8),33(f),General Operating Requirements,,,,UST-4,UST-9a,200.0,More stringent state requirement,
+763.0,Failure to test or inspect repaired overfill prevention equipment prior to return to service,2018,33(a)(8),33(f),General Operating Requirements,,,,UST-4,UST-9b,200.0,More stringent state requirement,
+764.0,Failure to generate and maintain accurate documentation of repairs to the UST system for the life of the equipment,2018,33(b),33(g),General Operating Requirements,,,,,,200.0,,
+765.0,Failure to notify the department of changes in information relating to the UST or tank system,2018,34(a) ,-,General Operating Requirements,,,,,,200.0,,
+765.1,(see Sec 71 for citations relating to notification for closure or change-in-service),2021,34(b),,General Operating Requirements,,,,,,,this is an fyi to also see section 71,
+766.0,Failure to submit notification to the department within specified time frame,2018,(2018) 34(b),-,General Operating Requirements,,,,,,100.0,,
+766.1,Failure to submit notification to the department within specified time frame,2021,34( c ),-,General Operating Requirements,,,,,,100.0,in 2018 rules this was 34(b),
+767.0,Failure to maintain records on site or at and alternative location approved by the department ,2018,(2018) 34(e)(1),34(c)(1),General Operating Requirements,,,,,,100.0,,
+767.1,Failure to maintain records on site or at an alternative location approved by the department,2021,34(f)(1),34(c )(1),General Operating Requirements,,,,,,100.0,In 2018 rules  this  was 34(e)(1) and fix language,
+768.0,Failure to make records immediately available for inspection by the department at the UST site,2018,(2018) 34(e)(2),34(c)(2),General Operating Requirements,,,,,,100.0,,
+768.1,Failure to make records immediately available for inspection by the department at the UST site,2021,34(f)(2),34(c )(2),General Operating Requirements,,,,,,100.0,in 2018 rules this was 34(e)(2),
+769.0,"Failure to conduct annual tightness test on spill prevention equipment, or to have double-walled spill prevention equipment and monitor the integrity of both walls monthly",2018,35(a)(1),35(a)(1),General Operating Requirements,,,,UST-4,UST-9a,200.0,More stringent state requirement,
+770.0,"Failure to perform integrity testing of containment sumps used for interstitial monitoring of piping using vacuum, pressure, or liquid testing at least once every three years, or have double-walled containment sumps used for interstitial monitoring of pip",2018,35(a)(2),35(a)(1),General Operating Requirements,,,,UST-5,UST-9d,200.0,,
+771.0,Failure to inspect overfill prevention equipment at least once every three years,2018,35(a)(3),35(a)(2),General Operating Requirements,,,,UST-4,UST-9b,200.0,,
+772.0,Failure to maintain records of periodic testing of spill prevention equipment for three years,2018,35(b)(1),35(c)(1) ,General Operating Requirements,,,,UST-4,UST-9a,100.0,,
+773.0,Failure to maintain records of periodic testing of containment sumps used for interstitial monitoring of piping equipment for three years,2018,35(b)(1),35(c)(1) ,General Operating Requirements,,,,UST-5,UST-9d,100.0,,
+774.0,Failure to maintain records of period inspection of overfill prevention equipment for three years,2018,35(b)(1),35(c)(1) ,General Operating Requirements,,,,UST-4,UST-9b,100.0,,
+775.0,Failure to maintain documentation showing that spill prevention equipment is double-walled and the integrity of both walls is monitored as required,2018,35(b)(2),35(c)(2) ,General Operating Requirements,,,,UST-4,UST-9a,100.0,,
+776.0,Failure to maintain documentation showing that containment sumps used for interstitial monitoring of piping equipment are double-walled and the integrity of both walls is monitored as required,2018,35(b)(2),35(c)(2) ,General Operating Requirements,,,,UST-5,UST-9d,100.0,,
+776.1,Failure to conduct periodic operation and maintenance walkthrough inspection - spill prevention equipment and release detection equipment (every 31 days),2021,36(a)(1),,General Operating Requirements,,,,,UST-12,400.0,added FC criteria as a new option,
+777.0,"Failure to inspect spill prevention equipment at least every 31 days, or prior to delivery if receiving delivery less frequently than every 31 days",2018,(2018) 36(a)(1)(A),36(a)(1)(i)(A),General Operating Requirements,,,,,UST-12,200.0,,
+777.1,Failure to conduct periodic operation and mainteance walkthrough inspection - spill prevention equipment (every 31 days or prior to delivery if receiving delivery less frequently),2018,36(a)(1)(A),36(a)(1)(i)(A),General Operating Requirements,,,,,UST-12,200.0,fixed the language,
+778.0,Failure to inspect release detection equipment at least every 31 days,2018,(2018) 36(a)(1)(B),36(a)(1)(i)(B),General Operating Requirements,,,,,UST-12,200.0,,
+778.1,Failure to conduct periodic operation and mainteance walkthrough inspection - release detection equipment (every 31 days),2018,36(a)(1)(B),36(a)(1)(i)(B),General Operating Requirements,,,,,UST-12,200.0,fixed the language,
+779.0,Failure to inspect containment sumps at least annually,2018,(2018) 36(a)(2)(A),36(a)(1)(ii)(A),General Operating Requirements,,,,,UST-12,200.0,,
+779.1,Failure to conduct periodic operation and mainteance walkthrough inspection - containment sumps (annually),2018,36(a)(2)(A),36(a)(1)(ii)(A),General Operating Requirements,,,,,UST-12,200.0,fixed the language,
+780.0,Failure to inspect handheld release detection equipment at least annually,2018,(2018) 36(a)(2)(B),36(a)(1)(ii)(B),General Operating Requirements,,,,,UST-12,200.0,,
+780.1,Failure to conduct periodic operation and mainteance walkthrough inspection - handheld release detection equipment (annually),2018,36(a)(2)(B),36(a)(1)(ii)(B),General Operating Requirements,,,,,UST-12,200.0,fixed the language,
+781.0,"Failure to inspect hydrant pits and hydrant piping vaults at least every 31 days if confined space entry is not required, or at least annually if confined space entry is required",2018,(2018) 36(a)(4),252(c) ,General Operating Requirements,,,,,UST-12,200.0,,
+781.1,"Failure to conduct periodic operation and mainteance walkthrough inspection - hydrant pits and hydrant piping vaults (every 31 days if confined space entry is not required, or annually if confined space entry is required)",2018,36(a)(4),252(c) ,General Operating Requirements,,,,,UST-12,200.0,fixed the language,
+782.0,Failure to maintain sufficient records of operation and walkthrough inspections for three years,2018,36(b),36(b),General Operating Requirements,,,,,UST-12,100.0,More stringent state requirement,
+782.1,Failure to inspect under-dispenser containment for damage and remove any liquid or debris (every 31 days) ,2021,37(a),,General Operating Requirements,,,,,ust-12,400.0,new citation in the 7/2021 rules,
+783.0,Failure to operate and maintain under-dispenser containment sensor in accordance with the manufacturer’s instructions or a code of practice developed by a nationally recognized association or independent testing laboratory,2018,(2018) 37(a)(1),-,General Operating Requirements,,,,,,400.0,,
+783.1,Failure to operate and maintain under-dispenser containment sensor in accordance with the manufacturer’s instructions or a code of practice developed by a nationally recognized association or independent testing laboratory,2021,37(b)(1),-,General Operating Requirements,,,,,,400.0,In 2018 rules  this  was 37(a)(1), 
+784.0,Failure to annually inspect and test under-dispenser containment sensor,2018,(2018) 37(a)(2),-,General Operating Requirements,,,,,,400.0,,
+784.1,Failure to test under-dispenser containment sensor for proper operation (annually),2021,37(b)(2),-,General Operating Requirements,,,,,,400.0,in 2018 rules was 37(a)(2) ,
+785.0,Failure to maintain under-dispenser containment sensor records for three years,2018,(2018) 37(b),-,General Operating Requirements,,,,,,100.0,,
+785.1,Failure to maintain under-dispenser containment sensor or visual inspection records for three years,2021,37(c ),-,General Operating Requirements,,,,,,100.0,in 2018 rules was 37(b) and fixed language,
+786.0,Failure to provide release detection method that can detect a release from any portion of the tank and the connected underground piping that routinely contains product,2018,40(a)(1),40(a)(1),Release Detection,,,,UST-5,UST-9d,400.0,,
+787.0,Failure to properly operate release detection equipment,2018,40(a)(3),40(a)(2),Release Detection,,,,UST-5,UST-9d,400.0,,
+788.0,Failure to annually test proper operation of release detection equipment,2018,40(a)(4),40(a)(3),Release Detection,,,,UST-5,UST-9d,400.0,,
+789.0,"Failure to properly service or maintain release detection equipment in the time frame specified, or to have service and maintenance of release detection equipment conducted by a technician with current certification or training appropriate to the equipmen",2018,40(a)(4),40(a)(3),Release Detection,,,,UST-5,UST-9d,400.0,,
+791.0,Failure to provide an allowed method of release detection for tanks,2018,41(a),41(a),Release Detection,,,,UST-5,UST-9d,400.0,,
+792.0,Failure to provide an allowed method of release detection for piping,2018,41(b),41(b),Release Detection,,,,UST-5,UST-9d,400.0,,
+793.0,"Failure to provide monthly interstitial monitoring for tanks and piping, or automatic line leak detector for pressurized piping, for hazardous substance UST systems",2018,42,42,Release Detection,,,,UST-5,UST-9d,400.0,,
+794.0,Failure to maintain written performance claims pertaining to release detection system used and the manner in which these claims have been justified or tested by the equipment manufacturer or installer,2018,45(1),45(a),Release Detection,,,,UST-5,UST-9d,100.0,,
+795.0,Failure to maintain records of site assessments for vapor monitoring or groundwater monitoring as long as these methods are used to meet the requirements of section 41,2018,45(1),45(a),Release Detection,,,,UST-5,UST-9d,100.0,,
+796.0,"Failure of site assessment records developed after July 15, 2018 to be signed by a professional engineer, professional geologist, or equivalent licensed professional with experience in environmental engineering, hydrogeology, or other relevant technical d",2018,45(1),45(a),Release Detection,,,,UST-5,UST-9d,100.0,,
+797.0,Failure to maintain release detection records applicable for the release detection method(s) used to meet the requirements of section 41 or 42 for three years,2018,45(2),45(b),Release Detection,,,,UST-5,UST-9d,100.0,,
+798.0,"Failure to maintain adequate records of annual operation tests required in §11-280.1-40(a)(4), including whether each component tested meets criteria or needs to have action taken and a description of any action taken to correct an issue",2018,45(2)(A),45(b)(1),Release Detection,,,,UST-5,UST-9d,100.0,,
+799.0,Failure to maintain results of tank tightness testing conducted in accordance with §11-280.1-43(3) used to meet the requirements of section 41 until the next test is conducted,2018,45(2)(B),45(b)(2),Release Detection,,,,UST-5,UST-9d,100.0,,
+800.0,"Failure to maintain results of tank tightness testing, line tightness testing, and vapor monitoring using a tracer compound conducted in accordance with §11-280.1-43(10) or 11-280.1-44(4) used to meet the requirements of section 41 until the next test is ",2018,45(2)(C),45(b)(3),Release Detection,,,,UST-5,UST-9d,100.0,,
+801.0,Failure to maintain all records that the equipment being used to monitor or maintain the UST systems is designed to produce for three years,2018,45(3),-,Release Detection,,,,,,100.0,,
+802.0,"Failure to maintain written documentation of all calibration, maintenance, and repair of release detection equipment permanently located on site for three years",2018,45(4),45(c) ,Release Detection,,,,UST-5,UST-9d,100.0,,
+803.0,Failure to maintain schedules of required calibration and maintenance provided by the release detection equipment manufacturer for five years from the date of installation,2018,45(4),45(c) ,Release Detection,,,,UST-5,UST-9d,100.0,,
+804.0,Failure to notify the department within 24 hours of evidence of a suspected release,2018,50,50,"Release Reporting, Investigation, and Confirmation",,,,UST-5,UST-9d,400.0,,
+805.0,Failure to properly investigate a suspected release within seven days following discovery ,2018,52,52,"Release Reporting, Investigation, and Confirmation",,,,,,400.0,,
+806.0,Failure to submit investigation report to the department within thirty days following suspected release if it is determined that a release has not occurred,2018,52(c),-,"Release Reporting, Investigation, and Confirmation",,,,,,200.0,,
+807.0,Failure to properly contain and immediately clean up spill or overfill ,2018,53(a),53(a),"Release Reporting, Investigation, and Confirmation",,,,,,400.0,,
+808.0,"Failure to notify the department within 24 hours and begin release response action, for a spill or overfill of more than 25 gallons of petroleum, or causing a petroleum sheen on surface water, or more than the reportable quantity of a hazardous substance",2018,53(b),53(a),"Release Reporting, Investigation, and Confirmation",,,,,,400.0,,
+809.0,Failure to notify the department within 24 hours of a spill or overfill of less than 25 gallons of petroleum or less than the reportable quantity of a hazardous substance if cleanup cannot be completed within 24 hours,2018,53(c),53(b),"Release Reporting, Investigation, and Confirmation",,,,,,200.0,,
+810.0,Failure to continue operation and/or maintenance of corrosion protection system in a temporarily closed tank system ,2018,70(a),70(a),Out-of-Service UST Systems and Closure,,,,UST-4,UST-9c,400.0,,
+811.0,Failure to continue operation and/or maintenance of release detection in a temporarily closed tank that is not empty,2018,70(a),70(a),Out-of-Service UST Systems and Closure,,,,UST-5,UST-9d,400.0,,
+812.0,Failure to leave vent lines open and functioning for a tank system that is temporarily closed for 90 or more days,2018,70(b)(1),70(b)(1),Out-of-Service UST Systems and Closure,,,,,,200.0,,
+813.0,"Failure to cap and secure all other lines, pumps, manways, and ancillary equipment for a tank system that is temporarily closed for 90 or more days ",2018,70(b)(2),70(b)(2),Out-of-Service UST Systems and Closure,,,,,,200.0,,
+814.0,Failure to permanently close a tank system that does not meet applicable standards in subchapter 2 and has been temporarily closed for more than one year and has not received an extension for the one year temporary closure period,2018,70(c) ,70(c) ,Out-of-Service UST Systems and Closure,,,,,,400.0,,
+815.0,"Failure to notify the department, in writing, at least 30 days before beginning permanent closure or change-in-service ",2018,71(a),71(a),Out-of-Service UST Systems and Closure,,,,,,400.0,,
+816.0,Failure to notify the department at least 7 days before permanent closure or change-in-service work ,2018,71(b)    ,-,Out-of-Service UST Systems and Closure,,,,,,200.0,,
+817.0,Failure to properly close UST system ,2018,71(c),71(b),Out-of-Service UST Systems and Closure,,,,,,400.0,,
+818.0,Failure to properly conduct change-in-service of UST system,2018,71(d),71(c) ,Out-of-Service UST Systems and Closure,,,,,,400.0,,
+819.0,Failure to notify the department within thirty days after completing a permanent closure or change-in-service,2018,71(e),-,Out-of-Service UST Systems and Closure,,,,,,200.0,,
+820.0,Failure to properly maintain closure or change-in-service records ,2018,74,74,Out-of-Service UST Systems and Closure,,,,,,400.0,,
+821.0,Failure to meet the financial responsibility requirement for per-occurrence coverage amount ,2018,93(a),93(a),Financial Responsibility,,,,,UST-11,400.0,,
+822.0,Failure to meet the financial responsibility requirement for annual aggregate coverage amount ,2018,93(b),93(b),Financial Responsibility,,,,,UST-11,400.0,,
+823.0,Failure to use an approved mechanism or combination of mechanisms to demonstrate financial responsibility ,2018,94,94,Financial Responsibility,,,,,UST-11,400.0,,
+824.0,Failure to notify the director within ten days of owner/operator failure to obtain alternate financial assurance within 150 days of finding he/she no longer meets the requirements of the financial test of self-insurance based on year-end financial stateme,2018,95(g) [110(a)(3)],95(g),Financial Responsibility,,,,,UST-11,400.0,language is too long. Did not fix.,
+825.0,Failure to notify the director within sixty days if a provider of a financial assurance mechanism cancels or fails to renew for reasons other than incapacity of the provider and the owner/operator is unable to obtain alternate coverage within the sixty da,2018,109(b) [110(a)(3)],109(b),Financial Responsibility,,,,,UST-11,400.0,language is too long.  Did not fix,
+826.0,Failure to submit evidence of financial responsibility to the director within 30 days of detecting a known or suspected release,2018,110(a)(1),110(a)(1),Financial Responsibility,,,,,UST-11,200.0,,
+827.0,Failure to submit evidence of financial responsibility to the director if the provider becomes incapable of providing assurance and the owner or operator is unable to obtain alternate coverage within 30 days ,2018,110(a)(2),110(a)(2),Financial Responsibility,,,,,UST-11,400.0,,
+828.0,Failure to certify compliance with financial responsibility requirements on the notification form or permit application,2018,(2018) 110(b),110(b),Financial Responsibility,,,,,UST-11,100.0,,
+828.1,"Failure to certify compliance with financial responsibility requirements on the notification form,  permit application, or certification of installation form. ",2021,110(b),110(b),Financial Responsibility,,,,,UST-11,100.0,fixed the language,
+829.0,Failure to maintain records of proof of current financial assurance mechanism used to demonstrate financial responsibility ,2018,111,111,Financial Responsibility,,,,,UST-11,100.0,,
+830.0,Failure to designate at least one Class A Operator and one Class B Operator ,2018,241(a)(1),241(a),Operator Training,,,,,UST-10,400.0,,
+831.0,Failure to designate all individuals meeting the definition of Class C Operator as Class C Operators,2018,241(a)(2),241(b),Operator Training,,,,,UST-10,400.0,,
+832.0,Failure to notify the department of Class A and Class B operator designation and information ,2018,241(c),-,Operator Training,,,,,,200.0,,
+833.0,Failure to obtain operator training from a program approved or administered by the department,2018,242(4),242(d),Operator Training,,,,,UST-10,200.0,More stringent state requirement,
+834.0,Failure to have an individual trained for the operator class which he or she is designated within the applicable time frame,2018,243,243,Operator Training,,,,,UST-10,400.0,,
+835.0,"Failure to retrain Class A or Class B Operator every five years, or Class C Operator every 365 days",2018,244(a),-,Operator Training,,,,,,200.0,,
+836.0,Failure to retrain Class A and Class B Operators within 30 days after an associated UST system was determined to be out of compliance ,2018,244(c),244,Operator Training,,,,,UST-10,400.0,,
+837.0,"Failure to maintain a list of designated Class A, Class B, and Class C Operators and records verifying training and retraining have been completed, as applicable",2018,245,245,Operator Training,,,,,UST-10,100.0,,
+838.0,Failure to inform the department at least 7 days prior to installation ,2018,325(c),-,Permits and Variances,,,,,,400.0,,
+839.0,Failure to submit tank notification and installation certification within 30 days after installation ,2018,325(d),22(a),Permits and Variances,,,,,,200.0,More stringent state requirement,
+840.0,Failure to submit proper documents for a permit renewal within the specified time frame,2018,326(c),-,Permits and Variances,,,,,,200.0,,
+841.0,Failure to properly apply for the modification of a permit within the specified time frame ,2018,329,-,Permits and Variances,,,,,,400.0,,
+842.0,Failure to apply to transfer permit to new owner or operator within the specified time frame,2018,331(c),22(b),Permits and Variances,,,,,,300.0,More stringent state requirement,
+843.0,"Failure to maintain permit or variance records, including application, at the location of the UST or tank system ",2018,334(a) ,-,Permits and Variances,,,,,,100.0,,
+844.0,"Failure to make permit or variance records, including application, immediately available for inspection upon request",2018,334(a),-,Permits and Variances,,,,,,100.0,,
+845.0,Spill prevention device is not present and functional (upgrade),2018,21(a)(1),21(d),"Design, Construction, and Installation",,,,UST-4,UST-9a,,not listed on the citation listing because NOVO,
+846.0,Spill prevention device is not present and functional (upgrade),2018,21(A)(2)(B),21(d),"Design, Construction, and Installation",,,,UST-4,UST-9a,,not listed on the citation listing because NOVO,
+847.0,Overfill prevention device is not present and operational (upgrade),2018,21(a)(1),21(d),"Design, Construction, and Installation",,,,UST-4,UST-9b,,not listed on the citation listing because NOVO,
+848.0,Overfill prevention device is not present and operational (upgrade),2018,21(a)(2)(B),21(d),"Design, Construction, and Installation",,,,UST-4,UST-9b,,not listed on the citation listing because NOVO,
+849.0,Corrosion protection system for tanks is not present and operational (upgrade),2018,21(a)(1),21(b),"Design, Construction, and Installation",,,,UST-4,UST-9c,,not listed on the citation listing because NOVO,
+850.0,Corrosion protection system for tanks is not present and operational (upgrade),2018,21(a)(2)(A),21(b),"Design, Construction, and Installation",,,,UST-4,UST-9c,,not listed on the citation listing because NOVO,
+851.0,Corrosion protection system for piping is not present and operational (upgrade),2018,21(a)(1),21(c) ,"Design, Construction, and Installation",,,,UST-4,UST-9c,,not listed on the citation listing because NOVO,
+852.0,Corrosion protection system for piping is not present and operational (upgrade),2018,21(a)(2)(A),21(c) ,"Design, Construction, and Installation",,,,UST-4,UST-9c,,not listed on the citation listing because NOVO,
+853.0,"Failure of the release detection method used to meet the requirements of section 41 or 42 to meet the performance requirements specified for that method in section 43 or 44, including the leak rate or quantity if applicable",2018,40(a)(5),40(a)(4),Release Detection,,,,UST-5,UST-9d,400.0,,
+854.0,"[Non-AHS/FCT; tank installed before 8/9/13; using ATG, vapor monitoring, groundwater monitoring, interstitial monitoring, or statistical inventory reconciliation; expires 7/15/28] Failure to monitor tank for a release at least every thirty-one days",2018,41(a)(1)(A),41(a)(1),Release Detection,,,,UST-5,UST-9d,400.0,,
+855.0,[Non-AHS/FTC; tank installed before 8/9/13; less than ten years old and meets monthly inventory requirements; expires 8/9/2023] Failure to monitor tank for a release every five years,2018,41(a)(1)(A)(i),41(a)(1)(i),Release Detection,,,,UST-5,UST-9d,400.0,,
+856.0,"[Non-AHS/FCT; tank installed before 8/9/13; capacity <1,000 gallons; using manual tank gauging; expires 7/15/28] Failure to monitor  tank for a release weekly",2018,41(a)(1)(A)(ii),41(a)(1)(ii),Release Detection,,,,UST-5,UST-9d,400.0,,
+858.0,Beginning 7/15/28 [Non-AHS/FCT; tank installed before 8/9/13; required to use interstitial monitoring] Failure to monitor tank for a release at least every thirty-one days,2018,41(a)(1)(B),-,Release Detection,,,,,,400.0,effective date is 7/15/2028,
+859.0,[Non-AHS/FCT; tank installed on/after 8/9/13; required to use interstitial monitoring] Failure to monitor tank for a release at least every thirty-one days,2018,41(a)(1)(C),41(a)(2),Release Detection,,,,UST-5,UST-9d,400.0,,
+860.0,"[AHS/FCT; tank capacity <50,000 gal; installed before 7/15/18; using 43(5) to (9) methods] Failure to monitor tank for a release at least every thirty-one days",2018,41(a)(2)(A),252(d)(1),Release Detection,,,,UST-5,UST-9d,400.0,,
+861.0,"[AHS/FCT; tank capacity <50,000 gal; installed on/after 7/15/18; required to use interstitial monitoring] Failure to monitor tank for a release at least every thirty-one days",2018,41(a)(2)(B),252(d)(1),Release Detection,,,,UST-5,UST-9d,400.0,,
+862.0,"[AHS/FCT; tank capacity >50,000 gal; installed on/after 7/15/18; required to use interstitial monitoring] Failure to monitor tank for a release at least every thirty-one days",2018,41(a)(3)(B),252(d)(1),Release Detection,,,,UST-5,UST-9d,400.0,,
+863.0,[Non-AHS/FCT; piping installed before 8/9/13; expires 7/15/28] Failure to monitor piping for release on required schedule,2018,41(b)(1),41(b)(1),Release Detection,,,,UST-5,UST-9d,400.0,,
+864.0,"For pressurized piping, failure to be equipped with automatic line leak detector or to test automatic line leak detector (annually) ",2018,41(b)(1)(A)(i),,Release detection,,,,,ust-9d,400.0,in 2021 added new penalty,
+865.0,Beginning 7/15/28 [Non-AHS/FCT; piping installed before 8/9/13; required to use interstitial monitoring] Failure to monitor piping for release at least every thirty-one days,2018,41(b)(2),-,Release Detection,,,,,,400.0,effective date is 7/15/2028,
+866.0,[Non-AHS/FCT; piping installed on/after 8/9/13; required to use interstitial monitoring] Failure to monitor piping for release at least every thirty-one days,2018,(2018) 41(b)(3),41(b)(2),Release Detection,,,,UST-5,UST-9d,400.0,,
+866.1,[Non-AHS/FCT; piping installed on/after 8/9/13; required to use interstitial monitoring] Failure to monitor piping for release at least every thirty-one days,2018,41(b)(3) [41(b)(2)(A)(i) or 41(b)(2)(B)(i)],41(b)(2),Release Detection,,,,UST-5,UST-9d,400.0,"in 2022, added this citation because is effective",
+867.0,"[AHS/FCT; tank capacity <50,000 gal; piping installed before 7/15/18; expires 7/15/38] Failure to monitor piping for release on required schedule",2018,41(b)(4)(A),252(d)(2),Release Detection,,,,UST-5,UST-9d,400.0,,
+868.0,"[AHS/FCT; tank capacity <50,000 gal; piping installed on/after 7/15/18; required to use interstitial monitoring] Failure to monitor piping for release at least every thirty-one days",2018,41(b)(4)(C),252(d)(2),Release Detection,,,,UST-5,UST-9d,400.0,,
+869.0,"[AHS/FCT; tank capacity >50,000 gal] Failure to monitor piping for release on required schedule",2018,41(b)(5),252(d)(2),Release Detection,,,,UST-5,UST-9d,400.0,,
+870.0,"Beginning 7/15/38 [AHS/FCT; tank capacity <50,000 gal; piping installed before 7/15/18; required to use interstitial monitoring unless alternative approved under 21(c)] Failure to monitor piping for release at least every thirty-one days",2018,41(b)(4)(B),-,Release Detection,,,,,,400.0,effective date is 7/18/2038,
+871.0,"[Non-AHS/FCT; piping installed on/after 8/9/13; required to use interstitial monitoring] For pressurized piping, failure to be equipped with automatic line leak detector or to test automatic line leak detector (annually) ",2018,41(b)(3) [41(b)(2)(A)(ii)],,,,,,,ust-9d,400.0,"in 2022, added this citation because is effective",

@@ -1,0 +1,528 @@
+AttribId,AttribCode,Parent,Attribute,Description,Master,Order,Level,Low,High,SubCategory,DateCreated,UserCreated,DateModified,UserModified,YesNo
+1,,TankStatusDesc,Currently In Use,,Tank,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+2,,TankStatusDesc,Temporarily out of Use,,Tank,2.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+3,,TankStatusDesc,Permanently out of Use,,Tank,3.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+4, ,tlkpLead,RP-Lead,,,2.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+5, ,tlkpLead,State-Lead with Trust Fund Money,,,3.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+6, ,tlkpLead,State-Lead with State Money,,,4.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+7, ,tlkpLead,EPA Lead,,,5.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+8, ,tlkpPipeTypeDesc,Gravity Feed,,,1.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+9, ,tlkpPipeTypeDesc,Pressurized,,,2.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+10, ,tlkpPipeTypeDesc,Safe Suction,,,3.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+11, ,tlkpPipeTypeDesc,U.S. Suction,,,4.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+12, ,tlkpSubstanceDesc,JP-4,,,5.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+13,,tlkpSubstanceDesc,Diesel,,,2.0,1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+14,,tlkpSubstanceDesc,Gasohol,,,9.0,1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+15,,tlkpSubstanceDesc,Gasoline,,,1.0,1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+16,,tlkpSubstanceDesc,Hazardous Substance,,,8.0,3,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+17,,tlkpSubstanceDesc,Heating Oil,,,6.0,2,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+18,,tlkpSubstanceDesc,Kerosene,,,4.0,1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+19,,tlkpSubstanceDesc,Mixture,,,7.0,3,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+20,,tlkpSubstanceDesc,Used Oil,,,3.0,2,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+21,,tlkpSubstanceDesc,Unknown,,,12.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+22,,tlkpSubstanceDesc,Other,,,10.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+23,,tlkpSubstanceDesc,Not Listed,,,11.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+24,,tlkpPipeMatDesc,Bare Steel,,,1.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+25,,tlkpPipeMatDesc,Galvanized Steel,,,2.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+26,,tlkpPipeMatDesc,Fiberglass Reinforced Plastic,,,3.0,-1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+27,,tlkpPipeMatDesc,Copper,,,4.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+28,,tlkpPipeMatDesc,Flexible Plastic,,,5.0,-1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+29,,tlkpPipeMatDesc,Unknown,,,8.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+30,,tlkpPipeMatDesc,Other,,,6.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+31,,tlkpPipeMatDesc,Not Listed,,,7.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+32,,tlkpPipeMatDesc,No Piping,,,9.0,-1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+33,,tlkpPipeModDesc,Double-Walled,,,2.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+34,,tlkpPipeModDesc,Secondary Containment,,,3.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+35,,tlkpTankMatDesc,Bare Steel,,,1.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+36,,tlkpTankMatDesc,Composite (Steel w/ FRP),,,2.0,-1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+37,,tlkpTankMatDesc,Concrete,,,3.0,-1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+38,,tlkpTankMatDesc,Epoxy Coated Steel,,,4.0,-1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+39,,tlkpTankMatDesc,Fiberglass Reinforced Plastic,,,5.0,-1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+40,,tlkpTankMatDesc,Polyethylene Tank Jacket,,,6.0,-1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+41,,tlkpTankMatDesc,Unknown,,,8.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+42,,tlkpTankMatDesc,Other,,,7.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+43,,tlkpTankModsDesc,Double-Walled,,,1.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+44,,tlkpTankModsDesc,Excavation Liner,,,2.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+45,,tlkpTankModsDesc,Lined Interior,,,3.0,-1,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2006-09-14 00:00:00,,False
+46,,CEStatus,Open,,,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+47,,CEStatus,Closed,,,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+48,,CEStatus,No Visits,,,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+49,,tlkpAction,State Lead Inspection,,tblCompliance,1.0,-1,0,0.0,,2006-08-04 12:54:33,DEBUG,2006-09-14 00:00:00,,False
+50,,tlkpAction,Federal Lead Inspection,,tblCompliance,5.0,-1,0,0.0,,2006-08-04 12:54:35,DEBUG,2006-09-14 00:00:00,,False
+51,,tlkpAction,Tank Installation Inspection,,tblCompliance,10.0,-1,0,0.0,,2006-08-04 12:54:35,DEBUG,2006-09-14 00:00:00,,False
+52,,tlkpAction,Tank Removal Inspection,,tblCompliance,15.0,-1,0,0.0,,2006-08-04 12:54:37,DEBUG,2006-09-14 00:00:00,,False
+53,,tlkpAction,Troubleshooting Inspection,,tblCompliance,20.0,-1,0,0.0,,2006-08-04 12:54:37,DEBUG,2006-09-14 00:00:00,,False
+54,,tlkpAction,Desk Issued Field Citation,,tblCompliance,25.0,-1,0,0.0,,2006-08-04 12:54:39,DEBUG,2006-09-14 00:00:00,,False
+55,,tlkpAction,Administrative Order,,tblCompliance,30.0,-1,0,0.0,,2006-08-04 12:55:12,DEBUG,2006-09-14 00:00:00,,False
+56,,TankOwnerStatus,"Corporation, Principal Executive Officer",,tblContactAffiliation,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+57,,TankOwnerStatus,"Corporation, Authorized Representive",,tblContactAffiliation,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+58,,TankOwnerStatus,"Partnership, General Partner",,tblContactAffiliation,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+59,,TankOwnerStatus,"Sole Proprietorship, Proprietor",,tblContactAffiliation,15.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+60,,TankOwnerStatus,"Govt Entity, Principal Executive Officer",,tblContactAffiliation,20.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+61,,TankOwnerStatus,"Govt Entity, Ranking Elected Official",,tblContactAffiliation,25.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+62,,TankOwnerStatus,"Govt Entity, Authorized Employee",,tblContactAffiliation,30.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+63,,TankOwnerType,"Federal Government, Military",,TankOwnerType,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+64,,TankOwnerType,"Federal Government, Non-military",,TankOwnerType,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+65,,TankOwnerType,State Government,,TankOwnerType,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+66,,TankOwnerType,Local Government,,TankOwnerType,15.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+67,,TankOwnerType,Marketer,,TankOwnerType,20.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+68,,OperatorType,At Location,,OperatorType,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+69,,OperatorType,Contract Dealer,,OperatorType,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+70,,OperatorType,Franchise Dealer,,OperatorType,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+71,,OperatorType,Oil Company,,OperatorType,15.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+72,,OperatorType,Owner Operator,,OperatorType,20.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+73,,ConsultantType,Attorney,,ConsultantType,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+74,,ConsultantType,Enviornmental,,ConsultantType,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+75,,ConsultantType,Laboratory,,ConsultantType,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+76,,ContractorType,CP Tester,,ContractorType,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+77,,ContractorType,TT Tester,,ContractorType,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+78,,ContractorType,Maintenance,,ContractorType,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+79,,ContractorType,Installer,,ContractorType,15.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+80,,ContractorType,Remover,,ContractorType,20.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+81,,TelephoneNumberTypeName,Primary,,tblContactPhone,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+82,,TelephoneNumberTypeName,Cell,,tblContactPhone,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+83,,TelephoneNumberTypeName,Pager,,tblContactPhone,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+84,,TelephoneNumberTypeName,FAX,,tblContactPhone,15.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+85,,TelephoneNumberTypeName,Direct,,tblContactPhone,20.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+86,,TelephoneNumberTypeName,Office,,tblContactPhone,25.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+87,,TelephoneNumberTypeName,Home,,tblContactPhone,30.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+88,,tlkpFacilityType,Airline,,tblFacility,1.0,0,0,0.0,,2006-08-04 12:57:28,DEBUG,2006-09-14 00:00:00,,False
+89,,tlkpFacilityType,Auto Dealership,,tblFacility,5.0,0,0,0.0,,2006-08-04 12:57:30,DEBUG,2006-09-14 00:00:00,,False
+90,,tlkpFacilityType,Baseyard,,tblFacility,10.0,0,0,0.0,,2006-08-04 12:57:33,DEBUG,2006-09-14 00:00:00,,False
+91,,tlkpFacilityType,Car Rental,,tblFacility,20.0,0,0,0.0,,2006-08-04 12:57:34,DEBUG,2006-09-14 00:00:00,,False
+92,,tlkpFacilityType,Cleaner Laundromat,,tblFacility,25.0,0,0,0.0,,2006-08-04 12:57:35,DEBUG,2006-09-14 00:00:00,,False
+93,,tlkpFacilityType,Communication Site,,tblFacility,30.0,0,0,0.0,,2006-08-04 12:57:36,DEBUG,2006-09-14 00:00:00,,False
+94,,tlkpFacilityType,Contractor,,tblFacility,35.0,0,0,0.0,,2006-08-04 12:57:37,DEBUG,2006-09-14 00:00:00,,False
+95,,tlkpFacilityType,Farm,,tblFacility,40.0,0,0,0.0,,2006-08-04 12:57:38,DEBUG,2006-09-14 00:00:00,,False
+96,,tlkpFacilityType,Fire Station,,tblFacility,45.0,0,0,0.0,,2006-08-04 12:57:39,DEBUG,2006-09-14 00:00:00,,False
+97,,tlkpFacilityType,Gas Station,,tblFacility,50.0,0,0,0.0,,2006-08-04 12:57:40,DEBUG,2006-09-14 00:00:00,,False
+98,,tlkpFacilityType,Golf Course,,tblFacility,55.0,0,0,0.0,,2006-08-04 12:57:42,DEBUG,2006-09-14 00:00:00,,False
+99,,tlkpFacilityType,Hospital,,tblFacility,60.0,0,0,0.0,,2006-08-04 12:57:44,DEBUG,2006-09-14 00:00:00,,False
+100,,tlkpFacilityType,Petroleum Distributor,,tblFacility,65.0,0,0,0.0,,2006-08-04 12:57:45,DEBUG,2006-09-14 00:00:00,,False
+101,,tlkpFacilityType,Police Station,,tblFacility,70.0,0,0,0.0,,2006-08-04 12:57:46,DEBUG,2006-09-14 00:00:00,,False
+102,,tlkpFacilityType,Residential,,tblFacility,75.0,0,0,0.0,,2006-08-04 12:57:47,DEBUG,2006-09-14 00:00:00,,False
+103,,tlkpFacilityType,Resort Hotel,,tblFacility,80.0,0,0,0.0,,2006-08-04 12:57:48,DEBUG,2006-09-14 00:00:00,,False
+104,,tlkpFacilityType,School,,tblFacility,85.0,0,0,0.0,,2006-08-04 12:57:50,DEBUG,2006-09-14 00:00:00,,False
+105,,tlkpFacilityType,Service Center,,tblFacility,90.0,0,0,0.0,,2006-08-04 12:57:54,DEBUG,2006-09-14 00:00:00,,False
+106,,tlkpFacilityType,Trucking Transporter,,tblFacility,95.0,0,0,0.0,,2006-08-04 12:57:55,DEBUG,2006-09-14 00:00:00,,False
+107,,tlkpFacilityType,Utility,,tblFacility,100.0,0,0,0.0,,2006-08-04 12:57:56,DEBUG,2006-09-14 00:00:00,,False
+108,,tlkpFacilityType,Wastewater Plant,,tblFacility,105.0,0,0,0.0,,2006-08-04 12:57:57,DEBUG,2006-09-14 00:00:00,,False
+109,,tlkpFacilityType,Wholesaler Retailer,,tblFacility,110.0,0,0,0.0,,2006-08-04 12:57:59,DEBUG,2006-09-14 00:00:00,,False
+110,,tlkpFacilityType,Other,,tblFacility,115.0,0,0,0.0,,2006-08-04 12:58:43,DEBUG,2006-09-14 00:00:00,,False
+111,,tlkpHorizontalReferenceDatumName,NAD83,,HorizontalReferenceDatumName,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+112,,tlkpHorizontalReferenceDatumName,WGS84,,HorizontalReferenceDatumName,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+113,,tlkpHorizontalReferenceDatumName,NAD27,,HorizontalReferenceDatumName,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+114,,tlkpGeometricTypeName,Point,,GeometricTypeName,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+115,,tlkpGeometricTypeName,Area,,GeometricTypeName,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+116,,tlkpGeometricTypeName,Line,,GeometricTypeName,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+117,,tlkpGeometricTypeName,Region,,GeometricTypeName,15.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+118,,tlkpGeometricTypeName,Route,,GeometricTypeName,20.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+119,,tlkpHorizontalCollectionMethodName,GPS,,HorizontalCollectionMethodName,10.0,0,0,0.0,,2007-07-03 11:18:01,rkrygier,2006-09-14 00:00:00,,False
+120,,tlkpHorizontalCollectionMethodName,Address Matching,,HorizontalCollectionMethodName,15.0,0,0,0.0,,2007-07-03 11:18:03,rkrygier,2006-09-14 00:00:00,,False
+121,,tlkpHorizontalCollectionMethodName,Classical Surveying Techniques,,HorizontalCollectionMethodName,20.0,0,0,0.0,,2007-07-03 11:18:06,rkrygier,2006-09-14 00:00:00,,False
+122,,tlkpHorizontalCollectionMethodName,Zip Code,,HorizontalCollectionMethodName,25.0,0,0,0.0,,2007-07-03 11:18:21,rkrygier,2006-09-14 00:00:00,,False
+123,,tlkpGeographicReferencePointName,Fill Pipe,,GeographicReferencePointName,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+124,,tlkpGeographicReferencePointName,Excavation Pit Center,,GeographicReferencePointName,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+125,,tlkpGeographicReferencePointName,Underground Storage Tank,,GeographicReferencePointName,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+126,,tlkpGeographicReferencePointName,Facility Boundary,,GeographicReferencePointName,15.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+127,,tlkpGeographicReferencePointName,Potential Contaminant Source,,GeographicReferencePointName,20.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+128,,tlkpFRType,Insurance,,tblFacilityFR,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+129,,tlkpFRType,Surety Bond,,tblFacilityFR,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+130,,tlkpFRType,Guarantee,,tblFacilityFR,10.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+131,,tlkpFRType,Letter of Credit,,tblFacilityFR,15.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+132,,tlkpFRType,Self Insured,,tblFacilityFR,20.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+133,,tlkpFRType,Risk Retention Group,,tblFacilityFR,25.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+134,,tlkpFRType,Other,,tblFacilityFR,30.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+135,,tlkpTypePermit,New,,tblFacilityPermit,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+136,,tlkpTypePermit,Renewal,,tblFacilityPermit,2.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+137,,tlkpTypePermit,Transfer,,tblFacilityPermit,3.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+138,,tlkpTypePermit,Modification,,tblFacilityPermit,4.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+139,,tlkpTypePermit,Variance,,tblFacilityPermit,5.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+144,,tlkpSuspectedCause,Spill,,Cause,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+145,,tlkpSuspectedCause,Overfill,,Cause,2.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+146,,tlkpSuspectedCause,Phys/Mech Damage,,Cause,3.0,0,0,0.0,,2009-01-02 10:02:51,rkwan,2006-09-14 00:00:00,,False
+147,,tlkpSuspectedCause,Corrosion,,Cause,4.0,0,0,0.0,,2009-01-02 10:02:59,rkwan,2006-09-14 00:00:00,,False
+148,,tlkpSuspectedCause,Install Problem,,Cause,5.0,0,0,0.0,,2009-01-02 10:03:17,rkwan,2006-09-14 00:00:00,,False
+149,,tlkpSuspectedCause,Unknown,,Cause,7.0,0,0,0.0,,2009-01-02 10:04:00,rkwan,2006-09-14 00:00:00,,False
+150,,tlkpHowDiscovered,Tank Removal,,HowDiscovered,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+151,,tlkpHowDiscovered,Leak Detection,,HowDiscovered,2.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+152,,tlkpHowDiscovered,Off-site Discovery,,HowDiscovered,3.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+153,,tlkpHowDiscovered,Other,,HowDiscovered,4.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+154,,tlkpTankClosureStatusDesc,Removed from Ground,,ClosureStatusDesc,1.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+155,,tlkpTankClosureStatusDesc,Closed in Place,,ClosureStatusDesc,2.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+156,,tlkpTankClosureStatusDesc,Change in Service,,ClosureStatusDesc,3.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+157,,tlkpInertMaterial,Concrete,,tlkpInertMaterial,10.0,0,0,0.0,,2007-01-09 11:52:11,Rkrygier,2006-09-14 00:00:00,,False
+158,,tlkpInertMaterial,Sand,,tlkpInertMaterial,20.0,0,0,0.0,,2007-01-09 11:52:12,Rkrygier,2006-09-14 00:00:00,,False
+159,,tlkpInertMaterial,Water,,tlkpInertMaterial,30.0,0,0,0.0,,2007-01-09 11:52:14,Rkrygier,2006-09-14 00:00:00,,False
+161,,tlkpInertMaterial,Crushed Rock,,tlkpInertMaterial,50.0,0,0,0.0,,2007-01-09 11:52:43,Rkrygier,2006-09-14 00:00:00,,False
+162,,tlkpInertMaterial,Dirt,,tlkpInertMaterial,60.0,0,0,0.0,,2007-01-09 11:53:33,Rkrygier,2006-09-14 00:00:00,,False
+163,,tlkpInertMaterial,Dirt / Gravel,,tlkpInertMaterial,70.0,0,0,0.0,,2007-01-09 11:53:37,Rkrygier,2006-09-14 00:00:00,,False
+164,,tlkpInertMaterial,Gravel,,tlkpInertMaterial,80.0,0,0,0.0,,2007-01-09 11:53:58,Rkrygier,2006-09-14 00:00:00,,False
+165,,tlkpInertMaterial,HC&D Flowable Fill,,tlkpInertMaterial,90.0,0,0,0.0,,2007-01-09 11:54:36,Rkrygier,2006-09-14 00:00:00,,False
+166,,tlkpInertMaterial,Sand & Concrete,,tlkpInertMaterial,100.0,0,0,0.0,,2007-01-09 11:54:40,Rkrygier,2006-09-14 00:00:00,,False
+167,,tlkpInertMaterial,Slurry,,tlkpInertMaterial,110.0,0,0,0.0,,2007-01-09 11:55:04,Rkrygier,2006-09-14 00:00:00,,False
+168,,tlkpInertMaterial,Other Approved Fill,,tlkpInertMaterial,120.0,0,0,0.0,,2007-01-09 11:55:19,Rkrygier,2006-09-14 00:00:00,,False
+169,,tlkpInertMaterial,Not Listed,,tlkpInertMaterial,130.0,0,0,0.0,,2007-01-09 11:55:49,Rkrygier,2006-09-14 00:00:00,,False
+170,,CitationSOC,No Affect,,,0.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+171,D,CitationSOC,Leak Detection,Detect,,0.0,0,0,0.0,D,,,2006-09-14 00:00:00,,False
+172,P,CitationSOC,Leak Prevention,Prevent,,0.0,0,0,0.0,P,,,2006-09-14 00:00:00,,False
+173,,tlkpIsland,Hawaii,,,1.0,0,0,,,,,,0,False
+174,,tlkpIsland,Kauai,,,2.0,0,0,,,,,,0,False
+175,,tlkpIsland,Lanai,,,3.0,0,0,,,,,,0,False
+176,,tlkpIsland,Maui,,,4.0,0,0,,,,,,0,False
+177,,tlkpIsland,Molokai,,,5.0,0,0,,,,,,0,False
+178,,tlkpIsland,Oahu,,,6.0,0,0,,,,,,0,False
+179,,tlkpFunding,Responsible Party,,tblLUSTSite,1.0,0,0,,,,,,0,False
+180,,tlkpFunding,LUST Trust Fund,,tblLUSTSite,2.0,0,0,,,,,,0,False
+181,,LUSTStatus,Complete,,LUST,1.0,0,0,,,,,,0,False
+182,,LUSTStatus,Active,,LUST,2.0,0,0,,,,,,0,False
+183,,LUSTStatus,Confirm Release,,LUST,3.0,0,0,,,,,,0,False
+184,,LUSTStatus,Cleanup initiated,,LUST,4.0,0,0,,,,,,0,False
+186, ,tlkpStatus,Confirmed Release,,,10.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,,,False
+187, ,tlkpStatus,LUST Cleanup Initiated,eff 2/1/2008,,30.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2008-02-04 11:53:12,RKWAN,False
+188, ,tlkpStatus,Active Remediation,,,40.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2007-01-09 10:25:51,Rkrygier,False
+189, ,tlkpStatus,Exposure Prevention Management Plan,eff 8/18/2020 no longer useand changed order from 60 to 130.5 - rk,,130.5,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2007-01-09 10:26:21,Rkrygier,False
+190, ,tlkpStatus,Monitored Natural Attenuation,,,50.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,,,False
+191, ,tlkpStatus,Disconfirmed Release,,,20.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2007-01-09 10:26:44,Rkrygier,False
+194, ,tlkpStatus,Site Cleanup Completed (NFA),for sites closed under the Tier 1 action levels.  Eff 8/18/2020 changed order from 70 to 60 - rk,,60.0,0,0,0.0,,2005-05-03 00:00:00,R8 UST-DATA.mdb,2007-01-09 10:27:55,Rkrygier,False
+195,,tlkpFacilityStatus,Operating,,,1.0,1,0,0.0,,,,,,False
+196,,tlkpFacilityStatus,Temporarily Closed,,,2.0,2,0,0.0,,,,,,False
+197,,tlkpFacilityStatus,Closed,,,3.0,3,0,0.0,,2009-03-09 14:09:06,rkrygier,,,False
+198,Not Both,tlkpSOC,Not Both,Does not meet Both Requirements?,B,1.0,0,0,0.0,,2006-08-11 16:42:40,Cambria,,,False
+199,Not Prevent,tlkpSOC,Not Prevent,Does not meet Release Prevention Requirements,P,2.0,0,0,0.0,,2006-08-11 16:42:44,Cambria,,,False
+200,Not Detect,tlkpSOC,Not Detect,Does not meet Release Detection Requirements,D,3.0,0,0,0.0,,2006-08-11 16:43:18,Cambria,,,False
+201,,tlkpSOC,,In SOC,In SOC,4.0,0,0,0.0,,,,,,False
+204,,tlkpLUSTSource,Tank,,,1.0,0,0,0.0,,2009-01-02 10:05:30,rkwan,,,False
+205,,tlkpLUSTSource,Piping,,,2.0,0,0,0.0,,2009-01-02 10:05:34,rkwan,,,False
+206,,tlkpLUSTSource,Dispenser,,,3.0,0,0,0.0,,2009-01-02 10:05:37,rkwan,,,False
+207,,tlkpLUSTSource,Submersible Turbine Pump,,,4.0,0,0,0.0,,2009-01-02 10:05:40,rkwan,,,False
+208,,tlkpLUSTSource,Delivery,,,5.0,0,0,0.0,,2009-01-02 10:05:43,rkwan,,,False
+209,,tlkpLUSTSource,Unknown,,,7.0,0,0,0.0,,2009-01-02 10:05:47,rkwan,2009-01-02 10:08:02,rkwan,False
+219, ,tlkpActionNonUSTRP,Confirmation of Release,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+220, ,tlkpActionNonUSTRP,O/O Notification,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+221, ,tlkpActionNonUSTRP,First CA Letter,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+222, ,tlkpActionNonUSTRP,Second CA Letter,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+223, ,tlkpActionNonUSTRP,NOV,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+224, ,tlkpActionNonUSTRP,O/O Report on Initial Abatement,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+225, ,tlkpActionNonUSTRP,O/O Report of Site Characterization,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+226, ,tlkpActionNonUSTRP,CAP Submitted by RP,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+227, ,tlkpActionNonUSTRP,General Correspondence,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+228, ,tlkpActionUSTRP,General Correspondence,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+229, ,tlkpActionUSTRP,Meeting,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+230, ,tlkpActionUSTRP,Site Visit,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+231, ,tlkpActionUSTRP,Telephone call,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+232, ,tlkpActionUSTRP,Report Review Letter,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+233, ,tlkpActionUSTRP,Confirmation of Release,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+234, ,tlkpActionUSTRP,Confirmed Release Notification Form,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+235, ,tlkpActionUSTRP,STD Acknowledgement Letter,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+236, ,tlkpActionUSTRP,STD Release Report Acknowledgment Letter,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+237, ,tlkpActionUSTRP,Cleanup Plan,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+238, ,tlkpActionUSTRP,Cleanup Plan Review Letter,,,11.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+239, ,tlkpActionUSTRP,Closure Report,,,12.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+240, ,tlkpActionUSTRP,Closure Report Review Letter,,,13.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+241, ,tlkpActionUSTRP,Closure Report Review Letter (DOH clean closure),,,14.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+242, ,tlkpActionUSTRP,Documentation of Financial Responsibility,,,15.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+243, ,tlkpActionUSTRP,Documentation of FR Review Letter,,,16.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+244, ,tlkpActionUSTRP,Environmental Risk Assessment Report,,,17.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+245, ,tlkpActionUSTRP,Environmental Risk Assessment Review Letter,,,18.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+246, ,tlkpActionUSTRP,EPMP,,,19.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+247, ,tlkpActionUSTRP,EPMP Review Letter,,,20.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+248, ,tlkpActionUSTRP,Free Product Removal Report,,,21.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+249, ,tlkpActionUSTRP,Free Product Removal Report Review Letter,,,22.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+250, ,tlkpActionUSTRP,GW Investigation Report,,,23.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+251, ,tlkpActionUSTRP,GW Investigation Report Review Letter,,,24.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+252, ,tlkpActionUSTRP,GW Monitoring Report,,,25.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+253, ,tlkpActionUSTRP,GW Monitoring Report Review Letter,,,26.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+254, ,tlkpActionUSTRP,Hazardous Waste Manifest,,,27.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+255, ,tlkpActionUSTRP,Initial Abatement/Site Assessment Report,,,28.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+256, ,tlkpActionUSTRP,Initial Abatement/Site Assessment Report Review Letter,,,29.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+257, ,tlkpActionUSTRP,Initial Site Characterization Report,,,30.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+258, ,tlkpActionUSTRP,Initial Site Characterization Report Review Letter,,,31.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+259, ,tlkpActionUSTRP,NFA Letter,,,32.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+260, ,tlkpActionUSTRP,NFA Request,,,33.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+261, ,tlkpActionUSTRP,Quarterly Progress Report,,,34.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+262, ,tlkpActionUSTRP,Quarterly Progress Report Review Letter,,,35.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+263, ,tlkpActionUSTRP,Release Response Report,,,36.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+264, ,tlkpActionUSTRP,Release Response Report Review Letter,,,37.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+265, ,tlkpActionUSTRP,Soil and Groundwater Investigation Report,,,38.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+266, ,tlkpActionUSTRP,Soil and Groundwater Investigation Report Review Letter,,,39.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+267, ,tlkpActionUSTRP,Soil Investigation Report,,,40.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+268, ,tlkpActionUSTRP,Soil Investigation Report Review Letter,,,41.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+269, ,tlkpActionUSTRP,Work Plan Review Letter,,,42.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+270, ,tlkpAgency,State UST,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,2007-01-09 11:18:10,Rkrygier,False
+271, ,tlkpAgency,State LUST,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,2007-01-09 11:18:20,Rkrygier,False
+272, ,tlkpAgency,Federal,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,2007-01-09 11:18:29,Rkrygier,False
+273, ,tlkpAgency,Other,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,2007-01-09 11:18:41,Rkrygier,False
+278, ,tlkpAgencyPermit,Air Quality/State,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+279, ,tlkpAgencyPermit,Air Quality/County,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+280, ,tlkpAgencyPermit,State Closure,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+281, ,tlkpAgencyPermit,County Closure,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+282, ,tlkpAgencyPermit,NPDES Discharge,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+283, ,tlkpAgencyPermit,UPDES Discharge,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+284, ,tlkpAgencyPermit,POTW Discharge,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+285, ,tlkpAgencyPermit,UIC Discharge,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+286, ,tlkpAgencyPermit,Not Listed,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+287, ,tlkpConEffect,Excellent,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+288, ,tlkpConEffect,Good,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+289, ,tlkpConEffect,Fair,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+290, ,tlkpConEffect,Poor,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+291, ,tlkpConEffect,Not Listed,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+292, ,tlkpContaminant,Explosive Vapor,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+293, ,tlkpContaminant,Vapor,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+294, ,tlkpContaminant,Contaminated Soil,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+295, ,tlkpContaminant,Dissolved Product,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+296, ,tlkpContaminant,Free Product,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+297, ,tlkpContaminantAir,TPH,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+298, ,tlkpContaminantAir,Benzene,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+299, ,tlkpContaminantAir,Toluene,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+300, ,tlkpContaminantAir,Ethylbenzene,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+301, ,tlkpContaminantAir,Xylenes,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+302, ,tlkpContaminantAir,Naphthalene,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+303, ,tlkpContaminantAir,PAHs,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+304, ,tlkpContaminantAir,Oil & Grease,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+305, ,tlkpContaminantAir,Lead,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+306, ,tlkpContaminantAir,F Solvents,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+307, ,tlkpContaminantAir,Haz. Substance,,,11.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+308, ,tlkpContaminantAir,MTBE,,,12.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+309, ,tlkpContaminantAir,,,,13.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+310, ,tlkpContaminantAir,Other,,,14.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+311, ,tlkpContaminantSoil,TPH,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+312, ,tlkpContaminantSoil,Benzene,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+313, ,tlkpContaminantSoil,Toluene,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+314, ,tlkpContaminantSoil,Ethylbenzene,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+315, ,tlkpContaminantSoil,Xylenes,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+316, ,tlkpContaminantSoil,Naphthalene,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+317, ,tlkpContaminantSoil,PAHs,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+318, ,tlkpContaminantSoil,Oil & Grease,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+319, ,tlkpContaminantSoil,Lead,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+320, ,tlkpContaminantSoil,F Solvents,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+321, ,tlkpContaminantSoil,Free Product,,,11.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+322, ,tlkpContaminantSoil,Haz. Substance,,,12.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+323, ,tlkpContaminantSoil,MTBE,,,13.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+324, ,tlkpContaminantSoil,,,,14.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+325, ,tlkpContaminantSoil,Other,,,15.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+326, ,tlkpContaminantWater,TPH,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+327, ,tlkpContaminantWater,Benzene,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+328, ,tlkpContaminantWater,Toluene,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+329, ,tlkpContaminantWater,Ethylbenzene,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+330, ,tlkpContaminantWater,Xylenes,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+331, ,tlkpContaminantWater,Naphthalene,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+332, ,tlkpContaminantWater,PAHs,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+333, ,tlkpContaminantWater,Oil & Grease,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+334, ,tlkpContaminantWater,Lead,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+335, ,tlkpContaminantWater,F Solvents,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+336, ,tlkpContaminantWater,Free Product,,,11.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+337, ,tlkpContaminantWater,Haz. Substance,,,12.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+338, ,tlkpContaminantWater,MTBE,,,13.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+339, ,tlkpContaminantWater,,,,14.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+340, ,tlkpContaminantWater,Other,,,15.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+341, ,tlkpDiscovery,Facility Leak Detection Method,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+342, ,tlkpDiscovery,Surface Sheen,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+343, ,tlkpDiscovery,GW Well,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+344, ,tlkpDiscovery,Vapors,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+345, ,tlkpDiscovery,Free Product,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+346, ,tlkpDiscovery,Soil Contamination,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+347, ,tlkpDiscovery,Other,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+348, ,tlkpDiscovery,Not Listed,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+349, ,tlkpEffectiveness,Excellent,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+350, ,tlkpEffectiveness,Good,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+351, ,tlkpEffectiveness,Fair,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+352, ,tlkpEffectiveness,Poor,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+353, ,tlkpEffectiveness,Not Listed,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+380, ,tlkpHowFound,Facility Reported,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+381, ,tlkpHowFound,Off-site Discovery,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+382, ,tlkpHowFound,Not Listed,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+383, ,tlkpImpact,Impacted,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+384, ,tlkpImpact,Imminent,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+385, ,tlkpImpact,Potential,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+386, ,tlkpImpact,Unlikely,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+387, ,tlkpImpact,,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+388, ,tlkpImpact,Unknown,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+404, ,tlkpLead,,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+408, ,tlkpLicenseType,Assistant General Manager,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+409, ,tlkpLicenseType,Cathodic Protection,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+410, ,tlkpLicenseType,Chairman,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+411, ,tlkpLicenseType,Excavator,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+412, ,tlkpLicenseType,Fleet Manager,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+413, ,tlkpLicenseType,Foreman,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+414, ,tlkpLicenseType,General manager,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+415, ,tlkpLicenseType,Installer,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+416, ,tlkpLicenseType,Job Foreman,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+417, ,tlkpLicenseType,Manager,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+418, ,tlkpLicenseType,Owner,,,11.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+419, ,tlkpLicenseType,President,,,12.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+420, ,tlkpLicenseType,Remover,,,13.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+421, ,tlkpLicenseType,Sales Executive,,,14.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+422, ,tlkpLicenseType,Service Tech,,,15.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+423, ,tlkpLicenseType,Supervisor,,,16.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+424, ,tlkpLicenseType,Vice President,,,17.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+425, ,tlkpLicenseType,Other,,,18.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+426, ,tlkpLicenseType,Not Listed,,,19.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+427, ,tlkpLicenseType,AREA ENGINEER,,,20.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+428, ,tlkpLicenseType,AREA MANAGER,,,21.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+429, ,tlkpLicenseType,ASST DIRECTOR PROPER,,,22.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+430, ,tlkpLicenseType,C.E.O.,,,23.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+431, ,tlkpLicenseType,CHIEF,,,24.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+432, ,tlkpLicenseType,CIVIL ENGINEER VI,,,25.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+433, ,tlkpLicenseType,COC,,,26.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+434, ,tlkpLicenseType,CONSTR/MAINT REP.,,,27.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+435, ,tlkpLicenseType,CONSTRUCTION FOREMAN,,,28.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+436, ,tlkpLicenseType,CONSTRUCTION MANAGER,,,29.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+437, ,tlkpLicenseType,CONTRACTOR'S QUALITY,,,30.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+438, ,tlkpLicenseType,DIRECTOR OF ADMIN,,,31.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+439, ,tlkpLicenseType,ENGINEER,,,32.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+440, ,tlkpLicenseType,ENGINNERING MANAGER,,,33.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+441, ,tlkpLicenseType,ENV ANALYST,,,34.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+442, ,tlkpLicenseType,ENV ENGINEER,,,35.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+443, ,tlkpLicenseType,GENERAL CONTRACTOR,,,36.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+444, ,tlkpLicenseType,MECHANICAL ENGINEER,,,37.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+445, ,tlkpLicenseType,OPERATIONS MANAGER,,,38.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+446, ,tlkpLicenseType,PHYSCIAL PLANT DIREC,,,39.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+447, ,tlkpLicenseType,PLIMBING GENRAL FORE,,,40.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+448, ,tlkpLicenseType,PROJECT DESIGN COOR,,,41.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+449, ,tlkpLicenseType,PROJECT ENGINEER,,,42.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+450, ,tlkpLicenseType,PROJECT MANAGER,,,43.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+451, ,tlkpLicenseType,PROJECT MANAGER - RM,,,44.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+452, ,tlkpLicenseType,PROJECT SUPERINTENDE,,,45.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+453, ,tlkpLicenseType,SEC TREASURER,,,46.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+454, ,tlkpLicenseType,STAFF,,,47.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+455, ,tlkpLicenseType,SUPERINTENDENT,,,48.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+456, ,tlkpLicenseType,TREASURER,,,49.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+457, ,tlkpMedium,Air,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+458, ,tlkpMedium,Ground Water,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+459, ,tlkpMedium,Surface Water,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+460, ,tlkpMedium,Soil,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+461, ,tlkpMedium,Not Listed,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+462, ,tlkpMethod,Air Sparging,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+463, ,tlkpMethod,Air Stripper,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+464, ,tlkpMethod,Asphalt Batching,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+465, ,tlkpMethod,Biomounding,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+466, ,tlkpMethod,Biosparging,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+467, ,tlkpMethod,Bioventing,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+468, ,tlkpMethod,Excavation & Hauling,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+469, ,tlkpMethod,"Hi-vac, Dual-phase Extraction",,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+470, ,tlkpMethod,In Situ GW Biorem.,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+471, ,tlkpMethod,Land Farming,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+472, ,tlkpMethod,Natural Attenuation,,,11.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+473, ,tlkpMethod,Pump & Treat,,,12.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+474, ,tlkpMethod,Soil Vapor Extraction,,,13.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+475, ,tlkpMethod,Thermal Desorption,,,14.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+476, ,tlkpMethod,Other,,,15.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+477, ,tlkpMethod,Not Listed,,,16.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+478, ,tlkpOwnerType,Commercial,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+479, ,tlkpOwnerType,Private,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+480, ,tlkpOwnerType,Local Government,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+481, ,tlkpOwnerType,State Government,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+482, ,tlkpOwnerType,Federal Government,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+483, ,tlkpOwnerType,Not Listed,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+489, ,tlkpReceptor,Business,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+490, ,tlkpReceptor,Home,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+491, ,tlkpReceptor,School,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+492, ,tlkpReceptor,Hospital,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+493, ,tlkpReceptor,Env. Sensitive Area,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+494, ,tlkpReceptor,River,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+495, ,tlkpReceptor,Lake,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+496, ,tlkpReceptor,Sewers,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+497, ,tlkpReceptor,Utility Vaults/Trenches,,,11.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+498, ,tlkpReceptor,Basements/Crawl Spaces,,,12.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+499, ,tlkpReceptor,Shallow Surface Soils,,,13.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+500, ,tlkpReceptor,Subsurface Soils,,,14.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+501, ,tlkpReceptor,Deep (>3 ft BGS) Soils,,,15.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+502, ,tlkpReceptor,Water Wells,,,16.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+503, ,tlkpReceptor,Other,,,17.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+504, ,tlkpReceptor,Ocean,,,18.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+505, ,tlkpReportType,Consultant,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+506, ,tlkpReportType,Federal Official,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+507, ,tlkpReportType,Insurance Company,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+508, ,tlkpReportType,Local Official,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+509, ,tlkpReportType,Media,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+510, ,tlkpReportType,Public,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+511, ,tlkpReportType,State Official,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+512, ,tlkpReportType,Tank Owner/Operator,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+513, ,tlkpReportType,Other,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+514, ,tlkpReportType,Not Listed,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+515, ,tlkpStatus,Case Transferred to HEER (regulated),8/18/2020 changed order from 110 to 80 - rk,,80.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,2007-03-15 09:52:29,rkwan,False
+526, ,tlkpSubstanceNonUST,Gasoline,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+527, ,tlkpSubstanceNonUST,Diesel,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+528, ,tlkpSubstanceNonUST,Gasohol,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+529, ,tlkpSubstanceNonUST,Kerosene,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+530, ,tlkpSubstanceNonUST,Heating Oil,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+531, ,tlkpSubstanceNonUST,Used Oil,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+532, ,tlkpSubstanceNonUST,Mixture,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+533, ,tlkpSubstanceNonUST,Haz. Substance,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+534, ,tlkpSubstanceNonUST,Other,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+535, ,tlkpSubstanceNonUST,Not Listed,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+536, ,tlkpTypeAir,Home Air Vapor,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+537, ,tlkpTypeAir,Business Air Vapor,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+538, ,tlkpTypeAir,Gas Utility Conduit,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+539, ,tlkpTypeAir,Sewer Utility Conduit,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+540, ,tlkpTypeAir,Power Utility Conduit,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+541, ,tlkpTypeAir,Water Utility Conduit,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+542, ,tlkpTypeAir,Drain Utility Conduit,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+543, ,tlkpTypeAir,Not Listed,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+550,GW,tlkpTypeSoil,"Well-graded gravels, gravel-sand",,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+551,GP,tlkpTypeSoil,"Poorly-graded gravels, gravel-sand",,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+552,GM,tlkpTypeSoil,Silty gravels,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+553,GC,tlkpTypeSoil,Clayey gravels,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+554,SW,tlkpTypeSoil,Well-graded sands,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+555,SP,tlkpTypeSoil,Poorly-graded sands,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+556,SM,tlkpTypeSoil,Silty sands,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+557,SC,tlkpTypeSoil,Clayey sands,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+558,ML,tlkpTypeSoil,Inorganic silts and very fine sands,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+559,CL,tlkpTypeSoil,"Inorganic clays, lean clays",,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+560,OL,tlkpTypeSoil,Organic silts,,,11.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+561,MH,tlkpTypeSoil,"Inorganic silts, elastic silts",,,12.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+562,CH,tlkpTypeSoil,"Inorganic clays, fat clays",,,13.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+563,OH,tlkpTypeSoil,Organic clays,,,14.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+564,PT,tlkpTypeSoil,"Peat, organic soils",,,15.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+565,Other,tlkpTypeSoil,Other,,,16.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+566,NL,tlkpTypeSoil,Not Listed,,,17.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+567,CR,tlkpTypeWater,Creek,,,1.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+568,RV,tlkpTypeWater,River,,,2.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+569,LK,tlkpTypeWater,Lake,,,3.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+570,OC,tlkpTypeWater,Ocean,,,4.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+571,IR,tlkpTypeWater,Irrigation,,,5.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+572,SDW,tlkpTypeWater,Surface Drinking Water,,,6.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+573,DMW,tlkpTypeWater,Domestic/Municipal Well,,,7.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+574,DPW,tlkpTypeWater,Domestic/Private Well,,,8.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+575,AW,tlkpTypeWater,Agricultural Well,,,9.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+576,IW,tlkpTypeWater,Industrial Well,,,10.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+577,TW,tlkpTypeWater,Transient Well,,,11.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+578,MW,tlkpTypeWater,Monitoring Well,,,12.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+579,Other,tlkpTypeWater,Other,,,13.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+580,NL,tlkpTypeWater,Not Listed,,,14.0,0,0,0.0,,2006-08-02 16:02:02,Cambria:,,,False
+582,,TankOwnerType,Non-Marketer,,TankOwnerType,25.0,0,0,0.0,,2007-01-09 11:34:00,Rkrygier,2007-01-09 11:34:42,Rkrygier,False
+583,,tlkpInertMaterial,Concrete Slurry,,tlkpInertMaterial,40.0,0,0,0.0,,2007-01-09 11:51:22,Rkrygier,2007-01-09 11:52:18,Rkrygier,False
+584,,TankOwnerStatus,Owner - UST Conversion,,,0.0,0,0,0.0,,,,,,False
+585, ,tlkpStatus,Case Transferred to HEER (unregulated),8/18/2020 changed order from to 90 - rk,,90.0,0,0,0.0,,2007-03-15 09:52:29,rkwan,2007-03-15 09:53:33,rkwan,False
+586, ,tlkpStatus,Case Transferred to HEER (DERA),8/18/2020 changed order fromto 100 - rk,,100.0,0,0,0.0,,2007-03-15 09:53:33,rkwan,2007-03-15 09:55:02,rkwan,False
+587, ,tlkpStatus,Case Transferred to HEER (VRP),,,110.0,0,0,0.0,,2007-03-15 09:54:02,rkwan,2009-03-19 14:20:24,rkrygier,False
+590,,tlkpHorizontalCollectionMethodName,Map,,HorizontalCollectionMethodName,5.0,0,0,0.0,,2007-07-03 11:18:24,rkrygier,2007-07-03 11:19:33,rkrygier,False
+596, ,tlkpStatus,Site Assessment Ongoing,eff 2/1/2008; eff 8/18/2020 no longer used.  Changed order from 31 to 130.3 - rk,,130.3,0,0,0.0,,2008-02-04 11:53:12,RKWAN,2008-02-04 11:54:12,RKWAN,False
+597, ,tlkpStatus,Site Assessment Completed (delineated),eff 2/1/2008; eff 8/18/2020 no longer used. changed order 32 to 130.1 - rk,,130.1,0,0,0.0,,2008-02-04 11:53:45,RKWAN,2008-02-04 11:54:37,RKWAN,False
+598,,tlkpStatus,Remedy Decision Pending (ongoing monitoring),eff 2/1/2008; eff 8/18/2020 no longer used and changed order from 33 to 130.2- rk,,130.2,0,0,0.0,,2008-02-04 11:54:37,RKWAN,2008-02-04 11:55:50,RKWAN,False
+600, ,tlkpStatus,2 Year pre-NFA monitoring,eff 2/1/2008; eff 8/18/2020 no longer use and changed order from 69 to 130.6- rk,,130.6,0,0,0.0,,2008-02-04 11:56:19,RKWAN,2008-02-04 11:57:09,RKWAN,False
+602, ,tlkpStatus,Site Cleanup Completed with EHE/EHMP,"eff 2/1/2008   11/18/2013 added ""EHE"".  For sites closed under the DOH Heer Guidance since 2005 with EHMP and soil >EALs remaining in subsurface.  Both the EHE and EHMP must be approved before entering this status.",,130.7,0,0,0.0,,2008-02-04 11:58:26,RKWAN,2008-02-04 11:59:04,RKWAN,False
+604,,tlkpStatus,Case Transferred to HW (unregulated),,,120.0,0,0,0.0,,,,,,False
+605,,tlkpStatus,Suspected release,,,1.0,0,0,0.0,,,,,,False
+606,,tlkpSuspectedCause,Other,,Cause,6.0,0,0,0.0,,2009-01-02 10:03:17,rkwan,2009-01-02 10:04:55,rkwan,False
+607,,tlkpLUSTSource,Other,,,6.0,0,0,0.0,,2009-01-02 10:05:11,rkwan,2009-01-02 10:08:06,rkwan,False
+608,,ContactType,Corrsion Protection,,,0.0,0,0,0.0,,,,,,False
+609,,tlkpHorizontalCollectionMethodName,On Base,Clone,HorizontalCollectionMethod,24.0,0,0,0.0,,2011-03-23 11:10:49,RKrygier,2011-03-23 11:11:41,RKrygier,False
+610, ,tlkpStatus,Site Cleanup Completed with EHE,"eff 1/1/2012  11/18/2013 for sites closed under the DOH HEER guidance since 2005.  Could have been EHA  Eff 8/18/2020 changed order from 90 to 130.8
+ and no longer use- rk",,130.8,0,0,0.0,,,RKWAN,,RKWAN,False
+611,,tlkpTypePermit,Operational,,tblfacilitypermit,1.1,0,0,0.0,,2013-08-29 10:20:51,rkwan,2013-08-29 10:21:35,rkwan,False
+612,,TankStatusDesc,To be installed,,Tank,3.0,0,0,0.0,,,,2006-09-14 00:00:00,,False
+613,,tlkpStatus,Soil Vapor Sampling,eff 11/20/2013; eff 8/18/2020 no longer used. changed order from 41 to 130.4 -rk,,130.4,0,0,0.0,,,,,,False
+615,,tlkpStatus,---  DO NOT USE STATUS BELOW THIS LINE -----,eff 8/18/2020 added this,,130.0,0,0,0.0,,,,,,False
+616,,,Consolidated previous releases,,,11.0,0,0,0.0,,,,,,False
+617,,tlkpStatus,Consolidated releases,,,11.0,0,0,0.0,,,,,,False
+618,ust44,,,,,0.0,0,0,0.0,,,,,,False
+619,,,fdf,,ust-4,0.0,0,0,0.0,,,,,,False
+620,fdf,,,,,0.0,0,0,0.0,,,,,,False
+621,,,UST-4,,4,0.0,0,0,0.0,,,,,,False
+623,,TankStatusDesc,Not installed,,,0.0,0,0,0.0,,,,,,False
+624,,,Site cleanup completed with Restrictions,,,73.0,0,0,0.0,,,,,,False
+625,,,Site Cleanup Completed with Restrictions,,,73.0,0,0,0.0,,,,,,False
+626,,tlkpStatus,Site Cleanup Completed (NFA) with Restrictions,8/18/2020 changed order from 100 to 70 - rk,,70.0,0,0,0.0,,,,,,False
+627, ,tlkpStatus,Disconfirmed Release - investigation ongoing,,,21.0,0,0,0.0,,,,,,False

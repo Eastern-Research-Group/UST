@@ -1,0 +1,103 @@
+Inspector ID,First Name,Last Name,Agency,StampDate,StampInit,LoginName,LoginLevel,ActiveYesNo,Comments,Code
+41,Gregory,Olmsted,DOH/SHWB,,,GOlmsted,Inspector,False,,GO
+20,Terence,Corpus,DOH/SHWB/UST (UST Unit),1996-04-17 00:00:00,System Admin,TCorpus,Inspector,False,,
+19,Sheila,Mackenzie,DOH/SHWB/UST (LUST Unit),1996-04-17 00:00:00,System Admin,SMackenzie,Inspector,False,,
+18,Scott,Lewis,DOH/SHWB/UST (UST Unit),1996-04-17 00:00:00,System Admin,SLewis,Inspector,False,,
+17,Stanton,Enomoto,DOH/SHWB/UST (LUST Unit),1996-04-17 00:00:00,System Admin,SEnomoto,Inspector,False,,
+16,Raymond,Seid,DOH/SHWB/UST (LUST Unit),1996-04-17 00:00:00,System Admin,RSeid,Inspector,False,,
+13,Rhonda,Goyke,DOH/SHWB/UST (LUST Unit),1996-04-17 00:00:00,System Admin,RGoyke,Inspector,False,,
+11,Pierette,Arroyo,DOH/SHWB/UST (LUST Unit),1996-04-17 00:00:00,System Admin,PArroyo,Inspector,False,,
+10,Leslie,Segundo,DOH/SHWB/UST (UST Unit),1996-04-17 00:00:00,System Admin,LSegundo,Inspector,False,,
+12,Roger,Brewer,DOH/SHWB/UST (LUST Unit),1996-08-01 10:33:48,rkwan,RBrewer,Inspector,False,,
+22,Janet,Sherrer,DOH/SHWB/UST (UST Unit),1996-08-01 12:00:40,rkwan,JSherrer,Inspector,False,,
+8,Jose,Ruiz,DOH/SHWB/UST (LUST Unit),1996-08-13 11:56:44,rkwan,JRuiz,Inspector,False,,
+30,David,Hodges,DOH/SHWB/UST (LUST Unit),1997-03-03 10:03:36,system admin,DHodges,Inspector,False,,
+32,Steven,Okoji,DOH/SHWB/UST (LUST Unit),1997-05-12 15:24:54,esadoyama,SOkoji,Inspector,False,,
+47,Russ,Beckwith,Federal,1998-03-20 13:22:40,JRICHARDSON,RBeckwith,Inspector,False,,
+48,Charley,Langer,DOH/SHWB/UST (UST Unit),1998-08-11 16:18:01,RKWAN,CLanger,Inspector,False,,
+49,Renato,Maniulit,DOH/SHWB/UST (LUST Unit),1998-09-03 18:13:21,esadoyama,RManiulit,Inspector,False,,RM
+51,To,DERA,DOH/HEER,1999-01-22 16:13:58,esadoyama,TDERA,Inspector,True,,
+40,To,HEER,DOH/HEER,1999-01-22 16:14:27,esadoyama,THEER,Inspector,True,,
+60,K.,Natarajan,DOH/SHWB/UST (UST Unit),2000-06-26 15:33:05,knatarajan,KNatarajan,Inspector,False,,KN
+62,Kathi,Hardin,DOH/SHWB/UST (UST Unit),2000-06-29 08:53:45,khardin,KHardin,Inspector,False,,
+63,Kathi,Scanlan,Not Listed,2000-09-28 10:56:16,RKWAN,KScanlan,Inspector,False,,KS
+68,Shumin,Liu,DOH/SHWB/UST (LUST Unit),2000-12-04 13:06:05,rtakaba,SLiu,Inspector,False,,
+70,Mark,Sutterfield,DOH/SHWB/UST (LUST Unit),2001-09-26 09:13:14,msutterfield,MSutterfield,Inspector,False,,
+74,Rebecca,Sciulli,DOH/SHWB/UST (LUST Unit),2001-12-31 10:26:13,rkwan,RSciulli,Inspector,False,,
+75,Robert,Caplan,DOH/SHWB/UST (UST Unit),2002-01-02 11:03:24,RKWAN,RCaplan,Inspector,False,,RC
+78,Blondell,Quinland-Francis,DOH/SHWB/UST (LUST Unit),2002-01-25 15:55:00,rkwan,BQuinland-Francis,Inspector,False,,BQF
+86,John,Peard,DOH/SHWB/UST (LUST Unit),2002-12-02 15:36:16,RKWAN,JPeard,Inspector,False,,
+96,Janice,Imrich,DOH/SHWB/UST (UST Unit),2003-06-13 10:54:33,golmsted,JImrich,Inspector,False,,JLI
+101,Jon,Ishihara,DOH/SHWB/UST (LUST Unit),2003-09-05 08:36:44,jishihara,JIshihara,Inspector,False,,JI
+122,To,VRP,DOH/HEER,2006-05-19 11:26:35,rkwan,TVRP,Inspector,True,,
+36,Jeffrey,Ung,DOH/SHWB,2007-01-09 08:56:49,RKwan,JUng,Inspector,False,,JU
+111,Haven,Westerman,DOH/SHWB/UST (LUST Unit),2007-01-09 08:57:57,RKwan,HWesterman,Inspector,False,,
+129,EPA,User,,2007-07-23 08:44:46,rkrygier,epauser,Inspector,True,,
+133,John,Diehm,Not Listed,2009-04-14 08:39:27,rkwan,jdiehm,User,False,,
+132,Ramona,Matau,DOH/SHWB,2009-04-14 08:39:31,rkwan,rmatau,User,False,,
+131,Jonathan,Leong,Federal,2009-04-14 08:39:35,rkwan,jonathan leong,Admin,False,,
+130,Tess,Salire,Federal,2009-04-14 08:39:37,rkwan,tsalire,Admin,False,,
+128,Matt,Tsuji,DOH/SHWB,2009-04-14 08:39:41,rkwan,mbtsuji,User,False,,
+126,Nancy,Crewdson,Not Listed,2009-04-14 08:39:46,rkwan,Nancy,Admin,False,Needed for testing database during conversion,
+106,Jose,Balignasay,DOH/SHWB/UST (LUST Unit),2009-04-14 08:39:57,rkwan,JBalignasay,Inspector,False,,JB
+93,Stefan,Borduz,DOH/SHWB/UST (UST Unit),2009-04-14 08:40:04,rkwan,SBorduz,Inspector,False,,SB
+44,Norwood,Scott,Federal,2009-04-14 08:40:24,rkwan,NScott,Inspector,False,,NS
+2,Chad,Pritchard,DOH/SHWB/UST (LUST Unit),2010-02-19 09:30:50,rkwan,Cpritchard,Inspector,False,,
+3,Cynthia,Rountree,DOH/SHWB/UST (UST Unit),2010-02-19 09:30:52,rkwan,CRountree,Inspector,False,,
+4,Carolyn,Winters,DOH/SHWB/UST (UST Unit),2010-02-19 09:30:54,rkwan,CWinters,Inspector,False,,
+5,Daniel,Chang,DOH/SHWB/UST (UST Unit),2010-02-19 09:30:56,rkwan,DChang,Inspector,False,,
+6,Dudley,Williams,DOH/SHWB/UST (LUST Unit),2010-02-19 09:30:58,rkwan,DWilliams,Inspector,False,,
+7,Eric,Sadoyama,DOH/SHWB/UST (LUST Unit),2010-02-19 09:31:00,rkwan,ESadoyama,Inspector,False,,
+141,ECS,xSystem,,2010-04-09 15:24:55,RKrygier,xSystem,Admin,True,,
+149,Jerry,Whitum,SAIC (EPA Contractor conducting inspection,2013-09-25 10:00:08,rkwan,,Inspector,False,,
+148,Louis,Diaz,SAIC (EPA Contractor conducting inspection,2013-09-25 10:00:21,rkwan,,Inspector,False,,
+150,Computer,Administrator,DOH/SHWB,2014-01-06 11:09:32,rkrygier,Administrator,Admin,True,,
+145,SHWB,Guest,,2014-02-13 08:52:12,rkwan,shwbguest,Admin,True,,
+25,Anthony,John,DOH/SHWB/UST (UST Unit),2014-11-25 10:06:44,rkwan,AJohn,Inspector,False,,AJ
+123,Darren,Park,DOH/SHWB/UST (LUST Unit),2014-11-25 10:07:37,rkwan,DPark,Inspector,False,,
+124,Scott,Basto,DOH/SHWB/UST (LUST Unit),2014-11-25 10:07:41,rkwan,SBasto,Inspector,False,,SSB
+134,H,Rodrigues,DOH/SHWB,2014-11-25 10:08:03,rkwan,hrodrigues,User,False,,
+136,Nicole,Peterman,DOH/SHWB/UST (LUST Unit),2014-11-25 10:08:08,rkwan,npeterman,Inspector,False,,
+138,Letizia,Delannoy,DOH/HEER,2014-11-25 10:26:04,rkwan,Ldelannoy,Inspector,False,,
+142,Teo,Anita,,2014-11-25 10:26:14,rkwan,Anita,Admin,False,,
+144,Deena,Kam,DOH - SHWB,2014-11-25 10:26:18,rkwan,dkam,Inspector,False,,
+151,james,bozic,Booz allen,2014-11-25 10:26:44,rkwan,jbozic,Admin,False,,
+14,Roxanne,Kwan,DOH/SHWB/UST (UST Unit),2016-03-01 15:38:28,rkwan,roxanne.kwan,Admin,True,,RK
+26,Richard,Takaba,DOH/SHWB/UST (LUST Unit),2016-03-01 15:38:46,rkwan,richard.takaba,Inspector,True,,RT
+120,George,Tabil,DOH/SHWB/UST (LUST Unit),2016-03-01 15:40:11,rkwan,george.tabil,Inspector,True,,GT
+125,Richard J,Krygier,Not Listed,2016-03-01 15:40:21,rkwan,Rkrygier,Admin,False,,
+139,Elaine,Lake,Not Listed,2016-03-01 15:41:06,rkwan,elaine.lake,Admin,True,,
+140,Julia,Kanagy,DOH - SHWB,2016-03-01 15:41:10,rkwan,jkanagy,Inspector,False,,
+143,Thu,Perry,DOH - SHWB,2016-03-01 15:41:26,rkwan,thu.perry,Inspector,True,,
+155,flora,obayashi,DOH/SHWB,2016-03-01 15:42:41,rkwan,fobayashi,Inspector,False,,
+9,Jack,Richardson,Federal,2017-06-28 15:39:52,william.campbell,JRichardson,Inspector,False,,JR
+159,Timothy,Ugaitafa,DOH - SHWB,2018-05-29 12:51:48,roxanne.kwan,timothy.ugaitafa,Inspector,True,,
+162,Allison,Hutto,DOH/SHWB/UST (LUST Unit),2018-09-17 13:22:27,roxanne.kwan,allison.hutto,Inspector,True,,
+113,Roy,Ilaga,DOH/SHWB/UST (LUST Unit),2018-09-18 07:49:35,roxanne.kwan,roy.ilaga,Inspector,True,,RI
+164,PERMIT,DESK,DOH - SHWB,2018-10-08 16:52:22,roxanne.kwan,PERMITDESK,Inspector,True,,
+165,Hugh,Myers,DOH - SHWB,2019-01-23 09:20:25,roxanne.kwan,hugh.myers,Admin,True,,
+170,Miranda,Fleisher,DOH/SHWB/UST (LUST Unit),2020-03-05 17:32:52,roxanne.kwan,miranda.fleisher,Inspector,True,,
+176,YongKeng,Liu,DOH - SHWB,2022-12-20 16:41:33,roxanne.kwan,yongkeng.liu,Inspector,True,,
+178,Teresa,Oshiro,,2024-01-10 11:30:22,roxanne.kwan,Teresa.Oshiro,Admin,True,,
+158,william,campbell,DOH - SHWB,2024-01-11 08:51:42,roxanne.kwan,william.campbell,Admin,False,,
+163,Waimano,Bloom,DOH/SHWB,2024-01-11 08:51:48,roxanne.kwan,EMDNET,Admin,False,,
+59,Shaobin,Li,DOH/SHWB/UST (LUST Unit),2024-01-11 09:45:38,roxanne.kwan,shaobin.li,Inspector,False,,
+64,Shunsheng,Fu,DOH/SHWB/UST (LUST Unit),2024-01-11 09:45:46,roxanne.kwan,shunsheng.fu,Inspector,False,,
+100,Randall,Heu,DOH/SHWB/UST (LUST Unit),2024-01-11 09:45:58,roxanne.kwan,randall.heu,Inspector,False,,
+127,Molly,Duffy,DOH/SHWB,2024-01-11 09:46:20,roxanne.kwan,molly.duffy,User,False,,
+135,Josh,Nagashima,DOH/SHWB/UST (LUST Unit),2024-01-11 09:46:43,roxanne.kwan,josh.nagashima,Admin,False,,
+21,Edlyn,Nunez,DOH/SHWB/UST,2024-01-11 09:49:20,roxanne.kwan,Edlyn.Nunez,Admin,False,,
+31,Lene,Ichinotsubo,DOH/SHWB,2024-01-11 09:49:33,roxanne.kwan,LIchinotsubo,Inspector,True,,
+152,KC,Magata,DOH/EMD,2024-01-11 09:52:15,roxanne.kwan,kc.magata,Admin,False,,
+153,jenny,bernier,DOH - SHWB,2024-01-11 09:52:19,roxanne.kwan,jenny.bernier,Inspector,False,,
+156,Amanda,Sweigard-Lewis,DOH - SHWB,2024-01-11 09:52:26,roxanne.kwan,amanda.lewis,Admin,False,,
+157,Nicole,Okino,DOH/SHWB/UST (UST Unit),2024-01-11 09:52:31,roxanne.kwan,nicole.okino,Inspector,False,,
+160,doug,nguyen,DOH - SHWB,2024-01-11 09:52:39,roxanne.kwan,doug.nguyen,Admin,False,,
+161,Dejanira,Seale,DOH/SHWB/UST (UST Unit),2024-01-11 09:52:43,roxanne.kwan,dejanira.seale,Inspector,False,,
+166,Katherine,O'Neill,Advanta - contractor,2024-01-11 09:52:59,roxanne.kwan,katherine.oneil,User,False,,
+167,Mike,Mariano,Advanta - contractor,2024-01-11 09:53:02,roxanne.kwan,mike.mariano,User,False,,
+168,Bobby,Ohja,Federal,2024-01-11 09:53:06,roxanne.kwan,bohja,Inspector,False,,
+169,Rick,Sakow,Federal,2024-01-11 09:53:10,roxanne.kwan,rsakow,User,False,,
+171,Anay,Shende,DOH - SHWB,2024-01-11 09:53:18,roxanne.kwan,anay.shende,Inspector,False,,
+181,Christina,Flores,DOH - SHWB,2024-09-04 08:32:45,clay.asato,christina.flores,Inspector,True,,
+182,Michelle,Liu,DOH/SHWB/UST (LUST Unit),2024-10-30 09:15:33,roxanne.kwan,michelle.liu,Inspector,True,,

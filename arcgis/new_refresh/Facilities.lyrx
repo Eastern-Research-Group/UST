@@ -1,0 +1,1117 @@
+{
+  "type" : "CIMLayerDocument",
+  "version" : "3.6.0",
+  "build" : 59527,
+  "layers" : [
+    "CIMPATH=Map/Facilities2.json"
+  ],
+  "layerDefinitions" : [
+    {
+      "type" : "CIMFeatureLayer",
+      "name" : "Facilities",
+      "uRI" : "CIMPATH=Map/Facilities2.json",
+      "sourceModifiedTime" : {
+        "type" : "TimeInstant",
+        "start" : -62135596800000
+      },
+      "metadataURI" : "CIMPATH=Metadata/73c1f879c9bf5f44dc2bddee248cca93.xml",
+      "useSourceMetadata" : false,
+      "description" : "Underground storage tank (UST) facility locations and information was collected from state agencies and integrated into a national database by EPA's Office of Research and Development, Office of Underground Storage Tanks, and the Association of State and Territorial Solid Waste Management Officials. Tabular information includes the number of open, closed, and temporarily out of service USTs, locational information, estimated private domestic wells within 1,500 feet, estimated population within 1,500 ft, proximity to FEMAâ\u20AC\u2122s estimated 100-year floodplain, land-use type, and information on corresponding drinking water source protection areas. This information collected from September 2018 through December 2019 and represents a snapshot of UST facilities at time of data collection.",
+      "layerElevation" : {
+        "type" : "CIMLayerElevationSurface"
+      },
+      "expanded" : true,
+      "layer3DProperties" : {
+        "type" : "CIM3DLayerProperties",
+        "castShadows" : true,
+        "isLayerLit" : true,
+        "layerFaceCulling" : "None",
+        "maxDistance" : -1,
+        "minDistance" : -1,
+        "preloadTextureCutoffHigh" : 0,
+        "preloadTextureCutoffLow" : 0.25,
+        "textureCutoffHigh" : 0.25,
+        "textureCutoffLow" : 1,
+        "useCompressedTextures" : true,
+        "verticalExaggeration" : 1,
+        "exaggerationMode" : "ScaleZ",
+        "verticalUnit" : {
+          "uwkid" : 9001
+        },
+        "lighting" : "OneSideDataNormal",
+        "optimizeMarkerTransparency" : true
+      },
+      "layerType" : "Operational",
+      "showLegends" : true,
+      "visibility" : true,
+      "displayCacheType" : "Permanent",
+      "maxDisplayCacheAge" : 5,
+      "popupInfo" : {
+        "type" : "CIMPopupInfo",
+        "title" : "{Name}",
+        "mediaInfos" : [
+          {
+            "type" : "CIMTableMediaInfo",
+            "refreshRateUnit" : "esriTimeUnitsSeconds",
+            "rowSpan" : 1,
+            "columnSpan" : 1,
+            "fields" : [
+              "OBJECTID",
+              "Facility_ID",
+              "Name",
+              "Address",
+              "City",
+              "County",
+              "State",
+              "Zip_Code",
+              "Latitude",
+              "Longitude",
+              "Coordinate_Source",
+              "Address_Match_Type",
+              "Open_USTs",
+              "Closed_USTs",
+              "TOS_USTs",
+              "Population_1500ft",
+              "Private_Wells_1500ft",
+              "Within_100yr_Floodplain",
+              "LandUse",
+              "Within_SPA",
+              "SPA_PWS_FacilityID",
+              "SPA_Water_Type",
+              "SPA_Facility_Type",
+              "SPA_HUC12",
+              "Within_WHPA",
+              "WHPA_PWS_FacilityID",
+              "WHPA_Water_Type",
+              "WHPA_Facility_Type",
+              "WHPA_HUC12",
+              "Facility_Status",
+              "Date_of_Last_Inspection",
+              "EPA_Region",
+              "Tribe"
+            ]
+          }
+        ],
+        "gridLayout" : {
+          "type" : "CIMPopupLayout",
+          "columnWidths" : [
+            100
+          ],
+          "borderWidth" : 0,
+          "borderColor" : {
+            "type" : "CIMRGBColor",
+            "values" : [
+              0,
+              0,
+              0,
+              100
+            ]
+          }
+        },
+        "fieldDescriptions" : [
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Address",
+            "fieldName" : "Address"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Address Match Type",
+            "fieldName" : "Address_Match_Type"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "City",
+            "fieldName" : "City"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Closed USTs",
+            "fieldName" : "Closed_USTs",
+            "numberFormat" : {
+              "type" : "CIMNumericFormat",
+              "alignmentOption" : "esriAlignLeft",
+              "alignmentWidth" : 12,
+              "roundingOption" : "esriRoundNumberOfDecimals",
+              "roundingValue" : 0
+            }
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Coordinate Source",
+            "fieldName" : "Coordinate_Source"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "County",
+            "fieldName" : "County"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Date_of_Last_Inspection",
+            "fieldName" : "Date_of_Last_Inspection"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "EPA Region",
+            "fieldName" : "EPA_Region",
+            "numberFormat" : {
+              "type" : "CIMNumericFormat",
+              "alignmentOption" : "esriAlignLeft",
+              "alignmentWidth" : 12,
+              "roundingOption" : "esriRoundNumberOfDecimals",
+              "roundingValue" : 0
+            }
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Facility ID",
+            "fieldName" : "Facility_ID"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Facility Status",
+            "fieldName" : "Facility_Status"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Land Use",
+            "fieldName" : "LandUse"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Latitude",
+            "fieldName" : "Latitude",
+            "numberFormat" : {
+              "type" : "CIMNumericFormat",
+              "alignmentOption" : "esriAlignLeft",
+              "alignmentWidth" : 12,
+              "roundingOption" : "esriRoundNumberOfDecimals",
+              "roundingValue" : 6
+            }
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Longitude",
+            "fieldName" : "Longitude",
+            "numberFormat" : {
+              "type" : "CIMNumericFormat",
+              "alignmentOption" : "esriAlignLeft",
+              "alignmentWidth" : 12,
+              "roundingOption" : "esriRoundNumberOfDecimals",
+              "roundingValue" : 6
+            }
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Name",
+            "fieldName" : "Name"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "OBJECTID",
+            "fieldName" : "OBJECTID",
+            "numberFormat" : {
+              "type" : "CIMNumericFormat",
+              "alignmentOption" : "esriAlignLeft",
+              "alignmentWidth" : 12,
+              "roundingOption" : "esriRoundNumberOfDecimals",
+              "roundingValue" : 0
+            }
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Open USTs",
+            "fieldName" : "Open_USTs",
+            "numberFormat" : {
+              "type" : "CIMNumericFormat",
+              "alignmentOption" : "esriAlignLeft",
+              "alignmentWidth" : 12,
+              "roundingOption" : "esriRoundNumberOfDecimals",
+              "roundingValue" : 0
+            }
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Estimated Population within 1500ft",
+            "fieldName" : "Population_1500ft",
+            "numberFormat" : {
+              "type" : "CIMNumericFormat",
+              "alignmentOption" : "esriAlignLeft",
+              "alignmentWidth" : 12,
+              "roundingOption" : "esriRoundNumberOfDecimals",
+              "roundingValue" : 0
+            }
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Estimated Private Domestic Wells wihtin 1500ft",
+            "fieldName" : "Private_Wells_1500ft",
+            "numberFormat" : {
+              "type" : "CIMNumericFormat",
+              "alignmentOption" : "esriAlignLeft",
+              "alignmentWidth" : 12,
+              "roundingOption" : "esriRoundNumberOfDecimals",
+              "roundingValue" : 0
+            }
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "SPA Facility Type",
+            "fieldName" : "SPA_Facility_Type"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "SPA HUC12",
+            "fieldName" : "SPA_HUC12"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "SPA Public Water System and Facility ID",
+            "fieldName" : "SPA_PWS_FacilityID"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "SPA Water Type",
+            "fieldName" : "SPA_Water_Type"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "State",
+            "fieldName" : "State"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Temporarily Out of Service USTs",
+            "fieldName" : "TOS_USTs",
+            "numberFormat" : {
+              "type" : "CIMNumericFormat",
+              "alignmentOption" : "esriAlignLeft",
+              "alignmentWidth" : 12,
+              "roundingOption" : "esriRoundNumberOfDecimals",
+              "roundingValue" : 0
+            }
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Tribe",
+            "fieldName" : "Tribe"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "WHPA Facility Type",
+            "fieldName" : "WHPA_Facility_Type"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "WHPA HUC12",
+            "fieldName" : "WHPA_HUC12"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "WHPA Public Water System and Facility ID",
+            "fieldName" : "WHPA_PWS_FacilityID"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "WHPA Water Type",
+            "fieldName" : "WHPA_Water_Type"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Within 100-year Floodplain",
+            "fieldName" : "Within_100yr_Floodplain"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Within Source Water Protection Area (SPA)",
+            "fieldName" : "Within_SPA"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Within Groundwater Wellhead Protection Area (WHPA)",
+            "fieldName" : "Within_WHPA"
+          },
+          {
+            "type" : "CIMPopupFieldDescription",
+            "alias" : "Zip Code",
+            "fieldName" : "Zip_Code"
+          }
+        ]
+      },
+      "showPopups" : true,
+      "serviceLayerID" : 0,
+      "refreshRate" : -1,
+      "refreshRateUnit" : "esriTimeUnitsSeconds",
+      "blendingMode" : "Alpha",
+      "allowDrapingOnIntegratedMesh" : true,
+      "autoGenerateFeatureTemplates" : true,
+      "featureElevationExpression" : "Shape.Z",
+      "featureTable" : {
+        "type" : "CIMFeatureTable",
+        "displayField" : "Name",
+        "editable" : true,
+        "fieldDescriptions" : [
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "OBJECTID",
+            "fieldName" : "OBJECTID",
+            "readOnly" : true,
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Shape",
+            "fieldName" : "Shape",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Facility ID",
+            "fieldName" : "Facility_ID",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Name",
+            "fieldName" : "Name",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Address",
+            "fieldName" : "Address",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "City",
+            "fieldName" : "City",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "County",
+            "fieldName" : "County",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "State",
+            "fieldName" : "State",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Zip Code",
+            "fieldName" : "Zip_Code",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Latitude",
+            "fieldName" : "Latitude",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Longitude",
+            "fieldName" : "Longitude",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Coordinate Source",
+            "fieldName" : "Coordinate_Source",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Address Match Type",
+            "fieldName" : "Address_Match_Type",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Open USTs",
+            "fieldName" : "Open_USTs",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Closed USTs",
+            "fieldName" : "Closed_USTs",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Temporarily Out of Service USTs",
+            "fieldName" : "TOS_USTs",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Estimated Population within 1500ft",
+            "fieldName" : "Population_1500ft",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Estimated Private Domestic Wells within 1500ft",
+            "fieldName" : "Private_Wells_1500ft",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Within 100-year Floodplain",
+            "fieldName" : "Within_100yr_Floodplain",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Land Use",
+            "fieldName" : "LandUse",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Within Source Water Protection Area (SPA)",
+            "fieldName" : "Within_SPA",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "SPA Public Water System and Facility ID",
+            "fieldName" : "SPA_PWS_FacilityID",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "SPA Water Type",
+            "fieldName" : "SPA_Water_Type",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "SPA Facility Type",
+            "fieldName" : "SPA_Facility_Type",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "SPA HUC12",
+            "fieldName" : "SPA_HUC12",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Within Groundwater Wellhead Protection Area (WHPA)",
+            "fieldName" : "Within_WHPA",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "WHPA Public Water System and Facility ID",
+            "fieldName" : "WHPA_PWS_FacilityID",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "WHPA Water Type",
+            "fieldName" : "WHPA_Water_Type",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "WHPA Facility Type",
+            "fieldName" : "WHPA_Facility_Type",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "WHPA HUC12",
+            "fieldName" : "WHPA_HUC12",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Facility Status",
+            "fieldName" : "Facility_Status",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Date_of_Last_Inspection",
+            "fieldName" : "Date_of_Last_Inspection",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "EPA Region",
+            "fieldName" : "EPA_Region",
+            "visible" : true,
+            "searchMode" : "Exact"
+          },
+          {
+            "type" : "CIMFieldDescription",
+            "alias" : "Tribe",
+            "fieldName" : "Tribe",
+            "visible" : true,
+            "searchMode" : "Exact"
+          }
+        ],
+        "timeFields" : {
+          "type" : "CIMTimeTableDefinition"
+        },
+        "timeDefinition" : {
+          "type" : "CIMTimeDataDefinition",
+          "timeReference" : {
+            "type" : "TimeReference",
+            "timeZone" : "Eastern Standard Time",
+            "respectsDaylightSaving" : true,
+            "respectsDynamicAdjustmentRules" : false,
+            "timeZoneIANA" : "America/New_York"
+          },
+          "customTimeExtent" : {
+            "type" : "TimeExtent",
+            "start" : null,
+            "end" : null,
+            "empty" : false
+          },
+          "applyTimeReferenceToAllFields" : true
+        },
+        "timeDisplayDefinition" : {
+          "type" : "CIMTimeDisplayDefinition",
+          "timeInterval" : 10,
+          "timeIntervalUnits" : "esriTimeUnitsUnknown",
+          "timeOffsetUnits" : "esriTimeUnitsDays"
+        },
+        "timeDimensionFields" : {
+          "type" : "CIMTimeDimensionDefinition"
+        },
+        "dataConnection" : {
+          "type" : "CIMStandardDataConnection",
+          "workspaceConnectionString" : "DATABASE=.\\new_refresh.geodatabase",
+          "workspaceFactory" : "SQLite",
+          "dataset" : "facilities",
+          "datasetType" : "esriDTFeatureClass"
+        },
+        "studyAreaSpatialRel" : "esriSpatialRelUndefined",
+        "searchOrder" : "esriSearchOrderSpatial"
+      },
+      "featureTemplates" : [
+        {
+          "type" : "CIMRowTemplate",
+          "name" : "Facilities",
+          "defaultValues" : {
+            "type" : "PropertySet",
+            "propertySetItems" : [
+            ]
+          }
+        }
+      ],
+      "htmlPopupEnabled" : true,
+      "selectable" : true,
+      "featureCacheType" : "Session",
+      "displayFiltersType" : "ByScale",
+      "featureBlendingMode" : "Alpha",
+      "layerEffectsMode" : "Layer",
+      "labelClasses" : [
+        {
+          "type" : "CIMLabelClass",
+          "expressionTitle" : "Custom",
+          "expression" : "$feature.Name",
+          "expressionEngine" : "Arcade",
+          "featuresToLabel" : "AllVisibleFeatures",
+          "maplexLabelPlacementProperties" : {
+            "type" : "CIMMaplexLabelPlacementProperties",
+            "featureType" : "Point",
+            "avoidPolygonHoles" : true,
+            "canOverrunFeature" : true,
+            "canPlaceLabelOutsidePolygon" : true,
+            "canRemoveOverlappingLabel" : true,
+            "canStackLabel" : true,
+            "centerLabelAnchorType" : "Symbol",
+            "connectionType" : "Unambiguous",
+            "constrainOffset" : "NoConstraint",
+            "contourAlignmentType" : "Page",
+            "contourLadderType" : "Straight",
+            "contourMaximumAngle" : 90,
+            "enableConnection" : true,
+            "enablePointPlacementPriorities" : true,
+            "featureWeight" : 0,
+            "fontHeightReductionLimit" : 4,
+            "fontHeightReductionStep" : 0.5,
+            "fontWidthReductionLimit" : 90,
+            "fontWidthReductionStep" : 5,
+            "graticuleAlignmentType" : "Straight",
+            "keyNumberGroupName" : "Default",
+            "labelBuffer" : 15,
+            "labelLargestPolygon" : true,
+            "labelPriority" : -1,
+            "labelStackingProperties" : {
+              "type" : "CIMMaplexLabelStackingProperties",
+              "stackAlignment" : "ChooseBest",
+              "maximumNumberOfLines" : 3,
+              "minimumNumberOfCharsPerLine" : 3,
+              "maximumNumberOfCharsPerLine" : 24,
+              "separators" : [
+                {
+                  "type" : "CIMMaplexStackingSeparator",
+                  "separator" : " ",
+                  "splitAfter" : true
+                },
+                {
+                  "type" : "CIMMaplexStackingSeparator",
+                  "separator" : ",",
+                  "visible" : true,
+                  "splitAfter" : true
+                }
+              ],
+              "trimStackingSeparators" : true,
+              "preferToStackLongLabels" : true
+            },
+            "lineFeatureType" : "General",
+            "linePlacementMethod" : "OffsetCurvedFromLine",
+            "maximumLabelOverrun" : 36,
+            "maximumLabelOverrunUnit" : "Point",
+            "minimumFeatureSizeUnit" : "Map",
+            "multiPartOption" : "OneLabelPerPart",
+            "offsetAlongLineProperties" : {
+              "type" : "CIMMaplexOffsetAlongLineProperties",
+              "placementMethod" : "BestPositionAlongLine",
+              "labelAnchorPoint" : "CenterOfLabel",
+              "distanceUnit" : "Percentage",
+              "useLineDirection" : true
+            },
+            "pointExternalZonePriorities" : {
+              "type" : "CIMMaplexExternalZonePriorities",
+              "aboveLeft" : 4,
+              "aboveCenter" : 2,
+              "aboveRight" : 1,
+              "centerRight" : 3,
+              "belowRight" : 5,
+              "belowCenter" : 7,
+              "belowLeft" : 8,
+              "centerLeft" : 6
+            },
+            "pointPlacementMethod" : "AroundPoint",
+            "polygonAnchorPointType" : "GeometricCenter",
+            "polygonBoundaryWeight" : 0,
+            "polygonExternalZones" : {
+              "type" : "CIMMaplexExternalZonePriorities",
+              "aboveLeft" : 4,
+              "aboveCenter" : 2,
+              "aboveRight" : 1,
+              "centerRight" : 3,
+              "belowRight" : 5,
+              "belowCenter" : 7,
+              "belowLeft" : 8,
+              "centerLeft" : 6
+            },
+            "polygonFeatureType" : "General",
+            "polygonInternalZones" : {
+              "type" : "CIMMaplexInternalZonePriorities",
+              "center" : 1
+            },
+            "polygonPlacementMethod" : "CurvedInPolygon",
+            "primaryOffset" : 1,
+            "primaryOffsetUnit" : "Point",
+            "removeAmbiguousLabels" : "All",
+            "removeExtraWhiteSpace" : true,
+            "repetitionIntervalUnit" : "Point",
+            "rotationProperties" : {
+              "type" : "CIMMaplexRotationProperties",
+              "rotationType" : "Arithmetic",
+              "alignmentType" : "Straight"
+            },
+            "secondaryOffset" : 100,
+            "secondaryOffsetUnit" : "Percentage",
+            "strategyPriorities" : {
+              "type" : "CIMMaplexStrategyPriorities",
+              "stacking" : 1,
+              "overrun" : 2,
+              "fontCompression" : 3,
+              "fontReduction" : 4,
+              "abbreviation" : 5
+            },
+            "thinningDistanceUnit" : "Point",
+            "truncationMarkerCharacter" : ".",
+            "truncationMinimumLength" : 1,
+            "truncationPreferredCharacters" : "aeiou",
+            "truncationExcludedCharacters" : "0123456789",
+            "polygonAnchorPointPerimeterInsetUnit" : "Point"
+          },
+          "name" : "Class 1",
+          "priority" : -1,
+          "standardLabelPlacementProperties" : {
+            "type" : "CIMStandardLabelPlacementProperties",
+            "featureType" : "Line",
+            "featureWeight" : "None",
+            "labelWeight" : "High",
+            "numLabelsOption" : "OneLabelPerName",
+            "lineLabelPosition" : {
+              "type" : "CIMStandardLineLabelPosition",
+              "above" : true,
+              "inLine" : true,
+              "parallel" : true
+            },
+            "lineLabelPriorities" : {
+              "type" : "CIMStandardLineLabelPriorities",
+              "aboveStart" : 3,
+              "aboveAlong" : 3,
+              "aboveEnd" : 3,
+              "centerStart" : 3,
+              "centerAlong" : 3,
+              "centerEnd" : 3,
+              "belowStart" : 3,
+              "belowAlong" : 3,
+              "belowEnd" : 3
+            },
+            "pointPlacementMethod" : "AroundPoint",
+            "pointPlacementPriorities" : {
+              "type" : "CIMStandardPointPlacementPriorities",
+              "aboveLeft" : 2,
+              "aboveCenter" : 2,
+              "aboveRight" : 1,
+              "centerLeft" : 3,
+              "centerRight" : 2,
+              "belowLeft" : 3,
+              "belowCenter" : 3,
+              "belowRight" : 2
+            },
+            "rotationType" : "Arithmetic",
+            "polygonPlacementMethod" : "AlwaysHorizontal"
+          },
+          "textSymbol" : {
+            "type" : "CIMSymbolReference",
+            "symbol" : {
+              "type" : "CIMTextSymbol",
+              "blockProgression" : "TTB",
+              "depth3D" : 1,
+              "extrapolateBaselines" : true,
+              "fontEffects" : "Normal",
+              "fontEncoding" : "Unicode",
+              "fontFamilyName" : "Tahoma",
+              "fontStyleName" : "Regular",
+              "fontType" : "Unspecified",
+              "haloSize" : 1,
+              "height" : 10,
+              "hinting" : "Default",
+              "horizontalAlignment" : "Left",
+              "kerning" : true,
+              "letterWidth" : 100,
+              "ligatures" : true,
+              "lineGapType" : "ExtraLeading",
+              "symbol" : {
+                "type" : "CIMPolygonSymbol",
+                "symbolLayers" : [
+                  {
+                    "type" : "CIMSolidFill",
+                    "enable" : true,
+                    "color" : {
+                      "type" : "CIMRGBColor",
+                      "values" : [
+                        0,
+                        0,
+                        0,
+                        100
+                      ]
+                    }
+                  }
+                ],
+                "angleAlignment" : "Map"
+              },
+              "textCase" : "Normal",
+              "textDirection" : "LTR",
+              "verticalAlignment" : "Bottom",
+              "verticalGlyphOrientation" : "Right",
+              "wordSpacing" : 100,
+              "billboardMode3D" : "FaceNearPlane"
+            }
+          },
+          "useCodedValue" : true,
+          "visibility" : true,
+          "iD" : -1
+        }
+      ],
+      "renderer" : {
+        "type" : "CIMSimpleRenderer",
+        "sampleSize" : 10000,
+        "patch" : "Default",
+        "symbol" : {
+          "type" : "CIMSymbolReference",
+          "symbol" : {
+            "type" : "CIMPointSymbol",
+            "symbolLayers" : [
+              {
+                "type" : "CIMVectorMarker",
+                "enable" : true,
+                "anchorPoint" : {
+                  "x" : 0,
+                  "y" : 0
+                },
+                "anchorPointUnits" : "Relative",
+                "dominantSizeAxis3D" : "Z",
+                "size" : 4,
+                "billboardMode3D" : "FaceNearPlane",
+                "frame" : {
+                  "xmin" : -2,
+                  "ymin" : -2,
+                  "xmax" : 2,
+                  "ymax" : 2
+                },
+                "markerGraphics" : [
+                  {
+                    "type" : "CIMMarkerGraphic",
+                    "geometry" : {
+                      "rings" : [
+                        [
+                          [
+                            0,
+                            2
+                          ],
+                          [
+                            0.34999999999999998,
+                            1.97
+                          ],
+                          [
+                            0.68000000000000005,
+                            1.8799999999999999
+                          ],
+                          [
+                            1,
+                            1.73
+                          ],
+                          [
+                            1.29,
+                            1.53
+                          ],
+                          [
+                            1.53,
+                            1.29
+                          ],
+                          [
+                            1.73,
+                            1
+                          ],
+                          [
+                            1.8799999999999999,
+                            0.68000000000000005
+                          ],
+                          [
+                            1.97,
+                            0.34999999999999998
+                          ],
+                          [
+                            2,
+                            0
+                          ],
+                          [
+                            1.97,
+                            -0.34999999999999998
+                          ],
+                          [
+                            1.8799999999999999,
+                            -0.68000000000000005
+                          ],
+                          [
+                            1.73,
+                            -1
+                          ],
+                          [
+                            1.53,
+                            -1.29
+                          ],
+                          [
+                            1.29,
+                            -1.53
+                          ],
+                          [
+                            1,
+                            -1.73
+                          ],
+                          [
+                            0.68000000000000005,
+                            -1.8799999999999999
+                          ],
+                          [
+                            0.34999999999999998,
+                            -1.97
+                          ],
+                          [
+                            0,
+                            -2
+                          ],
+                          [
+                            -0.34999999999999998,
+                            -1.97
+                          ],
+                          [
+                            -0.68000000000000005,
+                            -1.8799999999999999
+                          ],
+                          [
+                            -1,
+                            -1.73
+                          ],
+                          [
+                            -1.29,
+                            -1.53
+                          ],
+                          [
+                            -1.53,
+                            -1.29
+                          ],
+                          [
+                            -1.73,
+                            -1
+                          ],
+                          [
+                            -1.8799999999999999,
+                            -0.68000000000000005
+                          ],
+                          [
+                            -1.97,
+                            -0.34999999999999998
+                          ],
+                          [
+                            -2,
+                            0
+                          ],
+                          [
+                            -1.97,
+                            0.34999999999999998
+                          ],
+                          [
+                            -1.8799999999999999,
+                            0.68000000000000005
+                          ],
+                          [
+                            -1.73,
+                            1
+                          ],
+                          [
+                            -1.53,
+                            1.29
+                          ],
+                          [
+                            -1.29,
+                            1.53
+                          ],
+                          [
+                            -1,
+                            1.73
+                          ],
+                          [
+                            -0.68000000000000005,
+                            1.8799999999999999
+                          ],
+                          [
+                            -0.34999999999999998,
+                            1.97
+                          ],
+                          [
+                            0,
+                            2
+                          ]
+                        ]
+                      ]
+                    },
+                    "symbol" : {
+                      "type" : "CIMPolygonSymbol",
+                      "symbolLayers" : [
+                        {
+                          "type" : "CIMSolidStroke",
+                          "enable" : true,
+                          "capStyle" : "Round",
+                          "joinStyle" : "Round",
+                          "lineStyle3D" : "Strip",
+                          "miterLimit" : 10,
+                          "width" : 0.69999999999999996,
+                          "height3D" : 1,
+                          "anchor3D" : "Center",
+                          "color" : {
+                            "type" : "CIMRGBColor",
+                            "values" : [
+                              0,
+                              0,
+                              0,
+                              100
+                            ]
+                          }
+                        },
+                        {
+                          "type" : "CIMSolidFill",
+                          "enable" : true,
+                          "color" : {
+                            "type" : "CIMRGBColor",
+                            "values" : [
+                              83,
+                              173,
+                              104,
+                              100
+                            ]
+                          }
+                        }
+                      ],
+                      "angleAlignment" : "Map"
+                    }
+                  }
+                ],
+                "scaleSymbolsProportionally" : true,
+                "respectFrame" : true
+              }
+            ],
+            "haloSize" : 1,
+            "scaleX" : 1,
+            "angleAlignment" : "Display"
+          }
+        }
+      },
+      "scaleSymbols" : true,
+      "snappable" : true
+    }
+  ],
+  "binaryReferences" : [
+    {
+      "type" : "CIMBinaryReference",
+      "uRI" : "CIMPATH=Metadata/73c1f879c9bf5f44dc2bddee248cca93.xml",
+      "data" : "<?xml version=\"1.0\"?>\r\n<metadata xml:lang=\"en\">\r\n\t<Esri>\r\n\t\t<CreaDate>20251218</CreaDate>\r\n\t\t<CreaTime>11175700</CreaTime>\r\n\t\t<ArcGISFormat>1.0</ArcGISFormat>\r\n\t\t<SyncOnce>TRUE</SyncOnce>\r\n\t</Esri>\r\n\t<dataIdInfo>\r\n\t\t<idCitation>\r\n\t\t\t<resTitle>Facilities</resTitle>\r\n\t\t</idCitation>\r\n\t\t<idAbs>Underground storage tank (UST) facility locations and information was collected from state agencies and integrated into a national database by EPA's Office of Research and Development, Office of Underground Storage Tanks, and the Association of State and Territorial Solid Waste Management Officials. Tabular information includes the number of open, closed, and temporarily out of service USTs, locational information, estimated private domestic wells within 1,500 feet, estimated population within 1,500 ft, proximity to FEMAÃƒÂ¢\u20AC\u2122s estimated 100-year floodplain, land-use type, and information on corresponding drinking water source protection areas. This information collected from September 2018 through December 2019 and represents a snapshot of UST facilities at time of data collection.</idAbs>\r\n\t\t<idCredit>Alabama Department of Environmental Management's Groundwater Branch, Alaska's Department of Environmental Conservation's Prevention Preparedness and Response Program, Arizona Department of Environmental Quality's Underground Storage Tank Program, Arkansas Department of Environmental Quality's Regulated Storage Tanks Division, California Environmental Protection Agency's California Environmental Reporting System, Colorado Department of Labor and Employment's Division of Oil and Public Safety, Connecticut Department of Energy and Environmental Protection, Delaware Department of Natural Resources and Environmental Control's Underground Storage Tank Compliance Program, Florida Department of Environmental Protection's Permitting and Compliance Assistance Program, Georgia Environmental Protection Division's Underground Storage Tank Management Program, Hawaii Department of Health's Solid and Hazardous Waste Branch, Idaho Department of Environmental Quality's Waste Management and Remediation Division, Illinois State Fire Marshal's Division of Petroleum and Chemical Safety, Indiana Department of Environmental Management's UST Branch, Iowa Department of Natural Resources' Underground Storage Tanks Section, Kansas Department of Health and Environment's Storage Tank Section, Kentucky Energy and Environment Cabinet's Underground Storage Tank Branch, Louisiana Department of Environmental Quality's Underground Storage Tank Program, Maine Department of Environmental Protection's Underground Storage Tank Program, Maryland Department of the Environment's Oil Control Program, Massachusetts Department of Environmental Protection's Underground Storage Tank Program, Michigan Department of Licensing and Regulatory Affairs' Storage Tank Division, Minnesota Pollution Control Agency's Underground Storage Tank Program, Mississippi Department of Environmental Quality's Underground Storage Tank Program, Missouri Department of Natural Resourcesâ\u20AC\u2122' Environmental Remediation Program, Montana Department of Environmental Quality's Underground Storage Tank Leak Prevention Program, Nebraska State Fire Marshal's Fuels Safety Division, Nevada Division of Environmental Protection's Underground Storage Tank Program, New Hampshire Department of Environmental Services' Underground Storage Tank Program, New Jersey Department of Environmental Protection's Site Remediation Program, New Mexico Environment Department's Petroleum Storage Tank Bureau, New York Department of Environmental Conservation's Chemical Bulk Storage Program, North Carolina Environmental Quality's Underground Storage Tank Section, North Dakota Department of Environmental Quality's Underground Storage Tank Program, Ohio Department of Commerce's Bureau of Underground Storage Tank Regulations, Oklahoma Corporation Commission's Petroleum Storage Tank Division, Oregon Department of Environmental Quality's Underground Storage Tank Program, Pennsylvania Department of Environmental Protection's Division of Storage Tanks, Rhode Island Department of Environmental Management's Underground Storage Tank Management Program, South Carolina Department of Health and Environmental Control's Underground Storage Tanks Program, Tennessee Department of Environment and Conservation's Division of Underground Storage Tanks, Texas Commission on Environmental Quality, Utah Department of Environmental Quality's Underground Storage Tanks Branch, Vermont Department of Environmental Conservation's Waste Management and Prevention Division, Virginia Department of Environmental Quality's Underground Storage Tanks Program, Washington Department of Ecology's Underground Storage Tank Program, District of Columbia Department of Energy and Environmentâ\u20AC\u2122s Underground Storage Tank Program, West Virginia Department of Environmental Protection's Underground Storage Tank Section, Wisconsin Department of Agriculture's Trade and Consumer Protection's Bureau of Weights and Measures, Wyoming Department of Environmental Quality's Storage Tank Program, EPAâ\u20AC\u2122s Office of Ground Water and Drinking Water, EPAsâ\u20AC\u2122 EnviroAtlas and EPAâ\u20AC\u2122s Office of Research and Development for the Estimated floodplain map for the Conterminous United States, Multi-Resolution Land Characteristics (MRLC) consortium</idCredit>\r\n\t</dataIdInfo>\r\n</metadata>\r\n"
+    }
+  ],
+  "rGBColorProfile" : "sRGB IEC61966-2.1",
+  "cMYKColorProfile" : "U.S. Web Coated (SWOP) v2"
+}

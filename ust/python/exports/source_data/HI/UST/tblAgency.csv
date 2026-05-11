@@ -1,0 +1,3 @@
+ST,State,Agency,Logo,IdleTimeAllowed,Phone,Fax,MaxLogin,WordDoc,ExcelPath,Region,SqlReportsLink,SharePointReportsLink,FrsLink
+HI,Hawaii,"Hawaii Department of Health
+Solid and Hazardous Waste Branch",,480,8085864226,8085867509,5,,,9,http://shwb1.emd/LUSTReports.aspx?EventID=,http://SHWB-xSQL1/,http://iaspub.epa.gov/enviro/fii_query_dtl.disp_program_facility?p_registry_id=

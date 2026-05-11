@@ -1,0 +1,82 @@
+{
+  "type" : "CIMLayerDocument",
+  "version" : "3.6.0",
+  "build" : 59527,
+  "tables" : [
+    "CIMPATH=UST_Finder_Feature_Layer_2/main_usts.json"
+  ],
+  "binaryReferences" : [
+    {
+      "type" : "CIMBinaryReference",
+      "uRI" : "CIMPATH=Metadata/ae85e959726344b72016f90130dcc8a2.xml",
+      "data" : "<?xml version=\"1.0\"?>\r\n<metadata xml:lang=\"en\">\r\n\t<Esri>\r\n\t\t<CreaDate>20260131</CreaDate>\r\n\t\t<CreaTime>12375700</CreaTime>\r\n\t\t<ArcGISFormat>1.0</ArcGISFormat>\r\n\t\t<SyncOnce>TRUE</SyncOnce>\r\n\t</Esri>\r\n</metadata>\r\n"
+    }
+  ],
+  "tableDefinitions" : [
+    {
+      "type" : "CIMStandaloneTable",
+      "name" : "USTs",
+      "uRI" : "CIMPATH=UST_Finder_Feature_Layer_2/main_usts.json",
+      "sourceModifiedTime" : {
+        "type" : "TimeInstant",
+        "start" : -62135596800000
+      },
+      "metadataURI" : "CIMPATH=Metadata/ae85e959726344b72016f90130dcc8a2.xml",
+      "useSourceMetadata" : false,
+      "displayField" : "State",
+      "editable" : true,
+      "timeFields" : {
+        "type" : "CIMTimeTableDefinition"
+      },
+      "timeDefinition" : {
+        "type" : "CIMTimeDataDefinition",
+        "timeReference" : {
+          "type" : "TimeReference",
+          "timeZone" : "Eastern Standard Time",
+          "respectsDaylightSaving" : true,
+          "respectsDynamicAdjustmentRules" : false,
+          "timeZoneIANA" : "America/New_York"
+        },
+        "customTimeExtent" : {
+          "type" : "TimeExtent",
+          "start" : null,
+          "end" : null,
+          "empty" : false
+        },
+        "applyTimeReferenceToAllFields" : true
+      },
+      "timeDisplayDefinition" : {
+        "type" : "CIMTimeDisplayDefinition",
+        "timeInterval" : 10,
+        "timeIntervalUnits" : "esriTimeUnitsUnknown",
+        "timeOffsetUnits" : "esriTimeUnitsDays"
+      },
+      "timeDimensionFields" : {
+        "type" : "CIMTimeDimensionDefinition"
+      },
+      "dataConnection" : {
+        "type" : "CIMStandardDataConnection",
+        "workspaceConnectionString" : "DATABASE=.\\new_refresh.geodatabase",
+        "workspaceFactory" : "SQLite",
+        "dataset" : "usts",
+        "datasetType" : "esriDTTable"
+      },
+      "autoGenerateRowTemplates" : true,
+      "rowTemplates" : [
+        {
+          "type" : "CIMRowTemplate",
+          "name" : "USTs",
+          "defaultValues" : {
+            "type" : "PropertySet",
+            "propertySetItems" : [
+            ]
+          }
+        }
+      ],
+      "serviceTableID" : 4,
+      "showPopups" : true
+    }
+  ],
+  "rGBColorProfile" : "sRGB IEC61966-2.1",
+  "cMYKColorProfile" : "U.S. Web Coated (SWOP) v2"
+}

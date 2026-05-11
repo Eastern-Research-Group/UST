@@ -1,0 +1,220 @@
+Permit Number,Facility Name,Address,City,Owner,Tank  Capacity/Substance,Date Installed,Facility Description
+GEPA038,Former Martinez Service Station,Lot 10 Block 1 Tract 109 Barrigada,Barrigada,Martinez  Incorporated,T1-8000 Gas T2- 8000 Gas T3-8000 Gas,1999-01-01 00:00:00,Gas Station
+GEPA043,Tumon Bay Capital Hotel,1448 Pale SanVitores Street,Tamuning,Tai Shan Investment Co. Inc.,T1-1000 Diesel,1991-12-01 00:00:00,Commercial
+GEPA-UST-001,AAFES Service Station,Bldg. 26104 Carolines Avenue AAFB,Yigo,Andersen AFB,"T1-10000 Gas T2-10000 Gas T3-10000 Gas
+T4-10000 Gas",1994-06-01 00:00:00,Gas Station
+GEPA-UST-002,Tanguisson Beach Cable Station,Route 34 Tanguisson Beach Road,Dededo,"AT&T Global
+Communication  Services Incorporated",T1-8000 Diesel T2-8000 Diesesl T3-8000 Diesel,1993-07-01 00:00:00,Utilities
+GEPA-UST-003,Tumon Bay Cable Station,1169 North Marine Corps Drive,Tamuning,"AT&T Global
+Communication  Services Incorporated","T1-12000 Diesel T2-12000
+Diesel",1991-09-01 00:00:00,Utilities
+GEPA-UST-004,Bank of Guam,111 Chalan Santo Papa,Hagatna,Bank of Guam,T1-6000 Diesel,1988-05-01 00:00:00,Commercial
+GEPA-UST-005,Citadel Plaza (Former Bank of Hawaii Building),134 West Soledad Avenue,Hagatna,"Prospector Retail Concepts, LLC",T1-6000 Diesel,1974-01-01 00:00:00,Commercial
+GEPA-UST-006,Black  Construction Corporation,JL Baker Street,Harmon,"Black  Construction
+Corporation",T1-550 Used Oil,,Industrial
+GEPA-UST-007,Car's Plus Maite,"648 Purple Heart highway, Rt. 8",Maite,"Car's Plus, LLC",T1-1000 OWS,2007-12-01 00:00:00,Auto  Dealership
+GEPA-UST-008,"DNA, Inc.",238 AFC Flores Street Ste 301,Hagatna,"DNA, Inc.",T1-4000 Diesel,1999-11-01 00:00:00,Commercial
+GEPA-UST-009,GCIC BUILDING,414 W. Soledad Ave. Ste 500,Hagatna,GUAM CAPITAL INVESTMENT  CORP (GCIC),T1-4000 Diesel,1994-02-01 00:00:00,Commercial
+GEPA-UST-010,Guam International Country Club,495 Battulo Street,Dededo,"Japan Golf Management Company, Ltd","T1-6000 Gas
+T2-8000 Diesel T3-2500 Gas",1994-07-01 00:00:00,Commercial
+GEPA-UST-011,"Barrigada Post Office, GMF",489 Route 16,Barrigada,US POSTAL SERVICE,T1-4000 Diesel,1991-07-01 00:00:00,Federal  Non-Military
+GEPA-UST-012,The Home Depot #1710,295 Chalan Pasaheru,Tamuning,"HOME DEPOT U.S.A., INCORPORATED c/o 3E
+Company",T1-12000 Diesel,2007-06-01 00:00:00,Commercial
+GEPA-UST-014,LADERA TOWERS,310 Ladera Lane,Mangilao,LTA LLC dba Ladera Tower,T1-4000 Diesel,1994-01-01 00:00:00,Commercial
+GEPA-UST-015,"Leo Palace Resort - Booster Pump
+Station",221 Lakeview Drive,Yona,"LeoPalace Guam Corporation
+dba LeoPalace Resort",T1-4000 Diesel,1991-08-01 00:00:00,Utilities
+GEPA-UST-019,Micronesia Mall,"Corner of Route 1 and Route 16, Suite 1
+1088 West Marine Corps
+Drive, Suite 214",Dededo,Goodwind  Development Corporation,"T1-4000 Diesel T2-10000
+Diesel",1998-12-31 00:00:00,Commercial
+GEPA-UST-020,Adelup Mobil Service Station,490 Chorito Blvd. Marine Drive Route 1,Hagatna,MOBIL OIL GUAM INC.,"T1-8000 Gas T2-6000 Gas
+T3-4000 Diesel",1989-06-01 00:00:00,Gas Station
+GEPA-UST-021,Agana Mobil Service Station,B-230 Route 4,Hagatna,MOBIL OIL GUAM INC.,"T1-4000 Gas T2-6000 Gas
+T3-6000 Gas",7/25&27/23,Gas Station
+GEPA-UST-022,Agat Mobil Service Station,854 North Route 2,Agat,MOBIL OIL GUAM INC.,T1-6000 Gas T2-10000 Gas T3-1000 Gas,1985-01-01 00:00:00,Gas Station
+GEPA-UST-023,Airport Mobil Service Station,Bldg 101 Chalan Pasaheru,Tamuning,MOBIL OIL GUAM INC.,"T1-10000 Gas T2-5000 Diesel T3-10000 Gas T4-10000 Gas
+T5-5000 Diesel",1998-10-01 00:00:00,Gas Station
+GEPA-UST-025,Anigua Mobil Service Station,Bldg 752 Marine Corps Drive,Anigua,MOBIL OIL GUAM INC.,T1-5000 Diesel T2-10000 Gas T3-5000 Gas,1992-07-01 00:00:00,Gas Station
+GEPA-UST-026,Apra Heights Mobil Service Station,Bldg 547 Santa Rita Drive,Santa Rita,MOBIL OIL GUAM INC.,T1-10000 Gas T2-1000 Gas,2017-12-01 00:00:00,Gas Station
+GEPA-UST-027,Barrigada Heights Mobil Service Station,Bldg 1116 Route 16,Barrigada,MOBIL OIL GUAM INC.,T1-10000 Gas T2-6000 Gas T3-6000 Gas,1996-06-01 00:00:00,Gas Station
+GEPA-UST-030,East Agana Mobil Service Station,Bldg 620 East Marine Corps Drive,Hagatna,MOBIL OIL GUAM INC.,"T1-10000 Gas T2-10000 Gas
+T3-10000 Diesel",2019-10-01 00:00:00,Gas Station
+GEPA-UST-032,Fatima Mobil Service Station,614 Marine Corps Drive,Dededo,MOBIL OIL GUAM INC.,"T1-10000 Gas T2-10000 Gas
+T3-5000 Diesel T4-5000 Diesel",1996-04-01 00:00:00,Gas Station
+GEPA-UST-037,Holiday Resort & Spa Guam,881 Pale San Vitores Road,Tamuning,Holiday Resort Guam,T1-4000 Diesel,1996-02-01 00:00:00,Commercial
+GEPA-UST-039,Ipan Mobil Service Station,"251 North Chalan Antigo Street, Route 4",Ipan,MOBIL OIL GUAM INC.,T1-4000 Gas T2-4000 Gas,1987-03-01 00:00:00,Gas Station
+GEPA-UST-041,Liguan Mobil Service Station,Bldg 479 Fatima Street,Dededo,MOBIL OIL GUAM INC.,T1-7000 Gas T2-8000 Gas T3-15000 Gas,2006-05-05 00:00:00,Gas Station
+GEPA-UST-042,Maite Mobil Service Station,Bldg 860 WEST RTE 4,Barrigada,MOBIL OIL GUAM INC.,T1-10000 Gas T2-10000 Gas T3-10000 Gas T4-10000 Diesel,1995-07-01 00:00:00,Gas Station
+GEPA-UST-043,Mangilao Mobil Service Station,493 South Route 10,Mangilao,MOBIL OIL GUAM INC.,"T1-12000 Gas T2-6000 Gas
+T3-6000 Diesel",1989-04-01 00:00:00,Gas Station
+GEPA-UST-045,Onward Agana Beach Resort,445 Governor Carlos G. Camacho Road,Tamuning,"Onward Beach Resort Guam, Inc.",T1-4000 Diesel T2-1000 Diesel T3-6000 Diesel 9/95,1995-06-01 00:00:00,Commercial
+GEPA-UST-049,Sinajana Mobil Service Station,Bldg 118 Chalan Canton Tutujan,Sinajana,MOBIL OIL GUAM INC.,T1-6000 Diesel T2-15000 Gas T3-8000 Gas,1995-05-01 00:00:00,Gas Station
+GEPA-UST-051,Tamuning Mobil Service Station,Bldg 706 South Marine Corps Drive,Tamuning,MOBIL OIL GUAM INC.,"T1-8000 Gas T2-12000 Gas
+T3-6000 Diesel",1990-05-01 00:00:00,Gas Station
+GEPA-UST-052,Upper Tumon Mobil Service Station,422 North Marine Corps Drive,Tamuning,MOBIL OIL GUAM INC.,T1-10000 Diesel T2-10000 Gas T3-10000 Gas,1996-04-01 00:00:00,Gas Station
+GEPA-UST-054,Yigo North Mobil Service Station,"214 Chalan Pale Ramon Haya, Route 1",Yigo,MOBIL OIL GUAM INC.,T1-10000 Gas T2-10000 Gas T3-10000 Gas T4-10000 Diesel,1996-10-01 00:00:00,Gas Station
+GEPA-UST-055,Yigo Perez Acres Mobil Service Station,465 North Marine Corps Drive,Yigo,MOBIL OIL GUAM INC.,"T1-8000 Gas T2-10000 Gas
+T3-10000 Diesel",2018-08-01 00:00:00,Gas Station
+GEPA-UST-056,Yona Mobil Service Station,1552 North Kanton Tasi Street,Yona,MOBIL OIL GUAM INC.,"T1-6000 Gas T2-8000 Gas
+T3-6000 Diesel T4-8000 Gas",1994-08-01 00:00:00,Gas Station
+GEPA-UST-057,Ysengsong Mobil Service Station,Bldg 240 East Marine Corps Drive,Dededo,MOBIL OIL GUAM INC.,T1-12000 Gas T2-4000 Diesel T3-12000 Gas T4-8000 Gas,2003-07-01 00:00:00,Gas Station
+GEPA-UST-058,Nissan Upper Tumon,1012 North Marine Corps Drive,Tamuning,Nissan Motor Corporation in Guam,"T1-4000 Gas
+T2-1000 Used Oil",2016-08-01 00:00:00,Auto  Dealership
+GEPA-UST-059,Oka Towers Condominium,"Suite 1514, 162 Western Blvd",Tamuning,Oka Towers Condominium Homeowners Association,T1-1000 Diesel,1989-01-01 00:00:00,Residential
+GEPA-UST-060,Onward Mangilao Golf Club,1810 Route 15 Pagat,Mangilao,"Onward Golf Resort Guam, Inc. dba OTGC",T1-550 Used Oil,1991-12-01 00:00:00,Other
+GEPA-UST-061,Onward Talofofo Golf Club,825 Route 4A,Talofofo,"Onward Golf Resort Guam, Inc. dba OTGC",T1-4000 Diesel T2-1000 Gas T3-1000 Gas T4-1000 Diesel T5-500 Used Oil,1992-12-01 00:00:00,Other
+GEPA-UST-062,Pacific Islands Club Guam,210 Pale San Vitores Road,Tamuning,"Guam & Guam, Inc. dba Pacific Islands Club Guam",T1-4000 Diesel T2-4000 Diesel,1985-07-01 00:00:00,Other
+GEPA-UST-063,Reflection  Center,"222 Chalan Santa Papa, Suite 304",Hagatna,REFLECTION  CENTER OWNERS ASSN.,T1-550 Diesel,1989-01-01 00:00:00,Commercial
+GEPA-UST-064,Alupang Beach Club (IP&E),997 South Marine Drive,Tamuning,"IP&E Holdings, LLC dba IP&E Guam, Incoporated",T1-4000 Gas,1991-12-01 00:00:00,Commercial
+GEPA-UST-065,Shell/Foody's Barrigada (IP&E),446 West Route 8,Barrigada,"IP&E Holdings, LLC dba IP&E Guam, Incoporated","T1-4000 Gas T2-4000 Gas
+T3-4000 Diesel T4-4000 Gas T5-4000 Gas",1988-12-01 00:00:00,Gas Station
+GEPA-UST-066,Shell Chalan Pago (IP&E),"160 North Chalan Kanton Tasi, Route 4",Chalan Pago,"IP&E Holdings, LLC dba IP&E Guam, Incoporated","T1-8000 Gas T2-8000 Gas
+T3-4000 Diesel",1998-11-01 00:00:00,Gas Station
+GEPA-UST-067,Shell/Foody's Dededo (IP&E),184 East Marine Corps Drive,Dededo,"IP&E Holdings, LLC dba IP&E Guam, Incoporated",T1-4000 Diesel T2-4000 Gas T3- 12000 Gas,2004-12-01 00:00:00,Gas Station
+GEPA-UST-068,Shell/Foody's Hagatna (IP&E),"380 East Marine Corps Drive, ROUTE 1",Hagatna,"IP&E Holdings, LLC dba IP&E Guam, Incoporated","T1-12000 Gas T2-6000 Gas
+T3-4000 Diesel",2005-05-01 00:00:00,Gas Station
+GEPA-UST-146,Shell/Foody's Harmon (IP&E),1779 Route 16,Tamuning,"IP&E Holdings, LLC dba IP&E Guam, Incoporated","T1-8000 Gas T2-8000 Gas T3-
+8000 Gas",2018-01-01 00:00:00,Gas Station
+,,,,,,,
+GEPA-UST-070,Hotel Nikko Guam (IP&E),245 Gun Beach Road,Tamuning,,T1-4000 Diesel T2-4000 Diesel,1991-12-01 00:00:00,Commercial
+GEPA-UST-071,Shell/Foody's Mangilao (IP&E),480 South Route 10,Mangilao,"IP&E Holdings, LLC dba
+IP&E Guam, Incoporated","T1-8000 Gas
+T2-8000 Gas",1989-01-01 00:00:00,Gas Station
+GEPA-UST-072,Shell/Foody's NCS (IP&E),"1822 NCS, Finegayan",Dededo,"IP&E Holdings, LLC dba IP&E Guam, Incoporated",T1-4000 Diesel T2-4000 Gas T3-8000 Gas,2002-01-01 00:00:00,Gas Station
+GEPA-UST-140,Shell/Foody's Micro Mall/JIB (IP&E),"1355 Route 1
+North Marine Corps Drive, upper Tumon",Tamuning,"IP&E Holdings, LLC dba IP&E Guam, Incoporated","T1-10000 Gas T2-10000 Gas
+T3-8000 Gas T4-8000 Diesel",2014-03-01 00:00:00,Gas Station
+GEPA-UST-073,Onward Mangilao Golf Course (IP&E),"1810 Route 15, Pagat",Mangilao,"IP&E Holdings, LLC dba IP&E Guam, Incoporated",T1-2500 Diesel T2-4000 Gas,1991-12-01 00:00:00,Gas Station
+GEPA-UST-075,Shell Tamuning (IP&E),"180 Chalan San Antonio, Route 14",Tamuning,"IP&E Holdings, LLC dba IP&E Guam, Incoporated",T1-12000 Gas T2-12000 Gas T3-12000 Gas,1991-12-01 00:00:00,Gas Station
+GEPA-UST-076,Shell Tiyan (IP&E),"111 Tiyan, Route 10",Barrigada,"IP&E Holdings, LLC dba IP&E Guam, Incoporated",T1-4000 Gas T2-8000 Gas,2002-07-01 00:00:00,Gas Station
+GEPA-UST-077,Shell/Foody's Tumon (IP&E),"280 North Marine Corps Drive, Route 1",Tamuning,"IP&E Holdings, LLC dba IP&E Guam, Incoporated",T1-8000 Gas T2-4000 Diesel T3-8000 Gas T4-8000 Gas,1989-12-01 00:00:00,Gas Station
+GEPA-UST-078,Shell/Foody's Yigo (IP&E),"214 Chalan Pale Ramon Haya, ROUTE 1",Yigo,"IP&E Holdings, LLC dba IP&E Guam, Incoporated","T1-8000 Gas T2-12000 Gas
+T3-6000 Diesel",1994-12-01 00:00:00,Gas Station
+GEPA-UST-079,Sheraton Laguna Guam Resort,470 Farenholt Avenue,Tamuning,,T1-6000 Diesel T2-6000 Diesel,1989-11-30 00:00:00,Hotel
+GEPA-UST-080,Hyatt Regency Guam (SPPC),115 San Vitores Road,Tamuning,South Pacific Petroleum Corporation,T1-10000 Diesel T2-10000 Diesel,1993-04-01 00:00:00,Commercial
+GEPA-UST-081,Leo Palace Resort (SPPC),Mannengon  Hills,Yona,South Pacific Petroleum Corporation,"T1-1000 LPG T2-1000 LPG T3-500 LPG T4-6000 Gas
+T5-6000 Diesel",1992-09-01 00:00:00,Commercial
+GEPA-UST-083,Lufthansa Service (LSG) (SPPC),166 Guerrero Street Harmon Industrial Park,Tamuning,South Pacific Petroleum Corporation,T1-2500 Diesel,1993-09-01 00:00:00,Commercial
+GEPA-UST-084,76 Agat Station (SPPC),"Route 2
+Lot 33-1-1-1 & Lot 33-1-2-
+1 Agat",Agat,South Pacific Petroleum Corporation,T1-10000 Gas T2-8000 Diesel T3-12000 Gas,1994-11-01 00:00:00,Gas Station
+GEPA-UST-085,76 Airport Station (SPPC),Intersections of Route 1 and 10A,Tamuning,South Pacific Petroleum Corporation,T1-10000 Gas T2-8000 Diesel T3-12000 Gas,1994-09-01 00:00:00,Gas Station
+GEPA-UST-086,76 Anigua Station (SPPC),Route 1,Anigua,South Pacific Petroleum Corporation,T1-12000 Gas T2-10000 Diesel T3-12000 Gas,1992-04-01 00:00:00,Gas Station
+GEPA-UST-087,76 Barrigada Station (SPPC),Intersections of Route 8 and 10,Barrigada,South Pacific Petroleum Corporation,T1-10000 Diesel T2-12000 Gas T3-12000 Gas,1992-03-01 00:00:00,Gas Station
+GEPA-UST-088,76 Cabras Station (SPPC),"Cabras Road, Route 11
+Lot 2 Lot 3A Tract 245 Cabras Island",Piti,South Pacific Petroleum Corporation,T1-4000 Gas,1991-11-01 00:00:00,Gas Station
+GEPA-UST-089,76 Dededo Station (SPPC),Route 1,Dededo,South Pacific Petroleum Corporation,T1-10000 Diesel T2-12000 Gas T3-12000 Gas,1990-03-01 00:00:00,Gas Station
+GEPA-UST-090,76 Malojloj Station (SPPC),Route 4,Inarajan,South Pacific Petroleum Corporation,"T1-6000 Diesel
+T2-8000 Gas T3-8000 Gas",1992-04-01 00:00:00,Gas Station
+GEPA-UST-091,76 Ocean Vista Station (SPPC),Intersections of Route 10A and 16,Barrigada,South Pacific Petroleum Corporation,"T1-12000 Gas T2-12000 Gas
+T3-10000 Diesel",1992-08-01 00:00:00,Gas Station
+GEPA-UST-092,76 Piti Station (SPPC),396 Marine Corps Drive,Piti,South Pacific Petroleum Corporation,T1-6000 Gas T2-3000 Gas,2010-01-01 00:00:00,Gas Station
+GEPA-UST-093,76 Sinajana Station (SPPC),Route 4,Sinajana,South Pacific Petroleum Corporation,"T1-12000 Gas
+T2-10000 Diesel T3-12000 Gas",1991-10-01 00:00:00,Gas Station
+GEPA-UST-094,76 Ypao Station (SPPC),Intersections of Route 1 and 10B,Tamuning,South Pacific Petroleum Corporation,"T1-12000 Gas T2-12000 Gas
+T3-4000 Diesel",1990-08-01 00:00:00,Gas Station
+GEPA-UST-095,Paradisu Estates (SPPC),Cross Island Road Route 4A,Talofofo,"South Pacific Petroleum
+Corporation",T1-1000 LPG,2009-05-01 00:00:00,Residential
+GEPA-UST-096,Talo Verde Estates (SPPC),Ypao Road,Tamuning,South Pacific Petroleum Corporation,T1-1000 LPG T2-1000 LPG,2008-01-01 00:00:00,Residential
+GEPA-UST-097,Bldg. 303 NEX Autoport,"Building 303 Bullard Avenue, NCTAMS",Dededo,U.S. Naval Forces Marianas,T1-8000 Gas T2-5000 Gas T3-4000 Gas,1997-06-01 00:00:00,Gas Station
+GEPA-UST-099,University of Guam,UOG Station,Mangilao,Government of Guam,"T1-4000 Diesel T2-2500 Diesel
+T3-2500 Diesel","01-Nov-91
+01-Nov-95",State Government
+GEPA-UST-100,East West Business Center,744 North Marine Dr.,Tamuning,"EAST WEST BUSINESS
+CENTER","T1-2500 Diesel
+T2-1000 Diesel",1995-11-01 00:00:00,Commercial
+GEPA-UST-101,Pacific Star Resort & Spa,627B Pale San Vitores Road,Tamuning,Marianas Properties LLC,"T1-15000 Diesel
+T2-15000 Diesel",1986-12-01 00:00:00,Commercial
+GEPA-UST-102,Docomo Pacific - Agana,173 Aspinall Avenue,Hagatna,Docomo Pacific,T1-2500 Diesel,1994-02-01 00:00:00,Utilities
+GEPA-UST-103,Docomo Pacific - Yona,"Lot # 177-1 Pulantat 570 Chalan
+Teloforo",Yona,Docomo Pacific,T1-8000 Diesel,1998-08-01 00:00:00,Utilities
+GEPA-UST-104,"Triple J Enterprises, Inc.",470 N. Marine Corps Drive,Tamuning,"Triple J Enterprise,
+Incorporated","T1-2500 Diesel
+T2-1000 Used Oil",2005-12-01 00:00:00,Auto  Dealership
+GEPA-UST-105,MVP Business Complex,"T232 B21122, Sinijana 777 Route 4",Sinajana,Mark V. Pangilinan Enterprises,T1-1000 Diesel,,Commercial
+GEPA-UST-106,GTA Mangilao Remote,Intersection of Route 10 & Route 15,Mangilao,"TeleGuam  Holdings, LLC. GTA TeleGuam",T1-1200 Diesel,1989-11-01 00:00:00,Utilities
+GEPA-UST-107,GTA Tumon Central Office,624 N. Marine Corps Drive,Tamuning,"TeleGuam  Holdings, LLC. GTA TeleGuam",T1-6000 Diesel,1986-06-01 00:00:00,Utilities
+GEPA-UST-108,GTA Agana Central Office,"Intersection of Route 4 & West O'Brien Drive      241 Martyr
+Street",Hagatna,"TeleGuam  Holdings, LLC. GTA TeleGuam",T1-4000 Diesel,2000-05-01 00:00:00,Utilities
+GEPA-UST-109,GTA  Dededo Central Office,"Intersection of Route 1 & Route
+27",Dededo,"TeleGuam  Holdings, LLC.
+GTA TeleGuam",T1-4000 Diesel,1986-06-01 00:00:00,Utilities
+GEPA-UST-110,AAFES Gas Station & KIOSK,430 Army Drive,Barrigada,Guam Army National Guard,T1-10000 Gas T2-15000 Gas,2010-04-01 00:00:00,Gas Station
+GEPA-UST-111,Guam Judicial Center,120 West O'Brien,Hagatna,Government of Guam,T1-4000 Diesel,1990-01-01 00:00:00,Local Government
+GEPA-UST-113,Agana Beach Condominium,"Lot No. 2121-1-4
+Tamuning",Tamuning,"Agana Beach Condominium
+Homeowners Association",T1-4000 Diesel,1992-12-01 00:00:00,Commercial
+GEPA-UST-114,Coast 360 Federal Credit Union,450 Route 8,Maite,"Coast 360 Federal Credit
+Union",T1-2500 Diesel,2010-03-01 00:00:00,Commercial
+GEPA-UST-115,Villa Kanton Tasi Condominium,301 Frank Cushing Way,Tamuning,Villa Kanton Tasi Homeowners Association,T1-2500 Diesel,2001-02-06 00:00:00,Residential
+GEPA-UST-116,Agat New SPS 1,Route 2 (beside STP),Agat,Government of Guam,T1-10000 Diesel,1997-07-01 00:00:00,State Government
+GEPA-UST-117,Agat New SPS 2 (Tipalao),Route 2A,Agat,Government of Guam,T1-10000 Diesel,1997-05-01 00:00:00,State Government
+GEPA-UST-119,Chaligan/Taleyfac  SPS,Route 2 across Agat Marina,Agat,Government of Guam,T1-6000 Diesel,1997-10-01 00:00:00,State Government
+GEPA-UST-120,Chaot SPS - New,"Afame, Sinajan Route 4",Sinajana,Government of Guam,T1-4000 Diesel,1999-06-01 00:00:00,State Government
+GEPA-UST-121,"Commercial Port Sewer Pump
+Station - New","Cabras Highway, Piti",Piti,Government of Guam,T1-2500 Diesel,2001-12-01 00:00:00,State Government
+GEPA-UST-122,Leyang Sewer Pump Station,Off Dairy Road,Mangilao,Government of Guam,T1-2500 Diesel,2006-02-01 00:00:00,State Government
+GEPA-UST-123,SureStay  Hotel,"122 Hasalao Street, Route 8",Barrigada,Tent Corporation,T1-1000 Diesel,1991-12-01 00:00:00,Commercial
+GEPA-UST-124,"NEX NRMC, Building 5, Autoport","Building #5, Naval Regional Medical Center",Agana Heights,U.S. Naval Forces Marianas,T1-6000 Gas T2-10000 Gas,1990-08-01 00:00:00,Gas Station
+GEPA-UST-126,Laguna Pago Bay (SPPC),Route 4,Yona,South Pacific Petroleum Corporation,T1-2000 LPG T2-2000 LPG,2009-12-01 00:00:00,Residential
+GEPA-UST-127,"POL Fuel Pump House I & Reciept
+Pad","B-26200 & 26210 Marianas
+Blvd.",Yigo,Andersen AFB,T1-4000 Jet Fuel T2-4000 Jet Fuel,"01-Dec-00
+01-Feb-01",Federal Military
+GEPA-UST-127,POL Fuel Pump House 2,Bldg 19021 Arc Light Blvd. Andersen AFB,,Andersen AFB,T1-4000 Jet Fuel,2001-11-01 00:00:00,Federal Military
+GEPA-UST-127,Fuel Pump Houses 3 & 4,"B-2590 & 2595 Marianas Blvd,
+Andersen AFB",Yigo,Andersen AFB,"T1-4000 Jet Fuel
+T2-4000 Jet Fuel",2005-01-01 00:00:00,Federal Military
+GEPA-UST-128,Sandcastle  Incorporated,1199 Pale San Vitores Road,Tamuning,Sandcastle  Incorporated,T1-10000 Diesel,1990-10-01 00:00:00,Commercial
+GEPA-UST-129,First Hawaiian Bank,"400 Route 8 MongMong Maite
+Branch",MongMong,First Hawaiian Bank,T1-8000 Diesel,1993-10-01 00:00:00,Commercial
+GEPA-UST-130,Guam  Homeland Security/OCD,221-B Chalan Payasyo,Agana Heights,Government of Guam,T1-2500 Diesel,2007-09-01 00:00:00,State Government
+GEPA-UST-131,SKILLED NURSING UNIT,449 North Sabana Drive,Barrigada,Government of Guam,T1-8000 Diesel,1995-04-01 00:00:00,State Government
+GEPA-UST-132,"MENTAL HEALTH &
+SUBSTANCE ABUSE","790 Gov. Carlos G. Camacho
+Road",Tamuning,Government of Guam,T1-1000 Diesel,1993-12-01 00:00:00,State Government
+GEPA-UST-135,Layon  Landfill,1130 Chalan Layon Inarajan,Inarajan,Government of Guam,T1-1000 OWS,2011-01-01 00:00:00,State Government
+GEPA-UST-137,Guam Area Fuel Division,"Building 1700 Marine Corps
+Drive",Piti,U.S. Naval Forces Marianas,"T1 thru T18-40800000
+Hazardous  Substance",1952-12-01 00:00:00,"U.S. Naval Forces
+Marianas"
+GEPA-UST-137,Guam Area Fuel Division,Building 1700 Marine Corps Drive,Piti,U.S. Naval Forces Marianas,"T19 & T20-4200000
+Hazardous  Substance",1954-12-01 00:00:00,U.S. Naval Forces Marianas
+GEPA-UST-137,Guam Area Fuel Division,"Building 1700 Marine Corps
+Drive",Piti,U.S. Naval Forces Marianas,"T21 & T22-4200000
+Hazardous  Substance",1957-12-01 00:00:00,"U.S. Naval Forces
+Marianas"
+GEPA-UST-137,Guam Area Fuel Division,Building 1700 Marine Corps Drive,Piti,U.S. Naval Forces Marianas,"T23 thru T27-12000000
+Hazardous  Substance",1960-12-01 00:00:00,U.S. Naval Forces Marianas
+GEPA-UST-138,"Andy III, Tanks 19,20,21,22,23,24","Bldg. 14513 - 14510
+Andy III Tank Farm, AAFB",Yigo,Andersen AFB,"T1 thru T6-26656729
+Hazardous  Substance",1984-12-01 00:00:00,Andersen AFB
+GEPA-UST-139,Guam Memorial Hospital Authority  (Decon),850 Governor Carlos Camacho Road,Tamuning,Government of Guam,T1-1000  Hazardous Substance,2013-06-01 00:00:00,Government of Guam
+GEPA-UST-141,NEX  Autoport/Minimart Service Station B1760,Building 1760 Marine Corps Drive,Santa Rita,U.S. Naval Forces Marianas,T1-20000 Gas T2-10000 Diesel T3-20000 Gas T4-12000 Gas,,Gas Station
+GEPA-UST-142,Applebee's  Restaurant,341 Chalan San Antonio Unit A,Tamuning,"CAM Properties, LLC",T1-600 Diesel,2014-07-01 00:00:00,Commercial
+GEPA-UST-143,IHOP,"249 Chalan San Antonio
+Building 3",Tamuning,"CAM Properties, LLC",T1-1000 Diesel,2015-06-01 00:00:00,Commercial
+GEPA-UST-144,Ambros Incorporated  (SPPC),"124 Chalan Achote, Harmon Industrial Park",Tamuning,South Pacific Petroleum Corporation,"T1-2000 Gas
+T2-4000 Diesel",2015-04-01 00:00:00,Commercial
+GEPA-UST-145,Westin Resort Guam (IP&E),105 Gun Beach Road,Tamuning,"IP&E Holdings, LLC dba",T1-8000 Diesel,1992-02-01 00:00:00,Commercial
+GEPA044,"Naval Hospital (decon) Guam Regional Medical City
+Southern  Regional Community Health Center
+GPA Substation","Building #5, Naval Regional Medical Center","Agana Heights Dededo
+Inarajan Talofofo",U.S. Naval Forces Marianas,T1-2500  Hazardous Substance,"18-03-14
+5-03-14
+1-08-11
+1-12-06",U.S. Naval Forces Marianas
+"GEPA045
+GEPA046 GEPA047",,"133 Route 3
+Route 4 Route 4A",,"Guam Regional Medical City
+Government of Guam Government of Guam Government of Guam",T1-550  Hazardous Substance,,Guam Regional Medical City
+,,,,,T1-1000  Hazardous Substance,,Government of Guam
+,,,,,T1-2000  Hazardous Substance,,Government of Guam
+GEPA048,GIAA,Chalan Paseheru,Tamuning,,"T1 thru T5 - 25000
+Hazardous  Substance",2000-06-01 00:00:00,Government of Guam
+GEPA049,Red Horse Gas Station,Ritidian,Dededo,U.S. Naval Forces Marianas,"T1-5000 Diesel
+T2-2500 Gas",2011-02-24 00:00:00,"U.S. Naval Forces
+Marianas"
+GEPA050,Marine Wing Support Squadron Facility,AAFB North Ramp,AAFB Yigo,U.S. Naval Forces Marianas,"T1-1000 OWS
+T2-5000  Hazardous Substance",2016-12-30 00:00:00,U.S. Naval Forces Marianas

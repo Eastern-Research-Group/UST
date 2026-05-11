@@ -1,0 +1,58 @@
+RankingAnswerId,RankingCategoryId,RankingQuestionId,RankingQuestion,Answer,Points,Time of entry.,Entered by,RankingAnswerOrder
+1,0,1,DissolvedConcentrations,Above MCLs or site-specific levels,30.0,2004-02-12 08:43:30,,1
+2,0,1,DissolvedConcentrations,Below MCLs or site-specific levels,20.0,2004-02-12 08:43:43,,2
+3,0,1,DissolvedConcentrations,Non-detect,0.0,2004-02-12 08:43:58,,3
+4,0,2,AquiferUsage,"Currently used for drinking water, designated sole source aquifer",25.0,2004-02-12 08:48:08,,1
+5,0,2,AquiferUsage,"Currently used for drinking water, not sole-source",15.0,2004-02-12 08:48:32,,2
+6,0,2,AquiferUsage,"Currently used non-drinking water, designated sole source aquifer",20.0,2004-02-12 13:27:10,,3
+7,0,2,AquiferUsage,"Currently used non-drinking water, not sole source",10.0,2004-02-12 13:27:33,,4
+8,0,2,AquiferUsage,"Potential use, designated sole source aquifer",15.0,2004-02-12 13:27:53,,5
+9,0,2,AquiferUsage,"Potential use, not sole source",5.0,2004-02-12 13:28:23,,6
+10,0,2,AquiferUsage,No probable or currently planned use,0.0,2004-02-12 13:28:47,,7
+11,0,3,SoilConcentrations,"> 10 times above action levels for indicator compounds or > 10,000 ppm TPH",40.0,2004-02-12 13:33:11,,1
+12,0,3,SoilConcentrations,"Up to 10 times above action levels for indicator compounds or > 1,000 ppm TPH",30.0,2004-02-12 13:33:56,,2
+13,0,3,SoilConcentrations,Above action levels for indicator compounds or over 100 ppm TPH,20.0,2004-02-12 13:34:21,,3
+14,0,3,SoilConcentrations,Below action levels for indicator compounds and below 100 ppm TPH,10.0,2004-02-12 13:34:27,,4
+15,0,3,SoilConcentrations,Non detect for indicator compounds and TPH,0.0,2004-02-12 13:35:05,,5
+16,0,4,FireExplosionHazards,Yes,100.0,2004-02-12 13:37:51,,1
+17,0,4,FireExplosionHazards,No,0.0,2004-02-12 13:37:56,,2
+18,0,5,PublicHealthHazard,Yes,100.0,2004-02-12 13:38:19,,1
+19,0,5,PublicHealthHazard,No,0.0,2004-02-12 13:38:25,,2
+20,0,6,SourceType,Unknown,20.1,2004-02-12 13:39:06,,1
+21,0,6,SourceType,Solvent,20.0,2004-02-12 13:39:16,,2
+22,0,6,SourceType,Gasoline,20.0,2004-02-12 13:39:29,,3
+23,0,6,SourceType,Diesel and heating oil,5.0,2004-02-12 13:39:41,,4
+24,0,6,SourceType,Waste oil and lubricating oils,5.0,2004-02-12 13:39:55,,5
+25,0,7,ReleaseVolumeInGallons,Unknown,20.1,2004-02-12 13:40:48,,1
+26,0,7,ReleaseVolumeInGallons,>1000,20.0,2004-02-12 13:40:59,,2
+27,0,7,ReleaseVolumeInGallons,500-1000,10.0,2004-02-12 13:41:15,,3
+28,0,7,ReleaseVolumeInGallons,<500,5.0,2004-02-12 13:41:31,,4
+29,0,8,DepthToGroundWater,Unknown,20.1,2004-02-12 13:42:06,,1
+30,0,8,DepthToGroundWater,<10 feet,35.0,2004-02-12 13:42:16,,2
+31,0,8,DepthToGroundWater,10-30 feet,20.0,2004-02-12 13:42:38,,3
+32,0,8,DepthToGroundWater,30-50 feet,10.0,2004-02-12 13:42:49,,4
+33,0,8,DepthToGroundWater,>50 feet,5.0,2004-02-12 13:43:00,,5
+34,0,9,WaterSupplyWellProximity,Known impact to well,100.0,2004-02-12 13:44:27,,1
+35,0,9,WaterSupplyWellProximity,Unknown,35.1,2004-02-12 13:44:36,,2
+36,0,9,WaterSupplyWellProximity,< 1/4 mile,35.0,2004-02-12 13:44:47,,3
+37,0,9,WaterSupplyWellProximity,1/4 - 1/2 mile,15.0,2004-02-12 13:45:56,,4
+38,0,9,WaterSupplyWellProximity,1/2 - 1 mile,5.0,2004-02-12 13:46:05,,5
+39,0,9,WaterSupplyWellProximity,> 1 mile,0.0,2004-02-12 13:46:15,,6
+42,0,10,SurfaceWaterImpactProximity,Known water impact,100.0,2004-02-12 13:47:57,,1
+43,0,10,SurfaceWaterImpactProximity,Unknown,35.1,2004-02-12 13:48:09,,2
+44,0,10,SurfaceWaterImpactProximity,< 1/4 mile,35.0,2004-02-12 13:48:16,,3
+45,0,10,SurfaceWaterImpactProximity,1/4 - 1/2 mile,15.0,2004-02-12 13:48:28,,4
+46,0,10,SurfaceWaterImpactProximity,1/2 - 1 mile,5.0,2004-02-12 13:48:37,,5
+47,0,10,SurfaceWaterImpactProximity,> 1 mile,0.0,2004-02-12 13:48:47,,6
+48,0,11,AdditionalMigrationPathways,Fractured rock,10.0,2004-02-12 13:50:05,,1
+49,0,11,AdditionalMigrationPathways,"Other geologic path (faults, fractures, etc.)",10.0,2004-02-12 13:50:15,,2
+50,0,11,AdditionalMigrationPathways,Other,10.0,2004-02-12 13:50:22,,3
+51,0,11,AdditionalMigrationPathways,,0.0,2004-02-12 13:50:26,,4
+52,0,12,OtherConsiderations,Yes,20.0,2004-02-12 13:52:41,,1
+53,0,12,OtherConsiderations,Yes,10.0,2004-02-12 13:52:45,,2
+54,0,12,OtherConsiderations,No,0.0,2004-02-12 13:52:49,,3
+55,0,13,IrreplaceableFuelSupply,No,0.0,2004-02-12 13:53:17,,1
+56,0,13,IrreplaceableFuelSupply,Yes,20.0,2004-02-12 13:53:20,,2
+63,0,1,DissolvedConcentrations,Unknown,0.1,2005-05-20 10:38:34,,4
+64,0,2,AquiferUsage,Unknown,0.1,2005-05-20 10:39:34,,8
+65,0,3,SoilConcentrations,Unknown,0.1,2005-05-20 10:40:13,,6
