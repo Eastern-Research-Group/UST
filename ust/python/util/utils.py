@@ -36,7 +36,7 @@ def connect_db(db_name=config.db_name, schema='public'):
     return conn
 
 
-def get_engine(db_name=config.db_name, schema=None):
+def get_engine(db_name=config.db_name, schema='public'):
     try:
         engine = create_engine(config.db_connection_string + db_name, connect_args={'options': f'-csearch_path="{schema}"'})
         return engine
@@ -231,6 +231,11 @@ def delete_all_release_data(control_id):
     process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_release_substance', cur.rowcount)
 
+    sql = """delete from public.ust_release_geocode 
+            where ust_release_id in (select ust_release_id from ust_release where release_control_id = %s)"""
+    process_sql(conn, cur, sql, params=(control_id,))
+    logger.info('Deleted %s rows from public.ust_release_geocode', cur.rowcount)
+
     sql = """delete from public.ust_release where release_control_id = %s"""
     process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_release', cur.rowcount)
@@ -274,7 +279,7 @@ def delete_all_ust_data(control_id):
     process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_compartment_substance', cur.rowcount)
 
-    sql = """delete from ust_compartment
+    sql = """delete from public.ust_compartment
              where ust_tank_id in 
                 (select ust_tank_id from public.ust_tank 
                 where ust_facility_id in
@@ -282,7 +287,7 @@ def delete_all_ust_data(control_id):
     process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_compartment', cur.rowcount)
 
-    sql = """delete from ust_tank_dispenser
+    sql = """delete from public.ust_tank_dispenser
              where ust_tank_id in 
                 (select ust_tank_id from public.ust_tank 
                 where ust_facility_id in
@@ -290,7 +295,7 @@ def delete_all_ust_data(control_id):
     process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_tank_dispenser', cur.rowcount)
 
-    sql = """delete from ust_tank_substance 
+    sql = """delete from public.ust_tank_substance 
              where ust_tank_id in 
                 (select ust_tank_id from public.ust_tank 
                 where ust_facility_id in
@@ -298,19 +303,25 @@ def delete_all_ust_data(control_id):
     process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_tank_substance', cur.rowcount)
 
-    sql = """delete from ust_tank 
+    sql = """delete from public.ust_tank 
              where ust_facility_id in
                  (select ust_facility_id from public.ust_facility where ust_control_id = %s)"""
     process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_tank', cur.rowcount)
 
-    sql = """delete from ust_facility_dispenser
+    sql = """delete from public.ust_facility_dispenser
              where ust_facility_id in
                  (select ust_facility_id from public.ust_facility where ust_control_id = %s)"""
     process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_facility_dispenser', cur.rowcount)
 
-    sql = """delete from ust_facility where ust_control_id = %s"""
+    sql = """delete from public.ust_facility_geocode
+             where ust_facility_id in
+                 (select ust_facility_id from public.ust_facility where ust_control_id = %s)"""
+    process_sql(conn, cur, sql, params=(control_id,))
+    logger.info('Deleted %s rows from public.ust_facility_geocode', cur.rowcount)
+
+    sql = """delete from public.ust_facility where ust_control_id = %s"""
     process_sql(conn, cur, sql, params=(control_id,))
     logger.info('Deleted %s rows from public.ust_facility', cur.rowcount)
 
