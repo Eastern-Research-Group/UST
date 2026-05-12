@@ -207,8 +207,9 @@ class Unregulated:
 					where tank_capacity_gallons < 1100 and substance_group in ('Diesel','Gasoline')
 					on conflict do nothing"""
 			utils.process_sql(self.conn, self.cur, sql)
-			logger.info('Inserted %s rows into %s.%s due to tank capacity <1100 gallones in a farm or residence facility', self.cur.rowcount, self.dataset.schema, self.unreg_table)
+			logger.info('Inserted %s rows into %s.%s due to tank capacity <1100 gallons in a farm or residence facility', self.cur.rowcount, self.dataset.schema, self.unreg_table)
 			self.conn.commit()
+
 
 
 	def insert_facilities(self):
