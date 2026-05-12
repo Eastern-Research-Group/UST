@@ -1,3 +1,4 @@
+--todo: working through ut_release.get_release_status and release status mapping table
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Update the control table 
@@ -39,6 +40,29 @@ select count( "DERRID") from ut_lust;
 
 select distinct "NFAFORM" from ut_lust order by 1;
 
+select release_comment from public.ust_release;
+
+
+delete from ut_lust where "FEDREG" = 'No';
+
+
+
+--derive release status from multiple fields in the get_release_status funtion
+drop table erg_release_status;
+
+create table erg_release_status as
+select "LUSTKEY", get_release_status("LUSTKEY") release_status
+from ut_lust;
+
+
+
+select  * from erg_release_status where release_status is null;
+;
+select * from release_element_mapping where release_element_mapping_id = 287;
+
+select count(*) from ut_lust_1115;
+5631
+5643
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,11 +93,15 @@ insert into release_element_mapping (release_control_id, epa_table_name, epa_col
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (11,'ust_release','latitude','fac','DDLat',null);
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (11,'ust_release','longitude','fac','DDLon',null);
 
-insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (11,'ust_release','release_status_id','ut_lust','NFAFORM','Please verify this field can be used.  NFAFORM to have status values about where it is in the process.  The following values are available: null, RCL/MCL, blank, closeout Checklist,Internal Closeout Memo,Risk Assessment, Tier 1 Worksheet,Tier 2 Risk Assessment,Tier 2 Worksheet,Transfer - DWQ,UST NFA,UST NFA, TIER 1 W/INFO, CHECKLIST.' );
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (11,'ust_release','release_status_id','erg_release_status','release_status','ERG created table erg_release_status to calculate release status from three columns: "CLOSURETYPE","DATECLOSE","NFAFORM". See deriviation logic in get_release_status function.' );
 
 
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (11,'ust_release','reported_date','ut_lust','NOTIFICATI',null);
 insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (11,'ust_release','nfa_date','ut_lust','DATECLOSE',null);
+
+select * from ut_release.ut_lust;
+
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (11,'ust_release','release_comment','DEPTHGW','ut_lust','Mapped 4 groundwater related fields to this: DEPTHGW - This is the general depth to groundwater at the release site.  GWFLOWDIR1 - This is the groundwater flow direction at the release site.  GWFLOWDIR2 - An additional groundwater flow direction if it fluctuates seasonally, we can capture that here. CAPH2OTREA - This is a volume of groundwater treated by corrective action, generally used for pump and treat technologies.');
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -108,7 +136,6 @@ select distinct
 from ut_release."fac" order by 1;
 
 
-select  * from public.facility_types;
 
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (322, 'Air Taxi (Airline)', 'Aviation/airport (non-rental car)', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (322, 'Aircraft Owner', 'Aviation/airport (non-rental car)', null);
@@ -132,6 +159,15 @@ insert into release_element_value_mapping (release_element_mapping_id, organizat
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (322, 'Truck/Transporter', 'Trucking/transport/fleet operation', null);
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (322, 'Utilities', 'Utility', null);
 
+select * from wv_release.erg_release_status;
+;
+select  * from public.facility_types;
+
+update release_element_value_mapping 
+set epa_value = 'State/local government', programmer_comments=null
+where release_element_mapping_id = 322
+and organization_value = 'State Government';
+
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --release_status_id
 
@@ -149,33 +185,19 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 11 and epa_column_name = 'release_status_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 325 || ', ''' || "NFAFORM" || ''', '''', null);'
-from ut_release."ut_lust" order by 1;
+	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 342 || ', ''' || "release_status" || ''', '''', null);'
+from ut_release."erg_release_status" order by 1;
 
 /*below I have mapped the ones I can take a reasonable guess at, but I've inserted nulls for the ones I have no idea about 
 the state codes are pretty obtuse so I'm not very confident of my mapping on any of them; therefore I've added a "please verify" comment 
 for the ones I took a stab at mapping, as well as "MAPPING NEEDED" for those I didn't. This way, when the mapping is exported to
 the review template, EPA and the state have a visual indicator that we need their input for all of them. */
 
-select  from release_element_value_mapping where release_element_mapping_id= 325;
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, '< RCL/MCL', null, 'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, '<blank>', null, 'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, '<Blank>', null, 'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'closeout Checklist', 'No further action', 'Please verify');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'Closeout Checklist', 'No further action', 'Please verify');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'internal Closeout Memo', 'No further action', 'Please verify');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'Internal Closeout Memo', 'No further action', 'Please verify');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'Risk Assessment', null, 'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'tier 1 Worksheet', null, 'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'Tier 1 Worksheet', null,'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'Tier 1 Worksheet w/ Supp. Info', null, 'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'Tier 2 Risk Assessment', null, 'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'Tier 2 w/Institutional Controls',null, 'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'Tier 2 Worksheet', null, 'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'Transfer - DWQ', null,'MAPPING NEEDED');
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'UST NFA', 'No further action', null);
-insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (325, 'UST NFA, TIER 1 W/INFO, CHECKLIST', 'No further action', 'Please verify');
+select *  from release_element_value_mapping where release_element_mapping_id= 342;
 
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (342, 'Active: corrective action', 'Active: corrective action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (342, 'No further action', 'No further action', null);
+insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (342, 'Other', 'Other', null);
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -192,7 +214,9 @@ from v_release_bad_mapping
 where release_control_id = 11 order by 1, 2;
 --!!!if there are results from this query, fix them!!!
 
+select * from public.release_control
 --if not, it's time to write the queries that manipulate the state's data into EPA's tables 
+Download csvs from https://opendata.gis.utah.gov/datasets/utah::utah-petroleum-storage-tanks/about, https://opendata.gis.utah.gov/datasets/utah::utah-deqmap-lust/about, and exported csv from https://services1.arcgis.com/99lidPhWCzftIe9K/ArcGIS/rest/services/FacilityPST/FeatureServer/0/.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -262,6 +286,19 @@ order by column_sort_order;
 !!! NOTE: Some states do not include State or EPA Region in their database, but it is generally
     safe for you to insert these yourself, so add them! */
 
+
+select * from public.ust_release where release_comment is not null;
+select column_name from information_schema.columns
+             where table_schema = 'public' and table_name = 'ust_release'
+             order by ordinal_position
+             
+ select * from release_template_data_tables
+ 
+ select column_name from information_schema.columns
+             where table_schema = 'public' and table_name = 'v_ust_release'
+             order by ordinal_position
+ release_comment
+             select * from ust_release;
 create or replace view ut_release.v_ust_release as 
 select distinct 
 "FACILITYID"::character varying(50) as facility_id,
@@ -278,12 +315,18 @@ release_status_id as release_status_id,
 "NOTIFICATI"::date as reported_date,
 "DATECLOSE"::date as nfa_date,
 8 as epa_region, 
-'UT' as state
+'UT' as state,
+"DEPTHGW" || ' - is the general depth to groundwater at the release site. '||"GWFLOWDIR1"|| ' - is the groundwater flow direction at the release site.   '||"GWFLOWDIR2" ||' - An additional groundwater flow direction if it fluctuates seasonally.  '||"CAPH2OTREA"|| ' - is a volume of groundwater treated by corrective action, generally used for pump and treat technologies.' as release_comment
 from ut_lust y 
 join fac x on x."FacilityID"  = y."FACILITYID"
 left join ut_release.v_release_status_xwalk	rs on y."NFAFORM" = rs.organization_value 
 left join ut_release.v_facility_type_xwalk	ft on x."FACILITYDE" = ft.organization_value 
 where  x."RELEASE" > 0;
+
+select distinct "NFAFORM"  from ut_lust;
+
+select * from ut_lust;
+insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values (11,'ust_release','release_comment','DEPTHGW','ut_lust','Mapped 4 groundwater related fields to this: DEPTHGW - This is the general depth to groundwater at the release site.  GWFLOWDIR1 - This is the groundwater flow direction at the release site.  GWFLOWDIR2 - An additional groundwater flow direction if it fluctuates seasonally, we can capture that here. CAPH2OTREA - This is a volume of groundwater treated by corrective action, generally used for pump and treat technologies.');
 
 
 select * from  ut_release.v_ust_release;;
@@ -364,10 +407,7 @@ delete_existing = False # can set to True if there is existing release data you 
 --Quick sanity check of number of rows inserted:
 select table_name, num_rows from v_release_table_row_count
 where release_control_id = 11 order by sort_order;
-ust_release	7177
-ust_release_substance	4711
-ust_release_cause	7117
-
+ust_release	5493
 
 --------------------------------------------------------------------------------------------------------------------------
 --export template

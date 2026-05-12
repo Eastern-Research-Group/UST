@@ -1,0 +1,68 @@
+create or replace view "nc_release"."v_lust_geocode" as
+ SELECT DISTINCT lust_old."FacilityID",
+    lust_old."TankIDAssociatedwithRelease",
+    lust_old."LUSTID",
+    lust_old."FederallyReportableRelease",
+    lust_old."SiteName",
+    lust_old."SiteAddress",
+    lust_old."SiteAddress2",
+    lust_old."SiteCity",
+    lust_old."Zipcode",
+    lust_old."County",
+    lust_old."State",
+    lust_old."EPARegion",
+    lust_old."FacilityType",
+    lust_old."TribalSite",
+    lust_old."Tribe",
+        CASE
+            WHEN (lust_old.gc_latitude IS NOT NULL) THEN lust_old.gc_latitude
+            ELSE lust_old."Latitude"
+        END AS "Latitude",
+        CASE
+            WHEN (lust_old.gc_longitude IS NOT NULL) THEN lust_old.gc_longitude
+            ELSE lust_old."Longitude"
+        END AS "Longitude",
+    lust_old.gc_coordinate_source,
+    lust_old.gc_address_type,
+    lust_old."CoordinateSource",
+    lust_old."LUSTStatus",
+    lust_old."ReportedDate",
+    lust_old."NFADate",
+    lust_old."MediaImpactedSoil",
+    lust_old."MediaImpactedGroundwater",
+    lust_old."MediaImpactedSurfaceWater",
+    lust_old."SubstanceReleased1",
+    lust_old."QuantityReleased1",
+    lust_old."Unit1",
+    lust_old."SubstanceReleased2",
+    lust_old."QuantityReleased2",
+    lust_old."Unit2",
+    lust_old."SubstanceReleased3",
+    lust_old."QuantityReleased3",
+    lust_old."Unit3",
+    lust_old."SubstanceReleased4",
+    lust_old."QuantityReleased4",
+    lust_old."Unit4",
+    lust_old."SubstanceReleased5",
+    lust_old."QuantityReleased5",
+    lust_old."Unit5",
+    lust_old."SourceOfRelease1",
+    lust_old."CauseOfRelease1",
+    lust_old."SourceOfRelease2",
+    lust_old."CauseOfRelease2",
+    lust_old."SourceOfRelease3",
+    lust_old."CauseOfRelease3",
+    lust_old."HowReleaseDetected",
+    lust_old."CorrectiveActionStrategy1",
+    lust_old."CorrectiveActionStrategy1StartDate",
+    lust_old."CorrectiveActionStrategy2",
+    lust_old."CorrectiveActionStrategy2StartDate",
+    lust_old."CorrectiveActionStrategy3",
+    lust_old."CorrectiveActionStrategy3StartDate",
+    lust_old."ClosedWithContamination",
+    lust_old."NoFurtherActionLetterURL",
+    lust_old."MilitaryDoDSite"
+   FROM archive.lust_old
+  WHERE (((lust_old.organization_id)::text = 'NC'::text) AND (lust_old.control_id = ( SELECT max(lust_control.control_id) AS max
+           FROM archive.lust_control
+          WHERE ((lust_control.organization_id)::text = 'NC'::text))));

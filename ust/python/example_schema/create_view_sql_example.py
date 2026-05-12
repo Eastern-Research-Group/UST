@@ -68,7 +68,7 @@ class ViewSql:
 		self.conn.commit()
 		self.cur.close()
 		self.conn.close()
-		logger.info('Diconnected from database')
+		logger.info('Disconnected from database')
 
 
 	def show_existing_cols(self):
@@ -137,7 +137,7 @@ class ViewSql:
 	def get_existing_cols(self):
 		sql = f"""select column_sort_order as column_id, 
 					epa_column_name, organization_column_name, 
-					selected_column, programmer_comments,
+					selected_column, query_logic,
 					organization_table_name
 			from example.v_{self.dataset.ust_or_release}_table_population_sql
 			where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s
@@ -157,7 +157,7 @@ class ViewSql:
 			epa_column_name = existing_col[1]
 			organization_column_name = existing_col[2]
 			selected_column = existing_col[3]
-			programmer_comments = existing_col[4]
+			query_logic = existing_col[4]
 			organization_table_name = existing_col[5]
 			if not selected_column:
 				selected_column = self.get_column_select_sql(epa_column_name, organization_column_name)
@@ -165,15 +165,15 @@ class ViewSql:
 					selected_column = self.table_aliases[organization_table_name] + '.' + selected_column
 				except KeyError:
 					pass
-			if programmer_comments:
-				programmer_comments = '	  -- ' + programmer_comments
+			if query_logic:
+				query_logic = utils.comment_every_line(query_logic)
 			else:
-				programmer_comments = ''
+				query_logic = ''
 			if column_id == max(self.existing_col_ids):
 				selected_column = selected_column[:-1]
 			existing_cols[column_id] = {'column_name': epa_column_name, 
 			                            'selected_column': selected_column, 
-			                            'programmer_comments': programmer_comments,
+			                            'query_logic': query_logic,
 			                            'organization_table_name': organization_table_name}		
 		return existing_cols
 
@@ -241,6 +241,8 @@ class ViewSql:
 		for index, row in df.iterrows():
 			logger.info('Working on table %s', index)
 			alias = row['alias']
+			print('alias = ' + alias)
+			print("row['table_type'] = " + row['table_type'])
 
 			if alias == 'a':
 				self.from_sql = self.from_sql + self.dataset.schema + '.' + '"' + index + '" ' + alias
@@ -260,15 +262,16 @@ class ViewSql:
 			elif row['table_type'] == 'join' or row['table_type'] == 'id-join':
 				from_table = index
 
-				# if self.table_name == 'ust_compartment':
-				# 	epa_table_name = 'ust_tank'
-				# 	search_table = 'organization_table_name'
+				if self.table_name == 'ust_compartment':
+					epa_table_name = 'ust_tank'
+					search_table = 'organization_table_name'
 				# elif self.table_name == 'ust_piping':
+					
 				# 	epa_table_name = 'ust_compartment'
 				# 	search_table = 'organization_table_name'
-				# else:
-				epa_table_name = self.table_name
-				search_table = 'organization_join_table'
+				else:
+					epa_table_name = self.table_name
+					search_table = 'organization_join_table'
 				print('from_table = ' + from_table)
 				print('search_table = ' + search_table)
 				print('epa_table_name = ' + epa_table_name)
@@ -330,7 +333,8 @@ class ViewSql:
 				self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_column_name'] + '" = ' + alias + '.organization_value'
 				self.table_aliases[index] = alias
 			# print(self.from_sql) 
-		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;'
+			print('__________________________________________________________________________________________________________________\n')
+		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;\n'
 
 
 	def build_select_query(self):
@@ -367,7 +371,7 @@ class ViewSql:
 				if self.dataset.ust_or_release == 'ust' and self.table_name == 'ust_facility' and 12 not in self.existing_col_ids:
 					region_next = True
 			
-			self.select_sql = self.select_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['programmer_comments']+ '\n'
+			self.select_sql = self.select_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['query_logic']+ '\n'
 
 
 	def generate_sql(self):
@@ -404,7 +408,7 @@ def get_tables_needed(dataset):
 
 
 
-def main(ust_or_release, control_id, table_name=None):
+def main(ust_or_release, control_id, table_name=None, overwrite_sql_file=False):
 	dataset = Dataset(ust_or_release=ust_or_release,
 				 	  control_id=control_id,
 					  base_file_name='view_creation.sql',
@@ -413,17 +417,20 @@ def main(ust_or_release, control_id, table_name=None):
 					  export_file_path=export_file_path)
 	if table_name:
 		sql = ViewSql(dataset=dataset, 
-			          table_name=table_name)
+			          table_name=table_name,
+			          overwrite_sql_file=overwrite_sql_file)
 		print(sql.view_sql)
 	else:
 		tables_needed = get_tables_needed(dataset)
 		for table in tables_needed: 
 			sql = ViewSql(dataset=dataset, 
-				          table_name=table)
+				          table_name=table,
+				          overwrite_sql_file=overwrite_sql_file)
 			# print(sql.view_sql)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
-		 table_name=table_name)
+		 table_name=table_name,
+		 overwrite_sql_file=overwrite_sql_file)
