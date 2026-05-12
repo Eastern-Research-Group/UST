@@ -86,6 +86,7 @@ class QualityCheck:
 			self.check_bad_mapping()
 			if self.dataset.ust_or_release == 'ust':
 				self.check_compartment_data_flag()
+		self.check_inactive_substances()
 		self.check_heating_oil()
 		self.write_overview()
 		element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=True)
@@ -405,7 +406,7 @@ class QualityCheck:
 				from information_schema.columns c 
 					join information_schema.tables t 
 						on c.table_schema = t.table_schema and c.table_name = t.table_name
-					join ust_template_data_tables x on c.table_name = x.view_name
+					join public.{self.dataset.ust_or_release}_template_data_tables x on c.table_name = x.view_name
 				where c.table_schema = %s and c.table_name = %s 
 				and column_name not in ('facility_state', 'facility_epa_region') and not exists 
 					(select 1 from public.{self.dataset.ust_or_release}_element_mapping m
@@ -446,6 +447,24 @@ class QualityCheck:
 			logger.warning('Wrong element %s mapped for table %s; perhaps you meant to map %s_id?', col, table, col)
 			
 
+	def check_inactive_substances(self):
+		# Check that any substances mapped are flagged as inactive in the lookup table 
+		sql = f"""select distinct epa_table_name, epa_value 
+				from public.v_{self.dataset.ust_or_release}_element_mapping a join public.substances b on a.epa_value = b.substance 
+				where {self.dataset.ust_or_release}_control_id = %s 
+				and a.epa_column_name = 'substance_id' and b.inactive_flag is not null
+				order by 1, 2"""
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
+		rows = self.cur.fetchall()
+		num_rows = self.cur.rowcount
+		self.error_cnt_dict['Inactive substances mapped in ' + self.dataset.ust_or_release + '_element_value_mapping'] = num_rows
+		for row in rows:
+			epa_table_name = row[0]
+			epa_value = row[1]
+			self.error_dict['Inactive EPA substance mapped in ' + epa_table_name] = epa_value
+			logger.warning('Inactive EPA substance "%s" mapped in %s_element_value_mapping', epa_value, epa_table_name)
+
+
 	def check_bad_mapping(self):
 		# check for bad mapping values
 		sql = f"""select distinct epa_column_name, epa_value, database_lookup_table, database_column_name 
@@ -471,7 +490,6 @@ class QualityCheck:
 
 	def check_heating_oil(self):
 		# check for inclusion of tanks that are unregulated due to heating oil
-
 		if self.dataset.ust_or_release == 'ust':
 			sql = f"""select count(*) from information_schema.columns 
 			          where table_schema = %s and table_name = %s and column_name like 'facility_type%%'"""
