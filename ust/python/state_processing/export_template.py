@@ -255,7 +255,7 @@ class Template:
 
 		conn = utils.connect_db()
 		cur = conn.cursor()	
-		sql = f"select substance_group, substance from public.substances order by 1, 2"
+		sql = f"select substance_group, substance from public.substances where inactive_flag is null order by 1, 2"
 		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
