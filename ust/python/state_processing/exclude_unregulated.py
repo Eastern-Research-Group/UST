@@ -12,7 +12,7 @@ from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 find_regulated = True          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 

@@ -16,11 +16,11 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 
-exclude_unregulated = True
+exclude_unregulated = False
 repopulate = True 
 reexport = True 
 do_peer_review = True 
