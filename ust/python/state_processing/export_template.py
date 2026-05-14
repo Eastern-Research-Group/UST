@@ -16,7 +16,7 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' 	        # Valid values are 'ust' or 'release'
+ust_or_release = '' 	        # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 
 data_only = False				# Boolean; defaults to False. Set to True to generate a populated template that does not include the Reference and Lookup tabs.
@@ -255,7 +255,7 @@ class Template:
 
 		conn = utils.connect_db()
 		cur = conn.cursor()	
-		sql = f"select substance_group, substance from public.substances order by 1, 2"
+		sql = f"select substance_group, substance from public.substances where inactive_flag is null order by 1, 2"
 		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
