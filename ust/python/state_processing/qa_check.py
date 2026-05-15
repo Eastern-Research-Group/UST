@@ -546,15 +546,12 @@ class QualityCheck:
 				logger.info('No view %s.v_ust_release_substance so not performating heating oil tank check', self.dataset.schema)
 				return 
 
-			sql = f"""select distinct facility_id, release_id
-					from 
-						(select ts.release_id, f.facility_id 
-						from {self.dataset.schema}.v_ust_release_substance ts join public.substances s on ts.substance_id = s.substance_id 
-							join (select distinct release_id, facility_id from 
-									(select release_id, facility_id, facility_type_id from {self.dataset.schema}.v_ust_release ) x 
-								  where facility_type_id <> 4) f on ts.release_id = f.release_id
-						where s.substance like 'Heating%') a
-					order by 1, 2"""
+			sql = f"""select distinct ts.release_id
+						from (select release_id from {self.dataset.schema}.v_ust_release where facility_type_id <> 4) r
+							join {self.dataset.schema}.v_ust_release_substance ts on ts.release_id = r.release_id
+							join public.substances s on ts.substance_id = s.substance_id 
+						where s.substance_group = 'Heating'
+					order by 1"""
 		utils.process_sql(self.conn, self.cur, sql)
 		rows = self.cur.fetchall()
 		num_rows = len(rows) 

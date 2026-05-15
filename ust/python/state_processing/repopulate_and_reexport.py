@@ -17,13 +17,13 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = '' 			# Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 0                 # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 
-exclude_unregulated = False
-repopulate = True 
-reexport = True 
-do_peer_review = True 
+exclude_unregulated = False     # Set to True if you have not yet excluded unregulated tanks/facilities/releases from the views. Leave as False if already done.
+repopulate = True 				# Set to True to delete existing data from EPA data tables (if necessary) and re-import from views. Set to False if this is not necessary. 
+reexport = False 				# Set to True to re-export all review materials (control summary, QAQC, and populated template). Set to False if you don't want to create the exports. 
+do_peer_review = False 			# Set to True to run the peer review Python script or False to skip. 
 
 
 class Redo:
