@@ -12,11 +12,11 @@ from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
-ust_or_release = '' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
-organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
-find_regulated = True          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
-execute_sql = False            	# Boolean; defaults to False. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
+organization_id = 'MD'            # Optional; if control_id = 0 or None, will find the most recent control_id
+find_regulated = False          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
+execute_sql = True            	# Boolean; defaults to False. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
 export_sql = True              	# Boolean; defaults to True. If True will generate a SQL file containing the 'create or replace view' statements.
 view_name = None                # String; defaults to None. To limit output to a single view, enter view name (e.g. "v_ust_tank_substance").
 
@@ -31,9 +31,9 @@ class Exclude:
 	df = None 
 	view_def = None 
 	value_mapping_sql = '------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
-	facility_id_column = None 
+	pk_id_column = None 
 	child_id_column = None 
-	facility_table_alias = None 
+	pk_table_alias = None 
 	child_table_alias = None 	
 
 	def __init__(self, 
@@ -96,42 +96,53 @@ class Exclude:
 
 	def get_new_view_def(self, view_name):
 		table = view_name.replace('v_','')
+		
+		erg_table_name = ''
+		epa_col_name = ''
+		pk_col_name = ''
+		if 'release' in view_name:
+			erg_table_name = 'erg_unregulated_releases'
+			epa_col_name = 'release_id'
+			pk_col_name = epa_col_name
+		elif view_name in ['v_ust_facility', 'v_ust_facility_dispenser']:
+			erg_table_name = 'erg_unregulated_facilities'
+			epa_col_name = 'facility_id'
+		elif self.dataset.ust_or_release == 'ust':	
+			erg_table_name = 'erg_unregulated_tanks'	
+			epa_col_name = 'tank_id'		
+			pk_col_name = 'facility_id'
+		if not pk_col_name:
+			pk_col_name = epa_col_name
+		
 		view_def = self.get_view_def(view_name)
 		if 'WHERE' in view_def:
 			view_def = view_def + '\n and '
 		else:
 			view_def = view_def + '\n where '
-		filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == 'facility_id'")
 
-		if view_name == 'v_ust_facility' or view_name == 'v_ust_release' or view_name == 'v_ust_facility_dispenser':
-			self.facility_id_column = filtered_df['column_name'].iloc[0]
-			from_table = self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
-			self.facility_table_alias = get_table_alias(self.get_view_def(view_name), from_table)
-			view_def = view_def + f'{self.facility_table_alias}."{self.facility_id_column}"::varchar(50) not in (select facility_id from {self.dataset.schema}.erg_unregulated_facilities)'
-		else:
-			if len(filtered_df) > 0:
-				self.facility_id_column = filtered_df['column_name'].iloc[0]
-				from_table =  self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
-				self.facility_table_alias = get_table_alias(self.get_view_def(view_name), from_table)
-			
-			if self.dataset.ust_or_release == 'ust':
-				epa_column_name = 'tank_id'
-				type = 'tanks'
-				data_type = 'int'
-			else:
-				epa_column_name = 'release_id'
-				type = 'releases'
-				data_type = 'varchar(50)'
-			filtered_df = self.df.query(f"epa_table_name == '{table}' & epa_column_name == '{epa_column_name}'")
+		# print(f'table = "{table}"')
+		# print(f'erg_table_name = "{erg_table_name}"')
+		# print(f'epa_col_name = "{epa_col_name}"')
+		# print(f'pk_col_name = "{pk_col_name}"')
 
-			if len(filtered_df) > 0:
-				self.child_id_column = filtered_df['column_name'].iloc[0]
-				from_table = self.dataset.schema + '.' + str(filtered_df['table_name'].iloc[0])
-				self.child_table_alias = get_table_alias(self.get_view_def(view_name), from_table)		
+		filtered_table_df = self.df.copy().query(f"epa_table_name == '{table}'")
+		# utils.pretty_print_df(filtered_table_df)
+		from_table =  self.dataset.schema + '.' + filtered_table_df['table_name'].iloc[0]
+		# print(f'from_table = {from_table}')		
 
+		src_pk_name = filtered_table_df.query(f"epa_column_name == '{pk_col_name}'")['column_name'].iloc[0]
+		# print(f'src_pk_name = "{src_pk_name}"')
+		src_col_name = filtered_table_df.query(f"epa_column_name == '{epa_col_name}'")['column_name'].iloc[0]
+		# print(f'src_col_name = "{src_col_name}"')
+		table_alias = get_table_alias(self.get_view_def(view_name), from_table)
+		# print(f'table_alias = "{table_alias}"')
+
+		if view_name == 'v_ust_facility' or view_name == 'v_ust_facility_dispenser' or 'release' in view_name:
+			view_def = view_def + f'{table_alias}."{src_pk_name}"::varchar(50) not in (select {pk_col_name} from {self.dataset.schema}.{erg_table_name})'
+		elif self.dataset.ust_or_release == 'ust':
+			view_def = view_def + f"not exists\n\t(select 1 from {self.dataset.schema}.{erg_table_name} unreg"
+			view_def = view_def + f'\n\twhere {table_alias}."{src_pk_name}"::varchar(50) = unreg.facility_id and {table_alias}."{src_col_name}"::int = unreg.{epa_col_name})'
 				
-			view_def = view_def + f"not exists\n\t(select 1 from {self.dataset.schema}.erg_unregulated_{type} unreg"
-			view_def = view_def + f'\n\twhere {self.facility_table_alias}."{self.facility_id_column}"::varchar(50) = unreg.facility_id and {self.child_table_alias}."{self.child_id_column}"::{data_type} = unreg.{epa_column_name})'
 		if view_def[:-1] != ';':
 			view_def = view_def + ';'
 
