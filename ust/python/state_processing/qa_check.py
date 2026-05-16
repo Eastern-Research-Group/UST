@@ -11,14 +11,17 @@ from openpyxl.styles.borders import Border, Side
 import psycopg2.errors
 
 from python.state_processing import element_mapping_to_excel
+from python.state_processing.qa_summary_counts import SummaryCounts
 from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
 
 ust_or_release = '' 			# Valid values are 'ust' or 'release'
-control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
+control_id = 0             	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
+
+force_summary_counts = False    # Boolean; defaults to False. If False, will only generate summary counts if there are no errors. Set to True to force summary counts even if there are errors to resolve.
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -56,9 +59,9 @@ class QualityCheck:
 	error_cnt_dict = {}
 	view_counts = {}
 
-	def __init__(self, 
-				 dataset):
+	def __init__(self, dataset, force_summary_counts=False):
 		self.dataset = dataset
+		self.force_summary_counts = force_summary_counts
 		self.connect_db()
 		self.set_views()
 		if not self.views_to_review:
@@ -89,6 +92,7 @@ class QualityCheck:
 		self.check_inactive_substances()
 		self.check_heating_oil()
 		self.write_overview()
+		self.summary_counts()
 		element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=True)
 		self.cleanup_wb()
 		self.disconnect_db()
@@ -626,6 +630,28 @@ class QualityCheck:
 			ws.cell(row=rowno, column=1).font = Font(italic=True)
 
 
+	def summary_counts(self):
+		if self.error_dict and not self.force_summary_counts:
+			return 
+		summ_counts = SummaryCounts(self.dataset).summ_counts 
+
+		for k, rows in summ_counts.items():
+			logger.info('Working on "%s"', k)
+			ws = self.wb.create_sheet(k)
+			rowno = 1
+			ws.cell(row=rowno, column=1).value = 'EPA Value'
+			ws.cell(row=rowno, column=1).font = Font(bold=True)
+			ws.cell(row=rowno, column=2).value = 'Number of Rows'
+			ws.cell(row=rowno, column=2).font = Font(bold=True)
+			rowno +=1 
+			for row in rows:
+				print(row[0] + ' = ' + str(row[1]))
+				ws.cell(row=rowno, column=1).value = row[0]
+				ws.cell(row=rowno, column=2).value = row[1]  
+				rowno += 1
+			utils.autowidth(ws)		
+	
+
 	def cleanup_wb(self):
 		try:
 			self.wb.remove(self.wb['Sheet'])
@@ -636,7 +662,13 @@ class QualityCheck:
 
 
 
-def main(ust_or_release, control_id=0, organization_id=None, export_file_name=None, export_file_dir=None, export_file_path=None):
+def main(ust_or_release, 
+	     control_id=0, 
+	     organization_id=None, 
+	     force_summary_counts=False, 
+	     export_file_name=None, 
+	     export_file_dir=None, 
+	     export_file_path=None):
 	if not control_id or control_id == 0:
 		control_id = utils.get_control_id(ust_or_release, organization_id)
 
@@ -647,13 +679,14 @@ def main(ust_or_release, control_id=0, organization_id=None, export_file_name=No
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
 
-	qc = QualityCheck(dataset=dataset)
+	qc = QualityCheck(dataset=dataset, force_summary_counts=force_summary_counts)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id, 
 		 organization_id=organization_id,
+		 force_summary_counts=force_summary_counts,
 		 export_file_name=export_file_name,
 		 export_file_dir=export_file_dir,
 		 export_file_path=export_file_path)

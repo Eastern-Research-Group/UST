@@ -97,7 +97,7 @@ class Template:
 		cur.close()
 		conn.close()
 
-		if ust_or_release == 'ust':
+		if self.dataset.ust_or_release == 'ust':
 			for row in ws[1:ws.max_row]:  
 				cell = row[0]            
 				cell.alignment = left_align
@@ -151,7 +151,7 @@ class Template:
 			ws.column_dimensions['G'].width = 13
 			ws.column_dimensions['H'].width = 32
 			ws.column_dimensions['I'].width = 70
-		elif ust_or_release == 'release':
+		elif self.dataset.ust_or_release == 'release':
 			for row in ws[1:ws.max_row]:  
 				cell = row[0]            
 				cell.alignment = left_align

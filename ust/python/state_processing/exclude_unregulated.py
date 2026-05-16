@@ -12,9 +12,9 @@ from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
-organization_id = 'MD'            # Optional; if control_id = 0 or None, will find the most recent control_id
+organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 find_regulated = False          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
 execute_sql = True            	# Boolean; defaults to False. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
 export_sql = True              	# Boolean; defaults to True. If True will generate a SQL file containing the 'create or replace view' statements.
@@ -31,11 +31,7 @@ class Exclude:
 	df = None 
 	view_def = None 
 	value_mapping_sql = '------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
-	pk_id_column = None 
-	child_id_column = None 
-	pk_table_alias = None 
-	child_table_alias = None 	
-
+	
 	def __init__(self, 
 				 dataset,
 				 find_regulated=True,
