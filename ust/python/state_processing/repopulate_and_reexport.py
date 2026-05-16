@@ -22,8 +22,8 @@ organization_id = ''            # Optional; if control_id = 0 or None, will find
 
 exclude_unregulated = False     # Set to True if you have not yet excluded unregulated tanks/facilities/releases from the views. Leave as False if already done.
 repopulate = True 				# Set to True to delete existing data from EPA data tables (if necessary) and re-import from views. Set to False if this is not necessary. 
-reexport = False 				# Set to True to re-export all review materials (control summary, QAQC, and populated template). Set to False if you don't want to create the exports. 
-do_peer_review = False 			# Set to True to run the peer review Python script or False to skip. 
+reexport = True 				# Set to True to re-export all review materials (control summary, QAQC, and populated template). Set to False if you don't want to create the exports. 
+do_peer_review = True 			# Set to True to run the peer review Python script or False to skip. 
 
 
 class Redo:

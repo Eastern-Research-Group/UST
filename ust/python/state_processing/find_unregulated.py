@@ -10,9 +10,9 @@ from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
-organization_id = None          # Optional; if control_id = 0 or None, will find the most recent control_id
+organization_id = ''          # Optional; if control_id = 0 or None, will find the most recent control_id
 drop_existing = True            # Boolean; defaults to True. If True, will drop existing erg_ unregulated table(s). 
 
 
@@ -31,8 +31,6 @@ class Unregulated:
 		else:
 			self.unreg_table = 'erg_unregulated_facilities'
 		self.unreg_tank_table = 'erg_unregulated_tanks'
-		# self.data_type = 'tanks'
-		# self.data_type = 'releases'
 			
 
 	def check_for_substances(self):
@@ -123,7 +121,6 @@ class Unregulated:
 			sql = f"alter table {self.dataset.schema}.{self.unreg_tank_table} add constraint {self.unreg_tank_table}_pk primary key (facility_id, tank_id);"
 			utils.process_sql(self.conn, self.cur, sql)
 			logger.info('Created table %s.%s', self.dataset.schema, self.unreg_tank_table)	
-
 			column2 = 'facility_id'
 		else:
 			column2 = 'release_id'
@@ -136,52 +133,47 @@ class Unregulated:
 		self.conn.commit()
 
 
-	def build_facility_type_sql(self, fac_type):
+	def build_ust_facility_type_sql(self, fac_type):
 		if self.dataset.ust_or_release == 'ust':
-			view_name = 'v_ust_facility'
-			extrawhere_sql = ' and facility_id is not null'
+			view_name =  'v_ust_facility'
 		else:
-			view_name = 'v_ust_release'
-			extrawhere_sql = ''
-
-		sql = """select count(*) from information_schema.columns 
+			view_name = 'v_ust_releases'
+		sql = """select column_name, count(*) from information_schema.columns 
 				where table_schema = %s and table_name = %s
 				and column_name like 'facility_type%%'
-				order by 1 """
+				order by column_name"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, view_name))
-		cnt = self.cur.fetchone()[0]
-		if cnt == 0:
-			logger.info('No facility type data mapped in %s', self.dataset.schema)
-			return None
-		else: 
-			if self.dataset.ust_or_release == 'ust':
-				fsql = f"""\n\t(select distinct facility_id from 
-				(select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.{view_name} """
-				if cnt > 1:
-					fsql = fsql + f'union all\n\tselect facility_id, facility_type2 as facility_type_id from {self.dataset.schema}.{view_name} '
-				fsql = fsql + """) x """
-			else:
-				fsql = f'\n\t(select distinct release_id, facility_type_id from {self.dataset.schema}.{view_name} '
-		if fac_type == 'heating oil':
-			fsql = fsql + f"where facility_type_id <> 4 {extrawhere_sql}) f\n"
+		rows = self.cur.fetchall()
+		if not rows:
+			return None  
+		elif self.dataset.ust_or_release == 'release':
+			return 'where 1=1'
+		wheresql = "\nwhere facility_id is not null "
+		if fac_type == 'heating':
+			wheresql += 'and facility_type_id <> 4'
 		else:
-			fsql = fsql + f"where \facility_type_id in (1,12) {extrawhere_sql}) f\n"
+			wheresql += 'and facility_type_id in (1,12)'
+		fsql = f"""\n\t(select distinct facility_id from 
+				(select facility_id, facility_type1 as facility_type_id 
+				 from {self.dataset.schema}.v_ust_facility {wheresql}"""
+		if len(rows) > 1:
+			fsql += f"""\nunion all\n\tselect facility_id, facility_type2 as facility_type_id 
+			            from {self.dataset.schema}.v_ust_facility {wheresql}'"""
+		fsql += ") f "
 		return fsql 
 
 
 	def insert_heating_oil(self):
-		facility_type_sql = self.build_facility_type_sql('heating oil')
-		if not facility_type_sql:
-			logger.info('No facility types so not inserting heating oil %s', self.data_type)
-			return None 
-		insert_table = ''
-
+		fac_sql = self.build_ust_facility_type_sql('heating')
+		if not fac_sql:
+			logger.info('No facility type data so not inserting unregulated heating oil rows.')
+			return
 		if self.dataset.ust_or_release == 'ust':
 			insert_table = self.unreg_tank_table
 			sql = f"""insert into {self.dataset.schema}.{insert_table}
 			          select distinct ts.facility_id, tank_id 
 			          from {self.dataset.schema}.v_ust_tank_substance ts join public.substances s on ts.substance_id = s.substance_id 
-						join {facility_type_sql} on ts.facility_id = f.facility_id
+						join {fac_sql} on ts.facility_id = f.facility_id
 					  where s.substance_group = 'Heating' 
 					  on conflict do nothing"""
 		else:
