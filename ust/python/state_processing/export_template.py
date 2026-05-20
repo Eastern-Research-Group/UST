@@ -217,8 +217,10 @@ class Template:
 			logger.info('Created Substances lookup tab')
 			return
 
+		extrawheresql = ''
 		if lookup_table_name == 'corrective_action_strategies':
 			pretty_name = 'Corrective Actions'
+			extrawheresql = ' where inactive_flag is null '
 		else:
 			pretty_name = lookup_table_name.replace('_',' ').title()
 		ws = self.wb.create_sheet(pretty_name + ' lookup')
@@ -226,7 +228,7 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 		
-		sql = f"select {lookup_column_name} from public.{lookup_table_name} order by 1"
+		sql = f"select {lookup_column_name} from public.{lookup_table_name} {extrawheresql} order by 1"
 		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
@@ -255,7 +257,11 @@ class Template:
 
 		conn = utils.connect_db()
 		cur = conn.cursor()	
-		sql = f"select substance_group, substance from public.substances where inactive_flag is null order by 1, 2"
+		sql = f"""select substance_group, substance 
+		          from public.substances 
+		          where inactive_flag is null 
+		          and {self.dataset.ust_or_release}_flag is not null
+		          order by 1, 2"""
 		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
