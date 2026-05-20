@@ -21,9 +21,10 @@ ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 
+exclude_qa = False				# Set to True if the QA export has already been created and can be excluded.
 
 class ReviewMaterials:
-	def __init__(self, ust_or_release, control_id=0, organization_id=None ):
+	def __init__(self, ust_or_release, control_id=0, organization_id=None, exclude_qa=False):
 		self.ust_or_release = ust_or_release
 		self.control_id = control_id
 		self.organization_id = organization_id
@@ -32,6 +33,7 @@ class ReviewMaterials:
 				logger.warning('Either control_id or organization_id must be passed; exiting...')
 				exit()
 			self.control_id = utils.get_control_id(self.ust_or_release, self.organization_id)
+		self.exclude_qa = exclude_qa
 
 
 	def export_control_summary(self):
@@ -58,7 +60,8 @@ class ReviewMaterials:
 
 	def export_all(self):
 		self.export_control_summary()
-		self.export_qa()
+		if not self.exclude_qa:
+			self.export_qa()
 		self.export_template()
 
 
@@ -70,8 +73,8 @@ class ReviewMaterials:
 
 
 
-def main(ust_or_release, control_id=None, organization_id=None):
-	review = ReviewMaterials(ust_or_release=ust_or_release, control_id=control_id, organization_id=organization_id)
+def main(ust_or_release, control_id=None, organization_id=None, exclude_qa=False):
+	review = ReviewMaterials(ust_or_release=ust_or_release, control_id=control_id, organization_id=organization_id, exclude_qa=exclude_qa)
 	review.peer_review()
 	review.export_all()	
 
@@ -79,4 +82,5 @@ def main(ust_or_release, control_id=None, organization_id=None):
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
-		 organization_id=organization_id)		
+		 organization_id=organization_id,
+		 exclude_qa=exclude_qa)		
