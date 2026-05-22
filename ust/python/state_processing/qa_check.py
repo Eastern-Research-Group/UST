@@ -11,14 +11,17 @@ from openpyxl.styles.borders import Border, Side
 import psycopg2.errors
 
 from python.state_processing import element_mapping_to_excel
+from python.state_processing.qa_summary_counts import SummaryCounts
 from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 23              	# Enter an integer that is the ust_control_id or release_control_id
+ust_or_release = '' 			# Valid values are 'ust' or 'release'
+control_id = 0             	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
+
+force_summary_counts = False    # Boolean; defaults to False. If False, will only generate summary counts if there are no errors. Set to True to force summary counts even if there are errors to resolve.
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -56,9 +59,9 @@ class QualityCheck:
 	error_cnt_dict = {}
 	view_counts = {}
 
-	def __init__(self, 
-				 dataset):
+	def __init__(self, dataset, force_summary_counts=False):
 		self.dataset = dataset
+		self.force_summary_counts = force_summary_counts
 		self.connect_db()
 		self.set_views()
 		if not self.views_to_review:
@@ -86,8 +89,11 @@ class QualityCheck:
 			self.check_bad_mapping()
 			if self.dataset.ust_or_release == 'ust':
 				self.check_compartment_data_flag()
+		self.check_inactive_substances()
+		self.check_substance_types()
 		self.check_heating_oil()
 		self.write_overview()
+		self.summary_counts()
 		element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=True)
 		self.cleanup_wb()
 		self.disconnect_db()
@@ -237,7 +243,7 @@ class QualityCheck:
 				sql3 = f"select * from {self.dataset.schema}.{self.view_name} where {col_name} is null"
 				utils.process_sql(self.conn, self.cur, sql3)
 				data = self.cur.fetchall()
-				num_rows = self.cur.rowcount 
+				num_rows = len(data)
 				self.error_cnt_dict['Number of null rows for required column ' + self.table_name + '.' + col_name] = num_rows
 				logger.warning('Number of null rows for required column %s.%s = %s', self.table_name, col_name, num_rows)
 				self.write_to_ws(data, col_name + ' null')
@@ -259,7 +265,8 @@ class QualityCheck:
 		sql = f"""select {key_col_str}, count(*) num_rows from {self.dataset.schema}.{self.view_name} 
 				  group by {key_col_str} having count(*) > 1"""
 		utils.process_sql(self.conn, self.cur, sql)
-		num_rows = self.cur.rowcount
+		rows = self.cur.fetchall()
+		num_rows = len(rows) 
 		self.error_cnt_dict['Number of duplicated key columns in ' + self.dataset.schema + '.' + self.view_name + ' (' + key_col_str + ')'] = num_rows
 		logger.warning('Number of duplicated key columns in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
 		if num_rows > 0:
@@ -273,7 +280,7 @@ class QualityCheck:
 					order by 1, 2, 3"""
 			utils.process_sql(self.conn, self.cur, sql)
 			data = self.cur.fetchall()
-			num_rows = self.cur.rowcount
+			num_rows = len(rows) 
 			self.write_to_ws(data, self.view_name + ' duplicates')
 			self.error_dict['Number of rows with duplicated key columns in ' + self.dataset.schema + '.' + self.view_name ] = num_rows
 
@@ -289,7 +296,7 @@ class QualityCheck:
 				sql2 = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
 				utils.process_sql(self.conn, self.cur, sql2, params=(table_len,))
 				data = self.cur.fetchall()
-				num_rows = self.cur.rowcount 
+				num_rows = len(data)
 				self.error_cnt_dict['Number of rows exceeding allowed length of ' + self.table_name + '.' + col_name] = num_rows
 				logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
 				self.write_to_ws(data, col_name + ' too long')
@@ -297,7 +304,7 @@ class QualityCheck:
 				sql = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
 				utils.process_sql(self.conn, self.cur, sql, params=(table_len,))
 				data = self.cur.fetchall()
-				num_rows = self.cur.rowcount 
+				num_rows = len(data)
 				if num_rows > 0:
 					self.error_cnt_dict['Number of rows exceeding allowed length of ' + self.table_name + '.' + col_name] = num_rows
 					logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
@@ -362,7 +369,7 @@ class QualityCheck:
 		sql = f"select {self.view_col_str}, count(*) from {self.dataset.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
 		utils.process_sql(self.conn, self.cur, sql)
 		data = self.cur.fetchall()
-		num_rows = self.cur.rowcount 
+		num_rows = len(data)
 		self.error_cnt_dict['nonunique rows in ' + self.dataset.schema + '.' + self.view_name] = num_rows
 		logger.warning('Number of non-unique rows in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
 		self.write_to_ws(data, self.view_name + ' nonunique')
@@ -394,7 +401,7 @@ class QualityCheck:
 				self.conn.close()        
 				exit()  
 			data = self.cur.fetchall()
-			num_rows = self.cur.rowcount 
+			num_rows = len(data)
 			self.error_cnt_dict['failed check constraint ' + self.dataset.schema + '.' + constraint_name] = num_rows
 			logger.warning('Number of failed rows for check constraint %s.%s: %s', self.table_name, constraint_name, num_rows)
 			self.write_to_ws(data, constraint_name)
@@ -405,16 +412,16 @@ class QualityCheck:
 				from information_schema.columns c 
 					join information_schema.tables t 
 						on c.table_schema = t.table_schema and c.table_name = t.table_name
-					join ust_template_data_tables x on c.table_name = x.view_name
+					join public.{self.dataset.ust_or_release}_template_data_tables x on c.table_name = x.view_name
 				where c.table_schema = %s and c.table_name = %s 
-				and column_name not in ('facility_state', 'facility_epa_region') and not exists 
+				and column_name not in ('facility_state', 'facility_epa_region', 'epa_region', 'state') and not exists 
 					(select 1 from public.{self.dataset.ust_or_release}_element_mapping m
 					where x.table_name = m.epa_table_name and c.column_name = m.epa_column_name
 					and m.{self.dataset.ust_or_release}_control_id = %s)
 				order by c.ordinal_position"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.view_name, self.dataset.control_id))
 		rows = self.cur.fetchall()
-		num_rows = self.cur.rowcount 
+		num_rows = len(rows) 
 		self.error_cnt_dict['Unmapped elements in ' + self.dataset.schema + '.' + self.view_name] = num_rows
 		unmapped_cols = ''
 		for row in rows:
@@ -437,7 +444,7 @@ class QualityCheck:
 				order by 1, 2"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 		rows = self.cur.fetchall()
-		num_rows = self.cur.rowcount
+		num_rows = len(rows) 
 		self.error_cnt_dict['Wrong elements mapped in ' + self.dataset.ust_or_release + '_element_mapping'] = num_rows
 		for row in rows:
 			table = row[0]
@@ -445,6 +452,45 @@ class QualityCheck:
 			self.error_dict['Wrong element mapped in table ' + table + '; perhaps you meant to map ' + col + '_id?'] = col 
 			logger.warning('Wrong element %s mapped for table %s; perhaps you meant to map %s_id?', col, table, col)
 			
+
+	def check_inactive_substances(self):
+		# Check that any substances mapped are flagged as inactive in the lookup table 
+		sql = f"""select distinct epa_table_name, epa_value 
+				from public.v_{self.dataset.ust_or_release}_element_mapping a join public.substances b on a.epa_value = b.substance 
+				where {self.dataset.ust_or_release}_control_id = %s 
+				and a.epa_column_name = 'substance_id' and b.inactive_flag is not null
+				order by 1, 2"""
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
+		rows = self.cur.fetchall()
+		num_rows = len(rows) 
+		self.error_cnt_dict['Inactive EPA substances mapped in ' + self.dataset.ust_or_release + '_element_value_mapping'] = num_rows
+		for row in rows:
+			epa_table_name = row[0]
+			epa_value = row[1]
+			self.error_dict['Inactive EPA substance mapped in ' + epa_table_name] = epa_value
+			logger.warning('Inactive EPA substance "%s" mapped in %s_element_value_mapping', epa_value, epa_table_name)
+
+
+	def check_substance_types(self):
+		# Check that any substances are flagged as UST/Release as appropriate in Substances lookup table
+		sql = f"""select distinct epa_table_name, epa_value 
+				from public.v_{self.dataset.ust_or_release}_element_mapping a join public.substances b on a.epa_value = b.substance 
+				where {self.dataset.ust_or_release}_control_id = %s 
+				and a.epa_column_name = 'substance_id' and b.{self.dataset.ust_or_release}_flag is null
+				order by 1, 2"""
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
+		rows = self.cur.fetchall()
+		num_rows = len(rows) 
+		subtype = 'Prevention'
+		if self.dataset.ust_or_release == 'release':
+			subtype = 'Cleanup'
+		self.error_cnt_dict['Substance not valid for ' + subtype + ' mapped in ' + self.dataset.ust_or_release + '_element_value_mapping'] = num_rows
+		for row in rows:
+			epa_table_name = row[0]
+			epa_value = row[1]
+			self.error_dict['Substance not valid for ' + subtype + ' mapped in ' + epa_table_name] = epa_value
+			logger.warning('Invalid ' + substype + ' substance "%s" mapped in %s_element_value_mapping', epa_value, epa_table_name)
+
 
 	def check_bad_mapping(self):
 		# check for bad mapping values
@@ -454,6 +500,7 @@ class QualityCheck:
 				order by 1, 2, 3"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.table_name))
 		rows = self.cur.fetchall()
+		num_errors = 0
 		for row in rows:
 			epa_column_name = row[0]
 			epa_value = row[1]
@@ -465,13 +512,14 @@ class QualityCheck:
 			utils.process_sql(self.conn, self.cur, sql2, params=(epa_value,))
 			cnt = self.cur.fetchone()[0]
 			if cnt < 1:
-				self.error_dict['invalid EPA value in ' + epa_column_name] = epa_value 
+				self.error_dict['Invalid EPA value in ' + epa_column_name] = epa_value 
 				logger.warning('Invalid EPA value for %s.%s: %s', self.table_name, epa_column_name, cnt)
-
+				num_errors += 1
+		self.error_cnt_dict['Invalid EPA values in ' + self.dataset.ust_or_release + '_element_value_mapping'] = num_errors
+		
 
 	def check_heating_oil(self):
 		# check for inclusion of tanks that are unregulated due to heating oil
-
 		if self.dataset.ust_or_release == 'ust':
 			sql = f"""select count(*) from information_schema.columns 
 			          where table_schema = %s and table_name = %s and column_name like 'facility_type%%'"""
@@ -524,17 +572,15 @@ class QualityCheck:
 				logger.info('No view %s.v_ust_release_substance so not performating heating oil tank check', self.dataset.schema)
 				return 
 
-			sql = f"""select distinct facility_id, release_id
-					from 
-						(select ts.release_id, f.facility_id 
-						from {self.dataset.schema}.v_ust_release_substance ts join public.substances s on ts.substance_id = s.substance_id 
-							join (select distinct release_id, facility_id from 
-									(select release_id, facility_id, facility_type_id from {self.dataset.schema}.v_ust_release ) x 
-								  where facility_type_id <> 4) f on ts.release_id = f.release_id
-						where s.substance like 'Heating%') a
-					order by 1, 2"""
+			sql = f"""select distinct ts.release_id
+						from (select release_id from {self.dataset.schema}.v_ust_release where facility_type_id <> 4) r
+							join {self.dataset.schema}.v_ust_release_substance ts on ts.release_id = r.release_id
+							join public.substances s on ts.substance_id = s.substance_id 
+						where s.substance_group = 'Heating'
+					order by 1"""
 		utils.process_sql(self.conn, self.cur, sql)
-		num_rows = self.cur.rowcount
+		rows = self.cur.fetchall()
+		num_rows = len(rows) 
 		self.error_cnt_dict['Rows that need to be excluded related to unregulated heating oil'] = num_rows
 		if self.dataset.ust_or_release == 'ust':
 			row_type = 'tanks'
@@ -606,6 +652,28 @@ class QualityCheck:
 			ws.cell(row=rowno, column=1).font = Font(italic=True)
 
 
+	def summary_counts(self):
+		if self.error_dict and not self.force_summary_counts:
+			return 
+		summ_counts = SummaryCounts(self.dataset).summ_counts 
+
+		for k, rows in summ_counts.items():
+			logger.info('Working on "%s"', k)
+			ws = self.wb.create_sheet(k)
+			rowno = 1
+			ws.cell(row=rowno, column=1).value = 'EPA Value'
+			ws.cell(row=rowno, column=1).font = Font(bold=True)
+			ws.cell(row=rowno, column=2).value = 'Number of Rows'
+			ws.cell(row=rowno, column=2).font = Font(bold=True)
+			rowno +=1 
+			for row in rows:
+				print(row[0] + ' = ' + str(row[1]))
+				ws.cell(row=rowno, column=1).value = row[0]
+				ws.cell(row=rowno, column=2).value = row[1]  
+				rowno += 1
+			utils.autowidth(ws)		
+	
+
 	def cleanup_wb(self):
 		try:
 			self.wb.remove(self.wb['Sheet'])
@@ -616,7 +684,13 @@ class QualityCheck:
 
 
 
-def main(ust_or_release, control_id=0, organization_id=None, export_file_name=None, export_file_dir=None, export_file_path=None):
+def main(ust_or_release, 
+	     control_id=0, 
+	     organization_id=None, 
+	     force_summary_counts=False, 
+	     export_file_name=None, 
+	     export_file_dir=None, 
+	     export_file_path=None):
 	if not control_id or control_id == 0:
 		control_id = utils.get_control_id(ust_or_release, organization_id)
 
@@ -627,13 +701,14 @@ def main(ust_or_release, control_id=0, organization_id=None, export_file_name=No
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
 
-	qc = QualityCheck(dataset=dataset)
+	qc = QualityCheck(dataset=dataset, force_summary_counts=force_summary_counts)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id, 
 		 organization_id=organization_id,
+		 force_summary_counts=force_summary_counts,
 		 export_file_name=export_file_name,
 		 export_file_dir=export_file_dir,
 		 export_file_path=export_file_path)

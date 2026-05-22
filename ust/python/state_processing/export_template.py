@@ -16,8 +16,8 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'ust' 	        # Valid values are 'ust' or 'release'
-control_id = 23                  # Enter an integer that is the ust_control_id or release_control_id
+ust_or_release = '' 	        # Valid values are 'ust' or 'release'
+control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 
 data_only = False				# Boolean; defaults to False. Set to True to generate a populated template that does not include the Reference and Lookup tabs.
 template_only = False			# Boolean; defaults to False. Set to True to generate an blank template with no data.
@@ -97,7 +97,7 @@ class Template:
 		cur.close()
 		conn.close()
 
-		if ust_or_release == 'ust':
+		if self.dataset.ust_or_release == 'ust':
 			for row in ws[1:ws.max_row]:  
 				cell = row[0]            
 				cell.alignment = left_align
@@ -151,7 +151,7 @@ class Template:
 			ws.column_dimensions['G'].width = 13
 			ws.column_dimensions['H'].width = 32
 			ws.column_dimensions['I'].width = 70
-		elif ust_or_release == 'release':
+		elif self.dataset.ust_or_release == 'release':
 			for row in ws[1:ws.max_row]:  
 				cell = row[0]            
 				cell.alignment = left_align
@@ -217,8 +217,10 @@ class Template:
 			logger.info('Created Substances lookup tab')
 			return
 
+		extrawheresql = ''
 		if lookup_table_name == 'corrective_action_strategies':
 			pretty_name = 'Corrective Actions'
+			extrawheresql = ' where inactive_flag is null '
 		else:
 			pretty_name = lookup_table_name.replace('_',' ').title()
 		ws = self.wb.create_sheet(pretty_name + ' lookup')
@@ -226,7 +228,7 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 		
-		sql = f"select {lookup_column_name} from public.{lookup_table_name} order by 1"
+		sql = f"select {lookup_column_name} from public.{lookup_table_name} {extrawheresql} order by 1"
 		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
@@ -255,7 +257,11 @@ class Template:
 
 		conn = utils.connect_db()
 		cur = conn.cursor()	
-		sql = f"select substance_group, substance from public.substances order by 1, 2"
+		sql = f"""select substance_group, substance 
+		          from public.substances 
+		          where inactive_flag is null 
+		          and {self.dataset.ust_or_release}_flag is not null
+		          order by 1, 2"""
 		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
