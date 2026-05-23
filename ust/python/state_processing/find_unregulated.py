@@ -27,11 +27,15 @@ class Unregulated:
 		self.dataset = dataset
 		self.drop_existing = drop_existing
 		if self.dataset.ust_or_release == 'release':
-			self.unreg_table = 'erg_unregulated_releases'
+			self.unreg_parent_table = 'erg_unregulated_releases'
+			self.parent_col = 'release_id'
+			self.join_view = 'v_ust_release_substance'
 		else:
-			self.unreg_table = 'erg_unregulated_facilities'
-		self.unreg_tank_table = 'erg_unregulated_tanks'
-			
+			self.unreg_parent_table = 'erg_unregulated_facilities'
+			self.parent_col = 'facility_id'
+			self.join_view = 'v_ust_tank_substance'
+		self.unreg_child_table = 'erg_unregulated_substances'
+
 
 	def check_for_substances(self):
 		self.connect_db()
@@ -45,7 +49,7 @@ class Unregulated:
 		         where table_schema = %s and table_type = 'VIEW' and table_name = %s"""
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, view_name))
 		cnt = self.cur.fetchone()[0]
-		
+
 		self.disconnect_db()		
 
 		if cnt > 0:
@@ -74,38 +78,37 @@ class Unregulated:
 	
 		self.insert_heating_oil()
 		self.insert_small_tank()
-		self.insert_facilities()
+		self.insert_parents()
 
 		self.disconnect_db()		
 
 
 	def drop_existing_tables(self):
-		if self.dataset.ust_or_release == 'ust':
-			try:
-				sql = f"drop table if exists {self.dataset.schema}.{self.unreg_tank_table}"
-				self.cur.execute(sql)
-			except psycopg2.errors.DependentObjectsStillExist as e:
-				logger.warning('Table %s.%s exists but the views that depend on it have already been written, so truncating it instead of creating it.', self.dataset.schema, self.unreg_tank_table)
-				sql = f"truncate table {self.dataset.schema}.{self.unreg_tank_table}"
-				utils.process_sql(self.conn, self.cur, sql)
-				logger.info('Truncated table %s.%s', self.dataset.schema, self.unreg_tank_table)
-				self.tables_exist = True 
-
 		try:
-			sql = f"drop table if exists {self.dataset.schema}.{self.unreg_table}"
+			sql = f"drop table if exists {self.dataset.schema}.{self.unreg_child_table}"
 			self.cur.execute(sql)
 		except psycopg2.errors.DependentObjectsStillExist as e:
-			logger.warning('Table %s.%s exists but the views that depend on it have already been written, so truncating it instead of creating it.', self.dataset.schema, self.unreg_table)
-			sql = f"truncate table {self.dataset.schema}.{self.unreg_table}"
+			logger.warning('Table %s.%s exists but the views that depend on it have already been written, so truncating it instead of creating it.', self.dataset.schema, self.unreg_child_table)
+			sql = f"truncate table {self.dataset.schema}.{self.unreg_child_table}"
 			utils.process_sql(self.conn, self.cur, sql)
-			logger.info('Truncated table %s.%s', self.dataset.schema, self.unreg_table)
+			logger.info('Truncated table %s.%s', self.dataset.schema, self.unreg_child_table)
+			self.tables_exist = True 
+
+		try:
+			sql = f"drop table if exists {self.dataset.schema}.{self.unreg_parent_table}"
+			self.cur.execute(sql)
+		except psycopg2.errors.DependentObjectsStillExist as e:
+			logger.warning('Table %s.%s exists but the views that depend on it have already been written, so truncating it instead of creating it.', self.dataset.schema, self.unreg_parent_table)
+			sql = f"truncate table {self.dataset.schema}.{self.unreg_parent_table}"
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Truncated table %s.%s', self.dataset.schema, self.unreg_parent_table)
 			self.tables_exist = True 
 
 
 	def get_existing_tables(self):
 		sql = """select table_name from information_schema.tables
 		         where table_schema = %s and table_name in (%s,%s) order by 1 """
-		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.unreg_tank_table, self.unreg_table))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.unreg_child_table, self.unreg_parent_table))
 		rows = self.cur.fetchall()
 		if rows:
 			existing_tables = [r[0] for r in rows]
@@ -114,21 +117,16 @@ class Unregulated:
 			return None 
 
 
-	def create_tables(self):
-		if self.dataset.ust_or_release == 'ust':
-			sql = f"create table {self.dataset.schema}.{self.unreg_tank_table} (facility_id varchar(50) not null, tank_id int not null)"
-			utils.process_sql(self.conn, self.cur, sql)
-			sql = f"alter table {self.dataset.schema}.{self.unreg_tank_table} add constraint {self.unreg_tank_table}_pk primary key (facility_id, tank_id);"
-			utils.process_sql(self.conn, self.cur, sql)
-			logger.info('Created table %s.%s', self.dataset.schema, self.unreg_tank_table)	
-			column2 = 'facility_id'
-		else:
-			column2 = 'release_id'
-		datatype = 'varchar(50)'
-
-		sql = f"create table {self.dataset.schema}.{self.unreg_table} ({column2} varchar(50) not null primary key)"
+	def create_tables(self):		
+		sql = f"create table {self.dataset.schema}.{self.unreg_parent_table} ({self.parent_col} varchar(50) not null primary key, unregulated_reason varchar(1000))"
 		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Created table %s.%s', self.dataset.schema, self.unreg_table)	
+		logger.info('Created table %s.%s', self.dataset.schema, self.unreg_parent_table)	
+
+		sql = f"create table {self.dataset.schema}.{self.unreg_child_table} ({self.parent_col} varchar(50) not null, substance_id int not null, unregulated_reason varchar(1000))"
+		utils.process_sql(self.conn, self.cur, sql)
+		sql = f"alter table {self.dataset.schema}.{self.unreg_child_table} add constraint {self.unreg_child_table}_pk primary key ({self.parent_col}, substance_id);"		
+		utils.process_sql(self.conn, self.cur, sql)
+		logger.info('Created table %s.%s', self.dataset.schema, self.unreg_child_table)
 		
 		self.conn.commit()
 
@@ -137,8 +135,8 @@ class Unregulated:
 		if self.dataset.ust_or_release == 'ust':
 			view_name =  'v_ust_facility'
 		else:
-			view_name = 'v_ust_releases'
-		sql = """select column_name, count(*) from information_schema.columns 
+			view_name = 'v_ust_release'
+		sql = """select column_name from information_schema.columns 
 				where table_schema = %s and table_name = %s
 				and column_name like 'facility_type%%'
 				order by column_name"""
@@ -146,20 +144,20 @@ class Unregulated:
 		rows = self.cur.fetchall()
 		if not rows:
 			return None  
-		elif self.dataset.ust_or_release == 'release':
-			return 'where 1=1'
-		wheresql = "\nwhere facility_id is not null "
+		column_name = rows[0][0]
+		try:
+			column_name2 = rows[1][0]
+		except:
+			column_name2 = None 
 		if fac_type == 'heating':
-			wheresql += 'and facility_type_id <> 4'
+			wheresql = f"where {column_name} <> 4 "
 		else:
-			wheresql += 'and facility_type_id in (1,12)'
-		fsql = f"""\n\t(select distinct facility_id from 
-				(select facility_id, facility_type1 as facility_type_id 
-				 from {self.dataset.schema}.v_ust_facility {wheresql}"""
+			wheresql = f"where {column_name} in (1,12) "
+
+		fsql = f"\nand {self.parent_col} in (select {self.parent_col} from {self.dataset.schema}.{view_name} {wheresql}"
 		if len(rows) > 1:
-			fsql += f"""\nunion all\n\tselect facility_id, facility_type2 as facility_type_id 
-			            from {self.dataset.schema}.v_ust_facility {wheresql}'"""
-		fsql += ") f "
+			fsql += f"""\nunion all\n\tselect {self.parent_col} from {self.dataset.schema}.{view_name} {wheresql.replace(column_name, column_name2)}"""
+		fsql += ") " 
 		return fsql 
 
 
@@ -168,58 +166,71 @@ class Unregulated:
 		if not fac_sql:
 			logger.info('No facility type data so not inserting unregulated heating oil rows.')
 			return
+
 		if self.dataset.ust_or_release == 'ust':
-			insert_table = self.unreg_tank_table
-			sql = f"""insert into {self.dataset.schema}.{insert_table}
-			          select distinct ts.facility_id, tank_id 
-			          from {self.dataset.schema}.v_ust_tank_substance ts join public.substances s on ts.substance_id = s.substance_id 
-						join {fac_sql} on ts.facility_id = f.facility_id
-					  where s.substance_group = 'Heating' 
-					  on conflict do nothing"""
+			substance_table = 'v_ust_tank_substance'
 		else:
-			insert_table = self.unreg_table
-			sql = f"""insert into {self.dataset.schema}.{insert_table}
-			          select distinct ts.release_id
-					  from (select release_id from {self.dataset.schema}.v_ust_release where facility_type_id <> 4) r
-					    	join {self.dataset.schema}.v_ust_release_substance ts on ts.release_id = r.release_id
-						    join public.substances s on ts.substance_id = s.substance_id 
-					  where s.substance_group = 'Heating'
-					  on conflict do nothing"""
+			substance_table = 'v_ust_release_substance'
+
+		sql = f"""insert into {self.dataset.schema}.{self.unreg_child_table}
+			      select distinct {self.parent_col}, ts.substance_id, 'Heating oil' 
+			      from {self.dataset.schema}.{substance_table} ts 
+			      	join public.substances s on ts.substance_id = s.substance_id 
+			      where s.substance_group = 'Heating' {fac_sql}
+			      on conflict do nothing"""
 		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Inserted %s rows into %s.%s due presence of heating oil in a non-bulk distributor facility', self.cur.rowcount, self.dataset.schema, insert_table)
+		logger.info('Inserted %s rows into %s.%s due presence of heating oil in a non-bulk distributor facility', self.cur.rowcount, self.dataset.schema, self.unreg_child_table)
 		self.conn.commit()
 
 
 	def insert_small_tank(self):
-		if self.dataset.ust_or_release == 'ust':
-			facility_type_sql = self.build_facility_type_sql('farm/residence')
+		if self.dataset.ust_or_release == 'release':
+			return 
 
-			sql = f"""insert into {self.dataset.schema}.{self.unreg_tank_table}
-					select x.facility_id, x.tank_id 
-					from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
-						  from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x 
-						join {facility_type_sql} on x.facility_id = f.facility_id	  
-						join {self.dataset.schema}.v_ust_tank_substance s on x.facility_id = s.facility_id and x.tank_id = s.tank_id 
-						join public.substances sub on s.substance_id = sub.substance_id
-					where tank_capacity_gallons < 1100 and substance_group in ('Diesel','Gasoline')
+		fac_sql = self.build_facility_type_sql('farm/residence')
+		sql = f"""insert into {self.dataset.schema}.{self.unreg_child_table}
+				select x.facility_id, ts.substance_id, 'Small tank at farm/residence'
+				from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
+					from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x join 
+					{self.dataset.schema}.v_ust_tank_substance ts on x.facility_id = ts.facility_id and x.tank_id = ts.tank_id  
+					join public.substances s on ts.substance_id = s.substance_id
+				where tank_capacity_gallons < 1100 and substance_group in ('Diesel','Gasoline')
+				{fac_sql}"""
+		# sql = f"""insert into {self.dataset.schema}.{self.unreg_child_table}
+		# 		select x.facility_id, x.tank_id 
+		# 		from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
+		# 			  from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x 
+		# 			join {fac_sql} on x.facility_id = f.facility_id	  
+		# 			join {self.dataset.schema}.v_ust_tank_substance s on x.facility_id = s.facility_id and x.tank_id = s.tank_id 
+		# 			join public.substances sub on s.substance_id = sub.substance_id
+		# 		where tank_capacity_gallons < 1100 and substance_group in ('Diesel','Gasoline')
+		# 		on conflict do nothing"""
+		utils.process_sql(self.conn, self.cur, sql)
+		logger.info('Inserted %s rows into %s.%s due to tank capacity <1100 gallons in a farm or residence facility', self.cur.rowcount, self.dataset.schema, self.unreg_child_table)
+		self.conn.commit()
+
+
+	def insert_parents(self):
+
+		sql = f"""insert into {self.dataset.schema}.{self.unreg_parent_table}
+					select v.{self.parent_col}, string_agg(distinct eus.unregulated_reason, '; ' order by eus.unregulated_reason) as unregulated_reason
+					from {self.dataset.schema}.{self.join_view} v
+						join  {self.dataset.schema}.{self.unreg_child_table} eus 
+							on v.{self.parent_col} = eus.{self.parent_col} and v.substance_id = eus.substance_id
+					where not exists (
+					    select 1
+					    from  {self.dataset.schema}.{self.join_view} v2
+					    where v2.{self.parent_col} = v.{self.parent_col}
+					      and not exists (
+					          select 1
+					          from  {self.dataset.schema}.{self.unreg_child_table} eus
+					          where eus.{self.parent_col} = v2.{self.parent_col}
+					            and eus.substance_id = v2.substance_id))
+					group by v.{self.parent_col}
 					on conflict do nothing"""
-			utils.process_sql(self.conn, self.cur, sql)
-			logger.info('Inserted %s rows into %s.%s due to tank capacity <1100 gallons in a farm or residence facility', self.cur.rowcount, self.dataset.schema, self.unreg_tank_table)
-			self.conn.commit()
-
-
-	def insert_facilities(self):
-		if self.dataset.ust_or_release == 'ust':
-			sql = f"""insert into {self.dataset.schema}.{self.unreg_table} 
-					select distinct facility_id
-					from {self.dataset.schema}.{self.unreg_tank_table} a 
-					where not exists 
-						(select 1 from {self.dataset.schema}.v_ust_tank b
-						where a.facility_id = b.facility_id
-						and a.tank_id <> b.tank_id)"""
-			utils.process_sql(self.conn, self.cur, sql)
-			logger.info('Inserted %s rows into %s.%s because the facility has no regulated %s', self.cur.rowcount, self.dataset.schema, self.unreg_table, self.data_type)
-			self.conn.commit()
+		utils.process_sql(self.conn, self.cur, sql)
+		logger.info('Inserted %s rows into %s.%s', self.cur.rowcount, self.dataset.schema, self.unreg_parent_table)
+		self.conn.commit()
 
 
 	def connect_db(self):

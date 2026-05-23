@@ -472,24 +472,47 @@ class Template:
 		headers = utils.get_headers(view_name)
 		green_cells = []
 		orange_cells = []
+		sortsql = ''
 		if self.dataset.ust_or_release == 'ust':
 			if tab_name == 'Facility':
 				green_cells = ['FacilityID']
+				sortsql = 'order by "FacilityID"'
 			elif tab_name == 'Facility Dispenser':
 				green_cells = ['DispenserID']
 				orange_cells = ['FacilityID']
+				sortsql = 'order by "FacilityID", "DispenserID"'
 			elif tab_name == 'Tank':
 				green_cells = ['TankID']
 				orange_cells = ['FacilityID']
+				sortsql = 'order by "FacilityID", "TankID"'
 			elif tab_name == 'Tank Substance' or tab_name == 'Tank Dispenser':
 				green_cells = ['Substance','DispenserID']
 				orange_cells = ['FacilityID','TankID','TankName']
+				sortsql = 'order by "FacilityID", "TankID"'
+				if tab_name == 'Tank Substance':
+					sortsql += ', "Substance"'
+				elif tab_name == 'Tank Dispenser':
+					sortsql += ', "DispenserID"'
 			elif tab_name == 'Compartment':
 				green_cells = ['CompartmentID']
 				orange_cells = ['FacilityID','TankID','TankName']
+				sortsql = 'order by "FacilityID", "TankID", "CompartmentID"'
 			elif tab_name == 'Piping' or tab_name == 'Compartment Substance' or tab_name == 'Compartment Dispenser':
 				green_cells = ['Substance','PipingID','DispenserID']
 				orange_cells = ['FacilityID','TankID','TankName','CompartmentID','CompartmentName']
+				sortsql = 'order by "FacilityID", "TankID", "CompartmentID"'
+				if tab_name == 'Piping':
+					sortsql += ', "PipingID"'
+				elif tab_name == 'Compartment Substance':
+					sortsql += ', "Substance"'
+				elif tab_name == 'Compartment Dispenser':
+					sortsql += ', "DispenserID"'
+		else:
+			sortsql = 'order by "ReleaseID"'
+			if tab_name == 'Corrective Action Strategy':
+				sortsql += ', "CorrectiveActionStrategySortOrder", "CorrectiveActionStrategySortOrder"'
+			elif tab_name != 'Release':
+				sortsql += f', "{tab_name}"'
 		for colno, header in enumerate(headers, start=1):
 			cell = ws.cell(row=1, column=colno)
 			cell.value = header
@@ -502,6 +525,7 @@ class Template:
 			conn = utils.connect_db()
 			cur = conn.cursor()
 			sql = f"select * from public.{view_name} where {self.dataset.ust_or_release}_control_id = %s"
+
 			utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
 			data = cur.fetchall()
 			for rowno, row in enumerate(data, start=2):
