@@ -16,9 +16,9 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = '' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'release' 			# Valid values are 'ust' or 'release'
 control_id = 0                 # Enter an integer that is the ust_control_id or release_control_id
-organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
+organization_id = 'MA'            # Optional; if control_id = 0 or None, will find the most recent control_id
 
 exclude_unregulated = False     # Set to True if you have not yet excluded unregulated tanks/facilities/releases from the views. Leave as False if already done.
 exclude_qa = True				# set to True if the QA output has already been generated and is not necessary. 
@@ -100,6 +100,7 @@ def main(ust_or_release,
 
 
 if __name__ == '__main__':   
+
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
 		 organization_id=organization_id,
@@ -108,3 +109,22 @@ if __name__ == '__main__':
 		 repopulate=repopulate,
 		 reexport=reexport,
 		 do_peer_review=do_peer_review)
+
+	# states = ['OK','MA','VA','SD','WV']
+	# ust_or_release = 'release'
+	# exclude_unregulated = False 
+	# exclude_qa = True
+	# repopulate = True
+	# reexport = True
+	# do_peer_review = True
+
+	# for state in states:
+	# 	organization_id = state 
+	# 	main(ust_or_release=ust_or_release,
+	# 		 control_id=control_id,
+	# 		 organization_id=organization_id,
+	# 		 exclude_unregulated=exclude_unregulated,
+	# 		 exclude_qa=exclude_qa,
+	# 		 repopulate=repopulate,
+	# 		 reexport=reexport,
+	# 		 do_peer_review=do_peer_review)
