@@ -630,7 +630,7 @@ def process_sql(conn, cur, sql, params=None, print_sql=False, exit_on_fail=True)
             cur.close()
             conn.close()     
             error_logger.error('\n\nEXITING DUE TO SQL ERROR....\n\n')  
-            exit()  
+            sys.exit()  
     if print_sql:
         print(get_pretty_query(cur))
 

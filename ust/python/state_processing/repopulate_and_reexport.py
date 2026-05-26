@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
-control_id = 23                 # Enter an integer that is the ust_control_id or release_control_id
+control_id = 9                 # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
 
 exclude_unregulated = False     # Set to True if you have not yet excluded unregulated tanks/facilities/releases from the views. Leave as False if already done.
