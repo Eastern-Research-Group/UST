@@ -11,16 +11,18 @@ from openpyxl.styles.borders import Border, Side
 import psycopg2.errors
 
 from python.state_processing import element_mapping_to_excel
+from python.state_processing.qa_exclusions import Exclusions
 from python.state_processing.qa_summary_counts import SummaryCounts
 from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
 
-ust_or_release = '' 			# Valid values are 'ust' or 'release'
-control_id = 0             	# Enter an integer that is the ust_control_id or release_control_id
+ust_or_release = 'release' 			# Valid values are 'ust' or 'release'
+control_id = 22             	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
+force_exclusions = True    	# Boolean; defaults to False. If False, will only generate exclusions (e.g. unregulated substances, etc.) if there are no errors. Set to True to force exclusion export even if there are errors to resolve.
 force_summary_counts = False    # Boolean; defaults to False. If False, will only generate summary counts if there are no errors. Set to True to force summary counts even if there are errors to resolve.
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
@@ -59,8 +61,9 @@ class QualityCheck:
 	error_cnt_dict = {}
 	view_counts = {}
 
-	def __init__(self, dataset, force_summary_counts=False):
+	def __init__(self, dataset, force_exclusions=False, force_summary_counts=False):
 		self.dataset = dataset
+		self.force_exclusions = force_exclusions
 		self.force_summary_counts = force_summary_counts
 		self.connect_db()
 		self.set_views()
@@ -93,6 +96,7 @@ class QualityCheck:
 		self.check_substance_types()
 		self.check_heating_oil()
 		self.write_overview()
+		self.exclusions()
 		self.summary_counts()
 		element_mapping_to_excel.build_ws(self.dataset, self.wb.create_sheet(), admin=True)
 		self.cleanup_wb()
@@ -655,6 +659,31 @@ class QualityCheck:
 			ws.cell(row=rowno, column=1).font = Font(italic=True)
 
 
+	def exclusions(self):
+		if self.error_dict and not self.force_exclusions:
+			return 
+		exclusions = Exclusions(self.dataset).exclusions 
+
+		for tab_name, metadata in self.exclusions.items():
+			logger.info('Working on "%s"', tab_name)
+			ws = self.wb.create_sheet(tab_name)
+			rowno = 1		
+			colno = 1
+			for header in metadata['headers']:
+				ws.cell(row=rowno, column=colno).value = header
+				ws.cell(row=rowno, column=1).font = Font(bold=True)
+				colno += 1
+			rowno +=1 
+			for row in metadata['data']: 
+				colno = 1
+				for col in row:				
+					ws.cell(row=rowno, column=colno).value = row[colno-1]
+				rowno += 1
+			utils.autowidth(ws)		
+	
+		logger.info('Added exclusion tabs')
+
+
 	def summary_counts(self):
 		if self.error_dict and not self.force_summary_counts:
 			return 
@@ -692,12 +721,13 @@ class QualityCheck:
 def main(ust_or_release, 
 	     control_id=0, 
 	     organization_id=None, 
+	     force_exclusions=False,
 	     force_summary_counts=False, 
 	     export_file_name=None, 
 	     export_file_dir=None, 
 	     export_file_path=None):
 	if not control_id or control_id == 0:
-		control_id = utils.get_control_id(ust_or_release, organization_id)
+		control_id = utils.get_control_id(ust_or_release, organization_id.upper())
 
 	dataset = Dataset(ust_or_release=ust_or_release,
 					  control_id=control_id, 
@@ -706,13 +736,14 @@ def main(ust_or_release,
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
 
-	qc = QualityCheck(dataset=dataset, force_summary_counts=force_summary_counts)
+	qc = QualityCheck(dataset=dataset, force_exclusions=force_exclusions, force_summary_counts=force_summary_counts)
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id, 
 		 organization_id=organization_id,
+		 force_exclusions=force_exclusions,
 		 force_summary_counts=force_summary_counts,
 		 export_file_name=export_file_name,
 		 export_file_dir=export_file_dir,

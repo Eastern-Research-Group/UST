@@ -132,7 +132,7 @@ def main(ust_or_release,
 		logger.errror('Either control_id or organization_id is required; exiting')
 		exit()
 	if not control_id:
-		control_id = utils.get_control_id(ust_or_release, organization_id)
+		control_id = utils.get_control_id(ust_or_release, organization_id.upper())
 		logger.info('control_id set to %s', control_id)
 
 	CuiUpdate(ust_or_release=ust_or_release, control_id=control_id).process()
