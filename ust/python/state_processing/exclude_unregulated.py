@@ -12,11 +12,11 @@ from python.util import utils
 from python.util.dataset import Dataset 
 from python.util.logger_factory import logger
 
-ust_or_release = 'release' 			# Valid values are 'ust' or 'release'
-control_id = 22              	# Enter an integer that is the ust_control_id or release_control_id
+ust_or_release = '' 			# Valid values are 'ust' or 'release'
+control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
-find_regulated = False          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
-execute_sql = False            	# Boolean; defaults to False. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
+find_regulated = False          # Boolean; defauls to False. Set to True if the unregulated tanks and facilites tables do not already exist in the schema and need to be created. 
+execute_sql = True            	# Boolean; defaults to True. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
 export_sql = True              	# Boolean; defaults to True. If True will generate a SQL file containing the 'create or replace view' statements.
 view_name = None                # String; defaults to None. To limit output to a single view, enter view name (e.g. "v_ust_tank_substance").
 
@@ -34,8 +34,8 @@ class Exclude:
 	
 	def __init__(self, 
 				 dataset,
-				 find_regulated=True,
-				 execute_sql=False,
+				 find_regulated=False,
+				 execute_sql=True,
 				 export_sql=True,
 				 view_name=None):
 		self.dataset = dataset
@@ -109,8 +109,6 @@ class Exclude:
 		if not epa_col_name:
 			epa_col_name = pk_col_name
 
-
-
 		if 'release' in view_name:
 			erg_table_name = 'erg_unregulated_releases'
 			epa_col_name = 'release_id'
@@ -148,10 +146,7 @@ class Exclude:
 		table_alias = get_table_alias(self.get_view_def(view_name), from_table)
 		# print(f'table_alias = "{table_alias}"')
 
-		if 'substance' in view_name:
-			view_def = 
-
-		elif view_name == 'v_ust_facility' or view_name == 'v_ust_facility_dispenser' or 'release' in view_name:
+		if view_name == 'v_ust_facility' or view_name == 'v_ust_facility_dispenser' or 'release' in view_name:
 			view_def = view_def + f'{table_alias}."{src_pk_name}"::varchar(50) not in (select {pk_col_name} from {self.dataset.schema}.{erg_table_name})'
 		elif self.dataset.ust_or_release == 'ust':
 			view_def = view_def + f"not exists\n\t(select 1 from {self.dataset.schema}.{erg_table_name} unreg"

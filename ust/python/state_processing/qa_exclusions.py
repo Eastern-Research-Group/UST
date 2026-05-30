@@ -56,7 +56,8 @@ class Exclusions:
 		cur = conn.cursor()
 
 		sql = f"""select table_name from information_schema.tables 
-		          where table_schema = %s and table_name like 'erg_unregulated%%'
+		          where table_schema = %s and table_name in
+		          	 ('erg_unregulated_facilities','erg_unregulated_tanks','erg_unregulated_substances','erg_unregulated_releases')
 		          order by 1"""
 		utils.process_sql(conn, cur, sql, params=(self.dataset.schema,))
 		rows = cur.fetchall()
@@ -78,17 +79,15 @@ class Exclusions:
 			utils.process_sql(conn, cur, sql, params=(self.dataset.schema, table_name))
 			rows2 = cur.fetchall()
 			vsql = "select "
-			substance_join = ""
 			headers = []
 			for row2 in rows2:
 				col_name = row2[0]
 				if col_name == 'substance_id':
-					col_name = 'substance'
-					substance_join = " a join public.substances s on a.substance_id = s.substance_id"
+					continue
 				vsql += '"' + col_name + '", '
 				headers.append(col_name)
 			vsql = vsql[:-2]
-			vsql += f"from {self.dataset.schema}.{table_name} {substance_join} order by 1, 2"
+			vsql += f"from {self.dataset.schema}.{table_name} order by 1, 2"
 
 			utils.process_sql(conn, cur, vsql)
 			rows = cur.fetchall()

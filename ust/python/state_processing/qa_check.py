@@ -18,11 +18,13 @@ from python.util.dataset import Dataset
 from python.util.logger_factory import logger
 
 
-ust_or_release = 'release' 			# Valid values are 'ust' or 'release'
-control_id = 22             	# Enter an integer that is the ust_control_id or release_control_id
+ust_or_release = '' 			# Valid values are 'ust' or 'release'
+control_id = 0            		# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
-force_exclusions = True    	# Boolean; defaults to False. If False, will only generate exclusions (e.g. unregulated substances, etc.) if there are no errors. Set to True to force exclusion export even if there are errors to resolve.
+
+
+force_exclusions = False    	# Boolean; defaults to False. If False, will only generate exclusions (e.g. unregulated substances, etc.) if there are no errors. Set to True to force exclusion export even if there are errors to resolve.
 force_summary_counts = False    # Boolean; defaults to False. If False, will only generate summary counts if there are no errors. Set to True to force summary counts even if there are errors to resolve.
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
@@ -94,7 +96,7 @@ class QualityCheck:
 				self.check_compartment_data_flag()
 		# self.check_inactive_substances()	# this is now covered under check_substance_types
 		self.check_substance_types()
-		self.check_heating_oil()
+		self.check_unregulated_substances()
 		self.write_overview()
 		self.exclusions()
 		self.summary_counts()
@@ -525,9 +527,12 @@ class QualityCheck:
 		self.error_cnt_dict['Invalid EPA values in ' + self.dataset.ust_or_release + '_element_value_mapping'] = num_errors
 
 
-	def check_heating_oil(self):
-		# check for inclusion of tanks that are unregulated due to heating oil
+	def check_unregulated_substances(self):
+		# check for inclusion of tanks/releases that are unregulated due to heating oil
 		if self.dataset.ust_or_release == 'ust':
+			unregulated_table = 'erg_unregulated_tanks'
+			row_type = 'tanks'
+			extramsg = ' or small tank at farm/residence'
 			sql = f"""select count(*) from information_schema.columns 
 			          where table_schema = %s and table_name = %s and column_name like 'facility_type%%'"""
 			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_facility'))
@@ -562,7 +567,10 @@ class QualityCheck:
 						where tank_capacity_gallons <1100 and s.substance_group in ('Diesel','Gasoline') """
 			sql = sql + """) a
 					order by 1, 2"""
-		else:
+		else: # releases
+			unregulated_table = 'erg_unregulated_substances'
+			row_type = 'substances'
+			extramsg = ''
 			sql = f"""select count(*) from information_schema.columns 
 			          where table_schema = %s and table_name = %s and column_name like 'facility_type%%'"""
 			utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'v_ust_release'))
@@ -588,14 +596,24 @@ class QualityCheck:
 		utils.process_sql(self.conn, self.cur, sql)
 		rows = self.cur.fetchall()
 		num_rows = len(rows) 
-		self.error_cnt_dict['Rows that need to be excluded related to unregulated heating oil'] = num_rows
-		if self.dataset.ust_or_release == 'ust':
-			row_type = 'tanks'
-		else:
-			row_type = 'releases'
+		
 		if num_rows > 0:
-			logger.warning('There are %s %s that need to be excluded due to unregulated heating oil. Run script exclude_unregulated.py and rebuild the data views.', num_rows, row_type)
-			self.error_dict[f'Number of {row_type} that need to be excluded due to unregulated heating oil. Run script exclude_unregulated.py and rebuild the data views.'] = num_rows
+			msg = f'Number of {row_type} that need to be excluded due to unregulated heating oil{extramsg}. '
+			sql = f"""select count(*) from {self.dataset.schema}.{unregulated_table} 
+			          where lower(unregulated_reason) in ('heating oil','small tank at farm/residence')"""
+			utils.process_sql(self.conn, self.cur, sql)
+			unreg_cnt = self.cur.fetchone()[0]
+			if unreg_cnt == len(rows):
+				msg += f'It looks like exclude_unregulated.py was run but unregulated {row_type} were not excluded from data views.'
+			elif unreg_cnt == 0:
+				msg += f'{unregulated_table} does not contain expected rows. Run script exclude_unregulated.py and rebuild data views.'
+			else:
+				msg += f'{unreg_cnt} rows found in {unregulated_table}. Investigate this discrepancy and rebuild data views.'
+
+		self.error_cnt_dict['Rows with unregulated substances not excluded from views'] = num_rows
+		if num_rows > 0:
+			logger.warning(msg)
+			self.error_dict[msg] = num_rows
 
 
 	def check_compartment_data_flag(self):
@@ -662,25 +680,24 @@ class QualityCheck:
 	def exclusions(self):
 		if self.error_dict and not self.force_exclusions:
 			return 
-		exclusions = Exclusions(self.dataset).exclusions 
-
-		for tab_name, metadata in self.exclusions.items():
+		exclusions = Exclusions(self.dataset).exclusions
+		for tab_name, metadata in exclusions.items():
 			logger.info('Working on "%s"', tab_name)
 			ws = self.wb.create_sheet(tab_name)
 			rowno = 1		
 			colno = 1
 			for header in metadata['headers']:
 				ws.cell(row=rowno, column=colno).value = header
-				ws.cell(row=rowno, column=1).font = Font(bold=True)
+				ws.cell(row=rowno, column=colno).font = Font(bold=True)
 				colno += 1
 			rowno +=1 
 			for row in metadata['data']: 
 				colno = 1
 				for col in row:				
 					ws.cell(row=rowno, column=colno).value = row[colno-1]
+					colno += 1
 				rowno += 1
 			utils.autowidth(ws)		
-	
 		logger.info('Added exclusion tabs')
 
 

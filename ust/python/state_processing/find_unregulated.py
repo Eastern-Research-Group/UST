@@ -1,8 +1,20 @@
+"""
+THIS SCRIPT HAS BEEN REPLACED BY create_unreg_tables.py. 
+INSTEAD OF RUNNING THIS SCRIPT AFTER CREATING THE SCHEMA DATA VIEWS,
+RUN create_unreg_tables.py *BEFORE* CREATING THE VIEWS.
+
+Continue to run export_unregulated.py after writing the views,
+unless you manually add the unregulated tables to the where statement. 
+"""
+
+
 import os
 from pathlib import Path
+import string
 import sys  
 ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
+
 
 import psycopg2
 
@@ -14,14 +26,16 @@ from python.util.logger_factory import logger
 ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''          	# Optional; if control_id = 0 or None, will find the most recent control_id
+delete_existing = True  		# Boolean, defaults to True. If True, will delete all existing rows from erg_unregulated% tables. Set to False to skip the delete (will likely cause errors if this script has been run before.)
 
 
 class Unregulated:
 	conn = None 
 	cur = None 
 
-	def __init__(self, dataset):
+	def __init__(self, dataset, delete_existing=True):
 		self.dataset = dataset
+		self.delete_existing = delete_existing
 		self.unreg = UnregTables(self.dataset)
 		self.data_type = 'facilities'
 		if self.dataset.ust_or_release == 'release':
@@ -54,12 +68,14 @@ class Unregulated:
 
 
 	def create_tables(self):
-		sql = f"select count(*) from information_schema.tables where table_schema = %s and table_name = %s"
-		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, 'erg_unregulated_substances'))
+		sql = f"select count(*) from information_schema.tables where table_schema = %s and table_name like 'erg_unregulated%%'"
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema,))
 		cnt = self.cur.fetchone()[0]
 		if cnt == 0:
 			logger.warning('ERG Unregulated tables do not exist; creating....')
-			UnregTables(dataset, drop_existing=False).execute()
+			UnregTables(self.dataset, drop_existing=False).execute()
+		else:
+			UnregTables(self.dataset, drop_existing=delete_existing).execute()
 
 
 	def insert_nonreg_substances(self):
@@ -71,11 +87,14 @@ class Unregulated:
 					on a.epa_table_name = b.table_name and a.epa_column_name = b.column_name 
 				where {self.dataset.ust_or_release}_control_id = %s
 				and epa_table_name = %s
-				and epa_column_name in (%s, %s)
+				and epa_column_name in (%s, %s, %s)
 				order by b.column_sort_order"""
-		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, substance_table, self.unreg.unreg_parent_col, 'substance_id'), print_sql=False)
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, substance_table, self.unreg.unreg_parent_col, 'tank_id', 'substance_id'), print_sql=False)
 		rows = self.cur.fetchall()
-		vsql = f"insert into {self.unreg.unreg_substance_table}\nselect distinct "
+		tanksql = ''
+		if self.dataset.ust_or_release == 'ust':
+			tanksql = 'tank_id, '
+		vsql = f"insert into {self.unreg.unreg_substance_table} ({self.unreg.unreg_parent_col}, {tanksql} substance, unregulated_reason)\nselect distinct "
 		org_table_name = ''
 		substance_col_name = ''
 		for row in rows:
@@ -93,13 +112,12 @@ class Unregulated:
 		             where {self.dataset.ust_or_release}_control_id = %s
 		             and epa_table_name = %s and epa_column_name = 'substance_id') 
 		             order by 1, 2"""
-		utils.process_sql(self.conn, self.cur, vsql, params=(self.dataset.control_id, substance_table), print_sql=True)
-		rows = self.cur.fetchall()
-		if len(rows) == 0:
+		utils.process_sql(self.conn, self.cur, vsql, params=(self.dataset.control_id, substance_table), print_sql=False)
+		num_inserted = self.cur.rowcount
+		if num_inserted == 0:
 			logger.info('No non-regulated substances')
 			return 
-		utils.process_sql(self.conn, self.cur, sql, print_sql=False)
-		logger.info('Inserted %s rows into %s due non-regulated substance', self.cur.rowcount,self.unreg.unreg_substance_table)
+		logger.info('Inserted %s rows into %s due non-regulated substance', num_inserted, self.unreg.unreg_substance_table)
 		self.conn.commit()
 
 
@@ -141,16 +159,21 @@ class Unregulated:
 
 		if self.dataset.ust_or_release == 'ust':
 			substance_table = 'v_ust_tank_substance'
+			tanksql = 'tank_id, '
 		else:
 			substance_table = 'v_ust_release_substance'
+			tanksql = ''
 
 		sql = f"""insert into {self.unreg.unreg_substance_table}
-			      select distinct {self.unreg.unreg_parent_col}, ts.substance_id, 'Heating oil' 
+			      select distinct {self.unreg.unreg_parent_col}, {tanksql} org.organization_value, ts.substance_id, 'Heating oil' 
 			      from {self.unreg.substance_join_view} ts 
 			      	join public.substances s on ts.substance_id = s.substance_id 
+		      	  	join (select distinct organization_value, epa_value from public.v_ust_mapping 
+				  	      where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id') org 
+				  		on s.substance = org.epa_value 
 			      where s.substance_group = 'Heating' {fac_sql}
 			      on conflict do nothing"""
-		utils.process_sql(self.conn, self.cur, sql, print_sql=False)
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,), print_sql=False)
 		logger.info('Inserted %s rows into %s due presence of heating oil in a non-bulk distributor facility', self.cur.rowcount, self.unreg.unreg_substance_table)
 		self.conn.commit()
 
@@ -161,75 +184,42 @@ class Unregulated:
 
 		fac_sql = self.build_ust_facility_type_sql('farm/residence')
 		sql = f"""insert into {self.unreg.unreg_substance_table}
-				select distinct x.facility_id, ts.substance_id, 'Small tank at farm/residence'
+				select distinct x.facility_id, x.tank_id, org.organization_value, ts.substance_id, 'Small tank at farm/residence'
 				from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
 					from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x join 
 					{self.unreg.substance_join_view} ts on x.facility_id = ts.facility_id and x.tank_id = ts.tank_id  
 					join public.substances s on ts.substance_id = s.substance_id
+		      	  	join (select distinct organization_value, epa_value from public.v_ust_mapping 
+				  	      where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id') org 
+				  		on s.substance = org.epa_value 					
 				where tank_capacity_gallons < 1100 and substance_group in ('Diesel','Gasoline')
 				{fac_sql}"""
-		utils.process_sql(self.conn, self.cur, sql, print_sql=False)
+		utils.process_sql(self.conn, self.cur, sql,  params=(self.dataset.control_id,), print_sql=False)
 		logger.info('Inserted %s rows into %s due to tank capacity <1100 gallons in a farm or residence facility', self.cur.rowcount, self.unreg.unreg_substance_table)
 		self.conn.commit()
 
 
 	def insert_parents(self):
+		extrajoinsql = ""
 		if self.dataset.ust_or_release == 'ust':
-			# erg_unregulated_tanks
-			sql = f"""insert into {self.unreg.unreg_tank_table}
-					select v.facility_id, v.tank_id, string_agg(distinct eus.unregulated_reason, '; ' order by eus.unregulated_reason) as unregulated_reason
-					from {self.unreg.substance_join_view} v
-						join {self.unreg.unreg_tank_table} eus 
-							on v.facility_id = eus.facility_id and v.substance_id = eus.substance_id
-					where not exists (
-					    select 1
-					    from  {self.unreg.substance_join_view} v2
-					    where v2.facility_id = v.facility_id and v2.tank_id = v.tank_id
-					      and not exists (
-					          select 1
-					          from {self.unreg.unreg_tank_table} eus
-					          where eus.facility_id = v2.facility_id and eus.substance_id = v2.substance_id)
-					     )
-					group by v.facility_id, v.tank_id"""
-			utils.process_sql(self.conn, self.cur, sql)
-			logger.info('Inserted %s rows into %s', self.cur.rowcount, self.unreg.unreg_tank_table)
+			extrajoinsql = " and v.tank_id = eus.tank_id "
 
-			# erg_unregulated_facilities
-			sql = f"""insert into {self.unreg.unreg_parent_table}
-					select v.{self.unreg.unreg_parent_col}, string_agg(distinct eus.unregulated_reason, '; ' order by eus.unregulated_reason) as unregulated_reason
-					from {self.unreg.substance_join_view} v
-						join {self.unreg.unreg_tank_table} eus 
-							on v.{self.unreg.unreg_parent_col} = eus.{self.unreg.unreg_parent_col} and v.tank_id = eus.tank_id
-					where not exists (
-					    select 1
-					    from {self.unreg.substance_join_view} v2
-					    where v2.{self.unreg.unreg_parent_col} = v.{self.unreg.unreg_parent_col}
-					      and not exists (
-					          select 1
-					          from {self.unreg.unreg_tank_table} eus
-					          where eus.{self.unreg.unreg_parent_col} = v2.{self.unreg.unreg_parent_col}
-					            and eus.tank_id = v2.tank_id))
-					group by v.{self.unreg.unreg_parent_col}
-					on conflict do nothing"""		
-
-		else:
-			# erg_unregulated_releases
-			sql = f"""insert into {self.unreg.unreg_parent_table}
-						select v.{self.unreg.unreg_parent_col}, string_agg(distinct eus.unregulated_reason, '; ' order by eus.unregulated_reason) as unregulated_reason
-						from {self.unreg.substance_join_view} v
-							join {self.unreg.unreg_substance_table} eus 
-								on v.{self.unreg.unreg_parent_col} = eus.{self.unreg.unreg_parent_col} and v.substance_id = eus.substance_id
-						where not exists (
-						    select 1
-						    from  {self.unreg.substance_join_view} v2
-						    where v2.{self.unreg.unreg_parent_col} = v.{self.unreg.unreg_parent_col}
-						      and not exists (
-						          select 1
-						          from {self.unreg.unreg_substance_table} eus
-						          where eus.{self.unreg.unreg_parent_col} = v2.{self.unreg.unreg_parent_col}
-						            and eus.substance_id = v2.substance_id))
-						group by v.{self.unreg.unreg_parent_col}
-						on conflict do nothing"""
+		sql = f"""insert into {self.unreg.unreg_parent_table}
+			select v.{self.unreg.unreg_parent_col}, string_agg(distinct eus.unregulated_reason, '; ' order by eus.unregulated_reason) as unregulated_reason
+			from {self.unreg.substance_join_view} v
+				join {self.unreg.unreg_substance_table} eus join public.substances s on eus.substance = s.substance
+					on v.{self.unreg.unreg_parent_col} = eus.{self.unreg.unreg_parent_col} and v.substance_id = s.substance_id {extrajoinsql}
+			where not exists (
+			    select 1
+			    from  {self.unreg.substance_join_view} v2
+			    where v2.{self.unreg.unreg_parent_col} = v.{self.unreg.unreg_parent_col}
+			      and not exists (
+			          select 1
+			          from {self.unreg.unreg_substance_table} eus join public.substances s on eus.substance = s.substance
+			          where eus.{self.unreg.unreg_parent_col} = v2.{self.unreg.unreg_parent_col}
+			            and s.substance_id = v2.substance_id {extrajoinsql.replace('v.','v2.')}))
+			group by v.{self.unreg.unreg_parent_col}
+			on conflict do nothing"""
 		
 		utils.process_sql(self.conn, self.cur, sql, print_sql=True)
 		logger.info('Inserted %s rows into %s', self.cur.rowcount, self.unreg.unreg_parent_table)
@@ -252,7 +242,8 @@ class Unregulated:
 
 
 
-def main(ust_or_release, control_id=0, organization_id=None):
+
+def main(ust_or_release, control_id=0, organization_id=None, delete_existing=delete_existing):
 	if not control_id or control_id == 0:
 		control_id = utils.get_control_id(ust_or_release, organization_id.upper())
 
@@ -260,12 +251,15 @@ def main(ust_or_release, control_id=0, organization_id=None):
 				 	  control_id=control_id,
 				 	  requires_export=False)
 
-	Unregulated(dataset).execute()
+	# Unregulated(dataset, delete_existing=delete_existing).execute()
 
+	u = Unregulated(dataset, delete_existing=delete_existing)
+	u.execute()
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
-		 organization_id=organization_id)
+		 organization_id=organization_id,
+		 delete_existing=delete_existing)
 
