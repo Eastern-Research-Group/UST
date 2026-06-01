@@ -106,10 +106,12 @@ class UnregTables:
 			try:
 				sql = f"drop table if exists {table}"
 				self.cur.execute(sql)
+				return True
 			except psycopg2.errors.DependentObjectsStillExist as e:
-				logger.warning('Table %s exists but it has dependencies, so creating a backup and truncating the original table instead of creating a new one.', self.table)
+				logger.warning('Table %s exists but it has dependencies, so creating a backup and truncating the original table instead of creating a new one.', table)
 				self.backup_table(table)
 				self.truncate_table(table)
+				return False
 		else:
 			sql = f"""select count(*) from information_schema.tables 
 					  where table_schema = %s and table_name = %s"""
@@ -124,27 +126,28 @@ class UnregTables:
 	def create_tables(self):
 		self.connect_db()
 
-		self.drop_table(self.unreg_substance_table)
-		tanksql = ""
-		if self.dataset.ust_or_release == 'ust':
-			tanksql = "\ntank_id int not null,"
-			tanksql2 = "tank_id, "
-		sql = f"""create table {self.unreg_substance_table} 
-					({self.unreg_parent_col} varchar(50) not null, {tanksql} 
-				   organization_substance varchar(1000) not null,
-				   substance_id int, 
-				   epa_substance varchar(200), 
-				   unregulated_reason varchar(1000),
-				   primary key ({self.unreg_parent_col}, {tanksql2} organization_substance))"""
-		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Created table %s', self.unreg_substance_table)	
+		if self.drop_table(self.unreg_substance_table):
+			tanksql = ""
+			tanksql2 = ""
+			if self.dataset.ust_or_release == 'ust':
+				tanksql = "\ntank_id int not null,"
+				tanksql2 = "tank_id, "
+			sql = f"""create table {self.unreg_substance_table} 
+						({self.unreg_parent_col} varchar(50) not null, {tanksql} 
+					   organization_substance varchar(1000) not null,
+					   substance_id int, 
+					   epa_substance varchar(200), 
+					   unregulated_reason varchar(1000),
+					   primary key ({self.unreg_parent_col}, {tanksql2} organization_substance))"""
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Created table %s', self.unreg_substance_table)	
 
-		self.drop_table(self.unreg_parent_table)
-		sql = f"""create table {self.unreg_parent_table} 
-					({self.unreg_parent_col} varchar(50) not null primary key, 
-					unregulated_reason varchar(1000))"""
-		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Created table %s', self.unreg_parent_table)	
+		if self.drop_table(self.unreg_parent_table):
+			sql = f"""create table {self.unreg_parent_table} 
+						({self.unreg_parent_col} varchar(50) not null primary key, 
+						unregulated_reason varchar(1000))"""
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Created table %s', self.unreg_parent_table)	
 
 		self.disconnect_db()
 
@@ -329,9 +332,13 @@ class UnregTables:
 			self.disconnect_db()
 			return 
 
+		if self.dataset.ust_or_release == 'ust':
+			join_col = 'facility_id'
+		else:
+			join_col = 'release_id'
 		sql = f"""select a.*, 'Heating oil' as unregulated_reason
 				from {self.dataset.schema}.{self.erg_substance_mapping_view} a join {self.dataset.schema}.{self.erg_facility_type_mapping_view} b 
-					on a.facility_id = b.facility_id
+					on a.{join_col} = b.{join_col}
 					join public.substances s on a.substance_id = s.substance_id
 				where s.substance_group = 'Heating' and facility_type_id <> 4 --Bulk plant storage/petroleum distributor """
 		
@@ -359,10 +366,13 @@ class UnregTables:
 			logger.warning('No view %s.%s found; will not insert non-regulated substances', self.dataset.schema, self.erg_substance_mapping_view)
 			self.disconnect_db()
 			return 
+		tanksql = ''
+		pk_col = 'release_id'
 		if self.dataset.ust_or_release == 'ust':
 			tanksql = 'tank_id, '
+			pk_col = 'facility_id'
 		sql = f"""insert into {self.unreg_substance_table} 
-				select distinct facility_id, {tanksql}org_substance, substance_id, epa_substance, 'Non-regulated substance'
+				select distinct {pk_col}, {tanksql}org_substance, substance_id, epa_substance, 'Non-regulated substance'
 				from {self.dataset.schema}.{self.erg_substance_mapping_view}
 				where substance_id is null 
 				on conflict do nothing"""
@@ -379,10 +389,13 @@ class UnregTables:
 						   self.dataset.schema, self.unreg_substance_table)
 			self.disconnect_db()
 			return 
+		tanksql = ''
+		pk_col = 'release_id'
 		if self.dataset.ust_or_release == 'ust':
 			tanksql = 'tank_id, '
+			pk_col = 'facility_id'
 		sql = f"""insert into {self.unreg_substance_table} 
-				select distinct facility_id, {tanksql}org_substance, substance_id, epa_substance, unregulated_reason
+				select distinct {pk_col}, {tanksql}org_substance, substance_id, epa_substance, unregulated_reason
 				from {self.dataset.schema}.{self.erg_unreg_tank_view}
 				on conflict do nothing"""
 		utils.process_sql(self.conn, self.cur, sql)
@@ -451,13 +464,11 @@ def main(ust_or_release, control_id=0, organization_id=None, drop_existing=False
 					  requires_export=False)
 
 	unreg = UnregTables(dataset, drop_existing=drop_existing)
-	# unreg.execute()
+	unreg.execute()
 
 	# unreg.create_views()
-
 	# unreg.insert_data()
-
-	unreg.insert_parents()
+	# unreg.insert_parents()
 
 
 if __name__ == '__main__':   
