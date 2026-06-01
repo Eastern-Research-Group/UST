@@ -8,6 +8,7 @@ sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
 
+from python.state_processing.create_unreg_tables import UnregTables
 from python.util.dataset import Dataset 
 from python.util import utils
 from python.util.logger_factory import logger
@@ -35,6 +36,7 @@ class ViewSql:
 	join_info = {}
 	select_sql = ''
 	from_sql = ''
+	where_sql = ''
 	view_sql = '----------------------------------------------------------------------------------------------------------\n\n'
 	table_aliases = {}
 
@@ -216,6 +218,54 @@ class ViewSql:
 	# 		self.join_info['organization_column_name'] = row[8]				
 
 
+
+	def build_where_sql(self):
+		if self.dataset.ust_or_release == 'ust':
+			parent_table = 'ust_facility'
+			parent_col = 'facility_id'
+			parent_unreg_table = 'erg_unregulated_facilities'
+			child_unreg_table = 'erg_unregulated_tanks'
+		else:
+			parent_table = 'ust_release'
+			parent_col = 'release_id'
+			parent_unreg_table = 'erg_unregulated_releases'
+			child_unreg_table = 'erg_unregulated_substances'
+		if self.table == parent_table:
+			unreg_table = parent_unreg_table
+		else:
+			unreg_table = child_unreg_table
+
+		self.where_sql = f"\nwhere not exists\n\t(select 1 from {self.dataset.schema}.{unreg_table} unreg\n\t"
+
+		sql = f"""select organization_column_name, epa_column_name 
+				  from public.{self.dataset.ust_or_release}_element_mapping 
+		          where {self.dataset.ust_or_release}_control_id = %s 
+		          and table_name = %s and epa_column_name in ('facility_id','release_id','tank_id','substance_id')
+		          order by 2"""
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.table_name))
+		rows = self.cur.fetchall()
+
+		org_parent_col = ''
+		org_child_col = ''
+		for row in rows:
+			if row[1] == parent_col:
+				org_parent_col = row[0]
+			else:
+				org_child_col = row[0]
+		self.where_sql += f"""a."{org_parent_col}":: varchar(50) = unreg.{parent_col} """
+		if org_child_col:
+			if self.dataset.ust_or_release == 'ust':
+				self.where_sql += f"""and a."{org_child_col}"::int = unreg.tank_id"""
+			else:
+				self.where_sql += f"""and a."{org_child_col}"::varchar() = unreg.substance_id"""
+
+		self.where_sql += ")\n"
+
+a."FacilityID"::varchar(50) = unreg.facility_id and a."tank_name"::int = unreg.tank_id);
+
+		self.where_sql = self.where_sql + '\n-- ADD ADDITIONAL SQL HERE IF NECESSARY\n;\n'
+
+
 	def build_from_sql(self, from_table, alias, join_alias):
 		if self.join_info['table_type'] == 'lookup':
 			self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '.organization_value'
@@ -259,7 +309,6 @@ class ViewSql:
 
 			print('__________________________________________________________________________________________________________________\n')
 
-		self.from_sql = self.from_sql + '\nwhere -- ADD ADDITIONAL SQL HERE BASED ON PROGRAMMER COMMENTS, OR REMOVE WHERE CLAUSE\n;\n'
 
 	# def build_from_query(self):
 	# 	self.from_sql = 'from '
@@ -426,7 +475,9 @@ class ViewSql:
 			self.select_sql = self.select_sql + '\t' + selected_column + ' ' + self.existing_cols[column_id]['query_logic'] + '\n'
 
 
+
 	def generate_sql(self):
+		self.build_where_sql()
 		self.build_from_query()
 		self.required_cols = self.get_required_cols()
 		self.existing_cols = self.get_existing_cols()
@@ -467,6 +518,8 @@ def main(ust_or_release, control_id, table_name=None, overwrite_sql_file=False):
 					  export_file_name=export_file_name,
 					  export_file_dir=export_file_dir,
 					  export_file_path=export_file_path)
+
+	UnregTables(dataset, drop_existing=False).execute()
 
 	if table_name:
 		sql = ViewSql(dataset=dataset, 

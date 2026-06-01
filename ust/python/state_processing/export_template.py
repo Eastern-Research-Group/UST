@@ -17,7 +17,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = '' 	        # Valid values are 'ust' or 'release'
-control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
+control_id = 0                 	# Enter an integer that is the ust_control_id or release_control_id
 
 data_only = False				# Boolean; defaults to False. Set to True to generate a populated template that does not include the Reference and Lookup tabs.
 template_only = False			# Boolean; defaults to False. Set to True to generate an blank template with no data.
@@ -365,7 +365,16 @@ class Template:
 		conn = utils.connect_db()
 		cur = conn.cursor()	
 
-		sql = f"select {database_lookup_column} from {database_lookup_table} order by 1"
+		wheresql = ''
+		sql = f"""select count(*) from information_schema.columns 
+		          where table_schema = 'public' and table_name = %s
+		          and column_name = 'inactive_flag'"""
+		utils.process_sql(conn, cur, sql, params=(database_lookup_table,))
+		cnt = cur.fetchone()[0]
+		if cnt > 0:
+			wheresql =  " where inactive_flag is null "
+
+		sql = f"select {database_lookup_column} from {database_lookup_table} {wheresql} order by 1"
 		utils.process_sql(conn, cur, sql)
 		data = cur.fetchall()
 		for rowno, row in enumerate(data, start=2):
@@ -567,6 +576,7 @@ def main(ust_or_release, control_id=None, data_only=False, template_only=False, 
 	template = Template(dataset=dataset,
 						data_only=data_only,
 						template_only=template_only)
+	# template.make_lookup_tab(['corrective_action_strategies','corrective_action_strategy','corrective_action_strategy_id'])
 
 
 if __name__ == '__main__':   

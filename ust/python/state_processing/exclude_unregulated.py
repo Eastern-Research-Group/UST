@@ -15,8 +15,8 @@ from python.util.logger_factory import logger
 ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0              	# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
-find_regulated = False          	# Boolean; defauls to True. Set to False if the unregulated tanks and facilites tables already exist in the state schema and do not need to be updated. 
-execute_sql = True            	# Boolean; defaults to False. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
+find_regulated = False          # Boolean; defauls to False. Set to True if the unregulated tanks and facilites tables do not already exist in the schema and need to be created. 
+execute_sql = True            	# Boolean; defaults to True. Set to True to execute the SQL that replaces the views in the database; False to export the new view SQL to file without executing it in the database. 
 export_sql = True              	# Boolean; defaults to True. If True will generate a SQL file containing the 'create or replace view' statements.
 view_name = None                # String; defaults to None. To limit output to a single view, enter view name (e.g. "v_ust_tank_substance").
 
@@ -34,8 +34,8 @@ class Exclude:
 	
 	def __init__(self, 
 				 dataset,
-				 find_regulated=True,
-				 execute_sql=False,
+				 find_regulated=False,
+				 execute_sql=True,
 				 export_sql=True,
 				 view_name=None):
 		self.dataset = dataset
@@ -96,6 +96,19 @@ class Exclude:
 		erg_table_name = ''
 		epa_col_name = ''
 		pk_col_name = ''
+
+		erg_table_name = 'erg_unregulated_facilities'
+		pk_col_name = 'facility_id'
+		epa_col_name = ''
+		if 'substance' in view_name:
+			erg_table_name = 'erg_unregulated_substances'
+			epa_col_name = 'substance_id'
+		elif 'release' in view_name:
+			erg_table_name = 'erg_unregulated_releases'
+			pk_col_name = 'release_id'
+		if not epa_col_name:
+			epa_col_name = pk_col_name
+
 		if 'release' in view_name:
 			erg_table_name = 'erg_unregulated_releases'
 			epa_col_name = 'release_id'
@@ -193,7 +206,7 @@ def main(ust_or_release,
 		 export_file_name=None,
 		 view_name=None):
 	if not control_id or control_id == 0:
-		control_id = utils.get_control_id(ust_or_release, organization_id)
+		control_id = utils.get_control_id(ust_or_release, organization_id.upper())
 	dataset = Dataset(ust_or_release=ust_or_release,
 					  control_id=control_id,
 					  requires_export=True,
