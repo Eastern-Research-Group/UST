@@ -20,8 +20,7 @@ from python.util.peer_review import PeerReview
 ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; if control_id = 0 or None, will find the most recent control_id
-
-exclude_qa = True				# Set to True if the QA export has already been created and can be excluded.
+exclude_qa = False				# Boolean; defaults to False. Set to True if the QA export has already been created and can be excluded.
 
 class ReviewMaterials:
 	def __init__(self, ust_or_release, control_id=0, organization_id=None, exclude_qa=False):
