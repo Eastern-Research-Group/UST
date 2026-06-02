@@ -162,6 +162,21 @@ def get_control_id(ust_or_release, organization_id):
     return control_id
 
 
+def get_table_existence(table_name, table_schema='public'):
+    conn = connect_db()
+    cur = conn.cursor()
+    sql = f"""select count(*) from information_schema.tables 
+              where table_schema = %s and table_name = %s"""
+    process_sql(conn, cur, sql, params=(table_schema, table_name))
+    cnt = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    if cnt == 0:
+        return False 
+    else:
+        return True
+
+
 def get_selenium_driver(url):
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options

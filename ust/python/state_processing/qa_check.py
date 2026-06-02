@@ -23,7 +23,6 @@ control_id = 0            		# Enter an integer that is the ust_control_id or rel
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 
 
-
 force_exclusions = False    	# Boolean; defaults to False. If False, will only generate exclusions (e.g. unregulated substances, etc.) if there are no errors. Set to True to force exclusion export even if there are errors to resolve.
 force_summary_counts = False    # Boolean; defaults to False. If False, will only generate summary counts if there are no errors. Set to True to force summary counts even if there are errors to resolve.
 
