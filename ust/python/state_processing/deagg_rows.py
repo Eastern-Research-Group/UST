@@ -12,10 +12,10 @@ from python.util.logger_factory import logger
 
 # THIS SCRIPT DEAGGREGATES ENTIRE ROWS OF DATA THAT CONTAIN ROLLED UP DATA
 # RUN SCRIPT deagg.py BEFORE THIS ONE TO DEAGGREGATE THE LOOKUP VALUES THEMSELVES. 
-ust_or_release = 'ust'			# Valid values are 'ust' or 'release'
+ust_or_release = ''				# Valid values are 'ust' or 'release'
 control_id = 0  	            # Enter an integer that is the ust_control_id or release_control_id
 data_table_name = '' 			# Enter a string containing organization table name that contains the aggregated data 
-data_table_pk_cols = [''] 		# Python list of column names FROM THE SOURCE DATA that the new table should be grouped by, for example, in UST, substances may be grouped by ['FacilityID','TankID'] or ['FacilityID','TankID','CompartmentID'] 
+data_table_pk_cols = [] 		# Python list of column names FROM THE SOURCE DATA that the new table should be grouped by, for example, in UST, substances may be grouped by ['FacilityID','TankID'] or ['FacilityID','TankID','CompartmentID'] 
 data_deagg_column_name = '' 	# Column name FROM THE SOURCE DATA that contains the aggregated values 
 delimiters = [', '] 			# List of delimiters; defaults to [', ']. Put the most prevelant first. Put characters padded by spaces in list before those without spaces. Use '\n' for hard returns.
 exclude_values = []			    # Python list. Values that contain the delimiter but should not be deaggregated
@@ -134,12 +134,18 @@ class deaggRows:
 		if not self.col_str:
 			self.col_str = self.get_col_str()
 
+		extrawheresql = ""
+		params = None 
+		if self.exclude_values:
+			extrawheresql = f' and "{self.data_deagg_column_name}" <> any(%s) '
+			params = (self.exclude_values,)
+
 		sql = f"""select distinct {self.col_str} "{self.data_deagg_column_name}" 
 				  from {self.dataset.schema}."{self.data_table_name}" 
 				  where "{self.data_deagg_column_name}" is not null and "{self.data_deagg_column_name}" like '%%{delimiter}%%'
-		          and "{self.data_deagg_column_name}" <> any(%s)
+		          {extrawheresql}
 				  order by 1, 2""" 
-		utils.process_sql(self.conn, self.cur, sql, params=(self.exclude_values,))
+		utils.process_sql(self.conn, self.cur, sql, params=params)
 		rows = self.cur.fetchall()
 		n = 1
 		for row in rows: 

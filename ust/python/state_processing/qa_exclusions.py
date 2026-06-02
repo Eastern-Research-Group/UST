@@ -87,7 +87,7 @@ class Exclusions:
 				vsql += '"' + col_name + '", '
 				headers.append(col_name)
 			vsql = vsql[:-2]
-			vsql += f"from {self.dataset.schema}.{table_name} order by 1, 2"
+			vsql += f"from {self.dataset.schema}.{table_name} order by 1"
 
 			utils.process_sql(conn, cur, vsql)
 			rows = cur.fetchall()

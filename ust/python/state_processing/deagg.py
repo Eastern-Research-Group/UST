@@ -16,14 +16,14 @@ from python.util.logger_factory import logger
 # USE deagg_rows.py TO CREATE DEAGG TABLES AT THE FACILITY/TANK/COMPARTMENT LEVEL
 # THAT USE THE TABLES THIS SCRIPT CREATES
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 data_table_name = '' 			# Enter a string containing organization table name
 column_name = ''				# Enter a string containing organization column name
 delimiters =  [', ']			# List of delimiters; defaults to [', ']. Put the most prevelant first. Put characters padded by spaces in list before those without spaces. Use '\n' for hard returns.
 exclude_values = []			    # Python list. Values that contain the delimiter but should not be deaggregated
 drop_existing = True 			# Boolean, defaults to False. If True will drop existing deagg table with the same name
-deagg_rows = True				# Boolean, defaults to True. If True will automatically execute the deagg_rows.py scripts after executing this script.
+deagg_rows = False				# Boolean, defaults to True. If True will automatically execute the deagg_rows.py scripts after executing this script.
 
 
 class Deagg:
@@ -112,11 +112,17 @@ class Deagg:
 	def deagg(self, delimiter):
 		logger.info('Working on delimiter "%s"', delimiter)
 		n = 1
+		extrawheresql = ""
+		params = None 
+		if self.exclude_values:
+			extrawheresql = f' and "{self.column_name}" <> any(%s) '
+			params = (self.exclude_values,)
+
 		sql = f"""select distinct "{self.column_name}" from {self.dataset.schema}."{self.data_table_name}" 
 		          where "{self.column_name}" is not null and "{self.column_name}" like '%%{delimiter}%%'
-		          and "{self.column_name}" <> any(%s)
+		          {extrawheresql}
 		          order by 1"""
-		utils.process_sql(self.conn, self.cur, sql, params=(self.exclude_values,))
+		utils.process_sql(self.conn, self.cur, sql, params=params, print_sql=False)
 		rows = self.cur.fetchall()
 		for row in rows:
 			col_text = row[0]
@@ -160,7 +166,7 @@ class Deagg:
 				from public.{self.dataset.ust_or_release}_element_mapping 
 				where {self.dataset.ust_or_release}_control_id = %s
 				and organization_table_name = %s and organization_column_name = %s"""
-		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.data_table_name, self.column_name))
+		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.data_table_name, self.column_name), print_sql=False)
 		epa_table_name = self.cur.fetchone()[0]
 
 		sql = f"""select organization_column_name
@@ -185,15 +191,15 @@ class Deagg:
 
 	def process(self):
 		self.connect_db()
-		# self.create_deagg_table()
-		# self.insert_nonagged()
-		# delimiters = self.delimiters
-		# if self.nonagged == 0:
-		# 	self.deagg(delimiters[0])
-		# 	delimiters.pop(0)
-		# for delimiter in delimiters:
-		# 	self.deagg(delimiter)		
-		# self.update_element_mapping()
+		self.create_deagg_table()
+		self.insert_nonagged()
+		delimiters = self.delimiters
+		if self.nonagged == 0:
+			self.deagg(delimiters[0])
+			delimiters.pop(0)
+		for delimiter in delimiters:
+			self.deagg(delimiter)		
+		self.update_element_mapping()
 		self.run_deagg_rows()
 		self.disconnect_db()
 
