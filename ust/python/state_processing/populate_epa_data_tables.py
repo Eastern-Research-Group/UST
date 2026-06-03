@@ -13,7 +13,7 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = '' 		 	# Valid values are 'ust' or 'release' 
-control_id =                   # Enter an integer that is the release_control_id
+control_id = 0                  # Enter an integer that is the release_control_id
 organization_id = ''      		# Optional; if control_id = 0 or None, will find the most recent control_id
 delete_existing = False 		# Boolean, defaults to False. Can set to True if there is existing UST data you need to delete before inserting new.
 

@@ -16,7 +16,9 @@ from python.util.logger_factory import logger
 ust_or_release = ''                  	# Valid values are 'ust' or 'release'
 control_id = 0                          # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''                  	# Enter the two-character code for the state, or "TRUSTD" for the tribes database 
-drop_existing = True					# Boolean; defaults to False. If True, will drop existing tables if possible (will error if there are dependent objects). If False, will rename tables if they already exist. 
+drop_existing = False					# Boolean; defaults to False. If True, will drop existing tables if possible (will error if there are dependent objects). If False, will rename tables if they already exist. 
+views_only = False						# Boolean; defaults to False. If True, will not drop or create the "erg_unreg" tables and will only create/replace the "vw_erg" views related to this script.
+
 
 class UnregTables:
 	conn = None 
@@ -32,11 +34,12 @@ class UnregTables:
 	erg_substance_mapping_view = 'vw_erg_substance_mapping'
 	erg_facility_type_mapping_view = 'vw_erg_facility_type_mapping'
 	erg_tank_size_view = 'vw_erg_tank_sizes'
-	erg_unreg_tank_view = 'vw_erg_unreg_tanks'
+	erg_unreg_subs_view = 'vw_erg_unreg_substances'
 
-	def __init__(self, dataset, drop_existing=False):
+	def __init__(self, dataset, drop_existing=False, views_only=False):
 		self.dataset = dataset
 		self.drop_existing = drop_existing
+		self.views_only = views_only
 		self.set_variables()
 
 
@@ -102,6 +105,9 @@ class UnregTables:
 
 
 	def drop_table(self, table):
+		if self.views_only:
+			return 
+
 		if self.drop_existing:
 			try:
 				sql = f"drop table if exists {table}"
@@ -124,6 +130,9 @@ class UnregTables:
 
 
 	def create_tables(self):
+		if self.views_only:
+			return
+
 		self.connect_db()
 
 		if self.drop_table(self.unreg_substance_table):
@@ -165,7 +174,10 @@ class UnregTables:
 			logger.warning('No substances mapped; will not create %s', view_name)
 			return 
 
-		sql = f"""select epa_column_name, organization_column_name, organization_table_name, organization_join_table, organization_join_column
+		sql = f"""select epa_column_name,
+					case when deagg_column_name is not null then deagg_column_name else organization_column_name end as organization_column_name, 
+					case when deagg_table_name is not null then deagg_table_name else organization_table_name end as organization_table_name, 
+					organization_join_table, organization_join_column
 				from public.{self.dataset.ust_or_release}_element_mapping a join public.v_{self.dataset.ust_or_release}_sort_order b 
 					on a.epa_table_name = b.table_name and a.epa_column_name = b.column_name 
 				where {self.dataset.ust_or_release}_control_id = %s
@@ -317,7 +329,7 @@ class UnregTables:
 			logger.warning('%s.%s and/or %s.%s do not exist, so unable to create view %s.%s', 
 				           self.dataset.schema, self.erg_substance_mapping_view, 
 				           self.dataset.schema, self.erg_facility_type_mapping_view,
-				           self.dataset.schema, self.erg_unreg_tank_view)
+				           self.dataset.schema, self.erg_unreg_subs_view)
 			self.disconnect_db()
 			return 
 
@@ -342,9 +354,9 @@ class UnregTables:
 						and facility_type_id in (1, 12) --Agricultural/farm; Residential
 						and c.tank_capacity_gallons < 1100"""
 
-		sql = f"create or replace view {self.dataset.schema}.{self.erg_unreg_tank_view} as\n{sql}"
+		sql = f"create or replace view {self.dataset.schema}.{self.erg_unreg_subs_view} as\n{sql}"
 		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Created view %s.%s', self.dataset.schema, self.erg_unreg_tank_view)
+		logger.info('Created view %s.%s', self.dataset.schema, self.erg_unreg_subs_view)
 
 		self.disconnect_db()
 
@@ -357,11 +369,12 @@ class UnregTables:
 
 
 	def execute(self):
-		self.create_tables()
+		if not self.views_only:
+			self.create_tables()
 		self.create_views()
 
 
-def main(ust_or_release, control_id=0, organization_id=None, drop_existing=False):
+def main(ust_or_release, control_id=0, organization_id=None, drop_existing=False, views_only=False):
 	if not control_id or control_id == 0:
 		control_id = utils.get_control_id(ust_or_release, organization_id.upper())
 
@@ -369,7 +382,7 @@ def main(ust_or_release, control_id=0, organization_id=None, drop_existing=False
 					  control_id=control_id,
 					  requires_export=False)
 
-	unreg = UnregTables(dataset, drop_existing=drop_existing)
+	unreg = UnregTables(dataset, drop_existing=drop_existing, views_only=views_only)
 	unreg.execute()
 
 
@@ -378,5 +391,6 @@ if __name__ == '__main__':
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
 		 organization_id=organization_id,
-		 drop_existing=drop_existing)
+		 drop_existing=drop_existing,
+		 views_only=views_only)
 

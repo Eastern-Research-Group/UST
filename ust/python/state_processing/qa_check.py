@@ -21,8 +21,6 @@ from python.util.logger_factory import logger
 ust_or_release = '' 			# Valid values are 'ust' or 'release'
 control_id = 0            		# Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''			# Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
-
-
 force_exclusions = False    	# Boolean; defaults to False. If False, will only generate exclusions (e.g. unregulated substances, etc.) if there are no errors. Set to True to force exclusion export even if there are errors to resolve.
 force_summary_counts = False    # Boolean; defaults to False. If False, will only generate summary counts if there are no errors. Set to True to force summary counts even if there are errors to resolve.
 
@@ -93,6 +91,7 @@ class QualityCheck:
 			self.check_bad_mapping()
 			if self.dataset.ust_or_release == 'ust':
 				self.check_compartment_data_flag()
+			self.check_unregulated_parents()
 		# self.check_inactive_substances()	# this is now covered under check_substance_types
 		self.check_substance_types()
 		self.check_unregulated_substances()
@@ -496,7 +495,7 @@ class QualityCheck:
 			epa_table_name = row[0]
 			epa_value = row[1]
 			self.error_dict['Substance not valid for ' + subtype + ' mapped in ' + epa_table_name] = epa_value
-			logger.warning('Invalid ' + subtype + ' substance "%s" mapped in %s_element_value_mapping', epa_value, epa_table_name)
+			logger.warning('Invalid %s substance "%s" mapped in %s_element_value_mapping', subtype, epa_value, epa_table_name)
 
 
 	def check_bad_mapping(self):
@@ -560,10 +559,10 @@ class QualityCheck:
 							  from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x 
 							join (select distinct facility_id from 
 									(select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.v_ust_facility ) x 
-								  where facility_type_id in (1,12)) f on x.facility_id = f.facility_id	  
+								  where facility_type_id in (1,12)) f on x.facility_id = f.facility_id	  --Agricultural/farm; Residential
 							join {self.dataset.schema}.v_ust_tank_substance ts on x.facility_id = ts.facility_id and x.tank_id = ts.tank_id
 							join public.substances s on ts.substance_id = s.substance_id
-						where tank_capacity_gallons <1100 and s.substance_group in ('Diesel','Gasoline') """
+						where tank_capacity_gallons < 1100 and s.substance_group in ('Diesel','Gasoline') """
 			sql = sql + """) a
 					order by 1, 2"""
 		else: # releases
@@ -587,7 +586,7 @@ class QualityCheck:
 				return 
 
 			sql = f"""select distinct ts.release_id
-						from (select release_id from {self.dataset.schema}.v_ust_release where facility_type_id <> 4) r
+						from (select release_id from {self.dataset.schema}.v_ust_release where facility_type_id <> 4) r 	--Bulk plant storage/petroleum distributor
 							join {self.dataset.schema}.v_ust_release_substance ts on ts.release_id = r.release_id
 							join public.substances s on ts.substance_id = s.substance_id 
 						where s.substance_group = 'Heating'
@@ -615,8 +614,30 @@ class QualityCheck:
 			self.error_dict[msg] = num_rows
 
 
+	def check_unregulated_parents(self):
+		if self.dataset.ust_or_release == 'ust':
+			unreg_table = 'erg_unregulated_tanks'	
+			ureg_col = 'facility_id'
+			unreg_type = 'facilities'
+		else:
+			unreg_table = 'erg_unregulated_releases'
+			unreg_col = 'release_id'
+			unreg_type = 'releases'
+
+		sql = f"""select a.{unreg_col}, b.unregulated_reason
+		          from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on a.{unreg_col} = b.{unreg_col}"""
+		utils.process_sql(self.conn, self.cur, sql)
+		data = self.cur.fetchall()
+		num_rows = len(data)
+		self.error_cnt_dict['Rows with unregulated ' + unreg_type + ' not excluded from ' + self.view_name] = num_rows
+		logger.warning('Rows with unregulated %s in %s: %s', unreg_type, self.view_name, num_rows)
+		if num_rows > 0:
+			self.error_dict['Unregulated ' + unreg_type + ' in ' + self.view_name] =  num_rows
+			self.write_to_ws(data, 'Unreg ' + self.view_name.replace('v_ust_',''))
+
+
 	def check_compartment_data_flag(self):
-		sql = "select organization_compartment_flag from ust_control where ust_control_id = %s"
+		sql = "select organization_compartment_flag from public.ust_control where ust_control_id = %s"
 		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
 		org_comp_flag = self.cur.fetchone()[0]
 		if not org_comp_flag:
@@ -624,7 +645,7 @@ class QualityCheck:
 			logger.warning('Missing organization_compartment_flag in ust_control')
 		elif org_comp_flag not in ['Y','N']:
 			self.error_dict['Bad value of in organization_compartment_flag in ust_control'] = org_comp_flag
-			logger.warning('Bad value of %s in  organization_compartment_flag in ust_control', org_comp_flag)
+			logger.warning('Bad value of %s in organization_compartment_flag in ust_control', org_comp_flag)
 
 
 	def write_overview(self):
@@ -697,6 +718,7 @@ class QualityCheck:
 					colno += 1
 				rowno += 1
 			utils.autowidth(ws)		
+			utils.add_ws_filter(ws)
 		logger.info('Added exclusion tabs')
 
 
