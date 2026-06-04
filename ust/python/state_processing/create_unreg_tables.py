@@ -14,9 +14,11 @@ from python.util.logger_factory import logger
 
 
 ust_or_release = ''                  	# Valid values are 'ust' or 'release'
-control_id = 0
+control_id = 0                          # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''                  	# Enter the two-character code for the state, or "TRUSTD" for the tribes database 
-drop_existing = True					# Boolean; defaults to False. If True, will drop existing tables if possible (will error if there are dependent objects). If False, will rename tables if they already exist. 
+drop_existing = False					# Boolean; defaults to False. If True, will drop existing tables if possible (will error if there are dependent objects). If False, will rename tables if they already exist. 
+views_only = False						# Boolean; defaults to False. If True, will not drop or create the "erg_unreg" tables and will only create/replace the "vw_erg" views related to this script.
+
 
 class UnregTables:
 	conn = None 
@@ -32,11 +34,12 @@ class UnregTables:
 	erg_substance_mapping_view = 'vw_erg_substance_mapping'
 	erg_facility_type_mapping_view = 'vw_erg_facility_type_mapping'
 	erg_tank_size_view = 'vw_erg_tank_sizes'
-	erg_unreg_tank_view = 'vw_erg_unreg_tanks'
+	erg_unreg_subs_view = 'vw_erg_unreg_substances'
 
-	def __init__(self, dataset, drop_existing=False):
+	def __init__(self, dataset, drop_existing=False, views_only=False):
 		self.dataset = dataset
 		self.drop_existing = drop_existing
+		self.views_only = views_only
 		self.set_variables()
 
 
@@ -102,14 +105,19 @@ class UnregTables:
 
 
 	def drop_table(self, table):
+		if self.views_only:
+			return 
+
 		if self.drop_existing:
 			try:
 				sql = f"drop table if exists {table}"
 				self.cur.execute(sql)
+				return True
 			except psycopg2.errors.DependentObjectsStillExist as e:
-				logger.warning('Table %s exists but it has dependencies, so creating a backup and truncating the original table instead of creating a new one.', self.table)
+				logger.warning('Table %s exists but it has dependencies, so creating a backup and truncating the original table instead of creating a new one.', table)
 				self.backup_table(table)
 				self.truncate_table(table)
+				return False
 		else:
 			sql = f"""select count(*) from information_schema.tables 
 					  where table_schema = %s and table_name = %s"""
@@ -122,29 +130,33 @@ class UnregTables:
 
 
 	def create_tables(self):
+		if self.views_only:
+			return
+
 		self.connect_db()
 
-		self.drop_table(self.unreg_substance_table)
-		tanksql = ""
-		if self.dataset.ust_or_release == 'ust':
-			tanksql = "\ntank_id int not null,"
-			tanksql2 = "tank_id, "
-		sql = f"""create table {self.unreg_substance_table} 
-					({self.unreg_parent_col} varchar(50) not null, {tanksql} 
-				   organization_substance varchar(1000) not null,
-				   substance_id int, 
-				   epa_substance varchar(200), 
-				   unregulated_reason varchar(1000),
-				   primary key ({self.unreg_parent_col}, {tanksql2} organization_substance))"""
-		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Created table %s', self.unreg_substance_table)	
+		if self.drop_table(self.unreg_substance_table):
+			tanksql = ""
+			tanksql2 = ""
+			if self.dataset.ust_or_release == 'ust':
+				tanksql = "\ntank_id int not null,"
+				tanksql2 = "tank_id, "
+			sql = f"""create table {self.unreg_substance_table} 
+						({self.unreg_parent_col} varchar(50) not null, {tanksql} 
+					   organization_substance varchar(1000) not null,
+					   substance_id int, 
+					   epa_substance varchar(200), 
+					   unregulated_reason varchar(1000),
+					   primary key ({self.unreg_parent_col}, {tanksql2} organization_substance))"""
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Created table %s', self.unreg_substance_table)	
 
-		self.drop_table(self.unreg_parent_table)
-		sql = f"""create table {self.unreg_parent_table} 
-					({self.unreg_parent_col} varchar(50) not null primary key, 
-					unregulated_reason varchar(1000))"""
-		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Created table %s', self.unreg_parent_table)	
+		if self.drop_table(self.unreg_parent_table):
+			sql = f"""create table {self.unreg_parent_table} 
+						({self.unreg_parent_col} varchar(50) not null primary key, 
+						unregulated_reason varchar(1000))"""
+			utils.process_sql(self.conn, self.cur, sql)
+			logger.info('Created table %s', self.unreg_parent_table)	
 
 		self.disconnect_db()
 
@@ -162,7 +174,10 @@ class UnregTables:
 			logger.warning('No substances mapped; will not create %s', view_name)
 			return 
 
-		sql = f"""select epa_column_name, organization_column_name, organization_table_name, organization_join_table, organization_join_column
+		sql = f"""select epa_column_name,
+					case when deagg_column_name is not null then deagg_column_name else organization_column_name end as organization_column_name, 
+					case when deagg_table_name is not null then deagg_table_name else organization_table_name end as organization_table_name, 
+					organization_join_table, organization_join_column
 				from public.{self.dataset.ust_or_release}_element_mapping a join public.v_{self.dataset.ust_or_release}_sort_order b 
 					on a.epa_table_name = b.table_name and a.epa_column_name = b.column_name 
 				where {self.dataset.ust_or_release}_control_id = %s
@@ -195,7 +210,7 @@ class UnregTables:
 		select_sql += f' s.substance as epa_substance, s.substance_id'
 		from_sql += f'\nleft join (select organization_value, epa_value from public.v_{self.dataset.ust_or_release}_mapping where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s) x on x.organization_value = {org_val_col} '
 		from_sql += f'\nleft join public.substances s on x.epa_value = s.substance'
-		view_sql = f'create or replace view {view_name} as\n{select_sql}{from_sql}'
+		view_sql = f'create or replace view {view_name} as\n{select_sql}{from_sql} where {org_val_col} is not null'
 		utils.process_sql(self.conn, self.cur, view_sql, params=(self.dataset.control_id, self.epa_substance_table))
 		logger.info('Created view %s', view_name)
 
@@ -248,7 +263,7 @@ class UnregTables:
 		select_sql += f' ft.facility_type as epa_facility_type, ft.facility_type_id'
 		from_sql += f'\nleft join (select organization_value, epa_value from public.v_{self.dataset.ust_or_release}_mapping where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s) x on x.organization_value = {org_val_col} '
 		from_sql += f'\nleft join public.facility_types ft on x.epa_value = ft.facility_type'
-		view_sql = f'create or replace view {view_name} as\n{select_sql}{from_sql}'
+		view_sql = f'create or replace view {view_name} as\n{select_sql}{from_sql} where {org_val_col} is not null'
 		utils.process_sql(self.conn, self.cur, view_sql, params=(self.dataset.control_id, self.epa_facility_table), print_sql=False)
 		logger.info('Created view %s', view_name)
 
@@ -307,35 +322,28 @@ class UnregTables:
 		self.disconnect_db()
 
 
-	def get_view_existence(self, view_name):
-		sql = f"""select count(*) from information_schema.tables 
-		          where table_schema = %s and table_name = %s"""
-		utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, view_name))
-		cnt = self.cur.fetchone()[0]
-		if cnt == 0:
-			return False 
-		else:
-			return True
-	
-
 	def create_unreg_tank_view(self):
 		self.connect_db()
 
-		if not self.get_view_existence(self.erg_substance_mapping_view) or not self.get_view_existence(self.erg_facility_type_mapping_view):
+		if not utils.get_table_existence(self.erg_substance_mapping_view, self.dataset.schema) or not utils.get_table_existence(self.erg_facility_type_mapping_view, self.dataset.schema):
 			logger.warning('%s.%s and/or %s.%s do not exist, so unable to create view %s.%s', 
 				           self.dataset.schema, self.erg_substance_mapping_view, 
 				           self.dataset.schema, self.erg_facility_type_mapping_view,
-				           self.dataset.schema, self.erg_unreg_tank_view)
+				           self.dataset.schema, self.erg_unreg_subs_view)
 			self.disconnect_db()
 			return 
 
+		if self.dataset.ust_or_release == 'ust':
+			join_col = 'facility_id'
+		else:
+			join_col = 'release_id'
 		sql = f"""select a.*, 'Heating oil' as unregulated_reason
 				from {self.dataset.schema}.{self.erg_substance_mapping_view} a join {self.dataset.schema}.{self.erg_facility_type_mapping_view} b 
-					on a.facility_id = b.facility_id
+					on a.{join_col} = b.{join_col}
 					join public.substances s on a.substance_id = s.substance_id
 				where s.substance_group = 'Heating' and facility_type_id <> 4 --Bulk plant storage/petroleum distributor """
 		
-		if self.dataset.ust_or_release == 'ust' and self.get_view_existence(self.erg_tank_size_view):
+		if self.dataset.ust_or_release == 'ust' and utils.get_table_existence(self.erg_tank_size_view, self.dataset.schema):
 			sql += f"""\nunion all
 						select a.*, 'Small tank at farm/residence' as unregulated_reason
 						from {self.dataset.schema}.{self.erg_substance_mapping_view} a join {self.dataset.schema}.{self.erg_facility_type_mapping_view} b 
@@ -346,80 +354,10 @@ class UnregTables:
 						and facility_type_id in (1, 12) --Agricultural/farm; Residential
 						and c.tank_capacity_gallons < 1100"""
 
-		sql = f"create or replace view {self.dataset.schema}.{self.erg_unreg_tank_view} as\n{sql}"
+		sql = f"create or replace view {self.dataset.schema}.{self.erg_unreg_subs_view} as\n{sql}"
 		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Created view %s.%s', self.dataset.schema, self.erg_unreg_tank_view)
+		logger.info('Created view %s.%s', self.dataset.schema, self.erg_unreg_subs_view)
 
-		self.disconnect_db()
-
-
-	def insert_nonregulated_substances(self):
-		self.connect_db()
-		if not self.get_view_existence(self.erg_substance_mapping_view):
-			logger.warning('No view %s.%s found; will not insert non-regulated substances', self.dataset.schema, self.erg_substance_mapping_view)
-			self.disconnect_db()
-			return 
-		if self.dataset.ust_or_release == 'ust':
-			tanksql = 'tank_id, '
-		sql = f"""insert into {self.unreg_substance_table} 
-				select distinct facility_id, {tanksql}org_substance, substance_id, epa_substance, 'Non-regulated substance'
-				from {self.dataset.schema}.{self.erg_substance_mapping_view}
-				where substance_id is null 
-				on conflict do nothing"""
-		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Inserted %s rows into %s', self.cur.rowcount, self.unreg_substance_table)
-		self.disconnect_db()
-
-
-	def insert_unregulated_tanks(self):
-		self.connect_db()
-		if not self.get_view_existence(self.erg_unreg_tank_view):
-			logger.warning('%s.%s does not exist; unable to insert unregistered tanks into %s.%s', 
-						   self.dataset.schema, self.erg_unreg_tank_view, 
-						   self.dataset.schema, self.unreg_substance_table)
-			self.disconnect_db()
-			return 
-		if self.dataset.ust_or_release == 'ust':
-			tanksql = 'tank_id, '
-		sql = f"""insert into {self.unreg_substance_table} 
-				select distinct facility_id, {tanksql}org_substance, substance_id, epa_substance, unregulated_reason
-				from {self.dataset.schema}.{self.erg_unreg_tank_view}
-				on conflict do nothing"""
-		utils.process_sql(self.conn, self.cur, sql)
-		logger.info('Inserted %s rows into %s', self.cur.rowcount, self.unreg_substance_table)
-		self.disconnect_db() 
-
-
-	def insert_parents(self):
-		self.connect_db()
-		
-		extrajoinsql = ""
-		if self.dataset.ust_or_release == 'ust':
-			extrajoinsql = "\nand v.tank_id::int = eus.tank_id::int "
-
-		sql = f"""insert into {self.unreg_parent_table}
-				 select v.{self.unreg_parent_col}, string_agg(distinct eus.unregulated_reason, '; ' order by eus.unregulated_reason) as unregulated_reason
-				 from {self.dataset.schema}.{self.erg_substance_mapping_view} v
-					join {self.unreg_substance_table} eus 
-				 on v.{self.unreg_parent_col}::varchar(50) = eus.{self.unreg_parent_col}::varchar(50) {extrajoinsql} 
-				 and v.org_substance::varchar(1000) = eus.organization_substance::varchar(1000)
-				 where not exists (
-					 select 1
-					 from {self.dataset.schema}.{self.erg_substance_mapping_view} v2
-					 where v2.{self.unreg_parent_col}::varchar(50)  = v.{self.unreg_parent_col}::varchar(50) 
-				 	and not exists (
-						 select 1
-						 from {self.unreg_substance_table} eus
-						 where eus.{self.unreg_parent_col}::varchar(50)  = v2.{self.unreg_parent_col}::varchar(50) {extrajoinsql.replace('v.','v2.')} 
-						and v2.org_substance::varchar(1000) = eus.organization_substance::varchar(1000)  
-					)
-				  )
-				 group by v.{self.unreg_parent_col}
-				 on conflict do nothing"""
-		
-		utils.process_sql(self.conn, self.cur, sql, print_sql=False)
-		logger.info('Inserted %s rows into %s', self.cur.rowcount, self.unreg_parent_table)
-		
 		self.disconnect_db()
 
 
@@ -430,19 +368,13 @@ class UnregTables:
 		self.create_unreg_tank_view()
 
 
-	def insert_data(self):
-		self.insert_nonregulated_substances()
-		self.insert_unregulated_tanks()
-		self.insert_parents()
-
-
 	def execute(self):
-		self.create_tables()
+		if not self.views_only:
+			self.create_tables()
 		self.create_views()
-		self.insert_data()
 
 
-def main(ust_or_release, control_id=0, organization_id=None, drop_existing=False):
+def main(ust_or_release, control_id=0, organization_id=None, drop_existing=False, views_only=False):
 	if not control_id or control_id == 0:
 		control_id = utils.get_control_id(ust_or_release, organization_id.upper())
 
@@ -450,19 +382,15 @@ def main(ust_or_release, control_id=0, organization_id=None, drop_existing=False
 					  control_id=control_id,
 					  requires_export=False)
 
-	unreg = UnregTables(dataset, drop_existing=drop_existing)
-	# unreg.execute()
+	unreg = UnregTables(dataset, drop_existing=drop_existing, views_only=views_only)
+	unreg.execute()
 
-	# unreg.create_views()
-
-	# unreg.insert_data()
-
-	unreg.insert_parents()
 
 
 if __name__ == '__main__':   
 	main(ust_or_release=ust_or_release,
 		 control_id=control_id,
 		 organization_id=organization_id,
-		 drop_existing=drop_existing)
+		 drop_existing=drop_existing,
+		 views_only=views_only)
 

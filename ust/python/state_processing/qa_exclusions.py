@@ -87,9 +87,9 @@ class Exclusions:
 				vsql += '"' + col_name + '", '
 				headers.append(col_name)
 			vsql = vsql[:-2]
-			vsql += f"from {self.dataset.schema}.{table_name} order by 1, 2"
+			vsql += f"\nfrom {self.dataset.schema}.{table_name} order by 1"
 
-			utils.process_sql(conn, cur, vsql)
+			utils.process_sql(conn, cur, vsql, print_sql=True)
 			rows = cur.fetchall()
 			exclusion_metadata = {}
 			exclusion_metadata['headers'] = headers

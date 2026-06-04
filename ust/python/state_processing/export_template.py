@@ -382,7 +382,9 @@ class Template:
 				ws.cell(row=rowno, column=colno).value = cell_value.replace('"','')
 
 		sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
-				from public.v_{self.dataset.ust_or_release}_element_mapping 
+				from public.v_{self.dataset.ust_or_release}_element_mapping a 
+					join public.{database_lookup_table} x on a.epa_value = x.{database_lookup_column}
+					join {self.dataset.schema}.v_{mapping_table_name} b on b.{mapping_column_name} = x.{mapping_column_name}
 				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s
 				order by 1, 2"""
 		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id, mapping_column_name))
@@ -423,8 +425,15 @@ class Template:
 
 		conn = utils.connect_db()
 		cur = conn.cursor()	
+
+		substance_view = 'v_ust_tank_substance'
+		if self.dataset.ust_or_release == 'release':
+			substance_view = 'v_ust_release_substance'
+
 		sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
-				from public.v_{self.dataset.ust_or_release}_element_mapping 
+				from public.v_{self.dataset.ust_or_release}_element_mapping a 
+					join public.substances s on a.epa_value = s.substance
+					join {self.dataset.schema}.{substance_view} b on b.substance_id = s.substance_id
 				where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'
 				order by 1, 2"""
 		utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
@@ -576,7 +585,6 @@ def main(ust_or_release, control_id=None, data_only=False, template_only=False, 
 	template = Template(dataset=dataset,
 						data_only=data_only,
 						template_only=template_only)
-	# template.make_lookup_tab(['corrective_action_strategies','corrective_action_strategy','corrective_action_strategy_id'])
 
 
 if __name__ == '__main__':   
