@@ -23,7 +23,7 @@ file_path = r"C:\Users\JChilton\OneDrive - Eastern Research Group\Desktop\UST\Te
 #file_path = r"C:\Users\JChilton\OneDrive - Eastern Research Group\Desktop\UST\Texas\Analysis\fac\facility4.txt"
 
 with open(file_path, 'r', encoding="utf8") as file:
-	file_content = file.read()
+    file_content = file.read()
 
 if __name__ == '__main__':
     insert_vendor(file_content)

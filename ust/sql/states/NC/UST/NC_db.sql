@@ -112,13 +112,13 @@ select * from "tblOwnership1";
 
 select *
 FROM ("tblPolType1" RIGHT JOIN 
-	  ("tblOwnership1" RIGHT JOIN 
-	   ((("tblUST_DB1" LEFT JOIN "tblPIRF1" ON "tblUST_DB1"."USTNum" = "tblPIRF1"."USTNum") 
-		 LEFT JOIN "tblAccuracy1" ON "tblUST_DB1"."HCS_Res" = "tblAccuracy1"."HCS_Res") 
-		LEFT JOIN "tblSourceType1" ON "tblPIRF1"."RSource" = "tblSourceType1"."TypeCode") 
-	  ON "tblOwnership1"."Ownership" = "tblPIRF1"."Ownership") 
-	 ON "tblPolType1"."TYPE CODE" = "tblPIRF1"."Type") 
-	LEFT JOIN "tblConSource1" ON "tblPIRF1"."RSource" = "tblConSource1".ID
+      ("tblOwnership1" RIGHT JOIN 
+       ((("tblUST_DB1" LEFT JOIN "tblPIRF1" ON "tblUST_DB1"."USTNum" = "tblPIRF1"."USTNum") 
+         LEFT JOIN "tblAccuracy1" ON "tblUST_DB1"."HCS_Res" = "tblAccuracy1"."HCS_Res") 
+        LEFT JOIN "tblSourceType1" ON "tblPIRF1"."RSource" = "tblSourceType1"."TypeCode") 
+      ON "tblOwnership1"."Ownership" = "tblPIRF1"."Ownership") 
+     ON "tblPolType1"."TYPE CODE" = "tblPIRF1"."Type") 
+    LEFT JOIN "tblConSource1" ON "tblPIRF1"."RSource" = "tblConSource1".ID
 WHERE ((("tblUST_DB1"."Comm")='C') AND (("tblUST_DB1"."reg")='R'));
 
 select * from "tblOwnership1"
@@ -126,50 +126,50 @@ select * from "tblOwnership1"
 select distinct "Ownership" from "tblPIRF1" order by 1;
 
 select * from 
-	(select a.*, cast(pir."Ownership" as bigint) as "OwnershipInt"
-	from "tblUST_DB1" ldb left join "tblPIRF1" pir on ldb."USTNum" = pir."USTNum"
-		left join "tblAccuracy1" acc on ldb."HCS_Res" = acc."HCS_Res"
-		left join "tblSourceType1" src on pir."RSource" = src."TypeCode") as a
-	where pir."Ownership" not in ('N','P')) as db1
-	left join "tblOwnership1" own on own."Ownership" = db1."Ownership";
+    (select a.*, cast(pir."Ownership" as bigint) as "OwnershipInt"
+    from "tblUST_DB1" ldb left join "tblPIRF1" pir on ldb."USTNum" = pir."USTNum"
+        left join "tblAccuracy1" acc on ldb."HCS_Res" = acc."HCS_Res"
+        left join "tblSourceType1" src on pir."RSource" = src."TypeCode") as a
+    where pir."Ownership" not in ('N','P')) as db1
+    left join "tblOwnership1" own on own."Ownership" = db1."Ownership";
 
 
 select * from public."tblConSource1";
-A	Tanks	21
-B	Piping	22
-C	Dispenser	23
-D	Submersible Turbine Pump	24
-E	Delivery Problem	25
-F	Other	26
-G	Unknown	27
+A    Tanks    21
+B    Piping    22
+C    Dispenser    23
+D    Submersible Turbine Pump    24
+E    Delivery Problem    25
+F    Other    26
+G    Unknown    27
 
 select * from public."tblRelCause1";
-1	Spill (Accidental)
-2	UST Overfill
-3	Corrosion
-4	Physical or Mechanical Damage
-5	UST Installation Problem
-6	Other
-7	Unknown
-8	Spill (Intentional)
-9	Equipment Failure
+1    Spill (Accidental)
+2    UST Overfill
+3    Corrosion
+4    Physical or Mechanical Damage
+5    UST Installation Problem
+6    Other
+7    Unknown
+8    Spill (Intentional)
+9    Equipment Failure
 
 select * from public."tblRelDisc1";
-4	Visual/Odor
-6	Water Supply Well Contamination
-7	Groundwater Contamination
-8	Surface Water Contamination
-9	Other (Specify in "Description" field above)
-10	Observation of Release at Occurrence
-11	Soil Contamination
+4    Visual/Odor
+6    Water Supply Well Contamination
+7    Groundwater Contamination
+8    Surface Water Contamination
+9    Other (Specify in "Description" field above)
+10    Observation of Release at Occurrence
+11    Soil Contamination
 
 
 select distinct "Reg" from public."tblUST_DB1" ;
 
 select * from public."tblType1";
-B	BOTH
-N	NON PETROLEUM
-P	PETROLEUM
+B    BOTH
+N    NON PETROLEUM
+P    PETROLEUM
 
 select * from public."qryLUST_Data" where "NFA" is null;
 
@@ -188,34 +188,34 @@ QuantityReleased1
 Unit1
 
 
-DIESEL/VEGETABLE BLEND	Diesel fuel (b-unknown)
-E01 - E10	Gasoline E-10 (E1-E10)
-E11 - E20	Ethanol blend gasoline (e-unknown)
-ETHANOL 100%	Other
-GASOLINE/DIESEL/KEROSENE	Other
-HEATING OIL	Heating/fuel oil # unknown
-OTHER ORGANICS	Other
-OTHER PETROLEUM PROD.	Other
-WASTE Oil	Used oil/waste oil
+DIESEL/VEGETABLE BLEND    Diesel fuel (b-unknown)
+E01 - E10    Gasoline E-10 (E1-E10)
+E11 - E20    Ethanol blend gasoline (e-unknown)
+ETHANOL 100%    Other
+GASOLINE/DIESEL/KEROSENE    Other
+HEATING OIL    Heating/fuel oil # unknown
+OTHER ORGANICS    Other
+OTHER PETROLEUM PROD.    Other
+WASTE Oil    Used oil/waste oil
 
 
 select * from public."tblConSource1";
-A	Tanks	21
-B	Piping	22
-C	Dispenser	23
-D	Submersible Turbine Pump	24
-E	Delivery Problem	25
-F	Other	26
-G	Unknown	27
+A    Tanks    21
+B    Piping    22
+C    Dispenser    23
+D    Submersible Turbine Pump    24
+E    Delivery Problem    25
+F    Other    26
+G    Unknown    27
 
 select "IncidentNumber" from public."tblUST_DB1" group by "IncidentNumber" having count(*) > 1;
 
 select * from public."tblUST_DB1" where "IncidentNumber" in 
-	(select "IncidentNumber" from public."tblUST_DB1" group by "IncidentNumber" having count(*) > 1)
+    (select "IncidentNumber" from public."tblUST_DB1" group by "IncidentNumber" having count(*) > 1)
 order by 1;
 
 select * from public."qryLUST_Data" where "IncidentNumber" in 
-	(select "IncidentNumber" from public."qryLUST_Data" group by "IncidentNumber" having count(*) > 1)
+    (select "IncidentNumber" from public."qryLUST_Data" group by "IncidentNumber" having count(*) > 1)
 order by 1;
 
 select * from public."qryLUST_Data" where "USTNum" is null;
@@ -228,24 +228,24 @@ select "IncidentNumber", "USTNum", "Substance" from public."qryLUST_Data" where 
 select "IncidentNumber", "USTNum", count(*)
 from public."vSubstances" s group by "IncidentNumber", "USTNum"
 having count(*) > 2;
-45282	WS-10114
-41653	AS-4635
-41619	AS-4581
-32768	WI-7675
-44116	WS-8870
-33323	RA-4960
+45282    WS-10114
+41653    AS-4635
+41619    AS-4581
+32768    WI-7675
+44116    WS-8870
+33323    RA-4960
 
 select * from public."vSubstances" where "IncidentNumber" = 45282 and "USTNum" = 'WS-10114';
 
 
 create view "vSubstances" as 
 select distinct "IncidentNumber", "USTNum", "Substance", 
-		case when ld."Substance" = 'DIESEL/VEGETABLE BLEND' then 'Diesel fuel (b-unknown)'
-	     when ld."Substance" = 'E01 - E10' then 'Gasoline E-10 (E1-E10)'
-	     when ld."Substance" = 'E11 - E20' then 'Ethanol blend gasoline (e-unknown)'
-	     when ld."Substance" = 'HEATING OIL' then 'Heating/fuel oil # unknown'
-	     when ld."Substance" = 'WASTE Oil' then 'Used oil/waste oil' 
-		 else 'Other' end as "SubstanceReleased" --see crosswalk in template
+        case when ld."Substance" = 'DIESEL/VEGETABLE BLEND' then 'Diesel fuel (b-unknown)'
+         when ld."Substance" = 'E01 - E10' then 'Gasoline E-10 (E1-E10)'
+         when ld."Substance" = 'E11 - E20' then 'Ethanol blend gasoline (e-unknown)'
+         when ld."Substance" = 'HEATING OIL' then 'Heating/fuel oil # unknown'
+         when ld."Substance" = 'WASTE Oil' then 'Used oil/waste oil' 
+         else 'Other' end as "SubstanceReleased" --see crosswalk in template
 from "qryLUST_Data" ld where ld."Substance" is not null;
 
 select "IncidentNumber", "USTNum", "SubstanceReleased" from "vSubstances" 
@@ -268,25 +268,25 @@ MediaImpactedSurfaceWater
 
 
 select distinct
-	ld."FacilID" as "FacilityID", ld."USTNum" as "TankIDAssociatedwithRelease", ld."IncidentNumber" as "LUSTID",
-	ld."IncidentName" as "FacilityName", --is this right?
-	ld."Address" as "SiteAddress", ld."CityTown" as "SiteCity", ld."ZipCode" as "Zipcode", ld."County", ld."State", 4 as "EPARegion",
-	ld."LatDec" as "Latitude", ld."LongDec" as "Longitude", 
-	--What is the lookup for "LUSTStatus"?
-	case when "NFA" is not null then 'No Further Action' else 'Active' end as "LUSTStatus", --is this right? 
-	ld."DateReported" as "ReportedDate", ld."NFA" as "NFADate",
-	--tblRelDisc1 seems to be a lookup table that would contain information related to MediaImpactedSoil, MediaImpactedGroundwater, MediaImpactedSurfaceWater
-	--but I don't see any columns related to it
-	s1."SubstanceReleased" as "SubstanceReleased1", --see template for crosswalk
-	s2."SubstanceReleased" as "SubstanceReleased2", --some substances may be repeated b/c multiple NC substances mapped to the same EPA substance
-	s3."SubstanceReleased" as "SubstanceReleased3" --can we get the amounts released and units?
+    ld."FacilID" as "FacilityID", ld."USTNum" as "TankIDAssociatedwithRelease", ld."IncidentNumber" as "LUSTID",
+    ld."IncidentName" as "FacilityName", --is this right?
+    ld."Address" as "SiteAddress", ld."CityTown" as "SiteCity", ld."ZipCode" as "Zipcode", ld."County", ld."State", 4 as "EPARegion",
+    ld."LatDec" as "Latitude", ld."LongDec" as "Longitude", 
+    --What is the lookup for "LUSTStatus"?
+    case when "NFA" is not null then 'No Further Action' else 'Active' end as "LUSTStatus", --is this right? 
+    ld."DateReported" as "ReportedDate", ld."NFA" as "NFADate",
+    --tblRelDisc1 seems to be a lookup table that would contain information related to MediaImpactedSoil, MediaImpactedGroundwater, MediaImpactedSurfaceWater
+    --but I don't see any columns related to it
+    s1."SubstanceReleased" as "SubstanceReleased1", --see template for crosswalk
+    s2."SubstanceReleased" as "SubstanceReleased2", --some substances may be repeated b/c multiple NC substances mapped to the same EPA substance
+    s3."SubstanceReleased" as "SubstanceReleased3" --can we get the amounts released and units?
 from "tblUST_DB1" ld 
-	left join (select * from "vSubstances2" where rn = 1) s1 on ld."IncidentNumber" = s1."IncidentNumber" and ld."USTNum" = s1."USTNum"
-	left join (select * from "vSubstances2" where rn = 2) s2 on ld."IncidentNumber" = s2."IncidentNumber" and ld."USTNum" = s2."USTNum"
-	left join (select * from "vSubstances2" where rn = 3) s3 on ld."IncidentNumber" = s3."IncidentNumber" and ld."USTNum" = s3."USTNum"
+    left join (select * from "vSubstances2" where rn = 1) s1 on ld."IncidentNumber" = s1."IncidentNumber" and ld."USTNum" = s1."USTNum"
+    left join (select * from "vSubstances2" where rn = 2) s2 on ld."IncidentNumber" = s2."IncidentNumber" and ld."USTNum" = s2."USTNum"
+    left join (select * from "vSubstances2" where rn = 3) s3 on ld."IncidentNumber" = s3."IncidentNumber" and ld."USTNum" = s3."USTNum"
 where "FacilID" is not null --why are some facility IDs null?
-	and upper("Reg") = 'R' --does this mean federally reportable? If so, should we include all rows instead and set "FederallyReportableRelease" to "No" for the others?
-	and upper("Comm") = 'C' --got this from Lust_Finder.txt; what does it mean?
+    and upper("Reg") = 'R' --does this mean federally reportable? If so, should we include all rows instead and set "FederallyReportableRelease" to "No" for the others?
+    and upper("Comm") = 'C' --got this from Lust_Finder.txt; what does it mean?
 ;
 
 
@@ -514,20 +514,20 @@ select distinct "LUSTStatus" from "qryLUST_Data" order by 1;
 select * from "tblCAP1"
 
 
-5)	What is the lookup for "RemediationStrategy" from "qryLUST_Data"?
-	Lookup table is tblCAP,
-	Values are A = Air Sparging & Soil Vapor Extraction, B = Biosparging, C = CAP in Accordance with .0106[c], D = Dual Phase Extraction, E = Excavation, F = Free Product Skimming System, I = Internal Combustion Engines, K = CAP in Accordance with .0106[k], L = CAP in Accordance with .0106[l], M = CAP in Accordance with .0106[m], N = Natural Attenuation (not an L-CAP), O = Other Type of System, P = Pump & Treat, R = Biofluid Reactor, S = SV, T = Monitoring Only, U = UVB/KGB, V = AFVR, data stored in field TypeCAP in tblUST_DB
+5)    What is the lookup for "RemediationStrategy" from "qryLUST_Data"?
+    Lookup table is tblCAP,
+    Values are A = Air Sparging & Soil Vapor Extraction, B = Biosparging, C = CAP in Accordance with .0106[c], D = Dual Phase Extraction, E = Excavation, F = Free Product Skimming System, I = Internal Combustion Engines, K = CAP in Accordance with .0106[k], L = CAP in Accordance with .0106[l], M = CAP in Accordance with .0106[m], N = Natural Attenuation (not an L-CAP), O = Other Type of System, P = Pump & Treat, R = Biofluid Reactor, S = SV, T = Monitoring Only, U = UVB/KGB, V = AFVR, data stored in field TypeCAP in tblUST_DB
 
-	
-	select * from "tblRelDisc1" trd 
-	
-4	Visual/Odor
-6	Water Supply Well Contamination
-7	Groundwater Contamination
-8	Surface Water Contamination
-9	Other (Specify in "Description" field above)
-10	Observation of Release at Occurrence
-11	Soil Contamination
+    
+    select * from "tblRelDisc1" trd 
+    
+4    Visual/Odor
+6    Water Supply Well Contamination
+7    Groundwater Contamination
+8    Surface Water Contamination
+9    Other (Specify in "Description" field above)
+10    Observation of Release at Occurrence
+11    Soil Contamination
 
 select distinct "HowReleaseDetected" from "qryLUST_Data" order by 1;
 1.0

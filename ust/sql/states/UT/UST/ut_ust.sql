@@ -18,16 +18,16 @@ Filter by where (ut_tank."SUBSTANCED" = 'Heating Oil' or ut_facility."FACILITYDE
 select  * from ut_tank  a where "SUBSTANCED" = 'Heating Oil'
 and facility_id in (select facility_id from ut_facility b 
 where "FACILITYDE" = 'Petroleum Distributor'  and b."FACILITYDE" = 'Petroleum Distributor'
-				         );
+                         );
 
 
  WHERE y."TANK" = 1 AND y."OPENREGAST" = 0 and y."FACILITYDE" = 'Petroleum Distributor'
-				          AND y."REGAST" = 0));
+                          AND y."REGAST" = 0));
 
 
  WHERE y."TANK" = 1 AND y."OPENREGAST" = 0 and y."FACILITYDE" = 'Petroleum Distributor'
-				          AND y."REGAST" = 0));
-				         
+                          AND y."REGAST" = 0));
+                         
 18601
 
 SELECT DISTINCT x.facility_id::character varying(50) AS facility_id,
@@ -61,10 +61,10 @@ SELECT DISTINCT x.facility_id::character varying(50) AS facility_id,
   and (x."SUBSTANCED" <> 'Heating Oil' or x."SUBSTANCED" is null)
   AND x."TANKSTATUS" <> 'Install in Process'::text 
   AND (x.facility_id IN ( SELECT y.facility_id
-				           FROM ut_ust.ut_facility y
-				          WHERE y."TANK" = 1 AND y."OPENREGAST" = 0
-				          AND y."REGAST" = 0))
-				          
+                           FROM ut_ust.ut_facility y
+                          WHERE y."TANK" = 1 AND y."OPENREGAST" = 0
+                          AND y."REGAST" = 0))
+                          
 union 
 
 SELECT DISTINCT x.facility_id::character varying(50) AS facility_id,
@@ -98,9 +98,9 @@ SELECT DISTINCT x.facility_id::character varying(50) AS facility_id,
   and x."SUBSTANCED" = 'Heating Oil'
   AND x."TANKSTATUS" <> 'Install in Process'::text 
   AND (x.facility_id IN ( SELECT y.facility_id
-				           FROM ut_ust.ut_facility y
-				          WHERE y."TANK" = 1 AND y."OPENREGAST" = 0 and y."FACILITYDE" = 'Petroleum Distributor'
-				          AND y."REGAST" = 0));
+                           FROM ut_ust.ut_facility y
+                          WHERE y."TANK" = 1 AND y."OPENREGAST" = 0 and y."FACILITYDE" = 'Petroleum Distributor'
+                          AND y."REGAST" = 0));
 
 Downloaded layers for https://opendata.gis.utah.gov/datasets/utah::utah-petroleum-storage-tanks/about (CSV) and https://opendata.gis.utah.gov/datasets/utah-petroleum-storage-tank-facilities/about (added as a new layer in ArcGIS Pro).
 
@@ -276,14 +276,14 @@ select * from ust_element_mapping where ust_control_id = 19    order by epa_Tabl
 delete from erg_substance;
 
 select * from erg_substance where substance='Gas/Diesel';
-Gas/Diesel	Diesel #2 (U.L.S.)	Gas/Diesel Diesel #2 (U.L.S.)
+Gas/Diesel    Diesel #2 (U.L.S.)    Gas/Diesel Diesel #2 (U.L.S.)
 
 insert into erg_substance
 select distinct facility_id, tank_id, "SUBSTANCED", "SUBSTANCET", 
-	case when "SUBSTANCED" is null and "SUBSTANCET" is not null then "SUBSTANCET" 
-	     when "SUBSTANCET" is null and "SUBSTANCED" is not null then "SUBSTANCED" 
-	     when "SUBSTANCED" is not null and "SUBSTANCET" is not null then "SUBSTANCED" || ' ' || "SUBSTANCET"
-	     else null end as substance
+    case when "SUBSTANCED" is null and "SUBSTANCET" is not null then "SUBSTANCET" 
+         when "SUBSTANCET" is null and "SUBSTANCED" is not null then "SUBSTANCED" 
+         when "SUBSTANCED" is not null and "SUBSTANCET" is not null then "SUBSTANCED" || ' ' || "SUBSTANCET"
+         else null end as substance
 from ut_ust.ut_tank x
   where  x."FEDERALREG" = 'Yes'::text AND x."TANKSTATUS" <> 'Install in Process'::text AND (x.facility_id IN ( SELECT y.facility_id
            FROM ut_ust.ut_facility y
@@ -408,10 +408,10 @@ select * from ust_element_mapping where ust_control_id = 19 order by epa_table_n
 
 update ust_element_mapping
 set query_logic = 'select distinct facility_id, tank_id, "SUBSTANCED", "SUBSTANCET", 
-	case when "SUBSTANCED" is null and "SUBSTANCET" is not null then "SUBSTANCET" 
-	     when "SUBSTANCET" is null and "SUBSTANCED" is not null then "SUBSTANCED" 
-	     when "SUBSTANCED" is not null and "SUBSTANCET" is not null then "SUBSTANCED" || '' '' || "SUBSTANCET"
-	     else null end as substance
+    case when "SUBSTANCED" is null and "SUBSTANCET" is not null then "SUBSTANCET" 
+         when "SUBSTANCET" is null and "SUBSTANCED" is not null then "SUBSTANCED" 
+         when "SUBSTANCED" is not null and "SUBSTANCET" is not null then "SUBSTANCED" || '' '' || "SUBSTANCET"
+         else null end as substance
 from ut_ust.ut_tank x
 where  x."FEDERALREG" = ''Yes''::text AND (x.facility_id IN ( SELECT y.facility_id
            FROM ut_ust.ut_facility y
@@ -424,11 +424,11 @@ select distinct "PIPEMODDES"  from ut_tank order by 1;
 select * from ust_element_mapping where ust_control_id = 19 order by epa_table_name;
 
 insert into public.ust_element_mapping
-	 (ust_control_id, epa_table_name, epa_column_name, 
-	 organization_table_name, organization_column_name, 
-	 query_logic, inferred_value_comment,epa_comments)
+     (ust_control_id, epa_table_name, epa_column_name, 
+     organization_table_name, organization_column_name, 
+     query_logic, inferred_value_comment,epa_comments)
 values(19, 'ust_piping', 'piping_corrosion_protection_sacrificial_anode', 'ut_tank', 'PIPEMATDES, PIPEMODES', 
-	 'when ("PIPEMATDES" = ''Other (CP met)'' or "PIPEMODES" = ''Cathodically Protected'') then ''Yes'' else null', 'Inferred from ut_tank.PIPEMATDES and ut_tank.PIPEMODES','NOTE:  Piping material description also has Corrosion Protection data that needs to be mapped to the Piping CP fields.  Where Pipemoddes is cathodically protected then PipingCorrosionProtectionSacrificialAnode = Yes. PIPEMATDES Other (CP Met) to be mapped to Piping CP Other.  ')
+     'when ("PIPEMATDES" = ''Other (CP met)'' or "PIPEMODES" = ''Cathodically Protected'') then ''Yes'' else null', 'Inferred from ut_tank.PIPEMATDES and ut_tank.PIPEMODES','NOTE:  Piping material description also has Corrosion Protection data that needs to be mapped to the Piping CP fields.  Where Pipemoddes is cathodically protected then PipingCorrosionProtectionSacrificialAnode = Yes. PIPEMATDES Other (CP Met) to be mapped to Piping CP Other.  ')
 on conflict (ust_control_id, epa_table_name, epa_column_name) 
 do update set organization_table_name = excluded.organization_table_name,
               organization_column_name = excluded.organization_column_name,
@@ -456,7 +456,7 @@ insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-select distinct "PIPEMODDES" from ut_tank_ust order by 1	;
+select distinct "PIPEMODDES" from ut_tank_ust order by 1    ;
 --see what columns in which table we need to map
 /*
 see what mapping hasn't yet been done for this dataset 
@@ -466,10 +466,10 @@ section below where we generate SQL to perform the mapping
 */
 select epa_table_name, epa_column_name 
 from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from v_ust_needed_mapping 
-	where ust_control_id = 19 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from v_ust_needed_mapping 
+    where ust_control_id = 19 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
 /*
 
 
@@ -483,7 +483,7 @@ from v_ust_needed_mapping_insert_sql
 where ust_control_id = 19 and epa_column_name = 'piping_wall_type_id';
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 2823 || ', ''' || "PIPEMODDES" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 2823 || ', ''' || "PIPEMODDES" || ''', '''', null);'
 from ut_ust."ut_tank" order by 1;
 
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (2823, 'Double-Walled', 'Double walled', null);
@@ -499,7 +499,7 @@ where ust_control_id = 19 and epa_column_name = 'substance_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1324 || ', ''' || "substance" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1324 || ', ''' || "substance" || ''', '''', null);'
 from ut_ust."erg_substance" order by 1;
 
 select distinct "SUBSTANCED"
@@ -604,7 +604,7 @@ where ust_control_id = 19 and epa_column_name = 'tank_secondary_containment_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1303 || ', ''' || "TANKMODSDE" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1303 || ', ''' || "TANKMODSDE" || ''', '''', null);'
 from ut_ust."ut_tank_ust" order by 1;
 
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (1303, 'Cathodic Protection', 'Other', 'MAPPING NEEDED');
@@ -639,7 +639,7 @@ where ust_control_id = 19 and epa_column_name = 'facility_type1';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1282 || ', ''' || "FACILITYDE" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1282 || ', ''' || "FACILITYDE" || ''', '''', null);'
 from ut_ust."ut_facility_ust" order by 1;
 
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (1282, 'Air Taxi (Airline)', 'Aviation/airport (non-rental car)', null);
@@ -674,7 +674,7 @@ where ust_control_id = 19 and epa_column_name = 'coordinate_source_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1289 || ', ''' || "UTMDESC" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1289 || ', ''' || "UTMDESC" || ''', '''', null);'
 from ut_ust."ut_facility_ust" order by 1;
 
 
@@ -697,7 +697,7 @@ select distinct "TANKSTATUS", "CLOSURESTA" from ut_ust."ut_tank_ust";
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1294 || ', ''' || "TANKSTATUS"||' '||COALESCE ("CLOSURESTA",'') || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1294 || ', ''' || "TANKSTATUS"||' '||COALESCE ("CLOSURESTA",'') || ''', '''', null);'
 from ut_ust."ut_tank_ust" order by 1;
 
 
@@ -729,7 +729,7 @@ where ust_control_id = 19 and epa_column_name = 'tank_material_description_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1300 || ', ''' || "TANKMATDES" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1300 || ', ''' || "TANKMATDES" || ''', '''', null);'
 from ut_ust."ut_tank_ust" order by 1;
 
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (1300, 'Asphalt Coated or Bare Steel', 'Asphalt coated or bare steel', null);
@@ -795,10 +795,10 @@ v_tank_status_xwalk
 -- ut_ust.v_tank_status_xwalk source
 
 select distinct facility_id, tank_id, "TANKSTATUS", "CLOSURESTA", 
-	case when "CLOSURESTA" is null and "TANKSTATUS" is not null then "TANKSTATUS" 
-	     when "TANKSTATUS" is null and "CLOSURESTA" is not null then "CLOSURESTA" 
-	     when "TANKSTATUS" is not null and "CLOSURESTA" is not null then "TANKSTATUS" || ' ' || "CLOSURESTA"
-	     else null end as tank_status
+    case when "CLOSURESTA" is null and "TANKSTATUS" is not null then "TANKSTATUS" 
+         when "TANKSTATUS" is null and "CLOSURESTA" is not null then "CLOSURESTA" 
+         when "TANKSTATUS" is not null and "CLOSURESTA" is not null then "TANKSTATUS" || ' ' || "CLOSURESTA"
+         else null end as tank_status
 into ut_ust.erg_tank_status
 from ut_ust.ut_tank_ust
 
@@ -837,10 +837,10 @@ NOTE! The view queried below (v_ust_table_population_sql) contains columns that 
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name , query_logic
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name , query_logic
 from v_ust_table_population_sql
 where ust_control_id = 19 and epa_table_name = 'ust_facility'
 order by column_sort_order;
@@ -930,10 +930,10 @@ select count(*) from ut_ust.v_ust_facility;
 
 --ust_tank 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 19 and epa_table_name = 'ust_tank'
 order by column_sort_order;
@@ -1036,10 +1036,10 @@ select facility_id,tank_id from v_ust_tank group by facility_id,tank_id  having 
 --ust_tank_substance
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 19 and epa_table_name = 'ust_tank_substance'
 order by column_sort_order;
@@ -1082,10 +1082,10 @@ select * from v_ust_tank_substance;
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 19 and epa_table_name = 'ust_compartment'
 order by column_sort_order;
@@ -1138,10 +1138,10 @@ select * from v_ust_compartment;
 
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, programmer_comments, 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 19 and epa_table_name = 'ust_piping'
 order by column_sort_order;
@@ -1260,9 +1260,9 @@ select * from ust_element_mapping where epa_column_name = 'facility_state';
  * in this format, and then perform the deaggregation if necessary. 
  * Set the following variables before running the script:
  
-ust_or_release = 'ust' 			# valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+only_incomplete = True             # Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
  * If - and only if - this script identifies possible aggregrated data, it will output SQL file in the repo at
  * /ust/sql/XX/UST/XX_UST_deagg.sql). Open the generated file in your database console and step through it.  
@@ -1284,17 +1284,17 @@ only_incomplete = True 			# Boolean, set to True to restrict the output to EPA c
  * manipulating them!)
 
 select epa_column_name from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from public.v_ust_needed_mapping 
-	where ust_control_id = 19 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from public.v_ust_needed_mapping 
+    where ust_control_id = 19 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
  
  * To generate the SQL that will assist you in doing the value mapping, run the script 
  * generate_value_mapping_sql.py. Set the following variables before running the script:
  
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+only_incomplete = True           # Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
@@ -1318,9 +1318,9 @@ overwrite_existing = False      # Boolean, defaults to False. Set to True to ove
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-send_email = True				# Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
+send_email = True                # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -1338,7 +1338,7 @@ export_file_name = None
  * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
  * Set these variables in the script:
  
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
   
  * To see the crosswalk views after running the script:
@@ -1359,9 +1359,9 @@ and table_name like '%_xwalk' order by 1;
  * are missing and to create an ERG table containing generated IDs if necessary. 
  * Set these variables in the script:
 
-ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
+ust_or_release = 'ust'              # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the ust_control_id
-drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = False              # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -1377,7 +1377,7 @@ overwrite_sql_file = False       # Boolean, defaults to False. Set to True to ov
 --check to see if the script generated any tables 
 select epa_table_name, epa_column_name, organization_table_name 
 from public.v_ust_element_mapping a join public.ust_template_data_tables b 
-	on a.epa_table_name = b.table_name 
+    on a.epa_table_name = b.table_name 
 where ust_control_id = 19 and organization_table_name like 'erg%'
 order by sort_order;
 
@@ -1420,7 +1420,7 @@ select comments from public.ust_control where ust_control_id = ZZ;
  * adhere to all business and logic rules.  
  * Set these variables in the script:
 
-ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
+ust_or_release = 'ust'              # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the ust_control_id
 
  * This script will check the views you just created in the state schema for the following:
@@ -1467,9 +1467,9 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
+ust_or_release = 'ust'              # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the ust_control_id
-delete_existing = False 		 # can set to True if there is existing UST data you need to delete before inserting new
+delete_existing = False          # can set to True if there is existing UST data you need to delete before inserting new
 
  * Do a quick sanity check of number of rows inserted:
 */
@@ -1492,7 +1492,7 @@ select  facility_id,tank_id,substance_id from ut_ust.v_ust_tank_substance group 
  * 
  * Set these variables in the script: 
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
@@ -1512,7 +1512,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * 
  * Set these variables in the script: 
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
@@ -1584,7 +1584,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * 
  * Set these variables in the script: 
  * 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those referenced in ust_element_mapping or release_element_mapping.
 tables_to_exclude = []          # Python list of strings; defaults to empty list. Populate with table names in the organization schema that should be excluded from the export. (NOTE: ERG-created tables will not be exported regardless of the values in this list.)
@@ -1605,9 +1605,9 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_ust_missing_view_mapping a
 where ust_control_id = 19
 order by 1, 2;
@@ -1619,8 +1619,8 @@ set variables:
 ust_or_release = 'ust' 
 control_id = 11
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -1653,7 +1653,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'ust' 
 control_id = 11
@@ -1667,11 +1667,11 @@ from v_ust_table_row_count
 where ust_control_id = 19 
 order by sort_order;
 /*
-ust_facility	6088
-ust_tank	18638
-ust_tank_substance	18638
-ust_compartment	18638
-ust_piping	18638
+ust_facility    6088
+ust_tank    18638
+ust_tank_substance    18638
+ust_compartment    18638
+ust_piping    18638
 */
 
 select count(*) from v_ust_tank;
@@ -1682,12 +1682,12 @@ select count(*) from v_ust_tank;
 set variables:
 control_id = 9
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 			# Set to False to export full template including mapping and reference tabs
-template_only = False 		# Set to False to export data and mapping tabs as well as reference tab
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False             # Set to False to export full template including mapping and reference tabs
+template_only = False         # Set to False to export data and mapping tabs as well as reference tab
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -1697,10 +1697,10 @@ export_file_name = None		# If export_file_path and export_file_dir/export_file_n
 set variables:
 control_id = 9
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 --------------------------------------------------------------------------------------------------------------------------
 
@@ -1711,13 +1711,13 @@ export_file_name = None		# If export_file_path and export_file_dir/export_file_n
 
 
 
-	select distinct ust_tank_id, compartment_id, compartment_status_id, compartment_capacity_gallons,c.tank_id
-	from ut_ust.v_ust_compartment a 
-		join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = 19) b
-			on a.facility_id = b.facility_id
-		join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
-		
-		
-		;
-		
-	*/
+    select distinct ust_tank_id, compartment_id, compartment_status_id, compartment_capacity_gallons,c.tank_id
+    from ut_ust.v_ust_compartment a 
+        join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = 19) b
+            on a.facility_id = b.facility_id
+        join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
+        
+        
+        ;
+        
+    */

@@ -73,10 +73,10 @@ insert into release_element_mapping (release_control_id, epa_table_name, epa_col
 --see what columns in which table we need to map
 select epa_table_name, epa_column_name 
 from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from v_release_needed_mapping 
-	where release_control_id = 9 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from v_release_needed_mapping 
+    where release_control_id = 9 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --facility_type_id
@@ -112,7 +112,7 @@ where release_control_id = 9 and epa_column_name = 'facility_type_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 310 || ', ''' || "facility_type" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 310 || ', ''' || "facility_type" || ''', '''', null);'
 from nh_release."nh_release" order by 1;
 
 
@@ -186,18 +186,18 @@ from archive.v_lust_element_mapping
 where lower(element_name) like lower('%facility_type%')
 order by 1, 2;
 /*
-Estimated								Map interpolation
-Geocode									Geocoded address
-GPS_EPA									GPS
-GPS_State								GPS
-GPS_Tribe								GPS
-Legacy Verified							Other
-OnlineMapGoogle							Map interpolation
-OnlineMapMS								Map interpolation
-Site Assessment Report by MCE Environmental dated 2/12/2003	Other
-Trimble, collected 5/3/2010				Other
-Trimble, collected 5/4/2010				Other
-Trimble, collected 5/5/2010				Other
+Estimated                                Map interpolation
+Geocode                                    Geocoded address
+GPS_EPA                                    GPS
+GPS_State                                GPS
+GPS_Tribe                                GPS
+Legacy Verified                            Other
+OnlineMapGoogle                            Map interpolation
+OnlineMapMS                                Map interpolation
+Site Assessment Report by MCE Environmental dated 2/12/2003    Other
+Trimble, collected 5/3/2010                Other
+Trimble, collected 5/4/2010                Other
+Trimble, collected 5/5/2010                Other
 */
 
 
@@ -218,7 +218,7 @@ where release_control_id = 9 and epa_column_name = 'release_status_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 313 || ', ''' || "LUSTstatusOrProjMgrName" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 313 || ', ''' || "LUSTstatusOrProjMgrName" || ''', '''', null);'
 from nh_release."nh_release" order by 1;
 
 select * from public.release_statuses;
@@ -316,9 +316,9 @@ NOTE! The view queried below (v_release_table_population_sql) contains columns t
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 9 and epa_table_name = 'ust_release'
 order by column_sort_order;
@@ -362,9 +362,9 @@ case release_status_id when 6 then release_status_id else 1 end  as release_stat
 'NH'as state, 
 1 as epa_region
 from "nh_release" x 
-	left join nh_release."nh_release_gis" cs on x.site_number = cs."SITE_NUMBER"  and x.project_rsn = cs."PROJECT_HEADER_RSN" 
-	left join nh_release.v_release_status_xwalk	rs on x."LUSTstatusOrProjMgrName" = rs.organization_value 
-	left join nh_release.v_facility_type_xwalk rd on x."facility_type" = rd.organization_value ;
+    left join nh_release."nh_release_gis" cs on x.site_number = cs."SITE_NUMBER"  and x.project_rsn = cs."PROJECT_HEADER_RSN" 
+    left join nh_release.v_release_status_xwalk    rs on x."LUSTstatusOrProjMgrName" = rs.organization_value 
+    left join nh_release.v_facility_type_xwalk rd on x."facility_type" = rd.organization_value ;
 
 
 select  count(*) from nh_release.v_ust_release;
@@ -376,9 +376,9 @@ select  count(*) from nh_release.v_ust_release;
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_release_missing_view_mapping a
 where release_control_id = 9
 order by 1, 2;
@@ -399,8 +399,8 @@ set variables:
 ust_or_release = 'release' 
 control_id = 2
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -431,7 +431,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'release' 
 control_id = 2
@@ -450,12 +450,12 @@ where release_control_id = 9 order by sort_order;
 set variables:
 control_id = 2
 ust_or_release = 'release' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 		# Set to False to export full template including mapping and reference tabs
-template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False         # Set to False to export full template including mapping and reference tabs
+template_only = False     # Set to False to export data and mapping tabs as well as reference tab
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------

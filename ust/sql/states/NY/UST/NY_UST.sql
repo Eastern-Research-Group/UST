@@ -341,7 +341,7 @@ insert into public.ust_element_value_mappings (element_db_mapping_id, state_valu
 select * from ust_element_db_mapping where state = 'NY' order by 1 desc;
 
 select * from ust_element_value_mappings order by 1 desc;
-	
+    
 
 select distinct "Type", "CodeName" from bsequip order by 1, 2;
 
@@ -365,19 +365,19 @@ select * from bsequip a
 where "Type" = 'Piping Secondary Containment' 
 and "CodeName" in ('Diking (AG only)','Double-Walled (AG only)','Modified Double-Walled (Aboveground)')
 and exists (select 1 from bstank b 
-			where a."ï»¿siteid" = b."ï»¿SiteID" and a."TankID" = b."TankID" 
-			and "Subpart" <> 2);
-	419309	230754
-419309	230751
-419309	230757
-419309	230752
-419309	230755
+            where a."ï»¿siteid" = b."ï»¿SiteID" and a."TankID" = b."TankID" 
+            and "Subpart" <> 2);
+    419309    230754
+419309    230751
+419309    230757
+419309    230752
+419309    230755
 
 3
 
 
 
-	select * from bstank where 	"ï»¿SiteID" = 465097 and "TankID" = 244335
+    select * from bstank where     "ï»¿SiteID" = 465097 and "TankID" = 244335
 
 select * from bstank where "ï»¿SiteID" in (374288,55490,55576)
 
@@ -401,8 +401,8 @@ select * from bsequip where "ï»¿siteid" = 11 and "Type" = 'Piping Secondary C
 
 select * from public.v_ust_element_mapping where element_name = 'PipeSecondaryContainment'
 
-11	703	5	E04	Double walled UG	Piping Secondary Containment
-11	51088	6	E04	Double walled UG	Piping Secondary Containment
+11    703    5    E04    Double walled UG    Piping Secondary Containment
+11    51088    6    E04    Double walled UG    Piping Secondary Containment
 
 
 select distinct "CodeName" from bsequip b where "Type" = 'Piping Secondary Containment' order by 1;
@@ -449,12 +449,12 @@ where "ï»¿siteid" = 11 order by 2;
 
 select * from v_ust_element_mapping where state = 'NY' and element_name = 'PipeSecondaryContainment'
 
-				(select distinct "ï»¿siteid", "TankID", epa_value 
-				from bsequip x join v_ust_element_mapping y on x."CodeName" = y.state_value 
-				where y.state = 'NY' and y.element_name = 'PipeSecondaryContainment' and "Type" = 'Piping Secondary Containment'
-				and "ï»¿siteid" = 11) psc
-		on t."ï»¿SiteID" = psc."ï»¿siteid" and t."TankID" = psc."TankID"	
-		
-		select distinct "Type" from bsequip order by 1;
-	
-	select distinct "CodeName" from bsequip where "Type" = 'Tank Secondary Containment' order by 1;
+                (select distinct "ï»¿siteid", "TankID", epa_value 
+                from bsequip x join v_ust_element_mapping y on x."CodeName" = y.state_value 
+                where y.state = 'NY' and y.element_name = 'PipeSecondaryContainment' and "Type" = 'Piping Secondary Containment'
+                and "ï»¿siteid" = 11) psc
+        on t."ï»¿SiteID" = psc."ï»¿siteid" and t."TankID" = psc."TankID"    
+        
+        select distinct "Type" from bsequip order by 1;
+    
+    select distinct "CodeName" from bsequip where "Type" = 'Tank Secondary Containment' order by 1;

@@ -200,8 +200,8 @@ order by 1;
  *     ["soil", "gw"]. 
  *     Map EPA fields media_impacted_soil and media_impacted_groundwater
  *     EACH to state column "media_impacted", and set the query_logic field as follows:
- *     media_impacted_soil: "if media_impacted = 'soil' then 'Yes'"	   
- *     media_impacted_groundwater: "if media_impacted = 'gw' then 'Yes'"	   
+ *     media_impacted_soil: "if media_impacted = 'soil' then 'Yes'"       
+ *     media_impacted_groundwater: "if media_impacted = 'gw' then 'Yes'"       
  * 
  * After you've adjusted all the SQL statements for elements you are able to map and deleted those
  * you can't, run the SQL statements to perform the inserts.  
@@ -244,11 +244,11 @@ order by 1;
  * For examples of how to do this, run this query:
  * 
 select release_control_id, epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name,
-	organization_join_table, 
-	organization_join_column, organization_join_fk,
-	organization_join_column2, organization_join_fk2,
-	organization_join_column3, organization_join_fk3
+    organization_table_name, organization_column_name,
+    organization_join_table, 
+    organization_join_column, organization_join_fk,
+    organization_join_column2, organization_join_fk2,
+    organization_join_column3, organization_join_fk3
 from public.release_element_mapping
 where organization_join_table is not null 
 order by 1, 2, 3, 4, 5;
@@ -271,8 +271,8 @@ order by 1;
  * populated for these fields. 
 
 select release_control_id, epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name,
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name,
+    deagg_table_name, deagg_column_name
 from public.release_element_mapping
 where deagg_table_name is not null 
 order by 1, 2, 3, 4, 5;
@@ -396,9 +396,9 @@ select * from release_element_mapping where release_control_id = 22 order by epa
  * in this format, and then perform the deaggregation if necessary. 
  * Set the following variables before running the script:
  
-ust_or_release = 'release' 		# valid values are 'ust' or 'release'
+ust_or_release = 'release'         # valid values are 'ust' or 'release'
 control_id = 22                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+only_incomplete = True             # Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
  * If - and only if - this script identifies possible aggregrated data, it will output SQL file in the repo at
  * /ust/sql/MA/Releases/MA_release_deagg.sql). Open the generated file in your database console and step through it.  
@@ -420,17 +420,17 @@ only_incomplete = True 			# Boolean, set to True to restrict the output to EPA c
  * manipulating them!)
 
 select epa_column_name from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from public.v_release_needed_mapping 
-	where release_control_id = 22 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from public.v_release_needed_mapping 
+    where release_control_id = 22 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
  
  * To generate the SQL that will assist you in doing the value mapping, run the script 
  * generate_value_mapping_sql.py. Set the following variables before running the script:
  
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 22                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+only_incomplete = True           # Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
@@ -457,9 +457,9 @@ overwrite_existing = False      # Boolean, defaults to False. Set to True to ove
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 22                 # Enter an integer that is the ust_control_id or release_control_id
-send_email = True				# Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
+send_email = True                # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -477,7 +477,7 @@ export_file_name = None
  * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
  * Set these variables in the script:
  
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 22                 # Enter an integer that is the ust_control_id or release_control_id
   
  * To see the crosswalk views after running the script:
@@ -498,10 +498,10 @@ and table_name like '%_xwalk' order by 1;
  * are missing and to create an ERG table containing generated IDs if necessary. 
  * Set these variables in the script:
 
-ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
 control_id = 22                  # Enter an integer that is the release_control_id
 table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
-drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = False              # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -517,7 +517,7 @@ overwrite_sql_file = False       # Boolean, defaults to False. Set to True to ov
 --check to see if the script generated any tables 
 select epa_table_name, epa_column_name, organization_table_name 
 from public.v_release_element_mapping a join public.ust_template_data_tables b 
-	on a.epa_table_name = b.table_name 
+    on a.epa_table_name = b.table_name 
 where release_control_id = 22 and organization_table_name like 'erg%'
 order by sort_order;
 
@@ -572,7 +572,7 @@ select comments from public.release_control where release_control_id = 22;
  * adhere to all business and logic rules.  
  * Set these variables in the script:
 
-ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
 control_id = 22                  # Enter an integer that is the release_control_id
 
  * This script will check the views you just created in the state schema for the following:
@@ -618,10 +618,10 @@ control_id = 22                  # Enter an integer that is the release_control_
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
 control_id = 22                  # Enter an integer that is the release_control_id
-organization_id = ''      		# Optional; if control_id = 0 or None, will find the most recent control_id
-delete_existing = False 		 # can set to True if there is existing UST data you need to delete before inserting new
+organization_id = ''              # Optional; if control_id = 0 or None, will find the most recent control_id
+delete_existing = False          # can set to True if there is existing UST data you need to delete before inserting new
 
  * Do a quick sanity check of number of rows inserted:
 */
@@ -641,7 +641,7 @@ order by sort_order;
  * 
  * Set these variables in the script: 
 0
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 22                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
@@ -661,7 +661,7 @@ control_id = 22                 # Enter an integer that is the ust_control_id or
  * 
  * Set these variables in the script: 
 
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 22                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
@@ -736,7 +736,7 @@ where release_control_id = 22;
  * 
  * Set these variables in the script: 
  * 
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 22                 # Enter an integer that is the ust_control_id or release_control_id
 all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those referenced in ust_element_mapping or release_element_mapping.
 tables_to_exclude = []          # Python list of strings; defaults to empty list. Populate with table names in the organization schema that should be excluded from the export. (NOTE: ERG-created tables will not be exported regardless of the values in this list.)

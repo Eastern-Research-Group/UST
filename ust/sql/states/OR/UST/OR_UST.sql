@@ -24,140 +24,140 @@ update Piping_Style_Sort set EPA_mapping = 'Non-operational ( e.g., fill line, v
 
 
 select distinct
-	f.FacilityId as "FacilityID", f.Name as "FacilityName",
-	case when f.BusinessType = 1 then 'Commercial'
-	     when f.BusinessType = 2 then 'Private' --is this right?
-	     when f.BusinessType = 3 then 'Federal Government - Non Military'
-	     when f.BusinessType = 4 then 'State Government - Non Military'
-	     when f.BusinessType = 5 then 'Local Government' end as "OwnerType",
-	loc.LINE_1_ADDR as "FacilityAddress1",
-	loc.CITY_TXT as "FacilityCity",
-	loc.ZIP_CD as "FacilityZipCode",
-	loc.LAT_DECIMAL_COORD as "FacilityLatitude",
-	loc.LONG_DECIMAL_COORD as "FacilityLongitude",
-	--"FacilityCoordinateSource", is there a lookup for Owners_and_Permittees_Locations.LAT_LONG_METH_CD?
-	'OR' as "FacilityState", 10 as "FacilityEPARegion",
-	case when f.IsIndianLand  = 1 then 'Yes' when f.IsIndianLand = 0 then 'No' end as "FacilityTribalSite",
-	o.LastName as "FacilityOwnerLastName",
-	o.FirstName as "FacilityOwnerFirstName",
-	o.Street as "FacilityOwnerAddress1",
-	o.City as "FacilityOwnerCity",
-	o.ZIP as "FacilityOwnerZipCode",
-	o.State as "FacilityOwnerState",
-	o.Phone as "FacilityOwnerPhoneNumber",
-	p.LastName as "FacilityOperatorLastName",
-	p.FirstName as "FacilityOperatorFirstName",
-	p.Street as "FacilityOperatorAddress1",
-	p.City as "FacilityOperatorCity",
-	p.ZIP as "FacilityOperatorZipCode",
-	p.State as "FacilityOperatorState",
-	p.Phone as "FacilityOperatorPhoneNumber"--,
-	--case when fr.FinancialResponsibilityTypeId = 2 then 'Yes' end as "FinancialResponsibilityCommercialInsurance",
-	--case when fr.FinancialResponsibilityTypeId = 3 then 'Yes' end as "FinancialResponsibilityGuarantee",
-	--case when fr.FinancialResponsibilityTypeId = 5 then 'Yes' end as "FinancialResponsibilityLetterOfCredit",
-	--case when fr.FinancialResponsibilityTypeId = 7 then 'Yes' end as "FinancialResponsibilityLocalGovernmentFinancialTest",
-	--case when fr.FinancialResponsibilityTypeId = 1 then 'Yes' end as "FinancialResponsibilitySelfInsuranceFinancialTest",
-	--case when fr.FinancialResponsibilityTypeId = 4 then 'Yes' end as "FinancialResponsibilitySuretyBond",
-	--case when fr.FinancialResponsibilityTypeId = 6 then 'Yes' end as "FinancialResponsibilityTrustFund",
-	--case when fr.FinancialResponsibilityTypeId = 13 then 'Yes' end as "FinancialResponsibilityOtherMethod",
-	--t.TankCode as "TankID",
-	--case when f.IsRegulatedFacility = 1 then 'Yes' else 'No' end "FederallyRegulated",
-	--case when t.TankStatusTypeId in (1,3,6,8) then 'Currently in use' 
-	--     when t.TankStatusTypeId = 4 then 'Closed (removed from ground)' 
-	--	 when t.TankStatusTypeId = 2 then 'Closed (status unknown)' end as "TankStatus",
-	--case when mn.TankId is not null then 'Yes' end as "ManifoldedTanks",
-	--t.DecommissionDate as "ClosureDate",
-	--t.InstallationDate,
-	--case when ts.SubstanceTypeId = 1 then 'Gasoline (unknown type)'
-	--     when ts.SubstanceTypeId = 2 then 'Diesel fuel (b-unknown)'
-	--	 when ts.SubstanceTypeId = 3 then 'Ethanol blend gasoline (e-unknown)'
-	--	 when ts.SubstanceTypeId = 4 then 'Kerosene'
-	--	 when ts.SubstanceTypeId = 5 then 'Heating/fuel oil # unknown'
-	--	 when ts.SubstanceTypeId = 6 then 'Used oil/waste oil'
-	--	 when ts.SubstanceTypeId in (7,11,12) then 'Other'
-	--	 when ts.SubstanceTypeId = 14 then 'Racing fuel/leaded gasoline'
-	--	 when ts.SubstanceTypeId = 15 then '100% biodiesel (not federally regulated)'
-	--	 when ts.SubstanceTypeId = 16 then 'Other unlisted blend containing any other mixture of diesel, renewable diesel, or 20% biodiesel or less'
-	--	 when ts.SubstanceTypeId = 17 then 'Ethanol blend gasoline (e-unknown)' end as "TankSubstance",
-	--t.EstimatedCapacityGallons as "TankGapacityGallons",
-	--case when ex.TankId is not null then 'Yes' end as "ExcavationLiner",
-	--case when mt.TankId = 1 then 'Asphalt Coated or Bare Steel'  
-	--	 when mt.TankId = 2 then 'Cathodically Protected Steel' 
-	--	 when mt.TankId = 3 then 'Coated and Cathodically Protected Steel'  
-	--	 when mt.TankId = 4 then 'Composite/Clad (Steel w/Fiberglass Reinforced Plastic)' 
-	--	 when mt.TankId in (5,13) then 'Fiberglass Reinforced Plastic' 
-	--	 when mt.TankId = 9 then 'Jacketed Steel' 
-	--	 when mt.TankId = 10 then 'Other' 
-	--	 when mt.TankId = 11 then 'Unknown' end as "MaterialType",
-	--case when t.TankLastRepairDate is not null then 'Yes' end as "TankRepaired",
-	--t.TankLastRepairDate as "TankRepairDate",
-	--mat."PipingMaterialDescription", 
-	--style."PipingStyle",
-	--case when db.TankId is not null then 'Double Walled' end as "TankWallType",
-	--case when t.PipeLastRepairDate is not null then 'Yes' end as "PipingRepaired",
-	--t.PipeLastRepairDate as "PipingRepairDate",
-	--case when t.CorrosionProtectionTypeID = 2 then 'Yes' end as "TankCorrosionProtectionSacrificialAnode",
-	--case when t.CorrosionProtectionTypeID = 2 then 'Unknown' end as "TankCorrosionProtectionAnodesInstalledOrRetrofitted",
-	--case when t.CorrosionProtectionTypeID = 1 then 'Yes' end as "TankCorrosionProtectionImpressedCurrent",
-	--case when t.CorrosionProtectionTypeID = 1 then 'Unknown' end as "TankCorrosionProtectionImpressedCurrentInstalledOrRetrofitted",
-	----Assume Tank.CorrosionProtectionTypeID refers to the tank, but we also have similar fields for piping                                                            
-	--case when t.OverfillDeviceTypeID = 2 then 'Yes' end as "AutomaticShutoffDevice",
-	--case when t.OverfillDeviceTypeID = 1 then 'Yes' end as "OverfillAlarm",
-	--case when t.OverfillDeviceTypeID = 3 then 'Yes' end as "BallFloatValve",
-	--case when t.SpillDeviceTypeID in (1,2) then 'Yes' 
-	--     when t.SpillDeviceTypeID = 3 then 'No' end as "SpillBucketInstalled",
-	--case when atg.TankId is not null then 'Yes' end as "AutomaticTankGauging",
-	--case when mtg.TankId is not null then 'Yes' end as "ManualTankGauging",
-	--case when sir.TankId is not null then 'Yes' end as "StatisticalInventoryReconciliation",
-	--case when tt.TankId is not null then 'Yes' end as "TankTightnessTesting",
-	--case when gw.TankId is not null then 'Yes' end as "GroundwaterMonitoring",
-	--case when vm.TankId is not null then 'Yes' end as "VaporMonitoring",
-	--case when el.TankId is not null then 'Yes' end as "ElectronicLineLeakDetector",
-	--case when me.TankId is not null then 'Yes' end as "MechanicalLineLeakDetector",
-	--case when im.TankId is not null then 'Yes' end as "AutomatedIntersticialMonitoring",
-	--case when ss.TankId is not null then 'Yes' end as "SafeSuction",
-	--case when us.TankId is not null then 'Yes' end as "AmericanSafeSuction",
-	--case when hp.TankId is not null then 'Yes' end as "HighPressure",
-	--t.DateUpdated as "DataCurrentDate"
+    f.FacilityId as "FacilityID", f.Name as "FacilityName",
+    case when f.BusinessType = 1 then 'Commercial'
+         when f.BusinessType = 2 then 'Private' --is this right?
+         when f.BusinessType = 3 then 'Federal Government - Non Military'
+         when f.BusinessType = 4 then 'State Government - Non Military'
+         when f.BusinessType = 5 then 'Local Government' end as "OwnerType",
+    loc.LINE_1_ADDR as "FacilityAddress1",
+    loc.CITY_TXT as "FacilityCity",
+    loc.ZIP_CD as "FacilityZipCode",
+    loc.LAT_DECIMAL_COORD as "FacilityLatitude",
+    loc.LONG_DECIMAL_COORD as "FacilityLongitude",
+    --"FacilityCoordinateSource", is there a lookup for Owners_and_Permittees_Locations.LAT_LONG_METH_CD?
+    'OR' as "FacilityState", 10 as "FacilityEPARegion",
+    case when f.IsIndianLand  = 1 then 'Yes' when f.IsIndianLand = 0 then 'No' end as "FacilityTribalSite",
+    o.LastName as "FacilityOwnerLastName",
+    o.FirstName as "FacilityOwnerFirstName",
+    o.Street as "FacilityOwnerAddress1",
+    o.City as "FacilityOwnerCity",
+    o.ZIP as "FacilityOwnerZipCode",
+    o.State as "FacilityOwnerState",
+    o.Phone as "FacilityOwnerPhoneNumber",
+    p.LastName as "FacilityOperatorLastName",
+    p.FirstName as "FacilityOperatorFirstName",
+    p.Street as "FacilityOperatorAddress1",
+    p.City as "FacilityOperatorCity",
+    p.ZIP as "FacilityOperatorZipCode",
+    p.State as "FacilityOperatorState",
+    p.Phone as "FacilityOperatorPhoneNumber"--,
+    --case when fr.FinancialResponsibilityTypeId = 2 then 'Yes' end as "FinancialResponsibilityCommercialInsurance",
+    --case when fr.FinancialResponsibilityTypeId = 3 then 'Yes' end as "FinancialResponsibilityGuarantee",
+    --case when fr.FinancialResponsibilityTypeId = 5 then 'Yes' end as "FinancialResponsibilityLetterOfCredit",
+    --case when fr.FinancialResponsibilityTypeId = 7 then 'Yes' end as "FinancialResponsibilityLocalGovernmentFinancialTest",
+    --case when fr.FinancialResponsibilityTypeId = 1 then 'Yes' end as "FinancialResponsibilitySelfInsuranceFinancialTest",
+    --case when fr.FinancialResponsibilityTypeId = 4 then 'Yes' end as "FinancialResponsibilitySuretyBond",
+    --case when fr.FinancialResponsibilityTypeId = 6 then 'Yes' end as "FinancialResponsibilityTrustFund",
+    --case when fr.FinancialResponsibilityTypeId = 13 then 'Yes' end as "FinancialResponsibilityOtherMethod",
+    --t.TankCode as "TankID",
+    --case when f.IsRegulatedFacility = 1 then 'Yes' else 'No' end "FederallyRegulated",
+    --case when t.TankStatusTypeId in (1,3,6,8) then 'Currently in use' 
+    --     when t.TankStatusTypeId = 4 then 'Closed (removed from ground)' 
+    --     when t.TankStatusTypeId = 2 then 'Closed (status unknown)' end as "TankStatus",
+    --case when mn.TankId is not null then 'Yes' end as "ManifoldedTanks",
+    --t.DecommissionDate as "ClosureDate",
+    --t.InstallationDate,
+    --case when ts.SubstanceTypeId = 1 then 'Gasoline (unknown type)'
+    --     when ts.SubstanceTypeId = 2 then 'Diesel fuel (b-unknown)'
+    --     when ts.SubstanceTypeId = 3 then 'Ethanol blend gasoline (e-unknown)'
+    --     when ts.SubstanceTypeId = 4 then 'Kerosene'
+    --     when ts.SubstanceTypeId = 5 then 'Heating/fuel oil # unknown'
+    --     when ts.SubstanceTypeId = 6 then 'Used oil/waste oil'
+    --     when ts.SubstanceTypeId in (7,11,12) then 'Other'
+    --     when ts.SubstanceTypeId = 14 then 'Racing fuel/leaded gasoline'
+    --     when ts.SubstanceTypeId = 15 then '100% biodiesel (not federally regulated)'
+    --     when ts.SubstanceTypeId = 16 then 'Other unlisted blend containing any other mixture of diesel, renewable diesel, or 20% biodiesel or less'
+    --     when ts.SubstanceTypeId = 17 then 'Ethanol blend gasoline (e-unknown)' end as "TankSubstance",
+    --t.EstimatedCapacityGallons as "TankGapacityGallons",
+    --case when ex.TankId is not null then 'Yes' end as "ExcavationLiner",
+    --case when mt.TankId = 1 then 'Asphalt Coated or Bare Steel'  
+    --     when mt.TankId = 2 then 'Cathodically Protected Steel' 
+    --     when mt.TankId = 3 then 'Coated and Cathodically Protected Steel'  
+    --     when mt.TankId = 4 then 'Composite/Clad (Steel w/Fiberglass Reinforced Plastic)' 
+    --     when mt.TankId in (5,13) then 'Fiberglass Reinforced Plastic' 
+    --     when mt.TankId = 9 then 'Jacketed Steel' 
+    --     when mt.TankId = 10 then 'Other' 
+    --     when mt.TankId = 11 then 'Unknown' end as "MaterialType",
+    --case when t.TankLastRepairDate is not null then 'Yes' end as "TankRepaired",
+    --t.TankLastRepairDate as "TankRepairDate",
+    --mat."PipingMaterialDescription", 
+    --style."PipingStyle",
+    --case when db.TankId is not null then 'Double Walled' end as "TankWallType",
+    --case when t.PipeLastRepairDate is not null then 'Yes' end as "PipingRepaired",
+    --t.PipeLastRepairDate as "PipingRepairDate",
+    --case when t.CorrosionProtectionTypeID = 2 then 'Yes' end as "TankCorrosionProtectionSacrificialAnode",
+    --case when t.CorrosionProtectionTypeID = 2 then 'Unknown' end as "TankCorrosionProtectionAnodesInstalledOrRetrofitted",
+    --case when t.CorrosionProtectionTypeID = 1 then 'Yes' end as "TankCorrosionProtectionImpressedCurrent",
+    --case when t.CorrosionProtectionTypeID = 1 then 'Unknown' end as "TankCorrosionProtectionImpressedCurrentInstalledOrRetrofitted",
+    ----Assume Tank.CorrosionProtectionTypeID refers to the tank, but we also have similar fields for piping                                                            
+    --case when t.OverfillDeviceTypeID = 2 then 'Yes' end as "AutomaticShutoffDevice",
+    --case when t.OverfillDeviceTypeID = 1 then 'Yes' end as "OverfillAlarm",
+    --case when t.OverfillDeviceTypeID = 3 then 'Yes' end as "BallFloatValve",
+    --case when t.SpillDeviceTypeID in (1,2) then 'Yes' 
+    --     when t.SpillDeviceTypeID = 3 then 'No' end as "SpillBucketInstalled",
+    --case when atg.TankId is not null then 'Yes' end as "AutomaticTankGauging",
+    --case when mtg.TankId is not null then 'Yes' end as "ManualTankGauging",
+    --case when sir.TankId is not null then 'Yes' end as "StatisticalInventoryReconciliation",
+    --case when tt.TankId is not null then 'Yes' end as "TankTightnessTesting",
+    --case when gw.TankId is not null then 'Yes' end as "GroundwaterMonitoring",
+    --case when vm.TankId is not null then 'Yes' end as "VaporMonitoring",
+    --case when el.TankId is not null then 'Yes' end as "ElectronicLineLeakDetector",
+    --case when me.TankId is not null then 'Yes' end as "MechanicalLineLeakDetector",
+    --case when im.TankId is not null then 'Yes' end as "AutomatedIntersticialMonitoring",
+    --case when ss.TankId is not null then 'Yes' end as "SafeSuction",
+    --case when us.TankId is not null then 'Yes' end as "AmericanSafeSuction",
+    --case when hp.TankId is not null then 'Yes' end as "HighPressure",
+    --t.DateUpdated as "DataCurrentDate"
 from Facility f left join FinancialResponsibility fr on f.FacilityId = fr.FacilityId
-	left join Tank t on f.FacilityId = t.FacilityId
-	left join Owners_and_Permittees_Locations loc on f.FacilityId = loc.FacilityId
-	left join (select * from Owners_and_Permittees where AffilTypeCd = 'OWN') o on f.FacilityId = o.FacilityID
-	left join (select * from Owners_and_Permittees where AffilTypeCd = 'PMT') p on f.FacilityId = p.FacilityID
-	left join TankSubstance ts on t.TankId = ts.TankId
-	left join (select TankId from TankConstruction where ConstructionTypeId = 12) mn on t.TankId = mn.TankId
-	left join (select TankId from TankConstruction where ConstructionTypeId = 7) ex on t.TankId = ex.TankId
-	left join (select TankId from TankConstruction where ConstructionTypeId = 8) db on t.TankId = db.TankId
-	left join (select TankId, EPA_mapping as "PipingMaterialDescription" from 
-				(select TankId, min(Sort_Order) as Sort_order
-				from TankPipingMaterial a join Piping_Material_Sort b on a.PipingMaterialTypeId = b.PipingMaterialTypeId
-				group by TankId) x join Piping_Material_Sort y on x.Sort_Order = y.Sort_Order) mat on t.TankId = mat.TankId
-	left join (select TankId, EPA_mapping as "PipingStyle" from 
-				(select TankId, min(Sort_Order) as Sort_Order
-				from TankPipingType a join Piping_Style_Sort b on a.PipingTypeId = b.PipingTypeId
-				group by TankId) x join Piping_Style_Sort y on x.Sort_Order = y.Sort_Order) style on t.TankId = style.TankId
-	left join (select TankId, ConstructionTypeId from TankConstruction where ConstructionTypeId in (1, 2, 3, 4, 5, 9, 10, 11, 13)) mt on t.TankId = mt.TankId
-	left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 4) atg on t.TankId = atg.TankId
-	left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 4) mtg on t.TankId = mtg.TankId
-	left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 16) sir on t.TankId = sir.TankId
-	left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 2) tt on t.TankId = tt.TankId
-	left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 8) gw on t.TankId = gw.TankId
-	left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 6) vm on t.TankId = vm.TankId
-	left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 23) el on t.TankId = el.TankId
-	left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 22) me on t.TankId = me.TankId
-	left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 11) im on t.TankId = im.TankId
-	left join (select TankId from TankPipingType where PipingTypeId = 1) ss on t.TankId = ss.TankId
-	left join (select TankId from TankPipingType where PipingTypeId = 2) us on t.TankId = us.TankId
-	left join (select TankId from TankPipingType where PipingTypeId = 3) hp on t.TankId = hp.TankId
+    left join Tank t on f.FacilityId = t.FacilityId
+    left join Owners_and_Permittees_Locations loc on f.FacilityId = loc.FacilityId
+    left join (select * from Owners_and_Permittees where AffilTypeCd = 'OWN') o on f.FacilityId = o.FacilityID
+    left join (select * from Owners_and_Permittees where AffilTypeCd = 'PMT') p on f.FacilityId = p.FacilityID
+    left join TankSubstance ts on t.TankId = ts.TankId
+    left join (select TankId from TankConstruction where ConstructionTypeId = 12) mn on t.TankId = mn.TankId
+    left join (select TankId from TankConstruction where ConstructionTypeId = 7) ex on t.TankId = ex.TankId
+    left join (select TankId from TankConstruction where ConstructionTypeId = 8) db on t.TankId = db.TankId
+    left join (select TankId, EPA_mapping as "PipingMaterialDescription" from 
+                (select TankId, min(Sort_Order) as Sort_order
+                from TankPipingMaterial a join Piping_Material_Sort b on a.PipingMaterialTypeId = b.PipingMaterialTypeId
+                group by TankId) x join Piping_Material_Sort y on x.Sort_Order = y.Sort_Order) mat on t.TankId = mat.TankId
+    left join (select TankId, EPA_mapping as "PipingStyle" from 
+                (select TankId, min(Sort_Order) as Sort_Order
+                from TankPipingType a join Piping_Style_Sort b on a.PipingTypeId = b.PipingTypeId
+                group by TankId) x join Piping_Style_Sort y on x.Sort_Order = y.Sort_Order) style on t.TankId = style.TankId
+    left join (select TankId, ConstructionTypeId from TankConstruction where ConstructionTypeId in (1, 2, 3, 4, 5, 9, 10, 11, 13)) mt on t.TankId = mt.TankId
+    left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 4) atg on t.TankId = atg.TankId
+    left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 4) mtg on t.TankId = mtg.TankId
+    left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 16) sir on t.TankId = sir.TankId
+    left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 2) tt on t.TankId = tt.TankId
+    left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 8) gw on t.TankId = gw.TankId
+    left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 6) vm on t.TankId = vm.TankId
+    left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 23) el on t.TankId = el.TankId
+    left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 22) me on t.TankId = me.TankId
+    left join (select TankId from TankReleaseDetection where ReleaseDetectionTypeId = 11) im on t.TankId = im.TankId
+    left join (select TankId from TankPipingType where PipingTypeId = 1) ss on t.TankId = ss.TankId
+    left join (select TankId from TankPipingType where PipingTypeId = 2) us on t.TankId = us.TankId
+    left join (select TankId from TankPipingType where PipingTypeId = 3) hp on t.TankId = hp.TankId
 ;
 
 
 select * from Piping_Material_Sort order by Sort_order;
 
 select TankId, EPA_mapping from 
-	(select TankId, min(Sort_Order) as Sort_order
-	from TankPipingMaterial a join Piping_Material_Sort b on a.PipingMaterialTypeId = b.PipingMaterialTypeId
-	group by TankId) x join Piping_Material_Sort y on x.Sort_order = y.Sort_order
+    (select TankId, min(Sort_Order) as Sort_order
+    from TankPipingMaterial a join Piping_Material_Sort b on a.PipingMaterialTypeId = b.PipingMaterialTypeId
+    group by TankId) x join Piping_Material_Sort y on x.Sort_order = y.Sort_order
 where TankId = 19897
 
 select * 
@@ -165,22 +165,22 @@ from TankPipingMaterial x join PipingMaterialType y on x.PipingMaterialTypeId = 
 where x.TankId = 19897
 
 in (
-	select TankId, count(*) from 
-		(select TankId, a.PipingMaterialTypeId, Name
-		from TankPipingMaterial a join PipingMaterialType b on a.PipingMaterialTypeId = b.PipingMaterialTypeId
-		where a.PipingMaterialTypeId in (1,2,3,4,5,6,7,10,14)) a 
-	group by TankId having count(*) > 1);
+    select TankId, count(*) from 
+        (select TankId, a.PipingMaterialTypeId, Name
+        from TankPipingMaterial a join PipingMaterialType b on a.PipingMaterialTypeId = b.PipingMaterialTypeId
+        where a.PipingMaterialTypeId in (1,2,3,4,5,6,7,10,14)) a 
+    group by TankId having count(*) > 1);
 
 order by 1, 2;
 
 select * from PipingType;
 
  (
-	select TankId, count(*) from 
-		(select TankId, a.PipingTypeId, Name
-		from TankPipingType a join PipingType b on a.PipingTypeId = b.PipingTypeId
-		where a.PipingTypeId in (1,2,3)) a 
-	group by TankId having count(*) > 1);
+    select TankId, count(*) from 
+        (select TankId, a.PipingTypeId, Name
+        from TankPipingType a join PipingType b on a.PipingTypeId = b.PipingTypeId
+        where a.PipingTypeId in (1,2,3)) a 
+    group by TankId having count(*) > 1);
 
 select * from  TankPipingType a join PipingType b on a.PipingTypeId = b.PipingTypeId
 where TankId = 11407;
@@ -199,12 +199,12 @@ upper(column_name) like upper('%inspect%') order by 1, 2;
 select * from InspectionType;
 
 select * from PipingType;
-PipingTypeId	Name
-1	"Safe Suction" (no valve at tank)
-2	"U.S. Suction" (valve at tank)
-3	Pressure
-4	Gravity Feed
-5	None
+PipingTypeId    Name
+1    "Safe Suction" (no valve at tank)
+2    "U.S. Suction" (valve at tank)
+3    Pressure
+4    Gravity Feed
+5    None
 
 
 select * from ReleaseDetectionType where TankPipeFlag = 'PIPE';
@@ -214,19 +214,19 @@ select * from Tank where SpillDeviceInd is not null;
 
 
 select * from SpillDeviceType;
-SpillDeviceTypeId	Name
-1	Spill Bucket
-2	Spill Catchment Basin
-3	No Spill Prevention Required
-4	Spill Device Type Unknown
+SpillDeviceTypeId    Name
+1    Spill Bucket
+2    Spill Catchment Basin
+3    No Spill Prevention Required
+4    Spill Device Type Unknown
 
 select * from OverfillDeviceType;
-OverfillDeviceTypeId	Name
-1	Overfill Alarm
-2	Automatic Shutoff Device
-3	Ball Float Valve
-4	No Overfill Prevention Required
-5	Overfill Device Type Unknown
+OverfillDeviceTypeId    Name
+1    Overfill Alarm
+2    Automatic Shutoff Device
+3    Ball Float Valve
+4    No Overfill Prevention Required
+5    Overfill Device Type Unknown
 
 
 
@@ -234,14 +234,14 @@ select distinct CorrosionProtectionTypeID from Tank;
 
 
 select * from PipingMaterialType;
-1	Bare Steel	Steel
-2	Bare Steel, Wrapped	Steel
-3	Galvanized Steel	Galvanized Steel
-4	Fiberglass Reinforced Plastic	Fiberglass Reinforced Plastic
-5	Copper	Copper
-6	Flexible Plastic	Flex Piping
-10	Unknown	Unknown
-12	None	No Piping
+1    Bare Steel    Steel
+2    Bare Steel, Wrapped    Steel
+3    Galvanized Steel    Galvanized Steel
+4    Fiberglass Reinforced Plastic    Fiberglass Reinforced Plastic
+5    Copper    Copper
+6    Flexible Plastic    Flex Piping
+10    Unknown    Unknown
+12    None    No Piping
 
 
 select * from TankPipingMaterial;
@@ -307,14 +307,14 @@ select table_name from INFORMATION_SCHEMA.tables where table_type like '%TABLE' 
 select * from ConstructionType;
 
 select * from ContactType;
-ContactTypeId	Name
-1	Legal Owner
-14	Permittee
-15	Owner
-16	Frmr owner
-17	Frmr legal owner
-30	Invoicee
-31	Mail Contact
+ContactTypeId    Name
+1    Legal Owner
+14    Permittee
+15    Owner
+16    Frmr owner
+17    Frmr legal owner
+30    Invoicee
+31    Mail Contact
 
 
 
@@ -413,12 +413,12 @@ delete from ust_element_db_mapping where state = 'OR'
 and element_name in ('FinancialResponsibilityStateFund','FinancialResponsibilityRiskRetentionGroup',
 'FinancialResponsibilityBondRatingTest','FinancialResponsibilityCommercialInsurance');
 
-delete from public.ust_element_db_mapping where state = 'OR' and element_name = 'PipingFlexConnector';	
+delete from public.ust_element_db_mapping where state = 'OR' and element_name = 'PipingFlexConnector';    
 
 update ust_element_db_mapping set element_name = 'OwerType' where state = 'OR' and element_name = 'FacilityType1';
 
 
-select * from substances;	
+select * from substances;    
 
 select * from SubstanceType; 
 
@@ -429,7 +429,7 @@ where state = 'OR'
 and id not in (select element_db_mapping_id from ust_element_value_mappings)
 --and state_table_name = 'FinancialResponsibilityType'
 order by state_table_name, element_name;
-	
+    
 select 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (' || id || ', '''', '''');--' || element_name
 from ust_element_db_mapping 
@@ -442,11 +442,11 @@ select * from ust_element_db_mapping where state = 'OR' and element_name like '%
 
 select * from pipingtype t 
 
-1	"Safe Suction" (no valve at tank)
-2	"U.S. Suction" (valve at tank)
-3	Pressure
-4	Gravity Feed
-5	None
+1    "Safe Suction" (no valve at tank)
+2    "U.S. Suction" (valve at tank)
+3    Pressure
+4    Gravity Feed
+5    None
 
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (41, '"Safe Suction" (no valve at tank)', 'Suction');--PipingStyle
@@ -486,7 +486,7 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (28, 'Cathodically Protected', 'Other');--PipingMaterialDescription
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (28, 'Unknown', 'Unknown');--PipingMaterialDescription
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (32, 'Impressed Current', 'Yes');--TankCorrosionProtectionImpressedCurrent
-insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (40, 'Galvanic', 'Yes');--TankCorrosionProtectionSacrificialAnode	
+insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (40, 'Galvanic', 'Yes');--TankCorrosionProtectionSacrificialAnode    
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (7, 'Retail', 'Commercial');--FacilityType1
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (7, 'Non-Retail', 'Private');--FacilityType1
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (7, 'Federal Government', 'Federal Government - Non Military');--FacilityType1
@@ -550,15 +550,15 @@ select * from ust_elements order by element_position ;
 
 select b.element_name, b.state_table_name, b.state_column_name, v.state_value, v.epa_value
 from ust_element_value_mappings v join ust_element_db_mapping b on v.element_db_mapping_id  = b.id
-	join ust_elements e on b.element_name = e.element_name
+    join ust_elements e on b.element_name = e.element_name
 where b.state = 'OR'
 order by e.element_position, v.epa_value;
 
 
 select e.element_name, 'null as "' || e.element_name || '",' as element_name_select, 
-	b.state_table_name, b.state_column_name, v.state_value, v.epa_value 
+    b.state_table_name, b.state_column_name, v.state_value, v.epa_value 
 from ust_elements e left join ust_element_db_mapping b on b.element_name = e.element_name 
-	left join ust_element_value_mappings v on v.element_db_mapping_id = b.id
+    left join ust_element_value_mappings v on v.element_db_mapping_id = b.id
 order by e.element_position;
 
 

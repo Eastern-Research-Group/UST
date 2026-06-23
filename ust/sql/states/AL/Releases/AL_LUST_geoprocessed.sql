@@ -81,10 +81,10 @@ alter table al_lust_to_geogprocess alter column "gc_outside_state" type text;
 
 
 
-4)	In the UST files, when gc_latitude and gc_longitude are not null, move their values to the latitude and longitude columns.
-5)	In the UST files, move gc_coordinate_source to the right of FacilityLongitude.
-6)	In the UST files, move gc_address_type to the right of gc_coordinate_source.
-7)	In the UST files, remove globalid column and all other “gc_XXX” columns.
+4)    In the UST files, when gc_latitude and gc_longitude are not null, move their values to the latitude and longitude columns.
+5)    In the UST files, move gc_coordinate_source to the right of FacilityLongitude.
+6)    In the UST files, move gc_address_type to the right of gc_coordinate_source.
+7)    In the UST files, remove globalid column and all other “gc_XXX” columns.
 
 
 
@@ -92,17 +92,17 @@ select * from information_schema.tables;
 
 update public.lust x 
 set gc_latitude = y.gc_latitude::float, 
-	gc_longitude = y.gc_longitude::float, 
-	gc_coordinate_source = y.gc_coordinate_source, 
-	gc_address_type = y.gc_address_type
+    gc_longitude = y.gc_longitude::float, 
+    gc_coordinate_source = y.gc_coordinate_source, 
+    gc_address_type = y.gc_address_type
 from "AL_LUST".al_lust_to_geogprocess y
 where x."FacilityID" = y.facilityid and x."LUSTID" = y.lustid
 and x.state = 'AL' and x.control_id = (select max(control_id) from public.lust_control where state = 'AL');
 
 
 select * from information_schema.tables 
-		         where table_schema ='AL_LUST' and table_type = 'BASE TABLE'
-		         and lower(table_name) like '%geo%'
+                 where table_schema ='AL_LUST' and table_type = 'BASE TABLE'
+                 and lower(table_name) like '%geo%'
 
 
 select count(*) from "AL_LUST".al_lust_to_geogprocess

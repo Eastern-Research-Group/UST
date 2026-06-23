@@ -207,17 +207,17 @@ values (2, 'ust_release_source', 'source_id', 'Tank_Cleanup_Incidents', 'SOURCE_
 --see what columns in which table we need to map
 select epa_table_name, epa_column_name 
 from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from v_release_needed_mapping 
-	where release_control_id = 2 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from v_release_needed_mapping 
+    where release_control_id = 2 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
 /*
-ust_release				coordinate_source_id
-ust_release				release_status_id
-ust_release				how_release_detected_id
-ust_release_substance	substance_id
-ust_release_source		source_id
-ust_release_cause		cause_id
+ust_release                coordinate_source_id
+ust_release                release_status_id
+ust_release                how_release_detected_id
+ust_release_substance    substance_id
+ust_release_source        source_id
+ust_release_cause        cause_id
 */
 
 
@@ -232,12 +232,12 @@ from v_release_needed_mapping
 where release_control_id = 2 and mapping_complete = 'N'
 order by 1, 2;
 /*
-ust_release				coordinate_source_id
-ust_release				how_release_detected_id
-ust_release				release_status
-ust_release_cause		cause_id
-ust_release_source		source_id
-ust_release_substance	substance_id
+ust_release                coordinate_source_id
+ust_release                how_release_detected_id
+ust_release                release_status
+ust_release_cause        cause_id
+ust_release_source        source_id
+ust_release_substance    substance_id
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -279,7 +279,7 @@ where release_control_id = 2 and epa_column_name = 'coordinate_source_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 22 || ', ''' || "HOR_REF_DATUM" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 22 || ', ''' || "HOR_REF_DATUM" || ''', '''', null);'
 from "Tank_Cleanup_Incidents"
 order by 1;
  
@@ -316,18 +316,18 @@ from archive.v_lust_element_mapping
 where lower(element_name) like lower('%coord%')
 order by 1, 2;
 /*
-Estimated								Map interpolation
-Geocode									Geocoded address
-GPS_EPA									GPS
-GPS_State								GPS
-GPS_Tribe								GPS
-Legacy Verified							Other
-OnlineMapGoogle							Map interpolation
-OnlineMapMS								Map interpolation
-Site Assessment Report by MCE Environmental dated 2/12/2003	Other
-Trimble, collected 5/3/2010				Other
-Trimble, collected 5/4/2010				Other
-Trimble, collected 5/5/2010				Other
+Estimated                                Map interpolation
+Geocode                                    Geocoded address
+GPS_EPA                                    GPS
+GPS_State                                GPS
+GPS_Tribe                                GPS
+Legacy Verified                            Other
+OnlineMapGoogle                            Map interpolation
+OnlineMapMS                                Map interpolation
+Site Assessment Report by MCE Environmental dated 2/12/2003    Other
+Trimble, collected 5/3/2010                Other
+Trimble, collected 5/4/2010                Other
+Trimble, collected 5/5/2010                Other
 */
 
 
@@ -391,7 +391,7 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 2 and epa_column_name = 'how_release_detected_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 29 || ', ''' || "RELEASE_DISCOVERED" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 29 || ', ''' || "RELEASE_DISCOVERED" || ''', '''', null);'
 from "erg_release_discovered_deagg" order by 1;
 
 /*below I have mapped the ones I can take a reasonable guess at, but I've inserted nulls for the ones I have no idea about 
@@ -470,7 +470,7 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 2 and epa_column_name = 'release_status_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 23 || ', ''' || "STATUS_DESCRIPTION" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 23 || ', ''' || "STATUS_DESCRIPTION" || ''', '''', null);'
 from "Tank_Cleanup_Incidents" order by 1;
 
 --These are a little easier to map because they are more descriptive, but I've still put a comment to "please verify"
@@ -551,7 +551,7 @@ where release_control_id = 2 and epa_column_name = 'substance_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 30 || ', ''' || "SUBSTANCE" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 30 || ', ''' || "SUBSTANCE" || ''', '''', null);'
 from "Tank_Cleanup_Incidents" order by 1;
 
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (30, 'Aviation Gasoline', 'Aviation gasoline', null);
@@ -590,13 +590,13 @@ order by 1;
 --NOTE! As we continue to map more states, we can check the current mapping table instead of the archive table!
 --in the case of Substances, you can check both v_lust_element_mapping and v_ust_element_mapping!
 select distinct state_value, epa_value from 
-	(select state_value, epa_value
-	from archive.v_lust_element_mapping 
-	where lower(element_name) like '%substance%' 
-	union all 
-	select state_value, epa_value
-	from archive.v_ust_element_mapping 
-	where lower(element_name) like '%substance%') x
+    (select state_value, epa_value
+    from archive.v_lust_element_mapping 
+    where lower(element_name) like '%substance%' 
+    union all 
+    select state_value, epa_value
+    from archive.v_ust_element_mapping 
+    where lower(element_name) like '%substance%') x
 where lower(state_value) like lower('%gashol%')
 order by 1, 2;
 
@@ -621,8 +621,8 @@ Other or mixture
 --update release_element_value_mapping with the new value
 update release_element_value_mapping a set epa_value = 'Other or mixture'
 where epa_value = 'Other' and release_element_mapping_id in 
-	(select release_element_mapping_id from release_element_mapping 
-	where release_control_id = 2 and epa_column_name = 'substance_id');
+    (select release_element_mapping_id from release_element_mapping 
+    where release_control_id = 2 and epa_column_name = 'substance_id');
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -670,14 +670,14 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 2 and epa_column_name = 'source_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 32 || ', ''' || "SOURCE_CAUSE_OF_RELEASE" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 32 || ', ''' || "SOURCE_CAUSE_OF_RELEASE" || ''', '''', null);'
 from "erg_source_cause_of_release_deagg" order by 1;
 
 /* Mapping I was able to guess at: 
-DISP	Dispenser
-OTHR	Other
-SUBTP	Submersible turbine pump
-TANK	Tank
+DISP    Dispenser
+OTHR    Other
+SUBTP    Submersible turbine pump
+TANK    Tank
 */
  
 /*below I have mapped the ones I can take a reasonable guess at, but I've inserted nulls for the ones I have no idea about 
@@ -744,16 +744,16 @@ where release_control_id = 2
 and epa_column_name = 'cause_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 31 || ', ''' || "SOURCE_CAUSE_OF_RELEASE" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 31 || ', ''' || "SOURCE_CAUSE_OF_RELEASE" || ''', '''', null);'
 from "erg_source_cause_of_release_deagg" order by 1;
 
 /*Mapping I was able to guess at: 
-CORR	Corrosion
-HOSE	Damage to dispenser hose
-OTHR	Other
-OVER	Delivery overfill
-SPILL	Dispenser spill
-VEHIC	Motor vehicle accident
+CORR    Corrosion
+HOSE    Damage to dispenser hose
+OTHR    Other
+OVER    Delivery overfill
+SPILL    Dispenser spill
+VEHIC    Motor vehicle accident
 */
  
 --below I have mapped the ones I can take a reasonable guess at, but I've inserted nulls for the ones I have no idea about 
@@ -845,9 +845,9 @@ NOTE! The view queried below (v_release_table_population_sql) contains columns t
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release'
 order by column_sort_order;
@@ -865,30 +865,30 @@ order by column_sort_order;
     safe for you to insert these yourself, so add them! */
 create or replace view pa_release.v_ust_release as 
 select distinct 
-		"FACILITY_ID"::character varying(50) as facility_id,
-		"TANK"::character varying(50) as tank_id_associated_with_release,
-		"INCIDENT_ID"::character varying(50) as release_id,
-		"FACILITY_NAME"::character varying(200) as site_name,
-		"ADDRESS1"::character varying(100) as site_address,
-		"ADDRESS2"::character varying(100) as site_address2,
-		"CITY"::character varying(100) as site_city,
-		"ZIP"::character varying(10) as zipcode,
-		'PA' as state, 
-		3 as epa_region, 
-		"LATITUDE"::double precision as latitude,
-		"LONGITUDE"::double precision as longitude,
-		coordinate_source_id as coordinate_source_id,
-		release_status_id as release_status_id,
-		"CONFIRMED_DATE"::date as reported_date,
-		case when "STATUS_DESCRIPTION" = 'Cleanup Completed' then "STATUS_DATE"::date end as nfa_date, 
-		case when "IMPACT_DESCRIPTION" = 'Soil' then 'Yes' end as media_impacted_soil,
-		case when "IMPACT_DESCRIPTION" = 'Ground Water' then 'Yes' end as media_impacted_groundwater,
-		case when "IMPACT_DESCRIPTION" = 'Surface Water' then 'Yes' end as media_impacted_surface_water,
-		how_release_detected_id
+        "FACILITY_ID"::character varying(50) as facility_id,
+        "TANK"::character varying(50) as tank_id_associated_with_release,
+        "INCIDENT_ID"::character varying(50) as release_id,
+        "FACILITY_NAME"::character varying(200) as site_name,
+        "ADDRESS1"::character varying(100) as site_address,
+        "ADDRESS2"::character varying(100) as site_address2,
+        "CITY"::character varying(100) as site_city,
+        "ZIP"::character varying(10) as zipcode,
+        'PA' as state, 
+        3 as epa_region, 
+        "LATITUDE"::double precision as latitude,
+        "LONGITUDE"::double precision as longitude,
+        coordinate_source_id as coordinate_source_id,
+        release_status_id as release_status_id,
+        "CONFIRMED_DATE"::date as reported_date,
+        case when "STATUS_DESCRIPTION" = 'Cleanup Completed' then "STATUS_DATE"::date end as nfa_date, 
+        case when "IMPACT_DESCRIPTION" = 'Soil' then 'Yes' end as media_impacted_soil,
+        case when "IMPACT_DESCRIPTION" = 'Ground Water' then 'Yes' end as media_impacted_groundwater,
+        case when "IMPACT_DESCRIPTION" = 'Surface Water' then 'Yes' end as media_impacted_surface_water,
+        how_release_detected_id
 from "Tank_Cleanup_Incidents" x 
-	left join pa_release.v_coordinate_source_xwalk cs on x."HOR_REF_DATUM" = cs.organization_value 
-	left join pa_release.v_release_status_xwalk	rs on x."STATUS_DESCRIPTION" = rs.organization_value 
-	left join pa_release.v_how_release_detected_xwalk rd on x."RELEASE_DISCOVERED" = rd.organization_value 
+    left join pa_release.v_coordinate_source_xwalk cs on x."HOR_REF_DATUM" = cs.organization_value 
+    left join pa_release.v_release_status_xwalk    rs on x."STATUS_DESCRIPTION" = rs.organization_value 
+    left join pa_release.v_how_release_detected_xwalk rd on x."RELEASE_DISCOVERED" = rd.organization_value 
 where "INCIDENT_TYPE" <> 'AST';
 
 --review: 
@@ -900,9 +900,9 @@ select count(*) from pa_release.v_ust_release;
 
 --ust_release_substance 
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release_substance'
 order by column_sort_order;
@@ -910,9 +910,9 @@ order by column_sort_order;
 --be sure to do select distinct if necessary!
 create or replace view pa_release.v_ust_release_substance as 
 select distinct "INCIDENT_ID"::character varying(50) as release_id,
-		s.substance_id
+        s.substance_id
 from "Tank_Cleanup_Incidents" x 
-	join pa_release.v_substance_xwalk s on x."SUBSTANCE" = s.organization_value 
+    join pa_release.v_substance_xwalk s on x."SUBSTANCE" = s.organization_value 
 where s.substance_id is not null 
 and "INCIDENT_TYPE" <> 'AST'; 
 
@@ -922,9 +922,9 @@ select count(*) from pa_release.v_ust_release_substance;
 --------------------------------------------------------------------------------------------------------------------------
 --ust_release_source 
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release_source'
 order by column_sort_order;
@@ -932,11 +932,11 @@ order by column_sort_order;
 --!! this one has a deagg table so we have to alter the join 
 create or replace view pa_release.v_ust_release_source as 
 select distinct "INCIDENT_ID"::character varying(50) as release_id,
-		b.source_id
+        b.source_id
 from "Tank_Cleanup_Incidents" a join pa_release.v_source_xwalk b on a."SOURCE_CAUSE_OF_RELEASE" like '%' || b.organization_value || '%'
 where epa_value is not null
 and "INCIDENT_TYPE" <> 'AST';
-	
+    
 select * from pa_release.v_ust_release_source;
 select count(*) from pa_release.v_ust_release_source;
 --5138
@@ -945,9 +945,9 @@ select count(*) from pa_release.v_ust_release_source;
 --ust_release_cause 
 
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 2 and epa_table_name = 'ust_release_cause'
 order by column_sort_order;
@@ -955,11 +955,11 @@ order by column_sort_order;
 --!! this one has a deagg table so we have to alter the join 
 create or replace view pa_release.v_ust_release_cause as 
 select distinct "INCIDENT_ID"::character varying(50) as release_id,
-		b.cause_id
+        b.cause_id
 from "Tank_Cleanup_Incidents" a join pa_release.v_cause_xwalk b on a."SOURCE_CAUSE_OF_RELEASE" like '%' || b.organization_value || '%'
 where epa_value is not null
 and "INCIDENT_TYPE" <> 'AST';
-	
+    
 select * from pa_release.v_ust_release_cause;
 select count(*) from pa_release.v_ust_release_cause;
 --3120
@@ -970,9 +970,9 @@ select count(*) from pa_release.v_ust_release_cause;
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_release_missing_view_mapping a
 where release_control_id = 2
 order by 1, 2;
@@ -993,8 +993,8 @@ set variables:
 ust_or_release = 'release' 
 control_id = 2
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -1025,7 +1025,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'release' 
 control_id = 2
@@ -1044,12 +1044,12 @@ where ust_control_id = 11 order by sort_order;
 set variables:
 control_id = 2
 ust_or_release = 'release' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 		# Set to False to export full template including mapping and reference tabs
-template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False         # Set to False to export full template including mapping and reference tabs
+template_only = False     # Set to False to export data and mapping tabs as well as reference tab
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------

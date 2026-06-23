@@ -6,7 +6,6 @@ ROOT_PATH = Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
-from psycopg2.errors import DuplicateSchema, UndefinedTable
 
 from python.util import config, utils
 from python.util.logger_factory import logger
@@ -83,7 +82,7 @@ class DatabaseImporter:
             try:
                 df.to_sql(table_name, engine, index=False)
                 logger.info('Created table %s', table_name)       
-            except error as e:
+            except Exception as e:
                 self.bad_file_list.append(table_name)
                 logger.error('Unable to load table %s; adding to bad_file_list: %s: %s', table_name, e)
         return True
@@ -104,7 +103,7 @@ class DatabaseImporter:
                     logger.debug('%s read into dataframe', file_path)
                 except ValueError as e:
                     logger.error('Error opening %s; skipping: %s', file_path, e) 
-                    self.bad_file_list.append(table_name)
+                    self.bad_file_list.append(self.get_table_name_from_file_name(file_path))
                     return False
                 self.save_table_to_db(df, table_name=self.get_table_name_from_file_name(file_path))
         elif file_path[-3:] == 'csv':

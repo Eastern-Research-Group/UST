@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name,
-	state_join_table, state_join_column, state_join_column_fk)
+    state_join_table, state_join_column, state_join_column_fk)
 values ('MO', '2023-06-20', 'OwnerType', 'tblownerclass', 'ownerdescription', 'tblowner', 'ownercode', 'ownerclass')
 returning id;
 
@@ -29,8 +29,8 @@ select * from "MO_UST".tblownerclass order by 1;
  CASE WHEN fed.ownerid IS NOT NULL THEN 'Federal Government - Non Military'
       WHEN state.ownerid IS NOT NULL THEN 'State Government - Non Military'
       WHEN localg.ownerid IS NOT NULL THEN 'Local Government'
- 	  WHEN commercial.ownerid IS NOT NULL THEN 'Commercial'
- 	  WHEN private.ownerid IS NOT NULL THEN 'Private' END as "OwnerType",
+       WHEN commercial.ownerid IS NOT NULL THEN 'Commercial'
+       WHEN private.ownerid IS NOT NULL THEN 'Private' END as "OwnerType",
 
 left join tblowner o on fl.ownerid = o.ownerid
 left join (select distinct ownerid from tblownertype where ownerclass = 'h') commercial on o.ownerid = commercial.ownerid
@@ -43,7 +43,7 @@ select * from owner_type;
 
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name,
-	state_join_table, state_join_column, state_join_column_fk)
+    state_join_table, state_join_column, state_join_column_fk)
 values ('MO', '2023-06-20', 'TankLocation', 'tbltanktype', 'tanktypedescription', 'tbltank', 'tanktypecode', 'tanktype')
 returning id;
 
@@ -51,10 +51,10 @@ select * from ust_element_db_mapping
 
 update ust_element_db_mapping 
 set state_table_name = 'tbltanktype', 
-	state_column_name = 'tanktypedescription', 
-	state_join_table = 'tbltank',
-	state_join_column = 'tanktypecode',
-	state_join_column_fk = 'tanktype'
+    state_column_name = 'tanktypedescription', 
+    state_join_table = 'tbltank',
+    state_join_column = 'tanktypecode',
+    state_join_column_fk = 'tanktype'
 where id = 258;
 
 select * from "MO_UST".tbltanktype;
@@ -80,16 +80,16 @@ update ust_element_value_mappings set state_value = 'Below Ground' where element
       
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name,
-	state_join_table, state_join_column, state_join_column_fk)
+    state_join_table, state_join_column, state_join_column_fk)
 values ('MO', '2023-06-20', 'TankStatus', 'tbltankstatus', 'tankstatusdescription', 'tbltank', 'tankstatuscode', 'status')
 returning id;
 
 update ust_element_db_mapping 
 set state_table_name = 'tbltankstatus', 
-	state_column_name = 'tankstatusdescription', 
-	state_join_table = 'tbltank',
-	state_join_column = 'tankstatuscode',
-	state_join_column_fk = 'status'
+    state_column_name = 'tankstatusdescription', 
+    state_join_table = 'tbltank',
+    state_join_column = 'tankstatuscode',
+    state_join_column_fk = 'status'
 where id = 259;
 
 
@@ -121,16 +121,16 @@ CASE WHEN t.status IN ('C','N') THEN 'Currently in use'
       WHEN t.status = 'T' THEN 'Closed (general)' END as "TankStatus", --OUT OF use
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name,
-	state_join_table, state_join_column, state_join_column_fk)
+    state_join_table, state_join_column, state_join_column_fk)
 values ('MO', '2023-06-20', 'CompartmentSubstanceStored', 'tbltanksubstance', 'tanksubstancedescription', 'tbltank', 'tanksubstancecode', 'substance')
 returning id;
 
 update ust_element_db_mapping 
 set state_table_name = 'tbltanksubstance', 
-	state_column_name = 'tanksubstancedescription', 
-	state_join_table = 'tbltank',
-	state_join_column = 'tanksubstancecode',
-	state_join_column_fk = 'substance'
+    state_column_name = 'tanksubstancedescription', 
+    state_join_table = 'tbltank',
+    state_join_column = 'tanksubstancecode',
+    state_join_column_fk = 'substance'
 where id = 260;
 
 select distinct 
@@ -201,7 +201,7 @@ CASE WHEN t.tankdoublewall = -1 THEN 'Double'
       
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name,
-	state_join_table, state_join_column, state_join_column_fk)
+    state_join_table, state_join_column, state_join_column_fk)
 values ('MO', '2023-06-20', 'MaterialDescription', 'tbltankmaterial', 'tankmaterialdescription', 'tbltank', 'tankmaterialcode', 'tankmaterial')
 returning id;
 
@@ -225,7 +225,7 @@ select * from "MO_UST".tbltankmaterial order by 1;
       WHEN t.tankmaterial = 4 THEN 'Other' end as "MaterialDescription",
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name,
-	state_join_table, state_join_column, state_join_column_fk)
+    state_join_table, state_join_column, state_join_column_fk)
 values ('MO', '2023-06-20', 'PipingMaterialDescription', 'tblpipematerial', 'pipematerialdescription', 'tbltankbycompartment', 'pipematerialcode', 'pipematerial')
 returning id;
 
@@ -251,17 +251,17 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 select * from  "MO_UST".tblpipematerial order by 1;         
 
 CASE WHEN tc.pipematerial = 3 THEN 'Copper'
- 	  WHEN tc.pipematerial = 2 THEN 'Fiberglass Reinforced Plastic'
- 	  WHEN tc.pipematerial IN (6,7,8,10,11) THEN 'Flex Piping'
- 	  WHEN tc.pipematerial = 5 THEN 'No Piping'
- 	  WHEN tc.pipematerial in (4,9) THEN 'Other'
- 	  WHEN tc.pipematerial = 1 THEN 'Steel'
- 	  WHEN tc.pipematerial = 0 THEN 'Unknown'
- 	  WHEN tc.pipematerial = 12 THEN '' --???
- 	END as "PipingMaterialDescription",
+       WHEN tc.pipematerial = 2 THEN 'Fiberglass Reinforced Plastic'
+       WHEN tc.pipematerial IN (6,7,8,10,11) THEN 'Flex Piping'
+       WHEN tc.pipematerial = 5 THEN 'No Piping'
+       WHEN tc.pipematerial in (4,9) THEN 'Other'
+       WHEN tc.pipematerial = 1 THEN 'Steel'
+       WHEN tc.pipematerial = 0 THEN 'Unknown'
+       WHEN tc.pipematerial = 12 THEN '' --???
+     END as "PipingMaterialDescription",
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name,
-	state_join_table, state_join_column, state_join_column_fk)
+    state_join_table, state_join_column, state_join_column_fk)
 values ('MO', '2023-06-20', 'PipingStyle', 'tblpipingsystem', 'tankpipingsystemdescription', 'tbltankbycompartment', 'tankpipingsystemcode', 'pipesystem')
 returning id;
 
@@ -271,7 +271,7 @@ select distinct
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (264, ''' || tankpipingsystemdescription ||  ''', '''');'
 from "MO_UST".tblpipingsystem
 order by 1;         
- 	
+     
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (264, 'Gravity', 'Non-operational (e.g., fill line, vent line, gravity)');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (264, 'Manifold', 'Other');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (264, 'Pressure', 'Pressure');
@@ -282,14 +282,14 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 select * from "MO_UST".tblpipingsystem order by 1;
 
  CASE WHEN tc.pipesystem IN (0,2,3) THEN 'Suction'
- 	  WHEN tc.pipesystem  = 1 THEN 'Pressure'
- 	  WHEN tc.pipesystem  = 4 THEN 'Non-operational (e.g., fill line, vent line, gravity)'
- 	  WHEN tc.pipesystem  = 8 THEN '' --Manifold
- 	 end as "PipingStyle",
- 	 
- 	 select * from v_ust_element_mapping where element_name = 'PipingStyle'
- 	 
- 	 select * from piping_style;
+       WHEN tc.pipesystem  = 1 THEN 'Pressure'
+       WHEN tc.pipesystem  = 4 THEN 'Non-operational (e.g., fill line, vent line, gravity)'
+       WHEN tc.pipesystem  = 8 THEN '' --Manifold
+      end as "PipingStyle",
+      
+      select * from v_ust_element_mapping where element_name = 'PipingStyle'
+      
+      select * from piping_style;
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name)
 values ('MO', '2023-06-20', 'PipingWallType', 'tbltankbycompartment', 'pipedoublewall')
@@ -302,7 +302,7 @@ order by 1;
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (265, '-1', 'Double');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (265, '0', 'Single');
- 	 
+      
 select * from ust_element_value_mappings where element_db_mapping_id = 265;
 
  CASE WHEN tc.pipedoublewall = -1 THEN 'Double'
@@ -381,25 +381,25 @@ SELECT distinct
  CASE WHEN rem.facilityid IS NOT NULL THEN 'Yes' end as "USTReportedRelease",
  rem.remid as "AssociatedLUSTID"
 from "MO_UST".tblfacility f left join
-	(select facilityid, case when r = 5 then 'Federal Government - Non Military'
-	                        when r = 4 then 'State Government - Non Military'
-	                        when r = 3 then 'Local Government'
-	                        when r = 2 then 'Commercial'
-	                        when r = 1 then 'Private'
-	                        when r = 0 then null end as epa_value 
-	from
-		(select facilityid, max(r) as r from 
-			(select fl.facilityid, case when epa_value = 'Federal Government - Non Military' then 5 
-			                           when epa_value = 'State Government - Non Military' then 4
-			                           when epa_value = 'Local Government' then 3
-			                           when epa_value = 'Commercial' then 2
-			                           when epa_value = 'Private' then 1
-			                           else 0 end as r
-			from v_ust_element_mapping a join "MO_UST".tblownerclass toc on a.state_value = toc.ownerdescription 
-				join "MO_UST".tblownertype tot on toc.ownercode = tot.ownerclass 
-				join "MO_UST".tblfacilitylookup fl on tot.ownerid = fl.ownerid
-			where a.state = 'MO' and a.element_name = 'OwnerType') a
-		group by facilityid) b) ot on f.facilityid = ot.facilityid
+    (select facilityid, case when r = 5 then 'Federal Government - Non Military'
+                            when r = 4 then 'State Government - Non Military'
+                            when r = 3 then 'Local Government'
+                            when r = 2 then 'Commercial'
+                            when r = 1 then 'Private'
+                            when r = 0 then null end as epa_value 
+    from
+        (select facilityid, max(r) as r from 
+            (select fl.facilityid, case when epa_value = 'Federal Government - Non Military' then 5 
+                                       when epa_value = 'State Government - Non Military' then 4
+                                       when epa_value = 'Local Government' then 3
+                                       when epa_value = 'Commercial' then 2
+                                       when epa_value = 'Private' then 1
+                                       else 0 end as r
+            from v_ust_element_mapping a join "MO_UST".tblownerclass toc on a.state_value = toc.ownerdescription 
+                join "MO_UST".tblownertype tot on toc.ownercode = tot.ownerclass 
+                join "MO_UST".tblfacilitylookup fl on tot.ownerid = fl.ownerid
+            where a.state = 'MO' and a.element_name = 'OwnerType') a
+        group by facilityid) b) ot on f.facilityid = ot.facilityid
 left join "MO_UST".tblgeosite g on f.facilityid  = g.facilityid  
 left join "MO_UST".tblgeosite_latlong ll on f.facilityid = ll.facilityid
 left join "MO_UST".tblcounty c on g.county = c.countycode 
@@ -408,7 +408,7 @@ left join "MO_UST".tblowner o on fl.ownerid = o.ownerid
 left join "MO_UST".tbltank t on f.facilityid = t.facilityid
 left join "MO_UST".tbltankbycompartment tc on t.tankpk = tc.tankpk 
 left join (select tankpk, count(*) as "numcompartments" from "MO_UST".tbltankbycompartment group by tankpk) tn 
-	on t.tankpk = tn.tankpk
+    on t.tankpk = tn.tankpk
 left join "MO_UST".tbltankstatus tts on t.status = tts.tankstatuscode
 left join (select distinct state_value, epa_value from v_ust_element_mapping where state = 'MO' and element_name = 'TankStatus') ts on ts.state_value = tts.tankstatusdescription 
 left join "MO_UST".tbltanktype ttt on t.tanktype = ttt.tanktypecode
@@ -424,33 +424,33 @@ left join (select distinct state_value, epa_value from v_ust_element_mapping whe
 left join "MO_UST".tblpipematerial pmat on tc.pipematerial = pmat.pipematerialcode
 left join (select distinct state_value, epa_value from v_ust_element_mapping where state = 'MO' and element_name = 'PipingMaterialDescription') pmd on pmd.state_value = pmat.pipematerialdescription
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankoverfillprot where typeoverfillprot = 1) autoshutoff 
-	on tc.tankcompartmentpk = autoshutoff.tankcompartmentpk
+    on tc.tankcompartmentpk = autoshutoff.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankoverfillprot where typeoverfillprot = 2) ballvalve 
-	on tc.tankcompartmentpk = ballvalve.tankcompartmentpk	
+    on tc.tankcompartmentpk = ballvalve.tankcompartmentpk    
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankoverfillprot where typeoverfillprot = 3) alarm 
-	on tc.tankcompartmentpk = alarm.tankcompartmentpk	
+    on tc.tankcompartmentpk = alarm.tankcompartmentpk    
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankrlsdetection where tankreleasecode = 5) interstitial 
-	on tc.tankcompartmentpk = interstitial.tankcompartmentpk
+    on tc.tankcompartmentpk = interstitial.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankrlsdetection where tankreleasecode = 1) atg  
-	on tc.tankcompartmentpk = atg.tankcompartmentpk
+    on tc.tankcompartmentpk = atg.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankrlsdetection where tankreleasecode = 3) mtg  
-	on tc.tankcompartmentpk = mtg.tankcompartmentpk
+    on tc.tankcompartmentpk = mtg.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankrlsdetection where tankreleasecode = 6) sir 
-	on tc.tankcompartmentpk = sir.tankcompartmentpk
+    on tc.tankcompartmentpk = sir.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankrlsdetection where tankreleasecode = 2) tt 
-	on tc.tankcompartmentpk = tt.tankcompartmentpk
+    on tc.tankcompartmentpk = tt.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankrlsdetection where tankreleasecode = 8) gw 
-	on tc.tankcompartmentpk = gw.tankcompartmentpk
+    on tc.tankcompartmentpk = gw.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankrlsdetection where tankreleasecode = 7) vapor 
-	on tc.tankcompartmentpk = vapor.tankcompartmentpk
+    on tc.tankcompartmentpk = vapor.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankpipereleasedet where pipereleasedetcode = 1) elld
-	on tc.tankcompartmentpk = elld.tankcompartmentpk
+    on tc.tankcompartmentpk = elld.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankpipereleasedet where electronicormechanicallld = 2) alld
-	on tc.tankcompartmentpk = alld.tankcompartmentpk
+    on tc.tankcompartmentpk = alld.tankcompartmentpk
 left join (select distinct tankcompartmentpk from "MO_UST".tbltankpipereleasedet where pipereleasedetcode = 3) atm
-	on tc.tankcompartmentpk = atm.tankcompartmentpk
+    on tc.tankcompartmentpk = atm.tankcompartmentpk
 left join (select facilityid, max(remid) remid from "MO_UST".tblremediation group by facilityid) rem
-	on f.facilityid = rem.facilityid
+    on f.facilityid = rem.facilityid
 where ownerinactivewfacility = 0
 and tanktype <> 'A' --???
 order by g.facilityid, t.tankid;
@@ -478,27 +478,27 @@ select facilityid, case when r = 5 then 'Federal Government - Non Military'
                         when r = 1 then 'Private'
                         when r = 0 then null end as epa_value 
 from
-	(select facilityid, max(r) as r from 
-		(select fl.facilityid, case when epa_value = 'Federal Government - Non Military' then 5 
-		                           when epa_value = 'State Government - Non Military' then 4
-		                           when epa_value = 'Local Government' then 3
-		                           when epa_value = 'Commercial' then 2
-		                           when epa_value = 'Private' then 1
-		                           else 0 end as r
-		from v_ust_element_mapping a join "MO_UST".tblownerclass toc on a.state_value = toc.ownerdescription 
-			join "MO_UST".tblownertype tot on toc.ownercode = tot.ownerclass 
-			join "MO_UST".tblfacilitylookup fl on tot.ownerid = fl.ownerid
-		where a.state = 'MO' and a.element_name = 'OwnerType') a
-	group by facilityid) b;
+    (select facilityid, max(r) as r from 
+        (select fl.facilityid, case when epa_value = 'Federal Government - Non Military' then 5 
+                                   when epa_value = 'State Government - Non Military' then 4
+                                   when epa_value = 'Local Government' then 3
+                                   when epa_value = 'Commercial' then 2
+                                   when epa_value = 'Private' then 1
+                                   else 0 end as r
+        from v_ust_element_mapping a join "MO_UST".tblownerclass toc on a.state_value = toc.ownerdescription 
+            join "MO_UST".tblownertype tot on toc.ownercode = tot.ownerclass 
+            join "MO_UST".tblfacilitylookup fl on tot.ownerid = fl.ownerid
+        where a.state = 'MO' and a.element_name = 'OwnerType') a
+    group by facilityid) b;
 
 
 select distinct epa_value from v_ust_element_mapping where state = 'MO' and element_name = 'OwnerType'  order by 1;
 
-Commercial	NI0000393
-Private	NI0000393
-Private	NI0000404
-Local Government	NI0000405
-Private	NI0000405
+Commercial    NI0000393
+Private    NI0000393
+Private    NI0000404
+Local Government    NI0000405
+Private    NI0000405
 
 select * from owner_type;
 Federal Government - Non Military

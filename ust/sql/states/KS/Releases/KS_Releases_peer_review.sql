@@ -7,8 +7,8 @@
 
 select * from ks_release.v_ust_release_substance a join substances sub on a.substance_id = sub.substance_id
 where not exists
-	(select 1 from public.v_ust_release_substance b join public.substances c on b."SubstanceReleased" = c.substance
-	where a.release_id = b."ReleaseID" and a.substance_id = c."substance_id")
+    (select 1 from public.v_ust_release_substance b join public.substances c on b."SubstanceReleased" = c.substance
+    where a.release_id = b."ReleaseID" and a.substance_id = c."substance_id")
 order by a.release_id,a.substance_id;
 
 select * from 
@@ -30,8 +30,8 @@ select * from
 
 select * from ks_release.v_ust_release_source a
 where not exists
-	(select 1 from public.v_ust_release_source b join public.sources c on b."SourceOfRelease" = c.source
-	where a.release_id = b."ReleaseID" and a.source_id = c."source_id")
+    (select 1 from public.v_ust_release_source b join public.sources c on b."SourceOfRelease" = c.source
+    where a.release_id = b."ReleaseID" and a.source_id = c."source_id")
 order by a.release_id,a.source_id;
 
 --View definition for ks_release.v_ust_release_source:
@@ -46,8 +46,8 @@ order by a.release_id,a.source_id;
 
 select * from ks_release.v_ust_release_cause a
 where not exists
-	(select 1 from public.v_ust_release_cause b join public.causes c on b."CauseOfRelease" = c.cause
-	where a.release_id = b."ReleaseID" and a.cause_id = c."cause_id")
+    (select 1 from public.v_ust_release_cause b join public.causes c on b."CauseOfRelease" = c.cause
+    where a.release_id = b."ReleaseID" and a.cause_id = c."cause_id")
 order by a.release_id,a.cause_id;
 
 --View definition for ks_release.v_ust_release_cause:

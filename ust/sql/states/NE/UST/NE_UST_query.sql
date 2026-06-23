@@ -1,4 +1,4 @@
-select '	null as "' || element_name || '",'
+select '    null as "' || element_name || '",'
 from ust_elements order by element_position;
 
 select * from "NE_UST".tanks;
@@ -417,52 +417,52 @@ drop view  "NE_UST".v_ust_base;
 
 create or replace view "NE_UST".v_ust_base as 
 select distinct 
-	t."Facility ID" as "FacilityID",
-	t."Facility Name" as "FacilityName",
-	t."Facility Address" as "FacilityAddress1",
-	t."Facility City" as "FacilityCity",
-	t."Facility County" as "FacilityCounty",
-	t."Facility Zip" as "FacilityZipCode",
-	'NE' as "FacilityState",
-	'7'::int as "FacilityEPARegion",
-	t."Owner Name" as "FacilityOwnerCompanyName",
-	t."Owner Address" as "FacilityOwnerAddress1",
-	t."Owner City" as "FacilityOwnerCity",
-	t."Owner Zip" as "FacilityOwnerZipCode",
-	t."Owner State" as "FacilityOwnerState",
-	'Yes' as "FinancialResponsibilityTrustFund",
-	t."Tank #" as "TankID",
-	case when tt.cnt > 0 then 'Yes' else 'No' end as "FederallyRegulated",
-	ts.epa_value as "TankStatus",
-	t."Tank Installed" as "InstallationDate",
-	tss.epa_value as "TankSubstanceStored",
-	t."Tank Size" as "TankCapacityGallons",
-	el.epa_value as "ExcavationLiner",
-	wt.epa_value as "TankWallType",
-	md.epa_value as "MaterialDescription",
-	pmd.epa_value as "PipingMaterialDescription",
-	case when lower(t."Piping Const. Material") like '%double%'	then 'Double walled' end as "PipingWallType",
-	case when lower(t."Tank Ext Prot") like '%sacrificial%' then 'Yes' end as "TankCorrosionProtectionSacrificialAnode",
-	case when lower(t."Tank Ext Prot") like '%sacrificial%' then 'Unknown' end as "TankCorrosionProtectionSacrificialAnodeInstalledOrRetrofitted",
+    t."Facility ID" as "FacilityID",
+    t."Facility Name" as "FacilityName",
+    t."Facility Address" as "FacilityAddress1",
+    t."Facility City" as "FacilityCity",
+    t."Facility County" as "FacilityCounty",
+    t."Facility Zip" as "FacilityZipCode",
+    'NE' as "FacilityState",
+    '7'::int as "FacilityEPARegion",
+    t."Owner Name" as "FacilityOwnerCompanyName",
+    t."Owner Address" as "FacilityOwnerAddress1",
+    t."Owner City" as "FacilityOwnerCity",
+    t."Owner Zip" as "FacilityOwnerZipCode",
+    t."Owner State" as "FacilityOwnerState",
+    'Yes' as "FinancialResponsibilityTrustFund",
+    t."Tank #" as "TankID",
+    case when tt.cnt > 0 then 'Yes' else 'No' end as "FederallyRegulated",
+    ts.epa_value as "TankStatus",
+    t."Tank Installed" as "InstallationDate",
+    tss.epa_value as "TankSubstanceStored",
+    t."Tank Size" as "TankCapacityGallons",
+    el.epa_value as "ExcavationLiner",
+    wt.epa_value as "TankWallType",
+    md.epa_value as "MaterialDescription",
+    pmd.epa_value as "PipingMaterialDescription",
+    case when lower(t."Piping Const. Material") like '%double%'    then 'Double walled' end as "PipingWallType",
+    case when lower(t."Tank Ext Prot") like '%sacrificial%' then 'Yes' end as "TankCorrosionProtectionSacrificialAnode",
+    case when lower(t."Tank Ext Prot") like '%sacrificial%' then 'Unknown' end as "TankCorrosionProtectionSacrificialAnodeInstalledOrRetrofitted",
     case when lower(t."Tank Ext Prot") like '%impressed%' then 'Yes' end as "TankCorrosionProtectionImpressedCurrent",
-	case when lower(t."Tank Ext Prot") like '%impressed%' then 'Unknown' end as "TankCorrosionProtectionImpressedCurrentInstalledOrRetrofitted"
+    case when lower(t."Tank Ext Prot") like '%impressed%' then 'Unknown' end as "TankCorrosionProtectionImpressedCurrentInstalledOrRetrofitted"
 from "NE_UST".tanks t left join "NE_UST".facilities f on t."Facility ID" = f."Facility ID"
-	left join (select "Facility ID", count(*) as cnt from "NE_UST".tanks
-	           where "Tank Type" = 'Federally Regulated' group by "Facility ID") tt on t."Facility ID" = tt."Facility ID"
-	left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'TankStatus') ts 
-		on t."Tank Usage Status" = ts.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'ExcavationLiner') el 
-		on t."Tank Sec Contain" = el.state_value	    
-	left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'TankWallType') wt
-		on t."Tank Int Prot" = wt.state_value	    
-	left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'MaterialDescription') md
-		on t."Tank Constr." = md.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'PipingMaterialDescription') pmd
-		on t."Piping Const. Material" = pmd.state_value			
-	left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'TankSubstanceStored') tss
-		on t."Tank Contents" = tss.state_value;	
-		
-select * from "NE_UST".v_ust_base order by "FacilityID", "TankID";	
+    left join (select "Facility ID", count(*) as cnt from "NE_UST".tanks
+               where "Tank Type" = 'Federally Regulated' group by "Facility ID") tt on t."Facility ID" = tt."Facility ID"
+    left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'TankStatus') ts 
+        on t."Tank Usage Status" = ts.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'ExcavationLiner') el 
+        on t."Tank Sec Contain" = el.state_value        
+    left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'TankWallType') wt
+        on t."Tank Int Prot" = wt.state_value        
+    left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'MaterialDescription') md
+        on t."Tank Constr." = md.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'PipingMaterialDescription') pmd
+        on t."Piping Const. Material" = pmd.state_value            
+    left join (select state_value, epa_value from v_ust_element_mapping where organization_id = 'NE' and element_name = 'TankSubstanceStored') tss
+        on t."Tank Contents" = tss.state_value;    
+        
+select * from "NE_UST".v_ust_base order by "FacilityID", "TankID";    
 
 select * from "NE_UST"."tanks" 
 

@@ -157,14 +157,14 @@ insert into release_element_mapping (release_control_id, epa_table_name, epa_col
 ----- see what columns in which table we need to map
 select epa_table_name, epa_column_name 
 from (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from v_release_needed_mapping where release_control_id = 5 and mapping_complete = 'N' 
+    from v_release_needed_mapping where release_control_id = 5 and mapping_complete = 'N' 
      order by table_sort_order, column_sort_order) x;
 
 /*
-ust_release			how_release_detected_id
-ust_release			release_status
-ust_release_cause		cause_id
-ust_release_substance		substance_id
+ust_release            how_release_detected_id
+ust_release            release_status
+ust_release_cause        cause_id
+ust_release_substance        substance_id
 */
 */
 
@@ -198,7 +198,7 @@ where release_control_id = 5 and epa_column_name = 'how_release_detected_id';
 
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 74 || ', ''' || "Howdiscovered" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 74 || ', ''' || "Howdiscovered" || ''', '''', null);'
 from tn_release."ust_all-tn-environmental-sites" order by 1;
 /*
 Query results like
@@ -277,7 +277,7 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 5 and epa_column_name = 'release_status_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 71 || ', ''' || "Currentstatus" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 71 || ', ''' || "Currentstatus" || ''', '''', null);'
 from tn_release."ust_all-tn-environmental-sites" order by 1;
 
 /* Query results and edit
@@ -360,7 +360,7 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 5 and epa_column_name = 'substance_id';
 ----Query result---------------------
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 75 || ', ''' || "Productreleased"|| ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 75 || ', ''' || "Productreleased"|| ''', '''', null);'
 from tn_release."erg_productreleased_deagg" order by 1;
 
 ----Query for insert statement---------------------
@@ -444,7 +444,7 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 5 and epa_column_name = 'cause_id';
 ----Query result---------------------
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) 
      values (' || 76 || ', ''' || "Cause" || ''', '''', null);'
 from tn_release."ust_all-tn-environmental-sites" order by 1;
 
@@ -547,9 +547,9 @@ NOTE! The view queried below (v_release_table_population_sql) contains columns t
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 5 and epa_table_name = 'ust_release'
 order by column_sort_order;
@@ -613,19 +613,19 @@ select count(*) from tn_release.v_ust_release;
 ----  now repeat for each data table:
 ------ ust_release_substance --------------
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 5 and epa_table_name = 'ust_release_substance'
 order by column_sort_order;
 /*
-"ust_all-tn-environmental-sites"	
+"ust_all-tn-environmental-sites"    
 "substance_id as substance_id,"
-"Column is comma-separated",		
-"substances"	
-"substance"	
-"erg_productreleased_deagg"	
+"Column is comma-separated",        
+"substances"    
+"substance"    
+"erg_productreleased_deagg"    
 "Productreleased"
 */
 --!! this one has a deagg table so we have to alter the join 
@@ -646,9 +646,9 @@ select count(*) from tn_release.v_ust_release_substance;
 --------------------------------------------------------------------------------------------------------------------------
 ------ ust_release_cause ----------------------
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 5 and epa_table_name = 'ust_release_cause'
 order by column_sort_order;
@@ -677,9 +677,9 @@ select count(*) from tn_release.v_ust_release_cause;
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_release_missing_view_mapping a
 where release_control_id =5
 order by 1, 2;
@@ -701,8 +701,8 @@ set variables
 ust_or_release = 'release' 
 control_id = 5
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 #    self.export_file_dir = '../exports/QAQC/' + self.organization_id.upper() + '/'
      self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/QAQC/' + self.organization_id.upper() + '/'
 
@@ -734,14 +734,14 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 ---------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'release' 
 control_id = 5
 delete_existing = False # can set to True if there is existing release data you need to delete before inserting new
 */--insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'release' 
 control_id = 5
@@ -760,12 +760,12 @@ where ust_control_id = 5 order by sort_order;
 set variables:
 control_id = 5
 ust_or_release = 'release' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 		# Set to False to export full template including mapping and reference tabs
-template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False         # Set to False to export full template including mapping and reference tabs
+template_only = False     # Set to False to export data and mapping tabs as well as reference tab
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 ----Similar error for folder exports, had to set physical path
     self.export_file_dir = 'C:/Github/UST-49/ust/python/exports/epa_templates/' + self.organization_id.upper() + '/'

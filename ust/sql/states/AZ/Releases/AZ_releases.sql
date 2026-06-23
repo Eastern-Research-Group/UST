@@ -39,14 +39,14 @@ alter table az_release."2024.06.28.draft_AZ_LUST_data_v1" rename to "ust_release
 
 
 select distinct table_name, 
-	replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(column_name,'LUST','Release'),'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9',''),'0','')
+    replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(column_name,'LUST','Release'),'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9',''),'0','')
 from information_schema.columns 
 where table_schema = 'az_release' 
 and column_name not in (select element_name from release_elements)
 order by 1, 2;
 
 select distinct table_name, column_name 
-	--replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(column_name,'LUST','Release'),'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9',''),'0','')
+    --replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(column_name,'LUST','Release'),'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9',''),'0','')
 from information_schema.columns 
 where table_schema = 'az_release' 
 and column_name not in (select element_name from release_elements)
@@ -129,25 +129,25 @@ where release_control_id = 6 and epa_column_name = 'corrective_action_strategy_i
 delete from release_element_mapping where  release_control_id = 6 and release_element_mapping_id > 146;
 
 select 'insert into release_element_mapping (release_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-	values (6, ''' ||
-	epa_table_name || ''',''' || epa_column_name || ''',''' || org_table_name || ''',''' || org_column_name || ''',''Direct mapping to EPA template per state'')'
+    values (6, ''' ||
+    epa_table_name || ''',''' || epa_column_name || ''',''' || org_table_name || ''',''' || org_column_name || ''',''Direct mapping to EPA template per state'')'
 from 
-	(select distinct c.table_name as epa_table_name, b.database_column_name as epa_column_name, 
-		a.table_name as org_table_name, a.column_name as org_column_name, a.ordinal_position
-	from information_schema.columns a join release_elements b on a.column_name = b.element_name 
-		join release_elements_tables c on b.element_id = c.element_id 
-	where table_schema = 'az_release') x 
+    (select distinct c.table_name as epa_table_name, b.database_column_name as epa_column_name, 
+        a.table_name as org_table_name, a.column_name as org_column_name, a.ordinal_position
+    from information_schema.columns a join release_elements b on a.column_name = b.element_name 
+        join release_elements_tables c on b.element_id = c.element_id 
+    where table_schema = 'az_release') x 
 
 
 select distinct c.table_name as epa_table_name, b.database_column_name as epa_column_name, 
-	a.table_name as org_table_name, a.column_name as org_column_name, a.ordinal_position
+    a.table_name as org_table_name, a.column_name as org_column_name, a.ordinal_position
 from information_schema.columns a join release_elements b on a.column_name = b.element_name 
-	join release_elements_tables c on b.element_id = c.element_id 
-where table_schema = 'az_release'	
-	
+    join release_elements_tables c on b.element_id = c.element_id 
+where table_schema = 'az_release'    
+    
 select * 
 from release_elements b join  release_elements_tables c on b.element_id = c.element_id 
-	
+    
 
 CREATE OR REPLACE VIEW public.v_release_elements
 AS SELECT a.element_name AS "Element Name",
@@ -170,7 +170,7 @@ AS SELECT a.element_name AS "Element Name",
 
 
 select distinct epa_table_name, epa_column_name, release_element_mapping_id, organization_table_name, organization_column_name, 
-		database_lookup_table, database_lookup_column, table_sort_order, column_sort_order
+        database_lookup_table, database_lookup_column, table_sort_order, column_sort_order
 from v_release_needed_mapping 
 where release_control_id = 6 order by table_sort_order, column_sort_order
  
@@ -214,11 +214,11 @@ select count(*) from  az_release."ust_release"  where "CauseOfRelease5" is not n
 
 select table_name, column_name 
 from information_schema.columns a
-where table_schema = 'az_release' and not exists 	
-	(select 1 from release_element_mapping b 
-	where release_control_id = 6
-	and a.table_name = b.organization_table_name
-	and a.column_name = b.organization_column_name)
+where table_schema = 'az_release' and not exists     
+    (select 1 from release_element_mapping b 
+    where release_control_id = 6
+    and a.table_name = b.organization_table_name
+    and a.column_name = b.organization_column_name)
 order by 1, 2
 
 select * from release_element_mapping order by 1 desc;
@@ -226,21 +226,21 @@ select * from release_element_mapping order by 1 desc;
 select b.table_name, a.database_column_name 
 from release_elements a join release_elements_tables b on a.element_id = b.element_id 
 where not exists 
-	(select 1 from release_element_mapping c
-	where release_control_id = 6 
-	and c.epa_table_name = b.table_name and c.epa_column_name = a.database_column_name)
+    (select 1 from release_element_mapping c
+    where release_control_id = 6 
+    and c.epa_table_name = b.table_name and c.epa_column_name = a.database_column_name)
 and exists 
-	(select 1 from information_schema.columns d
-	where table_schema = 'az_release'
-	and a.element_name = d.column_name)
+    (select 1 from information_schema.columns d
+    where table_schema = 'az_release'
+    and a.element_name = d.column_name)
 
 select * from information_schema.columns 
 where table_schema = 'az_release'
 and column_name like '%etected%'
 
 select * from release_elements order by 1; 
-	
-	
+    
+    
 select * from release_element_mapping 
 
 
@@ -403,17 +403,17 @@ values (2, 'ust_release_source', 'source_id', 'Tank_Cleanup_Incidents', 'SOURCE_
 --see what columns in which table we need to map
 select epa_table_name, epa_column_name 
 from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from v_release_needed_mapping 
-	where release_control_id = 6 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from v_release_needed_mapping 
+    where release_control_id = 6 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
 /*
-ust_release				coordinate_source_id
-ust_release				release_status_id
-ust_release				how_release_detected_id
-ust_release_substance	substance_id
-ust_release_source		source_id
-ust_release_cause		cause_id
+ust_release                coordinate_source_id
+ust_release                release_status_id
+ust_release                how_release_detected_id
+ust_release_substance    substance_id
+ust_release_source        source_id
+ust_release_cause        cause_id
 */
 
 
@@ -428,12 +428,12 @@ from v_release_needed_mapping
 where release_control_id = 6 and mapping_complete = 'N'
 order by 1, 2;
 /*
-ust_release				coordinate_source_id
-ust_release				how_release_detected_id
-ust_release				release_status
-ust_release_cause		cause_id
-ust_release_source		source_id
-ust_release_substance	substance_id
+ust_release                coordinate_source_id
+ust_release                how_release_detected_id
+ust_release                release_status
+ust_release_cause        cause_id
+ust_release_source        source_id
+ust_release_substance    substance_id
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -475,7 +475,7 @@ where release_control_id = 6 and epa_column_name = 'coordinate_source_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 22 || ', ''' || "HOR_REF_DATUM" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 22 || ', ''' || "HOR_REF_DATUM" || ''', '''', null);'
 from "Tank_Cleanup_Incidents"
 order by 1;
  
@@ -512,18 +512,18 @@ from archive.v_lust_element_mapping
 where lower(element_name) like lower('%coord%')
 order by 1, 2;
 /*
-Estimated								Map interpolation
-Geocode									Geocoded address
-GPS_EPA									GPS
-GPS_State								GPS
-GPS_Tribe								GPS
-Legacy Verified							Other
-OnlineMapGoogle							Map interpolation
-OnlineMapMS								Map interpolation
-Site Assessment Report by MCE Environmental dated 2/12/2003	Other
-Trimble, collected 5/3/2010				Other
-Trimble, collected 5/4/2010				Other
-Trimble, collected 5/5/2010				Other
+Estimated                                Map interpolation
+Geocode                                    Geocoded address
+GPS_EPA                                    GPS
+GPS_State                                GPS
+GPS_Tribe                                GPS
+Legacy Verified                            Other
+OnlineMapGoogle                            Map interpolation
+OnlineMapMS                                Map interpolation
+Site Assessment Report by MCE Environmental dated 2/12/2003    Other
+Trimble, collected 5/3/2010                Other
+Trimble, collected 5/4/2010                Other
+Trimble, collected 5/5/2010                Other
 */
 
 
@@ -587,7 +587,7 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 6 and epa_column_name = 'how_release_detected_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 29 || ', ''' || "RELEASE_DISCOVERED" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 29 || ', ''' || "RELEASE_DISCOVERED" || ''', '''', null);'
 from "erg_release_discovered_deagg" order by 1;
 
 /*below I have mapped the ones I can take a reasonable guess at, but I've inserted nulls for the ones I have no idea about 
@@ -666,7 +666,7 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 6 and epa_column_name = 'release_status_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 23 || ', ''' || "STATUS_DESCRIPTION" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 23 || ', ''' || "STATUS_DESCRIPTION" || ''', '''', null);'
 from "Tank_Cleanup_Incidents" order by 1;
 
 --These are a little easier to map because they are more descriptive, but I've still put a comment to "please verify"
@@ -747,7 +747,7 @@ where release_control_id = 6 and epa_column_name = 'substance_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 30 || ', ''' || "SUBSTANCE" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 30 || ', ''' || "SUBSTANCE" || ''', '''', null);'
 from "Tank_Cleanup_Incidents" order by 1;
 
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (30, 'Aviation Gasoline', 'Aviation gasoline', null);
@@ -786,13 +786,13 @@ order by 1;
 --NOTE! As we continue to map more states, we can check the current mapping table instead of the archive table!
 --in the case of Substances, you can check both v_lust_element_mapping and v_ust_element_mapping!
 select distinct state_value, epa_value from 
-	(select state_value, epa_value
-	from archive.v_lust_element_mapping 
-	where lower(element_name) like '%substance%' 
-	union all 
-	select state_value, epa_value
-	from archive.v_ust_element_mapping 
-	where lower(element_name) like '%substance%') x
+    (select state_value, epa_value
+    from archive.v_lust_element_mapping 
+    where lower(element_name) like '%substance%' 
+    union all 
+    select state_value, epa_value
+    from archive.v_ust_element_mapping 
+    where lower(element_name) like '%substance%') x
 where lower(state_value) like lower('%gashol%')
 order by 1, 2;
 
@@ -817,8 +817,8 @@ Other or mixture
 --update release_element_value_mapping with the new value
 update release_element_value_mapping a set epa_value = 'Other or mixture'
 where epa_value = 'Other' and release_element_mapping_id in 
-	(select release_element_mapping_id from release_element_mapping 
-	where release_control_id = 6 and epa_column_name = 'substance_id');
+    (select release_element_mapping_id from release_element_mapping 
+    where release_control_id = 6 and epa_column_name = 'substance_id');
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -866,14 +866,14 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 6 and epa_column_name = 'source_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 32 || ', ''' || "SOURCE_CAUSE_OF_RELEASE" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 32 || ', ''' || "SOURCE_CAUSE_OF_RELEASE" || ''', '''', null);'
 from "erg_source_cause_of_release_deagg" order by 1;
 
 /* Mapping I was able to guess at: 
-DISP	Dispenser
-OTHR	Other
-SUBTP	Submersible turbine pump
-TANK	Tank
+DISP    Dispenser
+OTHR    Other
+SUBTP    Submersible turbine pump
+TANK    Tank
 */
  
 /*below I have mapped the ones I can take a reasonable guess at, but I've inserted nulls for the ones I have no idea about 
@@ -940,16 +940,16 @@ where release_control_id = 6
 and epa_column_name = 'cause_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 31 || ', ''' || "SOURCE_CAUSE_OF_RELEASE" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 31 || ', ''' || "SOURCE_CAUSE_OF_RELEASE" || ''', '''', null);'
 from "erg_source_cause_of_release_deagg" order by 1;
 
 /*Mapping I was able to guess at: 
-CORR	Corrosion
-HOSE	Damage to dispenser hose
-OTHR	Other
-OVER	Delivery overfill
-SPILL	Dispenser spill
-VEHIC	Motor vehicle accident
+CORR    Corrosion
+HOSE    Damage to dispenser hose
+OTHR    Other
+OVER    Delivery overfill
+SPILL    Dispenser spill
+VEHIC    Motor vehicle accident
 */
  
 --below I have mapped the ones I can take a reasonable guess at, but I've inserted nulls for the ones I have no idea about 
@@ -1041,9 +1041,9 @@ NOTE! The view queried below (v_release_table_population_sql) contains columns t
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 6 and epa_table_name = 'ust_release'
 order by column_sort_order;
@@ -1061,33 +1061,33 @@ order by column_sort_order;
     safe for you to insert these yourself, so add them! */
 create or replace view az_release.v_ust_release as 
 select distinct 
-	"FacilityID"::character varying(50) as facility_id,
-	"TankIDAssociatedwithRelease"::character varying(50) as tank_id_associated_with_release,
-	"LUSTID"::character varying(50) as release_id,
-	"FederallyReportableRelease"::character varying(7) as federally_reportable_release,
-	"SiteName"::character varying(200) as site_name,
-	"SiteAddress"::character varying(100) as site_address,
-	"SiteAddress2"::character varying(100) as site_address2,
-	"SiteCity"::character varying(100) as site_city,
-	"Zipcode"::character varying(10) as zipcode,
-	"County"::character varying(100) as county,
-	"State" as state,
-	"EPARegion"::integer as epa_region,
-	"TribalSite"::character varying(7) as tribal_site,
-	"Tribe"::character varying(50) as tribe,
-	"Latitude"::double precision as latitude,
-	"Longitude"::double precision as longitude,
-	release_status_id as release_status_id,
-	"ReportedDate"::date as reported_date,
-	"NFADate"::date as nfa_date,
-	"MediaImpactedSoil"::character varying(3) as media_impacted_soil,
-	"MediaImpactedGroundwater"::character varying(3) as media_impacted_groundwater,
-	"MediaImpactedSurfaceWater"::character varying(3) as media_impacted_surface_water,
-	"ClosedWithContamination"::character varying(7) as closed_with_contamination,
-	"NoFurtherActionLetterURL"::character varying(2000) as no_further_action_letter_url,
-	"MilitaryDoDSite"::character varying(7) as military_dod_site
+    "FacilityID"::character varying(50) as facility_id,
+    "TankIDAssociatedwithRelease"::character varying(50) as tank_id_associated_with_release,
+    "LUSTID"::character varying(50) as release_id,
+    "FederallyReportableRelease"::character varying(7) as federally_reportable_release,
+    "SiteName"::character varying(200) as site_name,
+    "SiteAddress"::character varying(100) as site_address,
+    "SiteAddress2"::character varying(100) as site_address2,
+    "SiteCity"::character varying(100) as site_city,
+    "Zipcode"::character varying(10) as zipcode,
+    "County"::character varying(100) as county,
+    "State" as state,
+    "EPARegion"::integer as epa_region,
+    "TribalSite"::character varying(7) as tribal_site,
+    "Tribe"::character varying(50) as tribe,
+    "Latitude"::double precision as latitude,
+    "Longitude"::double precision as longitude,
+    release_status_id as release_status_id,
+    "ReportedDate"::date as reported_date,
+    "NFADate"::date as nfa_date,
+    "MediaImpactedSoil"::character varying(3) as media_impacted_soil,
+    "MediaImpactedGroundwater"::character varying(3) as media_impacted_groundwater,
+    "MediaImpactedSurfaceWater"::character varying(3) as media_impacted_surface_water,
+    "ClosedWithContamination"::character varying(7) as closed_with_contamination,
+    "NoFurtherActionLetterURL"::character varying(2000) as no_further_action_letter_url,
+    "MilitaryDoDSite"::character varying(7) as military_dod_site
 from az_release.ust_release x 
-	left join az_release.v_release_status_xwalk	rs on x."LUSTStatus" = rs.organization_value ;
+    left join az_release.v_release_status_xwalk    rs on x."LUSTStatus" = rs.organization_value ;
 
 select distinct "CoordinateSource" from az_release.ust_release;
 
@@ -1104,36 +1104,36 @@ select count(*) from az_release.ust_release
 create view az_release.v_substances as 
 select distinct release_id, substance, quantity_released, unit
 from (
-	select distinct "LUSTID" as release_id, 
-		"SubstanceReleased1" as substance, 
-		"QuantityReleased1" as quantity_released, 
-		"Unit1" as unit
-	from az_release.ust_release where "SubstanceReleased1" is not null union all 
-	select distinct "LUSTID" as release_id, 
-		"SubstanceReleased2" as substance, 
-		"QuantityReleased2" as quantity_released, 
-		"Unit2" as unit
-	from az_release.ust_release where "SubstanceReleased2" is not null union all 
-	select distinct "LUSTID" as release_id, 
-		"SubstanceReleased3" as substance, 
-		"QuantityReleased3" as quantity_released, 
-		"Unit3" as unit
-	from az_release.ust_release where "SubstanceReleased3" is not null union all 
-	select distinct "LUSTID" as release_id, 
-		"SubstanceReleased4" as substance, 
-		"QuantityReleased4" as quantity_released, 
-		"Unit4" as unit
-	from az_release.ust_release where "SubstanceReleased4" is not null ) x;
+    select distinct "LUSTID" as release_id, 
+        "SubstanceReleased1" as substance, 
+        "QuantityReleased1" as quantity_released, 
+        "Unit1" as unit
+    from az_release.ust_release where "SubstanceReleased1" is not null union all 
+    select distinct "LUSTID" as release_id, 
+        "SubstanceReleased2" as substance, 
+        "QuantityReleased2" as quantity_released, 
+        "Unit2" as unit
+    from az_release.ust_release where "SubstanceReleased2" is not null union all 
+    select distinct "LUSTID" as release_id, 
+        "SubstanceReleased3" as substance, 
+        "QuantityReleased3" as quantity_released, 
+        "Unit3" as unit
+    from az_release.ust_release where "SubstanceReleased3" is not null union all 
+    select distinct "LUSTID" as release_id, 
+        "SubstanceReleased4" as substance, 
+        "QuantityReleased4" as quantity_released, 
+        "Unit4" as unit
+    from az_release.ust_release where "SubstanceReleased4" is not null ) x;
 
-	
+    
 --be sure to do select distinct if necessary!
 drop view  az_release.v_ust_release_substance;
 create or replace view az_release.v_ust_release_substance as 
 select distinct release_id::character varying(50) as release_id,
-		s.substance_id,
-		organization_value as substance_comment
+        s.substance_id,
+        organization_value as substance_comment
 from az_release.v_substances x 
-	join az_release.v_substance_xwalk s on x.substance = s.organization_value 
+    join az_release.v_substance_xwalk s on x.substance = s.organization_value 
 where s.substance_id is not null ; 
 
 select * from  az_release.v_substance_xwalk
@@ -1144,9 +1144,9 @@ select count(*) from az_release.v_ust_release_substance;
 --------------------------------------------------------------------------------------------------------------------------
 --ust_release_source 
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 6 and epa_table_name = 'ust_release_source'
 order by column_sort_order;
@@ -1154,19 +1154,19 @@ order by column_sort_order;
 create view az_release.v_source as 
 select distinct release_id, "source"
 from (
-	select distinct "LUSTID" as release_id, "SourceOfRelease1" as "source" from az_release.ust_release where "SourceOfRelease1" is not null union all 
-	select distinct "LUSTID" as release_id, "SourceOfRelease2" as "source" from az_release.ust_release where "SourceOfRelease2" is not null union all 
-	select distinct "LUSTID" as release_id, "SourceOfRelease3" as "source" from az_release.ust_release where "SourceOfRelease3" is not null union all 
-	select distinct "LUSTID" as release_id, "SourceOfRelease4" as "source" from az_release.ust_release where "SourceOfRelease4" is not null  ) x;
+    select distinct "LUSTID" as release_id, "SourceOfRelease1" as "source" from az_release.ust_release where "SourceOfRelease1" is not null union all 
+    select distinct "LUSTID" as release_id, "SourceOfRelease2" as "source" from az_release.ust_release where "SourceOfRelease2" is not null union all 
+    select distinct "LUSTID" as release_id, "SourceOfRelease3" as "source" from az_release.ust_release where "SourceOfRelease3" is not null union all 
+    select distinct "LUSTID" as release_id, "SourceOfRelease4" as "source" from az_release.ust_release where "SourceOfRelease4" is not null  ) x;
 
 drop view az_release.v_ust_release_source;
 create or replace view az_release.v_ust_release_source as 
 select distinct release_id::character varying(50) as release_id,
-		b.source_id,
-		b.organization_value as source_comment 
+        b.source_id,
+        b.organization_value as source_comment 
 from az_release.v_source a 
-	join az_release.v_source_xwalk b on a."source" = b.organization_value;
-	
+    join az_release.v_source_xwalk b on a."source" = b.organization_value;
+    
 select * from az_release.v_ust_release_source;
 select count(*) from az_release.v_ust_release_source;
 --583
@@ -1177,9 +1177,9 @@ select * from az_release.ust_release;
 --ust_release_cause 
 
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 6 and epa_table_name = 'ust_release_cause'
 order by column_sort_order;
@@ -1188,11 +1188,11 @@ select * from az_release.v_cause_mapping
 
 create or replace view az_release.v_ust_release_cause as 
 select distinct "LUSTID"::character varying(50) as release_id,
-		b.cause_id,
-		a.cause_comment
+        b.cause_id,
+        a.cause_comment
 from az_release.v_cause_mapping  a
-	join causes b on a.epa_cause = b.cause ;
-	
+    join causes b on a.epa_cause = b.cause ;
+    
 
 
 select * from az_release.v_ust_release_cause;
@@ -1232,10 +1232,10 @@ select * from information_schema.columns where table_schema = 'public' and table
 drop view az_release.v_ust_release_corrective_action_strategy;
 create or replace view az_release.v_ust_release_corrective_action_strategy as 
 select distinct release_id::character varying(50) as release_id,
-		s.corrective_action_strategy_id,
-		corrective_action_strategy_start_date::date as corrective_action_strategy_start_date 
+        s.corrective_action_strategy_id,
+        corrective_action_strategy_start_date::date as corrective_action_strategy_start_date 
 from az_release.v_corrective_action_strategy x 
-	join az_release.v_corrective_action_strategy_xwalk  s on x.corrective_action_strategy = s.organization_value  ; 
+    join az_release.v_corrective_action_strategy_xwalk  s on x.corrective_action_strategy = s.organization_value  ; 
 
 select * from  az_release.v_corrective_action_strategy_xwalk
 
@@ -1249,10 +1249,10 @@ select count(*) from az_release.v_ust_release_corrective_action_strategy;
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
-	
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
+    
 from v_release_missing_view_mapping a
 where release_control_id = 6
 order by 1, 2;
@@ -1275,8 +1275,8 @@ set variables:
 ust_or_release = 'release' 
 control_id = 6
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -1307,7 +1307,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'release' 
 control_id = 6
@@ -1319,11 +1319,11 @@ delete_existing = False # can set to True if there is existing release data you 
 select table_name, num_rows from v_release_table_row_count
 where release_control_id = 6 order by sort_order;
 /* 
-ust_release	9535
-ust_release_substance	9685
-ust_release_source	583
-ust_release_cause	504
-ust_release_corrective_action_strategy	6305
+ust_release    9535
+ust_release_substance    9685
+ust_release_source    583
+ust_release_cause    504
+ust_release_corrective_action_strategy    6305
  */
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -1333,12 +1333,12 @@ ust_release_corrective_action_strategy	6305
 set variables:
 control_id = 6
 ust_or_release = 'release' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 		# Set to False to export full template including mapping and reference tabs
-template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False         # Set to False to export full template including mapping and reference tabs
+template_only = False     # Set to False to export data and mapping tabs as well as reference tab
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------

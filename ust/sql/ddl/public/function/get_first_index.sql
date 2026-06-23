@@ -4,9 +4,9 @@ CREATE OR REPLACE FUNCTION public.get_first_index(search_string text, search_cha
  LANGUAGE plpgsql
 AS $function$
 declare
-	i integer;
+    i integer;
 begin 
-	select position(search_char in search_string) into i;
-	return i;
+    select position(search_char in search_string) into i;
+    return i;
 end
 $function$

@@ -1,7 +1,7 @@
 
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into lust_element_db_mapping (state", mapping_date", element_name", state_table_name", state_column_name",
-	state_join_table", state_join_column", state_join_column_fk)
+    state_join_table", state_join_column", state_join_column_fk)
 values ('MO'", '2023-06-20'", 'TankStatus'", 'tbltankstatus'", 'tankstatusdescription'", 'tbltank'", 'tankstatuscode'", 'status')
 returning id;
 
@@ -45,18 +45,18 @@ select f.facilityid as "FacilityID",
       WHEN t.remtechid = 'W' THEN 'Vacuum vaporizing well' 
       WHEN t.remtechid = 'Z' THEN 'Oxygen or oxydizer injection or placement in excavation' END as "RemediationStrategy1" --need additional mapping help; see spreadsheet
 FROM "MO_UST".tblFacility f 
-	LEFT JOIN "MO_UST".tblGeoSite g ON f.facilityid = g.facilityid  
-	LEFT JOIN "MO_UST".tblGeoSite_latlong ll ON f.facilityid = ll.facilityid
-	LEFT JOIN "MO_UST".tblcounty c ON g.county = c.countycode 
-	JOIN "MO_UST".tblRemediation r ON f.facilityid = r.facilityid
-	LEFT JOIN (SELECT DISTINCT remid FROM "MO_UST".tblremmediaaffected WHERE mediaaffectedid = '1') soil ON r.remid = soil.remid
-	LEFT JOIN (SELECT DISTINCT remid FROM "MO_UST".tblremmediaaffected WHERE mediaaffectedid = '2') gw ON r.remid = gw.remid
-	LEFT JOIN (SELECT DISTINCT remid FROM "MO_UST".tblremmediaaffected WHERE mediaaffectedid = '4') sw ON r.remid = sw.remid
-	LEFT JOIN (SELECT DISTINCT remid, remtechid FROM "MO_UST".tblRemTech) t ON r.remid = t.remid ;   --this JOIN assumes one ROW per remid", which works FOR now but may NOT ALWAYS be the case
+    LEFT JOIN "MO_UST".tblGeoSite g ON f.facilityid = g.facilityid  
+    LEFT JOIN "MO_UST".tblGeoSite_latlong ll ON f.facilityid = ll.facilityid
+    LEFT JOIN "MO_UST".tblcounty c ON g.county = c.countycode 
+    JOIN "MO_UST".tblRemediation r ON f.facilityid = r.facilityid
+    LEFT JOIN (SELECT DISTINCT remid FROM "MO_UST".tblremmediaaffected WHERE mediaaffectedid = '1') soil ON r.remid = soil.remid
+    LEFT JOIN (SELECT DISTINCT remid FROM "MO_UST".tblremmediaaffected WHERE mediaaffectedid = '2') gw ON r.remid = gw.remid
+    LEFT JOIN (SELECT DISTINCT remid FROM "MO_UST".tblremmediaaffected WHERE mediaaffectedid = '4') sw ON r.remid = sw.remid
+    LEFT JOIN (SELECT DISTINCT remid, remtechid FROM "MO_UST".tblRemTech) t ON r.remid = t.remid ;   --this JOIN assumes one ROW per remid", which works FOR now but may NOT ALWAYS be the case
 ----------------------------------------------------------------------------------------------------------------------------------
-	
-select * from "MO_LUST".v_lust_base where "LUSTID" is not null;	
-	
+    
+select * from "MO_LUST".v_lust_base where "LUSTID" is not null;    
+    
 select distinct element_name", state_table_name", state_column_name", state_join_table", state_join_column", state_join_column_fk 
 from v_lust_element_mapping
 where state = 'MO';

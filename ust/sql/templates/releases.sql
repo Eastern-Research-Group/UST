@@ -16,27 +16,31 @@
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /* OVERVIEW:
+ * 
  * Step 1: Upload the source data 
  * Step 2: Update the control table 
  * Step 3: Get an overview of the source data and prepare it for processing
- * Step 4: Map the source data elements to the EPA template elements 
- * Step 5: Check for lookup data that needs to be deaggregated 
- * Step 6: Map the source data values to EPA values 
- * Step 7: Send the substance mapping for review by an ERG chemical expert  
- * Step 8: Create the value mapping crosswalk views
- * Step 9: Create unique identifiers if they don't exist
- * Step 10: Write the views that convert the source data to the EPA format
- * Step 11: QA the views
- * Step 12: Insert data into the EPA schema 
- * Step 13: Export populated EPA template 
- * Step 14: Export control table summary
- * Step 15: Upload exported files to EPA Teams
- * Step 16: Request peer review and make any suggested changes
- * Step 17: Export source data (if necessary)
- * Step 18: Request OUST review
- * Step 19: Respond to OUST comments 
- * Step 20: State review 
- * Step 21: GIS processing (coming soon)
+ * Step 4: Create the unregulated exclusion tables and views. 
+ * Step 5: Insert top-level non-regulated/non-UST releases into table erg_unregulated_releases. 
+ * Step 6: Map the source data elements to the EPA template elements  
+ * Step 7: Check for lookup data that needs to be deaggregated 
+ * Step 8: Map the source data values to EPA values 
+ * Step 9: Send the substance mapping for review by an ERG chemical expert  
+ * Step 10: Create the value mapping crosswalk views
+ * Step 11: Create unique identifiers if they don't exist
+ * Step 12: Insert unregulated tanks/substances into table erg_unregulated_tanks. 
+ * Step 13: Write the views that convert the source data to the EPA format
+ * Step 14: QA the views
+ * Step 15: Insert data into the EPA schema 
+ * Step 16: Export populated EPA template 
+ * Step 17: Export control table summary
+ * Step 18: Upload exported files to EPA Teams
+ * Step 19: Request peer review and make any suggested changes
+ * Step 20: Export source data (if necessary)
+ * Step 21: Request OUST review
+ * Step 22: Respond to OUST comments 
+ * Step 21: State review 
+ * Step 22: GIS processing (coming soon)
  * 
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -169,7 +173,53 @@ order by 1;
  * done to the source data should be done by writing views or creating "erg_" prefixed tables.  
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 4: Map the source data elements to the EPA template elements 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Step 4: Create the unregulated exclusion tables and views. 
+
+/* Script create_unreg_tables.py creates the following tables and views:
+ * 
+ *   * XX_ust.erg_unregulated_releases
+ *   * XX_ust.erg_unregulated_substances
+ *   * XX_ust.vw_erg_substance_mapping
+ *   * XX_ust.vw_erg_facility_type_mapping
+ *   * XX_ust.vw_erg_unreg_substances
+ * 
+ * The views won't contain any rows until after the mapping is completed in subsequent steps
+ * but we may inserting some rows into erg_unregulated_releases in the next step. 
+ *
+ * Run script create_unreg_tables.py. Set these variables in the script: 
+ * 
+ 
+ust_or_release = 'release'              # Valid values are 'ust' or 'release'
+control_id = ZZ                         # Enter an integer that is the ust_control_id or release_control_id
+organization_id = None                  # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
+drop_existing = False                    # Boolean; defaults to False. If True, will drop existing tables if possible (will error if there are dependent objects). If False, will rename tables if they already exist. 
+views_only = False                        # Boolean; defaults to False. If True, will not drop or create the "erg_unreg" tables and will only create/replace the "vw_erg" views related to this script.
+
+ * 
+ */
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Step 5: Insert top-level non-regulated/non-UST releases into table erg_unregulated_releases. 
+
+/* If the source data contains any non-regulated releases, such as from aboveground storage tanks, 
+ * insert them into table XX_ust.erg_unregulated_releases, providing a concise but descriptive unregulated_reason. 
+ * Below is an EXAMPLE query you could use to insert releases from AST facilities:
+
+insert into XX_ust.erg_unregulated_releases (release_id, unregulated_reason)
+select distinct "ReleaseID", 'AST' 
+from XX_ust.releases
+where facility_site_type = 'AST'
+on conflict do nothing; 
+
+*
+*/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Step 6: Map the source data elements to the EPA template elements 
 
 /* Table public.release_element_mapping documents the mapping of the source data elements
  * to the EPA template data elements. 
@@ -199,8 +249,8 @@ order by 1;
  *     ["soil", "gw"]. 
  *     Map EPA fields media_impacted_soil and media_impacted_groundwater
  *     EACH to state column "media_impacted", and set the query_logic field as follows:
- *     media_impacted_soil: "if media_impacted = 'soil' then 'Yes'"	   
- *     media_impacted_groundwater: "if media_impacted = 'gw' then 'Yes'"	   
+ *     media_impacted_soil: "if media_impacted = 'soil' then 'Yes'"       
+ *     media_impacted_groundwater: "if media_impacted = 'gw' then 'Yes'"       
  * 
  * After you've adjusted all the SQL statements for elements you are able to map and deleted those
  * you can't, run the SQL statements to perform the inserts.  
@@ -243,11 +293,11 @@ order by 1;
  * For examples of how to do this, run this query:
  * 
 select release_control_id, epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name,
-	organization_join_table, 
-	organization_join_column, organization_join_fk,
-	organization_join_column2, organization_join_fk2,
-	organization_join_column3, organization_join_fk3
+    organization_table_name, organization_column_name,
+    organization_join_table, 
+    organization_join_column, organization_join_fk,
+    organization_join_column2, organization_join_fk2,
+    organization_join_column3, organization_join_fk3
 from public.release_element_mapping
 where organization_join_table is not null 
 order by 1, 2, 3, 4, 5;
@@ -270,8 +320,8 @@ order by 1;
  * populated for these fields. 
 
 select release_control_id, epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name,
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name,
+    deagg_table_name, deagg_column_name
 from public.release_element_mapping
 where deagg_table_name is not null 
 order by 1, 2, 3, 4, 5;
@@ -392,7 +442,7 @@ values (ZZ,'ust_release_corrective_action_strategy','corrective_action_strategy_
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 5: Check for lookup data that needs to be deaggregated 
+--Step 7: Check for lookup data that needs to be deaggregated 
 
 /* 
  * Some states store data with multiple values in a single row, for example, 
@@ -404,9 +454,9 @@ values (ZZ,'ust_release_corrective_action_strategy','corrective_action_strategy_
  * in this format, and then perform the deaggregation if necessary. 
  * Set the following variables before running the script:
  
-ust_or_release = 'release' 		# valid values are 'ust' or 'release'
+ust_or_release = 'release'         # valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+only_incomplete = True             # Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
  * If - and only if - this script identifies possible aggregrated data, it will output SQL file in the repo at
  * /ust/sql/XX/Releases/XX_release_deagg.sql). Open the generated file in your database console and step through it.  
@@ -416,7 +466,7 @@ only_incomplete = True 			# Boolean, set to True to restrict the output to EPA c
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 6: Map the source data values to EPA values 
+--Step 8: Map the source data values to EPA values 
 
 /* 
  * Table public.release_element_value_mapping documents the mapping of the source data element
@@ -428,17 +478,17 @@ only_incomplete = True 			# Boolean, set to True to restrict the output to EPA c
  * manipulating them!)
 
 select epa_column_name from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from public.v_release_needed_mapping 
-	where release_control_id = ZZ and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from public.v_release_needed_mapping 
+    where release_control_id = ZZ and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
  
  * To generate the SQL that will assist you in doing the value mapping, run the script 
  * generate_value_mapping_sql.py. Set the following variables before running the script:
  
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+only_incomplete = True           # Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
@@ -449,7 +499,7 @@ overwrite_existing = False      # Boolean, defaults to False. Set to True to ove
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 7: Send the substance mapping (if it exists) for review by an ERG chemical expert 
+--Step 9: Send the substance mapping (if it exists) for review by an ERG chemical expert 
 
 /*
  * Run script export_substance_mapping.py to export the substance mapping and email it to John Wilhelmi,
@@ -462,9 +512,9 @@ overwrite_existing = False      # Boolean, defaults to False. Set to True to ove
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-send_email = True				# Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
+send_email = True                # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -476,13 +526,13 @@ export_file_name = None
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 8: Create the value mapping crosswalk views
+--Step 10: Create the value mapping crosswalk views
 
 /* 
  * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
  * Set these variables in the script:
  
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
   
  * To see the crosswalk views after running the script:
@@ -496,17 +546,17 @@ and table_name like '%_xwalk' order by 1;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 9: Create unique identifiers if they don't exist
+--Step 11: Create unique identifiers if they don't exist
 
 /* 
  * Run script create_missing_id_columns.py to identify if any required columns (e.g. Tank ID, Compartment ID, etc.)
  * are missing and to create an ERG table containing generated IDs if necessary. 
  * Set these variables in the script:
 
-ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the release_control_id
 table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
-drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = False              # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -522,14 +572,39 @@ overwrite_sql_file = False       # Boolean, defaults to False. Set to True to ov
 --check to see if the script generated any tables 
 select epa_table_name, epa_column_name, organization_table_name 
 from public.v_release_element_mapping a join public.ust_template_data_tables b 
-	on a.epa_table_name = b.table_name 
+    on a.epa_table_name = b.table_name 
 where release_control_id = ZZ and organization_table_name like 'erg%'
 order by sort_order;
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 10: Write the views that convert the source data to the EPA format
+--Step 12: Insert unregulated substances into table erg_unregulated_substances. 
+
+/* 
+ * Run script populate_unreg_tables.py to insert unregulated heating oil tanks and gasoline/diesel
+ * tanks on small farms/residences into table XX_ust.erg_unregulated_substances. The script will also 
+ * insert rows into XX_ust.erg_unregulated_releases for any releases that contains only 
+ * unregulated substances. 
+ * Set these variables in the script:
+
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
+control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+organization_id = None          # Optional; if control_id = 0 or None, will find the most recent control_id
+delete_auto_inserts = False      # Boolean, defaults to False. If True, will delete existing rows from erg_unregulated% tables where unregulated_reason is "Non-regulated substance", "Heating oil", or "Small tank at farm/residence". Set to False to skip the delete (will likely cause errors if this script has been run before.)
+delete_all = False                 # Boolean, defaults to False. CAUTION! If True, will delete all existing rows from erg_unregulated% tables, INCLUDING any inserted by means other this script. 
+
+ * If you inserted any rows into XX_ust.erg_unregulated_releases in step 5 above, be sure to leave the 
+ * delete_all variable = False; otherwise the rows you inserted previously will be deleted. If you need to
+ * rerun this script at a later time, after making changes to the data, set delete_auto_inserts = True 
+ * to delete only those rows that were inserted by this script and do a fresh insert.  
+ * 
+*/
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Step 13: Write the views that convert the source data to the EPA format
 
 /** THIS SECTION UNDER CONSTRUCTION!!! 
  * 
@@ -570,14 +645,14 @@ select comments from public.release_control where release_control_id = ZZ;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 11: QA the views 
+--Step 14: QA the views 
 
 /* 
  * Run script qa_check.py to check that the views you have written to populate the main data tables
  * adhere to all business and logic rules.  
  * Set these variables in the script:
 
-ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the release_control_id
 
  * This script will check the views you just created in the state schema for the following:
@@ -598,12 +673,16 @@ control_id = ZZ                  # Enter an integer that is the release_control_
  * 9) Columns that exist in the view that were not mapped in release_element_mapping. 
  * 10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.release_element_value_mapping 
  *     and ensure the epa_value exists in the associated lookup table. 
- * 11) Unregulated facility/release data related to heating oil in certain facility types. To resolve these issues, run script
- *     exclude_unregulated.py, which will identify the unregulated facilities and tanks and will generate SQL to help you rewrite your views.
+ * 11) Substance mapping using an inactive substance, or a substance not flagged for releases. 
+ * 12) Unregulated release data related to heating oil in certain facility types. To resolve these issues, run script
+ *     exclude_unregulated.py, which will identify the unregulated releases and substances and will generate SQL to help you rewrite your views.
  *
  * The script will also provide the counts of rows in v_ust_release, v_ust_release_substance, v_ust_release_source, v_ust_release_cause,
  * and v_ust_release_corrective_action_strategy (if these views exist) - ensure these counts make sense! 
  *   
+ * If no errors are identified during the QA, the generated file will also contain tabs for excluded/non-regulated releases and excluded/non-regulated
+ * substances as well as counts of certain values requested by OUST. 
+ * 
  * The script will export a QAQC spreadsheet to the repo at 
  * /ust/python/exports/QAQC/XX/Releases/XX_release_QAQC_yyyymmddsssss.xlsx 
  * (in additional to printing to the screen and logs). If there are errors, re-write the views above, 
@@ -614,7 +693,7 @@ control_id = ZZ                  # Enter an integer that is the release_control_
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 12: Insert data into the EPA schema 
+--Step 15: Insert data into the EPA schema 
 
 /*
  * Run script populate_epa_data_tables.py to insert data into the main data tables in the public schema 
@@ -623,10 +702,10 @@ control_id = ZZ                  # Enter an integer that is the release_control_
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the release_control_id
-organization_id = ''      		# Optional; if control_id = 0 or None, will find the most recent control_id
-delete_existing = False 		 # can set to True if there is existing UST data you need to delete before inserting new
+organization_id = None           # Optional; if control_id = 0 or None, will find the most recent control_id
+delete_existing = False          # can set to True if there is existing UST data you need to delete before inserting new
 
  * Do a quick sanity check of number of rows inserted:
 */
@@ -638,7 +717,7 @@ order by sort_order;
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 13: Export populated EPA template
+--Step 16: Export populated EPA template
 
 /*
  * Run script export_template.py to generate a populated EPA template that will be sent first to OUST
@@ -646,40 +725,40 @@ order by sort_order;
  * 
  * Set these variables in the script: 
 
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
  * This script will output an Excel file (located by default in the repo at 
  * /ust/python/exports/epa_templates/XX/Releases/XX_release_template_yyyymmddsssss.xlsx). 
- * Before uploading this file in Step 14, open it to make sure it was generated correctly.
+ * Before uploading this file in Step 18, open it to make sure it was generated correctly.
  * 
 */
 
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 14: Export control table summary
+--Step 17: Export control table summary
 
 /*
  * Run script control_table_summary.py to generate a high-level overview of the data for OUST's review. 
  * 
  * Set these variables in the script: 
 
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
  * This script will output an Excel file (located by default in the repo at 
  * /ust/python/exports/control_table_summaries/XX/Releases/XX_release_control_table_summary_yyyymmddsssss.xlsx). 
- * Before uploading this file in Step 14, open it to make sure it was generated correctly.
+ * Before uploading this file in Step 18, open it to make sure it was generated correctly.
  * 
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 15: Upload exported files to EPA Teams
+--Step 18: Upload exported files to EPA Teams
 
 /* 
  * Upload the following three files to the appropriate state folder on the EPA Teams site at 
@@ -695,7 +774,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 16: Request peer review and make any suggested changes
+--Step 19: Request peer review and make any suggested changes
 
 /* 
  * All templates must be peer reviewed before sending to OUST. Currently Renae and Jim are available for peer reviews.
@@ -705,13 +784,13 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * If the reviewing developer suggested any changes to your mapping or logic, follow these steps:
  * 
  * 1) Make suggested changes in the database. 
- * 2) If necessary, update the views you created in Step 9. 
- * 3) If you made any changes to the views you created in Step 9, re-run Step 10 to QA the views. 
+ * 2) If necessary, update the views you created in Step 13. 
+ * 3) If you made any changes to the views you created in Step 13, re-run Step 14 to QA the views. 
  * 4) Rerun Step 11 to re-insert the data into the EPA schema. Remember to set the delete_existing variable 
  *    in the script to True (it defaults to False) to delete the data before re-inserting it. 
  * 5) Rerun Step 12 to export a new populated template. 
- * 6) If you made any changes to release_control, rerun Step 13 to export a new control table summary file. 
- * 7) Rerun Step 14 to re-upload all new exports to the EPA Teams site. 
+ * 6) If you made any changes to release_control, rerun Step 14 to export a new control table summary file. 
+ * 7) Rerun Step 15 to re-upload all new exports to the EPA Teams site. 
  * 8) Add a comment to the Jira ticket noting you've made the changes and are ready for another review.
  *    Assign the ticket back to the original reviewer and make sure the status is ERG Peer Review if not already.
  *    Be sure to @ the reviewer in the ticket comment so they are aware they need to take action. 
@@ -722,7 +801,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 17: Export source data (if necessary)
+--Step 20: Export source data (if necessary)
 
 /* 
  * OUST has requested that ERG make all source data available to them to assist in their review. If the 
@@ -738,7 +817,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * 
  * Set these variables in the script: 
  * 
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those referenced in ust_element_mapping or release_element_mapping.
 tables_to_exclude = []          # Python list of strings; defaults to empty list. Populate with table names in the organization schema that should be excluded from the export. (NOTE: ERG-created tables will not be exported regardless of the values in this list.)
@@ -755,7 +834,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 18: Request OUST review
+--Step 21: Request OUST review
 
 /* 
  * Sit back and relax, your work here is done for the time being! Or rather, sit back and start another ticket! 
@@ -772,7 +851,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 19: Respond to OUST comments 
+--Step 22: Respond to OUST comments 
 
 /* 
  * When OUST completes their review, they will email us. An updated version of the populated template will be 
@@ -780,7 +859,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
  * https://usepa.sharepoint.com/:f:/r/sites/USTFinder2ASTSWMO/Shared%20Documents/General/04%20-%20Template%20Feedback%20from%20OUST?csf=1&web=1&e=tVFLfE
  * 
  * Any changes you make per OUST's comments need to be peer reviewed before sending the template back to OUST, 
- * so repeat Step 15: Request peer review and make any suggested changes. 
+ * so repeat Step 19: Request peer review and make any suggested changes. 
  * 
  * Once you've resolved all of OUST's comments and the reviewing developer approves it, the process repeats itself
  * until OUST declares their review final, at which time Victoria will send the populated template to the state
@@ -791,7 +870,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 20: State review 
+--Step 23: State review 
 
 /* 
  * We haven't gotten this far yet, but this process will be very similar to the OUST review process. 
@@ -802,7 +881,7 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 21: GIS processing (coming soon)
+--Step 24: GIS processing (coming soon)
 
 /* 
  * For any facilities the state did not submit coordinates for, or for coordinates less than 3 decimal 

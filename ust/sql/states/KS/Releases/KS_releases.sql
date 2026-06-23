@@ -251,8 +251,8 @@ order by 1;
  *     ["soil", "gw"]. 
  *     Map EPA fields media_impacted_soil and media_impacted_groundwater
  *     EACH to state column "media_impacted", and set the query_logic field as follows:
- *     media_impacted_soil: "if media_impacted = 'soil' then 'Yes'"	   
- *     media_impacted_groundwater: "if media_impacted = 'gw' then 'Yes'"	   
+ *     media_impacted_soil: "if media_impacted = 'soil' then 'Yes'"       
+ *     media_impacted_groundwater: "if media_impacted = 'gw' then 'Yes'"       
  * 
  * After you've adjusted all the SQL statements for elements you are able to map and deleted those
  * you can't, run the SQL statements to perform the inserts.  
@@ -295,11 +295,11 @@ order by 1;
  * For examples of how to do this, run this query:
  * 
 select release_control_id, epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name,
-	organization_join_table, 
-	organization_join_column, organization_join_fk,
-	organization_join_column2, organization_join_fk2,
-	organization_join_column3, organization_join_fk3
+    organization_table_name, organization_column_name,
+    organization_join_table, 
+    organization_join_column, organization_join_fk,
+    organization_join_column2, organization_join_fk2,
+    organization_join_column3, organization_join_fk3
 from public.release_element_mapping
 where organization_join_table is not null 
 order by 1, 2, 3, 4, 5;
@@ -322,8 +322,8 @@ order by 1;
  * populated for these fields. 
 
 select release_control_id, epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name,
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name,
+    deagg_table_name, deagg_column_name
 from public.release_element_mapping
 where deagg_table_name is not null 
 order by 1, 2, 3, 4, 5;
@@ -333,87 +333,87 @@ order by 1, 2, 3, 4, 5;
 drop view ks_release.v_releases;
 create or replace view ks_release.v_releases as 
 select 
-	"Number" as release_id,  
-	"ALT_ID" as facility_id, 
-	"Name" as site_name, 
-	"Address Street" as site_address, 
-	"Address Line 2" as site_address2,
-	"Address City" as site_city,
-	"Address State" as state, 
-	"Address PostalCode"::text as zipcode, 
-	"Latitude" as latitude,
-	"Longitude" as longitude, 
-	"Collection Method" as coordinate_source, 
-	"County" as county, 
-	"Master Status" as release_status, 
-	"Leak and Additional Information - Suspected or Report Leak Date"::text as reported_date, 
-	case when "Tank Excavation Area - Remaining soil condition" is not null then "Tank Excavation Area - Remaining soil condition"
-		else "Tank Excavation Area - Remaining soil condition.1" end as media_impacted_soil, 
-	case when "Groundwater contamination was confirmed on site ab " is not null 
-	 then upper("Groundwater contamination was confirmed on site ab ")
-	 else upper("Groundwater contamination was confirmed on site ab") end as media_impacted_groundwater,
-	null::text as nfa_date
+    "Number" as release_id,  
+    "ALT_ID" as facility_id, 
+    "Name" as site_name, 
+    "Address Street" as site_address, 
+    "Address Line 2" as site_address2,
+    "Address City" as site_city,
+    "Address State" as state, 
+    "Address PostalCode"::text as zipcode, 
+    "Latitude" as latitude,
+    "Longitude" as longitude, 
+    "Collection Method" as coordinate_source, 
+    "County" as county, 
+    "Master Status" as release_status, 
+    "Leak and Additional Information - Suspected or Report Leak Date"::text as reported_date, 
+    case when "Tank Excavation Area - Remaining soil condition" is not null then "Tank Excavation Area - Remaining soil condition"
+        else "Tank Excavation Area - Remaining soil condition.1" end as media_impacted_soil, 
+    case when "Groundwater contamination was confirmed on site ab " is not null 
+     then upper("Groundwater contamination was confirmed on site ab ")
+     else upper("Groundwater contamination was confirmed on site ab") end as media_impacted_groundwater,
+    null::text as nfa_date
 from ks_release.releases
 union all 
 select 
-	"Number" as release_id,  
-	"ALT_ID" as facility_id, 
-	"Name" as site_name, 
-	"Address Street" as site_address, 
-	"Address Line 2" as site_address2,
-	"Address City" as site_city,
-	"Address State" as state, 
-	"Address PostalCode"::text as zipcode, 
-	"Latitude" as latitude,
-	"Longitude" as longitude, 
-	"Collection Method" as coordinate_source, 
-	"County" as county, 
-	"Master Status" as release_status, 
-	"Inspection Details - Confirmed Release Date"::text as reported_date, 
-	null as media_impacted_soil, 
-	"Inspection Details - Describe extent of groundwater contaminati" as media_impacted_groundwater,
-	"Storage Tank Details - Cleanup Completed Date"::text as nfa_date
-from ks_release.historical_releases;	 
-	
+    "Number" as release_id,  
+    "ALT_ID" as facility_id, 
+    "Name" as site_name, 
+    "Address Street" as site_address, 
+    "Address Line 2" as site_address2,
+    "Address City" as site_city,
+    "Address State" as state, 
+    "Address PostalCode"::text as zipcode, 
+    "Latitude" as latitude,
+    "Longitude" as longitude, 
+    "Collection Method" as coordinate_source, 
+    "County" as county, 
+    "Master Status" as release_status, 
+    "Inspection Details - Confirmed Release Date"::text as reported_date, 
+    null as media_impacted_soil, 
+    "Inspection Details - Describe extent of groundwater contaminati" as media_impacted_groundwater,
+    "Storage Tank Details - Cleanup Completed Date"::text as nfa_date
+from ks_release.historical_releases;     
+    
 create or replace view ks_release.v_release_substance as
 select * from (
 select 
-	"Number" as release_id,  
-	"Leak and Additional Information - Material leaked" as substance, 
-	case when "Leak and Additional Information - Quantity lost gallons" is not null 
-	 then "Leak and Additional Information - Quantity lost gallons"::text
-	 else "Leak and Additional Information - Quantity lost gallons.1"::text end as quantity_released, 
-	'gallons' as unit
+    "Number" as release_id,  
+    "Leak and Additional Information - Material leaked" as substance, 
+    case when "Leak and Additional Information - Quantity lost gallons" is not null 
+     then "Leak and Additional Information - Quantity lost gallons"::text
+     else "Leak and Additional Information - Quantity lost gallons.1"::text end as quantity_released, 
+    'gallons' as unit
 from ks_release.releases
 union all 
 select 
-	"Number" as release_id,  
-	case when "Inspection Details - Material Leaked OtherReason" is not null then "Inspection Details - Material Leaked OtherReason"
-		else "Inspection Details - Material Leaked" end as substance, 
-	null as quantity_released, 
-	null as unit
+    "Number" as release_id,  
+    case when "Inspection Details - Material Leaked OtherReason" is not null then "Inspection Details - Material Leaked OtherReason"
+        else "Inspection Details - Material Leaked" end as substance, 
+    null as quantity_released, 
+    null as unit
 from ks_release.historical_releases) a where substance is not null;
 
 
 create or replace view ks_release.v_release_cause as
 select 
-	"Number" as release_id,  
-	"Leak and Additional Information - Cause of leak" as cause	
+    "Number" as release_id,  
+    "Leak and Additional Information - Cause of leak" as cause    
 from ks_release.releases
 where "Leak and Additional Information - Cause of leak" is not null;
 
 create or replace view ks_release.v_release_source as 
 select * from (
 select 
-	"Number" as release_id,  
-	case when "Leak and Additional Information - Leak type" is null then 'Other' 
-		else "Leak and Additional Information - Leak type" end as source
+    "Number" as release_id,  
+    case when "Leak and Additional Information - Leak type" is null then 'Other' 
+        else "Leak and Additional Information - Leak type" end as source
 from ks_release.releases 
 union all 
 select 
-	"Number" as release_id,  
-	case when "Inspection Details - Leak Type" is null then 'Other' 
-		else "Inspection Details - Leak Type" end as source
+    "Number" as release_id,  
+    case when "Inspection Details - Leak Type" is null then 'Other' 
+        else "Inspection Details - Leak Type" end as source
 from ks_release.historical_releases) a where source is not null;
 
 
@@ -430,11 +430,11 @@ order by ordinal_position;
 
 select * from sources;
 
-select * from ks_release.releases;	
+select * from ks_release.releases;    
 
 select "Program", count(*) 
 from ks_release.releases
-group by "Program";	
+group by "Program";    
   
 
 select * from release_control where organization_id = 'KS'
@@ -537,9 +537,9 @@ values (23,'ust_release_cause','cause_id','v_release_cause','cause',null,null);
  * in this format, and then perform the deaggregation if necessary. 
  * Set the following variables before running the script:
  
-ust_or_release = 'release' 		# valid values are 'ust' or 'release'
+ust_or_release = 'release'         # valid values are 'ust' or 'release'
 control_id = 23                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+only_incomplete = True             # Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
  * If - and only if - this script identifies possible aggregrated data, it will output SQL file in the repo at
  * /ust/sql/KS/Releases/KS_release_deagg.sql). Open the generated file in your database console and step through it.  
@@ -561,17 +561,17 @@ only_incomplete = True 			# Boolean, set to True to restrict the output to EPA c
  * manipulating them!)
 
 select epa_column_name from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from public.v_release_needed_mapping 
-	where release_control_id = 23 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from public.v_release_needed_mapping 
+    where release_control_id = 23 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
  
  * To generate the SQL that will assist you in doing the value mapping, run the script 
  * generate_value_mapping_sql.py. Set the following variables before running the script:
  
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 23                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+only_incomplete = True           # Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
@@ -583,10 +583,10 @@ overwrite_existing = False      # Boolean, defaults to False. Set to True to ove
 ="insert into public.oust_release_value_mapping (release_control_id, excel_tab_name, organization_value, epa_value) values (23,'"&TEXTAFTER(CELL("filename",$A$1),"]")&"','"&$D2&"','"&$E2&"');"
 
 select epa_column_name from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from public.v_release_needed_mapping 
-	where release_control_id = 23 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from public.v_release_needed_mapping 
+    where release_control_id = 23 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
  
 
 
@@ -853,9 +853,9 @@ select * from release_element_mapping where release_control_id = 23;
 
 select b.epa_table_name, b.epa_column_name, organization_value, epa_value 
 from public.oust_release_value_mapping a left join release_element_mapping b 
-		on a.epa_table_name = b.epa_table_name and a.epa_column_name = b.epa_column_name  
-	left join public.v_release_sort_order c
-		on b.epa_table_name = c.table_name and b.epa_column_name = c.column_name 
+        on a.epa_table_name = b.epa_table_name and a.epa_column_name = b.epa_column_name  
+    left join public.v_release_sort_order c
+        on b.epa_table_name = c.table_name and b.epa_column_name = c.column_name 
 where release_control_id = 23
 order by table_sort_order, column_sort_order;
 
@@ -889,8 +889,8 @@ where release_control_id = 23 and excel_tab_name = 'Substance';
 select distinct organization_table_name 
 from public.oust_release_value_mapping
 where release_control_id = 23 and not exists 
-	(select distinct organization_table_name from public.release_element_mapping
-	 where release_control_id = 23)
+    (select distinct organization_table_name from public.release_element_mapping
+     where release_control_id = 23)
 order by 1
 
 v_release
@@ -900,27 +900,27 @@ v_release_cause
 v_release_substance
 
 select distinct  organization_table_name from public.release_element_mapping
-	 where release_control_id = 23
+     where release_control_id = 23
 v_releases
 v_release_cause
 v_release_source
 v_release_substances
-v_ust_releases	 
-	 
+v_ust_releases     
+     
 select * from public.release_element_mapping
-	 where release_control_id = 23
-	 and organization_table_name not in (select table_name from information_schema.columns 
-	 where table_schema = 'ks_release' )
-	 
-update 	 release_element_mapping set organization_table_name = 'v_releases'
+     where release_control_id = 23
+     and organization_table_name not in (select table_name from information_schema.columns 
+     where table_schema = 'ks_release' )
+     
+update      release_element_mapping set organization_table_name = 'v_releases'
 where release_control_id = 23 and organization_table_name = 'v_ust_releases';
-	 
-update 	 release_element_mapping set organization_table_name = 'v_release_substance'
+     
+update      release_element_mapping set organization_table_name = 'v_release_substance'
 where release_control_id = 23 and organization_table_name = 'v_release_substances';
 
 update oust_release_value_mapping set organization_table_name = replace(organization_table_name,'v_ust_','v_')
 where  release_control_id = 23
-	 
+     
 select * from public.release_element_mapping
 where release_control_id = 23 and organization_table_name = 'media_impacted_groundwater'
 
@@ -931,16 +931,16 @@ where release_element_mapping_id = 571;
 
 select a.excel_tab_name, a.organization_table_name, a.organization_column_name
 from public.oust_release_value_mapping a join 
-	(select distinct release_control_id, organization_table_name from public.release_element_mapping) b 
-	on a.release_control_id = b.release_control_id and a.organization_table_name = b.organization_table_name 
+    (select distinct release_control_id, organization_table_name from public.release_element_mapping) b 
+    on a.release_control_id = b.release_control_id and a.organization_table_name = b.organization_table_name 
 where a.release_control_id = 23 and not exists 
-	(select 1 from public.release_element_mapping b 
-	where a.release_control_id = b.release_control_id 
-	and a.organization_table_name = b.organization_table_name and a.organization_column_name = b.organization_column_name);
-	
+    (select 1 from public.release_element_mapping b 
+    where a.release_control_id = b.release_control_id 
+    and a.organization_table_name = b.organization_table_name and a.organization_column_name = b.organization_column_name);
+    
 
-select * from release_element_mapping where 	release_control_id = 23
-	
+select * from release_element_mapping where     release_control_id = 23
+    
 
 select * from release_elements;
 
@@ -1005,7 +1005,7 @@ order by table_sort_order, column_sort_order;
 select * from oust_release_value_mapping 
 where release_control_id = 23 and organization_column_name = 'substance'
 and organization_value not in 
-	(select substance from ks_release.erg_substance_datarows_deagg);
+    (select substance from ks_release.erg_substance_datarows_deagg);
 
 update oust_release_value_mapping
 set organization_value = trim(organization_value)
@@ -1027,29 +1027,29 @@ insert into public.release_element_value_mapping
 values (567, 'ACTIVE', '', null);
 
 select a.release_element_mapping_id, 
-	a.epa_table_name, a.epa_column_name, 
-	b.organization_value, b.epa_value, 'OUST key vocabulary mapping'
-	
+    a.epa_table_name, a.epa_column_name, 
+    b.organization_value, b.epa_value, 'OUST key vocabulary mapping'
+    
 insert into public.release_element_value_mapping
-	(release_element_mapping_id, organization_value, epa_value, programmer_comments)	
+    (release_element_mapping_id, organization_value, epa_value, programmer_comments)    
 select a.release_element_mapping_id, 
-	b.organization_value, b.epa_value, 'OUST key vocabulary mapping'	
+    b.organization_value, b.epa_value, 'OUST key vocabulary mapping'    
 from public.release_element_mapping a join public.oust_release_value_mapping b 
-	on a.release_control_id = b.release_control_id
-	and a.organization_table_name = b.organization_table_name 
-	and a.organization_column_name = b.organization_column_name 
+    on a.release_control_id = b.release_control_id
+    and a.organization_table_name = b.organization_table_name 
+    and a.organization_column_name = b.organization_column_name 
 where a.release_control_id = 23
 
 
 
 select distinct a.organization_table_name, a.organization_column_name, epa_table_name, epa_column_name, 
-	database_lookup_table, c.database_lookup_column, case when d.column_name is not null then 'Y' else 'N' end as allowed_values,
-	table_sort_order, column_sort_order 
+    database_lookup_table, c.database_lookup_column, case when d.column_name is not null then 'Y' else 'N' end as allowed_values,
+    table_sort_order, column_sort_order 
 from public.oust_release_value_mapping a left join public.v_release_element_mapping b
-	on a.release_control_id = b.release_control_id
-	and a.organization_table_name = b.organization_table_name and a.organization_column_name = b.organization_column_name
-	left join public.release_elements c on b.epa_column_name = c.database_column_name 
-	left join (select column_name from public.release_element_allowed_values) d on b.epa_column_name = d.column_name
+    on a.release_control_id = b.release_control_id
+    and a.organization_table_name = b.organization_table_name and a.organization_column_name = b.organization_column_name
+    left join public.release_elements c on b.epa_column_name = c.database_column_name 
+    left join (select column_name from public.release_element_allowed_values) d on b.epa_column_name = d.column_name
 where a.release_control_id = 23
 order by table_sort_order, column_sort_order;
 
@@ -1080,14 +1080,14 @@ from public.oust_release_value_mapping a
 where release_control_id = 23 
 and organization_table_name = 'v_releases' and organization_column_name = 'release_status'
 and organization_value not in  
-	(select release_status from ks_release.v_releases)
+    (select release_status from ks_release.v_releases)
 order by 1;
 
 
 select *
 from public.oust_release_value_mapping a join public.v_release_element_mapping b 
-	on a.release_control_id = b.release_control_id and a.organization_table_name = b.organization_table_name
-		and a.organization_column_name = b.organization_column_name;
+    on a.release_control_id = b.release_control_id and a.organization_table_name = b.organization_table_name
+        and a.organization_column_name = b.organization_column_name;
 
 
 select * from  ks_release.historical_releases
@@ -1107,14 +1107,14 @@ select * from oust_release_value_mapping;
 
 select distinct substance from ks_release.v_release_substance 
 where substance not in 
-	(select organization_value from oust_release_value_mapping
-	where release_control_id = 23 and organization_column_name = 'substance');
+    (select organization_value from oust_release_value_mapping
+    where release_control_id = 23 and organization_column_name = 'substance');
 
 
 select distinct substance from ks_release.erg_substance_datarows_deagg  
 where substance not in 
-	(select organization_value from oust_release_value_mapping
-	where release_control_id = 23 and organization_column_name = 'substance');
+    (select organization_value from oust_release_value_mapping
+    where release_control_id = 23 and organization_column_name = 'substance');
 
 select * from oust_release_value_mapping
 where release_control_id = 23 and organization_column_name = 'substance'
@@ -1136,9 +1136,9 @@ where release_control_id = 23 and organization_column_name = 'substance'
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 23                 # Enter an integer that is the ust_control_id or release_control_id
-send_email = True				# Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
+send_email = True                # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -1156,7 +1156,7 @@ export_file_name = None
  * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
  * Set these variables in the script:
  
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 23                 # Enter an integer that is the ust_control_id or release_control_id
   
  * To see the crosswalk views after running the script:
@@ -1177,9 +1177,9 @@ and table_name like '%_xwalk' order by 1;
  * are missing and to create an ERG table containing generated IDs if necessary. 
  * Set these variables in the script:
 
-ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
 control_id = 23                  # Enter an integer that is the release_control_id
-drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = False              # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -1195,7 +1195,7 @@ overwrite_sql_file = False       # Boolean, defaults to False. Set to True to ov
 --check to see if the script generated any tables 
 select epa_table_name, epa_column_name, organization_table_name 
 from public.v_release_element_mapping a join public.ust_template_data_tables b 
-	on a.epa_table_name = b.table_name 
+    on a.epa_table_name = b.table_name 
 where release_control_id = 23 and organization_table_name like 'erg%'
 order by sort_order;
 
@@ -1250,7 +1250,7 @@ select comments from public.release_control where release_control_id = 23;
  * adhere to all business and logic rules.  
  * Set these variables in the script:
 
-ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
 control_id = 23                  # Enter an integer that is the release_control_id
 
  * This script will check the views you just created in the state schema for the following:
@@ -1296,9 +1296,9 @@ control_id = 23                  # Enter an integer that is the release_control_
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'release' 		 # Valid values are 'ust' or 'release' 
+ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
 control_id = 23                  # Enter an integer that is the release_control_id
-delete_existing = False 		 # can set to True if there is existing UST data you need to delete before inserting new
+delete_existing = False          # can set to True if there is existing UST data you need to delete before inserting new
 
  * Do a quick sanity check of number of rows inserted:
 */
@@ -1318,7 +1318,7 @@ order by sort_order;
  * 
  * Set these variables in the script: 
 
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 23                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
@@ -1338,7 +1338,7 @@ control_id = 23                 # Enter an integer that is the ust_control_id or
  * 
  * Set these variables in the script: 
 
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 23                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
@@ -1410,7 +1410,7 @@ control_id = 23                 # Enter an integer that is the ust_control_id or
  * 
  * Set these variables in the script: 
  * 
-ust_or_release = 'release' 		# Valid values are 'ust' or 'release'
+ust_or_release = 'release'         # Valid values are 'ust' or 'release'
 control_id = 23                 # Enter an integer that is the ust_control_id or release_control_id
 all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those referenced in ust_element_mapping or release_element_mapping.
 tables_to_exclude = []          # Python list of strings; defaults to empty list. Populate with table names in the organization schema that should be excluded from the export. (NOTE: ERG-created tables will not be exported regardless of the values in this list.)

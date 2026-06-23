@@ -5,24 +5,24 @@ select count(*) from (select distinct other_id from tanks) b;
 12038
 
 select cnt_tanks, cnt_complete, cnt_tanks - cnt_complete from 
-	(select count(*) cnt_tanks from active_tanks) a, 
-	(select sum(cnt) cnt_complete from 
-		(
-		select count(*) cnt from (select distinct facility_id from active_tank_components) x
-		union all
-		select count(*) cnt from (select distinct facility_id from facilities_without_tank_info) x
-	) y ) z;
-	
+    (select count(*) cnt_tanks from active_tanks) a, 
+    (select sum(cnt) cnt_complete from 
+        (
+        select count(*) cnt from (select distinct facility_id from active_tank_components) x
+        union all
+        select count(*) cnt from (select distinct facility_id from facilities_without_tank_info) x
+    ) y ) z;
+    
 
 select cnt_tanks, cnt_complete, cnt_tanks - cnt_complete difference from 
-	(select count(*) cnt_tanks from (select distinct other_id from tanks) b ) a, 
-	(select sum(cnt) cnt_complete from 
-		(
-		select count(*) cnt from (select distinct facility_id from active_tank_components) x
-		union all
-		select count(*) cnt from (select distinct facility_id from facilities_without_tank_info) x
-	) y ) z;
-	
+    (select count(*) cnt_tanks from (select distinct other_id from tanks) b ) a, 
+    (select sum(cnt) cnt_complete from 
+        (
+        select count(*) cnt from (select distinct facility_id from active_tank_components) x
+        union all
+        select count(*) cnt from (select distinct facility_id from facilities_without_tank_info) x
+    ) y ) z;
+    
 
 
 
@@ -94,9 +94,9 @@ alter table tanks rename column "NEXT_INSPECTION_DUE_DATE" to next_inspection_du
 
 select * from tanks;
 
-23-02719	007 CARWASH	450 S 69TH ST		UPPER DARBY	PA	19082-4901	Delaware	Upper Darby Twp
-23-02719	007 CARWASH	450 S 69TH ST		UPPER DARBY	PA	19082-4901	Delaware	Upper Darby Twp
-23-02719	007 CARWASH	450 S 69TH ST		UPPER DARBY	PA	19082-4901	Delaware	Upper Darby Twp
+23-02719    007 CARWASH    450 S 69TH ST        UPPER DARBY    PA    19082-4901    Delaware    Upper Darby Twp
+23-02719    007 CARWASH    450 S 69TH ST        UPPER DARBY    PA    19082-4901    Delaware    Upper Darby Twp
+23-02719    007 CARWASH    450 S 69TH ST        UPPER DARBY    PA    19082-4901    Delaware    Upper Darby Twp
 
 select * from active_tanks where facility_id = '23-02719'
 

@@ -43,15 +43,15 @@ update ust_element_value_mappings set epa_approved = 'Y' where element_db_mappin
 -----------------------------------------------------------------------------------------------------------------
 select distinct mechanism_type from "TX_UST".financial_assurance order by 1 ;
 
-FINANCIAL TEST					FinancialResponsibilitySelfInsuranceFinancialTest
-GUARANTEE						FinancialResponsibilityGuarantee
-INSURANCE OR RISK RETENTION		FinancialResponsibilityRiskRetentionGroup
-LETTER OF CREDIT				FinancialResponsibilityLetterOfCredit
-LOCAL GOV FIN TEST				FinancialResponsibilityLocalGovernmentFinancialTest
-LOCAL GOV GUARANTEE				FinancialResponsibilityGuarantee
-OTHER							FinancialResponsibilityOtherMethod
-SURETY BOND						FinancialResponsibilitySuretyBond
-TRUST FUND						FinancialResponsibilityTrustFund
+FINANCIAL TEST                    FinancialResponsibilitySelfInsuranceFinancialTest
+GUARANTEE                        FinancialResponsibilityGuarantee
+INSURANCE OR RISK RETENTION        FinancialResponsibilityRiskRetentionGroup
+LETTER OF CREDIT                FinancialResponsibilityLetterOfCredit
+LOCAL GOV FIN TEST                FinancialResponsibilityLocalGovernmentFinancialTest
+LOCAL GOV GUARANTEE                FinancialResponsibilityGuarantee
+OTHER                            FinancialResponsibilityOtherMethod
+SURETY BOND                        FinancialResponsibilitySuretyBond
+TRUST FUND                        FinancialResponsibilityTrustFund
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
 values ('TX', '2023-03-06', 'FinancialResponsibilitySelfInsuranceFinancialTest', 'financial_assurance', 'mechanism_type');
@@ -73,7 +73,7 @@ values ('TX', '2023-03-06', 'FinancialResponsibilityTrustFund', 'financial_assur
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (116, 'FINANCIAL TEST', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (117, 'GUARANTEE', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (117, 'LOCAL GOV GUARANTEE', 'Yes');
-insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (118, 'INSURANCE OR RISK RETENTION	', 'Yes');
+insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (118, 'INSURANCE OR RISK RETENTION    ', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (119, 'LETTER OF CREDIT', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (120, 'LOCAL GOV FIN TEST', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (121, 'OTHER', 'Yes');
@@ -140,7 +140,7 @@ case when f.enforcement_action = 'N' then 'Yes' when end as "Compliance",  --IS 
 drop view "TX_UST".v_excavation_liner;
 create or replace view "TX_UST".v_excavation_liner as
 select distinct t.facility_id, t.tank_id,
-	case when t.tank_synthetic_trench_liner = 'Y' or t.tank_rigid_trench_liner = 'Y' then 'Yes' end as "ExcavationLiner"
+    case when t.tank_synthetic_trench_liner = 'Y' or t.tank_rigid_trench_liner = 'Y' then 'Yes' end as "ExcavationLiner"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -157,7 +157,7 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 drop view  "TX_UST".v_tank_wall_type;
 create view "TX_UST".v_tank_wall_type as
 select distinct t.facility_id,  t.tank_id,
-		case when t.tank_single_wall = 'Y' then 'Single' when t.tank_double_wall = 'Y' then 'Double' end as "TankWallType"
+        case when t.tank_single_wall = 'Y' then 'Single' when t.tank_double_wall = 'Y' then 'Double' end as "TankWallType"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -175,11 +175,11 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 drop view  "TX_UST".v_material_description;
 create view "TX_UST".v_material_description as
 select distinct t.facility_id,  t.tank_id,
-			case when t.tank_material_steel = 'Y' then 'Steel' 
-	     when t.tank_material_frp = 'Y' then 'Fiberglass reinforced plastic'
-	     when t.tank_material_concrete = 'Y' then 'Concrete'
-	     when t.tank_material_jacketed = 'Y' then 'Jacketed steel'
-	     when t.tank_material_coated = 'Y' then 'Epoxy coated steel' end as "MaterialDescription"
+            case when t.tank_material_steel = 'Y' then 'Steel' 
+         when t.tank_material_frp = 'Y' then 'Fiberglass reinforced plastic'
+         when t.tank_material_concrete = 'Y' then 'Concrete'
+         when t.tank_material_jacketed = 'Y' then 'Jacketed steel'
+         when t.tank_material_coated = 'Y' then 'Epoxy coated steel' end as "MaterialDescription"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -200,11 +200,11 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 drop view  "TX_UST".v_piping_material_description;
 create view "TX_UST".v_piping_material_description as
 select distinct t.facility_id,  t.tank_id,
-	case when t.piping_material_steel = 'Y' then 'Steel' 
-		 when t.piping_material_frp = 'Y' then 'Fiberglass reinforced plastic' 
-		 when t.piping_material_concrete = 'Y' then 'Other' 
-		 when t.piping_material_jacketed = 'Y' then 'Other' 
-		 when t.piping_material_flex_pipe = 'Y' then 'Flex piping' end as "PipingMaterialDescription"
+    case when t.piping_material_steel = 'Y' then 'Steel' 
+         when t.piping_material_frp = 'Y' then 'Fiberglass reinforced plastic' 
+         when t.piping_material_concrete = 'Y' then 'Other' 
+         when t.piping_material_jacketed = 'Y' then 'Other' 
+         when t.piping_material_flex_pipe = 'Y' then 'Flex piping' end as "PipingMaterialDescription"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -237,7 +237,7 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 drop view "TX_UST".v_piping_wall_type;
 create view "TX_UST".v_piping_wall_type as
 select distinct t.facility_id,  t.tank_id,
-	case when t.piping_single_wall = 'Y' then 'Single walled' when t.piping_double_wall = 'Y' then 'Double walled' end as "PipingWallType"
+    case when t.piping_single_wall = 'Y' then 'Single walled' when t.piping_double_wall = 'Y' then 'Double walled' end as "PipingWallType"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -255,7 +255,7 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 drop view "TX_UST".v_tank_corrosion_protection_sac_anode;
 create view "TX_UST".v_tank_corrosion_protection_sac_anode as
 select distinct t.facility_id,  t.tank_id,
-	case when t.tank_corrosion_cathodic_factory = 'Y' or t.tank_corrosion_cathodic_field = 'Y' then 'Yes' end as "TankCorrosionProtectionSacrificialAnode"
+    case when t.tank_corrosion_cathodic_factory = 'Y' or t.tank_corrosion_cathodic_field = 'Y' then 'Yes' end as "TankCorrosionProtectionSacrificialAnode"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -271,7 +271,7 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 drop view "TX_UST".v_tank_corrosion_protection_sac_anode_install_retro;
 create view "TX_UST".v_tank_corrosion_protection_sac_anode_install_retro as
 select distinct t.facility_id,  t.tank_id,
-	case when t.tank_corrosion_cathodic_factory = 'Y' then 'Installed' when t.tank_corrosion_cathodic_field = 'Y' then 'Retrofitted' else 'Unknown' end as "TankCorrosionProtectionAnodeInstalledOrRetrofitted"
+    case when t.tank_corrosion_cathodic_factory = 'Y' then 'Installed' when t.tank_corrosion_cathodic_field = 'Y' then 'Retrofitted' else 'Unknown' end as "TankCorrosionProtectionAnodeInstalledOrRetrofitted"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -302,7 +302,7 @@ drop view "TX_UST".v_tank_corrosion_protection_other;
 create view "TX_UST".v_tank_corrosion_protection_other as
 select distinct t.facility_id,  t.tank_id,
 case when t.tank_corrosion_external_dielectric = 'Y' or t.tank_corrosion_composite = 'Y' or t.tank_corrosion_coated = 'Y'
-			or t.tank_corrosion_frp = 'Y' or t.tank_corrosion_external_jacket = 'Y' then 'Yes' end as "TankCorrosionProtectionOther"
+            or t.tank_corrosion_frp = 'Y' or t.tank_corrosion_external_jacket = 'Y' then 'Yes' end as "TankCorrosionProtectionOther"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -342,8 +342,8 @@ drop view "TX_UST".v_piping_corrosion_protection_other;
 create view "TX_UST".v_piping_corrosion_protection_other as
 select distinct t.facility_id,  t.tank_id,
 case when t.piping_corrosion_cathodic_factory = 'Y' or t.piping_corrosion_cathodic_field = 'Y'
-			or t.piping_corrosion_frp = 'Y' or t.piping_corrosion_flex = 'Y' or t.piping_corrosion_isolated = 'Y' 
-			or t.piping_corrosion_dual = 'Y' then 'Yes' end as "PipingCorrosionProtectionOther"
+            or t.piping_corrosion_frp = 'Y' or t.piping_corrosion_flex = 'Y' or t.piping_corrosion_isolated = 'Y' 
+            or t.piping_corrosion_dual = 'Y' then 'Yes' end as "PipingCorrosionProtectionOther"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -391,7 +391,7 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 -----------------------------------------------------------------------------------------------------------------
 create view "TX_UST".v_spill_bucket as
 select distinct c.facility_id, c.tank_id, c.compartment_id,
-	case when c.sp_tight_fill_container_bucket_sump = 'Y' or c.sp_factory_container_bucket_sump = 'Y' then 'Yes' end as "SpillBucketInstalled"
+    case when c.sp_tight_fill_container_bucket_sump = 'Y' or c.sp_factory_container_bucket_sump = 'Y' then 'Yes' end as "SpillBucketInstalled"
 from "TX_UST".compartments  c;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -434,7 +434,7 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 -----------------------------------------------------------------------------------------------------------------
 create view "TX_UST".v_manual_tank_gauging as
 select distinct c.facility_id, c.tank_id, c.compartment_id,
-	case when c.compartment_rd_manual_tank_gauge = 'Y' or c.compartment_rd_monthly_tank_gauge = 'Y' then 'Yes' end as "ManualTankGauging"
+    case when c.compartment_rd_manual_tank_gauge = 'Y' or c.compartment_rd_monthly_tank_gauge = 'Y' then 'Yes' end as "ManualTankGauging"
 from "TX_UST".compartments  c;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -515,8 +515,8 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 -----------------------------------------------------------------------------------------------------------------
 create view "TX_UST".v_pipe_secondary_containment as
 select distinct facility_id, tank_id, 
-	case when t.piping_double_wall = 'Y' then 'Double walled' 
-	     when t.piping_synthetic_trench_liner = 'Y' or t.piping_rigid_trench_liner = 'Y' then 'Trench liner' end as "PipeSecondaryContainment"
+    case when t.piping_double_wall = 'Y' then 'Double walled' 
+         when t.piping_synthetic_trench_liner = 'Y' or t.piping_rigid_trench_liner = 'Y' then 'Trench liner' end as "PipeSecondaryContainment"
 from "TX_UST".tanks t;
 
 insert into ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
@@ -534,14 +534,14 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 drop view "TX_UST".v_safe_suction;
 
 select facility_id, tank_id , count(*) from 
-	(select distinct t.facility_id, t.tank_id, c.piping_rd_exempt 
-	from "TX_UST".tanks t join "TX_UST".compartments c on t.facility_id = c.facility_id and t.tank_id = c.tank_id
-	where t.piping_type = 'S') a  
+    (select distinct t.facility_id, t.tank_id, c.piping_rd_exempt 
+    from "TX_UST".tanks t join "TX_UST".compartments c on t.facility_id = c.facility_id and t.tank_id = c.tank_id
+    where t.piping_type = 'S') a  
 group by facility_id, tank_id having count(*) > 1;
 
 create view "TX_UST".v_safe_suction as
 select distinct t.facility_id, t.tank_id, 
-	case when c.piping_rd_exempt = 'Y' then 'Yes' end as "SafeSuction"
+    case when c.piping_rd_exempt = 'Y' then 'Yes' end as "SafeSuction"
 from "TX_UST".tanks t join "TX_UST".compartments c on t.facility_id = c.facility_id and t.tank_id = c.tank_id
 where t.piping_type = 'S';
 
@@ -558,7 +558,7 @@ where element_db_mapping_id = 254;
 
 create view "TX_UST".v_american_suction as
 select distinct t.facility_id, t.tank_id, 
-	case when c.piping_rd_exempt = 'N' then 'Yes' end as "AmericanSuction"
+    case when c.piping_rd_exempt = 'N' then 'Yes' end as "AmericanSuction"
 from "TX_UST".tanks t join "TX_UST".compartments c on t.facility_id = c.facility_id and t.tank_id = c.tank_id
 where t.piping_type = 'S';
 
@@ -592,9 +592,9 @@ where element_db_mapping_id = 257;
 
 -----------------------------------------------------------------------------------------------------------------
 select distinct substance from (
-	select substance_stored1 as substance from "TX_UST".compartments union all
-	select substance_stored2 from "TX_UST".compartments union all
-	select substance_stored3 from "TX_UST".compartments) a 
+    select substance_stored1 as substance from "TX_UST".compartments union all
+    select substance_stored2 from "TX_UST".compartments union all
+    select substance_stored3 from "TX_UST".compartments) a 
 where substance is not null 
 order by 1;
 
@@ -995,154 +995,154 @@ drop view "TX_UST".v_ust_base;
 
 create view "TX_UST".v_ust_base as 
 select 
-	f.facility_id as "FacilityID",
-	f.facility_name as "FacilityName",
-	ft.epa_value "FacilityType1",
-	f.site_address as "FacilityAddress1",
-	f.site_city as "FacilityCity",
-	f.site_location_county as "FacilityCounty",
-	f.site_zip as "FacilityZipCode",
-	f.site_state as "FacilityState",
-	6 as "FacilityEPARegion",
-	f.facility_contact_organization_name as "FacilityOperatorCompanyName", 
-	f.facility_contact_last_name as "FacilityOperatorLastName",
-	f.facility_contact_first_name as "FacilityOperatorFirstName",
-	f.facility_contact_mailing_address as "FacilityOperatorAddress1",
-	f.facility_contact_mailing_city as "FacilityOperatorCity",
-	f.facility_contact_mailing_zip as "FacilityOperatorZipCode",
-	f.facility_contact_mailing_state as "FacilityOperatorState",
-	f.facility_contact_mailing_phone_number || ' ' || f.facility_contact_mailing_phone_number  as "FacilityOperatorPhoneNumber",
-	f.facility_contact_email as "FacilityOperatorEmail",
-	frg.epa_value as "FinancialResponsibilityGuarantee",
-	frlc.epa_value as "FinancialResponsibilityLetterOfCredit",
-	frlg.epa_value as "FinancialResponsibilityLocalGovernmentFinancialTest",
-	frrr.epa_value as "FinancialResponsibilityRiskRetentionGroup",
-	frsi.epa_value as "FinancialResponsibilitySelfInsuranceFinancialTest",
-	frsb.epa_value as "FinancialResponsibilitySuretyBond",
-	frtf.epa_value as "FinancialResponsibilityTrustFund",
-	fro.epa_value as "FinancialResponsibilityOtherMethod",
-	case when frg.epa_value is not null or frlc.epa_value is not null or frlg.epa_value is not null 
-	       or frrr.epa_value is not null or frsi.epa_value is not null or frsb.epa_value is not null 
-	       or frtf.epa_value is not null or fro.epa_value is not null then 'Yes' else 'Unknown' end as "FinancialResponsibilityObtained",
-	cmp.epa_value as "Compliance",
-	t.tank_id as "TankID",
-	fr.epa_value as "FederallyRegulated",
-	ts.epa_value as "TankStatus",
-	eg.epa_value as "EmergencyGenerator",
-	t.tank_registration_date as "InstallationDate",
-	case when t.number_of_compartments::integer > 1 then 'Yes' when t.number_of_compartments::integer = 1 then 'No' end as "CompartmentalizedUST",
-	case when t.number_of_compartments = '' then null::integer else t.number_of_compartments::integer end as "NumberOfCompartments",
-	c.compartment_id as "CompartmentID",
-	sub.epa_value as "CompartmentSubstanceStored", 
-	case when t.tank_capacity_gallons = '' then null
-		 else t.tank_capacity_gallons::integer end as "TankCapacityGallons",
-	case when c.capacity_gallons = '' then null
-		 else c.capacity_gallons::integer end as "CompartmentCapacityGallons",
-	el.epa_value as "ExcavationLiner",
-	twt.epa_value as "TankWallType",
-	md.epa_value as "MaterialDescription",
-	pmd.epa_value "PipingMaterialDescription",
-	pfc.epa_value "PipingFlexConnector",
-	pwt.epa_value as "PipingWallType",
-	tcpsa.epa_value as "TankCorrosionProtectionSacrificialAnode",
-	tcpair.epa_value as "TankCorrosionProtectionAnodeInstalledOrRetrofitted",
-	tcpcnr.epa_value "TankCorrosionProtectionCathodicNotRequired",
-	tcpo.epa_value as "TankCorrosionProtectionOther",
-	pcpcnr.epa_value as "PipingCorrosionProtectionCathodicNotRequired",
-	pcpec.epa_value as "PipingCorrosionProtectionExternalCoating",
-	pcpo.epa_value as "PipingCorrosionProtectionOther",
-	fsd.epa_value as "FlowShutoffDevice",
-	hla.epa_value as "HighLevelAlarm",
-	sbi.epa_value as "SpillBucketInstalled", 
-	atg.epa_value as "AutomaticTankGauging",
-	atgrd.epa_value as "AutomaticTankGaugingReleaseDetection",
-	atgcld.epa_value as "AutomaticTankGaugingContinuousLeakDetection",
-	mtg.epa_value as "ManualTankGauging",
-	sir.epa_value as "StatisticalInventoryReconciliation",
-	gw.epa_value as "GroundwaterMonitoring",
-	vm.epa_value as "VaporMonitoring",
-	ell.epa_value as "ElectronicLineLeak",
-	aim.epa_value as "AutomatedIntersticialMonitoring",
-	ss.epa_value as "SafeSuction", 
-	ass.epa_value as "AmericanSuction",
-	hp.epa_value as "HighPressure",
-	psc.epa_value as "PipeSecondaryContainment",
-	imce.epa_value as "InterstitialMonitoringContinualElectric"
+    f.facility_id as "FacilityID",
+    f.facility_name as "FacilityName",
+    ft.epa_value "FacilityType1",
+    f.site_address as "FacilityAddress1",
+    f.site_city as "FacilityCity",
+    f.site_location_county as "FacilityCounty",
+    f.site_zip as "FacilityZipCode",
+    f.site_state as "FacilityState",
+    6 as "FacilityEPARegion",
+    f.facility_contact_organization_name as "FacilityOperatorCompanyName", 
+    f.facility_contact_last_name as "FacilityOperatorLastName",
+    f.facility_contact_first_name as "FacilityOperatorFirstName",
+    f.facility_contact_mailing_address as "FacilityOperatorAddress1",
+    f.facility_contact_mailing_city as "FacilityOperatorCity",
+    f.facility_contact_mailing_zip as "FacilityOperatorZipCode",
+    f.facility_contact_mailing_state as "FacilityOperatorState",
+    f.facility_contact_mailing_phone_number || ' ' || f.facility_contact_mailing_phone_number  as "FacilityOperatorPhoneNumber",
+    f.facility_contact_email as "FacilityOperatorEmail",
+    frg.epa_value as "FinancialResponsibilityGuarantee",
+    frlc.epa_value as "FinancialResponsibilityLetterOfCredit",
+    frlg.epa_value as "FinancialResponsibilityLocalGovernmentFinancialTest",
+    frrr.epa_value as "FinancialResponsibilityRiskRetentionGroup",
+    frsi.epa_value as "FinancialResponsibilitySelfInsuranceFinancialTest",
+    frsb.epa_value as "FinancialResponsibilitySuretyBond",
+    frtf.epa_value as "FinancialResponsibilityTrustFund",
+    fro.epa_value as "FinancialResponsibilityOtherMethod",
+    case when frg.epa_value is not null or frlc.epa_value is not null or frlg.epa_value is not null 
+           or frrr.epa_value is not null or frsi.epa_value is not null or frsb.epa_value is not null 
+           or frtf.epa_value is not null or fro.epa_value is not null then 'Yes' else 'Unknown' end as "FinancialResponsibilityObtained",
+    cmp.epa_value as "Compliance",
+    t.tank_id as "TankID",
+    fr.epa_value as "FederallyRegulated",
+    ts.epa_value as "TankStatus",
+    eg.epa_value as "EmergencyGenerator",
+    t.tank_registration_date as "InstallationDate",
+    case when t.number_of_compartments::integer > 1 then 'Yes' when t.number_of_compartments::integer = 1 then 'No' end as "CompartmentalizedUST",
+    case when t.number_of_compartments = '' then null::integer else t.number_of_compartments::integer end as "NumberOfCompartments",
+    c.compartment_id as "CompartmentID",
+    sub.epa_value as "CompartmentSubstanceStored", 
+    case when t.tank_capacity_gallons = '' then null
+         else t.tank_capacity_gallons::integer end as "TankCapacityGallons",
+    case when c.capacity_gallons = '' then null
+         else c.capacity_gallons::integer end as "CompartmentCapacityGallons",
+    el.epa_value as "ExcavationLiner",
+    twt.epa_value as "TankWallType",
+    md.epa_value as "MaterialDescription",
+    pmd.epa_value "PipingMaterialDescription",
+    pfc.epa_value "PipingFlexConnector",
+    pwt.epa_value as "PipingWallType",
+    tcpsa.epa_value as "TankCorrosionProtectionSacrificialAnode",
+    tcpair.epa_value as "TankCorrosionProtectionAnodeInstalledOrRetrofitted",
+    tcpcnr.epa_value "TankCorrosionProtectionCathodicNotRequired",
+    tcpo.epa_value as "TankCorrosionProtectionOther",
+    pcpcnr.epa_value as "PipingCorrosionProtectionCathodicNotRequired",
+    pcpec.epa_value as "PipingCorrosionProtectionExternalCoating",
+    pcpo.epa_value as "PipingCorrosionProtectionOther",
+    fsd.epa_value as "FlowShutoffDevice",
+    hla.epa_value as "HighLevelAlarm",
+    sbi.epa_value as "SpillBucketInstalled", 
+    atg.epa_value as "AutomaticTankGauging",
+    atgrd.epa_value as "AutomaticTankGaugingReleaseDetection",
+    atgcld.epa_value as "AutomaticTankGaugingContinuousLeakDetection",
+    mtg.epa_value as "ManualTankGauging",
+    sir.epa_value as "StatisticalInventoryReconciliation",
+    gw.epa_value as "GroundwaterMonitoring",
+    vm.epa_value as "VaporMonitoring",
+    ell.epa_value as "ElectronicLineLeak",
+    aim.epa_value as "AutomatedIntersticialMonitoring",
+    ss.epa_value as "SafeSuction", 
+    ass.epa_value as "AmericanSuction",
+    hp.epa_value as "HighPressure",
+    psc.epa_value as "PipeSecondaryContainment",
+    imce.epa_value as "InterstitialMonitoringContinualElectric"
 from "TX_UST".facilities f left join "TX_UST".tanks t on f.facility_id = t.facility_id
-	left join "TX_UST".compartments c on t.ust_id = c.ust_id  
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FacilityType1') ft on f.facility_type = ft.state_value 
-	left join (select distinct facility_id, mechanism_type from "TX_UST".financial_assurance) fa on f.facility_id = fa.facility_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilitySelfInsuranceFinancialTest') frsi 
-		on fa.mechanism_type = frsi.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityGuarantee') frg
-		on fa.mechanism_type = frg.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityRiskRetentionGroup') frrr
-		on fa.mechanism_type = frrr.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityLetterOfCredit') frlc
-		on fa.mechanism_type = frlc.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityLocalGovernmentFinancialTest') frlg
-		on fa.mechanism_type = frlg.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityOtherMethod') fro
-		on fa.mechanism_type = fro.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilitySuretyBond') frsb
-		on fa.mechanism_type = frsb.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityTrustFund') frtf
-		on fa.mechanism_type = frtf.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FederallyRegulated') fr
-		on t.tank_regulatory_status = fr.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankStatus') ts
-		on t.tank_status = ts.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'EmergencyGenerator') eg
-		on t.tank_status = eg.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'CompartmentSubstanceStored') sub
-		on c.substance_stored1 = sub.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'Compliance') cmp
-		on f.enforcement_action = cmp.state_value	
-	left join "TX_UST".v_excavation_liner vel on t.facility_id = vel.facility_id and t.tank_id = vel.tank_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'ExcavationLiner') el on vel."ExcavationLiner" = el.state_value
-	left join "TX_UST".v_tank_wall_type vtwt on t.facility_id = vtwt.facility_id and t.tank_id = vtwt.tank_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankWallType') twt on vtwt."TankWallType" = twt.state_value
-	left join "TX_UST".v_material_description vmd on t.facility_id = vmd.facility_id and t.tank_id = vmd.tank_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'MaterialDescription') md on vmd."MaterialDescription" = md.state_value
-	left join "TX_UST".v_piping_material_description vpmd on t.facility_id = vpmd.facility_id and t.tank_id = vpmd.tank_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingMaterialDescription') pmd on vpmd."PipingMaterialDescription" = pmd.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingFlexConnector') pfc on t.piping_connector_flex = pfc.state_value
-	left join "TX_UST".v_piping_wall_type vpwt on t.facility_id = vpwt.facility_id and t.tank_id = vpwt.tank_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingWallType') pwt on vpwt."PipingWallType" = pwt.state_value
-	left join "TX_UST".v_tank_corrosion_protection_sac_anode vsac on t.facility_id = vsac.facility_id and t.tank_id = vsac.tank_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankCorrosionProtectionSacrificialAnode') tcpsa on vsac."TankCorrosionProtectionSacrificialAnode" = tcpsa.state_value
-	left join "TX_UST".v_tank_corrosion_protection_sac_anode_install_retro vsacir on t.facility_id = vsacir.facility_id and t.tank_id = vsacir.tank_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankCorrosionProtectionAnodeInstalledOrRetrofitted') tcpair on vsacir."TankCorrosionProtectionAnodeInstalledOrRetrofitted" = tcpair.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankCorrosionProtectionCathodicNotRequired') tcpcnr on t.tank_corrosion_not_required = tcpcnr.state_value
-	left join "TX_UST".v_tank_corrosion_protection_other vtcpo on t.facility_id = vtcpo.facility_id and t.tank_id = vtcpo.tank_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankCorrosionProtectionOther') tcpo on vtcpo."TankCorrosionProtectionOther" = tcpo.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingCorrosionProtectionCathodicNotRequired') pcpcnr on t.piping_corrosion_not_required = pcpcnr.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingCorrosionProtectionExternalCoating') pcpec on t.piping_corrosion_external_dielectric = pcpec.state_value
-	left join "TX_UST".v_piping_corrosion_protection_other vpcpo on t.facility_id = vpcpo.facility_id and t.tank_id = vpcpo.tank_id
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingCorrosionProtectionOther') pcpo on vpcpo."PipingCorrosionProtectionOther" = pcpo.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FlowShutoffDevice') fsd on c.sp_flow_restrictor = fsd.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'HighLevelAlarm') hla on c.sp_alarm = hla.state_value
-	left join "TX_UST".v_spill_bucket vsb on c.facility_id = vsb.facility_id  and c.tank_id = vsb.tank_id and c.compartment_id = vsb.compartment_id 
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'SpillBucketInstalled') sbi on vsb."SpillBucketInstalled" = sbi.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AutomaticTankGauging') atg on c.compartment_rd_automatic_tank_gauge = atg.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AutomaticTankGaugingReleaseDetection') atgrd on c.compartment_rd_automatic_tank_gauge = atgrd.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AutomaticTankGaugingContinuousLeakDetection') atgcld on c.compartment_rd_automatic_tank_gauge = atgcld.state_value
-	left join "TX_UST".v_manual_tank_gauging vmtg on c.facility_id = vmtg.facility_id  and c.tank_id = vmtg.tank_id and c.compartment_id = vmtg.compartment_id 
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'ManualTankGauging') mtg on vmtg."ManualTankGauging" = mtg.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'StatisticalInventoryReconciliation') sir on c.compartment_rd_sir = sir.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'GroundwaterMonitoring') gw on c.compartment_rd_gw_monitoring = gw.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'VaporMonitoring') vm on c.compartment_rd_vapor_monitoring = vm.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'ElectronicLineLeak') ell on c.piping_rd_auto_line_leak_detector = ell.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AutomatedIntersticialMonitoring') aim on c.piping_rd_interstitial_monitoring = aim.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'HighPressure') hp on t.piping_type = hp.state_value
-	left join "TX_UST".v_pipe_secondary_containment vpsc on t.facility_id = vpsc.facility_id  and t.tank_id = vpsc.tank_id 
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipeSecondaryContainment') psc on vpsc."PipeSecondaryContainment" = psc.state_value
-	left join "TX_UST".v_safe_suction vss on t.facility_id = vss.facility_id  and t.tank_id = vss.tank_id 
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'SafeSuction') ss on vss."SafeSuction" = ss.state_value
-	left join "TX_UST".v_american_suction vas on t.facility_id = vas.facility_id  and t.tank_id = vas.tank_id 
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AmericanSuction') ass on vas."AmericanSuction" = ass.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'InterstitialMonitoringContinualElectric') imce on c.compartment_rd_interstitial_monitoring = imce.state_value
-	;
+    left join "TX_UST".compartments c on t.ust_id = c.ust_id  
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FacilityType1') ft on f.facility_type = ft.state_value 
+    left join (select distinct facility_id, mechanism_type from "TX_UST".financial_assurance) fa on f.facility_id = fa.facility_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilitySelfInsuranceFinancialTest') frsi 
+        on fa.mechanism_type = frsi.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityGuarantee') frg
+        on fa.mechanism_type = frg.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityRiskRetentionGroup') frrr
+        on fa.mechanism_type = frrr.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityLetterOfCredit') frlc
+        on fa.mechanism_type = frlc.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityLocalGovernmentFinancialTest') frlg
+        on fa.mechanism_type = frlg.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityOtherMethod') fro
+        on fa.mechanism_type = fro.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilitySuretyBond') frsb
+        on fa.mechanism_type = frsb.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FinancialResponsibilityTrustFund') frtf
+        on fa.mechanism_type = frtf.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FederallyRegulated') fr
+        on t.tank_regulatory_status = fr.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankStatus') ts
+        on t.tank_status = ts.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'EmergencyGenerator') eg
+        on t.tank_status = eg.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'CompartmentSubstanceStored') sub
+        on c.substance_stored1 = sub.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'Compliance') cmp
+        on f.enforcement_action = cmp.state_value    
+    left join "TX_UST".v_excavation_liner vel on t.facility_id = vel.facility_id and t.tank_id = vel.tank_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'ExcavationLiner') el on vel."ExcavationLiner" = el.state_value
+    left join "TX_UST".v_tank_wall_type vtwt on t.facility_id = vtwt.facility_id and t.tank_id = vtwt.tank_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankWallType') twt on vtwt."TankWallType" = twt.state_value
+    left join "TX_UST".v_material_description vmd on t.facility_id = vmd.facility_id and t.tank_id = vmd.tank_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'MaterialDescription') md on vmd."MaterialDescription" = md.state_value
+    left join "TX_UST".v_piping_material_description vpmd on t.facility_id = vpmd.facility_id and t.tank_id = vpmd.tank_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingMaterialDescription') pmd on vpmd."PipingMaterialDescription" = pmd.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingFlexConnector') pfc on t.piping_connector_flex = pfc.state_value
+    left join "TX_UST".v_piping_wall_type vpwt on t.facility_id = vpwt.facility_id and t.tank_id = vpwt.tank_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingWallType') pwt on vpwt."PipingWallType" = pwt.state_value
+    left join "TX_UST".v_tank_corrosion_protection_sac_anode vsac on t.facility_id = vsac.facility_id and t.tank_id = vsac.tank_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankCorrosionProtectionSacrificialAnode') tcpsa on vsac."TankCorrosionProtectionSacrificialAnode" = tcpsa.state_value
+    left join "TX_UST".v_tank_corrosion_protection_sac_anode_install_retro vsacir on t.facility_id = vsacir.facility_id and t.tank_id = vsacir.tank_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankCorrosionProtectionAnodeInstalledOrRetrofitted') tcpair on vsacir."TankCorrosionProtectionAnodeInstalledOrRetrofitted" = tcpair.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankCorrosionProtectionCathodicNotRequired') tcpcnr on t.tank_corrosion_not_required = tcpcnr.state_value
+    left join "TX_UST".v_tank_corrosion_protection_other vtcpo on t.facility_id = vtcpo.facility_id and t.tank_id = vtcpo.tank_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'TankCorrosionProtectionOther') tcpo on vtcpo."TankCorrosionProtectionOther" = tcpo.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingCorrosionProtectionCathodicNotRequired') pcpcnr on t.piping_corrosion_not_required = pcpcnr.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingCorrosionProtectionExternalCoating') pcpec on t.piping_corrosion_external_dielectric = pcpec.state_value
+    left join "TX_UST".v_piping_corrosion_protection_other vpcpo on t.facility_id = vpcpo.facility_id and t.tank_id = vpcpo.tank_id
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipingCorrosionProtectionOther') pcpo on vpcpo."PipingCorrosionProtectionOther" = pcpo.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'FlowShutoffDevice') fsd on c.sp_flow_restrictor = fsd.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'HighLevelAlarm') hla on c.sp_alarm = hla.state_value
+    left join "TX_UST".v_spill_bucket vsb on c.facility_id = vsb.facility_id  and c.tank_id = vsb.tank_id and c.compartment_id = vsb.compartment_id 
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'SpillBucketInstalled') sbi on vsb."SpillBucketInstalled" = sbi.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AutomaticTankGauging') atg on c.compartment_rd_automatic_tank_gauge = atg.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AutomaticTankGaugingReleaseDetection') atgrd on c.compartment_rd_automatic_tank_gauge = atgrd.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AutomaticTankGaugingContinuousLeakDetection') atgcld on c.compartment_rd_automatic_tank_gauge = atgcld.state_value
+    left join "TX_UST".v_manual_tank_gauging vmtg on c.facility_id = vmtg.facility_id  and c.tank_id = vmtg.tank_id and c.compartment_id = vmtg.compartment_id 
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'ManualTankGauging') mtg on vmtg."ManualTankGauging" = mtg.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'StatisticalInventoryReconciliation') sir on c.compartment_rd_sir = sir.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'GroundwaterMonitoring') gw on c.compartment_rd_gw_monitoring = gw.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'VaporMonitoring') vm on c.compartment_rd_vapor_monitoring = vm.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'ElectronicLineLeak') ell on c.piping_rd_auto_line_leak_detector = ell.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AutomatedIntersticialMonitoring') aim on c.piping_rd_interstitial_monitoring = aim.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'HighPressure') hp on t.piping_type = hp.state_value
+    left join "TX_UST".v_pipe_secondary_containment vpsc on t.facility_id = vpsc.facility_id  and t.tank_id = vpsc.tank_id 
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'PipeSecondaryContainment') psc on vpsc."PipeSecondaryContainment" = psc.state_value
+    left join "TX_UST".v_safe_suction vss on t.facility_id = vss.facility_id  and t.tank_id = vss.tank_id 
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'SafeSuction') ss on vss."SafeSuction" = ss.state_value
+    left join "TX_UST".v_american_suction vas on t.facility_id = vas.facility_id  and t.tank_id = vas.tank_id 
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'AmericanSuction') ass on vas."AmericanSuction" = ass.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'TX' and element_name = 'InterstitialMonitoringContinualElectric') imce on c.compartment_rd_interstitial_monitoring = imce.state_value
+    ;
 
 
 
@@ -1173,8 +1173,8 @@ and tank_regulatory_status in ('FULLY REGULATED','OIL WATER SEPARATOR','EMERG PO
 delete
 from  ust u 
 where organization_id = 'TX' and exists 
-	(select 1 from "TX_UST".tanks t where  u."FacilityID" = t.facility_id and u."TankID" = t.tank_id
-	and (tank_regulatory_status = 'WASTEWATER TREATMENT' or tank_regulatory_status like 'EXEMPT%' or tank_regulatory_status = 'OIL WATER SEPARATOR')) ;
+    (select 1 from "TX_UST".tanks t where  u."FacilityID" = t.facility_id and u."TankID" = t.tank_id
+    and (tank_regulatory_status = 'WASTEWATER TREATMENT' or tank_regulatory_status like 'EXEMPT%' or tank_regulatory_status = 'OIL WATER SEPARATOR')) ;
 9926
 
 select * into tx_ust_bkup from ust where organization_id = 'TX'
@@ -1182,8 +1182,8 @@ select * into tx_ust_bkup from ust where organization_id = 'TX'
 select count(*)
 from  ust u 
 where organization_id = 'TX' and exists 
-	(select 1 from "TX_UST".tanks t where  u."FacilityID" = t.facility_id and u."TankID" = t.tank_id
-	and tank_regulatory_status = 'EMERG POWER GENERATOR') ;
+    (select 1 from "TX_UST".tanks t where  u."FacilityID" = t.facility_id and u."TankID" = t.tank_id
+    and tank_regulatory_status = 'EMERG POWER GENERATOR') ;
 
 EMERG POWER GENERATOR - 1214
 1227
@@ -1191,8 +1191,8 @@ EMERG POWER GENERATOR - 1214
 delete
 from  ust u 
 where organization_id = 'TX' and exists 
-	(select 1 from "TX_UST".tanks t where  u."FacilityID" = t.facility_id and u."TankID" = t.tank_id
-	and tank_regulatory_status = 'EMERG POWER GENERATOR') ;
+    (select 1 from "TX_UST".tanks t where  u."FacilityID" = t.facility_id and u."TankID" = t.tank_id
+    and tank_regulatory_status = 'EMERG POWER GENERATOR') ;
 
 select distinct element_db_mapping_id, element_name, state_table_name, state_column_name 
 from v_ust_element_mapping where state = 'TX'
@@ -1205,7 +1205,7 @@ create index compartment_facility_id on "TX_UST".compartments (facility_id);
 create index compartment_tank_id on "TX_UST".compartments (tank_id);
 create index compartment_comparment_id on "TX_UST".compartments (compartment_id);
 
-	
+    
 select facility_status, count(*)
 from "TX_UST".facilities f  join "TX_UST".tanks t on f.facility_id = t.facility_id
 where site_address  = ''

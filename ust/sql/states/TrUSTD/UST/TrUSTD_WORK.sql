@@ -132,9 +132,9 @@ select * from trustd.ut_overfill_protection_type;
 select * from trustd.ut_spill_prevention_type;
 
 select * from trustd.ut_spill_prevention_type;
-1	Double Walled
-21	Double Walled with Interstitial Monitoring
-41	Single Walled
+1    Double Walled
+21    Double Walled with Interstitial Monitoring
+41    Single Walled
 
 
 select * from trustd.ut_release_detection_type;
@@ -186,9 +186,9 @@ select * from trustd.ut_tank_system where obs_piping_deliveries like '%:%';
 select distinct lower(pipe_type_desc) from trustd.ut_tank_system order by 1;
 
 select * from trustd.ut_spill_prevention_type;
-1	Double Walled
-21	Double Walled with Interstitial Monitoring
-41	Single Walled
+1    Double Walled
+21    Double Walled with Interstitial Monitoring
+41    Single Walled
 
 select distinct obs_spill_preventions from trustd.ut_tank_system order by 1;
 
@@ -214,14 +214,14 @@ from trustd.ut_tank_system) where tank_attributes in (1,2,3,4,5,6,7,8,9,18,19,21
 select tank_system_id, obs_tank_mods_desc, tank_attributes
 from trustd.ut_tank_system where lower(obs_tank_mods_desc) not like 'double%' and tank_attributes  like '%12%';
 
-1	Manual Tank Gauging	ManualTankGauging
-2	Tank Tightness Testing	TankTightnessTesting
-3	Inventory Control	
-4	Automatic Tank Gauging	AutomaticTankGauging
-5	Vapor Monitoring	VaporMonitoring
-6	Groundwater Monitoring	GroundwaterMonitoring
-7	Interstitial Monitoring	
-8	Statistical Inventory Reconciliation	StatisticalInventoryReconciliation
+1    Manual Tank Gauging    ManualTankGauging
+2    Tank Tightness Testing    TankTightnessTesting
+3    Inventory Control    
+4    Automatic Tank Gauging    AutomaticTankGauging
+5    Vapor Monitoring    VaporMonitoring
+6    Groundwater Monitoring    GroundwaterMonitoring
+7    Interstitial Monitoring    
+8    Statistical Inventory Reconciliation    StatisticalInventoryReconciliation
 
 
 
@@ -229,11 +229,11 @@ select tank_system_id, 'Yes' as "ManuaTankGauging"
 from (select tank_system_id, case when obs_tank_release_detections like '%:%' then substr(obs_tank_release_detections,1,instr(obs_tank_release_detections,':')-1) else obs_tank_release_detections end as obs_tank_release_detections
      from trustd.ut_tank_system) where obs_tank_release_detections = 1
 
-7	Interstitial Monitoring	                Interstitial Monitoring
-8	Statistical Inventory Reconciliation	SIR
-10	Line Tightness Testing	                Line Test
-6	Groundwater Monitoring	                GW Monitoring
-5	Vapor Monitoring	                    Vapor Monitoring
+7    Interstitial Monitoring                    Interstitial Monitoring
+8    Statistical Inventory Reconciliation    SIR
+10    Line Tightness Testing                    Line Test
+6    Groundwater Monitoring                    GW Monitoring
+5    Vapor Monitoring                        Vapor Monitoring
 
 
 select distinct obs_pipe_release_detections from trustd.ut_tank_system where obs_pipe_release_detections like '%:%' order by 1;

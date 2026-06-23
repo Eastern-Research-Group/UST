@@ -32,98 +32,98 @@ releases_path = '../imports/perf_measures_releases.csv'
 
 
 def get_df(csv_path):
-	df = pd.read_csv(csv_path)
-	df.columns = [c.replace('\r', '_').replace(' ','_') for c in df.columns]
-	return df 
+    df = pd.read_csv(csv_path)
+    df.columns = [c.replace('\r', '_').replace(' ','_') for c in df.columns]
+    return df 
 
 
 def convert_int(val):
-	int_val = None 
-	try:
-		int_val = int(val)
-	except ValueError:
-		pass  
-	return int_val
+    int_val = None 
+    try:
+        int_val = int(val)
+    except ValueError:
+        pass  
+    return int_val
 
 
 def insert_ust(csv_path):
-	df = get_df(csv_path)
-	df = df.rename(columns={'State': 'organization_id', 
-		                    'Number_of_Active_Petroleum_UST_Systems': 'num_active_petroleum_ust',
-		                    'Number_of_Closed_Petroleum_UST_Systems': 'num_closed_petroleum_ust',
-		                    'Number_of_Active_Hazardous_Substance_UST_Systems': 'num_active_hazmat_ust',
-		                    'Number_of_Closed_Hazardous_Substance_UST_Systems': 'num_closed_hazmat_ust',
-		                    'Total_Active_UST_Systems': 'total_active_ust',
-		                    'Total_Closed_UST_Systems': 'total_closed_ust'})
-	df = df.replace({',':''}, regex=True)
+    df = get_df(csv_path)
+    df = df.rename(columns={'State': 'organization_id', 
+                            'Number_of_Active_Petroleum_UST_Systems': 'num_active_petroleum_ust',
+                            'Number_of_Closed_Petroleum_UST_Systems': 'num_closed_petroleum_ust',
+                            'Number_of_Active_Hazardous_Substance_UST_Systems': 'num_active_hazmat_ust',
+                            'Number_of_Closed_Hazardous_Substance_UST_Systems': 'num_closed_hazmat_ust',
+                            'Total_Active_UST_Systems': 'total_active_ust',
+                            'Total_Closed_UST_Systems': 'total_closed_ust'})
+    df = df.replace({',':''}, regex=True)
 
-	conn = utils.connect_db()
-	cur = conn.cursor()
-	sql = "delete from public.performance_measures_ust"
-	utils.process_sql(conn, cur, sql)
-	logger.info('Deleted %s rows from performance_measures_ust', cur.rowcount)
+    conn = utils.connect_db()
+    cur = conn.cursor()
+    sql = "delete from public.performance_measures_ust"
+    utils.process_sql(conn, cur, sql)
+    logger.info('Deleted %s rows from performance_measures_ust', cur.rowcount)
 
-	i = 0
-	for index, row in df.iterrows():
-		organization_id = row['organization_id']
-		num_active_petroleum_ust = convert_int(row['num_active_petroleum_ust'])
-		num_closed_petroleum_ust = convert_int(row['num_closed_petroleum_ust'])
-		num_active_hazmat_ust = convert_int(row['num_active_hazmat_ust'])
-		num_closed_hazmat_ust = convert_int(row['num_closed_hazmat_ust'])
-		total_active_ust = convert_int(row['total_active_ust'])
-		total_closed_ust = convert_int(row['total_closed_ust'])
-		total_ust = total_active_ust + total_closed_ust
+    i = 0
+    for index, row in df.iterrows():
+        organization_id = row['organization_id']
+        num_active_petroleum_ust = convert_int(row['num_active_petroleum_ust'])
+        num_closed_petroleum_ust = convert_int(row['num_closed_petroleum_ust'])
+        num_active_hazmat_ust = convert_int(row['num_active_hazmat_ust'])
+        num_closed_hazmat_ust = convert_int(row['num_closed_hazmat_ust'])
+        total_active_ust = convert_int(row['total_active_ust'])
+        total_closed_ust = convert_int(row['total_closed_ust'])
+        total_ust = total_active_ust + total_closed_ust
 
-		sql = "insert into public.performance_measures_ust values (%s, %s, %s, %s, %s, %s, %s, %s)"
-		utils.process_sql(conn, cur, sql, params=(organization_id, num_active_petroleum_ust, num_closed_petroleum_ust, 
-						  num_active_hazmat_ust, num_closed_hazmat_ust, total_active_ust, total_closed_ust, total_ust))
-		i += 1
+        sql = "insert into public.performance_measures_ust values (%s, %s, %s, %s, %s, %s, %s, %s)"
+        utils.process_sql(conn, cur, sql, params=(organization_id, num_active_petroleum_ust, num_closed_petroleum_ust, 
+                          num_active_hazmat_ust, num_closed_hazmat_ust, total_active_ust, total_closed_ust, total_ust))
+        i += 1
 
-	conn.commit()
-	logger.info('Inserted %s rows into performance_measures_ust', i)
-	cur.close()
-	conn.close()
-	
+    conn.commit()
+    logger.info('Inserted %s rows into performance_measures_ust', i)
+    cur.close()
+    conn.close()
+    
 
 
 def insert_releases(csv_path):
-	df = get_df(csv_path)
-	df.drop(columns=['Confirmed_Releases_Actions_This_Period','Cleanups_Completed_Actions_This_Period'])
-	df = df.rename(columns={'State': 'organization_id', 
-		                    'Confirmed_Releases_Cumulative': 'num_cumulative_releases',
-		                    'Cleanups_Initiated_Cumulative': 'num_cumulative_initiated_cleanups',
-		                    'Cleanups_Completed_Cumulative': 'num_cumulative_completed_cleanups',
-		                    'Cleanups_Backlog': 'num_cleanups_backlog'})
-	df = df.replace({',':''}, regex=True)
+    df = get_df(csv_path)
+    df.drop(columns=['Confirmed_Releases_Actions_This_Period','Cleanups_Completed_Actions_This_Period'])
+    df = df.rename(columns={'State': 'organization_id', 
+                            'Confirmed_Releases_Cumulative': 'num_cumulative_releases',
+                            'Cleanups_Initiated_Cumulative': 'num_cumulative_initiated_cleanups',
+                            'Cleanups_Completed_Cumulative': 'num_cumulative_completed_cleanups',
+                            'Cleanups_Backlog': 'num_cleanups_backlog'})
+    df = df.replace({',':''}, regex=True)
 
-	conn = utils.connect_db()
-	cur = conn.cursor()
-	sql = "delete from public.performance_measures_release"
-	utils.process_sql(conn, cur, sql)
-	logger.info('Deleted %s rows from performance_measures_release', cur.rowcount)
+    conn = utils.connect_db()
+    cur = conn.cursor()
+    sql = "delete from public.performance_measures_release"
+    utils.process_sql(conn, cur, sql)
+    logger.info('Deleted %s rows from performance_measures_release', cur.rowcount)
 
-	i = 0
-	for index, row in df.iterrows():
-		organization_id = row['organization_id']
-		num_cumulative_releases = convert_int(row['num_cumulative_releases'])
-		num_cumulative_initiated_cleanups = convert_int(row['num_cumulative_initiated_cleanups'])
-		num_cumulative_completed_cleanups = convert_int(row['num_cumulative_completed_cleanups'])
-		num_cleanups_backlog = convert_int(row['num_cleanups_backlog'])
+    i = 0
+    for index, row in df.iterrows():
+        organization_id = row['organization_id']
+        num_cumulative_releases = convert_int(row['num_cumulative_releases'])
+        num_cumulative_initiated_cleanups = convert_int(row['num_cumulative_initiated_cleanups'])
+        num_cumulative_completed_cleanups = convert_int(row['num_cumulative_completed_cleanups'])
+        num_cleanups_backlog = convert_int(row['num_cleanups_backlog'])
 
-		sql = "insert into public.performance_measures_release values (%s, %s, %s, %s, %s)"
-		utils.process_sql(conn, cur, sql, params=(organization_id, num_cumulative_releases, num_cumulative_initiated_cleanups, 
-						  num_cumulative_completed_cleanups, num_cleanups_backlog))
-		i += 1
+        sql = "insert into public.performance_measures_release values (%s, %s, %s, %s, %s)"
+        utils.process_sql(conn, cur, sql, params=(organization_id, num_cumulative_releases, num_cumulative_initiated_cleanups, 
+                          num_cumulative_completed_cleanups, num_cleanups_backlog))
+        i += 1
 
-	conn.commit()
-	logger.info('Inserted %s rows into performance_measures_release', i)
-	cur.close()
-	conn.close()
+    conn.commit()
+    logger.info('Inserted %s rows into performance_measures_release', i)
+    cur.close()
+    conn.close()
 
 
 if __name__ == '__main__':   
-	# insert_ust(ust_path)
-	insert_releases(releases_path)
+    # insert_ust(ust_path)
+    insert_releases(releases_path)
 
 
 

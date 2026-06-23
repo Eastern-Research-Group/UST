@@ -17,25 +17,25 @@ overwrite_existing = False
 
 
 def upload(upload_file_path, schema, table_name, overwrite_existing=False):
-	conn = utils.connect_db()
-	cur = conn.cursor()
+    conn = utils.connect_db()
+    cur = conn.cursor()
 
-	df = pd.read_excel(upload_file_path)   
-	engine = utils.get_engine(schema=schema)    
-	if overwrite_existing:    
-		df.to_sql(table_name, engine, index=False, if_exists='replace')
-		logger.info('Created table %s', table_name)
-	else:
-		try:
-			df.to_sql(table_name, engine, index=False)
-			logger.info('Created table %s', table_name)       
-		except error as e:
-			logger.error('Unable to load file: %s', e)
+    df = pd.read_excel(upload_file_path)   
+    engine = utils.get_engine(schema=schema)    
+    if overwrite_existing:    
+        df.to_sql(table_name, engine, index=False, if_exists='replace')
+        logger.info('Created table %s', table_name)
+    else:
+        try:
+            df.to_sql(table_name, engine, index=False)
+            logger.info('Created table %s', table_name)       
+        except Exception as e:
+            logger.error('Unable to load file: %s', e)
 
-	cur.close()
-	conn.close()
+    cur.close()
+    conn.close()
 
 
 if __name__ == '__main__':   
-	upload(upload_file_path, schema, table_name, overwrite_existing)
+    upload(upload_file_path, schema, table_name, overwrite_existing)
 

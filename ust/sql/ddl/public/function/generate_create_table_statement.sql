@@ -22,7 +22,7 @@ BEGIN
                               WHERE d.adrelid = a.attrelid AND d.adnum = a.attnum AND a.atthasdef)
             else '' END as column_default_value,
             CASE WHEN a.attnotnull = true THEN 'NOT NULL' else 'NULL' END as column_not_null,
-  			case when a.attidentity = 'a' then 'generated always as identity' else '' end as column_identity,
+              case when a.attidentity = 'a' then 'generated always as identity' else '' end as column_identity,
             a.attnum as attnum,
             e.max_attnum as max_attnum
         FROM 
@@ -48,18 +48,18 @@ BEGIN
     LOOP
         IF column_record.attnum = 1 THEN
             v_table_ddl := 'CREATE TABLE ' || column_record.schema_name || 
-           					'.' || column_record.table_name || ' (';
+                               '.' || column_record.table_name || ' (';
         ELSE
             v_table_ddl := v_table_ddl || ',';
         END IF;
 
         IF column_record.attnum <= column_record.max_attnum THEN
           v_table_ddl := v_table_ddl || chr(10) || '    "' || 
-          				 column_record.column_name || '" ' || 
-                     	 column_record.column_type || ' ' || 
-                     	 column_record.column_default_value || ' ' ||
-                     	 column_record.column_not_null || ' ' ||
-                     	 column_record.column_identity;
+                           column_record.column_name || '" ' || 
+                          column_record.column_type || ' ' || 
+                          column_record.column_default_value || ' ' ||
+                          column_record.column_not_null || ' ' ||
+                          column_record.column_identity;
         END IF;
     END LOOP;
     v_table_ddl := v_table_ddl||');';

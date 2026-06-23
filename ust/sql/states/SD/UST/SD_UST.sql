@@ -405,13 +405,13 @@ from v_ust_available_mapping
 where ust_control_id = 9
 order by table_sort_order, column_sort_order;
 /*
-ust_facility	coordinate_source_id
-ust_tank	tank_location_id
-ust_tank	tank_status_id
-ust_tank	tank_material_description_id
-ust_tank_substance	substance_id
-ust_piping	piping_style_id
-ust_piping	piping_wall_type_id
+ust_facility    coordinate_source_id
+ust_tank    tank_location_id
+ust_tank    tank_status_id
+ust_tank    tank_material_description_id
+ust_tank_substance    substance_id
+ust_piping    piping_style_id
+ust_piping    piping_wall_type_id
 */
 
 /*
@@ -422,18 +422,18 @@ section below where we generate SQL to perform the mapping
 */
 select epa_table_name, epa_column_name 
 from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from v_ust_needed_mapping 
-	where ust_control_id = 9 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from v_ust_needed_mapping 
+    where ust_control_id = 9 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
 /*
-ust_facility	coordinate_source_id
-ust_tank	tank_location_id
-ust_tank	tank_status_id
-ust_tank	tank_material_description_id
-ust_tank_substance	substance_id
-ust_piping	piping_style_id
-ust_piping	piping_wall_type_id
+ust_facility    coordinate_source_id
+ust_tank    tank_location_id
+ust_tank    tank_status_id
+ust_tank    tank_material_description_id
+ust_tank_substance    substance_id
+ust_piping    piping_style_id
+ust_piping    piping_wall_type_id
 */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --owner_type_id
@@ -467,7 +467,7 @@ where ust_control_id = 9 and epa_column_name = 'facility_state';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 714 || ', ''' || "FacilityState" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 714 || ', ''' || "FacilityState" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
@@ -496,7 +496,7 @@ where ust_control_id = 9 and epa_column_name = 'coordinate_source_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 717 || ', ''' || "FacilityMethodDescription" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 717 || ', ''' || "FacilityMethodDescription" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
 
@@ -570,7 +570,7 @@ from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'substance_id';
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 729 || ', ''' || "TankProduct" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 729 || ', ''' || "TankProduct" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
 
@@ -665,7 +665,7 @@ from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'piping_style_id';
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 749 || ', ''' || "TankPipingType" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 749 || ', ''' || "TankPipingType" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
 select * from piping_styles;
@@ -698,7 +698,7 @@ from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'piping_wall_type_id';
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 767 || ', ''' || "TankPipingMaterial" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 767 || ', ''' || "TankPipingMaterial" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
 select * from piping_wall_types;
@@ -746,7 +746,7 @@ from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'tank_secondary_containment_id';
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1221 || ', ''' || "TankConstructionName" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1221 || ', ''' || "TankConstructionName" || ''', '''', null);'
 from sd_ust."tanks" where "FacilityType"='UST' order by 1;
 
 insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (1221, 'ACT-100-U', 'Single wall', null);
@@ -780,7 +780,7 @@ from v_ust_needed_mapping_insert_sql
 where ust_control_id = 9 and epa_column_name = 'tank_material_description_id';
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 727 || ', ''' || "TankConstructionName" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 727 || ', ''' || "TankConstructionName" || ''', '''', null);'
 from sd_ust."tanks"  where "FacilityType" = 'UST' order by 1;
 
 select "TankConstructionName" from  sd_ust."tanks" where "FacilityType" = 'UST';
@@ -839,7 +839,7 @@ select insert_sql
 from v_ust_needed_mapping_insert_sql 
 where ust_control_id = 9 and epa_column_name = 'tank_status_id';
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 722 || ', ''' || "StatusName" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 722 || ', ''' || "StatusName" || ''', '''', null);'
 from sd_ust."tanks" order by 1;
 
 select * from tank_statuses;
@@ -865,10 +865,10 @@ and epa_value = ' E-85/Flex Fuel (E51-E83)';
 
 select * from substances where substance like '%85%';
 
-substances	 E-85/Flex Fuel (E51-E83)
-substances	Hazardous Substance
-substances	Other
-substances	Petroleum products
+substances     E-85/Flex Fuel (E51-E83)
+substances    Hazardous Substance
+substances    Other
+substances    Petroleum products
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --check if there is any more mapping to do
@@ -892,11 +892,11 @@ database_lookup_column = state
 view_name = sd_ust.v_state_xwalk
 
 select epa_column_name, organization_table_name, organization_column_name,
-					database_lookup_table, database_lookup_column 
-			from {pop_view_name} 
-			where {control_id_col} = %s and database_lookup_table is not null
-			order by table_sort_order, column_sort_order
-			
+                    database_lookup_table, database_lookup_column 
+            from {pop_view_name} 
+            where {control_id_col} = %s and database_lookup_table is not null
+            order by table_sort_order, column_sort_order
+            
 select * from states;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -942,10 +942,10 @@ NOTE! The view queried below (v_ust_table_population_sql) contains columns that 
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_facility'
 order by column_sort_order;
@@ -962,7 +962,7 @@ order by column_sort_order;
 
 create or replace view sd_ust.v_ust_facility as 
 select distinct 
-		"FacilityNumber"::character varying(50) as facility_id,
+        "FacilityNumber"::character varying(50) as facility_id,
 "FacilityName"::character varying(100) as facility_name,
 "FacilityAddress1Text"::character varying(100) as facility_address1,
 "FacilityAddress2Text"::character varying(100) as facility_address2,
@@ -993,10 +993,10 @@ select count(*) from sd_ust.v_ust_facility;
 
 --ust_tank 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_tank'
 order by column_sort_order;
@@ -1041,21 +1041,21 @@ select count(*) from sd_ust.v_ust_tank;
 --ust_tank_substance
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_tank_substance'
 order by column_sort_order;
 /*
-"tanks"	
-"Substance"	
-substance_id as substance_id,	
-integer			
-substances	
-substance	
-erg_substance_deagg	
+"tanks"    
+"Substance"    
+substance_id as substance_id,    
+integer            
+substances    
+substance    
+erg_substance_deagg    
 Substance
 */
 
@@ -1064,9 +1064,9 @@ NOTE: ADD facility_id::character varying(50) and tank_id::int!!!!
 */
 create or replace view sd_ust.v_ust_tank_substance as 
 select distinct 
-	"FacilityNumber"::character varying(50) as facility_id,
-	c.tank_id as tank_id,
-	sx.substance_id as substance_id
+    "FacilityNumber"::character varying(50) as facility_id,
+    c.tank_id as tank_id,
+    sx.substance_id as substance_id
 from sd_ust.tanks x 
 join sd_ust.v_ust_tank c on x."FacilityNumber" = c.facility_id  and x."TankNumber" = c.tank_name::int
 left join sd_ust.v_substance_xwalk sx on x."TankProduct" = sx.organization_value
@@ -1083,10 +1083,10 @@ select count(*) from sd_ust.v_ust_tank_substance;
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_compartment'
 order by column_sort_order;
@@ -1151,10 +1151,10 @@ select facility_id,tank_id,compartment_id from sd_ust.v_ust_compartment;
 
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, programmer_comments, 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_piping'
 order by column_sort_order;
@@ -1212,9 +1212,9 @@ select count(*) from sd_ust.v_ust_piping;10647
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_ust_missing_view_mapping a
 where ust_control_id = 9
 order by 1, 2;
@@ -1226,8 +1226,8 @@ set variables:
 ust_or_release = 'ust' 
 control_id = 11
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -1260,7 +1260,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'ust' 
 control_id = 11
@@ -1274,11 +1274,11 @@ from v_ust_table_row_count
 where ust_control_id = 9 
 order by sort_order;
 /*
-ust_facility	3270
-ust_tank	10654
-ust_tank_substance	10395
-ust_compartment	10672
-ust_piping	10680
+ust_facility    3270
+ust_tank    10654
+ust_tank_substance    10395
+ust_compartment    10672
+ust_piping    10680
 */
 
 
@@ -1289,12 +1289,12 @@ ust_piping	10680
 set variables:
 control_id = 9
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 			# Set to False to export full template including mapping and reference tabs
-template_only = False 		# Set to False to export data and mapping tabs as well as reference tab
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False             # Set to False to export full template including mapping and reference tabs
+template_only = False         # Set to False to export data and mapping tabs as well as reference tab
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -1304,10 +1304,10 @@ export_file_name = None		# If export_file_path and export_file_dir/export_file_n
 set variables:
 control_id = 9
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 --------------------------------------------------------------------------------------------------------------------------
 

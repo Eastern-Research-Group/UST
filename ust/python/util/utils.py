@@ -122,7 +122,7 @@ def autowidth_column(worksheet, column):
         try: # necessary to avoid error on empty cells
             if len(str(cell.value)) > max_length:
                 max_length = len(str(cell.value))
-        except:
+        except Exception:
             pass
         adjusted_width = (max_length + 2) * 1.2
         worksheet.column_dimensions[column_letter].width = adjusted_width    
@@ -466,7 +466,7 @@ def get_epa_region(organization_id):
     process_sql(conn, cur, sql, params=(organization_id,))
     try:
         epa_region =  cur.fetchone()[0]
-    except:
+    except Exception:
         logger.warning('No such organization_id in table public.epa_regions: %s', organization_id)
         epa_region = None 
     cur.close()
@@ -482,7 +482,7 @@ def get_datatype_sql(data_type, character_maximum_length=None):
     elif character_maximum_length:
         try:
             int(character_maximum_length)
-        except:
+        except Exception:
             logger.error('character_maximum_length must be an integer (received %s)', character_maximum_length)
             exit()
     if data_type == 'character varying':
@@ -528,7 +528,8 @@ def get_join_info(dataset, epa_table_name, wheresql, schema='public'):
     join_info = {}
     conn = connect_db()
     cur = conn.cursor() 
-    sql = f"""select organization_table_name, organization_join_table,
+    sql = f"""select case when deagg_table_name is not null then deagg_table_name else organization_table_name end as organization_table_name, 
+                    organization_join_table,
                     organization_join_column, organization_join_fk,
                     organization_join_column2, organization_join_fk2,
                     organization_join_column3, organization_join_fk3,
@@ -537,7 +538,7 @@ def get_join_info(dataset, epa_table_name, wheresql, schema='public'):
             where {dataset.ust_or_release}_control_id = %s 
             and epa_table_name = %s """
     sql = sql + wheresql
-    sql = sql + """\ngroup by organization_table_name, 
+    sql = sql + """\ngroup by case when deagg_table_name is not null then deagg_table_name else organization_table_name end, 
                     organization_join_table,
                     organization_join_column, organization_join_fk,
                     organization_join_column2, organization_join_fk2,
