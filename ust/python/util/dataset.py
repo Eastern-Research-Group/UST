@@ -1,12 +1,9 @@
 import ntpath
 import os
 from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.util import utils
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 class Dataset:
@@ -35,15 +32,16 @@ class Dataset:
     def populate_export_vars(self):
         if not self.base_file_name:
             self.base_file_name = '_export.sql'
-        if not self.export_file_path and not self.export_file_path and not self.export_file_name:
+        if not self.export_file_path and not self.export_file_dir and not self.export_file_name:
+            project_ust_dir = Path(__file__).resolve().parents[2]
             if self.organization_id:
                 self.export_file_name = self.organization_id.upper() + '_' + utils.get_pretty_ust_or_release(self.ust_or_release) + '_' + self.base_file_name
             else:
                 self.export_file_name = utils.get_pretty_ust_or_release(self.ust_or_release) + '_' + self.base_file_name
             if not self.export_file_dir and self.base_file_name[-4:] == '.sql':
-                self.export_file_dir = '../../sql/states/' + self.organization_id.upper() + '/' + utils.get_pretty_ust_or_release(self.ust_or_release) + '/'
+                export_dir_path = project_ust_dir / 'sql' / 'states' / self.organization_id.upper() / utils.get_pretty_ust_or_release(self.ust_or_release)
             elif not self.export_file_dir and self.base_file_name[-5:] == '.xlsx':
-                self.export_file_dir = '../../python/exports/'
+                export_dir_path = project_ust_dir / 'python' / 'exports'
                 folder = None
                 if 'control' in self.base_file_name.lower():
                     folder = 'control_table_summaries/'
@@ -58,14 +56,16 @@ class Dataset:
                 else:
                     folder = 'other/'
                 if self.organization_id:
-                    self.export_file_dir = self.export_file_dir + folder + self.organization_id.upper() + '/' + utils.get_pretty_ust_or_release(self.ust_or_release) + '/'
+                    export_dir_path = export_dir_path / folder.rstrip('/') / self.organization_id.upper() / utils.get_pretty_ust_or_release(self.ust_or_release)
                 else:
-                    self.export_file_dir = self.export_file_dir + folder 
+                    export_dir_path = export_dir_path / folder.rstrip('/')
             else:
                 logger.error('Please set export_file_dir so I know where to save the export file. Exiting....')
+                raise RuntimeError('Unable to determine export directory. Set export_file_dir or export_file_path explicitly.')
 
-            self.export_file_path = self.export_file_dir + self.export_file_name
-            Path(self.export_file_dir).mkdir(parents=True, exist_ok=True)
+            self.export_file_dir = str(export_dir_path)
+            self.export_file_path = str(export_dir_path / self.export_file_name)
+            export_dir_path.mkdir(parents=True, exist_ok=True)
         elif self.export_file_path:
             fp = ntpath.split(self.export_file_path)
             self.export_file_dir = fp[0]

@@ -1,14 +1,7 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 # from arcgis.gis import GIS
-from arcgis.features import FeatureLayer
-
-from python.util import utils
-from python.util.logger_factory import logger, error_logger
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger, error_logger
 
 
 facilities_layer_url = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/0'
@@ -19,6 +12,11 @@ usts_out_fields = 'State,Facility_ID,Tank_ID,Tank_Status,Capacity'
 
 
 def get_layer(url):
+    try:
+        from arcgis.features import FeatureLayer
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError('download_from_ustfinder requires the arcgis package to be installed.') from exc
+
     # gis = GIS() 
     layer = FeatureLayer(url)
     logger.info('layer retrieved from %s', url)

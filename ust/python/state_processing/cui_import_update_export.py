@@ -1,15 +1,10 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 
-from python.state_processing.cui_import import CuiImport 
-from python.state_processing.cui_update import CuiUpdate 
-from python.state_processing.export_template import Template
-from python.util import utils
-from python.util.dataset import Dataset 
+from ust.python.state_processing.cui_import import CuiImport
+from ust.python.state_processing.cui_update import CuiUpdate
+from ust.python.state_processing.export_template import Template
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
 
 
 schema = ''                      # Enter the schema name
@@ -37,13 +32,13 @@ class Cui:
 
 
     def get_ust_or_release(self):
-        i = schema.find('_') + 1
-        return schema[i:]
+        i = self.schema.find('_') + 1
+        return self.schema[i:]
 
 
     def get_organization(self):
-        i = schema.find('_')
-        return schema[:i].upper()
+        i = self.schema.find('_')
+        return self.schema[:i].upper()
 
 
     def process(self):

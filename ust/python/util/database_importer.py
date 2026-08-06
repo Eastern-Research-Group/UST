@@ -1,14 +1,11 @@
 import glob
-from pathlib import Path
-import os
 import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
+from psycopg2.errors import DuplicateSchema
 
-from python.util import config, utils
-from python.util.logger_factory import logger
+from ust.python.util import config, utils
+from ust.python.util.logger_factory import logger
 
 
 

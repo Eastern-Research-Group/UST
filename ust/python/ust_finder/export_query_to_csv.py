@@ -1,14 +1,10 @@
-import os
 from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
 from zipfile import ZipFile, ZIP_DEFLATED
 
-from python.util import utils
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 

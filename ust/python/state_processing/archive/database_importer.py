@@ -6,7 +6,7 @@ from ust.python.util import config, utils
 import pandas as pd
 import os
 import glob
-from psycopg2.errors import DuplicateSchema, UndefinedTable
+from psycopg2.errors import DuplicateSchema
 
 
 class DatabaseImporter:

@@ -1,12 +1,6 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
-
-from python.util.dataset import Dataset 
-from python.util import utils
-from python.util.logger_factory import logger
+from ust.python.util.dataset import Dataset
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 ust_or_release = 'ust'               # Valid values are 'ust' or 'release' 
@@ -123,7 +117,9 @@ class IdColumns:
             utils.process_sql(self.conn, self.cur, sql)
         elif cnt > 0 and not self.drop_existing:
             logger.error('Table %s.%s already exists and drop_existing is set to False', self.dataset.schema, self.erg_table_name)
-            sys.exit()
+            raise RuntimeError(
+                f'Table {self.dataset.schema}.{self.erg_table_name} already exists; rerun with drop_existing=True to replace it.'
+            )
 
 
     def get_org_col_name(self, table_name, column_name):
@@ -304,7 +300,9 @@ class IdColumns:
                 select_cols = facility_id_col + "::varchar(50)"
             else:
                 logger.error('Enter a row in public.ust_element_mapping for epa_table_name = "%s" and epa_column_name = "facility_id", then re-run this script', self.table_name)
-                sys.exit()
+                raise RuntimeError(
+                    f'Missing element mapping for {self.table_name}.facility_id; add the mapping row and rerun the script.'
+                )
             if tank_name_info:
                 tank_name_col = '"' + tank_name_info[1] + '"'
                 select_cols = select_cols + ", " + tank_name_col + "::varchar(50)"
@@ -393,7 +391,9 @@ class IdColumns:
                     select_cols = facility_id_col + "::varchar(50)"
                 else:
                     logger.error('Enter a row in public.ust_element_mapping for epa_table_name = "%s" and epa_column_name = "facility_id", then re-run this script', self.table_name)
-                    sys.exit()
+                    raise RuntimeError(
+                        f'Missing element mapping for {self.table_name}.facility_id; add the mapping row and rerun the script.'
+                    )
                 if tank_name_info:
                     tank_name_col = '"' + tank_name_info[1] + '"'
                     select_cols = select_cols + ", " + tank_name_col + "::varchar(50)"
@@ -487,7 +487,9 @@ class IdColumns:
 
                 if not compartment_name_info and not compartment_id_info:
                     logger.error('Enter a row in public.ust_element_mapping for epa_table_name = "%s", and epa_column_name = "compartment_id" and/or epa_column_name = "compartment_name", then re-run this script', self.table_name)
-                    sys.exit()
+                    raise RuntimeError(
+                        f'Missing compartment mapping for {self.table_name}; add compartment_id and/or compartment_name mapping rows and rerun.'
+                    )
             
                 if facility_id_info:
                     facility_id_table = '"' + facility_id_info[0] + '"'
@@ -495,7 +497,9 @@ class IdColumns:
                     select_cols = facility_id_col + "::varchar(50)"
                 else:
                     logger.error('Enter a row in public.ust_element_mapping for epa_table_name = "%s" and epa_column_name = "facility_id", then re-run this script', self.table_name)
-                    sys.exit()
+                    raise RuntimeError(
+                        f'Missing element mapping for {self.table_name}.facility_id; add the mapping row and rerun the script.'
+                    )
                 if tank_name_info:
                     tank_name_col = '"' + tank_name_info[1] + '"'
                     select_cols = select_cols + ", " + tank_name_col + "::varchar(50)"
@@ -596,7 +600,14 @@ def drop_tables(dataset, table_name=None):
 
 
 
-def main(ust_or_release, control_id, table_name=None):
+def main(
+    ust_or_release,
+    control_id,
+    table_name=None,
+    drop_existing=False,
+    write_sql=True,
+    overwrite_sql_file=False,
+):
     dataset = Dataset(ust_or_release=ust_or_release,
                       control_id=control_id,
                       base_file_name='id_column_generation.sql',
@@ -624,11 +635,14 @@ def main(ust_or_release, control_id, table_name=None):
                                 drop_existing=drop_existing,
                                 write_sql=write_sql,
                                 overwrite_sql_file=overwrite_sql_file)
-            columns.process
+            columns.process()
 
 
 if __name__ == '__main__':   
     main(ust_or_release=ust_or_release,
          control_id=control_id,
-         table_name=table_name)
+         table_name=table_name,
+         drop_existing=drop_existing,
+         write_sql=write_sql,
+         overwrite_sql_file=overwrite_sql_file)
 

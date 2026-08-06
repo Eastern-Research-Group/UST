@@ -1,13 +1,8 @@
-import os
-from pathlib import Path
-import sys  
 
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset 
+from ust.python.util.logger_factory import logger
 
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 
 ust_or_release = ''             # Valid values are 'ust' or 'release'

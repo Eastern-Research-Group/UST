@@ -2,7 +2,7 @@ import sys
 import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.python.util.logger_factory import logger
-from ust.python.util import utils, config
+from ust.python.util import utils
 from ust.python.util import utils
 import psycopg2.errors
 

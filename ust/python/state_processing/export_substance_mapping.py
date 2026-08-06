@@ -1,14 +1,10 @@
 import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.state_processing.export_template import Template
-from python.util import config, utils
-from python.util.dataset import Dataset
-from python.util.emailer import Emailer 
-from python.util.logger_factory import logger
+from ust.python.state_processing.export_template import Template
+from ust.python.util import config, utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.emailer import Emailer
+from ust.python.util.logger_factory import logger
 
 
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
@@ -94,7 +90,7 @@ def main(ust_or_release, control_id=None, send_email=True, export_file_name=None
                       export_file_dir=export_file_dir,
                       export_file_path=export_file_path)
 
-    template = SubstanceMapping(dataset=dataset)
+    template = SubstanceMapping(dataset=dataset, send_email=send_email)
     template.export()
     if send_email:
         template.email()

@@ -2,16 +2,20 @@
 /* NOTES:
  * All Python scripts below are found in the github repo at https://github.com/Eastern-Research-Group/UST,
  * in the /ust/python/state_processing directory. 
- * You can set run variables at the top of the script; usually this will just be:
- * control_id (integer primary key from public.ust_control)
- * ust_or_release (string with values 'ust' or 'release').
+ * Prefer using the ust CLI commands shown in each step rather than editing variables
+ * at the top of Python scripts.
  * 
  * 1) Before beginning processing, first do a git pull on the main branch, then create and checkout a 
  *    branch the describes what you are processing, for example, XX-UST, where you will do your work. 
- * 2) Copy this template and do a global replace of XX for the organization_id. Save the script in the 
- *    repo at /ust/sql/states/XX/Releases/XX_releases.sql (create these folders if necessary)
- * 3) Follow the steps in the template; when prompted to run a Python script, change the variables
- *    at the top of the script before running it. Unless you need to make a bugfix to the Python script,
+ * 2) Run the command below to copy this template and replace XX for organization_id (and ZZ for control_id if known):
+ *
+ *    ust scaffold-template --type release --organization-id XX [--control-id ZZ]
+ *
+ *    Optional flags:
+ *    --no-control-lookup
+ *    --overwrite
+ * 3) Follow the steps in the template. Use the documented ust CLI commands where available.
+ *    Unless you need to make a bugfix to the Python script,
  *    don't include any Python scripts from the state_processing directory in your pull request later. 
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,6 +47,25 @@
  * Step 22: GIS processing (coming soon)
  * 
  */
+/* CLI QUICK CHECKLIST (copy/paste and replace XX + ZZ):
+ * Setup   : ust scaffold-template --type release --organization-id XX [--control-id ZZ]
+ * Step 1  : ust import-files --type release --organization-id XX --path "<path_to_directory_with_source_files>"
+ * Step 2  : ust init-dataset --type release --organization-id XX --data-source "<describe_data_source>" --date-received YYYY-MM-DD --comments "<dataset_comments>"
+ * Step 4  : ust create-unreg --type release --control-id ZZ
+ * Step 7  : ust generate-deagg --type release --control-id ZZ
+ * Step 8  : ust generate-value-mapping --type release --control-id ZZ --append
+ * Step 9  : ust export-substance-mapping --type release --control-id ZZ
+ * Step 10 : ust mapping-xwalks --type release --control-id ZZ
+ * Step 11 : ust create-missing-ids --type release --control-id ZZ
+ * Step 12 : ust populate-unreg --type release --control-id ZZ
+ * Step 13 : ust generate-views --type release --control-id ZZ
+ * Step 14 : ust qa --type release --control-id ZZ
+ * Step 15 : ust populate --type release --control-id ZZ
+ * Step 16 : ust export-template --type release --control-id ZZ
+ * Step 17 : ust export-control-summary --type release --control-id ZZ
+ * Step 20 : ust export-source-data --type release --control-id ZZ
+ * Optional: ust exclude-unregulated --type release --control-id ZZ
+ */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,14 +73,13 @@
 /*
  * EITHER:
  * If the data was submitted in the form of an Excel spreadsheet or a CSV/text file,
- * you can run script import_data_file_files.py. To run, set these variables:
+ * run the following command:
 
-ust_or_release = 'release'      # Valid values are 'ust' or 'release'
-organization_id = 'XX'          # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
-path = r''                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)
-overwrite_table = False         # Boolean, defaults to False; set to True if you are replacing existing data in the schema
+ust import-files --type release --organization-id XX --path "<path_to_directory_with_source_files>"
 
- * Script import_data_file_files.py will create the correct schema (if it doesn't yet exist), 
+ * Add --overwrite-table if you are replacing existing data in the schema.
+
+ * Script import_data_from_files.py will create the correct schema (if it doesn't yet exist), 
  * then upload all .xlsx, .xls, .csv, and .txt in the specified directory to this schema. 
  *
  * OR:
@@ -104,17 +126,12 @@ order by table_name;
  * To insert a new row into the control table: 
  *  
  * EITHER:
- * Run script insert_control.py
- * 
- * Set the following variables at the top of the script:
- 
-organization_id = 'XX'                  # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
-ust_or_release = 'release'              # Valid values are 'ust' or 'release'
-data_source = ''                        # Describe in detail where data came from (e.g. URL downloaded from, Excel spreadsheets from state, state API URL, etc.)
-date_received = 'YYYY-MM-DD'            # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
-date_processed = None                   # Defaults to datetime.today(). To use a date other than today, set as a string in the format of 'yyyy-mm-dd'.
-comments = ''                           # Top-level comments on the dataset. An example would be "Exclude Aboveground Storage Tanks".
-organization_compartment_flag = None    # For UST only set to 'Y' if state data includes compartments, 'N' if state data is tank-level only. You can set this later if you don't know.
+ * Run the following command:
+
+ust init-dataset --type release --organization-id XX --data-source "<describe_data_source>" --date-received YYYY-MM-DD --comments "<dataset_comments>"
+
+ * Optional flags:
+ * --date-processed YYYY-MM-DD
 
  * OR:
 
@@ -188,14 +205,13 @@ order by 1;
  * The views won't contain any rows until after the mapping is completed in subsequent steps
  * but we may inserting some rows into erg_unregulated_releases in the next step. 
  *
- * Run script create_unreg_tables.py. Set these variables in the script: 
- * 
- 
-ust_or_release = 'release'              # Valid values are 'ust' or 'release'
-control_id = ZZ                         # Enter an integer that is the ust_control_id or release_control_id
-organization_id = None                  # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
-drop_existing = False                    # Boolean; defaults to False. If True, will drop existing tables if possible (will error if there are dependent objects). If False, will rename tables if they already exist. 
-views_only = False                        # Boolean; defaults to False. If True, will not drop or create the "erg_unreg" tables and will only create/replace the "vw_erg" views related to this script.
+ * Run the following command:
+
+ust create-unreg --type release --control-id ZZ
+
+ * Optional flags:
+ * --drop-existing
+ * --views-only
 
  * 
  */
@@ -450,13 +466,12 @@ values (ZZ,'ust_release_corrective_action_strategy','corrective_action_strategy_
  * to deaggregate this data by creating an ERG table that contains a single
  * value per row.
  * 
- * Run script generate_deagg_code.py to look for state data that may be
- * in this format, and then perform the deaggregation if necessary. 
- * Set the following variables before running the script:
- 
-ust_or_release = 'release'         # valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True             # Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+ * Run the following command:
+
+ust generate-deagg --type release --control-id ZZ
+
+ * Optional flags:
+ * --all-columns
 
  * If - and only if - this script identifies possible aggregrated data, it will output SQL file in the repo at
  * /ust/sql/XX/Releases/XX_release_deagg.sql). Open the generated file in your database console and step through it.  
@@ -483,13 +498,12 @@ select epa_column_name from
     where release_control_id = ZZ and mapping_complete = 'N'
     order by table_sort_order, column_sort_order) x;
  
- * To generate the SQL that will assist you in doing the value mapping, run the script 
- * generate_value_mapping_sql.py. Set the following variables before running the script:
- 
-ust_or_release = 'release'         # Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True           # Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
-overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
+ * To generate the SQL that will assist you in doing the value mapping, run:
+
+ust generate-value-mapping --type release --control-id ZZ --append
+
+ * Optional flags:
+ * --all-columns
  
  * This script will output a SQL file (located by default in the repo at 
  * /ust/sql/XX/Releases/XX_release_value_mapping.sql). Open the generated file in your database console 
@@ -510,17 +524,12 @@ overwrite_existing = False      # Boolean, defaults to False. Set to True to ove
  * manually attach the file (located at /ust/python/exports/mapping/XX/Releases/) and send an email 
  * to John.Wilhelmi@erg.com, CCing Victoria and Renae. 
  * 
- * Set these variables in the script: 
- 
-ust_or_release = 'release'         # Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-send_email = True                # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
+ * Run the following command:
 
-# These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
-# This file directory and its contents are excluded from pushes to the repo by .gitignore.
-export_file_path = None
-export_file_dir = None
-export_file_name = None
+ust export-substance-mapping --type release --control-id ZZ
+
+ * Optional flags:
+ * --no-email
 
 */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -529,11 +538,9 @@ export_file_name = None
 --Step 10: Create the value mapping crosswalk views
 
 /* 
- * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
- * Set these variables in the script:
- 
-ust_or_release = 'release'         # Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+ * Run the following command:
+
+ust mapping-xwalks --type release --control-id ZZ
   
  * To see the crosswalk views after running the script:
 
@@ -549,16 +556,15 @@ and table_name like '%_xwalk' order by 1;
 --Step 11: Create unique identifiers if they don't exist
 
 /* 
- * Run script create_missing_id_columns.py to identify if any required columns (e.g. Tank ID, Compartment ID, etc.)
- * are missing and to create an ERG table containing generated IDs if necessary. 
- * Set these variables in the script:
+ * Run the following command:
 
-ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
-control_id = ZZ                  # Enter an integer that is the release_control_id
-table_name = None                # Optional; enter the table name that contains the missing ID column. If None, the script will identify all tables that require an ID column.
-drop_existing = False              # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
-write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
-overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
+ust create-missing-ids --type release --control-id ZZ
+
+ * Optional flags:
+ * --table-name <epa_table_name>
+ * --drop-existing
+ * --no-write-sql
+ * --overwrite-sql-file
 
  * By default, this script will generate any required ID columns, update the public.release_element_mapping table,
  * and export a SQL file (located by default in the repo at /ust/sql/XX/Releases/XX_release_id_column_generation.sql).
@@ -582,17 +588,14 @@ order by sort_order;
 --Step 12: Insert unregulated substances into table erg_unregulated_substances. 
 
 /* 
- * Run script populate_unreg_tables.py to insert unregulated heating oil tanks and gasoline/diesel
- * tanks on small farms/residences into table XX_ust.erg_unregulated_substances. The script will also 
- * insert rows into XX_ust.erg_unregulated_releases for any releases that contains only 
- * unregulated substances. 
- * Set these variables in the script:
+ * Run the following command:
 
-ust_or_release = 'release'         # Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-organization_id = None          # Optional; if control_id = 0 or None, will find the most recent control_id
-delete_auto_inserts = False      # Boolean, defaults to False. If True, will delete existing rows from erg_unregulated% tables where unregulated_reason is "Non-regulated substance", "Heating oil", or "Small tank at farm/residence". Set to False to skip the delete (will likely cause errors if this script has been run before.)
-delete_all = False                 # Boolean, defaults to False. CAUTION! If True, will delete all existing rows from erg_unregulated% tables, INCLUDING any inserted by means other this script. 
+ust populate-unreg --type release --control-id ZZ
+
+ * Optional flags:
+ * --organization-id XX
+ * --delete-auto-inserts
+ * --delete-all
 
  * If you inserted any rows into XX_ust.erg_unregulated_releases in step 5 above, be sure to leave the 
  * delete_all variable = False; otherwise the rows you inserted previously will be deleted. If you need to
@@ -626,14 +629,19 @@ delete_all = False                 # Boolean, defaults to False. CAUTION! If Tru
  * 'Bulk plant storage/petroleum distributor', however, you should not exclude heating oil releases
  * if Facility Type is not populated. 
  * 
- * You can run script find_unrequlated.py to build tables erg_unregulated_facilities and 
- * erg_unregulated_releases and then use these tables to exclude the necessary facilities and releases 
- * while writing your views, however, the QAQC script that you run in the next step will check for  
- * the existence of these unregulated facilities, and if applicable, will suggest that you run script 
- * exclude_unregulated.py, which will both identify the unregulated facilities/releases and generate 
- * the SQL for you to update your views after writing them. In most cases, it may be easier to 
- * not worry about these unregulated facilities/releases in this step and just take care of the 
- * issue during the QAQC step below if necessary. 
+ * You can run the command below to build unregulated tables and generate SQL to update your views:
+ *
+ * ust exclude-unregulated --type release --control-id ZZ
+ *
+ * Optional flags:
+ * --organization-id XX
+ * --execute-sql
+ * --print-sql
+ * --view-name <view_name>
+ * --override-existing-unreg-check
+ *
+ * In most cases, it may be easier to not worry about these unregulated facilities/releases in this step
+ * and just take care of the issue during the QAQC step below if necessary.
  * 
  * 
 */
@@ -648,12 +656,10 @@ select comments from public.release_control where release_control_id = ZZ;
 --Step 14: QA the views 
 
 /* 
- * Run script qa_check.py to check that the views you have written to populate the main data tables
- * adhere to all business and logic rules.  
- * Set these variables in the script:
+ * Run the following command to check that the views you have written to populate the main data tables
+ * adhere to all business and logic rules:
 
-ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
-control_id = ZZ                  # Enter an integer that is the release_control_id
+ust qa --type release --control-id ZZ
 
  * This script will check the views you just created in the state schema for the following:
  * 1) Missing views - will check that if you created a child view (for example, v_ust_release_substance), that the parent view(s) 
@@ -674,8 +680,16 @@ control_id = ZZ                  # Enter an integer that is the release_control_
  * 10) Bad mapping values. To resolve any cases where bad mapping values exist, examine the specific row(s) in public.release_element_value_mapping 
  *     and ensure the epa_value exists in the associated lookup table. 
  * 11) Substance mapping using an inactive substance, or a substance not flagged for releases. 
- * 12) Unregulated release data related to heating oil in certain facility types. To resolve these issues, run script
- *     exclude_unregulated.py, which will identify the unregulated releases and substances and will generate SQL to help you rewrite your views.
+ * 12) Unregulated release data related to heating oil in certain facility types. To resolve these issues, run:
+ *
+ *     ust exclude-unregulated --type release --control-id ZZ
+ *
+ *     Optional flags:
+ *     --organization-id XX
+ *     --execute-sql
+ *     --print-sql
+ *     --view-name <view_name>
+ *     --override-existing-unreg-check
  *
  * The script will also provide the counts of rows in v_ust_release, v_ust_release_substance, v_ust_release_source, v_ust_release_cause,
  * and v_ust_release_corrective_action_strategy (if these views exist) - ensure these counts make sense! 
@@ -696,16 +710,15 @@ control_id = ZZ                  # Enter an integer that is the release_control_
 --Step 15: Insert data into the EPA schema 
 
 /*
- * Run script populate_epa_data_tables.py to insert data into the main data tables in the public schema 
+ * Run the following command to insert data into the main data tables in the public schema 
  * (ust_release, ust_release_substance, ust_release_source, ust_release_cause, and/or ust_release_corrective_action_strategy)
  * using the views you wrote in Step 9 above. 
  * 
- * Set these variables in the script: 
- 
-ust_or_release = 'release'          # Valid values are 'ust' or 'release' 
-control_id = ZZ                  # Enter an integer that is the release_control_id
-organization_id = None           # Optional; if control_id = 0 or None, will find the most recent control_id
-delete_existing = False          # can set to True if there is existing UST data you need to delete before inserting new
+ust populate --type release --control-id ZZ
+
+ * Optional flags:
+ * --organization-id XX
+ * --delete-existing
 
  * Do a quick sanity check of number of rows inserted:
 */
@@ -720,13 +733,14 @@ order by sort_order;
 --Step 16: Export populated EPA template
 
 /*
- * Run script export_template.py to generate a populated EPA template that will be sent first to OUST
+ * Run the following command to generate a populated EPA template that will be sent first to OUST
  * for review, then to the state for review.
- * 
- * Set these variables in the script: 
+ *
+ust export-template --type release --control-id ZZ
 
-ust_or_release = 'release'         # Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+ * Optional flags:
+ * --data-only
+ * --template-only
 
  * 
  * This script will output an Excel file (located by default in the repo at 
@@ -741,12 +755,12 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
 --Step 17: Export control table summary
 
 /*
- * Run script control_table_summary.py to generate a high-level overview of the data for OUST's review. 
- * 
- * Set these variables in the script: 
+ * Run the following command:
 
-ust_or_release = 'release'         # Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
+ust export-control-summary --type release --control-id ZZ
+
+ * Optional flags:
+ * --organization-id XX
 
  * 
  * This script will output an Excel file (located by default in the repo at 
@@ -813,15 +827,14 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * tables from the ERG database to CSV files and upload them to the EPA Teams site at
  * Documents > General > 01 - UST Source Data > XX > ERG Source Data folder. 
  * 
- * To export the source data from the database, run script export_source_data.py
- * 
- * Set these variables in the script: 
- * 
-ust_or_release = 'release'         # Valid values are 'ust' or 'release'
-control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those referenced in ust_element_mapping or release_element_mapping.
-tables_to_exclude = []          # Python list of strings; defaults to empty list. Populate with table names in the organization schema that should be excluded from the export. (NOTE: ERG-created tables will not be exported regardless of the values in this list.)
-empty_export_dir = True         # Boolean, defaults to True. If True, will delete all files in the export directory before proceeding. If False, will not delete any files, but will overwrite any that have the same name as the generated file name. 
+ * To export the source data from the database, run:
+
+ust export-source-data --type release --control-id ZZ
+
+ * Optional flags:
+ * --used-tables-only
+ * --exclude-table <table_name>   (repeat as needed)
+ * --keep-existing-files
 
  * 
  * This script will output a CSV file for each table in the state schema (the default export location is 

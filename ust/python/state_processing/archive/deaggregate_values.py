@@ -1,10 +1,7 @@
 from logger_factory import logger
 import config, constants, utils
 
-from psycopg2.errors import DuplicateTable, UndefinedTable
-from datetime import datetime
-import pandas as pd
-import os.path
+from psycopg2.errors import UndefinedTable
 
 state = 'TN'
 ust_or_lust = 'LUST'
@@ -57,7 +54,7 @@ class Analyzer:
         self.cur.execute(sql)
         logger.info('Table %s created', self.deagg_table_name)
 
-sql = f'select "{self.key_column}", "{self.column_name}" from {self.table_name} order by 1'
+        sql = f'select "{self.key_column}", "{self.column_name}" from {self.table_name} order by 1'
         self.cur.execute(sql)
         rows = self.cur.fetchall()
         for row in rows:

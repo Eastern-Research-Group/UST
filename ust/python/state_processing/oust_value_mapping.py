@@ -1,12 +1,7 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
@@ -42,6 +37,17 @@ class OustValueMapping:
             logger.info('Disconnected from database')        
 
 
+    def fail_validation(self, message):
+        self.disconnect_db()
+        raise RuntimeError(message)
+
+
+    def log_fix_sql(self, statements, heading='Here is the SQL you can use:'):
+        logger.warning(heading)
+        for statement in statements:
+            logger.warning('\n%s', statement)
+
+
     def validate_oust_table(self):
         self.connect_db()
 
@@ -56,12 +62,12 @@ class OustValueMapping:
             logger.warning('')
             for row in rows:
                 logger.warning(row[0])
-            print('\n\nHere is the SQL you can use:\n')
-            for row in rows:
-                print(f"\nupdate public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_table_name = '', organization_column_name = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and excel_tab_name = '{row[0]}';")
-            print('\n\n')
-            self.disconnect_db()
-            exit()
+            statements = [
+                f"update public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_table_name = '', organization_column_name = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and excel_tab_name = '{row[0]}';"
+                for row in rows
+            ]
+            self.log_fix_sql(statements)
+            self.fail_validation('OUST value mapping has rows with missing organization_table_name and organization_column_name.')
 
         # Check that all organization column names are populated
         sql = f"""select distinct excel_tab_name, organization_table_name, organization_value
@@ -78,15 +84,16 @@ class OustValueMapping:
                 table_name = row[1]
                 org_value = row[2]
                 logger.warning('Excel Tab Name: %s; Organization Table Name: %s, Organization Value: %s', tab_name, table_name, org_value)
-            print('\n\nHere is the SQL you can use:\n')
+            statements = []
             for row in rows:
                 tab_name = row[0]
                 table_name = row[1]
                 org_value = row[2]
-                print(f"\nupdate public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_column_name = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and excel_tab_name = '{tab_name}' and organization_table_name = '{table_name}' and organization_value = '{org_value}';")
-            print('\n\n')
-            self.disconnect_db()
-            exit()
+                statements.append(
+                    f"update public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_column_name = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and excel_tab_name = '{tab_name}' and organization_table_name = '{table_name}' and organization_value = '{org_value}';"
+                )
+            self.log_fix_sql(statements)
+            self.fail_validation('OUST value mapping has rows with missing organization_column_name.')
 
         # Check that all organization table names are valid
         sql = f"""select distinct organization_table_name 
@@ -102,12 +109,12 @@ class OustValueMapping:
             logger.warning('')
             for row in rows:
                 logger.warning(row[0])
-            print('\n\nHere is the SQL you can use:\n')
-            for row in rows:
-                print(f"\nupdate public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_table_name = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and organization_table_name = '{row[0]}';")
-            print('\n\n')
-            self.disconnect_db()
-            exit()
+            statements = [
+                f"update public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_table_name = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and organization_table_name = '{row[0]}';"
+                for row in rows
+            ]
+            self.log_fix_sql(statements)
+            self.fail_validation('OUST value mapping contains organization_table_name values not present in element mapping.')
 
         # Check that all organization column names are valid
         sql = f"""select a.excel_tab_name, a.organization_table_name, a.organization_column_name
@@ -129,15 +136,16 @@ class OustValueMapping:
                 org_table = row[1]
                 org_col = row[2]
                 logger.warning('Excel Tab Name: %s; Organization Table Name: %s, Organization Column Name: %s', tab_name, org_table, org_col)
-            print('\n\nHere is the SQL you can use:\n')
+            statements = []
             for row in rows:
                 tab_name = row[0]
                 org_table = row[1]
-                org_col = row[2]                
-                print(f"\nupdate public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_column_name = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and organization_table_name = '{org_table}' and organization_column_name = '{org_col}';")
-            print('\n\n')
-            self.disconnect_db()
-            exit()
+                org_col = row[2]
+                statements.append(
+                    f"update public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_column_name = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id} and organization_table_name = '{org_table}' and organization_column_name = '{org_col}';"
+                )
+            self.log_fix_sql(statements)
+            self.fail_validation('OUST value mapping contains organization_column_name values not present in element mapping.')
 
         # Check that all organization values exist in state data
         sql = f"""select distinct a.organization_table_name, a.organization_column_name, epa_table_name, epa_column_name, 
@@ -171,12 +179,12 @@ class OustValueMapping:
                 logger.warning('')
                 for row2 in rows2:
                     logger.warning(row2[0])
-                print('\n\nHere is SQL you can use to fix them:')
-                for row2 in rows2:
-                    print(f"\nupdate public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_value = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id}\nand organization_table_name = '{org_table}' and organization_column_name = '{org_col}'\nand organization_value = '{row2[0]}';")
-                print('\n\n')
-                self.disconnect_db()
-                exit()
+                statements = [
+                    f"update public.oust_{self.dataset.ust_or_release}_value_mapping\nset organization_value = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id}\nand organization_table_name = '{org_table}' and organization_column_name = '{org_col}'\nand organization_value = '{row2[0]}';"
+                    for row2 in rows2
+                ]
+                self.log_fix_sql(statements, heading='Here is SQL you can use to fix them:')
+                self.fail_validation(f'OUST value mapping contains organization_value values not found in {self.dataset.schema}.{org_table}.{org_col}.')
 
         # Check that all EPA values are valid
         for row in rows:
@@ -203,12 +211,12 @@ class OustValueMapping:
                     logger.warning('')
                     for row2 in rows2:
                         logger.warning(row2[0])
-                    print('\n\nHere is SQL you can use to fix them:')
-                    for row2 in rows2:
-                        print(f"\nupdate public.oust_{self.dataset.ust_or_release}_value_mapping\nset epa_value = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id}\nand organization_table_name = '{org_table}' and organization_column_name = '{org_col}'\nand epa_value = '{row2[0]}';")
-                    print('\n\n')
-                    self.disconnect_db()
-                    exit()
+                    statements = [
+                        f"update public.oust_{self.dataset.ust_or_release}_value_mapping\nset epa_value = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id}\nand organization_table_name = '{org_table}' and organization_column_name = '{org_col}'\nand epa_value = '{row2[0]}';"
+                        for row2 in rows2
+                    ]
+                    self.log_fix_sql(statements, heading='Here is SQL you can use to fix them:')
+                    self.fail_validation(f'OUST value mapping contains invalid EPA values for lookup table public.{lookup_table}.{lookup_col}.')
 
             elif allowed_values:
                 sql = f"""select distinct epa_value
@@ -225,12 +233,12 @@ class OustValueMapping:
                     logger.warning('')
                     for row2 in rows2:
                         logger.warning(row2[0])
-                    print('\n\nHere is SQL you can use to fix them:')
-                    for row2 in rows2:
-                        print(f"\nupdate public.oust_{self.dataset.ust_or_release}_value_mapping\nset epa_value = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id}\nand organization_table_name = '{org_table}' and organization_column_name = '{org_col}'\nand epa_value = '{row2[0]}';")
-                    print('\n\n')
-                    self.disconnect_db()
-                    exit()
+                    statements = [
+                        f"update public.oust_{self.dataset.ust_or_release}_value_mapping\nset epa_value = ''\nwhere {self.dataset.ust_or_release}_control_id = {self.dataset.control_id}\nand organization_table_name = '{org_table}' and organization_column_name = '{org_col}'\nand epa_value = '{row2[0]}';"
+                        for row2 in rows2
+                    ]
+                    self.log_fix_sql(statements, heading='Here is SQL you can use to fix them:')
+                    self.fail_validation(f'OUST value mapping contains EPA values not present in public.{self.dataset.ust_or_release}_element_allowed_values.')
 
             else:
                 logger.warning('The EPA values for %s.%s.%s do not appear to either be in a lookup table or in the list of allowed values!', self.dataset.schema, org_table, org_col)

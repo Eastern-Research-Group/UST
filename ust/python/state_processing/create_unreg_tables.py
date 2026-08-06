@@ -1,15 +1,10 @@
-import os
-from pathlib import Path
 import string
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import psycopg2
 
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 
 ust_or_release = ''                      # Valid values are 'ust' or 'release'
@@ -63,14 +58,16 @@ class UnregTables:
                   where {self.dataset.ust_or_release}_control_id = %s
                   and epa_column_name like 'facility_type%%' and epa_table_name = %s"""
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.epa_facility_table))
-        self.org_facility_table = self.cur.fetchone()[0]
+        facility_row = self.cur.fetchone()
+        self.org_facility_table = facility_row[0] if facility_row else None
 
         sql = f"""select organization_table_name 
                   from public.{self.dataset.ust_or_release}_element_mapping 
                   where {self.dataset.ust_or_release}_control_id = %s
                   and epa_column_name = 'substance_id' and epa_table_name = %s"""
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.epa_substance_table))
-        self.org_substance_table = self.cur.fetchone()[0]
+        substance_row = self.cur.fetchone()
+        self.org_substance_table = substance_row[0] if substance_row else None
 
         self.disconnect_db()
 
@@ -125,7 +122,8 @@ class UnregTables:
             if cnt > 0:
                 logger.warning('drop_tables = False but table %s already exists. Exiting...', table)
                 self.disconnect_db()
-                exit()
+                raise RuntimeError(f'Table {table} already exists and drop_existing is False.')
+            return True
 
 
     def create_tables(self):

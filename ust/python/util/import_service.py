@@ -1,10 +1,5 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.util.database_importer import DatabaseImporter  
+from ust.python.util.database_importer import DatabaseImporter
 
 
 class ImportService:
@@ -22,8 +17,7 @@ class ImportService:
         self.import_ust(organization_id, file_path, overwrite_table)
         self.import_release(organization_id, file_path, overwrite_table)
 
-class ImportService:    
-    def import_data(self, organization_id, file_path, system_type, overwrite_table=True):
-        importer = DatabaseImporter(organization_id, file_path, system_type, overwrite_table)
+    def import_data(self, organization_id, ust_or_release, file_path, overwrite_table=True):
+        importer = DatabaseImporter(organization_id, ust_or_release, file_path, overwrite_table)
         importer.save_files_to_db()
     

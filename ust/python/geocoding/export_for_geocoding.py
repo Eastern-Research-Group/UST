@@ -1,13 +1,9 @@
-import os
 from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
 
-from python.util import utils
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 ust_control_ids = []             # List of ust_control_id's to include in export. Can be empty if release_control_ids is not empty. 

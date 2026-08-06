@@ -1,15 +1,5 @@
-from datetime import datetime
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
-
-import pandas as pd
-
-from python.util import utils
-from python.util.logger_factory import logger
-from python.util.upload_general_file import Importer
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
@@ -87,7 +77,7 @@ class CuiUpdate:
         except Exception:
             logger.warning('No CUI column found in %s.%s; exiting', self.schema, self.cui_table_name)
             self.disconnect_db()
-            exit()
+            raise RuntimeError(f'No CUI column found in {self.schema}.{self.cui_table_name}.')
         return cui_column_name
 
 
@@ -129,8 +119,8 @@ def main(ust_or_release,
           control_id=None,
           organization_id=None):
     if (control_id == 0 or not control_id) and not organization_id:
-        logger.errror('Either control_id or organization_id is required; exiting')
-        exit()
+        logger.error('Either control_id or organization_id is required; exiting')
+        raise ValueError('Either control_id or organization_id is required.')
     if not control_id:
         control_id = utils.get_control_id(ust_or_release, organization_id.upper())
         logger.info('control_id set to %s', control_id)

@@ -1,9 +1,7 @@
 import sys
 import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
-from ust.python.util.logger_factory import logger
-from ust.python.util import utils, config
-import psycopg2.errors
+from ust.python.util import utils
 
 
 def find_too_long_col(col_length, organization_id, ust_or_lust='ust', view_name=None):

@@ -1,17 +1,12 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import openpyxl as op
 from openpyxl.styles import Alignment, Font
 from openpyxl.styles.borders import Border, Side
 
-from python.state_processing import element_mapping_to_excel
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.state_processing import element_mapping_to_excel
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 
 ust_or_release = ''             # Valid values are 'ust' or 'release'

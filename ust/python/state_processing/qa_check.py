@@ -1,19 +1,14 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import openpyxl as op
 from openpyxl.styles import Font
 import psycopg2.errors
 
-from python.state_processing import element_mapping_to_excel
-from python.state_processing.qa_exclusions import Exclusions
-from python.state_processing.qa_summary_counts import SummaryCounts
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.state_processing import element_mapping_to_excel
+from ust.python.state_processing.qa_exclusions import Exclusions
+from ust.python.state_processing.qa_summary_counts import SummaryCounts
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 
 ust_or_release = ''             # Valid values are 'ust' or 'release'
@@ -21,6 +16,7 @@ control_id = 0                    # Enter an integer that is the ust_control_id 
 organization_id = ''            # Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
 force_exclusions = False        # Boolean; defaults to False. If False, will only generate exclusions (e.g. unregulated substances, etc.) if there are no errors. Set to True to force exclusion export even if there are errors to resolve.
 force_summary_counts = False    # Boolean; defaults to False. If False, will only generate summary counts if there are no errors. Set to True to force summary counts even if there are errors to resolve.
+include_details = True          # Boolean; defaults to True. Set to False to skip detail worksheets and speed up QA runs.
 
 # These variables can usually be left unset. This script will generate an Excel spreadsheet in the appropriate state folder in the repo under /ust/python/exports/QAQC
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -59,10 +55,11 @@ class QualityCheck:
     error_cnt_dict = {}
     view_counts = {}
 
-    def __init__(self, dataset, force_exclusions=False, force_summary_counts=False):
+    def __init__(self, dataset, force_exclusions=False, force_summary_counts=False, include_details=True):
         self.dataset = dataset
         self.force_exclusions = force_exclusions
         self.force_summary_counts = force_summary_counts
+        self.include_details = include_details
 
 
 
@@ -73,7 +70,7 @@ class QualityCheck:
             logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
             logger.info('Views this script looks for: %s', self.get_view_names())
             self.disconnect_db()
-            exit()
+            raise RuntimeError(f'No {self.dataset.ust_or_release} template views found in schema {self.dataset.schema}.')
         self.wb = op.Workbook()    
         self.check_missing_views()
         self.set_view_counts()
@@ -199,7 +196,14 @@ class QualityCheck:
         self.view_col_str = col_str 
 
 
+    def _select_count(self, sql, params=None):
+        utils.process_sql(self.conn, self.cur, sql, params=params)
+        return self.cur.fetchone()[0]
+
+
     def write_to_ws(self, data, ws_name):
+        if not self.include_details:
+            return
         ws_name = ws_name[:31]
         if data:
             ws = self.wb.create_sheet(ws_name)
@@ -231,6 +235,11 @@ class QualityCheck:
 
     def check_required_cols(self):
         # check for missing columns in the view that are required by EPA 
+        sql = """select column_name from information_schema.columns
+                where table_schema = %s and table_name = %s"""
+        utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.view_name))
+        existing_cols = {r[0] for r in self.cur.fetchall()}
+
         sql = """select column_name from information_schema.columns 
                 where table_schema = 'public' and table_name = %s 
                 and is_nullable = 'NO' and ordinal_position > 1
@@ -240,22 +249,18 @@ class QualityCheck:
         rows = self.cur.fetchall()
         for row in rows:
             col_name = row[0]
-            sql2 = """select count(*) from information_schema.columns 
-                     where table_schema = %s and table_name = %s
-                     and column_name = %s"""
-            utils.process_sql(self.conn, self.cur, sql2, params=(self.dataset.schema, self.view_name, col_name))
-            cnt = self.cur.fetchone()[0]
-            if cnt < 1:
+            if col_name not in existing_cols:
                 self.error_dict['Missing required column'] = self.dataset.schema + '.' + self.view_name + '.' + col_name 
                 logger.warning('Missing required column %s in view %s.%s', col_name, self.dataset.schema, self.view_name)
             else:
-                sql3 = f"select * from {self.dataset.schema}.{self.view_name} where {col_name} is null"
-                utils.process_sql(self.conn, self.cur, sql3)
-                data = self.cur.fetchall()
-                num_rows = len(data)
+                sql3 = f"select count(*) from {self.dataset.schema}.{self.view_name} where {col_name} is null"
+                num_rows = self._select_count(sql3)
                 self.error_cnt_dict['Number of null rows for required column ' + self.table_name + '.' + col_name] = num_rows
                 logger.warning('Number of null rows for required column %s.%s = %s', self.table_name, col_name, num_rows)
-                self.write_to_ws(data, col_name + ' null')
+                if num_rows > 0:
+                    details_sql = f"select * from {self.dataset.schema}.{self.view_name} where {col_name} is null"
+                    utils.process_sql(self.conn, self.cur, details_sql)
+                    self.write_to_ws(self.cur.fetchall(), col_name + ' null')
 
 
     def check_duplicate_rows(self):
@@ -375,13 +380,19 @@ class QualityCheck:
 
     def check_nonunique(self):
         # check for non-unique (repeating) rows    
-        sql = f"select {self.view_col_str}, count(*) from {self.dataset.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
-        utils.process_sql(self.conn, self.cur, sql)
-        data = self.cur.fetchall()
-        num_rows = len(data)
+        count_sql = f"""select count(*)
+                        from (
+                            select 1 from {self.dataset.schema}.{self.view_name}
+                            group by {self.view_col_str}
+                            having count(*) > 1
+                        ) x"""
+        num_rows = self._select_count(count_sql)
         self.error_cnt_dict['nonunique rows in ' + self.dataset.schema + '.' + self.view_name] = num_rows
         logger.warning('Number of non-unique rows in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
-        self.write_to_ws(data, self.view_name + ' nonunique')
+        if num_rows > 0:
+            sql = f"select {self.view_col_str}, count(*) from {self.dataset.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
+            utils.process_sql(self.conn, self.cur, sql)
+            self.write_to_ws(self.cur.fetchall(), self.view_name + ' nonunique')
 
 
     def check_failed_constraints(self):
@@ -397,23 +408,25 @@ class QualityCheck:
         for row in rows:
             constraint_name = row[0]
             check_clause = row[1]
-            sql2 = f"select * from {self.dataset.schema}.{self.view_name} where not {check_clause}"
+            sql2 = f"select count(*) from {self.dataset.schema}.{self.view_name} where not {check_clause}"
             try:
                 self.cur.execute(sql2)
             except psycopg2.errors.UndefinedColumn:
                 continue 
-            except Exception as e:
+            except psycopg2.Error as e:
                 logger.error('Error processing SQL: %s', e)
                 utils.pretty_print_query(self.cur)
                 self.conn.rollback()
                 self.cur.close()
                 self.conn.close()        
-                exit()  
-            data = self.cur.fetchall()
-            num_rows = len(data)
+                raise RuntimeError(f'Failed evaluating check constraint {constraint_name} against {self.dataset.schema}.{self.view_name}.') from e
+            num_rows = self.cur.fetchone()[0]
             self.error_cnt_dict['failed check constraint ' + self.dataset.schema + '.' + constraint_name] = num_rows
             logger.warning('Number of failed rows for check constraint %s.%s: %s', self.table_name, constraint_name, num_rows)
-            self.write_to_ws(data, constraint_name)
+            if num_rows > 0:
+                detail_sql = f"select * from {self.dataset.schema}.{self.view_name} where not {check_clause}"
+                utils.process_sql(self.conn, self.cur, detail_sql)
+                self.write_to_ws(self.cur.fetchall(), constraint_name)
 
 
     def check_missing_mapping(self):
@@ -620,21 +633,31 @@ class QualityCheck:
     def check_unregulated_parents(self):
         if self.dataset.ust_or_release == 'ust':
             unreg_table = 'erg_unregulated_tanks'    
+            unreg_col = 'facility_id'
             unreg_type = 'facilities'
         else:
             unreg_table = 'erg_unregulated_releases'
             unreg_col = 'release_id'
             unreg_type = 'releases'
 
-        sql = f"""select a.{unreg_col}, b.unregulated_reason
+        if not utils.get_table_existence(unreg_table, self.dataset.schema):
+            msg = f'Missing table {self.dataset.schema}.{unreg_table}; skipping unregulated {unreg_type} check. Run create-unreg first.'
+            logger.warning(msg)
+            self.error_cnt_dict['Rows with unregulated ' + unreg_type + ' not excluded from ' + self.view_name] = 0
+            self.error_dict[msg] = 'Skipped'
+            return
+
+        sql = f"""select count(*)
                   from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on a.{unreg_col} = b.{unreg_col}"""
-        utils.process_sql(self.conn, self.cur, sql)
-        data = self.cur.fetchall()
-        num_rows = len(data)
+        num_rows = self._select_count(sql)
         self.error_cnt_dict['Rows with unregulated ' + unreg_type + ' not excluded from ' + self.view_name] = num_rows
         logger.warning('Rows with unregulated %s in %s: %s', unreg_type, self.view_name, num_rows)
         if num_rows > 0:
             self.error_dict['Unregulated ' + unreg_type + ' in ' + self.view_name] =  num_rows
+            detail_sql = f"""select a.{unreg_col}, b.unregulated_reason
+                           from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on a.{unreg_col} = b.{unreg_col}"""
+            utils.process_sql(self.conn, self.cur, detail_sql)
+            data = self.cur.fetchall()
             self.write_to_ws(data, 'Unreg ' + self.view_name.replace('v_ust_',''))
 
 
@@ -752,7 +775,7 @@ class QualityCheck:
         try:
             self.wb.remove(self.wb['Sheet'])
             self.wb.active = self.wb['Overview']
-        except Exception:
+        except KeyError:
             pass
         self.wb.save(self.dataset.export_file_path)
 
@@ -763,6 +786,7 @@ def main(ust_or_release,
          organization_id=None, 
          force_exclusions=False,
          force_summary_counts=False, 
+         include_details=True,
          export_file_name=None, 
          export_file_dir=None, 
          export_file_path=None):
@@ -776,7 +800,12 @@ def main(ust_or_release,
                       export_file_dir=export_file_dir,
                       export_file_path=export_file_path)
 
-    qc = QualityCheck(dataset=dataset, force_exclusions=force_exclusions, force_summary_counts=force_summary_counts)
+    qc = QualityCheck(
+        dataset=dataset,
+        force_exclusions=force_exclusions,
+        force_summary_counts=force_summary_counts,
+        include_details=include_details,
+    )
     qc.process()
 
 if __name__ == '__main__':   
@@ -785,6 +814,7 @@ if __name__ == '__main__':
          organization_id=organization_id,
          force_exclusions=force_exclusions,
          force_summary_counts=force_summary_counts,
+         include_details=include_details,
          export_file_name=export_file_name,
          export_file_dir=export_file_dir,
          export_file_path=export_file_path)

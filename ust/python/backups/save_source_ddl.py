@@ -1,12 +1,7 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.backups.save_ddl import Ddl 
-from python.util import utils
-from python.util.logger_factory import logger
+from ust.python.backups.save_ddl import Ddl
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 schema = '' # If None, will export DDL for all _ust and _release schemas. 

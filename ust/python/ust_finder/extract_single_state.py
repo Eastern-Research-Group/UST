@@ -1,12 +1,7 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
 
-from python.util.logger_factory import logger
+from ust.python.util.logger_factory import logger
 
 path_to_facilities = r'C:/Users/erguser/Downloads/facilities.csv'
 path_to_tanks = r'C:/Users/erguser/Downloads/tanks.csv' 

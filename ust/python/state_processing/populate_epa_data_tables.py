@@ -1,13 +1,8 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.state_processing.cui_update import CuiUpdate 
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.state_processing.cui_update import CuiUpdate
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 
 ust_or_release = ''              # Valid values are 'ust' or 'release' 
@@ -43,7 +38,12 @@ class Populate:
             cnt = cur.fetchone()[0]
             if cnt > 0:
                 logger.warning('Data found in %s for %s_control_id %s. To proceed, set the delete_existing variable to True.', table_name, self.dataset.ust_or_release, self.dataset.control_id)
-                exit()
+                cur.close()
+                conn.close()
+                raise RuntimeError(
+                    f'Data already exists in public.{table_name} for {self.dataset.ust_or_release}_control_id {self.dataset.control_id}; '
+                    'rerun with delete_existing=True to replace it.'
+                )
 
         table_name = self.dataset.ust_or_release + '_template_data_tables'
         sql = f"""select table_name, view_name, sort_order

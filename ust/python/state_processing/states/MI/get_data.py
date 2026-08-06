@@ -1,22 +1,16 @@
 import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-import csv
-import json 
+import http.client
+import json
 import pandas as pd
-import requests
 import socket
 import ssl
 import time
-from urllib import error, parse, request
+from urllib import error, request
 
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
-from python.util.export_table import ExportTable
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
+from ust.python.util.export_table import ExportTable
 
 
 organization_id = 'MI'
@@ -33,32 +27,50 @@ MAX_TIMEOUT = 10
 TIMEOUT_TIME = 300
 
 
+def nested_get(data, *keys, default=None):
+    current = data
+    for key in keys:
+        if not isinstance(current, dict):
+            return default
+        current = current.get(key)
+        if current is None:
+            return default
+    return current
+
+
 def get_session():
-  s = requests.session()
-  return s
+    try:
+        import requests
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError('MI get_data requires the requests package to be installed.') from exc
+
+    s = requests.session()
+    return s
 
 
 def get_html(url, session=None, retry_count=0):
     url = url.replace('#','%23').replace(' ','%20')
     html = ''
     if session:
+        import requests
+
         try:
             response = session.get(url, timeout=MAX_TIMEOUT)
             return response.text
         except (requests.exceptions.Timeout, requests.exceptions.ReadTimeout) as e:
             logger.warning('Timed out trying to access %s: %s', url, e)
             return
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             logger.warning('Unable to access %s: %s', url, e)
             return
     else:
         try:
             context = ssl._create_unverified_context()
-            response = urlopen(url, context=context, timeout=MAX_TIMEOUT)
+            response = request.urlopen(url, context=context, timeout=MAX_TIMEOUT)
         except error.HTTPError:
             try:
-                req = Request(url=url, headers={'User-Agent': 'Mozilla/5.0'})
-                response = urlopen(req)
+                req = request.Request(url=url, headers={'User-Agent': 'Mozilla/5.0'})
+                response = request.urlopen(req)
             except error.HTTPError as e:
                 raise e
         except error.URLError as e:
@@ -68,9 +80,9 @@ def get_html(url, session=None, retry_count=0):
             if retry_count == MAX_URL_TRIES:
                 logger.warning('Exceeded MAX_URL_TRIES attempting to access %s', url)
                 raise e
-            time.sleep(config.TIMEOUT_TIME)
+            time.sleep(TIMEOUT_TIME)
             get_html(url, session=session, retry_count=retry_count + 1)
-        except Exception as e:
+        except (ssl.SSLError, OSError) as e:
             logger.warning('Error attempting to access %s: %s', url, e)
             raise e
     try:
@@ -121,7 +133,7 @@ class MiApi:
                 self.cursor.close()
                 self.conn.close()
                 logger.info('Disconnected from database')
-            except Exception:
+            except (AttributeError, psycopg2.Error):
                 pass
 
 
@@ -133,33 +145,18 @@ class MiApi:
         utils.process_sql(self.conn, self.cursor, sql)
         try:
             self.page_number = self.cursor.fetchone()[0] + 1
-        except Exception:
+        except TypeError:
             self.page_number = 0
         logger.info('Next page number processed is %s', self.page_number)
 
         
     def extract_facility_types(self, json, locationid):
         for f in json:
-            try:
-                facilitytype_id = f['id']
-            except Exception:
-                facilitytype_id = None 
-            try:
-                businesstypeid = f['businessTypeId']
-            except Exception:
-                businesstypeid = None 
-            try:
-                facilitytype_name = f['name']
-            except Exception:
-                facilitytype_name = None 
-            try:
-                isactive = f['isActive']
-            except Exception:
-                isactive = None 
-            try:
-                isreserved = f['isreserved']
-            except Exception:
-                isreserved = None 
+            facilitytype_id = nested_get(f, 'id')
+            businesstypeid = nested_get(f, 'businessTypeId')
+            facilitytype_name = nested_get(f, 'name')
+            isactive = nested_get(f, 'isActive')
+            isreserved = nested_get(f, 'isreserved')
             sql = """insert into mi_ust.facilitytype (locationid, id, businesstypeid, name, isactive, isreserved)
                         values (%s, %s, %s, %s, %s, %s)
                         on conflict (locationid, name) do nothing 
@@ -176,62 +173,20 @@ class MiApi:
 
     def extract_location_release(self, json, locationid):
         for r in json:
-            try:
-                locationreleaseid = r['locationReleaseId']
-            except Exception:
-                locationreleaseid = None 
-            try:
-                releasetypeid = r['releaseTypeId']
-            except Exception:
-                releasetypeid = None 
-            try:
-                releaselocationid = r['locationId']
-            except Exception:
-                releaselocationid = None 
-            try:
-                releaseid = r['releaseId']
-            except Exception:
-                releaseid = None 
-            try:
-                releasediscovereddate = r['releaseDiscoveredDate']
-            except Exception:
-                releasediscovereddate = None 
-            try:
-                isinstitutionalcontrols = r['isInstitutionalControls']
-            except Exception:
-                isinstitutionalcontrols = None 
-            try:
-                isapprovedprojectcompletion = r['isApprovedProjectCompletion']
-            except Exception:
-                isapprovedprojectcompletion = None 
-            try:
-                isclosedwithstatefunds = r['isClosedWithStateFunds']
-            except Exception:
-                isclosedwithstatefunds = None 
-            try:
-                entrydate = r['entryDate']
-            except Exception:
-                entrydate = None 
-            try:
-                reporteddate = r['reportedDate']
-            except Exception:
-                reporteddate = None 
-            try:
-                releastypeid = r['releaseType']['releaseTypeId']
-            except Exception:
-                releastypeid = None 
-            try:
-                releasetypename = r['releaseType']['name']
-            except Exception:
-                releasetypename = None 
-            try:
-                laralocationreleaseid = r['laraLocationReleaseId']
-            except Exception:
-                laralocationreleaseid = None 
-            try:
-                haslandresourceuserestrictions = r['hasLandResourceUseRestrictions']
-            except Exception:
-                haslandresourceuserestrictions = None
+            locationreleaseid = nested_get(r, 'locationReleaseId')
+            releasetypeid = nested_get(r, 'releaseTypeId')
+            releaselocationid = nested_get(r, 'locationId')
+            releaseid = nested_get(r, 'releaseId')
+            releasediscovereddate = nested_get(r, 'releaseDiscoveredDate')
+            isinstitutionalcontrols = nested_get(r, 'isInstitutionalControls')
+            isapprovedprojectcompletion = nested_get(r, 'isApprovedProjectCompletion')
+            isclosedwithstatefunds = nested_get(r, 'isClosedWithStateFunds')
+            entrydate = nested_get(r, 'entryDate')
+            reporteddate = nested_get(r, 'reportedDate')
+            releastypeid = nested_get(r, 'releaseType', 'releaseTypeId')
+            releasetypename = nested_get(r, 'releaseType', 'name')
+            laralocationreleaseid = nested_get(r, 'laraLocationReleaseId')
+            haslandresourceuserestrictions = nested_get(r, 'hasLandResourceUseRestrictions')
             sql = """insert into mi_ust.locationrelease (locationid, locationreleaseid, releasetypeid, releaselocationid, releaseid, releasediscovereddate, 
                             isinstitutionalcontrols, isapprovedprojectcompletion, isclosedwithstatefunds, entrydate, 
                             reporteddate, releastypeid, releasetypename, laralocationreleaseid, haslandresourceuserestrictions)
@@ -252,62 +207,20 @@ class MiApi:
 
     def extract_location_tank(self, json, locationid):
         for r in json:
-            try:
-                locationtankid = r['locationTankId']
-            except Exception:
-                locationtankid = None 
-            try:
-                locationtank_locationid = r['locationId']
-            except Exception:
-                locationtank_locationid = None 
-            try:
-                tankstatusid = r['tankStatusId']
-            except Exception:
-                tankstatusid = None 
-            try:
-                tankid = r['tankId']
-            except Exception:
-                tankid = None 
-            try:
-                capacity = r['capacity']
-            except Exception:
-                capacity = None 
-            try:
-                installationdate = r['installationDate']
-            except Exception:
-                installationdate = None 
-            try:
-                registrationdate = r['registrationDate']
-            except Exception:
-                registrationdate = None 
-            try:
-                tagged = r['tagged']
-            except Exception:
-                tagged = None 
-            try:
-                compartments = r['compartments']
-            except Exception:
-                compartments = None 
-            try:
-                changeinservice = r['changeInService']
-            except Exception:
-                changeinservice = None 
-            try:
-                newinstallchangeorupgrade = r['newInstallChangeOrUpgrade']
-            except Exception:
-                newinstallchangeorupgrade = None 
-            try:
-                tankfilledwithinertmaterial = r['tankFilledWithInertMaterial']
-            except Exception:
-                tankfilledwithinertmaterial = None 
-            try:
-                tankwasremovedfromground = r['tankWasRemovedFromGround']
-            except Exception:
-                tankwasremovedfromground = None 
-            try:
-                tankstatusname = r['tankStatus']['name']
-            except Exception:
-                tankstatusname = None 
+            locationtankid = nested_get(r, 'locationTankId')
+            locationtank_locationid = nested_get(r, 'locationId')
+            tankstatusid = nested_get(r, 'tankStatusId')
+            tankid = nested_get(r, 'tankId')
+            capacity = nested_get(r, 'capacity')
+            installationdate = nested_get(r, 'installationDate')
+            registrationdate = nested_get(r, 'registrationDate')
+            tagged = nested_get(r, 'tagged')
+            compartments = nested_get(r, 'compartments')
+            changeinservice = nested_get(r, 'changeInService')
+            newinstallchangeorupgrade = nested_get(r, 'newInstallChangeOrUpgrade')
+            tankfilledwithinertmaterial = nested_get(r, 'tankFilledWithInertMaterial')
+            tankwasremovedfromground = nested_get(r, 'tankWasRemovedFromGround')
+            tankstatusname = nested_get(r, 'tankStatus', 'name')
             sql = """insert into mi_ust.locationtank(locationid, locationtankid, locationtank_locationid, tankstatusid, tankid, 
                                 capacity, installationdate, registrationdate, tagged, compartments, changeinservice, newinstallchangeorupgrade,
                                 tankfilledwithinertmaterial, tankwasremovedfromground, tankstatusname)
@@ -329,26 +242,11 @@ class MiApi:
 
     def extract_location_tank_substance(self, json, locationtank_pk):
         for r in json:
-            try:
-                locationtankstoredsubstanceid = r['locationTankStoredSubstanceId']
-            except Exception:
-                locationtankstoredsubstanceid = None     
-            try:
-                locationtankid = r['locationTankId']
-            except Exception:
-                locationtankid = None     
-            try:
-                storedsubstancetypeid = r['storedSubstanceTypeId']
-            except Exception:
-                storedsubstancetypeid = None     
-            try:
-                substance_name = r['storedSubstanceType']['name']
-            except Exception:
-                substance_name = None     
-            try:
-                isavailableforcoversheetsubmittals = r['storedSubstanceType']['isAvailableForCoverSheetSubmittals']
-            except Exception:
-                isavailableforcoversheetsubmittals = None         
+            locationtankstoredsubstanceid = nested_get(r, 'locationTankStoredSubstanceId')
+            locationtankid = nested_get(r, 'locationTankId')
+            storedsubstancetypeid = nested_get(r, 'storedSubstanceTypeId')
+            substance_name = nested_get(r, 'storedSubstanceType', 'name')
+            isavailableforcoversheetsubmittals = nested_get(r, 'storedSubstanceType', 'isAvailableForCoverSheetSubmittals')
             sql = """insert into mi_ust.locationtankstoredsubstance (locationtank_pk, locationtankstoredsubstanceid, locationtankid, 
                                 storedsubstancetypeid, substance_name, isavailableforcoversheetsubmittals)
                         values (%s, %s, %s, %s, %s, %s)
@@ -367,70 +265,22 @@ class MiApi:
 
     def process_json(self, json):
         locationid = json['locationId']
-        try:
-            sitename = json['siteName']
-        except Exception:
-            sitename = None 
-        try:
-            facilityid = json['facilityId']
-        except Exception:
-            facilityid = None 
-        try:
-            latitude = json['latitude']
-        except Exception:
-            latitude = None 
-        try:
-            longitude = json['longitude']
-        except Exception:
-            longitude = None 
-        try:
-            countyid = json['county']['countyId']
-        except Exception:
-            countyid = None 
-        try:
-            county_name = json['county']['name']
-        except Exception:
-            county_name = None 
-        try:
-            horizontalcollectionmethodid = json['horizontalCollectionMethod']['horizontalCollectionMethodId']
-        except Exception:
-            horizontalcollectionmethodid = None 
-        try:
-            horizontalcollectionmethoddescription = json['horizontalCollectionMethod']['description']
-        except Exception:
-            horizontalcollectionmethoddescription = None 
-        try:
-            addressid = json['primaryLocationAddress']['addressId']
-        except Exception:
-            addressid = None 
-        try:
-            fulladdress = json['primaryLocationAddress']['fullAddress']
-        except Exception:
-            fulladdress = None 
-        try:
-            city = json['primaryLocationAddress']['city']
-        except Exception:
-            city = None 
-        try:
-            zipcode = json['primaryLocationAddress']['zipCode']
-        except Exception:
-            zipcode = None 
-        try:
-            stateid = json['primaryLocationAddress']['state']['stateId']
-        except Exception:
-            stateid = None 
-        try:
-            state_name = json['primaryLocationAddress']['state']['name']
-        except Exception:
-            state_name = None 
-        try:
-            townshipid = json['township']['townshipId']
-        except Exception:
-            townshipid = None 
-        try:
-            townshipname = json['township']['name']
-        except Exception:
-            townshipname = None 
+        sitename = nested_get(json, 'siteName')
+        facilityid = nested_get(json, 'facilityId')
+        latitude = nested_get(json, 'latitude')
+        longitude = nested_get(json, 'longitude')
+        countyid = nested_get(json, 'county', 'countyId')
+        county_name = nested_get(json, 'county', 'name')
+        horizontalcollectionmethodid = nested_get(json, 'horizontalCollectionMethod', 'horizontalCollectionMethodId')
+        horizontalcollectionmethoddescription = nested_get(json, 'horizontalCollectionMethod', 'description')
+        addressid = nested_get(json, 'primaryLocationAddress', 'addressId')
+        fulladdress = nested_get(json, 'primaryLocationAddress', 'fullAddress')
+        city = nested_get(json, 'primaryLocationAddress', 'city')
+        zipcode = nested_get(json, 'primaryLocationAddress', 'zipCode')
+        stateid = nested_get(json, 'primaryLocationAddress', 'state', 'stateId')
+        state_name = nested_get(json, 'primaryLocationAddress', 'state', 'name')
+        townshipid = nested_get(json, 'township', 'townshipId')
+        townshipname = nested_get(json, 'township', 'name')
         api_page_number = self.page_number
         
         sql = """insert into mi_ust.location (locationid, sitename, facilityid, latitude, longitude, countyid, county_name, 

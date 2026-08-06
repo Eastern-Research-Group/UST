@@ -1,13 +1,4 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
-
-import mechanicalsoup
-
-from python.util.logger_factory import logger
-from python.util import utils, config
+from ust.python.util.logger_factory import logger
 
 
 login_url = 'https://cersregulator.calepa.ca.gov/Account/SignIn?ReturnUrl=%2f'
@@ -40,6 +31,11 @@ def get_factank_report(browser):
 
 
 def login_report_browser():
+    try:
+        import mechanicalsoup
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError('download_CA_UST_data requires the mechanicalsoup package to be installed.') from exc
+
     browser = mechanicalsoup.StatefulBrowser()
     browser = login(browser)
     browser = get_factank_report(browser)

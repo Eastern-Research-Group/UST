@@ -1,12 +1,7 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 # THIS SCRIPT DEAGGREGATES ENTIRE ROWS OF DATA THAT CONTAIN ROLLED UP DATA
 # RUN SCRIPT deagg.py BEFORE THIS ONE TO DEAGGREGATE THE LOOKUP VALUES THEMSELVES. 
@@ -76,7 +71,9 @@ class deaggRows:
                 utils.process_sql(self.conn, self.cur, sql2)
             else:
                 logger.warning('Table %s.%s already exists but drop_existing flag is False. Set drop_existing to True to continue. Exiting...', self.dataset.schema, self.data_deagg_table_name)
-                exit()
+                raise RuntimeError(
+                    f'Table {self.dataset.schema}.{self.data_deagg_table_name} already exists; rerun with drop_existing=True to continue.'
+                )
 
         # convert list of columns into a string and wrap each one in quotes 
         col_str = ''  

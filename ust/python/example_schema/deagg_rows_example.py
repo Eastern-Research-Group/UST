@@ -1,14 +1,7 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
-from datetime import date
-import ntpath
 
-from python.example_schema.dataset_example import Dataset 
-from python.util import utils, config
-from python.util.logger_factory import logger
+from ust.python.example_schema.dataset_example import Dataset
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 # THIS SCRIPT DEAGGREGATES ENTIRE ROWS OF DATA THAT CONTAIN ROLLED UP DATA

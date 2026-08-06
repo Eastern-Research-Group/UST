@@ -1,16 +1,11 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-import psycopg2
+from datetime import datetime
 
-from python.state_processing.create_unreg_tables import UnregTables
-from python.state_processing.insert_control import ControlTable
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.state_processing.create_unreg_tables import UnregTables
+from ust.python.state_processing.insert_control import ControlTable
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 organization_id = ''                      # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
 ust_or_release = ''                      # Valid values are 'ust' or 'release'
@@ -93,6 +88,7 @@ def main(ust_or_release,
                     comments=comments,
                     organization_compartment_flag=organization_compartment_flag)
     i.execute()
+    return i.control_id
 
 
 if __name__ == '__main__':   

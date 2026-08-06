@@ -14,17 +14,11 @@ Repeat for the LUST table. Save both CSVs to the ../imports folder
 Then run the script below to insert into the database.
 """
 
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-import numpy as np
 import pandas as pd
 
-from python.util import utils
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 ust_path = '../imports/perf_measures_ust.csv'

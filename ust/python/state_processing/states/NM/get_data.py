@@ -1,17 +1,12 @@
 import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import csv
-import json 
+import json
 from urllib.request import urlopen
 import pandas as pd
 
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 organization_id = 'NM'

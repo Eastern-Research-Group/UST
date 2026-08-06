@@ -1,13 +1,8 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.state_processing.deagg_rows import deaggRows
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.state_processing.deagg_rows import deaggRows
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 
 # THIS SCRIPT DEAGGREGATES SINGLE COLUMN LOOKUP VALUES (for example, SUBSTANCES)
@@ -86,7 +81,9 @@ class Deagg:
         elif cnt > 0 and not self.drop_existing:
             logger.warning('Table %s.%s already exists. To drop and replace, pass drop_existing=True to this function. Exiting...', self.dataset.schema, self.deagg_table_name)
             self.disconnect_db()
-            exit()
+            raise RuntimeError(
+                f'Table {self.dataset.schema}.{self.deagg_table_name} already exists; rerun with drop_existing=True to replace it.'
+            )
 
         sql = f"""create table {self.dataset.schema}.{self.deagg_table_name}
              ({self.id_column_name} int not null generated always as identity primary key,

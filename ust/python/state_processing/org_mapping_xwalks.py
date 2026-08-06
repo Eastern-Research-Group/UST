@@ -1,19 +1,17 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 
 
-def main(dataset):
+def main(ust_or_release, control_id):
+    dataset = Dataset(ust_or_release=ust_or_release,
+                      control_id=control_id,
+                      requires_export=False)
     conn = utils.connect_db()
     cur = conn.cursor()
     logger.info('Connected to database')
@@ -23,7 +21,7 @@ def main(dataset):
             from public.v_{dataset.ust_or_release}_table_population 
             where {dataset.ust_or_release}_control_id = %s and database_lookup_table is not null
             order by table_sort_order, column_sort_order"""
-    utils.process_sql(conn, cur, sql, params=(control_id,))
+    utils.process_sql(conn, cur, sql, params=(dataset.control_id,))
     rows = cur.fetchall()
     for row in rows:
         epa_column_name = row[0]
@@ -46,11 +44,11 @@ def main(dataset):
                 where a.{dataset.ust_or_release}_control_id = %s and a.epa_column_name = %s"""
         # print(sql)
         try:
-            cur.execute(sql, (control_id, epa_column_name))
+            cur.execute(sql, (dataset.control_id, epa_column_name))
         except Exception:
             sql2 = f"drop view {view_name}"
             cur.execute(sql2)
-            cur.execute(sql, (control_id, epa_column_name))
+            cur.execute(sql, (dataset.control_id, epa_column_name))
 
         logger.info('Created view %s', view_name)
 
@@ -62,10 +60,7 @@ def main(dataset):
 
 
 if __name__ == '__main__':   
-    dataset = Dataset(ust_or_release=ust_or_release,
-                       control_id=control_id,
-                       requires_export=False)
-
-    main(dataset)
+    main(ust_or_release=ust_or_release,
+         control_id=control_id)
 
     

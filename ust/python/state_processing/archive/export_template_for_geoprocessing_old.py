@@ -4,8 +4,7 @@ import config
 
 from datetime import date
 import openpyxl as op
-from openpyxl.styles import Alignment, Font, PatternFill
-from openpyxl.styles.borders import Border, Side
+from openpyxl.styles import Font
 
 
 def get_headers(cur, view_name):

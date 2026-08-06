@@ -5,7 +5,7 @@ import export_template
 
 import pandas.io.sql as sqlio
 import pandas as pd
-from psycopg2.errors import DuplicateSchema, UndefinedTable
+from psycopg2.errors import UndefinedTable
 
 
 def upload_geocoded_data(state, ust_or_lust, file_path):

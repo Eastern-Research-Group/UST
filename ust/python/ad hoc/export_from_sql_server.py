@@ -1,13 +1,9 @@
-import os
 from pathlib import Path
-import sys
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
 
-from python.util import utils
-from python.util.logger_factory import logger
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 
 host = '4.36.57.30'
@@ -30,9 +26,9 @@ def get_tables_to_export():
 
 
 def export_tables_to_db():
-    conn = utils.connect_sqlserver_db()
+    conn = utils.connect_sqlserver_db(host=host, db=db, user=user, passwd=password)
     cur = conn.cursor()    
-    ssengine = utils.get_sqlserver_engine()
+    ssengine = utils.get_sqlserver_engine(host=host, db=db, user=user, passwd=password)
     engine = utils.get_engine()
 
     tables_to_export = get_tables_to_export()
@@ -72,6 +68,11 @@ def export_tables_to_csv(schema='or_ust'):
         logger.info('Exported table "%s" to %s', table, export_file_path)
 
 
-export_tables_to_db()
-export_tables_to_csv()
+def main():
+    export_tables_to_db()
+    export_tables_to_csv()
+
+
+if __name__ == '__main__':
+    main()
 

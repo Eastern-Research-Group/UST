@@ -1,14 +1,9 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.state_processing.find_unregulated import Unregulated
-from python.state_processing.export_all_review_materials import ReviewMaterials
-from python.state_processing.populate_epa_data_tables import Populate
-from python.util import utils
-from python.util.dataset import Dataset 
+from ust.python.state_processing.exclude_unregulated import Exclude
+from ust.python.state_processing.export_all_review_materials import ReviewMaterials
+from ust.python.state_processing.populate_epa_data_tables import Populate
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
 
 
 ust_or_release = 'release'             # Valid values are 'ust' or 'release'
@@ -35,7 +30,12 @@ class Redo:
 
 
     def unregulated(self):
-        Unregulated(self.dataset, drop_existing=True).execute()
+        Exclude(self.dataset,
+            find_regulated=True,
+            execute_sql=True,
+            export_sql=False,
+            print_sql=False,
+            override_existing_unreg_check=True).execute()
 
 
     def populate(self):

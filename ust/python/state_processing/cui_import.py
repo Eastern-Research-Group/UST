@@ -1,12 +1,7 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.util import utils
-from python.util.logger_factory import logger
-from python.util.upload_general_file import Importer
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
+from ust.python.util.upload_general_file import Importer
 
 schema = ''                          # Enter the schema name
 upload_file_path = r""                # Enter the path to the CUI check file

@@ -1,10 +1,5 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.util.import_service import ImportService
+from ust.python.util.import_service import ImportService
 
 
 state = 'TN' 

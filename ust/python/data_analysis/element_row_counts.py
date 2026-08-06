@@ -1,17 +1,14 @@
 import os
 from pathlib import Path
-import sys  
 from datetime import datetime
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import openpyxl as op
 from openpyxl.styles import Alignment, Font
 from openpyxl.styles.borders import Border, Side
 
-from python.util import utils, config
-from python.util.emailer import Emailer 
-from python.util.logger_factory import logger
+from ust.python.util import utils, config
+from ust.python.util.emailer import Emailer
+from ust.python.util.logger_factory import logger
 
 
 send_email = True        # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file to the user(s) identified in the config file. 
@@ -198,7 +195,7 @@ Thank you,
 
 def main(send_email=True):
     row_counts = RowCounts(send_email=send_email)
-    rows_counts.process()
+    row_counts.process()
 
 if __name__ == '__main__':   
     main(send_email=send_email)

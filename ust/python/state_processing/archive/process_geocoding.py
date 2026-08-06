@@ -2,13 +2,10 @@ import sys
 import os
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.python.util.logger_factory import logger
-from ust.python.util import utils, config
-from ust.python.state_processing import export_template
-from ust.python.util import config, utils
-import export_template
-import pandas.io.sql as sqlio
+from ust.python.util import utils
+from ust.python.util import utils
 import pandas as pd
-from psycopg2.errors import DuplicateSchema, UndefinedTable, InvalidTextRepresentation, DatatypeMismatch
+from psycopg2.errors import InvalidTextRepresentation, DatatypeMismatch
 
 
 def upload_geocoded_data(ust_or_lust, file_path, organization_id=None):

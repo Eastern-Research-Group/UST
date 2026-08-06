@@ -1,12 +1,11 @@
 from datetime import datetime
-import os
 from pathlib import Path
 import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 import traceback
 
 import logging
+
+ROOT_PATH = Path(__file__).parent.parent.parent
 
 
 class LoggerFactory:
@@ -22,7 +21,10 @@ class LoggerFactory:
                 format_exception = traceback.format_tb(tb)
                 for line in format_exception:
                     formatted_tb = formatted_tb + repr(line) + chr(13)            
-            logger.exception(f'Uncaught exception: {str(type)} | {str(value)} | {formatted_tb}')
+            logger.error(
+                f'Uncaught exception: {str(type)} | {str(value)} | {formatted_tb}',
+                exc_info=(type, value, tb),
+            )
 
         logger.addHandler(logging.StreamHandler(sys.stdout))
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(module)s.%(funcName)s:%(lineno)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')

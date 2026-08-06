@@ -1,8 +1,4 @@
 import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 from datetime import datetime
 import os.path
@@ -10,8 +6,8 @@ import os.path
 import pandas as pd
 from psycopg2.errors import DuplicateTable
 
-from python.util.logger_factory import logger
-from python.util import config, utils
+from ust.python.util.logger_factory import logger
+from ust.python.util import config, utils
 import constants
 
 state = 'CA'

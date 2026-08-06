@@ -1,13 +1,8 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-import pandas as pd 
+import pandas as pd
 
-from python.util.logger_factory import logger
-from python.util import utils
+from ust.python.util.logger_factory import logger
+from ust.python.util import utils
 
 
 input_file_path = r"C:\Users\RMyers\OneDrive - Eastern Research Group\Projects\UST\Geocoding\needed_geocoding_20251113202942_geocoded.xlsx"

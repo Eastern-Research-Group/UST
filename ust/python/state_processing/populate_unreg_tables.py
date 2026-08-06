@@ -1,13 +1,7 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
-
-from python.state_processing.unreg_tables import UnregTables
-from python.util import utils
-from python.util.dataset import Dataset 
-from python.util.logger_factory import logger
+from ust.python.state_processing.create_unreg_tables import UnregTables
+from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 ust_or_release = ''             # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
@@ -54,7 +48,7 @@ class Unregulated:
             if self.delete_auto_inserts:
                 self.delete_existing_auto_inserts()
             else:
-                UnregTables(self.dataset, drop_existing=delete_all).execute()
+                UnregTables(self.dataset, drop_existing=self.delete_all).execute()
 
 
     def delete_existing_auto_inserts(self):
@@ -152,7 +146,11 @@ class Unregulated:
     def execute(self):
         if not self.check_for_substances():
             logger.info('No substance data for %s %s, no need to check for unregulated %s.', self.dataset.organization_id, utils.get_pretty_ust_or_release(self.dataset.ust_or_release), self.data_type)
-            exit()
+            raise RuntimeError(
+                f'No substance mapping data found for {self.dataset.organization_id} '
+                f'{utils.get_pretty_ust_or_release(self.dataset.ust_or_release)}; '
+                f'unregulated {self.data_type} processing cannot continue.'
+            )
         self.create_tables()
         self.delete_existing_auto_inserts()
         self.insert_nonregulated_substances()

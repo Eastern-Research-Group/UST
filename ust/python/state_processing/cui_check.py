@@ -1,14 +1,10 @@
 import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
 
-from python.util import utils
-from python.util.logger_factory import logger
-from python.util.upload_general_file import Importer
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
+from ust.python.util.upload_general_file import Importer
 
 '''
 This script runs several checks against a specified database column in an attempt to identify rows that are likely NOT CUI. 
@@ -95,11 +91,14 @@ class CuiCheck:
     def parameter_check(self):
         if not self.control_id and not self.organization_id and not self.schema:
             logger.warning('Either control_id/organization_id or schema/table_name/column_name need to be passed; exiting...')
-            exit()
+            raise ValueError('Either control_id/organization_id or schema/table_name/column_names must be provided.')
         elif self.control_id and self.organization_id:
             if self.control_id != utils.get_control_id(self.ust_or_release, self.organization_id):
                 logger.warning('%s_control_id %s for organization %s is %s in the database, but %s was passed.', self.ust_or_release, self.organization_id, utils.get_control_id(self.ust_or_release, self.organization_id), self.control_id)
-                exit()
+                raise ValueError(
+                    f'{self.ust_or_release}_control_id {self.control_id} does not match the latest control id for organization {self.organization_id}. '
+                    'Pass a consistent control_id/organization_id pair.'
+                )
         elif self.control_id and not self.organization_id:
             self.organization_id = utils.get_org_from_control_id(self.control_id, self.ust_or_release)
         elif self.organization_id and not self.control_id:
@@ -118,24 +117,24 @@ class CuiCheck:
 
 
     def print_self(self):
-        print('ust_or_release = ' + str(self.ust_or_release))
-        print('control_id = ' + str(self.control_id))
-        print('organization_id = ' + str(self.organization_id))
-        print('schema = ' +  str(self.schema))
-        print('table_name = ' +  str(self.table_name))
-        print('column_names = ' + str( self.column_names))
-        print('drop_existing = ' + str( self.drop_existing))
-        print('maybe_as_true = ' + str( self.maybe_as_true))
-        print('upload_file_path = ' +  str(self.upload_file_path))
-        print('upload_schema = ' +  str(self.upload_schema))
-        print('upload_table_name = ' +  str(self.upload_table_name))
-        print('upload_overwrite_table = ' + str( self.upload_overwrite_table))
-        print('upload_excel_tabs = ' + str( self.upload_excel_tabs))
-        print('new_table_name = ' +  str(self.new_table_name))
-        print('file_name = ' +  str(self.file_name))
-        print('export_dir = ' +  str(self.export_dir))
-        print('export_file_path = ' +  str(self.export_file_path))
-        print('perform_check = ' + str( self.perform_check))
+        logger.info('ust_or_release = %s', self.ust_or_release)
+        logger.info('control_id = %s', self.control_id)
+        logger.info('organization_id = %s', self.organization_id)
+        logger.info('schema = %s', self.schema)
+        logger.info('table_name = %s', self.table_name)
+        logger.info('column_names = %s', self.column_names)
+        logger.info('drop_existing = %s', self.drop_existing)
+        logger.info('maybe_as_true = %s', self.maybe_as_true)
+        logger.info('upload_file_path = %s', self.upload_file_path)
+        logger.info('upload_schema = %s', self.upload_schema)
+        logger.info('upload_table_name = %s', self.upload_table_name)
+        logger.info('upload_overwrite_table = %s', self.upload_overwrite_table)
+        logger.info('upload_excel_tabs = %s', self.upload_excel_tabs)
+        logger.info('new_table_name = %s', self.new_table_name)
+        logger.info('file_name = %s', self.file_name)
+        logger.info('export_dir = %s', self.export_dir)
+        logger.info('export_file_path = %s', self.export_file_path)
+        logger.info('perform_check = %s', self.perform_check)
 
 
     def clean_variables(self):
@@ -179,7 +178,9 @@ class CuiCheck:
             cnt = 0
         elif cnt > 0 and not self.drop_existing:
             logger.warning('Table %s.%s already exists but drop_existing is False; exiting.', self.schema, self.new_table_name)
-            exit()
+            raise RuntimeError(
+                f'Table {self.schema}.{self.new_table_name} already exists; rerun with drop_existing=True to continue.'
+            )
 
         if cnt == 0:
             sql = f"select generate_create_table_statement('{self.schema}','{self.table_name}')"
