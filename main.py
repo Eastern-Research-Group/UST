@@ -1,4 +1,5 @@
 import argparse
+
 import psycopg2
 
 from ust.python.util import cli_profiles
@@ -30,10 +31,9 @@ def _apply_profile_defaults(args, required_fields: list[str], parser: argparse.A
     def maybe_source(field: str, profile_key: str | None = None, empty_value=None):
         key = profile_key or field
         current = getattr(args, field, None)
-        if current == empty_value or current is None or current == "":
-            if active_profile and active_profile.get(key) not in [None, ""]:
-                setattr(args, field, active_profile[key])
-                sourced[field] = key
+        if (current == empty_value or current is None or current == "") and active_profile and active_profile.get(key) not in [None, ""]:
+            setattr(args, field, active_profile[key])
+            sourced[field] = key
 
     maybe_source("ust_or_release")
     maybe_source("organization_id")
@@ -241,11 +241,26 @@ def build_parser() -> argparse.ArgumentParser:
 
     populate_unreg = subparsers.add_parser(
         "populate-unreg",
-        help="Populate unregulated facility/tank/substance tables from mappings",
+        help="Populate unregulated facility/tank/substance tables from mappings (reuses existing tables)",
+        description="Populate unregulated facility/tank/substance tables from mappings.",
+        epilog=(
+            "This command reuses existing erg_unregulated tables if they already exist from an earlier step.\n"
+            "Helper views (vw_erg_*) are refreshed on each run to avoid stale unregulated candidate logic.\n"
+            "Use --delete-auto-inserts to clear only rows inserted by this script before repopulating.\n"
+            "Use --delete-all if you want to recreate the unregulated tables from scratch first."
+        ),
     )
     _add_common_dataset_args(populate_unreg, include_org=True)
-    populate_unreg.add_argument("--delete-auto-inserts", action="store_true")
-    populate_unreg.add_argument("--delete-all", action="store_true")
+    populate_unreg.add_argument(
+        "--delete-auto-inserts",
+        action="store_true",
+        help="Delete only rows inserted by this script before repopulating",
+    )
+    populate_unreg.add_argument(
+        "--delete-all",
+        action="store_true",
+        help="Recreate the unregulated tables from scratch before repopulating",
+    )
     _add_yes_arg(populate_unreg)
     _add_dry_run_arg(populate_unreg)
 
@@ -514,7 +529,9 @@ def _main(argv=None):
         _apply_profile_defaults(args, required_fields=["ust_or_release", "organization_id"], parser=parser)
         if _dry_run(args, "Create state SQL template scaffold"):
             return
-        from ust.python.state_processing.scaffold_template import main as scaffold_template_main
+        from ust.python.state_processing.scaffold_template import (
+            main as scaffold_template_main,
+        )
         result = scaffold_template_main(
             ust_or_release=args.ust_or_release,
             organization_id=args.organization_id,
@@ -577,7 +594,9 @@ def _main(argv=None):
         _apply_profile_defaults(args, required_fields=["ust_or_release", "control_id"], parser=parser)
         if _dry_run(args, "Generate SQL scaffold for value mapping"):
             return
-        from ust.python.state_processing.generate_value_mapping_sql import main as value_mapping_main
+        from ust.python.state_processing.generate_value_mapping_sql import (
+            main as value_mapping_main,
+        )
         value_mapping_main(
             ust_or_release=args.ust_or_release,
             control_id=args.control_id,
@@ -590,7 +609,9 @@ def _main(argv=None):
         _apply_profile_defaults(args, required_fields=["ust_or_release", "control_id"], parser=parser)
         if _dry_run(args, "Export substance mapping workbook"):
             return
-        from ust.python.state_processing.export_substance_mapping import main as substance_mapping_main
+        from ust.python.state_processing.export_substance_mapping import (
+            main as substance_mapping_main,
+        )
         substance_mapping_main(
             ust_or_release=args.ust_or_release,
             control_id=args.control_id,
@@ -613,7 +634,9 @@ def _main(argv=None):
         _apply_profile_defaults(args, required_fields=["ust_or_release", "control_id"], parser=parser)
         if _dry_run(args, "Create missing required ID tables"):
             return
-        from ust.python.state_processing.create_missing_id_columns import main as missing_ids_main
+        from ust.python.state_processing.create_missing_id_columns import (
+            main as missing_ids_main,
+        )
         missing_ids_main(
             ust_or_release=args.ust_or_release,
             control_id=args.control_id,
@@ -629,7 +652,9 @@ def _main(argv=None):
         _require_control_or_org(args, parser)
         if _dry_run(args, "Populate unregulated tables from mapped data"):
             return
-        from ust.python.state_processing.populate_unreg_tables import main as populate_unreg_main
+        from ust.python.state_processing.populate_unreg_tables import (
+            main as populate_unreg_main,
+        )
         populate_unreg_main(
             ust_or_release=args.ust_or_release,
             control_id=args.control_id,
@@ -644,7 +669,9 @@ def _main(argv=None):
         _require_control_or_org(args, parser)
         if _dry_run(args, "Generate SQL to exclude unregulated rows from views"):
             return
-        from ust.python.state_processing.exclude_unregulated import main as exclude_unreg_main
+        from ust.python.state_processing.exclude_unregulated import (
+            main as exclude_unreg_main,
+        )
         exclude_unreg_main(
             ust_or_release=args.ust_or_release,
             control_id=args.control_id,
@@ -663,7 +690,9 @@ def _main(argv=None):
         _require_control_or_org(args, parser)
         if _dry_run(args, "Export control table summary workbook"):
             return
-        from ust.python.state_processing.control_table_summary import main as control_summary_main
+        from ust.python.state_processing.control_table_summary import (
+            main as control_summary_main,
+        )
         control_summary_main(
             ust_or_release=args.ust_or_release,
             organization_id=args.organization_id,
@@ -675,7 +704,9 @@ def _main(argv=None):
         _apply_profile_defaults(args, required_fields=["ust_or_release", "control_id"], parser=parser)
         if _dry_run(args, "Export source schema tables to CSV"):
             return
-        from ust.python.state_processing.export_source_data import main as export_source_main
+        from ust.python.state_processing.export_source_data import (
+            main as export_source_main,
+        )
         export_source_main(
             ust_or_release=args.ust_or_release,
             control_id=args.control_id,
@@ -707,7 +738,9 @@ def _main(argv=None):
         _confirm_dangerous_populate(args, parser)
         if _dry_run(args, "Populate EPA tables from state views"):
             return
-        from ust.python.state_processing.populate_epa_data_tables import main as populate_main
+        from ust.python.state_processing.populate_epa_data_tables import (
+            main as populate_main,
+        )
         populate_main(
             ust_or_release=args.ust_or_release,
             control_id=args.control_id,
@@ -734,7 +767,9 @@ def _main(argv=None):
         _require_control_or_org(args, parser)
         if _dry_run(args, "Export control summary, QA workbook, template workbook, and peer review SQL"):
             return
-        from ust.python.state_processing.export_all_review_materials import main as export_all_review_main
+        from ust.python.state_processing.export_all_review_materials import (
+            main as export_all_review_main,
+        )
         export_all_review_main(
             ust_or_release=args.ust_or_release,
             control_id=args.control_id,
@@ -777,6 +812,9 @@ def main(argv=None):
     except psycopg2.OperationalError as exc:
         print(f"Database connection failed: {exc}")
         print("Check network/VPN access and database host availability, then retry.")
+        return 1
+    except RuntimeError as exc:
+        print(f"Error: {exc}")
         return 1
 
 
