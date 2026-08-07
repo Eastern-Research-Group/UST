@@ -8,6 +8,7 @@ From the workspace root:
 
 ```bash
 python -m venv .venv
+python -m pip install --upgrade pip
 python -m pip install -e .
 ust validate
 ```
@@ -70,7 +71,7 @@ Available commands:
 - `export-substance-mapping`: export substance mapping workbook
 - `mapping-xwalks`: create mapping crosswalk views
 - `create-missing-ids`: create missing required ID tables
-- `populate-unreg`: populate unregulated helper tables; it reuses existing tables and only needs `--delete-all` if you want to recreate them from scratch
+- `populate-unreg`: populate unregulated helper tables; it reuses existing tables, `--delete-auto-inserts` clears only rows inserted by this script, and `--delete-all` recreates the helper tables from scratch
 - `exclude-unregulated`: generate/execute unregulated exclusion SQL for views
 - `qa`: run QA checks and export a QA workbook
 - `populate`: load data from state views into public EPA tables
@@ -205,6 +206,8 @@ What it does:
 - Imports non-archive Python modules to catch import-time failures
 - Runs the regression test in [tests/test_import_service.py](tests/test_import_service.py)
 - Runs CLI regression coverage in [tests/test_main_cli.py](tests/test_main_cli.py)
+
+The GitHub Actions workflow in [.github/workflows/validate.yml](.github/workflows/validate.yml) runs the same `validate` command, plus a fast `validate --skip-tests` gate.
 
 Optional flags:
 
