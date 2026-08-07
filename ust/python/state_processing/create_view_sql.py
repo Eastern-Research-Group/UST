@@ -395,7 +395,11 @@ class ViewSql:
 
 
     def _get_element_rule_columns(self):
-        if self._element_rule_columns is not None:
+        if getattr(self, '_element_rule_columns', None) is not None:
+            return self._element_rule_columns
+
+        if not getattr(self, 'cur', None):
+            self._element_rule_columns = set()
             return self._element_rule_columns
 
         table_name = f'{self.dataset.ust_or_release}_elements'
@@ -408,7 +412,11 @@ class ViewSql:
 
 
     def _get_source_column_names(self):
-        if self._source_column_names_cache is not None:
+        if getattr(self, '_source_column_names_cache', None) is not None:
+            return self._source_column_names_cache
+
+        if not getattr(self, 'cur', None) or not getattr(self, 'dataset', None):
+            self._source_column_names_cache = []
             return self._source_column_names_cache
 
         sql = f"""select distinct organization_column_name
@@ -469,7 +477,9 @@ class ViewSql:
     def _get_epa_column_rules(self, epa_column_name):
         if not self._has_value(epa_column_name):
             return {}
-        if epa_column_name in self._element_rule_cache:
+        if not getattr(self, '_element_rule_cache', None):
+            self._element_rule_cache = {}
+        if getattr(self, '_element_rule_cache', None) is not None and epa_column_name in self._element_rule_cache:
             return self._element_rule_cache[epa_column_name]
 
         available_columns = self._get_element_rule_columns()
@@ -552,7 +562,7 @@ class ViewSql:
 
 
     def _strip_unknown_aliases(self, sql_expression):
-        valid_aliases = self.used_aliases or set(self.table_aliases.values())
+        valid_aliases = getattr(self, 'used_aliases', set()) or set(getattr(self, 'table_aliases', {}).values())
 
         def replace_alias(match):
             alias = match.group(1)
@@ -690,6 +700,8 @@ class ViewSql:
             lowered_predicate = raw_predicate.lower()
             operators = ['=', '<', '>', '<=', '>=', '<>', '!=', '~~', ' like ', ' ilike ', ' is ', ' in ', ' any(']
             if source_text and not any(operator in lowered_predicate for operator in operators):
+                if re.match(r'^[A-Za-z_][\w]*\s*\(', raw_predicate.strip()):
+                    return None
                 raw_predicate = f'{source_text} = {self._quote_simple_sql_literal(raw_predicate)}'
 
             target_alias = explicit_alias or alias
@@ -858,7 +870,13 @@ class ViewSql:
         }
 
         direct_cols = {}
-        for epa_column_name, organization_column_name, organization_table_name in self.cur.fetchall():
+        for row in self.cur.fetchall():
+            if len(row) < 3:
+                self._warn(
+                    f'Unexpected required mapping row shape for {self.table_name}; expected at least 3 columns, got {len(row)}.'
+                )
+                continue
+            epa_column_name, organization_column_name, organization_table_name = row[-3:]
             column_id = required_column_ids.get(epa_column_name)
             if column_id is None:
                 self._warn(

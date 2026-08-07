@@ -1,4 +1,5 @@
 
+import pywintypes
 import win32com.client
 
 from ust.python.util import utils
@@ -58,9 +59,12 @@ class Emailer:
             self.email_item.Attachments.Add(self.attachment_path)
         try:
             self.email_item.Send()
-        except Exception as e:
+        except pywintypes.com_error as e:
             logger.error('Unable to send email to %s: %s', self.recipient, e)
+            return False
+
         logger.info('Email sent to %s', self.recipient)
+        return True
 
 
 def main(recipient, cc=None, bcc=None, subject=None, body=None, attachment_path=None):

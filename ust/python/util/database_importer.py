@@ -1,8 +1,10 @@
 import glob
 import sys
+from pathlib import Path
 
 import pandas as pd
 from psycopg2.errors import DuplicateSchema
+from sqlalchemy.exc import SQLAlchemyError
 
 from ust.python.util import config, utils
 from ust.python.util.logger_factory import logger
@@ -60,8 +62,8 @@ class DatabaseImporter:
         
         
     def get_table_name_from_file_name(self, file_path):
-        table_name = file_path.rsplit('\\', 1)[1]
-        table_name = table_name.replace(' ','_').replace('.xlsx','').replace('.xls','').replace('.csv','').replace('.txt','')
+        table_path = Path(file_path)
+        table_name = table_path.stem.replace(' ', '_')
         return table_name
         
         
@@ -78,7 +80,7 @@ class DatabaseImporter:
             try:
                 df.to_sql(table_name, engine, index=False)
                 logger.info('Created table %s', table_name)       
-            except Exception as e:
+            except (SQLAlchemyError, ValueError, OSError, TypeError) as e:
                 self.bad_file_list.append(table_name)
                 logger.error('Unable to load table %s; adding to bad_file_list: %s: %s', table_name, e)
         return True

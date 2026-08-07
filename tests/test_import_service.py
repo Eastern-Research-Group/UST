@@ -2,12 +2,16 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import pywintypes
+
 from ust.python.state_processing.create_view_sql import (
     ViewSql,
     _collect_table_preflight,
     preflight_report,
 )
 from ust.python.util import utils
+from ust.python.util.database_importer import DatabaseImporter
+from ust.python.util.emailer import Emailer
 from ust.python.util.import_service import ImportService
 
 
@@ -25,6 +29,51 @@ class ImportServiceTests(unittest.TestCase):
 
         importer_cls.assert_called_once_with("MA", "release", r"C:\\tmp\\data", False)
         importer_cls.return_value.save_files_to_db.assert_called_once_with()
+
+
+class EmailerTests(unittest.TestCase):
+    @patch("ust.python.util.emailer.logger")
+    @patch("ust.python.util.emailer.win32com.client.Dispatch")
+    def test_email_returns_true_on_success(self, dispatch, logger_mock):
+        outlook = unittest.mock.MagicMock()
+        email_item = unittest.mock.MagicMock()
+        outlook.CreateItem.return_value = email_item
+        dispatch.return_value = outlook
+
+        emailer = Emailer(recipient="test@example.com", subject="Subject", body="Body")
+
+        result = emailer.email()
+
+        self.assertTrue(result)
+        email_item.Send.assert_called_once_with()
+        logger_mock.info.assert_called_once_with("Email sent to %s", "test@example.com")
+        logger_mock.error.assert_not_called()
+
+    @patch("ust.python.util.emailer.logger")
+    @patch("ust.python.util.emailer.win32com.client.Dispatch")
+    def test_email_returns_false_when_send_fails(self, dispatch, logger_mock):
+        outlook = unittest.mock.MagicMock()
+        email_item = unittest.mock.MagicMock()
+        email_item.Send.side_effect = pywintypes.com_error(-1, "boom", None, None)
+        outlook.CreateItem.return_value = email_item
+        dispatch.return_value = outlook
+
+        emailer = Emailer(recipient="test@example.com", subject="Subject", body="Body")
+
+        result = emailer.email()
+
+        self.assertFalse(result)
+        email_item.Send.assert_called_once_with()
+        logger_mock.error.assert_called_once()
+        logger_mock.info.assert_not_called()
+
+
+class DatabaseImporterTests(unittest.TestCase):
+    def test_get_table_name_from_file_name_handles_multiple_path_styles(self):
+        importer = DatabaseImporter.__new__(DatabaseImporter)
+
+        self.assertEqual("My_File", importer.get_table_name_from_file_name(r"C:\\tmp\\My File.xlsx"))
+        self.assertEqual("another_file", importer.get_table_name_from_file_name("/tmp/another file.csv"))
 
 
 class ViewSqlTests(unittest.TestCase):
@@ -228,7 +277,7 @@ class ViewSqlTests(unittest.TestCase):
 
         view_sql.build_select_query()
 
-        self.assertIn('!!! upper(a."site_name") as facility_name', view_sql.select_sql)
+        self.assertIn('upper(a."site_name") as facility_name', view_sql.select_sql)
         self.assertIn('-- AUTO-GENERATED SOURCE: a."site_name"::varchar(100) as facility_name', view_sql.select_sql)
 
     def test_build_select_query_auto_compiles_when_fragments(self):
@@ -589,9 +638,9 @@ class ViewSqlTests(unittest.TestCase):
         view_sql.build_where_sql()
 
         process_sql_mock.assert_called_once()
-        self.assertIn("nullif(trim(a.\"facility_identifier\"::text), '') = unreg.facility_id", view_sql.where_sql)
+        self.assertIn("nullif(trim(a.\"facility_identifier\"::text), '') = unreg_fac.facility_id", view_sql.where_sql)
         self.assertIn(
-            "case when nullif(trim(a.\"tank_identifier\"::text), '') ~ '^[+-]?\\d+$' then nullif(trim(a.\"tank_identifier\"::text), '')::integer else null::integer end = unreg.tank_id",
+            "case when nullif(trim(a.\"tank_identifier\"::text), '') ~ '^[+-]?\\d+$' then nullif(trim(a.\"tank_identifier\"::text), '')::integer else null::integer end = unreg_tank.tank_id",
             view_sql.where_sql,
         )
 
