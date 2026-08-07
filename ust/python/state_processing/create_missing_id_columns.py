@@ -1,7 +1,6 @@
-from ust.python.util.dataset import Dataset
 from ust.python.util import utils
+from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
-
 
 ust_or_release = 'ust'               # Valid values are 'ust' or 'release' 
 control_id = 0                   # Enter an integer that is the release_control_id
@@ -231,10 +230,10 @@ class IdColumns:
                   where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name, col_name))     
         utils.pretty_print_query(self.cur)    
-        try:
-            return self.cur.fetchone()[0]
-        except Exception:
-            return None 
+        row = self.cur.fetchone()
+        if not row:
+            return None
+        return row[0]
 
 
     def get_join_column(self, col_name, table_name=None):
@@ -243,10 +242,10 @@ class IdColumns:
         sql = f"""select distinct organization_column_name from public.{self.dataset.ust_or_release}_element_mapping
                   where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, table_name, col_name))  
-        try:
-            return self.cur.fetchone()[0]
-        except Exception:
-            return None 
+        row = self.cur.fetchone()
+        if not row:
+            return None
+        return row[0]
 
 
     def get_child_join_info(self, col_name, table_name):

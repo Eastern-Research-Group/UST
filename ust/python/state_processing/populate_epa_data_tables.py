@@ -4,7 +4,6 @@ from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
 
-
 ust_or_release = ''              # Valid values are 'ust' or 'release' 
 control_id = 0                  # Enter an integer that is the release_control_id
 organization_id = ''              # Optional; if control_id = 0 or None, will find the most recent control_id
@@ -37,12 +36,18 @@ class Populate:
             utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
             cnt = cur.fetchone()[0]
             if cnt > 0:
-                logger.warning('Data found in %s for %s_control_id %s. To proceed, set the delete_existing variable to True.', table_name, self.dataset.ust_or_release, self.dataset.control_id)
+                logger.warning(
+                    'Data found in %s for %s_control_id %s. To replace existing rows, rerun with --delete-existing.',
+                    table_name,
+                    self.dataset.ust_or_release,
+                    self.dataset.control_id,
+                )
                 cur.close()
                 conn.close()
                 raise RuntimeError(
-                    f'Data already exists in public.{table_name} for {self.dataset.ust_or_release}_control_id {self.dataset.control_id}; '
-                    'rerun with delete_existing=True to replace it.'
+                    f'Data already exists in public.{table_name} for {self.dataset.ust_or_release}_control_id {self.dataset.control_id}. '
+                    f'Rerun with --delete-existing to replace existing rows.\n'
+                    f'Example: ust populate --type {self.dataset.ust_or_release} --control-id {self.dataset.control_id} --yes --delete-existing'
                 )
 
         table_name = self.dataset.ust_or_release + '_template_data_tables'

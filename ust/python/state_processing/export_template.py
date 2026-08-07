@@ -8,7 +8,6 @@ from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
 
-
 ust_or_release = ''             # Valid values are 'ust' or 'release'
 control_id = 0                     # Enter an integer that is the ust_control_id or release_control_id
 
@@ -67,10 +66,8 @@ class Template:
 
 
     def cleanup_wb(self):
-        try:
+        if 'Sheet' in self.wb.sheetnames:
             self.wb.remove(self.wb['Sheet'])
-        except Exception:
-            pass
         self.wb.save(self.dataset.export_file_path)
 
 
@@ -376,13 +373,68 @@ class Template:
             for colno, cell_value in enumerate(row, start=1):
                 ws.cell(row=rowno, column=colno).value = cell_value.replace('"','')
 
-        sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
-                from public.v_{self.dataset.ust_or_release}_element_mapping a 
-                    join public.{database_lookup_table} x on a.epa_value = x.{database_lookup_column}
-                    join {self.dataset.schema}.v_{mapping_table_name} b on b.{mapping_column_name} = x.{mapping_column_name}
-                where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s
-                order by 1, 2"""
-        utils.process_sql(conn, cur, sql, params=(self.dataset.control_id, mapping_column_name))
+        lookup_join_column = mapping_column_name
+        if mapping_column_name in ('facility_type1', 'facility_type2'):
+            lookup_join_column = 'facility_type_id'
+
+        lookup_cols_sql = """select column_name
+                             from information_schema.columns
+                             where table_schema = 'public' and table_name = %s"""
+        utils.process_sql(conn, cur, lookup_cols_sql, params=(database_lookup_table,))
+        lookup_cols = {r[0] for r in cur.fetchall()}
+
+        if lookup_join_column not in lookup_cols:
+            if database_lookup_column in lookup_cols:
+                logger.warning(
+                    'Column %s not found in public.%s; falling back to %s for mapping join.',
+                    lookup_join_column,
+                    database_lookup_table,
+                    database_lookup_column,
+                )
+                lookup_join_column = database_lookup_column
+            else:
+                logger.warning(
+                    'Columns %s and %s not found in public.%s; skipping mapped-value section for %s.%s.',
+                    lookup_join_column,
+                    database_lookup_column,
+                    database_lookup_table,
+                    mapping_table_name,
+                    mapping_column_name,
+                )
+                lookup_join_column = None
+
+        view_col_sql = """select count(*)
+                        from information_schema.columns
+                        where table_schema = %s and table_name = %s and column_name = %s"""
+        utils.process_sql(
+            conn,
+            cur,
+            view_col_sql,
+            params=(self.dataset.schema, 'v_' + mapping_table_name, mapping_column_name),
+        )
+        view_col_exists = cur.fetchone()[0] > 0
+        if not view_col_exists:
+            logger.warning(
+                'Column %s missing from %s.v_%s; skipping mapped-value section for this tab.',
+                mapping_column_name,
+                self.dataset.schema,
+                mapping_table_name,
+            )
+
+        if lookup_join_column and view_col_exists:
+            sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
+                    from public.v_{self.dataset.ust_or_release}_element_mapping a 
+                        join public.{database_lookup_table} x on a.epa_value = x.{database_lookup_column}
+                        join {self.dataset.schema}.v_{mapping_table_name} b on b.{mapping_column_name} = x.{lookup_join_column}
+                    where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = %s
+                    order by 1, 2"""
+            utils.process_sql(conn, cur, sql, params=(self.dataset.control_id, mapping_column_name))
+        else:
+            cur.close()
+            conn.close()
+            utils.autowidth(ws)
+            logger.info('Created %s mapping tab', pretty_name)
+            return
 
         if cur.rowcount > 0:
             cell = ws.cell(row=1, column=3)

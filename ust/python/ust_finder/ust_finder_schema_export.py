@@ -1,11 +1,10 @@
 import os
+import zipfile
 
 import pandas as pd
-import zipfile
 
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 file_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\UST\UST Finder\Exports\\'
 

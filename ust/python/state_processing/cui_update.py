@@ -1,7 +1,6 @@
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # State code. Required if control_id is None or 0; ignored otherwise. 
@@ -28,12 +27,10 @@ class CuiUpdate:
 
     def process(self):
         self.connect_db()
-        if self.check_for_cui_table():
-            if self.set_data_table_info():
-                if self.check_for_table_population():
-                    self.cui_column_name = self.get_cui_column_name()
-                    self.fac_name_column = self.cui_column_name.replace('_cui','')
-                    self.update_data_table()
+        if self.check_for_cui_table() and self.set_data_table_info() and self.check_for_table_population():
+            self.cui_column_name = self.get_cui_column_name()
+            self.fac_name_column = self.cui_column_name.replace('_cui','')
+            self.update_data_table()
         self.disconnect_db()
 
         
@@ -69,16 +66,15 @@ class CuiUpdate:
 
 
     def get_cui_column_name(self):
-        sql = f"""select column_name from information_schema.columns 
+        sql = """select column_name from information_schema.columns 
                  where table_schema = %s and table_name = %s and column_name like '%%_cui'"""
         utils.process_sql(self.conn, self.cur, sql, params=(self.schema, self.cui_table_name))
-        try:
-            cui_column_name = self.cur.fetchone()[0]
-        except Exception:
+        row = self.cur.fetchone()
+        if not row:
             logger.warning('No CUI column found in %s.%s; exiting', self.schema, self.cui_table_name)
             self.disconnect_db()
             raise RuntimeError(f'No CUI column found in {self.schema}.{self.cui_table_name}.')
-        return cui_column_name
+        return row[0]
 
 
     def update_data_table(self):

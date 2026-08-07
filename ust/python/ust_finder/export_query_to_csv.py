@@ -1,12 +1,10 @@
 from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
 
 import pandas as pd
-from zipfile import ZipFile, ZIP_DEFLATED
 
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
-
 
 file_path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\UST\UST Finder\Exports\\'
 subfolder = r'Tanks Export\\'

@@ -6,7 +6,6 @@ from ust.python.state_processing.export_template import Template
 from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 
-
 schema = ''                      # Enter the schema name
 upload_file_path = r""             # Path to CUI check spreadsheet.  
 

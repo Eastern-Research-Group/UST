@@ -9,7 +9,7 @@
  *    branch the describes what you are processing, for example, XX-UST, where you will do your work. 
  * 2) Run the command below to copy this template and replace XX for organization_id (and ZZ for control_id if known):
  *
- *    ust scaffold-template --type ust --organization-id XX [--control-id ZZ]
+ *    ust scaffold-template --type ust --organization-id XX [--control-id ZZ --yes]
  *
  *    Optional flags:
  *    --no-control-lookup
@@ -28,42 +28,41 @@
  * Step 6: Map the source data elements to the EPA template elements 
  * Step 7: Check for lookup data that needs to be deaggregated 
  * Step 8: Map the source data values to EPA values
- * Step 9: Send the substance mapping for review by an ERG chemical expert  
- * Step 10: Create the value mapping crosswalk views
- * Step 11: Create unique identifiers if they don't exist
- * Step 12: Insert unregulated tanks/substances into table erg_unregulated_tanks. 
- * Step 13: Write the views that convert the source data to the EPA format
- * Step 14: QA the views
- * Step 15: Insert data into the EPA schema 
- * Step 16: Export populated EPA template 
- * Step 17: Export control table summary
- * Step 18: Upload exported files to EPA Teams
- * Step 19: Request peer review and make any suggested changes
- * Step 20: Export source data (if necessary)
- * Step 21: Request OUST review
- * Step 22: Respond to OUST comments 
- * Step 23: State review 
- * Step 24: GIS processing (coming soon)
+ * Step 9: Create the value mapping crosswalk views
+ * Step 10: Create unique identifiers if they don't exist
+ * Step 11: Insert unregulated tanks/substances into table erg_unregulated_tanks. 
+ * Step 12: Write the views that convert the source data to the EPA format
+ * Step 13: QA the views
+ * Step 14: Insert data into the EPA schema 
+ * Step 15: Export populated EPA template 
+ * Step 16: Export control table summary
+ * Step 17: Upload exported files to EPA Teams
+ * Step 18: Request peer review and make any suggested changes
+ * Step 19: Export source data (if necessary)
+ * Step 20: Request OUST review
+ * Step 21: Respond to OUST comments 
+ * Step 22: State review 
+ * Step 23: GIS processing (coming soon)
  * 
  */
 /* CLI QUICK CHECKLIST (copy/paste and replace XX + ZZ):
- * Setup   : ust scaffold-template --type ust --organization-id XX [--control-id ZZ]
+ * Setup   : ust scaffold-template --type ust --organization-id XX [--control-id ZZ --yes]
  * Step 1  : ust import-files --type ust --organization-id XX --path "<path_to_directory_with_source_files>"
  * Step 2  : ust init-dataset --type ust --organization-id XX --data-source "<describe_data_source>" --date-received YYYY-MM-DD --comments "<dataset_comments>" --organization-compartment-flag Y
- * Step 4  : ust create-unreg --type ust --control-id ZZ
- * Step 7  : ust generate-deagg --type ust --control-id ZZ
- * Step 8  : ust generate-value-mapping --type ust --control-id ZZ --append
- * Step 9  : ust export-substance-mapping --type ust --control-id ZZ
- * Step 10 : ust mapping-xwalks --type ust --control-id ZZ
- * Step 11 : ust create-missing-ids --type ust --control-id ZZ
- * Step 12 : ust populate-unreg --type ust --control-id ZZ
- * Step 13 : ust generate-views --type ust --control-id ZZ
- * Step 14 : ust qa --type ust --control-id ZZ
- * Step 15 : ust populate --type ust --control-id ZZ
- * Step 16 : ust export-template --type ust --control-id ZZ
- * Step 17 : ust export-control-summary --type ust --control-id ZZ
- * Step 20 : ust export-source-data --type ust --control-id ZZ
- * Optional: ust exclude-unregulated --type ust --control-id ZZ
+ * Step 4  : ust create-unreg --type ust --control-id ZZ --yes
+ * Step 7  : ust generate-deagg --type ust --control-id ZZ --yes
+ * Step 8  : ust generate-value-mapping --type ust --control-id ZZ --yes --append
+ * Step 9  : ust mapping-xwalks --type ust --control-id ZZ --yes
+ * Step 10 : ust create-missing-ids --type ust --control-id ZZ --yes
+ * Step 11 : ust create-unreg --type ust --control-id ZZ --yes --views-only
+ *           ust populate-unreg --type ust --control-id ZZ --yes --delete-auto-inserts
+ * Step 12 : ust generate-views --type ust --control-id ZZ --yes
+ * Step 13 : ust qa --type ust --control-id ZZ --yes
+ * Step 14 : ust populate --type ust --control-id ZZ --yes
+ * Step 15 : ust export-template --type ust --control-id ZZ --yes
+ * Step 16 : ust export-control-summary --type ust --control-id ZZ --yes
+ * Step 19 : ust export-source-data --type ust --control-id ZZ --yes
+ * Optional: ust exclude-unregulated --type ust --control-id ZZ --yes
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -216,11 +215,22 @@ order by 1;
  *
  * Run the following command:
 
-ust create-unreg --type ust --control-id ZZ
+ust create-unreg --type ust --control-id ZZ --yes
 
  * Optional flags:
  * --drop-existing
  * --views-only
+
+ * NOTE:
+ * Run this early so the erg_unregulated tables exist for downstream scripts, even before mapping is done.
+ * Later, ust populate-unreg will reuse these tables if they already exist, so you do not need to recreate them.
+ * If you need to rerun the script after making changes, use --delete-auto-inserts to clear only rows this
+ * script inserted, or --delete-all if you want to recreate the unregulated tables from scratch.
+ * If mapping is incomplete, this command now creates placeholder vw_erg_* views.
+ * After completing Steps 8-9 (value mapping and xwalks), run this command again with --views-only
+ * to refresh vw_erg_* views with mapping-driven logic:
+
+ust create-unreg --type ust --control-id ZZ --yes --views-only
 
  * 
  */
@@ -743,7 +753,7 @@ values (ZZ,'ust_compartment_dispenser','dispenser_udc_wall_type','ORG_TAB_NAME',
  * 
  * Run the following command:
 
-ust generate-deagg --type ust --control-id ZZ
+ust generate-deagg --type ust --control-id ZZ --yes
 
  * Optional flags:
  * --all-columns
@@ -775,7 +785,7 @@ select epa_column_name from
  
  * To generate the SQL that will assist you in doing the value mapping, run:
 
-ust generate-value-mapping --type ust --control-id ZZ --append
+ust generate-value-mapping --type ust --control-id ZZ --yes --append
 
  * Optional flags:
  * --all-columns
@@ -788,34 +798,12 @@ ust generate-value-mapping --type ust --control-id ZZ --append
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 9: Send the substance mapping (if it exists) for review by an ERG chemical expert 
-
-/*
- * Run script export_substance_mapping.py to export the substance mapping and email it to John Wilhelmi,
- * who will send it along to a chemical expert at ERG to review it for possible hazardous substances.  
- * The script will automatically send the email through Outlook if you are on an ERG computer and
- * have the python module pypiwin32 installed in your environment. 
- * (Note: If the script is unable to send the email automatically (check your Sent folder), please
- * manually attach the file (located at /ust/python/exports/mapping/XX/UST/) and send an email 
- * to John.Wilhelmi@erg.com, CCing Victoria and Renae. 
- * 
- * Run the following command:
-
-ust export-substance-mapping --type ust --control-id ZZ
-
- * Optional flags:
- * --no-email
-
-*/
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 10: Create the value mapping crosswalk views
+--Step 9: Create the value mapping crosswalk views
 
 /* 
  * Run the following command:
 
-ust mapping-xwalks --type ust --control-id ZZ
+ust mapping-xwalks --type ust --control-id ZZ --yes
   
  * To see the crosswalk views after running the script:
 
@@ -830,12 +818,12 @@ and table_name like '%_xwalk' order by 1;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 11: Create unique identifiers if they don't exist
+--Step 10: Create unique identifiers if they don't exist
 
 /* 
  * Run the following command:
 
-ust create-missing-ids --type ust --control-id ZZ
+ust create-missing-ids --type ust --control-id ZZ --yes
 
  * Optional flags:
  * --table-name <epa_table_name>
@@ -862,29 +850,36 @@ order by sort_order;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 12: Insert unregulated tanks/substances into table erg_unregulated_tanks. 
+--Step 11: Insert unregulated tanks/substances into table erg_unregulated_tanks. 
 
 /* 
  * Run the following command:
 
-ust populate-unreg --type ust --control-id ZZ
+ust create-unreg --type ust --control-id ZZ --yes --views-only
+ust populate-unreg --type ust --control-id ZZ --yes --delete-auto-inserts
 
  * Optional flags:
  * --organization-id XX
  * --delete-auto-inserts
  * --delete-all
 
+ * The create-unreg --views-only command above refreshes vw_erg_substance_mapping,
+ * vw_erg_facility_type_mapping, vw_erg_tank_sizes, and vw_erg_unreg_substances.
  * If you inserted any rows into XX_ust.erg_unregulated_facilities in step 5 above, be sure to leave the 
- * delete_all variable = False; otherwise the rows you inserted previously will be deleted. If you need to
- * rerun this script at a later time, after making changes to the data, set delete_auto_inserts = True 
- * to delete only those rows that were inserted by this script and do a fresh insert.  
+ * delete_all variable = False; otherwise the rows you inserted previously will be deleted.
+ * If you need to rerun this script after creating the unregulated tables early, it will reuse the existing
+ * tables and refresh the inserts instead of failing.
+ * Use --delete-auto-inserts to clear only rows this script inserted, or --delete-all if you want to recreate
+ * the unregulated tables from scratch.
+ * If you need to rerun this script at a later time after making changes to the data, set delete_auto_inserts = True
+ * to delete only those rows that were inserted by this script and do a fresh insert.
  * 
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 13: Write the views that convert the source data to the EPA format
+--Step 12: Write the views that convert the source data to the EPA format
 
 /* THIS SECTION UNDER CONSTRUCTION!!! 
  * 
@@ -894,7 +889,7 @@ ust populate-unreg --type ust --control-id ZZ
  * 
 Run the following command:
 
-ust generate-views --type ust --control-id ZZ
+ust generate-views --type ust --control-id ZZ --yes
 
 Optional flags:
 --table-name <epa_table_name>
@@ -909,13 +904,13 @@ Optional flags:
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 14: QA the views 
+--Step 13: QA the views 
 
 /* 
  * Run the following command to check that the views you have written to populate the main data tables
  * adhere to all business and logic rules:
 
-ust qa --type ust --control-id ZZ
+ust qa --type ust --control-id ZZ --yes
 
  * This script will check the views you just created in the state schema for the following:
  * 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -941,7 +936,7 @@ ust qa --type ust --control-id ZZ
  * 13) Unregulated facility/tank data related to heating oil and small tank capacities in certain facility types. To resolve these issues,
  *     run:
  *
- *     ust exclude-unregulated --type ust --control-id ZZ
+ *     ust exclude-unregulated --type ust --control-id ZZ --yes
  *
  *     Optional flags:
  *     --organization-id XX
@@ -966,7 +961,7 @@ ust qa --type ust --control-id ZZ
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 15: Insert data into the EPA schema 
+--Step 14: Insert data into the EPA schema 
 
 /*
  * Run the following command to insert data into the main data tables in the public schema 
@@ -974,7 +969,7 @@ ust qa --type ust --control-id ZZ
  * ust_facility_dispenser, ust_tank_dispenser, and/or ust_compartment_dispenser) using the views you 
  * wrote in Step 13 above. 
  * 
-ust populate --type ust --control-id ZZ
+ust populate --type ust --control-id ZZ --yes
 
  * Optional flags:
  * --organization-id XX
@@ -990,13 +985,13 @@ order by sort_order;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 16: Export populated EPA template
+--Step 15: Export populated EPA template
 
 /*
  * Run the following command to generate a populated EPA template that will be sent first to OUST
  * for review, then to the state for review.
  *
-ust export-template --type ust --control-id ZZ
+ust export-template --type ust --control-id ZZ --yes
 
  * Optional flags:
  * --data-only
@@ -1011,12 +1006,12 @@ ust export-template --type ust --control-id ZZ
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 17: Export control table summary
+--Step 16: Export control table summary
 
 /*
  * Run the following command:
 
-ust export-control-summary --type ust --control-id ZZ
+ust export-control-summary --type ust --control-id ZZ --yes
 
  * Optional flags:
  * --organization-id XX
@@ -1024,14 +1019,14 @@ ust export-control-summary --type ust --control-id ZZ
  * 
  * This script will output an Excel file (located by default in the repo at 
  * /ust/python/exports/control_table_summaries/XX/UST/XX_UST_control_table_summary_yyyymmddsssss.xlsx). 
- * Before uploading this file in Step 18, open it to make sure it was generated correctly.
+ * Before uploading this file in Step 17, open it to make sure it was generated correctly.
  * 
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 18: Upload exported files to EPA Teams
+--Step 17: Upload exported files to EPA Teams
 
 /* 
  * Upload the following three files to the appropriate state folder on the EPA Teams site at 
@@ -1047,7 +1042,7 @@ ust export-control-summary --type ust --control-id ZZ
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 19: Request peer review and make any suggested changes
+--Step 18: Request peer review and make any suggested changes
 
 /* 
  * All templates must be peer reviewed before sending to OUST. Currently Renae and Jim are available for peer reviews.
@@ -1057,13 +1052,13 @@ ust export-control-summary --type ust --control-id ZZ
  * If the reviewing developer suggested any changes to your mapping or logic, follow these steps:
  * 
  * 1) Make suggested changes in the database. 
- * 2) If necessary, update the views you created in Step 9. 
- * 3) If you made any changes to the views you created in Step 9, re-run Step 10 to QA the views. 
- * 4) Rerun Step 11 to re-insert the data into the EPA schema. Remember to set the delete_existing variable 
+ * 2) If necessary, update the views you created in Step 12. 
+ * 3) If you made any changes to the views you created in Step 12, re-run Step 13 to QA the views. 
+ * 4) Rerun Step 14 to re-insert the data into the EPA schema. Remember to set the delete_existing variable 
  *    in the script to True (it defaults to False) to delete the data before re-inserting it. 
- * 5) Rerun Step 12 to export a new populated template. 
- * 6) If you made any changes to ust_control, rerun Step 13 to export a new control table summary file. 
- * 7) Rerun Step 14 to re-upload all new exports to the EPA Teams site. 
+ * 5) Rerun Step 15 to export a new populated template. 
+ * 6) If you made any changes to ust_control, rerun Step 16 to export a new control table summary file. 
+ * 7) Rerun Step 17 to re-upload all new exports to the EPA Teams site. 
  * 8) Add a comment to the Jira ticket noting you've made the changes and are ready for another review.
  *    Assign the ticket back to the original reviewer and make sure the status is ERG Peer Review if not already.
  *    Be sure to @ the reviewer in the ticket comment so they are aware they need to take action. 
@@ -1074,7 +1069,7 @@ ust export-control-summary --type ust --control-id ZZ
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 20: Export source data (if necessary)
+--Step 19: Export source data (if necessary)
 
 /* 
  * OUST has requested that ERG make all source data available to them to assist in their review. If the 
@@ -1088,7 +1083,7 @@ ust export-control-summary --type ust --control-id ZZ
  * 
  * To export the source data from the database, run:
 
-ust export-source-data --type ust --control-id ZZ
+ust export-source-data --type ust --control-id ZZ --yes
 
  * Optional flags:
  * --used-tables-only
@@ -1106,7 +1101,7 @@ ust export-source-data --type ust --control-id ZZ
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 21: Request OUST review
+--Step 20: Request OUST review
 
 /* 
  * Sit back and relax, your work here is done for the time being! Or rather, sit back and start another ticket! 
@@ -1123,7 +1118,7 @@ ust export-source-data --type ust --control-id ZZ
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 22: Respond to OUST comments 
+--Step 21: Respond to OUST comments 
 
 /* 
  * When OUST completes their review, they will email us. An updated version of the populated template will be 
@@ -1142,18 +1137,18 @@ ust export-source-data --type ust --control-id ZZ
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 23: State review 
+--Step 22: State review 
 
 /* 
  * We haven't gotten this far yet, but this process will be very similar to the OUST review process. 
- * Repeat Step 15 for any changes requested by the state. 
+ * Repeat Step 14 for any changes requested by the state. 
  * 
  */
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 24: GIS processing (coming soon)
+--Step 23: GIS processing (coming soon)
 
 /* 
  * For any facilities the state did not submit coordinates for, or for coordinates less than 3 decimal 

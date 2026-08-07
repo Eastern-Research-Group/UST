@@ -5,7 +5,6 @@ import pandas as pd
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 host = '4.36.57.30'
 db = 'ERG_UST'
 user = 'ergustuser'

@@ -366,19 +366,19 @@ def main(ust_or_release=None,
          upload_table_name=None, 
          upload_overwrite_table=False,
          upload_excel_tabs=None):
-    cui = CuiCheck(ust_or_release=ust_or_release,
-                   control_id=control_id,
-                   organization_id=organization_id,
-                   schema=schema, 
-                   table_name=table_name, 
-                   column_names=column_names,
-                   drop_existing=drop_existing,
-                   maybe_as_true=maybe_as_true,
-                    upload_file_path=upload_file_path,
-                   upload_schema=upload_schema,
-                   upload_table_name=upload_table_name,
-                   upload_overwrite_table=upload_overwrite_table,
-                   upload_excel_tabs=upload_excel_tabs)
+    CuiCheck(ust_or_release=ust_or_release,
+             control_id=control_id,
+             organization_id=organization_id,
+             schema=schema, 
+             table_name=table_name, 
+             column_names=column_names,
+             drop_existing=drop_existing,
+             maybe_as_true=maybe_as_true,
+             upload_file_path=upload_file_path,
+             upload_schema=upload_schema,
+             upload_table_name=upload_table_name,
+             upload_overwrite_table=upload_overwrite_table,
+             upload_excel_tabs=upload_excel_tabs)
 
 
 if __name__ == '__main__':   

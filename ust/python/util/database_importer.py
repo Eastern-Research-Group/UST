@@ -1,12 +1,11 @@
 import glob
-import sys  
+import sys
 
 import pandas as pd
 from psycopg2.errors import DuplicateSchema
 
 from ust.python.util import config, utils
 from ust.python.util.logger_factory import logger
-
 
 
 class DatabaseImporter:

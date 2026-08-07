@@ -1,7 +1,6 @@
 
 from ust.python.util.import_service import ImportService
 
-
 state = 'TN' 
 # Enter a directory (not path to a specific file) for ust_path and release_path
 # Set to None if not applicable

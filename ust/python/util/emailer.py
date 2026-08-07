@@ -4,7 +4,6 @@ import win32com.client
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 recipient = ''                 # Required. Email address of person receiving the email. Separate multiple addresses with a semicolon.  
 cc = None                    # Optional. Email address to CC. Separate multiple addresses with a semicolon. 
 bcc = None                  # Optional. Email adddress to BCC. Separate multiple addresses with a semicolon. 

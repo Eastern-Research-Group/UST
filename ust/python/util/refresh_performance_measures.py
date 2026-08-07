@@ -20,7 +20,6 @@ import pandas as pd
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 ust_path = '../imports/perf_measures_ust.csv'
 releases_path = '../imports/perf_measures_releases.csv'
 

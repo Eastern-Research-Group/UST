@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import psycopg2.errors
@@ -127,7 +128,7 @@ class NewColumn:
         if cnt > 0:
             logger.error('Column %s already exists on table %s.%s; exiting.', self.new_column_name, self.schema, self.table_name)
             self.disconnect_db()
-            exit()
+            sys.exit()
 
 
     def set_export_path(self):
@@ -152,7 +153,7 @@ class NewColumn:
             else:
                 logger.error('Unable to determine if table %s.%s is an UST or Release table. Check table_name and try again', self.schema, self.table_name)
                 self.disconnect_db()
-                exit()
+                sys.exit()
 
 
     def add_column(self):
@@ -160,7 +161,7 @@ class NewColumn:
             if not self.max_char_size:
                 logger.error('If data_type == varchar, max_char_size must be set.')
                 self.disconnect_db()
-                exit()
+                sys.exit()
             self.element_type = 'string'
             self.data_type = self.data_type + '(' + str(self.max_char_size) + ')'
         elif self.data_type in ['int','integer','bigint']:

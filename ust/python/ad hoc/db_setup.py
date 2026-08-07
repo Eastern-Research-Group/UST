@@ -1,5 +1,6 @@
-import sys
 import os
+import sys
+
 sys.path = [os.path.join(os.path.dirname(__file__), "..", "..")] + sys.path
 from ust.python.util import config, utils
 

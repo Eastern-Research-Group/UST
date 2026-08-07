@@ -1,11 +1,10 @@
-from io import StringIO
 import time
+from io import StringIO
 
 import pandas as pd
 
-from ust.python.util.logger_factory import logger
 from ust.python.util import config, utils
-
+from ust.python.util.logger_factory import logger
 
 tank_component_url = 'http://cedatareporting.pa.gov/ReportServer/Pages/ReportViewer.aspx?/Public/DEP/Tanks/SSRS/Tank_Component_Sub&rs:Command=Render&P_OTHER_ID=XXX'
 
@@ -65,8 +64,8 @@ def save_unfound_facility(facility_id):
 
 def main():
     try:
-        from bs4 import BeautifulSoup
         import selenium.common.exceptions
+        from bs4 import BeautifulSoup
         from selenium.webdriver.common.by import By
     except ModuleNotFoundError as exc:
         raise ModuleNotFoundError('pa_ust requires bs4 and selenium to be installed.') from exc

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from pathlib import Path
 import importlib
 import py_compile
 import unittest
+from dataclasses import dataclass
+from pathlib import Path
 
 from ust.python.util.logger_factory import logger
 
@@ -51,7 +51,7 @@ def import_modules(include_archive: bool = False) -> list[str]:
         module_name = path_str[:-3].replace("/", ".")
         try:
             importlib.import_module(module_name)
-        except Exception as exc:  # Import sweep should report any import-time failure.
+        except (ImportError, ModuleNotFoundError, AttributeError, RuntimeError, TypeError, ValueError, OSError, SyntaxError) as exc:
             errors.append(f"{module_name}: {type(exc).__name__}: {exc}")
     return errors
 

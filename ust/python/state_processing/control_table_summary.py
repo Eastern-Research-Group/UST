@@ -2,8 +2,9 @@
 import openpyxl as op
 from openpyxl.styles import Font
 
-from ust.python.util.logger_factory import logger
 from ust.python.util import utils
+from ust.python.util.dataset import Dataset
+from ust.python.util.logger_factory import logger
 
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
@@ -39,8 +40,8 @@ class Summary:
     def cleanup_wb(self):
         try:
             self.wb.remove(self.wb['Sheet'])
-        except Exception:
-            pass
+        except KeyError:
+            logger.debug('Default workbook sheet already removed.')
         self.wb.save(self.dataset.export_file_path)
 
 
@@ -144,7 +145,8 @@ class Summary:
                     where ust_control_id = %s group by "CompartmentStatus" """
             utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
             data = cur.fetchall()
-            for rowno, row in enumerate(data, start=rowno+1):
+            next_row = rowno + 1
+            for rowno, row in enumerate(data, start=next_row):
                 for colno, cell_value in enumerate(row, start=1):
                     ws.cell(row=rowno, column=colno).value = cell_value
                     if colno == 2:
@@ -196,7 +198,8 @@ class Summary:
                     where release_control_id = %s group by "USTReleaseStatus" """
             utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
             data = cur.fetchall()
-            for rowno, row in enumerate(data, start=rowno+1):
+            next_row = rowno + 1
+            for rowno, row in enumerate(data, start=next_row):
                 for colno, cell_value in enumerate(row, start=1):
                     ws.cell(row=rowno, column=colno).value = cell_value
                     if colno == 2:

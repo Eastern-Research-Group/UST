@@ -1,5 +1,6 @@
-import pandas as pd
 import os
+
+import pandas as pd
 
 # Unauthenticated client only works with public data sets. Note 'None'
 # in place of application token, and no username or password:

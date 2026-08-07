@@ -1,13 +1,12 @@
-import os
-
 import csv
 import json
+import os
 from urllib.request import urlopen
+
 import pandas as pd
 
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 organization_id = 'NM'
 

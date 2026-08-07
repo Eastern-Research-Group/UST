@@ -6,7 +6,6 @@ from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
 
-
 ust_or_release = ''                      # Valid values are 'ust' or 'release'
 control_id = 0                          # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''                      # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
@@ -158,6 +157,95 @@ class UnregTables:
         self.disconnect_db()
 
 
+    def create_placeholder_substance_view(self):
+        view_name = f'{self.dataset.schema}.{self.erg_substance_mapping_view}'
+        if self.dataset.ust_or_release == 'ust':
+            view_sql = f"""create or replace view {view_name} as
+select null::varchar(50) as facility_id,
+       null::int as tank_id,
+       null::varchar(1000) as org_substance,
+       null::varchar(200) as epa_substance,
+       null::int as substance_id
+where false"""
+        else:
+            view_sql = f"""create or replace view {view_name} as
+select null::varchar(50) as release_id,
+       null::varchar(1000) as org_substance,
+       null::varchar(200) as epa_substance,
+       null::int as substance_id
+where false"""
+        utils.process_sql(self.conn, self.cur, view_sql)
+        logger.info('Created placeholder view %s', view_name)
+
+
+    def create_placeholder_facility_type_view(self):
+        view_name = f'{self.dataset.schema}.{self.erg_facility_type_mapping_view}'
+        parent_col = 'facility_id' if self.dataset.ust_or_release == 'ust' else 'release_id'
+        view_sql = f"""create or replace view {view_name} as
+select null::varchar(50) as {parent_col},
+       null::varchar(1000) as org_facility_type,
+       null::varchar(200) as epa_facility_type,
+       null::int as facility_type_id
+where false"""
+        utils.process_sql(self.conn, self.cur, view_sql)
+        logger.info('Created placeholder view %s', view_name)
+
+
+    def create_placeholder_tank_size_view(self):
+        if self.dataset.ust_or_release == 'release':
+            return
+        view_name = f'{self.dataset.schema}.{self.erg_tank_size_view}'
+        view_sql = f"""create or replace view {view_name} as
+select null::varchar(50) as facility_id,
+       null::int as tank_id,
+       null::numeric as tank_capacity_gallons
+where false"""
+        utils.process_sql(self.conn, self.cur, view_sql)
+        logger.info('Created placeholder view %s', view_name)
+
+
+    def create_placeholder_unreg_subs_view(self):
+        view_name = f'{self.dataset.schema}.{self.erg_unreg_subs_view}'
+        if self.dataset.ust_or_release == 'ust':
+            view_sql = f"""create or replace view {view_name} as
+select null::varchar(50) as facility_id,
+       null::int as tank_id,
+       null::varchar(1000) as org_substance,
+       null::varchar(200) as epa_substance,
+       null::int as substance_id,
+       null::varchar(1000) as unregulated_reason
+where false"""
+        else:
+            view_sql = f"""create or replace view {view_name} as
+select null::varchar(50) as release_id,
+       null::varchar(1000) as org_substance,
+       null::varchar(200) as epa_substance,
+       null::int as substance_id,
+       null::varchar(1000) as unregulated_reason
+where false"""
+        utils.process_sql(self.conn, self.cur, view_sql)
+        logger.info('Created placeholder view %s', view_name)
+
+
+    def _cast_unreg_view_col(self, col_alias, expression):
+        cast_map = {
+            'facility_id': 'varchar(50)',
+            'release_id': 'varchar(50)',
+            'tank_id': 'int',
+            'org_substance': 'varchar(1000)',
+            'epa_substance': 'varchar(200)',
+            'substance_id': 'int',
+            'org_facility_type': 'varchar(1000)',
+            'epa_facility_type': 'varchar(200)',
+            'facility_type_id': 'int',
+            'tank_capacity_gallons': 'numeric',
+        }
+        datatype = cast_map.get(col_alias)
+        if not datatype:
+            return expression
+        return f'{expression}::{datatype}'
+
+
     def create_substance_view(self):
         self.connect_db()
 
@@ -168,7 +256,9 @@ class UnregTables:
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
         cnt = self.cur.fetchone()[0]
         if cnt == 0:
-            logger.warning('No substances mapped; will not create %s', view_name)
+            logger.warning('No substances mapped; creating placeholder %s', view_name)
+            self.create_placeholder_substance_view()
+            self.disconnect_db()
             return 
 
         sql = f"""select epa_column_name,
@@ -183,6 +273,11 @@ class UnregTables:
                 order by b.column_sort_order"""
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.epa_substance_table), print_sql=False)
         rows = self.cur.fetchall()
+        if not rows:
+            logger.warning('No mapping rows found to build %s; creating placeholder view.', view_name)
+            self.create_placeholder_substance_view()
+            self.disconnect_db()
+            return
 
         epa_cols, org_cols, org_tables, org_join_tables, org_join_cols = map(list, zip(*rows))
         unique_org_tables = list(dict.fromkeys(org_tables))
@@ -193,18 +288,23 @@ class UnregTables:
         from_sql = f'\nfrom {self.dataset.schema}."{unique_org_tables[0]}" {aliases[unique_org_tables[0]]}'
         org_val_col = ''
 
-        for i in range(0, len(epa_cols)):
+        for i in range(len(epa_cols)):
             if epa_cols[i] == 'substance_id':
                 org_val_col = f'{aliases[org_tables[i]]}."{org_cols[i]}"'
                 col_alias = 'org_substance'
             else:
                 col_alias = epa_cols[i]
-            select_sql += f'{aliases[org_tables[i]]}."{org_cols[i]}" as {col_alias}, ' 
+            source_expression = f'{aliases[org_tables[i]]}."{org_cols[i]}"'
+            casted_expression = self._cast_unreg_view_col(col_alias, source_expression)
+            select_sql += f'{casted_expression} as {col_alias}, '
             if org_join_tables[i]:
                 from_sql += f' join {self.dataset.schema}."{org_tables[i]}" {aliases[org_tables[i]]} '
                 from_sql += f' on {aliases[org_join_tables[i]]}."{org_join_cols[i]}" = {aliases[org_tables[i]]}."{org_join_cols[i]}" '
 
-        select_sql += ' s.substance as epa_substance, s.substance_id'
+        select_sql += (
+            f"{self._cast_unreg_view_col('epa_substance', 's.substance')} as epa_substance, "
+            f"{self._cast_unreg_view_col('substance_id', 's.substance_id')} as substance_id"
+        )
         from_sql += f'\nleft join (select organization_value, epa_value from public.v_{self.dataset.ust_or_release}_mapping where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s) x on x.organization_value = {org_val_col} '
         from_sql += '\nleft join public.substances s on x.epa_value = s.substance'
         view_sql = f'create or replace view {view_name} as\n{select_sql}{from_sql} where {org_val_col} is not null'
@@ -224,7 +324,9 @@ class UnregTables:
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
         cnt = self.cur.fetchone()[0]
         if cnt == 0:
-            logger.warning('No facility types mapped; will not create %s', view_name)
+            logger.warning('No facility types mapped; creating placeholder %s', view_name)
+            self.create_placeholder_facility_type_view()
+            self.disconnect_db()
             return 
 
         sql = f"""select distinct replace(replace(epa_column_name,'1','_id'),'2','_id') as epa_column_name, 
@@ -237,8 +339,13 @@ class UnregTables:
                 order by (epa_column_name ilike '%%type%%')"""
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.epa_facility_table), print_sql=False)
         rows = self.cur.fetchall()
+        if not rows:
+            logger.warning('No mapping rows found to build %s; creating placeholder view.', view_name)
+            self.create_placeholder_facility_type_view()
+            self.disconnect_db()
+            return
 
-        epa_cols, org_cols, org_tables, org_join_tables, org_join_cols, nulls = map(list, zip(*rows))
+        epa_cols, org_cols, org_tables, org_join_tables, org_join_cols, _nulls = map(list, zip(*rows))
         unique_org_tables = list(dict.fromkeys(org_tables))
         aliases = dict(zip(unique_org_tables, string.ascii_lowercase))
 
@@ -246,18 +353,23 @@ class UnregTables:
         from_sql = f'\nfrom {self.dataset.schema}."{unique_org_tables[0]}" {aliases[unique_org_tables[0]]}'
         org_val_col = ''
 
-        for i in range(0, len(epa_cols)):
+        for i in range(len(epa_cols)):
             if epa_cols[i] == 'facility_type_id':
                 org_val_col = f'{aliases[org_tables[i]]}."{org_cols[i]}"'
                 col_alias = 'org_facility_type'
             else:
                 col_alias = epa_cols[i]
-            select_sql += f'{aliases[org_tables[i]]}."{org_cols[i]}" as {col_alias}, ' 
+            source_expression = f'{aliases[org_tables[i]]}."{org_cols[i]}"'
+            casted_expression = self._cast_unreg_view_col(col_alias, source_expression)
+            select_sql += f'{casted_expression} as {col_alias}, '
             if org_join_tables[i]:
                 from_sql += f' join {self.dataset.schema}."{org_tables[i]}" {aliases[org_tables[i]]} '
                 from_sql += f' on {aliases[org_join_tables[i]]}."{org_join_cols[i]}" = {aliases[org_tables[i]]}."{org_join_cols[i]}" '
 
-        select_sql += ' ft.facility_type as epa_facility_type, ft.facility_type_id'
+        select_sql += (
+            f"{self._cast_unreg_view_col('epa_facility_type', 'ft.facility_type')} as epa_facility_type, "
+            f"{self._cast_unreg_view_col('facility_type_id', 'ft.facility_type_id')} as facility_type_id"
+        )
         from_sql += f'\nleft join (select organization_value, epa_value from public.v_{self.dataset.ust_or_release}_mapping where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s) x on x.organization_value = {org_val_col} '
         from_sql += '\nleft join public.facility_types ft on x.epa_value = ft.facility_type'
         view_sql = f'create or replace view {view_name} as\n{select_sql}{from_sql} where {org_val_col} is not null'
@@ -280,7 +392,9 @@ class UnregTables:
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
         cnt = self.cur.fetchone()[0]
         if cnt == 0:
-            logger.warning('No compartment sizes available; will not create %s', view_name)
+            logger.warning('No compartment sizes available; creating placeholder %s', view_name)
+            self.create_placeholder_tank_size_view()
+            self.disconnect_db()
             return 
 
         sql = """select epa_column_name, organization_column_name, organization_table_name, organization_join_table, organization_join_column
@@ -292,6 +406,11 @@ class UnregTables:
                 order by b.column_sort_order"""
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,), print_sql=False)
         rows = self.cur.fetchall()
+        if not rows:
+            logger.warning('No mapping rows found to build %s; creating placeholder view.', view_name)
+            self.create_placeholder_tank_size_view()
+            self.disconnect_db()
+            return
 
         epa_cols, org_cols, org_tables, org_join_tables, org_join_cols = map(list, zip(*rows))
         unique_org_tables = list(dict.fromkeys(org_tables))
@@ -302,12 +421,13 @@ class UnregTables:
         from_sql = f'\nfrom {self.dataset.schema}."{unique_org_tables[0]}" {aliases[unique_org_tables[0]]}'
         groupby_sql = f'\ngroup by {', '.join(groupby_cols)}'
 
-        for i in range(0, len(epa_cols)):
+        for i in range(len(epa_cols)):
             select_col = f'{aliases[org_tables[i]]}."{org_cols[i]}"'
             if epa_cols[i] == 'compartment_capacity_gallons':
-                select_sql += f'sum({select_col}) as tank_capacity_gallons'
+                select_sql += f"{self._cast_unreg_view_col('tank_capacity_gallons', f'sum({select_col})')} as tank_capacity_gallons"
             else:
-                select_sql += f'{select_col} as {epa_cols[i]}, '
+                casted_expression = self._cast_unreg_view_col(epa_cols[i], select_col)
+                select_sql += f'{casted_expression} as {epa_cols[i]}, '
             if org_join_tables[i]:
                 from_sql += f' join {self.dataset.schema}."{org_tables[i]}" {aliases[org_tables[i]]} '
                 from_sql += f' on {aliases[org_join_tables[i]]}."{org_join_cols[i]}" = {aliases[org_tables[i]]}."{org_join_cols[i]}" '
@@ -327,6 +447,7 @@ class UnregTables:
                            self.dataset.schema, self.erg_substance_mapping_view, 
                            self.dataset.schema, self.erg_facility_type_mapping_view,
                            self.dataset.schema, self.erg_unreg_subs_view)
+            self.create_placeholder_unreg_subs_view()
             self.disconnect_db()
             return 
 

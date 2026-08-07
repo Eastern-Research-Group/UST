@@ -1,8 +1,9 @@
 
+import sys
+
 from ust.python.example_schema.dataset_example import Dataset
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 # THIS SCRIPT DEAGGREGATES ENTIRE ROWS OF DATA THAT CONTAIN ROLLED UP DATA
 # RUN SCRIPT deagg.py BEFORE THIS ONE TO DEAGGREGATE THE LOOKUP VALUES THEMSELVES. 
@@ -67,7 +68,7 @@ class deaggRows:
                 self.cur.execute(sql2)
             else:
                 logger.warning('Table %s.%s already exists but drop_existing flag is False. Set drop_existing to True to continue. Exiting...', self.dataset.schema, self.data_deagg_table_name)
-                exit()
+                sys.exit()
 
         # convert list of columns into a string and wrap each one in quotes 
         col_str = ''  
@@ -163,13 +164,13 @@ def main(ust_or_release,
     dataset = Dataset(ust_or_release=ust_or_release,
                        control_id=control_id,
                       requires_export=False)
-    drows = deaggRows(dataset=dataset, 
-                     data_table_name=data_table_name, 
-                     data_table_pk_cols=data_table_pk_cols,
-                     data_deagg_column_name=data_deagg_column_name,
-                     deagg_table_name=deagg_table_name,
-                     delimiter=delimiter,
-                     drop_existing=drop_existing)
+    deaggRows(dataset=dataset, 
+              data_table_name=data_table_name, 
+              data_table_pk_cols=data_table_pk_cols,
+              data_deagg_column_name=data_deagg_column_name,
+              deagg_table_name=deagg_table_name,
+              delimiter=delimiter,
+              drop_existing=drop_existing)
 
 
 if __name__ == '__main__':   

@@ -1,15 +1,14 @@
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 import openpyxl as op
 from openpyxl.styles import Alignment, Font
 from openpyxl.styles.borders import Border, Side
 
-from ust.python.util import utils, config
+from ust.python.util import config, utils
 from ust.python.util.emailer import Emailer
 from ust.python.util.logger_factory import logger
-
 
 send_email = True        # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file to the user(s) identified in the config file. 
 

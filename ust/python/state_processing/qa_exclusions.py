@@ -3,7 +3,6 @@ from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
 
-
 ust_or_release = ''             # Valid values are 'ust' or 'release'
 control_id = 0                     # Enter an integer that is the ust_control_id or release_control_id
 organization_id = ''            # Optional; only used if control_id is not passed. If control_id == 0 or None, the script will retrieve the most recent control_id for the organization. 
@@ -25,8 +24,6 @@ export_file_name = None
 ###
 
 class Exclusions:
-    exclusions = {}
-
     def __init__(self, 
                  dataset,
                  standalone_export = False,
@@ -38,6 +35,7 @@ class Exclusions:
         self.export_file_path = export_file_path
         self.export_file_dir = export_file_dir
         self.export_file_name = export_file_name
+        self.exclusions = {}
         self.process()
 
 

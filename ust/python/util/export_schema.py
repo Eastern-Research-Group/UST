@@ -5,7 +5,6 @@ import pandas as pd
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 schema = ''                  # Enter the schema name
 exclude_erg_tables = True      # Boolean; defaults to True If True, will exclude all tables with an "erg_" prefix to their name.
 export_dir = None           # Optional. Defaults to '../../python/exports/other/[schema]'

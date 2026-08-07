@@ -1,10 +1,10 @@
+import sys
 from pathlib import Path
 
 import pandas as pd
 
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 ust_control_ids = []             # List of ust_control_id's to include in export. Can be empty if release_control_ids is not empty. 
 release_control_ids = []        # List of release_control_id's to include in export. Can be empty if release_control_ids is not empty. 
@@ -19,7 +19,7 @@ class GeocodingExport:
         self.release_control_ids = release_control_ids    
         if not self.release_control_ids and not self.release_control_ids:
             logger.warning('ust_control_ids and/or release_control_ids must be passed...')
-            exit()
+            sys.exit()
         self.export_file_dir = export_file_dir
         self.export_file_name = 'needed_geocoding_' + utils.get_timestamp_str() + '.xlsx'
         self.export_file_path = self.export_file_dir + self.export_file_name

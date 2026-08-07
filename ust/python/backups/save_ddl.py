@@ -1,8 +1,8 @@
 import os
+import sys
 
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 schema = 'public'
 export_path = None # If None, will default to ../../sql/ddl/[schema]
@@ -25,7 +25,7 @@ class Ddl:
             self.object_type = self.get_object_type(object_name)
             if not self.object_type:
                 logger.warning('object_name %s either does not exist in schema %s or is not a table, view, or function', object_name, self.schema)
-                exit()
+                sys.exit()
             else:
                 self.object_name = object_name
         else:
@@ -188,7 +188,7 @@ class Ddl:
         utils.process_sql(self.conn, self.cur, sql, params=(self.schema, object_name))
         try:
             object_type = self.cur.fetchone()[0]
-        except Exception:
+        except TypeError:
             pass
         return object_type
 

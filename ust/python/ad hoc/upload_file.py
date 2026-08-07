@@ -4,7 +4,6 @@ import pandas as pd
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 upload_file_path = r"C:\Users\erguser\OneDrive - Eastern Research Group\Projects\UST\Chemical List 40CFR302-2024-12-12.xlsx"
 schema = 'public'
 table_name = 'chemical_list' 

@@ -1,13 +1,13 @@
-from datetime import datetime
 import re
+import string
+from datetime import UTC, datetime
 
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy import create_engine
-import string
 
 from ust.python.util import config
-from ust.python.util.logger_factory import logger, error_logger
+from ust.python.util.logger_factory import error_logger, logger
 
 
 def connect_db(db_name=config.db_name, schema='public'):
@@ -120,8 +120,7 @@ def autowidth_column(worksheet, column):
         value = cell.value
         if value is None:
             continue
-        if len(str(value)) > max_length:
-            max_length = len(str(value))
+        max_length = max(max_length, len(str(value)))
         adjusted_width = (max_length + 2) * 1.2
         worksheet.column_dimensions[column_letter].width = adjusted_width    
 
@@ -131,7 +130,7 @@ def add_ws_filter(worksheet):
 
 
 def get_today_string():
-    return datetime.today().strftime('%Y-%m-%d')
+    return datetime.now(tz=UTC).strftime('%Y-%m-%d')
 
 
 def get_control_id(ust_or_release, organization_id):
@@ -165,23 +164,21 @@ def get_control_id(ust_or_release, organization_id):
 def get_table_existence(table_name, table_schema='public'):
     conn = connect_db()
     cur = conn.cursor()
-    sql = f"""select count(*) from information_schema.tables 
+    sql = """select count(*) from information_schema.tables 
               where table_schema = %s and table_name = %s"""
     process_sql(conn, cur, sql, params=(table_schema, table_name))
     cnt = cur.fetchone()[0]
     cur.close()
     conn.close()
-    if cnt == 0:
-        return False 
-    else:
-        return True
+    return cnt != 0
 
 
 def get_selenium_driver(url):
+    import time
+
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     from selenium.webdriver.chrome.service import Service
-    import time
 
     options = Options()
     service = Service()
@@ -400,8 +397,7 @@ def get_headers(table_name, schema='public'):
 
 
 def get_timestamp_str():
-    from datetime import datetime 
-    now = datetime.now()
+    now = datetime.now(tz=UTC)
     return now.strftime('%Y%m%d%H%M%S')
 
 
@@ -427,10 +423,7 @@ def get_table_values(table_name, column_name, schema='public'):
 
 
 def is_excel(file_path):
-    if file_path.lower()[-4:] == 'xlsx' or file_path.lower()[-3:] == 'xls':
-        return True 
-    else:
-        return False
+    return file_path.lower()[-4:] == 'xlsx' or file_path.lower()[-3:] == 'xls'
 
 
 def get_pretty_ust_or_release(ust_or_release):
@@ -482,7 +475,7 @@ def get_datatype_sql(data_type, character_maximum_length=None):
     elif character_maximum_length:
         try:
             int(character_maximum_length)
-        except Exception:
+        except (TypeError, ValueError):
             logger.error('character_maximum_length must be an integer (received %s)', character_maximum_length)
             raise ValueError(f'character_maximum_length must be an integer, received {character_maximum_length!r}.')
     if data_type == 'character varying':

@@ -3,7 +3,6 @@ from ust.python.example_schema.dataset_example import Dataset
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True             # Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
@@ -64,7 +63,7 @@ class ValueMapper:
         
             if epa_column_name == 'compartment_status_id' and self.organization_compartment_flag == 'N':
                 self.value_mapping_sql = self.value_mapping_sql + f'/*\n{self.dataset.organization_id} does not report at the Compartment level, but CompartmentStatus is required.\n'
-                self.value_mapping_sql = self.value_mapping_sql + f'\nCopy the tank status mapping down to the compartment!\n'
+                self.value_mapping_sql = self.value_mapping_sql + '\nCopy the tank status mapping down to the compartment!\n'
                 self.value_mapping_sql = self.value_mapping_sql + 'The lookup tables for compartment_statuses and tank_stasuses are the same.\n */\n\n'
 
             sql2 = f"""select {self.dataset.ust_or_release}_element_mapping_id, organization_table_name, organization_column_name, deagg_table_name, deagg_column_name 
@@ -110,16 +109,14 @@ class ValueMapper:
                 org_value = row4[0]
                 sql5 = f"""select {db_lookup_col} from public.{db_lookup_table} where replace(lower({db_lookup_col}),'-',' ') = %s"""
                 cur.execute(sql5, (org_value.lower().replace('-',' '),))
-                try:
-                    epa_value = cur.fetchone()[0]
-                except Exception:
-                    epa_value = None
+                row5 = cur.fetchone()
+                epa_value = row5[0] if row5 else None
 
                 self.value_mapping_sql = self.value_mapping_sql + f'insert into example.{self.dataset.ust_or_release}_element_value_mapping ({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments)\n'
                 if epa_value:
-                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {repr(org_value)}, '{epa_value}', null);\n"
+                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {org_value!r}, '{epa_value}', null);\n"
                 else:
-                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {repr(org_value)}, '', null);\n"
+                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {org_value!r}, '', null);\n"
 
             if epa_column_name == 'substance_id':
                 sql6 = "select substance from public.substances order by substance_group, substance"
@@ -169,7 +166,7 @@ def main(ust_or_release, control_id, only_incomplete=False, export_file_name=Non
                       export_file_dir=export_file_dir,
                       export_file_path=export_file_path)
 
-    export = ValueMapper(dataset=dataset, only_incomplete=only_incomplete)
+    ValueMapper(dataset=dataset, only_incomplete=only_incomplete)
 
 
 

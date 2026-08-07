@@ -1,10 +1,10 @@
 import os
+from typing import ClassVar
 
 import pandas as pd
 
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 export_file_path = r'C:\Users\renae\Documents\Work\UST\UST Finder inputs'
 exclude_invalid_coords = True   # invalid means null or less than 3-digit precision
@@ -13,7 +13,7 @@ release_exclude_orgs = []
 
 
 class Export:
-    ust_views = {
+    ust_views: ClassVar[dict[str, list[str]]] = {
                  'v_ust_facility': ['"FacilityID"'],
                  'v_ust_tank': ['"FacilityID"','"TankID"'],
                  'v_ust_tank_substance': ['"FacilityID"','"TankID"','"Substance"'],
@@ -24,7 +24,7 @@ class Export:
                  'v_ust_tank_dispenser': ['"FacilityID"','"TankID"','"DispenserID"'],
                  'v_ust_compartment_dispenser': ['"FacilityID"','"TankID"','"CompartmentID"','"DispenserID"']
                  }
-    release_views = {
+    release_views: ClassVar[dict[str, list[str]]] = {
                      'v_ust_release': ['"ReleaseID"'],
                      'v_ust_release_substance': ['"ReleaseID"','"SubstanceReleased"'],
                      'v_ust_release_source': ['"ReleaseID"','"SourceOfRelease"'],
@@ -35,12 +35,12 @@ class Export:
     def __init__(self, 
                  export_file_path,
                  exclude_invalid_coords=True,
-                 ust_exclude_orgs=[],
-                 release_exclude_orgs=[]):
+                 ust_exclude_orgs=None,
+                 release_exclude_orgs=None):
         self.export_file_path = export_file_path
         self.exclude_invalid_coords = exclude_invalid_coords
-        self.ust_exclude_orgs = ust_exclude_orgs 
-        self.release_exclude_orgs = release_exclude_orgs
+        self.ust_exclude_orgs = ust_exclude_orgs or []
+        self.release_exclude_orgs = release_exclude_orgs or []
 
 
     def process(self):
@@ -134,11 +134,7 @@ class Export:
     def export_view(self, view_name, ust_or_release):
         temp_table_name = 'temp_' + view_name
 
-        try:
-            df = pd.read_sql(f'select * from public.{temp_table_name}', utils.get_engine())
-        except Exception as e:
-            logger.error('Unable to export query to a dataframe. Error message: %s', e)
-            return
+        df = pd.read_sql(f'select * from public.{temp_table_name}', utils.get_engine())
         logger.info('Query exported to dataframe')
 
         file_name = view_name.replace('v_','') + '.csv'
@@ -146,11 +142,7 @@ class Export:
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
         full_path = dir_path + file_name
-        try:
-            df.to_csv(full_path, index=False)
-        except Exception as e:
-            logger.error('Unable to export query results to CSV. Error message: %s', e)
-            return
+        df.to_csv(full_path, index=False)
         logger.info('Exported %s to %s', view_name, full_path)
 
 
@@ -176,8 +168,8 @@ class Export:
 
 def main(export_file_path, 
          exclude_invalid_coords=True, 
-         ust_exclude_orgs=[],
-         release_exclude_orgs=[]):
+         ust_exclude_orgs=None,
+         release_exclude_orgs=None):
 
     export = Export(export_file_path=export_file_path,
                       exclude_invalid_coords=exclude_invalid_coords,

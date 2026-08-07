@@ -4,7 +4,6 @@ import psycopg2.errors
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 schema = 'co_ust'
 table_name = 'facs_tanks_comps'
 column_name = 'Products'

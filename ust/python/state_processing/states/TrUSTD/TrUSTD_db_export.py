@@ -1,7 +1,7 @@
-import os 
+import os
+
 import pandas as pd
 from sqlalchemy import create_engine
-
 
 db_user = 'TRUSTD_UST_FINDER_ETL'
 db_pass = 'ustETL2023qtr3!'

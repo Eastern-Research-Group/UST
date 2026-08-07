@@ -2,8 +2,8 @@ import os
 
 import pandas as pd
 
-from ust.python.util.logger_factory import logger
 from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 ust_control_ids = [16]
 release_control_ids = [8,13]

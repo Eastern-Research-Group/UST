@@ -1,9 +1,10 @@
 
+import sys
+
 from ust.python.example_schema.dataset_example import Dataset
 from ust.python.example_schema.deagg_rows_example import deaggRows
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 # THIS SCRIPT DEAGGREGATES SINGLE COLUMN LOOKUP VALUES (for example, SUBSTANCES)
 # USE deagg_rows_example.py TO CREATE DEAGG TABLES AT THE FACILITY/TANK/COMPARTMENT LEVEL
@@ -79,7 +80,7 @@ class deagg:
         elif cnt > 0 and not self.drop_existing:
             logger.warning('Table %s.%s already exists. To drop and replace, pass drop_existing=True to this function. Exiting...', self.dataset.schema, self.deagg_table_name)
             self.disconnect_db()
-            exit()
+            sys.exit()
 
         sql = f"""create table {self.dataset.schema}.{self.deagg_table_name}
              ({self.id_column_name} int not null generated always as identity primary key,
@@ -134,13 +135,13 @@ class deagg:
         rows = self.cur.fetchall()
         data_table_pk_cols = [r[0] for r in rows]
         
-        drows = deaggRows(dataset=self.dataset, 
-                 data_table_name=self.data_table_name, 
-                 data_table_pk_cols=data_table_pk_cols,
-                 data_deagg_column_name=self.column_name,
-                 deagg_table_name=self.deagg_table_name,
-                 delimiter=self.delimiter,
-                 drop_existing=self.drop_existing)
+        deaggRows(dataset=self.dataset, 
+              data_table_name=self.data_table_name, 
+              data_table_pk_cols=data_table_pk_cols,
+              data_deagg_column_name=self.column_name,
+              deagg_table_name=self.deagg_table_name,
+              delimiter=self.delimiter,
+              drop_existing=self.drop_existing)
 
 
 def main(ust_or_release, control_id, data_table_name, column_name, delimiter=',', drop_existing=False, deagg_rows=True):
@@ -148,12 +149,12 @@ def main(ust_or_release, control_id, data_table_name, column_name, delimiter=','
                        control_id=control_id,
                       requires_export=False)
 
-    deagged = deagg(dataset=dataset, 
-                      data_table_name=data_table_name, 
-                    column_name=column_name,
-                    delimiter=delimiter,
-                    drop_existing=drop_existing,
-                     deagg_rows=deagg_rows)
+    deagg(dataset=dataset, 
+          data_table_name=data_table_name, 
+          column_name=column_name,
+          delimiter=delimiter,
+          drop_existing=drop_existing,
+          deagg_rows=deagg_rows)
 
 
 if __name__ == '__main__':   

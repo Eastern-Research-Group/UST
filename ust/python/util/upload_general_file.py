@@ -1,10 +1,9 @@
-import sys  
+import sys
 
 import pandas as pd
 
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 upload_file_path = r""            # Path to Excel, CSV, or text file to upload. 
 schema = 'public'                # Schema to upload to. 

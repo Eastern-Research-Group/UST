@@ -1,8 +1,7 @@
 
 # from arcgis.gis import GIS
 from ust.python.util import utils
-from ust.python.util.logger_factory import logger, error_logger
-
+from ust.python.util.logger_factory import error_logger, logger
 
 facilities_layer_url = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/UST_Finder_Feature_Layer_2/FeatureServer/0'
 facilities_out_fields = 'Facility_ID,Name,Address,City,State,Zip_Code'

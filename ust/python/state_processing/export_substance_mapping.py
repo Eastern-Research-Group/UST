@@ -6,7 +6,6 @@ from ust.python.util.dataset import Dataset
 from ust.python.util.emailer import Emailer
 from ust.python.util.logger_factory import logger
 
-
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
 send_email = True                # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
@@ -35,10 +34,7 @@ class SubstanceMapping:
         cnt = cur.fetchone()[0]
         cur.close()
         conn.close()
-        if cnt > 0:
-            return True
-        else:
-            return False 
+        return cnt > 0
 
     def export(self):
         if self.check_for_substance_mapping():

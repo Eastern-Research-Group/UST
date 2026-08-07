@@ -24,7 +24,7 @@ def _resolve_control_id(ust_or_release: str, organization_id: str, control_id: i
         return None
     try:
         return utils.get_control_id(ust_or_release, organization_id)
-    except Exception:
+    except LookupError:
         logger.info(
             "No existing %s control_id found for %s; keeping ZZ placeholder in scaffold.",
             ust_or_release,

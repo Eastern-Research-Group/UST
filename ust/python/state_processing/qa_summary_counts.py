@@ -1,9 +1,7 @@
 
 from ust.python.util import utils
-from ust.python.util.dataset import Dataset 
+from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
-
-
 
 ust_or_release = ''             # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
@@ -28,7 +26,6 @@ export_file_name = None
 class SummaryCounts:
     conn = None 
     cur = None 
-    summ_counts = {}
 
     def __init__(self, 
                  dataset,
@@ -41,6 +38,7 @@ class SummaryCounts:
         self.export_file_path = export_file_path
         self.export_file_dir = export_file_dir
         self.export_file_name = export_file_name
+        self.summ_counts = {}
         self.connect_db()
         self.facility_type()
         self.tank_material()

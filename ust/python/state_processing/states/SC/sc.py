@@ -1,6 +1,6 @@
 
-from ust.python.util.import_service import ImportService
 from ust.python.util import config
+from ust.python.util.import_service import ImportService
 
 state = 'SC' 
 file_path = config.local_ust_path + state + '\\'

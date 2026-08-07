@@ -5,7 +5,6 @@ from ust.python.state_processing.populate_epa_data_tables import Populate
 from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 
-
 ust_or_release = 'release'             # Valid values are 'ust' or 'release'
 control_id = 0                 # Enter an integer that is the ust_control_id or release_control_id
 organization_id = 'MA'            # Optional; if control_id = 0 or None, will find the most recent control_id

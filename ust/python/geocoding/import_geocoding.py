@@ -1,9 +1,10 @@
 
+import sys
+
 import pandas as pd
 
-from ust.python.util.logger_factory import logger
 from ust.python.util import utils
-
+from ust.python.util.logger_factory import logger
 
 input_file_path = r"C:\Users\RMyers\OneDrive - Eastern Research Group\Projects\UST\Geocoding\needed_geocoding_20251113202942_geocoded.xlsx"
 
@@ -32,7 +33,7 @@ class Geocode:
             id_col = 'ust_release_id'
         else:
             logger.warning('Unknown value "%s" for ust_or_release; allowed values are "ust" and "release"', ust_or_release)
-            exit()
+            sys.exit()
         sql = f"""insert into public.{geo_table_name}
                     ({id_col}, status, score, match_type, rank, street_address, city,    
                      subregion, region_abbreviation, zip_code, zip_extension, country,

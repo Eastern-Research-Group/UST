@@ -5,7 +5,6 @@ from ust.python.example_schema.dataset_example import Dataset
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
 table_name = 'ust_piping'       # Enter EPA table name we are writing the view to populate. Set to None to generate all required views. 

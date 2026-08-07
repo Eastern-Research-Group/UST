@@ -903,6 +903,35 @@ set variables:
 control_id = 4
 ust_or_release = 'release' 
 organization_id = None      # Can leave as None if you specify the control_id
+
+
+
 export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+
+
+
+
+
+
+select organization_value, epa_value, release_element_value_mapping_id
+from v_release_element_mapping 
+where release_control_id = 4
+and epa_column_name = 'substance_id'
+and lower(organization_value) like '%oil%'
+order by 1;
+
+select * from substances 
+where release_flag is not null and inactive_flag is null
+order by substance_group, substance;
+
+Unleaded gasoline (unknown type)
+
+update release_element_value_mapping 
+set epa_value = 'Unleaded gasoline (unknown type)'
+where release_element_value_mapping_id = 326
+
+update release_element_value_mapping
+set epa_value = 'Oil (unspecified)'
+where release_element_value_mapping_id in (354,355)

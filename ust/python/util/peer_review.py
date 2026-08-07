@@ -1,11 +1,12 @@
 
+import sys
+
 import pandas as pd
 
 from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.export_view_ddl import ViewDdl
 from ust.python.util.logger_factory import logger
-
 
 ust_or_release = ''             # Valid values are 'ust' or 'release'
 control_id = 0                       # Enter an integer that is the ust_control_id or release_control_id
@@ -25,14 +26,9 @@ export_file_name = None
 class PeerReview:
     conn = None 
     cur = None 
-    views_to_review = []
-    tables_to_review = []
     view_name = None 
     table_name = None 
     view_col_str = None 
-    error_dict = {}
-    error_cnt_dict = {}
-    error_tables = []
     vsql = ''
 
     def __init__(self, 
@@ -44,6 +40,12 @@ class PeerReview:
         self.display_bad_data = display_bad_data
         self.overwrite_existing = overwrite_existing
         self.export_view_ddl = export_view_ddl
+        self.views_to_review = []
+        self.tables_to_review = []
+        self.error_dict = {}
+        self.error_cnt_dict = {}
+        self.error_tables = []
+        self.view_counts = {}
 
 
     def connect_db(self):
@@ -99,9 +101,9 @@ class PeerReview:
     def set_table_counts(self):
         for view in self.views_to_review:
             sql = f"select count(*) from public.{view} where {self.dataset.ust_or_release}_control_id = %s"
-            utils.process_sql(self.conn, self.cur, sql)
+            utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
             num_rows = self.cur.fetchone()[0]
-            self.view_counts[view_name] = num_rows            
+            self.view_counts[view] = num_rows            
 
 
     def get_sql(self):
@@ -115,8 +117,6 @@ class PeerReview:
                     order by a.sort_order"""
             utils.process_sql(self.conn, self.cur, sql, params=(view,))
             rows = self.cur.fetchall()
-            org_col_str = ''
-            epa_col_str = ''
             sql = f"select * from {self.dataset.schema}.{view} a\nwhere not exists"
             if "substance" in view:
                 if self.dataset.ust_or_release == 'ust':
@@ -176,7 +176,7 @@ class PeerReview:
             logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
             logger.info('Views this script looks for: %s', self.get_view_names())
             self.disconnect_db()
-            exit()
+            sys.exit()
         self.compare_row_counts()
         self.get_sql()
         self.disconnect_db()
@@ -195,7 +195,7 @@ class PeerReview:
 def main(ust_or_release, control_id=None, organization_id=None, display_bad_data=False, overwrite_existing=False, export_view_ddl=True):
     if not control_id and not organization_id:
         logger.error('Please pass either control_id or organization_id')
-        exit()
+        sys.exit()
     elif not control_id:
         control_id = utils.get_control_id(ust_or_release, organization_id)
 

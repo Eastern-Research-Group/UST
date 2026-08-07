@@ -1,8 +1,6 @@
-
 from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
-
 
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 0                     # Enter an integer that is the ust_control_id or release_control_id
@@ -135,10 +133,8 @@ class ValueMapper:
                 org_value = str(row4[0])
                 sql5 = f"""select {db_lookup_col} from public.{db_lookup_table} where replace(lower({db_lookup_col}),'-',' ') = %s"""
                 utils.process_sql(conn, cur, sql5, params=(org_value.lower().replace('-',' '),))
-                try:
-                    epa_value = cur.fetchone()[0]
-                except Exception:
-                    epa_value = None
+                fetched_value = cur.fetchone()
+                epa_value = fetched_value[0] if fetched_value else None
 
                 if not epa_value and epa_column_name == 'substance_id':
                     if org_value.lower() == 'jet fuel':
@@ -160,19 +156,19 @@ class ValueMapper:
                     elif 'not listed' in org_value.lower():
                         epa_value = 'Other or mixture'
                     else:
-                        sql5 = f"select count(*) from public.v_hazardous_substances where lower(substance) = lower({repr(org_value)})"
-                        utils.process_sql(conn, cur, sql5)
+                        sql5 = "select count(*) from public.v_hazardous_substances where lower(substance) = lower(%s)"
+                        utils.process_sql(conn, cur, sql5, params=(org_value,))
                         if cur.fetchone()[0] > 0:
                             epa_value = 'Hazardous substance'
 
                 self.value_mapping_sql = self.value_mapping_sql + f'insert into public.{self.dataset.ust_or_release}_element_value_mapping ({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments)\n'
                 if epa_value:
-                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {repr(org_value)}, '{epa_value}', null);\n"
+                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {org_value!r}, '{epa_value}', null);\n"
                 else:
-                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {repr(org_value)}, '', null);\n"
+                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {org_value!r}, '', null);\n"
 
             if epa_column_name == 'substance_id':
-                sql6 = "select substance from public.substances order by substance_group, substance"
+                sql6 = f"select substance from public.substances where inactive_flag is null and {self.dataset.ust_or_release}_flag is not null order by substance_group, substance"
             else:
                 sql6 = f"""select {db_lookup_col} from public.{db_lookup_table}"""
 

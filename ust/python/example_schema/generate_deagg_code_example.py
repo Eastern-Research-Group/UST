@@ -3,7 +3,6 @@ from ust.python.example_schema.dataset_example import Dataset
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 ust_or_release = 'ust'             # valid values are 'ust' or 'release'
 control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
 only_incomplete = True           # Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
@@ -106,9 +105,9 @@ class DeaggCode:
                 script_params = script_params + f"control_id = {self.dataset.control_id}                  # Enter an integer that is the ust_control_id or release_control_id\n"
                 script_params = script_params + f"data_table_name = '{org_table_name}'             # Enter a string containing organization table name\n"
                 script_params = script_params + f"column_name = '{org_column_name}'                # Enter a string containing organization column name\n"
-                script_params = script_params + f"delimiter = {repr(delimiter)}                 " + "# Defaults to ','; delimiter from the column beging deaggregated in the state table. Use '\n' for hard returns.".encode("unicode_escape").decode("utf-8") + '\n'
-                script_params = script_params + f"drop_existing = False             # Boolean, defaults to False; if True will drop existing deagg table with the same name\n"
-                script_params = script_params + f"deagg_rows = True                # Boolean, defaults to True. If True will automatically execute the deagg_rows_example.py scripts after executing this script.\n"
+                script_params = script_params + f"delimiter = {delimiter!r}                 " + "# Defaults to ','; delimiter from the column beging deaggregated in the state table. Use '\n' for hard returns.".encode("unicode_escape").decode("utf-8") + '\n'
+                script_params = script_params + "drop_existing = False             # Boolean, defaults to False; if True will drop existing deagg table with the same name\n"
+                script_params = script_params + "deagg_rows = True                # Boolean, defaults to True. If True will automatically execute the deagg_rows_example.py scripts after executing this script.\n"
                 self.deagg_sql = self.deagg_sql + script_params + '\n\n'
 
                 # deagg_table_name = utils.get_deagg_table_name(org_column_name)
@@ -151,7 +150,7 @@ def main(ust_or_release, control_id, only_incomplete=False, export_file_name=Non
                       export_file_dir=export_file_dir,
                       export_file_path=export_file_path)
 
-    export = DeaggCode(dataset=dataset, only_incomplete=only_incomplete)
+    DeaggCode(dataset=dataset, only_incomplete=only_incomplete)
 
 
 

@@ -3,7 +3,6 @@ from ust.python.backups.save_ddl import Ddl
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 schema = '' # If None, will export DDL for all _ust and _release schemas. 
 
 

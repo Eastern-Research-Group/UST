@@ -1,5 +1,6 @@
 import glob
 import os
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -7,7 +8,6 @@ import pandas as pd
 from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
-
 
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
@@ -104,7 +104,7 @@ class SourceData:
         if not self.table_list:
             logger.info('No non-ERG-created tables found in schema %s; exiting.', self.dataset.schema)
             self.disconnect_db()
-            exit()
+            sys.exit()
         for exclude_table in self.tables_to_exclude:
             try:
                 self.table_list.remove(exclude_table)

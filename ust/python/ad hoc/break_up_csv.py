@@ -1,6 +1,7 @@
 
-import pandas as pd
+import sys
 
+import pandas as pd
 
 path_to_csv = r"C:\Users\erguser\Downloads\Facilities.csv"
 
@@ -13,7 +14,7 @@ def main():
     df.sort_values(by=['State'], inplace=True)
     states = df['State'].unique().tolist()
     print(states)
-    exit()
+    sys.exit()
     i = int(len(states)/3)
     # print(i)
     group1 = states[:i]
@@ -37,7 +38,7 @@ def main():
         print('df groups contain all rows')
     else:
         print('Problem with chunked dfs; there are ' + str(df_len) + ' total rows in the chunked dfs!!!')
-        exit()
+        sys.exit()
     df1.to_csv(r'C:\Users\renae\Downloads/USTs_group1.csv', index=False)
     df2.to_csv(r'C:\Users\renae\Downloads/USTs_group2.csv', index=False)
     df3.to_csv(r'C:\Users\renae\Downloads/USTs_group3.csv', index=False)

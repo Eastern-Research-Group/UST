@@ -1,9 +1,8 @@
-import sys  
+import sys
 
 from ust.python.example_schema.dataset_example import Dataset
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 ust_or_release = 'ust'              # Valid values are 'ust' or 'release' 
 control_id = 1                   # Enter an integer that is the ust_control_id
@@ -101,7 +100,7 @@ class IdColumns:
 
 
     def check_existing(self, schema, table_name):
-        sql = f"select count(*) from information_schema.tables where table_schema = %s and table_name = %s"
+        sql = "select count(*) from information_schema.tables where table_schema = %s and table_name = %s"
         self.cur.execute(sql, (schema, table_name))
         return self.cur.fetchone()[0]
 
@@ -126,7 +125,7 @@ class IdColumns:
 
 
     def get_tank_table_name(self):
-        sql = f"""select epa_column_name, epa_table_name, b.sort_order 
+        sql = """select epa_column_name, epa_table_name, b.sort_order 
                 from example.ust_element_mapping a join public.ust_element_table_sort_order b 
                     on a.epa_table_name = b.table_name
                 where ust_control_id = %s and epa_column_name in ('tank_id','tank_name')
@@ -230,10 +229,10 @@ class IdColumns:
                   where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
         self.cur.execute(sql, (self.dataset.control_id, table_name, col_name))      
         utils.pretty_print_query(self.cur)    
-        try:
-            return self.cur.fetchone()[0]
-        except Exception:
-            return None 
+        row = self.cur.fetchone()
+        if not row:
+            return None
+        return row[0]
 
 
     def get_join_column(self, col_name, table_name=None):
@@ -242,10 +241,10 @@ class IdColumns:
         sql = f"""select distinct organization_column_name from example.{self.dataset.ust_or_release}_element_mapping
                   where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s and epa_column_name = %s"""
         self.cur.execute(sql, (self.dataset.control_id, table_name, col_name))          
-        try:
-            return self.cur.fetchone()[0]
-        except Exception:
-            return None 
+        row = self.cur.fetchone()
+        if not row:
+            return None
+        return row[0]
 
 
     def get_child_join_info(self, col_name, table_name):
@@ -301,7 +300,6 @@ class IdColumns:
                 logger.error('Enter a row in example.ust_element_mapping for epa_table_name = "%s" and epa_column_name = "facility_id", then re-run this script', self.table_name)
                 sys.exit()
             if tank_name_info:
-                tank_name_table = '"' + tank_name_info[0] + '"'
                 tank_name_col = '"' + tank_name_info[1] + '"'
                 select_cols = select_cols + ", " + tank_name_col + "::varchar(50)"
             else: 
@@ -344,7 +342,7 @@ class IdColumns:
             v_sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name, tank_id, compartment_name)\nselect distinct "
             select_cols = ''
 
-            sql = f"""select count(*) from example.ust_element_mapping 
+            sql = """select count(*) from example.ust_element_mapping 
                       where ust_control_id = %s and organization_table_name = 'erg_tank_id'"""
             self.cur.execute(sql, (self.dataset.control_id,))
             cnt = self.cur.fetchone()[0]
@@ -386,7 +384,6 @@ class IdColumns:
                     logger.error('Enter a row in example.ust_element_mapping for epa_table_name = "%s" and epa_column_name = "facility_id", then re-run this script', self.table_name)
                     sys.exit()
                 if tank_name_info:
-                    tank_name_table = '"' + tank_name_info[0] + '"'
                     tank_name_col = '"' + tank_name_info[1] + '"'
                     select_cols = select_cols + ", " + tank_name_col + "::varchar(50)"
                 else: 
@@ -398,7 +395,6 @@ class IdColumns:
                 else: 
                     select_cols = select_cols + ", null"
                 if compartment_name_info:
-                    compartment_name_table = '"' + compartment_name_info[0] + '"'
                     compartment_name_col = '"' + compartment_name_info[1] + '"'
                     select_cols = select_cols + ", " + compartment_name_col + "::varchar(50)"
                 else: 
@@ -442,7 +438,7 @@ class IdColumns:
             v_sql = f"insert into {self.dataset.schema}.{self.erg_table_name} (facility_id, tank_name, tank_id, compartment_name, compartment_id)\nselect distinct "
             select_cols = ''
 
-            sql = f"""select count(*) from example.ust_element_mapping 
+            sql = """select count(*) from example.ust_element_mapping 
                       where ust_control_id = %s and organization_table_name = 'erg_compartment_id'"""
             self.cur.execute(sql, (self.dataset.control_id,))
             cnt = self.cur.fetchone()[0]
@@ -484,7 +480,6 @@ class IdColumns:
                     logger.error('Enter a row in example.ust_element_mapping for epa_table_name = "%s" and epa_column_name = "facility_id", then re-run this script', self.table_name)
                     sys.exit()
                 if tank_name_info:
-                    tank_name_table = '"' + tank_name_info[0] + '"'
                     tank_name_col = '"' + tank_name_info[1] + '"'
                     select_cols = select_cols + ", " + tank_name_col + "::varchar(50)"
                 else: 
@@ -496,7 +491,6 @@ class IdColumns:
                 else: 
                     select_cols = select_cols + ", null"
                 if compartment_name_info:
-                    compartment_name_table = '"' + compartment_name_info[0] + '"'
                     compartment_name_col = '"' + compartment_name_info[1] + '"'
                     select_cols = select_cols + ", " + compartment_name_col + "::varchar(50)"
                 else: 
@@ -592,20 +586,20 @@ def main(ust_or_release, control_id, table_name=None):
         drop_tables(dataset, table_name)
 
     if table_name:
-        columns = IdColumns(dataset=dataset, 
-                            table_name=table_name, 
-                            drop_existing=drop_existing,
-                            write_sql=write_sql,
-                            overwrite_sql_file=overwrite_sql_file)        
+        IdColumns(dataset=dataset, 
+                  table_name=table_name, 
+                  drop_existing=drop_existing,
+                  write_sql=write_sql,
+                  overwrite_sql_file=overwrite_sql_file)        
     else:
         tables_needed = get_tables_with_missing_cols(dataset)
         for table in tables_needed: 
             logger.info('-------------------------------------------------------------------------\nWorking on table %s', table)
-            columns = IdColumns(dataset=dataset, 
-                                table_name=table, 
-                                drop_existing=drop_existing,
-                                write_sql=write_sql,
-                                overwrite_sql_file=overwrite_sql_file)
+            IdColumns(dataset=dataset, 
+                      table_name=table, 
+                      drop_existing=drop_existing,
+                      write_sql=write_sql,
+                      overwrite_sql_file=overwrite_sql_file)
 
 
 if __name__ == '__main__':   

@@ -5,7 +5,6 @@ import pandas as pd
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 schema = ''                  # Enter the schema name
 table_name = ''             # Enter the table name 
 column_names = []           # Optional. Enter a list of column names to select. If empty list, all columns will be selected.

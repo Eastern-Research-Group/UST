@@ -30,9 +30,7 @@ class Unregulated:
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
         cnt = self.cur.fetchone()[0]
         self.disconnect_db()        
-        if cnt > 0:
-            return True 
-        return False 
+        return cnt > 0
 
 
     def create_tables(self):
@@ -45,10 +43,35 @@ class Unregulated:
             logger.warning('ERG Unregulated tables do not exist; creating....')
             UnregTables(self.dataset, drop_existing=False).execute()
         else:
-            if self.delete_auto_inserts:
-                self.delete_existing_auto_inserts()
+            if self.delete_all:
+                logger.warning('ERG Unregulated tables already exist; recreating because delete_all=True.')
+                UnregTables(self.dataset, drop_existing=True).execute()
             else:
-                UnregTables(self.dataset, drop_existing=self.delete_all).execute()
+                logger.info('ERG Unregulated tables already exist; reusing existing tables.')
+
+
+    def refresh_unreg_views(self):
+        logger.info('Refreshing unregulated helper views for %s control_id=%s.', self.dataset.schema, self.dataset.control_id)
+        UnregTables(self.dataset, drop_existing=False, views_only=True).execute()
+
+
+    def log_unreg_source_counts(self):
+        self.connect_db()
+        source_objects = [
+            self.unreg.erg_substance_mapping_view,
+            self.unreg.erg_facility_type_mapping_view,
+            self.unreg.erg_tank_size_view,
+            self.unreg.erg_unreg_subs_view,
+        ]
+        for obj in source_objects:
+            if not utils.get_table_existence(obj, self.dataset.schema):
+                logger.warning('Missing helper view %s.%s', self.dataset.schema, obj)
+                continue
+            sql = f'select count(*) from {self.dataset.schema}.{obj}'
+            utils.process_sql(self.conn, self.cur, sql)
+            cnt = self.cur.fetchone()[0]
+            logger.info('Rows in %s.%s: %s', self.dataset.schema, obj, cnt)
+        self.disconnect_db()
 
 
     def delete_existing_auto_inserts(self):
@@ -152,7 +175,9 @@ class Unregulated:
                 f'unregulated {self.data_type} processing cannot continue.'
             )
         self.create_tables()
+        self.refresh_unreg_views()
         self.delete_existing_auto_inserts()
+        self.log_unreg_source_counts()
         self.insert_nonregulated_substances()
         self.insert_unregulated_tanks()
         self.insert_parents()

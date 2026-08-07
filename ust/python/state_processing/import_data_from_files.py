@@ -2,7 +2,6 @@
 from ust.python.util import utils
 from ust.python.util.import_service import ImportService
 
-
 ust_or_release = 'ust'          # Valid values are 'ust' or 'release'
 organization_id = ''            # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
 path = r""                      # Enter the full path to the directory containing the source data file(s) (NOT a path to a specific file)

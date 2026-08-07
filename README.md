@@ -70,7 +70,7 @@ Available commands:
 - `export-substance-mapping`: export substance mapping workbook
 - `mapping-xwalks`: create mapping crosswalk views
 - `create-missing-ids`: create missing required ID tables
-- `populate-unreg`: populate unregulated helper tables
+- `populate-unreg`: populate unregulated helper tables; it reuses existing tables and only needs `--delete-all` if you want to recreate them from scratch
 - `exclude-unregulated`: generate/execute unregulated exclusion SQL for views
 - `qa`: run QA checks and export a QA workbook
 - `populate`: load data from state views into public EPA tables
@@ -99,6 +99,7 @@ ust export-substance-mapping --type ust --control-id 123 --no-email
 ust mapping-xwalks --type ust --control-id 123
 ust create-missing-ids --type ust --control-id 123
 ust populate-unreg --type ust --control-id 123
+ust populate-unreg --type ust --control-id 123 --delete-auto-inserts
 ust exclude-unregulated --type ust --control-id 123 --print-sql
 ust qa --type ust --control-id 123 --organization-id TX
 ust qa --type ust --control-id 123 --organization-id TX --fast

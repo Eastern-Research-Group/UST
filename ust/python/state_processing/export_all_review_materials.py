@@ -1,4 +1,6 @@
 
+import sys
+
 from ust.python.state_processing.control_table_summary import Summary
 from ust.python.state_processing.export_template import Template
 from ust.python.state_processing.populate_epa_data_tables import Populate
@@ -7,7 +9,6 @@ from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
 from ust.python.util.peer_review import PeerReview
-
 
 ust_or_release = ''             # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
@@ -35,7 +36,7 @@ class ReviewMaterials:
         if not self.control_id or self.control_id == 0:
             if not self.organization_id:
                 logger.warning('Either control_id or organization_id must be passed; exiting...')
-                exit()
+                sys.exit()
             self.control_id = utils.get_control_id(self.ust_or_release, self.organization_id)
         self.exclude_qa = exclude_qa
         self.refresh_epa_tables = refresh_epa_tables

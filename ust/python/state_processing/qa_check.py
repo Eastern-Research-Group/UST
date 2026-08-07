@@ -1,7 +1,7 @@
 
 import openpyxl as op
-from openpyxl.styles import Font
 import psycopg2.errors
+from openpyxl.styles import Font
 
 from ust.python.state_processing import element_mapping_to_excel
 from ust.python.state_processing.qa_exclusions import Exclusions
@@ -9,7 +9,6 @@ from ust.python.state_processing.qa_summary_counts import SummaryCounts
 from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
-
 
 ust_or_release = ''             # Valid values are 'ust' or 'release'
 control_id = 0                    # Enter an integer that is the ust_control_id or release_control_id
@@ -47,19 +46,82 @@ class QualityCheck:
     conn = None 
     cur = None
     wb = None
-    views_to_review = []
     view_name = None 
     table_name = None 
     view_col_str = None 
-    error_dict = {}
-    error_cnt_dict = {}
-    view_counts = {}
 
     def __init__(self, dataset, force_exclusions=False, force_summary_counts=False, include_details=True):
         self.dataset = dataset
         self.force_exclusions = force_exclusions
         self.force_summary_counts = force_summary_counts
         self.include_details = include_details
+        self.views_to_review = []
+        self.error_dict = {}
+        self.error_cnt_dict = {}
+        self.view_counts = {}
+        self.view_columns_cache = {}
+        self.header_cache = {}
+        self.required_nonnull_cols_cache = {}
+        self.key_cols_cache = {}
+        self.check_constraints_cache = {}
+        self.lookup_values_cache = {}
+
+
+    def _get_view_columns(self, view_name):
+        if view_name in self.view_columns_cache:
+            return self.view_columns_cache[view_name]
+        sql = """select column_name
+                from information_schema.columns
+                where table_schema = %s and table_name = %s
+                order by ordinal_position"""
+        utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, view_name))
+        columns = [r[0] for r in self.cur.fetchall()]
+        self.view_columns_cache[view_name] = columns
+        return columns
+
+
+    def _quote_ident(self, name):
+        return '"' + name.replace('"', '""') + '"'
+
+
+    def _get_required_nonnull_cols(self, table_name):
+        if table_name in self.required_nonnull_cols_cache:
+            return self.required_nonnull_cols_cache[table_name]
+        sql = """select column_name from information_schema.columns 
+                where table_schema = 'public' and table_name = %s 
+                and is_nullable = 'NO' and ordinal_position > 1
+                and column_name not like 'ust%%id' and column_name not like 'release%%id'
+                order by ordinal_position"""
+        utils.process_sql(self.conn, self.cur, sql, params=(table_name,))
+        cols = [row[0] for row in self.cur.fetchall()]
+        self.required_nonnull_cols_cache[table_name] = cols
+        return cols
+
+
+    def _get_key_cols(self, view_name):
+        if view_name in self.key_cols_cache:
+            return self.key_cols_cache[view_name]
+        sql = f"""select column_name from public.{self.dataset.ust_or_release}_view_key_columns 
+                  where view_name = %s order by sort_order"""
+        utils.process_sql(self.conn, self.cur, sql, params=(view_name,))
+        cols = [r[0] for r in self.cur.fetchall()]
+        self.key_cols_cache[view_name] = cols
+        return cols
+
+
+    def _get_check_constraints(self, table_name):
+        if table_name in self.check_constraints_cache:
+            return self.check_constraints_cache[table_name]
+        sql = """select cc.constraint_name, check_clause
+                    from information_schema.check_constraints cc 
+                        join pg_constraint cons on cc.constraint_name = cons.conname
+                        join pg_class t on cons.conrelid = t.oid 
+                    where constraint_schema = 'public' and t.relname = %s
+                    order by 1, 2"""
+        utils.process_sql(self.conn, self.cur, sql, params=(table_name,))
+        rows = self.cur.fetchall()
+        self.check_constraints_cache[table_name] = rows
+        return rows
 
 
 
@@ -92,6 +154,7 @@ class QualityCheck:
             if self.dataset.ust_or_release == 'ust':
                 self.check_compartment_data_flag()
             self.check_unregulated_parents()
+            self.check_missing_parent_view_keys()
         # self.check_inactive_substances()    # this is now covered under check_substance_types
         self.check_substance_types()
         self.check_unregulated_substances()
@@ -140,11 +203,7 @@ class QualityCheck:
 
 
     def set_view_counts(self):
-        sql = f"select view_name from public.{self.dataset.ust_or_release}_template_data_tables order by sort_order"
-        utils.process_sql(self.conn, self.cur, sql)
-        rows = self.cur.fetchall()
-        for row in rows:
-            view_name = row[0]
+        for view_name in self.views_to_review:
             sql = f"select count(*) from {self.dataset.schema}.{view_name}"
             try:
                 self.cur.execute(sql)
@@ -155,10 +214,13 @@ class QualityCheck:
 
 
     def check_view_counts(self):
-        if self.dataset.ust_or_release == 'ust':
-            if 'v_ust_compartment' in self.views_to_review and 'v_ust_tank' in self.views_to_review:
-                if self.view_counts['v_ust_compartment'] < self.view_counts['v_ust_tank']:
-                    self.error_dict['Fewer rows in child table than expected'] = 'v_compartment_tank should have at least as many rows as v_ust_tank'
+        if (
+            self.dataset.ust_or_release == 'ust'
+            and 'v_ust_compartment' in self.views_to_review
+            and 'v_ust_tank' in self.views_to_review
+            and self.view_counts['v_ust_compartment'] < self.view_counts['v_ust_tank']
+        ):
+            self.error_dict['Fewer rows in child table than expected'] = 'v_compartment_tank should have at least as many rows as v_ust_tank'
             # if 'v_ust_piping' in self.views_to_review and 'v_ust_compartment' in self.views_to_review:
             #     if self.view_counts['v_ust_piping'] < self.view_counts['v_ust_compartment']:
             #         self.error_dict['Fewer rows in child table than expected'] = 'v_ust_piping should have at least as many rows as v_ust_compartment'
@@ -173,21 +235,15 @@ class QualityCheck:
                     missing_views.insert(0, 'v_ust_compartment')
                 if 'v_ust_tank' not in self.views_to_review:
                     missing_views.insert(0, 'v_ust_tank')
-            if 'v_ust_compartment' in self.views_to_review:
-                if 'v_ust_tank' not in self.views_to_review and 'v_ust_tank' not in missing_views:
-                    missing_views.insert(0, 'v_ust_tank')
+            if 'v_ust_compartment' in self.views_to_review and 'v_ust_tank' not in self.views_to_review and 'v_ust_tank' not in missing_views:
+                missing_views.insert(0, 'v_ust_tank')
             for view_name in missing_views:
                 self.error_dict['Missing required view (child data present)'] = self.dataset.schema + '.' + view_name  
-                logger.warning('Missing required view (child data present) %s.%s', self.dataset.schema, self.view_name)
+                logger.warning('Missing required view (child data present) %s.%s', self.dataset.schema, view_name)
 
 
     def set_view_col_str(self):
-        sql = """select column_name
-                from information_schema.columns 
-                where table_schema = %s and table_name = %s
-                order by ordinal_position"""
-        utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.view_name))
-        rows = self.cur.fetchall()
+        rows = [(c,) for c in self._get_view_columns(self.view_name)]
         col_str = ''
         for row in rows:
             col_str = col_str + row[0] + ', '
@@ -207,12 +263,14 @@ class QualityCheck:
         ws_name = ws_name[:31]
         if data:
             ws = self.wb.create_sheet(ws_name)
-            headers = utils.get_headers(self.view_name, self.dataset.schema)
-            for colno, header in enumerate(headers, start=1):
-                ws.cell(row=1, column=colno).value = header
-            for rowno, row in enumerate(data, start=2):
-                for colno, cell_value in enumerate(row, start=1):
-                    ws.cell(row=rowno, column=colno).value = cell_value
+            header_key = (self.dataset.schema, self.view_name)
+            headers = self.header_cache.get(header_key)
+            if headers is None:
+                headers = utils.get_headers(self.view_name, self.dataset.schema)
+                self.header_cache[header_key] = headers
+            ws.append(headers)
+            for row in data:
+                ws.append(list(row))
             logger.info('Data written to worksheet %s', ws_name)
         else:
             logger.info('Nothing to write to %s', ws_name)
@@ -221,12 +279,7 @@ class QualityCheck:
     def check_join_cols(self):
         # check for missing columns in the view that join child to parent tables 
         req_cols = join_cols[self.view_name]
-        sql = """select column_name from information_schema.columns 
-                where table_schema = %s and table_name = %s
-                order by ordinal_position"""
-        utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.view_name,))
-        rows = self.cur.fetchall()
-        existing_cols = [r[0] for r in rows]
+        existing_cols = self._get_view_columns(self.view_name)
         for rcol in req_cols:
             if rcol not in existing_cols:
                 self.error_dict['Missing join column'] = self.dataset.schema + '.' + self.view_name + '.' + rcol 
@@ -235,40 +288,45 @@ class QualityCheck:
 
     def check_required_cols(self):
         # check for missing columns in the view that are required by EPA 
-        sql = """select column_name from information_schema.columns
-                where table_schema = %s and table_name = %s"""
-        utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.schema, self.view_name))
-        existing_cols = {r[0] for r in self.cur.fetchall()}
+        existing_cols = set(self._get_view_columns(self.view_name))
 
-        sql = """select column_name from information_schema.columns 
-                where table_schema = 'public' and table_name = %s 
-                and is_nullable = 'NO' and ordinal_position > 1
-                and column_name not like 'ust%%id' and column_name not like 'release%%id'
-                order by ordinal_position"""
-        utils.process_sql(self.conn, self.cur, sql, params=(self.table_name,))
-        rows = self.cur.fetchall()
+        rows = [(col_name,) for col_name in self._get_required_nonnull_cols(self.table_name)]
+        present_required_cols = []
         for row in rows:
             col_name = row[0]
             if col_name not in existing_cols:
                 self.error_dict['Missing required column'] = self.dataset.schema + '.' + self.view_name + '.' + col_name 
                 logger.warning('Missing required column %s in view %s.%s', col_name, self.dataset.schema, self.view_name)
             else:
-                sql3 = f"select count(*) from {self.dataset.schema}.{self.view_name} where {col_name} is null"
-                num_rows = self._select_count(sql3)
-                self.error_cnt_dict['Number of null rows for required column ' + self.table_name + '.' + col_name] = num_rows
-                logger.warning('Number of null rows for required column %s.%s = %s', self.table_name, col_name, num_rows)
-                if num_rows > 0:
-                    details_sql = f"select * from {self.dataset.schema}.{self.view_name} where {col_name} is null"
-                    utils.process_sql(self.conn, self.cur, details_sql)
-                    self.write_to_ws(self.cur.fetchall(), col_name + ' null')
+                present_required_cols.append(col_name)
+
+        if not present_required_cols:
+            return
+
+        aggregate_terms = [
+            f"sum(case when {self._quote_ident(col_name)} is null then 1 else 0 end)"
+            for col_name in present_required_cols
+        ]
+        aggregate_sql = (
+            f"select {', '.join(aggregate_terms)} "
+            f"from {self._quote_ident(self.dataset.schema)}.{self._quote_ident(self.view_name)}"
+        )
+        utils.process_sql(self.conn, self.cur, aggregate_sql)
+        null_counts = self.cur.fetchone()
+
+        for col_name, num_rows in zip(present_required_cols, null_counts):
+            num_rows = int(num_rows or 0)
+            self.error_cnt_dict['Number of null rows for required column ' + self.table_name + '.' + col_name] = num_rows
+            logger.warning('Number of null rows for required column %s.%s = %s', self.table_name, col_name, num_rows)
+            if num_rows > 0 and self.include_details:
+                details_sql = f"select * from {self.dataset.schema}.{self.view_name} where {self._quote_ident(col_name)} is null"
+                utils.process_sql(self.conn, self.cur, details_sql)
+                self.write_to_ws(self.cur.fetchall(), col_name + ' null')
 
 
     def check_duplicate_rows(self):
         # check for rows that have duplicate key columns
-        sql = f"""select column_name from public.{self.dataset.ust_or_release}_view_key_columns 
-                  where view_name = %s order by sort_order"""
-        utils.process_sql(self.conn, self.cur, sql, params=(self.view_name,))
-        key_cols = [r[0] for r in self.cur.fetchall()]
+        key_cols = self._get_key_cols(self.view_name)
         key_col_str = ''
         join = ''
         for col in key_cols:
@@ -284,18 +342,19 @@ class QualityCheck:
         self.error_cnt_dict['Number of duplicated key columns in ' + self.dataset.schema + '.' + self.view_name + ' (' + key_col_str + ')'] = num_rows
         logger.warning('Number of duplicated key columns in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
         if num_rows > 0:
-            sql = f"""select * from {self.dataset.schema}.{self.view_name}  a
-                    where exists
-                        (select {key_col_str}
-                        from {self.dataset.schema}.{self.view_name}  b
-                        where {join}
-                        group by {key_col_str}
-                        having count(*) > 1)
-                    order by 1, 2, 3"""
-            utils.process_sql(self.conn, self.cur, sql)
-            data = self.cur.fetchall()
+            if self.include_details:
+                sql = f"""select * from {self.dataset.schema}.{self.view_name}  a
+                        where exists
+                            (select {key_col_str}
+                            from {self.dataset.schema}.{self.view_name}  b
+                            where {join}
+                            group by {key_col_str}
+                            having count(*) > 1)
+                        order by 1, 2, 3"""
+                utils.process_sql(self.conn, self.cur, sql)
+                data = self.cur.fetchall()
+                self.write_to_ws(data, self.view_name + ' duplicates')
             num_rows = len(rows) 
-            self.write_to_ws(data, self.view_name + ' duplicates')
             self.error_dict['Number of rows with duplicated key columns in ' + self.dataset.schema + '.' + self.view_name ] = num_rows
 
 
@@ -307,22 +366,24 @@ class QualityCheck:
             view_data_type = d[3]
             view_len = d[4]
             if view_len and table_len and view_len > table_len:
-                sql2 = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
-                utils.process_sql(self.conn, self.cur, sql2, params=(table_len,))
-                data = self.cur.fetchall()
-                num_rows = len(data)
+                count_sql = f"select count(*) from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
+                num_rows = self._select_count(count_sql, params=(table_len,))
                 self.error_cnt_dict['Number of rows exceeding allowed length of ' + self.table_name + '.' + col_name] = num_rows
                 logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
-                self.write_to_ws(data, col_name + ' too long')
+                if num_rows > 0 and self.include_details:
+                    sql2 = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
+                    utils.process_sql(self.conn, self.cur, sql2, params=(table_len,))
+                    self.write_to_ws(self.cur.fetchall(), col_name + ' too long')
             elif view_data_type == 'text' and table_data_type == 'character varying':
-                sql = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
-                utils.process_sql(self.conn, self.cur, sql, params=(table_len,))
-                data = self.cur.fetchall()
-                num_rows = len(data)
+                count_sql = f"select count(*) from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
+                num_rows = self._select_count(count_sql, params=(table_len,))
                 if num_rows > 0:
                     self.error_cnt_dict['Number of rows exceeding allowed length of ' + self.table_name + '.' + col_name] = num_rows
                     logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
-                    self.write_to_ws(data, col_name + ' too long')
+                    if self.include_details:
+                        sql = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
+                        utils.process_sql(self.conn, self.cur, sql, params=(table_len,))
+                        self.write_to_ws(self.cur.fetchall(), col_name + ' too long')
             elif table_data_type != view_data_type:
                 self.error_dict['Wrong data type for ' + self.table_name + '.' + col_name] = self.dataset.schema + '.' + self.view_name + '.' + col_name
 
@@ -389,7 +450,7 @@ class QualityCheck:
         num_rows = self._select_count(count_sql)
         self.error_cnt_dict['nonunique rows in ' + self.dataset.schema + '.' + self.view_name] = num_rows
         logger.warning('Number of non-unique rows in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
-        if num_rows > 0:
+        if num_rows > 0 and self.include_details:
             sql = f"select {self.view_col_str}, count(*) from {self.dataset.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
             utils.process_sql(self.conn, self.cur, sql)
             self.write_to_ws(self.cur.fetchall(), self.view_name + ' nonunique')
@@ -397,14 +458,7 @@ class QualityCheck:
 
     def check_failed_constraints(self):
         # check for failed check constraints
-        sql = """select cc.constraint_name, check_clause
-                    from information_schema.check_constraints cc 
-                        join pg_constraint cons on cc.constraint_name = cons.conname
-                        join pg_class t on cons.conrelid = t.oid 
-                    where constraint_schema = 'public' and t.relname = %s
-                    order by 1, 2"""
-        utils.process_sql(self.conn, self.cur, sql, params=(self.table_name,))
-        rows = self.cur.fetchall()
+        rows = self._get_check_constraints(self.table_name)
         for row in rows:
             constraint_name = row[0]
             check_clause = row[1]
@@ -423,7 +477,7 @@ class QualityCheck:
             num_rows = self.cur.fetchone()[0]
             self.error_cnt_dict['failed check constraint ' + self.dataset.schema + '.' + constraint_name] = num_rows
             logger.warning('Number of failed rows for check constraint %s.%s: %s', self.table_name, constraint_name, num_rows)
-            if num_rows > 0:
+            if num_rows > 0 and self.include_details:
                 detail_sql = f"select * from {self.dataset.schema}.{self.view_name} where not {check_clause}"
                 utils.process_sql(self.conn, self.cur, detail_sql)
                 self.write_to_ws(self.cur.fetchall(), constraint_name)
@@ -530,14 +584,23 @@ class QualityCheck:
             lookup_column = row[3].replace('_id','')
             if lookup_column == 'facility_type1' or lookup_column == 'facility_type2':
                 lookup_column = 'facility_type'
-            sql2 = f"select count(*) from public.{lookup_table} where {lookup_column} = %s"
-            utils.process_sql(self.conn, self.cur, sql2, params=(epa_value,))
-            cnt = self.cur.fetchone()[0]
-            if cnt < 1:
+            lookup_key = (lookup_table, lookup_column)
+            valid_values = self.lookup_values_cache.get(lookup_key)
+            if valid_values is None:
+                sql2 = (
+                    f"select {self._quote_ident(lookup_column)} "
+                    f"from public.{self._quote_ident(lookup_table)}"
+                )
+                utils.process_sql(self.conn, self.cur, sql2)
+                valid_values = {value_row[0] for value_row in self.cur.fetchall()}
+                self.lookup_values_cache[lookup_key] = valid_values
+
+            if epa_value not in valid_values:
                 self.error_dict['Invalid EPA value in ' + epa_column_name] = epa_value 
-                logger.warning('Invalid EPA value for %s.%s: %s', self.table_name, epa_column_name, cnt)
+                logger.warning('Invalid EPA value for %s.%s: %s', self.table_name, epa_column_name, epa_value)
                 num_errors += 1
-                self.write_to_ws(rows, 'Invalid EPA values')        
+        if num_errors > 0 and self.include_details:
+            self.write_to_ws(rows, 'Invalid EPA values')
         self.error_cnt_dict['Invalid EPA values in ' + self.dataset.ust_or_release + '_element_value_mapping'] = num_errors
 
 
@@ -610,6 +673,13 @@ class QualityCheck:
         utils.process_sql(self.conn, self.cur, sql)
         rows = self.cur.fetchall()
         num_rows = len(rows) 
+        unreg_source_view = 'vw_erg_unreg_substances'
+        unreg_source_cnt = None
+
+        if utils.get_table_existence(unreg_source_view, self.dataset.schema):
+            source_sql = f"select count(*) from {self.dataset.schema}.{unreg_source_view}"
+            utils.process_sql(self.conn, self.cur, source_sql)
+            unreg_source_cnt = self.cur.fetchone()[0]
         
         if num_rows > 0:
             msg = f'Number of {row_type} that need to be excluded due to unregulated heating oil{extramsg}. '
@@ -617,10 +687,17 @@ class QualityCheck:
                       where lower(unregulated_reason) in ('heating oil','small tank at farm/residence')"""
             utils.process_sql(self.conn, self.cur, sql)
             unreg_cnt = self.cur.fetchone()[0]
+            msg += f'QA candidates={num_rows}; {self.dataset.schema}.{unreg_source_view} rows={unreg_source_cnt}; {self.dataset.schema}.{unregulated_table} rows by reason={unreg_cnt}. '
             if unreg_cnt == len(rows):
                 msg += f'It looks like exclude_unregulated.py was run but unregulated {row_type} were not excluded from data views.'
             elif unreg_cnt == 0:
-                msg += f'{unregulated_table} does not contain expected rows. Run script exclude_unregulated.py and rebuild data views.'
+                if unreg_source_cnt == 0:
+                    msg += (
+                        f'{unregulated_table} does not contain expected rows and helper view {unreg_source_view} is empty. '
+                        'Run create-unreg with --views-only, then rerun populate-unreg.'
+                    )
+                else:
+                    msg += f'{unregulated_table} does not contain expected rows. Run script exclude_unregulated.py and rebuild data views.'
             else:
                 msg += f'{unreg_cnt} rows found in {unregulated_table}. Investigate this discrepancy and rebuild data views.'
 
@@ -631,14 +708,44 @@ class QualityCheck:
 
 
     def check_unregulated_parents(self):
+        def view_has_column(column_name):
+            return column_name in self._get_view_columns(self.view_name)
+
         if self.dataset.ust_or_release == 'ust':
-            unreg_table = 'erg_unregulated_tanks'    
-            unreg_col = 'facility_id'
-            unreg_type = 'facilities'
+            if not view_has_column('facility_id'):
+                msg = f'Missing column {self.view_name}.facility_id; skipping unregulated parent check.'
+                logger.warning(msg)
+                self.error_cnt_dict['Rows with unregulated rows not excluded from ' + self.view_name] = 0
+                self.error_dict[msg] = 'Skipped'
+                return
+
+            if self.view_name == 'v_ust_facility':
+                unreg_table = 'erg_unregulated_facilities'
+                unreg_type = 'facilities'
+                join_sql = 'a.facility_id = b.facility_id'
+                detail_cols = 'a.facility_id'
+            elif view_has_column('tank_id'):
+                unreg_table = 'erg_unregulated_tanks'
+                unreg_type = 'tanks'
+                join_sql = 'a.facility_id = b.facility_id and a.tank_id = b.tank_id'
+                detail_cols = 'a.facility_id, a.tank_id'
+            else:
+                unreg_table = 'erg_unregulated_facilities'
+                unreg_type = 'facilities'
+                join_sql = 'a.facility_id = b.facility_id'
+                detail_cols = 'a.facility_id'
         else:
+            if not view_has_column('release_id'):
+                msg = f'Missing column {self.view_name}.release_id; skipping unregulated parent check.'
+                logger.warning(msg)
+                self.error_cnt_dict['Rows with unregulated rows not excluded from ' + self.view_name] = 0
+                self.error_dict[msg] = 'Skipped'
+                return
+
             unreg_table = 'erg_unregulated_releases'
-            unreg_col = 'release_id'
             unreg_type = 'releases'
+            join_sql = 'a.release_id = b.release_id'
+            detail_cols = 'a.release_id'
 
         if not utils.get_table_existence(unreg_table, self.dataset.schema):
             msg = f'Missing table {self.dataset.schema}.{unreg_table}; skipping unregulated {unreg_type} check. Run create-unreg first.'
@@ -648,17 +755,108 @@ class QualityCheck:
             return
 
         sql = f"""select count(*)
-                  from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on a.{unreg_col} = b.{unreg_col}"""
+                  from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on {join_sql}"""
         num_rows = self._select_count(sql)
         self.error_cnt_dict['Rows with unregulated ' + unreg_type + ' not excluded from ' + self.view_name] = num_rows
         logger.warning('Rows with unregulated %s in %s: %s', unreg_type, self.view_name, num_rows)
         if num_rows > 0:
             self.error_dict['Unregulated ' + unreg_type + ' in ' + self.view_name] =  num_rows
-            detail_sql = f"""select a.{unreg_col}, b.unregulated_reason
-                           from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on a.{unreg_col} = b.{unreg_col}"""
-            utils.process_sql(self.conn, self.cur, detail_sql)
-            data = self.cur.fetchall()
-            self.write_to_ws(data, 'Unreg ' + self.view_name.replace('v_ust_',''))
+            if self.include_details:
+                detail_sql = f"""select {detail_cols}, b.unregulated_reason
+                               from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on {join_sql}"""
+                utils.process_sql(self.conn, self.cur, detail_sql)
+                data = self.cur.fetchall()
+                self.write_to_ws(data, 'Unreg ' + self.view_name.replace('v_ust_',''))
+
+
+    def check_missing_parent_view_keys(self):
+        parent_specs_ust = {
+            'v_ust_tank': ('v_ust_facility', ['facility_id']),
+            'v_ust_tank_substance': ('v_ust_tank', ['facility_id', 'tank_id']),
+            'v_ust_tank_dispenser': ('v_ust_tank', ['facility_id', 'tank_id']),
+            'v_ust_compartment': ('v_ust_tank', ['facility_id', 'tank_id']),
+            'v_ust_compartment_substance': ('v_ust_compartment', ['facility_id', 'tank_id', 'compartment_id']),
+            'v_ust_compartment_dispenser': ('v_ust_compartment', ['facility_id', 'tank_id', 'compartment_id']),
+            'v_ust_piping': ('v_ust_compartment', ['facility_id', 'tank_id', 'compartment_id']),
+        }
+        parent_specs_release = {
+            'v_ust_release_source': ('v_ust_release', ['release_id']),
+            'v_ust_release_cause': ('v_ust_release', ['release_id']),
+            'v_ust_release_substance': ('v_ust_release', ['release_id']),
+            'v_ust_release_corrective_action_strategy': ('v_ust_release', ['release_id']),
+        }
+
+        if self.dataset.ust_or_release == 'ust':
+            spec = parent_specs_ust.get(self.view_name)
+        else:
+            spec = parent_specs_release.get(self.view_name)
+
+        if not spec:
+            return
+
+        parent_view, key_cols = spec
+        child_cols = set(self._get_view_columns(self.view_name))
+        missing_child_key_cols = [col for col in key_cols if col not in child_cols]
+        if missing_child_key_cols:
+            msg = f'Missing key columns in {self.view_name}; skipping parent key check: {", ".join(missing_child_key_cols)}'
+            logger.warning(msg)
+            self.error_dict[msg] = 'Skipped'
+            self.error_cnt_dict[
+                'Rows in ' + self.dataset.schema + '.' + self.view_name + ' missing keys in ' + self.dataset.schema + '.' + parent_view
+            ] = 0
+            return
+
+        if parent_view not in self.views_to_review:
+            msg = f'Missing parent view {self.dataset.schema}.{parent_view}; skipping parent key check for {self.view_name}.'
+            logger.warning(msg)
+            self.error_dict[msg] = 'Skipped'
+            self.error_cnt_dict[
+                'Rows in ' + self.dataset.schema + '.' + self.view_name + ' missing keys in ' + self.dataset.schema + '.' + parent_view
+            ] = 0
+            return
+
+        if not utils.get_table_existence(parent_view, self.dataset.schema):
+            msg = f'Parent view {self.dataset.schema}.{parent_view} not found; skipping parent key check for {self.view_name}.'
+            logger.warning(msg)
+            self.error_dict[msg] = 'Skipped'
+            self.error_cnt_dict[
+                'Rows in ' + self.dataset.schema + '.' + self.view_name + ' missing keys in ' + self.dataset.schema + '.' + parent_view
+            ] = 0
+            return
+
+        join_sql = ' and '.join(
+            f'a.{self._quote_ident(col)} = p.{self._quote_ident(col)}'
+            for col in key_cols
+        )
+        missing_parent_sql = f"""select count(*)
+                  from {self.dataset.schema}.{self.view_name} a
+                  where not exists
+                        (select 1 from {self.dataset.schema}.{parent_view} p where {join_sql})"""
+        num_rows = self._select_count(missing_parent_sql)
+        error_label = (
+            'Rows in ' + self.dataset.schema + '.' + self.view_name
+            + ' missing keys in ' + self.dataset.schema + '.' + parent_view
+        )
+        self.error_cnt_dict[error_label] = num_rows
+        logger.warning('%s: %s', error_label, num_rows)
+
+        if num_rows > 0:
+            self.error_dict['Missing parent keys for ' + self.view_name + ' in ' + parent_view] = num_rows
+            if self.include_details:
+                key_col_sql = ', '.join('a.' + self._quote_ident(col) for col in key_cols)
+                order_sql = ', '.join(self._quote_ident(col) for col in key_cols)
+                detail_sql = f"""select distinct {key_col_sql}
+                               from {self.dataset.schema}.{self.view_name} a
+                               where not exists
+                                     (select 1 from {self.dataset.schema}.{parent_view} p where {join_sql})
+                               order by {order_sql}"""
+                utils.process_sql(self.conn, self.cur, detail_sql)
+                data = self.cur.fetchall()
+                ws_name = ('Missing parent ' + self.view_name.replace('v_ust_', ''))[:31]
+                ws = self.wb.create_sheet(ws_name)
+                ws.append(key_cols)
+                for row in data:
+                    ws.append(list(row))
 
 
     def check_compartment_data_flag(self):

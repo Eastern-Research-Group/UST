@@ -6,7 +6,6 @@ import psycopg2
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
 
-
 schema_names = None
 include_views = False 
 export_file_name =  None

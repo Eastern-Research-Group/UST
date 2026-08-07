@@ -28,15 +28,14 @@ class CuiImport:
     def get_clean_cui_table_name(self):
         sql = "select table_name from information_schema.tables where table_schema = %s and lower(table_name) like '%%clean_cui'"
         utils.process_sql(self.conn, self.cur, sql, params=(self.schema,))
-        try:
-            table_name = self.cur.fetchone()[0]
+        row = self.cur.fetchone()
+        if row:
+            table_name = row[0]
             logger.info('A clean_cui table, %s, already exists in schema %s and will be dropped', table_name, self.schema)
             sql = f'drop table {self.schema}."{table_name}"'
             utils.process_sql(self.conn, self.cur, sql)
             self.conn.commit()
             logger.info('Table %s.%s dropped', self.schema, table_name)
-        except Exception:
-            pass
         return 'erg_' + self.schema + '_clean_cui'
         
 

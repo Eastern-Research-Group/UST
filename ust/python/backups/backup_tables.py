@@ -3,7 +3,6 @@ import os
 from ust.python.util.export_table import ExportTable
 from ust.python.util.logger_factory import logger
 
-
 export_dir = r"K:/PROJECTS/UST/backups/"
 schema = 'public'
 data_only = True                 # Boolean. If True will backup tables of types data, mapping, and performance measures only. 

@@ -2,7 +2,6 @@
 from ust.python.util import utils
 
 
-
 def create_holding_table():
     conn = utils.connect_db()
     cur = conn.cursor()

@@ -1,6 +1,7 @@
-import os
 import csv
-    
+import os
+import sys
+
 # sourcefile      = "../data/_tblGeoSite__202211171348.csv";
 sourcefile = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\UST\State Data\NY\NY_utm_conversion.csv'
 targetfile      = "../data/NY_converted.csv";
@@ -53,9 +54,9 @@ def main():
                     indx_utm_zone = i
 
                 if col.upper() == new_longitude_column.upper():
-                    raise Exception("output column " + new_longitude_column + " already exists!")
+                    raise ValueError("output column " + new_longitude_column + " already exists!")
                 if col.upper() == new_latitude_column.upper():
-                    raise Exception("output column " + new_latitude_column + " already exists!")
+                    raise ValueError("output column " + new_latitude_column + " already exists!")
 
             writer.writerow(header + [new_longitude_column, new_latitude_column])
 
@@ -73,7 +74,7 @@ def main():
                 elif datum.upper() == "WGS84":
                     datum = 4326
                 else:
-                    raise Exception("unknown datum " + datum)
+                    raise ValueError("unknown datum " + datum)
 
                 if utm_zone is None or utm_zone == "":
                     utm_zone = utm_zone_assumption
@@ -102,12 +103,12 @@ def main():
                         print('northing = ' + str(northing))
                         print('zone_number = ' + str(utm_zone))
                         print('northern = ' + str(northern))
-                        exit()
+                        sys.exit()
 
                     if datum == 4326:
                         long, lat = t_4326_to_4269.transform(long, lat)
                     elif datum != 4269:
-                        raise Exception("unknown datum " + str(datum))
+                        raise ValueError("unknown datum " + str(datum))
 
                     writer.writerow(row + [long, lat])
 

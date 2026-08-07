@@ -2,8 +2,8 @@ import os
 
 import pandas as pd
 
-from ust.python.util.import_service import ImportService
 from ust.python.util import config, utils
+from ust.python.util.import_service import ImportService
 
 state = 'OR' 
 ust_folder = 'OR_LUST_tables/'
@@ -31,7 +31,7 @@ def get_csv_row_count(csv_path):
 
 
 def get_summary():
-    conn = conn = utils.connect_db(config.db_name)
+    conn = utils.connect_db(config.db_name)
     cur = conn.cursor()
 
     results = []

@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from ust.python.state_processing.create_unreg_tables import UnregTables
 from ust.python.state_processing.insert_control import ControlTable
@@ -24,8 +24,8 @@ class Initialize:
                  ust_or_release,
                  organization_id, 
                  data_source, 
-                 date_received=datetime.today(), 
-                 date_processed=datetime.today(), 
+                 date_received=None, 
+                 date_processed=None, 
                  comments=None,
                  organization_compartment_flag=None):
 
@@ -35,11 +35,11 @@ class Initialize:
         if date_received:
             self.date_received = date_received
         else:
-            self.date_received = datetime.today()
+            self.date_received = datetime.now(tz=UTC)
         if date_processed:
             self.date_processed = date_processed
         else:
-            self.date_processed = datetime.today()
+            self.date_processed = datetime.now(tz=UTC)
         self.comments = comments
         self.organization_compartment_flag = organization_compartment_flag
 
@@ -75,8 +75,8 @@ class Initialize:
 def main(ust_or_release, 
          organization_id, 
          data_source, 
-         date_received=datetime.today(), 
-         date_processed=datetime.today(),
+         date_received=None, 
+         date_processed=None,
          comments=None,
          organization_compartment_flag=None):
 

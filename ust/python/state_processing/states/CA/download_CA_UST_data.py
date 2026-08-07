@@ -1,6 +1,5 @@
 from ust.python.util.logger_factory import logger
 
-
 login_url = 'https://cersregulator.calepa.ca.gov/Account/SignIn?ReturnUrl=%2f'
 login_name = 'renaemyers'
 login_pword = 'XXXX'
@@ -13,12 +12,12 @@ def login(browser):
     # browser.form.print_summary()
     browser['UserName'] = login_name
     # browser.launch_browser()
-    response = browser.submit_selected()
+    browser.submit_selected()
     # print(response.text)
     browser.select_form() 
     # browser.form.print_summary()
     browser['Password'] = login_pword
-    response = browser.submit_selected()
+    browser.submit_selected()
     # print(response.text)
     # print(browser.url)
     return browser 

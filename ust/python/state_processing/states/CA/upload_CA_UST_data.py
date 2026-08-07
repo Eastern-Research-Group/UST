@@ -1,9 +1,9 @@
 
 import glob
+
 import pandas as pd
 
 from ust.python.util.logger_factory import logger
-
 
 
 def export_data_to_csv(file_path, first_file):

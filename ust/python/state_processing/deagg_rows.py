@@ -161,7 +161,7 @@ class deaggRows:
                     sql = sql + f" '{r}', "
                 sql = sql + f""" '{part}'\nwhere not exists\n(select 1 from {self.dataset.schema}.{self.data_deagg_table_name}\nwhere """
                 wheresql = ''
-                for i in range(0, len(self.cols)):
+                for i in range(len(self.cols)):
                     if row[i]:
                         wheresql = wheresql + f" {self.cols[i]} = '{row[i]}' and "
                     else:

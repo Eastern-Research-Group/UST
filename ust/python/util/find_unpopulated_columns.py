@@ -1,7 +1,8 @@
 
+import sys
+
 from ust.python.util import utils
 from ust.python.util.logger_factory import logger
-
 
 schema = ''             # Set to the schema name
 table_name = None         # If None, will check all tables in the specified schema. Set variable to a single table name to check a specific table. 
@@ -53,7 +54,7 @@ def main(schema, table_name=None):
         cnt = cur.fetchone()[0]
         if cnt == 0:
             logger.warning('No table named %s exists in schema %s', table_name, schema)
-            exit()
+            sys.exit()
         check_table(schema, table_name, cur, conn)
 
     cur.close()

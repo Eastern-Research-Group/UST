@@ -1,6 +1,6 @@
 
-from ust.python.util.import_service import ImportService
 from ust.python.util import utils
+from ust.python.util.import_service import ImportService
 
 state = 'CA' 
 file_path = r'C:\Users\RMyers\OneDrive - Eastern Research Group\Other Projects\UST\State Data\\' 

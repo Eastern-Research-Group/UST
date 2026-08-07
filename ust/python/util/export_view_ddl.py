@@ -1,8 +1,9 @@
 
+import sys
+
 from ust.python.util import utils
 from ust.python.util.dataset import Dataset
 from ust.python.util.logger_factory import logger
-
 
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 0                        # Enter an integer that is the ust_control_id or release_control_id
@@ -85,7 +86,7 @@ class ViewDdl:
             logger.warning('No %s template views found in schema %s; exiting.', self.dataset.ust_or_release, self.dataset.schema)
             logger.info('Views this script looks for: %s', self.get_view_names())
             self.disconnect_db()
-            exit()
+            sys.exit()
         self.get_sql()
         self.disconnect_db()
         self.write_sql()
@@ -94,7 +95,7 @@ class ViewDdl:
 def main(ust_or_release, control_id=None, organization_id=None, views_to_export=None):
     if not control_id and not organization_id:
         logger.error('Please pass either control_id or organization_id')
-        exit()
+        sys.exit()
     elif not control_id:
         control_id = utils.get_control_id(ust_or_release, organization_id)
 
