@@ -10,6 +10,7 @@ from ust.python.state_processing.create_view_sql import (
     preflight_report,
 )
 from ust.python.state_processing.export_template import Template
+from ust.python.state_processing.qa_check import QualityCheck
 from ust.python.util import utils
 from ust.python.util.database_importer import DatabaseImporter
 from ust.python.util.emailer import Emailer
@@ -141,6 +142,76 @@ class TemplateTests(unittest.TestCase):
         self.assertNotIn('"ks_release"."v_ust_release_substance"', sql)
         self.assertNotIn('substance_filter', sql)
         self.assertEqual([23], params)
+
+
+class QualityCheckTests(unittest.TestCase):
+    @patch.object(utils, "process_sql")
+    def test_check_bad_mapping_writes_only_invalid_rows_to_detail_sheet(self, process_sql_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", control_id=9)
+        qc.table_name = "ust_piping"
+        qc.view_name = "v_ust_piping"
+        qc.conn = unittest.mock.MagicMock()
+        qc.cur = unittest.mock.MagicMock()
+        qc.include_details = True
+        qc.error_dict = {}
+        qc.error_cnt_dict = {}
+        qc.lookup_values_cache = {}
+        qc.wb = unittest.mock.MagicMock()
+        qc.header_cache = {}
+        qc.write_invalid_epa_values_to_ws = unittest.mock.MagicMock()
+
+        qc.cur.fetchall.side_effect = [
+            [
+                ("piping_wall_type_id", "Single walled", "piping_wall_types", "piping_wall_type"),
+                ("piping_wall_type_id", "Single Wall", "piping_wall_types", "piping_wall_type"),
+            ],
+            [("Single Wall",), ("Double Wall",)],
+        ]
+
+        qc.check_bad_mapping()
+
+        qc.write_invalid_epa_values_to_ws.assert_called_once_with(
+            [
+                (
+                    "ust_piping",
+                    "piping_wall_type_id",
+                    "Single walled",
+                    "piping_wall_types",
+                    "piping_wall_type",
+                    "Double Wall, Single Wall",
+                )
+            ],
+        )
+        self.assertEqual(
+            {"Invalid EPA values in ust_element_value_mapping": 1},
+            qc.error_cnt_dict,
+        )
+        self.assertEqual(
+            {"Invalid EPA value in piping_wall_type_id: Single walled": "piping_wall_types.piping_wall_type"},
+            qc.error_dict,
+        )
+
+    @patch.object(utils, "process_sql")
+    def test_check_bad_mapping_accumulates_invalid_counts_across_views(self, process_sql_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", control_id=9)
+        qc.table_name = "ust_piping"
+        qc.view_name = "v_ust_piping"
+        qc.conn = unittest.mock.MagicMock()
+        qc.cur = unittest.mock.MagicMock()
+        qc.include_details = False
+        qc.error_dict = {}
+        qc.error_cnt_dict = {"Invalid EPA values in ust_element_value_mapping": 2}
+        qc.lookup_values_cache = {("piping_wall_types", "piping_wall_type"): {"Single Wall"}}
+
+        qc.cur.fetchall.return_value = [
+            ("piping_wall_type_id", "Single walled", "piping_wall_types", "piping_wall_type_id"),
+        ]
+
+        qc.check_bad_mapping()
+
+        self.assertEqual(3, qc.error_cnt_dict["Invalid EPA values in ust_element_value_mapping"])
 
 
 class ViewSqlTests(unittest.TestCase):

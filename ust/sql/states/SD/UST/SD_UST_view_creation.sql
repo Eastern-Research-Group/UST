@@ -90,3 +90,25 @@ where facility_id =  '62-00010'
 
 select * from sd_ust.erg_piping 
 where facility_id =  '62-00010'
+
+select * from sd_ust.erg_compartment a 
+where not exists 
+	(select 1 from sd_ust.erg_piping b
+	where a.facility_id = b.facility_id  and a.tank_id = b.tank_id)
+	
+select * from sd_ust.erg_compartment
+where facility_id not in (select "FacilityNumber"  from sd_ust.tanks)
+	
+delete from sd_ust.erg_compartment
+where facility_id not in (select "FacilityNumber"  from sd_ust.tanks)
+
+
+select * from 	 sd_ust.tanks where "FacilityNumber" = '01-00479'
+	
+insert into  sd_ust.erg_piping  (facility_id, tank_id, compartment_id)
+select distinct facility_id, tank_id, compartment_id 
+from sd_ust.erg_compartment a 
+where not exists 
+	(select 1 from sd_ust.erg_piping b
+	where a.facility_id = b.facility_id  and a.tank_id = b.tank_id)
+	

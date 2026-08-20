@@ -5,6 +5,27 @@ select * from information_schema.tables where table_schema ='public' and table_n
 update spill_bucket_wall_types set spill_bucket_wall_type = 'Single wall' where spill_bucket_wall_type = 'Single';
 update spill_bucket_wall_types set spill_bucket_wall_type = 'Double wall' where spill_bucket_wall_type = 'Double';
 
+select b.*
+from v_ust_element_mapping a join ust_element_value_mapping b on a.ust_element_value_mapping_id = b.ust_element_value_mapping_id
+where epa_column_name = 'spill_bucket_wall_type_id'
+
+
+update ust_element_value_mapping
+set epa_value = 'Double wall' 
+where ust_element_value_mapping_id in 
+	(select a.ust_element_value_mapping_id 
+	from v_ust_element_mapping a join ust_element_value_mapping b on a.ust_element_value_mapping_id = b.ust_element_value_mapping_id
+	where epa_column_name = 'spill_bucket_wall_type_id')
+and epa_value = 'Double';
+
+update ust_element_value_mapping
+set epa_value = 'Single wall' 
+where ust_element_value_mapping_id in 
+	(select a.ust_element_value_mapping_id 
+	from v_ust_element_mapping a join ust_element_value_mapping b on a.ust_element_value_mapping_id = b.ust_element_value_mapping_id
+	where epa_column_name = 'spill_bucket_wall_type_id')
+and epa_value = 'Single';
+
 select * from piping_styles ;
 
 insert into piping_styles (piping_style) values ('Siphon');
@@ -95,6 +116,8 @@ set epa_value = 'Urethane coated/clad steel (steel with/poly urethane)',
 where ust_element_value_mapping_id = 978
 
 select * from tank_material_descriptions;
+
+
 
 
 select organization_value, epa_value, ust_element_value_mapping_id, epa_comments 

@@ -276,6 +276,22 @@ class QualityCheck:
             logger.info('Nothing to write to %s', ws_name)
 
 
+    def write_invalid_epa_values_to_ws(self, data):
+        if not self.include_details:
+            return
+        ws_name = 'Invalid EPA values'
+        headers = ['EPA Table', 'EPA Column', 'Invalid EPA Value', 'Lookup Table', 'Lookup Column', 'Valid EPA Values']
+        if ws_name in self.wb.sheetnames:
+            ws = self.wb[ws_name]
+        else:
+            ws = self.wb.create_sheet(ws_name)
+            ws.append(headers)
+        for row in data:
+            ws.append(list(row))
+        utils.autowidth(ws)
+        logger.info('Data written to worksheet %s', ws_name)
+
+
     def check_join_cols(self):
         # check for missing columns in the view that join child to parent tables 
         req_cols = join_cols[self.view_name]
@@ -577,6 +593,8 @@ class QualityCheck:
         utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id, self.table_name))
         rows = self.cur.fetchall()
         num_errors = 0
+        invalid_rows = []
+        error_count_key = 'Invalid EPA values in ' + self.dataset.ust_or_release + '_element_value_mapping'
         for row in rows:
             epa_column_name = row[0]
             epa_value = row[1]
@@ -596,12 +614,20 @@ class QualityCheck:
                 self.lookup_values_cache[lookup_key] = valid_values
 
             if epa_value not in valid_values:
-                self.error_dict['Invalid EPA value in ' + epa_column_name] = epa_value 
+                self.error_dict[f'Invalid EPA value in {epa_column_name}: {epa_value}'] = f'{lookup_table}.{lookup_column}'
                 logger.warning('Invalid EPA value for %s.%s: %s', self.table_name, epa_column_name, epa_value)
                 num_errors += 1
+                invalid_rows.append((
+                    self.table_name,
+                    epa_column_name,
+                    epa_value,
+                    lookup_table,
+                    lookup_column,
+                    ', '.join(str(value) for value in sorted(valid_values)),
+                ))
         if num_errors > 0 and self.include_details:
-            self.write_to_ws(rows, 'Invalid EPA values')
-        self.error_cnt_dict['Invalid EPA values in ' + self.dataset.ust_or_release + '_element_value_mapping'] = num_errors
+            self.write_invalid_epa_values_to_ws(invalid_rows)
+        self.error_cnt_dict[error_count_key] = self.error_cnt_dict.get(error_count_key, 0) + num_errors
 
 
     def check_unregulated_substances(self):

@@ -303,5 +303,5 @@
      JOIN sd_ust.erg_piping c ON (((x."FacilityNumber" = (c.facility_id)::text) AND (x."TankNumber" = (c.tank_id)::double precision))))
      LEFT JOIN sd_ust.v_piping_style_xwalk px ON ((x."TankPipingType" = (px.organization_value)::text)))
      LEFT JOIN sd_ust.v_piping_wall_type_xwalk pwx ON ((x."TankPipingMaterial" = (pwx.organization_value)::text)))
-  WHERE (x."FacilityType" = 'UST'::text);;
+  WHERE (x."FacilityType" = 'UST'::text);
 
