@@ -60,6 +60,7 @@ class ViewSql:
         self.where_sql = ''
         self.view_sql = '----------------------------------------------------------------------------------------------------------\n\n'
         self.table_aliases = {}
+        self.table_alias_fallbacks = {}
         self.used_aliases = set()
         self.join_tables = []
         self.mapped_epa_columns = set()
@@ -67,6 +68,7 @@ class ViewSql:
         self._element_rule_cache = {}
         self._element_rule_columns = None
         self._source_column_names_cache = None
+        self._source_table_columns_cache = {}
         logger.info('Working on table %s', self.table_name)
         if overwrite_sql_file:
             self.overwrite_file()
@@ -347,7 +349,7 @@ class ViewSql:
 
 
     def _apply_table_alias(self, organization_table_name, selected_column):
-        alias = self.table_aliases.get(organization_table_name)
+        alias = self.table_aliases.get(organization_table_name) or self.table_alias_fallbacks.get(organization_table_name)
         if not alias:
             return selected_column
 
@@ -431,6 +433,21 @@ class ViewSql:
             row[0] for row in rows if self._has_value(row[0])
         ]
         return self._source_column_names_cache
+
+
+    def _get_source_table_columns(self, table_name):
+        if not getattr(self, '_source_table_columns_cache', None):
+            self._source_table_columns_cache = {}
+        if table_name in self._source_table_columns_cache:
+            return self._source_table_columns_cache[table_name]
+
+        sql = """select column_name
+                 from information_schema.columns
+                 where table_schema = %s and table_name = %s"""
+        self.cur.execute(sql, (self.dataset.schema, table_name))
+        columns = {row[0] for row in self.cur.fetchall()}
+        self._source_table_columns_cache[table_name] = columns
+        return columns
 
 
     def _replace_outside_single_quotes(self, text, replacement_func):
@@ -928,7 +945,7 @@ class ViewSql:
                 query_logic = ''
             if not selected_column:
                 selected_column = self.get_column_select_sql(epa_column_name, organization_column_name)
-                selected_column = self._apply_table_alias(organization_table_name, selected_column)
+            selected_column = self._apply_table_alias(organization_table_name, selected_column)
             selected_column = selected_column.strip()
             selected_column = selected_column.removesuffix(',')
             if query_logic:
@@ -1081,14 +1098,54 @@ class ViewSql:
             if self._has_value(self.join_info['organization_join_column3']) and self._has_value(self.join_info['organization_join_fk3']):
                 self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column3'] + '" = ' + alias + '."' + self.join_info['organization_join_fk3'] + '" '
                 clause_added = True
+            if not clause_added and self.join_info['table_type'] == 'id':
+                join_predicates = self._get_inferred_id_join_predicates(from_table, alias, join_alias)
+                if join_predicates:
+                    self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + ' and '.join(join_predicates) + ' '
+                    clause_added = True
 
         if clause_added:
             self.used_aliases.add(alias)
+        return clause_added
+
+
+    def _get_inferred_id_join_predicates(self, from_table, alias, join_alias):
+        source_columns = self._get_source_table_columns(from_table)
+        key_types = {
+            'facility_id': 'character varying',
+            'tank_id': 'integer',
+            'compartment_id': 'integer',
+        }
+        candidate_keys = [key for key in key_types if key in source_columns]
+        if not candidate_keys:
+            return []
+
+        sql = f"""select epa_column_name, organization_table_name, organization_column_name
+                  from public.{self.dataset.ust_or_release}_element_mapping
+                  where {self.dataset.ust_or_release}_control_id = %s
+                    and epa_table_name = %s
+                    and epa_column_name = any(%s)"""
+        self.cur.execute(sql, (self.dataset.control_id, self.table_name, candidate_keys))
+        predicates = []
+        for epa_column_name, organization_table_name, organization_column_name in self.cur.fetchall():
+            if not self._has_value(organization_column_name):
+                continue
+            source_alias = self.table_aliases.get(organization_table_name)
+            if source_alias != join_alias:
+                continue
+            source_expression = self._build_safe_key_expression(
+                f'{source_alias}."{organization_column_name}"',
+                key_types[epa_column_name],
+            )
+            predicates.append(f'{source_expression} = {alias}."{epa_column_name}"')
+
+        return predicates
 
 
     def build_from_query(self):
         self.from_sql = 'from '
         self.used_aliases = set()
+        self.table_alias_fallbacks = {}
 
         if not self.join_tables:
             fallback_table = self._get_fallback_source_table()
@@ -1125,8 +1182,10 @@ class ViewSql:
                     join_alias = 'a'
                 # print('alias = ' + alias)
                 # print('join_alias = ' + join_alias)
-                self.build_from_sql(from_table, alias, join_alias)
-                self.table_aliases[from_table] = alias
+                if self.build_from_sql(from_table, alias, join_alias):
+                    self.table_aliases[from_table] = alias
+                else:
+                    self.table_alias_fallbacks[from_table] = join_alias
 
             # print('__________________________________________________________________________________________________________________\n')
 

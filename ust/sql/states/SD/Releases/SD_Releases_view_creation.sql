@@ -1,15 +1,19 @@
 ----------------------------------------------------------------------------------------------------------
 
-create or replace view sd_release.v_ust_release_substance as
+-- WARNINGS
+-- No join metadata found for ust_piping; SQL will include placeholders and may need manual edits.
+-- Missing mapping for required key release_id in ust_piping; using where 1=1 fallback.
+-- No mapped elements found for EPA table ust_piping; generating required placeholders only.
+-- Generated SQL failed validation for ust_piping: syntax error at or near "from"
+LINE 4: from (select 1) a
+        ^
+
+
+create or replace view sd_release.v_ust_piping as
 select distinct
-    substance_id as substance_id, 
-    "amount"::double precision as quantity_released, 
-    "units"::character varying(20) as unit 
-from sd_release."erg_material_datarows_deagg" a
-    left join sd_release.v_substance_xwalk c on a."material" = c.organization_value
-where substance_id is not null and not exists
-    (select 1 from sd_release.erg_unregulated_substances unreg
-    where a."id":: varchar(50) = unreg.release_id and a."material"::varchar() = unreg.substance_id)
+
+from (select 1) a
+where 1=1
 
 -- ADD ADDITIONAL SQL HERE IF NECESSARY
 ;

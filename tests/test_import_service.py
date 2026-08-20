@@ -9,6 +9,7 @@ from ust.python.state_processing.create_view_sql import (
     _collect_table_preflight,
     preflight_report,
 )
+from ust.python.state_processing.export_template import Template
 from ust.python.util import utils
 from ust.python.util.database_importer import DatabaseImporter
 from ust.python.util.emailer import Emailer
@@ -74,6 +75,72 @@ class DatabaseImporterTests(unittest.TestCase):
 
         self.assertEqual("My_File", importer.get_table_name_from_file_name(r"C:\\tmp\\My File.xlsx"))
         self.assertEqual("another_file", importer.get_table_name_from_file_name("/tmp/another file.csv"))
+
+
+class TemplateTests(unittest.TestCase):
+    def test_substance_lookup_query_filters_to_ust_tank_substance_when_view_exists(self):
+        template = Template.__new__(Template)
+        template.dataset = SimpleNamespace(ust_or_release="ust", schema="sd_ust", control_id=9)
+        cur = unittest.mock.MagicMock()
+        cur.fetchone.return_value = (1,)
+        cur.fetchall.return_value = [("substance_id", "integer")]
+
+        sql, params = template._build_substance_lookup_query(cur)
+
+        self.assertIn('"sd_ust"."v_ust_tank_substance"', sql)
+        self.assertIn('substance_filter."substance_id" = s.substance_id', sql)
+        self.assertNotIn('v_release_substance', sql)
+        self.assertEqual([], params)
+
+    def test_substance_mapping_query_filters_to_regulated_source_rows_when_possible(self):
+        template = Template.__new__(Template)
+        template.dataset = SimpleNamespace(ust_or_release="ust", schema="sd_ust", control_id=9)
+        cur = unittest.mock.MagicMock()
+        cur.fetchone.return_value = (1,)
+        cur.fetchall.side_effect = [
+            [("facility_id", "character varying"), ("tank_id", "integer"), ("substance_id", "integer")],
+            [
+                ("facility_id", "tanks", "FacilityNumber"),
+                ("substance_id", "tanks", "TankProduct"),
+                ("tank_id", "tanks", "TankNumber"),
+            ],
+        ]
+
+        sql, params = template._build_substance_mapping_query(cur)
+
+        self.assertIn('from "sd_ust"."tanks" substance_source', sql)
+        self.assertIn('join "sd_ust"."v_ust_tank_substance" substance_filter', sql)
+        self.assertIn('nullif(trim(substance_source."TankProduct"::text), \'\') = a.organization_value', sql)
+        self.assertIn('nullif(trim(substance_source."FacilityNumber"::text), \'\') = substance_filter."facility_id"', sql)
+        self.assertIn('nullif(trim(substance_source."TankNumber"::text), \'\')::integer else null::integer end = substance_filter."tank_id"', sql)
+        self.assertNotIn('substance_filter."substance_id" = s.substance_id', sql)
+        self.assertEqual([9], params)
+
+    def test_substance_mapping_query_filters_release_raw_substances_when_view_exists(self):
+        template = Template.__new__(Template)
+        template.dataset = SimpleNamespace(ust_or_release="release", schema="ks_release", control_id=23)
+        cur = unittest.mock.MagicMock()
+        cur.fetchone.return_value = (1,)
+        cur.fetchall.return_value = [("substance", "text")]
+
+        sql, params = template._build_substance_mapping_query(cur)
+
+        self.assertIn('"ks_release"."v_ust_release_substance"', sql)
+        self.assertIn('nullif(trim(substance_filter."substance"::text), \'\') = a.organization_value', sql)
+        self.assertNotIn('"ks_release"."v_release_substance"', sql)
+        self.assertEqual([23], params)
+
+    def test_substance_mapping_query_is_unfiltered_when_state_view_is_missing(self):
+        template = Template.__new__(Template)
+        template.dataset = SimpleNamespace(ust_or_release="release", schema="ks_release", control_id=23)
+        cur = unittest.mock.MagicMock()
+        cur.fetchone.return_value = (0,)
+
+        sql, params = template._build_substance_mapping_query(cur)
+
+        self.assertNotIn('"ks_release"."v_ust_release_substance"', sql)
+        self.assertNotIn('substance_filter', sql)
+        self.assertEqual([23], params)
 
 
 class ViewSqlTests(unittest.TestCase):
@@ -223,6 +290,58 @@ class ViewSqlTests(unittest.TestCase):
         self.assertEqual("b.\"tank_identifier\"::integer as tank_id", existing_cols[20]["selected_column"])
         self.assertEqual("compartment_name", existing_cols[30]["column_name"])
 
+    def test_get_existing_cols_uses_fallback_alias_for_skipped_join_table(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.dataset = SimpleNamespace(control_id=123, ust_or_release="ust")
+        view_sql.table_name = "ust_piping"
+        view_sql.required_cols = {
+            10: {"column_name": "compartment_id", "data_type": "integer", "character_maximum_length": None},
+        }
+        view_sql.table_aliases = {"tanks": "a"}
+        view_sql.table_alias_fallbacks = {"erg_piping": "a"}
+        view_sql.warnings = []
+        view_sql.mapped_epa_columns = set()
+
+        view_sql.cur = unittest.mock.MagicMock()
+        view_sql.cur.fetchall.side_effect = [
+            [],
+            [(10, "compartment_id", "compartment_id", "erg_piping")],
+        ]
+        view_sql.cur.fetchone.return_value = ("integer", None)
+        view_sql._warn = unittest.mock.MagicMock()
+
+        existing_cols = view_sql.get_existing_cols()
+
+        self.assertEqual(
+            "case when nullif(trim(a.\"compartment_id\"::text), '') ~ '^[+-]?\\d+$' then nullif(trim(a.\"compartment_id\"::text), '')::integer else null::integer end as compartment_id",
+            existing_cols[10]["selected_column"],
+        )
+
+    def test_get_existing_cols_applies_alias_to_recipe_overrides(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.dataset = SimpleNamespace(control_id=123, ust_or_release="ust")
+        view_sql.table_name = "ust_piping"
+        view_sql.required_cols = {}
+        view_sql.table_aliases = {"tanks": "a"}
+        view_sql.table_alias_fallbacks = {}
+        view_sql.warnings = []
+        view_sql.mapped_epa_columns = set()
+
+        view_sql.cur = unittest.mock.MagicMock()
+        view_sql.cur.fetchall.side_effect = [
+            [
+                (10, "piping_material_steel", "TankPipingMaterial", '"TankPipingMaterial"::character varying(3) as piping_material_steel', 'WHEN Steel THEN Yes', "tanks"),
+            ],
+            [],
+        ]
+        view_sql.cur.fetchone.return_value = ("character varying", 3)
+        view_sql._warn = unittest.mock.MagicMock(side_effect=view_sql.warnings.append)
+
+        existing_cols = view_sql.get_existing_cols()
+
+        self.assertIn('a."TankPipingMaterial"', existing_cols[10]["selected_column"])
+        self.assertEqual("", existing_cols[10]["query_logic"])
+
     def test_get_existing_cols_prefers_recipe_over_query_logic(self):
         view_sql = ViewSql.__new__(ViewSql)
         view_sql.dataset = SimpleNamespace(control_id=123, ust_or_release="ust")
@@ -247,7 +366,7 @@ class ViewSqlTests(unittest.TestCase):
 
         view_sql.get_column_select_sql.assert_called_once_with("federally_regulated", "FederalFlag")
         self.assertEqual(
-            "case when lower(nullif(trim(\"FederalFlag\"::text), '')) in ('true', 't', 'yes', 'y', '1', '1.0') then 'Yes'::text when lower(nullif(trim(\"FederalFlag\"::text), '')) in ('false', 'f', 'no', 'n', '0', '0.0') then 'No'::text else null::text end as federally_regulated",
+            "case when lower(nullif(trim(a.\"FederalFlag\"::text), '')) in ('true', 't', 'yes', 'y', '1', '1.0') then 'Yes'::text when lower(nullif(trim(a.\"FederalFlag\"::text), '')) in ('false', 'f', 'no', 'n', '0', '0.0') then 'No'::text else null::text end as federally_regulated",
             existing_cols[10]["selected_column"],
         )
         self.assertEqual("", existing_cols[10]["query_logic"])
@@ -467,6 +586,54 @@ class ViewSqlTests(unittest.TestCase):
         self.assertIn("else to_date(a.\"tankinstalledyear\"::character varying::text, 'yyyy'::text)", compiled_sql)
         self.assertIn('end as tank_installation_date', compiled_sql)
         self.assertNotIn('!!!', view_sql.select_sql)
+
+    def test_build_from_query_infers_id_table_join_from_mapped_keys(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.dataset = SimpleNamespace(schema="sd_ust", control_id=9, ust_or_release="ust")
+        view_sql.table_name = "ust_piping"
+        view_sql.join_tables = [
+            {
+                "organization_table_name": "tanks",
+                "alias": "a",
+                "table_type": "org",
+                "organization_join_table": None,
+                "organization_join_column": None,
+                "organization_join_fk": None,
+                "organization_join_column2": None,
+                "organization_join_fk2": None,
+                "organization_join_column3": None,
+                "organization_join_fk3": None,
+            },
+            {
+                "organization_table_name": "erg_piping",
+                "alias": "b",
+                "table_type": "id",
+                "organization_join_table": "tanks",
+                "organization_join_column": None,
+                "organization_join_fk": None,
+                "organization_join_column2": None,
+                "organization_join_fk2": None,
+                "organization_join_column3": None,
+                "organization_join_fk3": None,
+            },
+        ]
+        view_sql.join_info = {}
+        view_sql.table_aliases = {}
+        view_sql._source_table_columns_cache = {"erg_piping": {"facility_id", "tank_id", "piping_id"}}
+        view_sql.cur = unittest.mock.MagicMock()
+        view_sql.cur.fetchall.return_value = [
+            ("facility_id", "tanks", "FacilityNumber"),
+            ("tank_id", "tanks", "TankNumber"),
+        ]
+
+        view_sql.build_from_query()
+
+        self.assertIn('from sd_ust."tanks" a', view_sql.from_sql)
+        self.assertIn('left join sd_ust."erg_piping" b on', view_sql.from_sql)
+        self.assertIn('nullif(trim(a."FacilityNumber"::text), \'\') = b."facility_id"', view_sql.from_sql)
+        self.assertIn('nullif(trim(a."TankNumber"::text), \'\')::integer else null::integer end = b."tank_id"', view_sql.from_sql)
+        self.assertEqual({"tanks": "a", "erg_piping": "b"}, view_sql.table_aliases)
+        self.assertEqual({"a", "b"}, view_sql.used_aliases)
 
     def test_validate_generated_sql_executes_explain_query(self):
         view_sql = ViewSql.__new__(ViewSql)

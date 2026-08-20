@@ -186,7 +186,7 @@
             ELSE NULL::text
         END AS spill_bucket_installed,
         CASE
-            WHEN (x."TankReleaseDetection" = ANY (ARRAY['Secondary Containment'::text, 'Double Walled'::text, 'Interstitial Monitoring'::text, 'Concrete Vault'::text])) THEN 'Yes'::text
+            WHEN (x."TankReleaseDetection" = ANY (ARRAY['Secondary Containment'::text, 'Interstitial Monitoring'::text])) THEN 'Yes'::text
             ELSE NULL::text
         END AS tank_interstitial_monitoring,
         CASE
@@ -243,11 +243,9 @@
             WHEN 'Safe Suction'::text THEN 'Yes'::text
             ELSE NULL::text
         END AS safe_suction,
-        CASE x."TankPipingType"
-            WHEN 'Suction'::text THEN 'Yes'::text
-            ELSE NULL::text
-        END AS american_suction,
-    NULL::text AS high_pressure_or_bulk_piping,
+    	CASE x."TankPipingType" 
+    		WHEN 'Pressure'::text THEN Yes::text
+            ELSE NULL::text AS high_pressure_or_bulk_piping,
         CASE
             WHEN (x."TankPipingMaterial" ~~ '%Fiberglass%'::text) THEN 'Yes'::text
             ELSE NULL::text
@@ -297,18 +295,10 @@
             WHEN 'Secondary Containment'::text THEN 'Yes'::text
             ELSE NULL::text
         END AS pipe_secondary_containment_other,
-        CASE x."TankPipingReleaseDetection"
-            WHEN 'Unknown'::text THEN 'Yes'::text
-            ELSE NULL::text
-        END AS pipe_secondary_containment_unknown,
         CASE
             WHEN (x."TankPipingMaterial" = ANY (ARRAY['Cath. Protection'::text, 'Cath. Steel'::text])) THEN 'Yes'::text
             ELSE NULL::text
-        END AS piping_corrosion_protection_sacrificial_anode,
-        CASE
-            WHEN (x."TankPipingReleaseDetection" = ANY (ARRAY['None'::text, 'Not Applicable'::text, 'Unknown'::text])) THEN 'EPA has no acceptable mapping to the State Release Detection values for this piping data.'::text
-            ELSE NULL::text
-        END AS piping_comment
+        END AS piping_corrosion_protection_sacrificial_anode
    FROM (((sd_ust.tanks x
      JOIN sd_ust.erg_piping c ON (((x."FacilityNumber" = (c.facility_id)::text) AND (x."TankNumber" = (c.tank_id)::double precision))))
      LEFT JOIN sd_ust.v_piping_style_xwalk px ON ((x."TankPipingType" = (px.organization_value)::text)))

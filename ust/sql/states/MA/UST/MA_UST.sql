@@ -373,6 +373,31 @@ from ma_ust."CLOSED_UST_FACILITIES_JUN_3_2024" a;
 *
 */
 
+select * from ust_control where organization_id = 'MA'
+
+select * from ust_facility 
+where ust_control_id = 42
+order by facility_id desc;
+
+select * from ma_ust.erg_facility_final 
+
+select * from ma_ust."OPEN_UST_FACILITIES_JUN_3_2024" 
+where "UST Facility ID"::text not in 
+	(select "Facility ID#"::text from ma_ust.erg_facility_final)
+	
+select "STATUS", count(*)
+from ma_ust."Tank info"
+where "Facility ID#"::text not in 
+	(select "Facility ID#"::text from ma_ust."Facility info")
+group by "STATUS"
+
+Tank Closure In-Place	241
+Tank Temporarily Out of Service	1
+In Use	4
+
+
+
+
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+import re
 
 import openpyxl as op
 from openpyxl.styles import Alignment, Font
@@ -236,6 +237,202 @@ class Template:
         logger.info('Created %s lookup tab', pretty_name)
 
 
+    def _quote_identifier(self, identifier):
+        if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', identifier):
+            raise ValueError(f'Unsafe SQL identifier: {identifier}')
+        return f'"{identifier}"'
+
+
+    def _quote_literal(self, value):
+        return "'" + str(value).replace("'", "''") + "'"
+
+
+    def _get_substance_filter_view_name(self):
+        if self.dataset.ust_or_release == 'release':
+            return 'v_ust_release_substance'
+        return 'v_ust_tank_substance'
+
+
+    def _get_substance_mapping_table_name(self):
+        if self.dataset.ust_or_release == 'release':
+            return 'ust_release_substance'
+        return 'ust_tank_substance'
+
+
+    def _get_substance_filter_info(self, cur):
+        substance_view = self._get_substance_filter_view_name()
+
+        view_exists_sql = """select count(*)
+                             from information_schema.tables
+                             where table_schema = %s and table_name = %s"""
+        utils.process_sql(cur.connection, cur, view_exists_sql, params=(self.dataset.schema, substance_view))
+        if cur.fetchone()[0] == 0:
+            return None
+
+        column_sql = """select column_name, data_type
+                        from information_schema.columns
+                        where table_schema = %s and table_name = %s
+                          and lower(column_name) in ('facility_id', 'tank_id', 'release_id', 'compartment_id', 'substance_id', 'substance')"""
+        utils.process_sql(cur.connection, cur, column_sql, params=(self.dataset.schema, substance_view))
+        columns = {row[0].lower(): {'column_name': row[0], 'data_type': row[1]} for row in cur.fetchall()}
+        if 'substance_id' in columns:
+            return {'view_name': substance_view, 'column_name': columns['substance_id']['column_name'], 'column_type': 'substance_id', 'columns': columns}
+        if 'substance' in columns:
+            return {'view_name': substance_view, 'column_name': columns['substance']['column_name'], 'column_type': 'substance', 'columns': columns}
+
+        logger.warning(
+            'Substance filter view %s.%s exists, but has no substance_id or substance column; exporting unfiltered substances.',
+            self.dataset.schema,
+            substance_view,
+        )
+        return None
+
+
+    def _get_substance_filter_view_sql(self, filter_info):
+        return f'{self._quote_identifier(self.dataset.schema)}.{self._quote_identifier(filter_info["view_name"])}'
+
+
+    def _get_trimmed_text_expression(self, source_expression):
+        return f"nullif(trim({source_expression}::text), '')"
+
+
+    def _build_safe_key_expression(self, source_expression, data_type):
+        source_text = self._get_trimmed_text_expression(source_expression)
+        if data_type in {'smallint', 'integer', 'bigint'}:
+            return (
+                f"case when {source_text} ~ '^[+-]?\\d+$' "
+                f'then {source_text}::{data_type} else null::{data_type} end'
+            )
+        return source_text
+
+
+    def _build_source_filter_predicates(self, cur, filter_info):
+        filter_columns = filter_info.get('columns', {})
+        key_columns = [key for key in ['facility_id', 'tank_id', 'release_id', 'compartment_id'] if key in filter_columns]
+        if not key_columns:
+            return []
+
+        mapping_table_name = self._get_substance_mapping_table_name()
+        mapping_sql = f"""select epa_column_name, organization_table_name, organization_column_name
+                         from public.{self.dataset.ust_or_release}_element_mapping
+                         where {self.dataset.ust_or_release}_control_id = %s
+                           and epa_table_name = %s
+                           and epa_column_name = any(%s)
+                           and organization_table_name is not null
+                           and organization_column_name is not null"""
+        utils.process_sql(
+            cur.connection,
+            cur,
+            mapping_sql,
+            params=(self.dataset.control_id, mapping_table_name, ['substance_id'] + key_columns),
+        )
+        substance_mappings = []
+        key_mappings = {}
+        for epa_column_name, organization_table_name, organization_column_name in cur.fetchall():
+            if epa_column_name == 'substance_id':
+                substance_mappings.append((organization_table_name, organization_column_name))
+            elif epa_column_name in key_columns:
+                key_mappings.setdefault(organization_table_name, {})[epa_column_name] = organization_column_name
+
+        filter_view_sql = self._get_substance_filter_view_sql(filter_info)
+        clauses = []
+        for organization_table_name, organization_column_name in substance_mappings:
+            source_key_mappings = key_mappings.get(organization_table_name, {})
+            if not source_key_mappings:
+                continue
+
+            join_predicates = []
+            for key_column in key_columns:
+                source_key_column = source_key_mappings.get(key_column)
+                if not source_key_column:
+                    continue
+                filter_column_info = filter_columns[key_column]
+                filter_column = self._quote_identifier(filter_column_info['column_name'])
+                source_expression = self._build_safe_key_expression(
+                    f'substance_source.{self._quote_identifier(source_key_column)}',
+                    filter_column_info['data_type'],
+                )
+                join_predicates.append(f'{source_expression} = substance_filter.{filter_column}')
+
+            if not join_predicates:
+                continue
+
+            source_table = f'{self._quote_identifier(self.dataset.schema)}.{self._quote_identifier(organization_table_name)}'
+            source_substance_column = self._quote_identifier(organization_column_name)
+            clauses.append(
+                f"(a.organization_table_name = {self._quote_literal(organization_table_name)} "
+                f"and a.organization_column_name = {self._quote_literal(organization_column_name)} "
+                f"and exists\n"
+                f"                    (select 1\n"
+                f"                     from {source_table} substance_source\n"
+                f"                     join {filter_view_sql} substance_filter\n"
+                f"                       on {' and '.join(join_predicates)}\n"
+                f"                     where {self._get_trimmed_text_expression(f'substance_source.{source_substance_column}')} = a.organization_value))"
+            )
+
+        return clauses
+
+
+    def _build_substance_lookup_query(self, cur):
+        filter_info = self._get_substance_filter_info(cur)
+        sql = f"""select distinct s.substance_group, s.substance 
+                  from public.substances s
+                  where s.inactive_flag is null 
+                  and s.{self.dataset.ust_or_release}_flag is not null"""
+        params = []
+        if filter_info:
+            filter_view_sql = self._get_substance_filter_view_sql(filter_info)
+            filter_column = self._quote_identifier(filter_info['column_name'])
+            if filter_info['column_type'] == 'substance_id':
+                sql += f"""
+                  and exists
+                    (select 1 from {filter_view_sql} substance_filter
+                     where substance_filter.{filter_column} = s.substance_id)"""
+            else:
+                sql += f"""
+                  and exists
+                    (select 1
+                     from public.v_{self.dataset.ust_or_release}_element_mapping substance_mapping
+                     join {filter_view_sql} substance_filter
+                       on nullif(trim(substance_filter.{filter_column}::text), '') = substance_mapping.organization_value
+                     where substance_mapping.{self.dataset.ust_or_release}_control_id = %s
+                       and substance_mapping.epa_column_name = 'substance_id'
+                       and substance_mapping.epa_value = s.substance)"""
+                params.append(self.dataset.control_id)
+        sql += "\n                  order by 1, 2"
+        return sql, params
+
+
+    def _build_substance_mapping_query(self, cur):
+        filter_info = self._get_substance_filter_info(cur)
+        sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
+                from public.v_{self.dataset.ust_or_release}_element_mapping a 
+                    join public.substances s on a.epa_value = s.substance
+                where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'"""
+        params = [self.dataset.control_id]
+        if filter_info:
+            source_filter_predicates = self._build_source_filter_predicates(cur, filter_info)
+            if source_filter_predicates:
+                sql += f"""
+                and ({' or '.join(source_filter_predicates)})"""
+            elif filter_info['column_type'] == 'substance_id':
+                filter_view_sql = self._get_substance_filter_view_sql(filter_info)
+                filter_column = self._quote_identifier(filter_info['column_name'])
+                sql += f"""
+                and exists
+                    (select 1 from {filter_view_sql} substance_filter
+                     where substance_filter.{filter_column} = s.substance_id)"""
+            else:
+                filter_view_sql = self._get_substance_filter_view_sql(filter_info)
+                filter_column = self._quote_identifier(filter_info['column_name'])
+                sql += f"""
+                and exists
+                    (select 1 from {filter_view_sql} substance_filter
+                     where nullif(trim(substance_filter.{filter_column}::text), '') = a.organization_value)"""
+        sql += "\n                order by 1, 2"
+        return sql, params
+
+
     def make_substance_lookup_tab(self, ws):
         cell = ws.cell(row=1, column=1)
         cell.value = 'Substance Group'
@@ -249,12 +446,8 @@ class Template:
 
         conn = utils.connect_db()
         cur = conn.cursor()    
-        sql = f"""select substance_group, substance 
-                  from public.substances 
-                  where inactive_flag is null 
-                  and {self.dataset.ust_or_release}_flag is not null
-                  order by 1, 2"""
-        utils.process_sql(conn, cur, sql)
+        sql, params = self._build_substance_lookup_query(cur)
+        utils.process_sql(conn, cur, sql, params=params or None)
         data = cur.fetchall()
         for rowno, row in enumerate(data, start=2):
             for colno, cell_value in enumerate(row, start=1):
@@ -472,18 +665,8 @@ class Template:
 
         conn = utils.connect_db()
         cur = conn.cursor()    
-
-        substance_view = 'v_ust_tank_substance'
-        if self.dataset.ust_or_release == 'release':
-            substance_view = 'v_ust_release_substance'
-
-        sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
-                from public.v_{self.dataset.ust_or_release}_element_mapping a 
-                    join public.substances s on a.epa_value = s.substance
-                    join {self.dataset.schema}.{substance_view} b on b.substance_id = s.substance_id
-                where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'
-                order by 1, 2"""
-        utils.process_sql(conn, cur, sql, params=(self.dataset.control_id,))
+        sql, params = self._build_substance_mapping_query(cur)
+        utils.process_sql(conn, cur, sql, params=tuple(params))
 
         if cur.rowcount > 0:
             cell = ws.cell(row=1, column=4)
