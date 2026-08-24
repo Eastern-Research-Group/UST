@@ -65,6 +65,7 @@ class QualityCheck:
         self.key_cols_cache = {}
         self.check_constraints_cache = {}
         self.lookup_values_cache = {}
+        self.relation_columns_cache = {}
 
 
     def _get_view_columns(self, view_name):
@@ -78,6 +79,25 @@ class QualityCheck:
         columns = [r[0] for r in self.cur.fetchall()]
         self.view_columns_cache[view_name] = columns
         return columns
+
+
+    def _get_relation_columns(self, table_name, schema=None):
+        schema = schema or self.dataset.schema
+        cache_key = (schema, table_name)
+        if cache_key in self.relation_columns_cache:
+            return self.relation_columns_cache[cache_key]
+        sql = """select column_name
+                from information_schema.columns
+                where table_schema = %s and table_name = %s
+                order by ordinal_position"""
+        utils.process_sql(self.conn, self.cur, sql, params=(schema, table_name))
+        columns = [r[0] for r in self.cur.fetchall()]
+        self.relation_columns_cache[cache_key] = columns
+        return columns
+
+
+    def _relation_has_column(self, table_name, column_name, schema=None):
+        return column_name in self._get_relation_columns(table_name, schema=schema)
 
 
     def _quote_ident(self, name):
@@ -457,6 +477,10 @@ class QualityCheck:
 
     def check_nonunique(self):
         # check for non-unique (repeating) rows    
+        if not self.include_details:
+            logger.info('Skipping full-row nonunique check for %s.%s in fast QA mode.', self.dataset.schema, self.view_name)
+            self.error_cnt_dict['nonunique rows in ' + self.dataset.schema + '.' + self.view_name] = 0
+            return
         count_sql = f"""select count(*)
                         from (
                             select 1 from {self.dataset.schema}.{self.view_name}
@@ -709,11 +733,18 @@ class QualityCheck:
         
         if num_rows > 0:
             msg = f'Number of {row_type} that need to be excluded due to unregulated heating oil{extramsg}. '
-            sql = f"""select count(*) from {self.dataset.schema}.{unregulated_table} 
-                      where lower(unregulated_reason) in ('heating oil','small tank at farm/residence')"""
-            utils.process_sql(self.conn, self.cur, sql)
-            unreg_cnt = self.cur.fetchone()[0]
-            msg += f'QA candidates={num_rows}; {self.dataset.schema}.{unreg_source_view} rows={unreg_source_cnt}; {self.dataset.schema}.{unregulated_table} rows by reason={unreg_cnt}. '
+            if self._relation_has_column(unregulated_table, 'unregulated_reason'):
+                sql = f"""select count(*) from {self.dataset.schema}.{unregulated_table} 
+                          where lower(unregulated_reason) in ('heating oil','small tank at farm/residence')"""
+                utils.process_sql(self.conn, self.cur, sql)
+                unreg_cnt = self.cur.fetchone()[0]
+                unreg_count_description = f'{self.dataset.schema}.{unregulated_table} rows by reason={unreg_cnt}'
+            else:
+                sql = f"select count(*) from {self.dataset.schema}.{unregulated_table}"
+                utils.process_sql(self.conn, self.cur, sql)
+                unreg_cnt = self.cur.fetchone()[0]
+                unreg_count_description = f'{self.dataset.schema}.{unregulated_table} rows={unreg_cnt}; missing unregulated_reason column'
+            msg += f'QA candidates={num_rows}; {self.dataset.schema}.{unreg_source_view} rows={unreg_source_cnt}; {unreg_count_description}. '
             if unreg_cnt == len(rows):
                 msg += f'It looks like exclude_unregulated.py was run but unregulated {row_type} were not excluded from data views.'
             elif unreg_cnt == 0:
@@ -726,6 +757,8 @@ class QualityCheck:
                     msg += f'{unregulated_table} does not contain expected rows. Run script exclude_unregulated.py and rebuild data views.'
             else:
                 msg += f'{unreg_cnt} rows found in {unregulated_table}. Investigate this discrepancy and rebuild data views.'
+            if not self._relation_has_column(unregulated_table, 'unregulated_reason'):
+                msg += f' Recreate {self.dataset.schema}.{unregulated_table} with create-unreg --drop-existing so QA can report exclusion reasons.'
 
         self.error_cnt_dict['Rows with unregulated substances not excluded from views'] = num_rows
         if num_rows > 0:
@@ -788,7 +821,10 @@ class QualityCheck:
         if num_rows > 0:
             self.error_dict['Unregulated ' + unreg_type + ' in ' + self.view_name] =  num_rows
             if self.include_details:
-                detail_sql = f"""select {detail_cols}, b.unregulated_reason
+                unreg_reason_sql = 'b.unregulated_reason'
+                if not self._relation_has_column(unreg_table, 'unregulated_reason'):
+                    unreg_reason_sql = 'null::varchar(1000) as unregulated_reason'
+                detail_sql = f"""select {detail_cols}, {unreg_reason_sql}
                                from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on {join_sql}"""
                 utils.process_sql(self.conn, self.cur, detail_sql)
                 data = self.cur.fetchall()
@@ -821,61 +857,64 @@ class QualityCheck:
             return
 
         parent_view, key_cols = spec
+        error_label = (
+            'Rows in ' + self.dataset.schema + '.' + self.view_name
+            + ' missing keys in ' + self.dataset.schema + '.' + parent_view
+        )
+        if not self.include_details:
+            logger.info('Skipping missing parent key check for %s.%s in fast QA mode.', self.dataset.schema, self.view_name)
+            self.error_cnt_dict[error_label] = 0
+            return
+
         child_cols = set(self._get_view_columns(self.view_name))
         missing_child_key_cols = [col for col in key_cols if col not in child_cols]
         if missing_child_key_cols:
             msg = f'Missing key columns in {self.view_name}; skipping parent key check: {", ".join(missing_child_key_cols)}'
             logger.warning(msg)
             self.error_dict[msg] = 'Skipped'
-            self.error_cnt_dict[
-                'Rows in ' + self.dataset.schema + '.' + self.view_name + ' missing keys in ' + self.dataset.schema + '.' + parent_view
-            ] = 0
+            self.error_cnt_dict[error_label] = 0
             return
 
         if parent_view not in self.views_to_review:
             msg = f'Missing parent view {self.dataset.schema}.{parent_view}; skipping parent key check for {self.view_name}.'
             logger.warning(msg)
             self.error_dict[msg] = 'Skipped'
-            self.error_cnt_dict[
-                'Rows in ' + self.dataset.schema + '.' + self.view_name + ' missing keys in ' + self.dataset.schema + '.' + parent_view
-            ] = 0
+            self.error_cnt_dict[error_label] = 0
             return
 
         if not utils.get_table_existence(parent_view, self.dataset.schema):
             msg = f'Parent view {self.dataset.schema}.{parent_view} not found; skipping parent key check for {self.view_name}.'
             logger.warning(msg)
             self.error_dict[msg] = 'Skipped'
-            self.error_cnt_dict[
-                'Rows in ' + self.dataset.schema + '.' + self.view_name + ' missing keys in ' + self.dataset.schema + '.' + parent_view
-            ] = 0
+            self.error_cnt_dict[error_label] = 0
             return
 
-        join_sql = ' and '.join(
-            f'a.{self._quote_ident(col)} = p.{self._quote_ident(col)}'
+        key_col_sql = ', '.join(self._quote_ident(col) for col in key_cols)
+        missing_key_sql = f"""select distinct {key_col_sql}
+                              from {self.dataset.schema}.{self.view_name}
+                              except
+                              select distinct {key_col_sql}
+                              from {self.dataset.schema}.{parent_view}"""
+        missing_key_join_sql = ' and '.join(
+            f'a.{self._quote_ident(col)} = missing_keys.{self._quote_ident(col)}'
             for col in key_cols
         )
-        missing_parent_sql = f"""select count(*)
+        missing_parent_sql = f"""with missing_keys as (
+                  {missing_key_sql}
+                  )
+                  select count(*)
                   from {self.dataset.schema}.{self.view_name} a
-                  where not exists
-                        (select 1 from {self.dataset.schema}.{parent_view} p where {join_sql})"""
+                  join missing_keys on {missing_key_join_sql}"""
         num_rows = self._select_count(missing_parent_sql)
-        error_label = (
-            'Rows in ' + self.dataset.schema + '.' + self.view_name
-            + ' missing keys in ' + self.dataset.schema + '.' + parent_view
-        )
         self.error_cnt_dict[error_label] = num_rows
         logger.warning('%s: %s', error_label, num_rows)
 
         if num_rows > 0:
             self.error_dict['Missing parent keys for ' + self.view_name + ' in ' + parent_view] = num_rows
             if self.include_details:
-                key_col_sql = ', '.join('a.' + self._quote_ident(col) for col in key_cols)
                 order_sql = ', '.join(self._quote_ident(col) for col in key_cols)
-                detail_sql = f"""select distinct {key_col_sql}
-                               from {self.dataset.schema}.{self.view_name} a
-                               where not exists
-                                     (select 1 from {self.dataset.schema}.{parent_view} p where {join_sql})
-                               order by {order_sql}"""
+                detail_sql = f"""{missing_key_sql}
+                         order by {order_sql}"""
                 utils.process_sql(self.conn, self.cur, detail_sql)
                 data = self.cur.fetchall()
                 ws_name = ('Missing parent ' + self.view_name.replace('v_ust_', ''))[:31]

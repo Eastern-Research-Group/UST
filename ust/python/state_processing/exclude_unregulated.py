@@ -1,4 +1,6 @@
 
+import re
+
 import pandas as pd
 
 from ust.python.state_processing.create_unreg_tables import UnregTables
@@ -46,6 +48,26 @@ class Exclude:
         self.override_existing_unreg_check = override_existing_unreg_check
 
 
+    def _quote_identifier(self, identifier):
+        if identifier is None or str(identifier).strip() == '':
+            raise ValueError(f'Unsafe SQL identifier: {identifier}')
+        return '"' + str(identifier).replace('"', '""') + '"'
+
+
+    def _qualify_table(self, table_name):
+        if '.' in table_name:
+            schema, table = table_name.split('.', 1)
+            return f'{self._quote_identifier(schema)}.{self._quote_identifier(table)}'
+        return self._quote_identifier(table_name)
+
+
+    def _alias_column(self, alias, column_name, cast_text=False):
+        expression = f'{alias}.{self._quote_identifier(column_name)}'
+        if cast_text:
+            expression += '::varchar(50)'
+        return expression
+
+
     def execute(self):
         if self.find_regulated:
             UnregTables(self.dataset, drop_existing=False).execute()
@@ -74,22 +96,24 @@ class Exclude:
 
     def get_columns(self):
         sql = f"""select a.epa_table_name, a.epa_column_name, b.table_name, b.column_name, table_sort_order, column_sort_order
-                 from public.{self.dataset.ust_or_release}_element_mapping a left join information_schema.columns b 
+                 from public.{self.dataset.ust_or_release}_element_mapping a join information_schema.columns b 
                     on lower(a.organization_table_name) = lower(b.table_name) and lower(a.organization_column_name) = lower(b.column_name)
                     left join public.v_{self.dataset.ust_or_release}_element_metadata c on a.epa_table_name = c.table_name and a.epa_column_name = c.column_name
-                 where a.{self.dataset.ust_or_release}_control_id = {self.dataset.control_id} 
-                 and b.table_schema = '{self.dataset.schema}' and a.epa_column_name in ('facility_id','tank_id','release_id','substance_id') """
+                 where a.{self.dataset.ust_or_release}_control_id = %s
+                 and b.table_schema = %s and a.epa_column_name in ('facility_id','tank_id','release_id','substance_id') """
+        params = [self.dataset.control_id, self.dataset.schema]
         if self.view_name:
-            sql = sql + f""" and epa_table_name = '{self.view_name.replace("v_","")}' """
+            sql = sql + " and epa_table_name = %s "
+            params.append(self.view_name.replace("v_", ""))
         sql = sql + " order by c.table_sort_order, c.column_sort_order"
-        df = pd.read_sql(sql, con=utils.get_engine())
+        df = pd.read_sql(sql, con=utils.get_engine(), params=tuple(params))
         return df 
 
 
     def get_view_def(self, view_name):
         sql = "select public.get_view_def(%s, %s)"
         utils.process_sql(self.conn, self.cur, sql, params=(view_name, self.dataset.schema))
-        view_def = f'\n\ncreate or replace view {self.dataset.schema}.{view_name} as\n' 
+        view_def = f'\n\ncreate or replace view {self._quote_identifier(self.dataset.schema)}.{self._quote_identifier(view_name)} as\n' 
         view_def = view_def + self.cur.fetchone()[0].replace(';','')
         return view_def
 
@@ -126,7 +150,8 @@ class Exclude:
 
         filtered_table_df = self.df.copy().query(f"epa_table_name == '{table}'")
         # utils.pretty_print_df(filtered_table_df)
-        from_table =  self.dataset.schema + '.' + filtered_table_df['table_name'].iloc[0]
+        source_table = filtered_table_df['table_name'].iloc[0]
+        from_table = self.dataset.schema + '.' + source_table
         # print(f'from_table = {from_table}')        
 
         src_pk_name = filtered_table_df.copy().query(f"epa_column_name == '{unreg_parent_col}'")['column_name'].iloc[0]
@@ -142,22 +167,26 @@ class Exclude:
         except IndexError:
             pass
         
-        table_alias = get_table_alias(self.get_view_def(view_name), from_table)
+        table_alias = get_table_alias(self.get_view_def(view_name), from_table) or self._qualify_table(from_table)
         # print(f'table_alias = "{table_alias}"')
 
         # All views should exclude the parents 
-        view_def += f'{table_alias}."{src_pk_name}"::varchar(50) not in (select {unreg_parent_col} from {unreg_parent_table})'
+        parent_key_expression = self._alias_column(table_alias, src_pk_name, cast_text=True)
+        view_def += (
+            f'not exists (select 1 from {unreg_parent_table} unregparent '
+            f'where {parent_key_expression} = unregparent.{unreg_parent_col})'
+        )
 
         if view_name not in ('v_ust_facility', 'v_ust_facility_dispenser') and self.dataset.ust_or_release == 'ust':
             # One additional exclusion: the child unreg table, joined only on child pk (that is, if not an UST substance view that requires an additional join on substance)
             view_def += f'\nand not exists (select 1 from {unreg_child_table} unreg'
-            view_def += f'\n\twhere {table_alias}."{src_pk_name}"::varchar(50) = unreg.{unreg_parent_col} and {table_alias}."{src_col_name}" = unreg.{unreg_child_col})'
+            view_def += f'\n\twhere {parent_key_expression} = unreg.{unreg_parent_col} and {self._alias_column(table_alias, src_col_name)} = unreg.{unreg_child_col})'
         if 'substance' in view_name:
             view_def += f'\nand not exists (select 1 from {unreg_child_table} unregsub'
-            view_def += f'\n\twhere {table_alias}."{src_pk_name}"::varchar(50) = unregsub.{unreg_parent_col} '
+            view_def += f'\n\twhere {parent_key_expression} = unregsub.{unreg_parent_col} '
             if self.dataset.ust_or_release == 'ust':
-                view_def += f' and {table_alias}."{src_col_name}" = unregsub.{unreg_child_col}' 
-            view_def += f' and {table_alias}."{sur_sub_col_name}" = unregsub.organization_substance)'        
+                view_def += f' and {self._alias_column(table_alias, src_col_name)} = unregsub.{unreg_child_col}' 
+            view_def += f' and {self._alias_column(table_alias, sur_sub_col_name)} = unregsub.organization_substance)'        
 
         if view_def[:-1] != ';':
             view_def = view_def + ';'
@@ -188,17 +217,18 @@ class Exclude:
 
 
 def get_table_alias(view_def, from_table):
-    table_def = view_def.replace('"','')
-    i = table_def.find(from_table)
-    i2 = i + table_def[i:].find('\n')
-    table_def = table_def[i:i2]
-    table_def = table_def.replace(from_table,'').strip()
-    i = table_def.find(' ')
-    if i > 0:
-        table_def = table_def[:i]
-    # if not table_def:
-    #     table_def = from_table
-    return table_def.strip()
+    schema, table = from_table.split('.', 1)
+    identifier = rf'(?:(?:"{re.escape(schema)}"|{re.escape(schema)})\.)?(?:"{re.escape(table)}"|{re.escape(table)})'
+    alias_match = re.search(
+        identifier + r'\s+(?:as\s+)?(?P<alias>"[^"]+"|[A-Za-z_][A-Za-z0-9_]*)',
+        view_def,
+        flags=re.IGNORECASE,
+    )
+    if alias_match:
+        return alias_match.group('alias')
+    if re.search(identifier, view_def, flags=re.IGNORECASE):
+        return from_table
+    return None
 
 
 

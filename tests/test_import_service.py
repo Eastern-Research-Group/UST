@@ -11,6 +11,10 @@ from ust.python.state_processing.create_view_sql import (
 )
 from ust.python.state_processing.export_template import Template
 from ust.python.state_processing.qa_check import QualityCheck
+from ust.python.state_processing.create_unreg_tables import UnregTables
+from ust.python.state_processing.exclude_unregulated import Exclude, get_table_alias
+from ust.python.state_processing.qa_exclusions import Exclusions
+from ust.python.util.peer_review import PeerReview
 from ust.python.util import utils
 from ust.python.util.database_importer import DatabaseImporter
 from ust.python.util.emailer import Emailer
@@ -78,7 +82,119 @@ class DatabaseImporterTests(unittest.TestCase):
         self.assertEqual("another_file", importer.get_table_name_from_file_name("/tmp/another file.csv"))
 
 
+class PeerReviewTests(unittest.TestCase):
+    def test_build_row_difference_count_sql_omits_order_and_select_star(self):
+        review = PeerReview.__new__(PeerReview)
+        review.dataset = SimpleNamespace(schema="dc_ust", ust_or_release="ust", control_id=30)
+        key_rows = [
+            ("facility_id", "FacilityID"),
+            ("tank_id", "TankID"),
+            ("compartment_id", "CompartmentID"),
+            ("piping_id", "PipingID"),
+        ]
+
+        count_sql = review._build_row_difference_count_sql("v_ust_piping", key_rows)
+
+        self.assertTrue(count_sql.startswith("select count(*) from ("))
+        self.assertIn("select 1 from dc_ust.v_ust_piping a", count_sql)
+        self.assertIn("b.ust_control_id = 30", count_sql)
+        self.assertNotIn("select *", count_sql.lower())
+        self.assertNotIn("order by", count_sql.lower())
+
+    def test_build_row_difference_sql_filters_public_view_by_release_control_id(self):
+        review = PeerReview.__new__(PeerReview)
+        review.dataset = SimpleNamespace(schema="dc_release", ust_or_release="release", control_id=18)
+
+        sql = review._build_row_difference_sql("v_ust_release", [("release_id", "ReleaseID")])
+
+        self.assertIn("from public.v_ust_release b", sql)
+        self.assertIn("b.release_control_id = 18", sql)
+        self.assertIn('a.release_id = b."ReleaseID"', sql)
+
+    @patch("ust.python.util.peer_review.pd.read_sql")
+    @patch.object(utils, "process_sql")
+    def test_get_sql_counts_without_reading_full_diff_when_display_disabled(self, process_sql_mock, read_sql_mock):
+        review = PeerReview.__new__(PeerReview)
+        review.dataset = SimpleNamespace(schema="dc_ust", ust_or_release="ust", control_id=30)
+        review.error_tables = ["v_ust_piping"]
+        review.display_bad_data = False
+        review.vsql = ""
+        review.conn = unittest.mock.MagicMock()
+        review.cur = unittest.mock.MagicMock()
+        review.cur.fetchall.return_value = [("piping_id", "PipingID")]
+        review.cur.fetchone.side_effect = [(7,), ("create view sql",)]
+
+        review.get_sql()
+
+        read_sql_mock.assert_not_called()
+        self.assertIn("--There are 7 rows in dc_ust.v_ust_piping that do not exist in public.v_ust_piping", review.vsql)
+        self.assertIn("select * from dc_ust.v_ust_piping a", review.vsql)
+
+    def test_compare_row_counts_records_failed_state_view_count_and_continues(self):
+        review = PeerReview.__new__(PeerReview)
+        review.dataset = SimpleNamespace(schema="dc_ust", ust_or_release="ust", control_id=30)
+        review.views_to_review = ["v_ust_tank"]
+        review.error_tables = []
+        review.vsql = ""
+        review._fetchone_value = unittest.mock.MagicMock(return_value=None)
+
+        review.compare_row_counts()
+
+        self.assertEqual([], review.error_tables)
+        self.assertIn("Unable to complete peer review row-count comparison for dc_ust.v_ust_tank", review.vsql)
+        self.assertIn("select count(*) from dc_ust.v_ust_tank;", review.vsql)
+
+
 class TemplateTests(unittest.TestCase):
+    @patch("ust.python.state_processing.export_template.op.Workbook")
+    def test_process_saves_workbook_only_during_cleanup(self, workbook_cls):
+        workbook = unittest.mock.MagicMock()
+        workbook.sheetnames = []
+        workbook_cls.return_value = workbook
+        template = Template.__new__(Template)
+        template.dataset = SimpleNamespace(export_file_path="C:/tmp/template.xlsx")
+        template.data_only = True
+        template.template_only = False
+        template.substance_mapping_only = False
+        template.make_data_tabs = unittest.mock.MagicMock()
+        template.cleanup_wb = Template.cleanup_wb.__get__(template, Template)
+
+        template.process()
+
+        workbook.save.assert_called_once_with("C:/tmp/template.xlsx")
+
+    @patch.object(utils, "connect_db")
+    def test_get_headers_caches_metadata(self, connect_db_mock):
+        conn = unittest.mock.MagicMock()
+        cur = unittest.mock.MagicMock()
+        conn.cursor.return_value = cur
+        connect_db_mock.return_value = conn
+        cur.fetchall.return_value = [("facility_id",), ("tank_id",)]
+        template = Template.__new__(Template)
+        template._headers_cache = {}
+
+        first = template._get_headers("v_ust_tank", schema="dc_ust")
+        second = template._get_headers("v_ust_tank", schema="dc_ust")
+
+        self.assertEqual(["facility_id", "tank_id"], first)
+        self.assertEqual(first, second)
+        connect_db_mock.assert_called_once_with()
+        cur.execute.assert_called_once()
+
+    @patch.object(utils, "process_sql")
+    def test_get_public_table_columns_caches_metadata(self, process_sql_mock):
+        template = Template.__new__(Template)
+        template._public_table_columns_cache = {}
+        cur = unittest.mock.MagicMock()
+        cur.fetchall.return_value = [("facility_type",), ("inactive_flag",)]
+
+        first = template._get_public_table_columns(cur, "facility_types")
+        second = template._get_public_table_columns(cur, "facility_types")
+
+        self.assertEqual({"facility_type", "inactive_flag"}, first)
+        self.assertEqual(first, second)
+        process_sql_mock.assert_called_once()
+
     def test_substance_lookup_query_filters_to_ust_tank_substance_when_view_exists(self):
         template = Template.__new__(Template)
         template.dataset = SimpleNamespace(ust_or_release="ust", schema="sd_ust", control_id=9)
@@ -105,6 +221,7 @@ class TemplateTests(unittest.TestCase):
                 ("substance_id", "tanks", "TankProduct"),
                 ("tank_id", "tanks", "TankNumber"),
             ],
+            [("FacilityNumber",), ("TankNumber",), ("TankProduct",)],
         ]
 
         sql, params = template._build_substance_mapping_query(cur)
@@ -114,8 +231,30 @@ class TemplateTests(unittest.TestCase):
         self.assertIn('nullif(trim(substance_source."TankProduct"::text), \'\') = a.organization_value', sql)
         self.assertIn('nullif(trim(substance_source."FacilityNumber"::text), \'\') = substance_filter."facility_id"', sql)
         self.assertIn('nullif(trim(substance_source."TankNumber"::text), \'\')::integer else null::integer end = substance_filter."tank_id"', sql)
-        self.assertNotIn('substance_filter."substance_id" = s.substance_id', sql)
+        self.assertIn('substance_filter."substance_id" = s.substance_id', sql)
         self.assertEqual([9], params)
+
+    @patch.object(utils, "add_ws_filter")
+    @patch.object(utils, "autowidth")
+    @patch.object(utils, "process_sql")
+    @patch.object(utils, "connect_db")
+    def test_make_data_tab_adds_filter_to_data_tabs(self, connect_db_mock, process_sql_mock, autowidth_mock, add_filter_mock):
+        template = Template.__new__(Template)
+        template.dataset = SimpleNamespace(ust_or_release="ust", control_id=30)
+        template.template_only = False
+        template._headers_cache = {("public", "v_ust_tank"): ["ust_control_id", "FacilityID", "TankID"]}
+        template.wb = unittest.mock.MagicMock()
+        ws = unittest.mock.MagicMock()
+        template.wb.create_sheet.return_value = ws
+        conn = unittest.mock.MagicMock()
+        cur = unittest.mock.MagicMock()
+        conn.cursor.return_value = cur
+        connect_db_mock.return_value = conn
+        cur.fetchall.return_value = [(30, "F1", 1)]
+
+        template.make_data_tab(("v_ust_tank", "Tank"))
+
+        add_filter_mock.assert_called_once_with(ws)
 
     def test_substance_mapping_query_filters_release_raw_substances_when_view_exists(self):
         template = Template.__new__(Template)
@@ -131,6 +270,12 @@ class TemplateTests(unittest.TestCase):
         self.assertNotIn('"ks_release"."v_release_substance"', sql)
         self.assertEqual([23], params)
 
+    def test_quote_identifier_allows_spaces_and_escapes_quotes(self):
+        template = Template.__new__(Template)
+
+        self.assertEqual('"Substance Released1"', template._quote_identifier("Substance Released1"))
+        self.assertEqual('"bad""name"', template._quote_identifier('bad"name'))
+
     def test_substance_mapping_query_is_unfiltered_when_state_view_is_missing(self):
         template = Template.__new__(Template)
         template.dataset = SimpleNamespace(ust_or_release="release", schema="ks_release", control_id=23)
@@ -142,6 +287,29 @@ class TemplateTests(unittest.TestCase):
         self.assertNotIn('"ks_release"."v_ust_release_substance"', sql)
         self.assertNotIn('substance_filter', sql)
         self.assertEqual([23], params)
+
+    def test_substance_mapping_query_resolves_source_column_case(self):
+        template = Template.__new__(Template)
+        template.dataset = SimpleNamespace(ust_or_release="ust", schema="hi_ust", control_id=37)
+        cur = unittest.mock.MagicMock()
+        cur.fetchone.return_value = (1,)
+        cur.fetchall.side_effect = [
+            [("facility_id", "character varying"), ("tank_id", "integer"), ("substance_id", "integer")],
+            [
+                ("facility_id", "tank_source", "FacilityID"),
+                ("substance_id", "tank_source", "TankProduct"),
+                ("tank_id", "tank_source", "TankID"),
+            ],
+            [("FacilityId",), ("TankID",), ("TankProduct",)],
+            [("FacilityId",), ("TankID",), ("TankProduct",)],
+            [("FacilityId",), ("TankID",), ("TankProduct",)],
+        ]
+
+        sql, params = template._build_substance_mapping_query(cur)
+
+        self.assertIn('substance_source."FacilityId"', sql)
+        self.assertNotIn('substance_source."FacilityID"', sql)
+        self.assertEqual([37], params)
 
 
 class QualityCheckTests(unittest.TestCase):
@@ -213,8 +381,360 @@ class QualityCheckTests(unittest.TestCase):
 
         self.assertEqual(3, qc.error_cnt_dict["Invalid EPA values in ust_element_value_mapping"])
 
+    @patch.object(utils, "get_table_existence", return_value=True)
+    def test_check_missing_parent_view_keys_uses_except_keyset(self, _table_exists_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", schema="tn_ust")
+        qc.view_name = "v_ust_piping"
+        qc.views_to_review = ["v_ust_compartment", "v_ust_piping"]
+        qc.view_columns_cache = {"v_ust_piping": ["facility_id", "tank_id", "compartment_id"]}
+        qc.error_dict = {}
+        qc.error_cnt_dict = {}
+        qc.include_details = True
+        qc._select_count = unittest.mock.MagicMock(return_value=0)
+
+        qc.check_missing_parent_view_keys()
+
+        sql = qc._select_count.call_args.args[0]
+        self.assertIn("except", sql.lower())
+        self.assertIn("with missing_keys as", sql.lower())
+        self.assertNotIn("not exists", sql.lower())
+        self.assertIn('from tn_ust.v_ust_piping', sql)
+        self.assertIn('from tn_ust.v_ust_compartment', sql)
+
+    @patch.object(utils, "get_table_existence", return_value=True)
+    def test_check_missing_parent_view_keys_skips_in_fast_mode(self, _table_exists_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", schema="tn_ust")
+        qc.view_name = "v_ust_piping"
+        qc.views_to_review = ["v_ust_compartment", "v_ust_piping"]
+        qc.error_dict = {}
+        qc.error_cnt_dict = {}
+        qc.include_details = False
+        qc._select_count = unittest.mock.MagicMock()
+
+        qc.check_missing_parent_view_keys()
+
+        qc._select_count.assert_not_called()
+        self.assertEqual(
+            0,
+            qc.error_cnt_dict["Rows in tn_ust.v_ust_piping missing keys in tn_ust.v_ust_compartment"],
+        )
+
+    @patch.object(utils, "get_table_existence", return_value=True)
+    @patch.object(utils, "process_sql")
+    def test_check_unregulated_parents_handles_missing_reason_column(self, process_sql_mock, _table_exists_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", schema="dc_ust")
+        qc.view_name = "v_ust_tank"
+        qc.conn = unittest.mock.MagicMock()
+        qc.cur = unittest.mock.MagicMock()
+        qc.include_details = True
+        qc.error_dict = {}
+        qc.error_cnt_dict = {}
+        qc.view_columns_cache = {"v_ust_tank": ["facility_id", "tank_id"]}
+        qc.relation_columns_cache = {("dc_ust", "erg_unregulated_tanks"): ["facility_id", "tank_id"]}
+        qc._select_count = unittest.mock.MagicMock(return_value=1)
+        qc.write_to_ws = unittest.mock.MagicMock()
+        qc.cur.fetchall.return_value = [("F1", 1, None)]
+
+        qc.check_unregulated_parents()
+
+        detail_sql = process_sql_mock.call_args.args[2]
+        self.assertIn("null::varchar(1000) as unregulated_reason", detail_sql)
+        self.assertNotIn("b.unregulated_reason", detail_sql)
+        qc.write_to_ws.assert_called_once_with([("F1", 1, None)], "Unreg tank")
+
+    @patch.object(utils, "get_table_existence", return_value=True)
+    @patch.object(utils, "process_sql")
+    def test_check_unregulated_substances_handles_missing_reason_column(self, process_sql_mock, _table_exists_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", schema="dc_ust")
+        qc.conn = unittest.mock.MagicMock()
+        qc.cur = unittest.mock.MagicMock()
+        qc.error_dict = {}
+        qc.error_cnt_dict = {}
+        qc.view_columns_cache = {"v_ust_facility": ["facility_id", "facility_type1"], "v_ust_compartment": []}
+        qc.relation_columns_cache = {("dc_ust", "erg_unregulated_tanks"): ["facility_id", "tank_id"]}
+        qc.cur.fetchone.side_effect = [(1,), (0,), (2,), (3,)]
+        qc.cur.fetchall.return_value = [("F1", 1), ("F2", 2)]
+
+        qc.check_unregulated_substances()
+
+        self.assertEqual({"Rows with unregulated substances not excluded from views": 2}, qc.error_cnt_dict)
+        message = next(iter(qc.error_dict))
+        self.assertIn("missing unregulated_reason column", message)
+        self.assertIn("create-unreg --drop-existing", message)
+
+    def test_check_nonunique_skips_full_row_scan_in_fast_mode(self):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(schema="dc_ust")
+        qc.view_name = "v_ust_piping"
+        qc.include_details = False
+        qc.error_cnt_dict = {}
+        qc._select_count = unittest.mock.MagicMock()
+
+        qc.check_nonunique()
+
+        qc._select_count.assert_not_called()
+        self.assertEqual(
+            0,
+            qc.error_cnt_dict["nonunique rows in dc_ust.v_ust_piping"],
+        )
+
+
+class ExclusionsTests(unittest.TestCase):
+    @patch.object(utils, "connect_db")
+    @patch.object(utils, "process_sql")
+    def test_release_exclusions_only_query_release_unregulated_tables(self, process_sql_mock, connect_db_mock):
+        conn = unittest.mock.MagicMock()
+        cur = unittest.mock.MagicMock()
+        conn.cursor.return_value = cur
+        connect_db_mock.return_value = conn
+        cur.fetchall.return_value = []
+
+        Exclusions(SimpleNamespace(schema="dc_release", ust_or_release="release"))
+
+        params = process_sql_mock.call_args.kwargs["params"]
+        self.assertEqual(("dc_release", ["erg_unregulated_releases", "erg_unregulated_substances"]), params)
+
+    @patch.object(utils, "connect_db")
+    @patch.object(utils, "process_sql")
+    def test_ust_exclusions_only_query_ust_unregulated_tables(self, process_sql_mock, connect_db_mock):
+        conn = unittest.mock.MagicMock()
+        cur = unittest.mock.MagicMock()
+        conn.cursor.return_value = cur
+        connect_db_mock.return_value = conn
+        cur.fetchall.return_value = []
+
+        Exclusions(SimpleNamespace(schema="dc_ust", ust_or_release="ust"))
+
+        params = process_sql_mock.call_args.kwargs["params"]
+        self.assertEqual(("dc_ust", ["erg_unregulated_facilities", "erg_unregulated_tanks"]), params)
+
+
+class ExcludeUnregulatedTests(unittest.TestCase):
+    def test_get_table_alias_handles_quoted_schema_table_and_alias(self):
+        view_def = 'select *\nfrom "hi_release"."tblLUSTSite" a join "hi_release"."tblFacility" b on true'
+
+        self.assertEqual('a', get_table_alias(view_def, 'hi_release.tblLUSTSite'))
+
+    def test_get_new_view_def_adds_release_parent_and_substance_exclusions(self):
+        exclude = Exclude.__new__(Exclude)
+        exclude.dataset = SimpleNamespace(schema="hi_release", ust_or_release="release")
+        exclude.unreg = SimpleNamespace(
+            unreg_parent_table="hi_release.erg_unregulated_releases",
+            unreg_parent_col="release_id",
+            unreg_substance_table="hi_release.erg_unregulated_substances",
+        )
+        exclude.override_existing_unreg_check = False
+        exclude.df = __import__('pandas').DataFrame([
+            {
+                "epa_table_name": "ust_release_substance",
+                "epa_column_name": "release_id",
+                "table_name": "tblLUSTSite",
+                "column_name": "EventID",
+            },
+            {
+                "epa_table_name": "ust_release_substance",
+                "epa_column_name": "substance_id",
+                "table_name": "tblLUSTSite",
+                "column_name": "Substance Released1",
+            },
+        ])
+        exclude.get_view_def = unittest.mock.MagicMock(
+            return_value='\n\ncreate or replace view "hi_release"."v_ust_release_substance" as\nselect *\nfrom "hi_release"."tblLUSTSite" a'
+        )
+
+        view_def = exclude.get_new_view_def("v_ust_release_substance")
+
+        self.assertIn('not exists (select 1 from hi_release.erg_unregulated_releases unregparent', view_def)
+        self.assertIn('a."EventID"::varchar(50) = unregparent.release_id', view_def)
+        self.assertIn('not exists (select 1 from hi_release.erg_unregulated_substances unregsub', view_def)
+        self.assertIn('a."Substance Released1" = unregsub.organization_substance', view_def)
+
+
+class UnregTablesTests(unittest.TestCase):
+    @patch.object(utils, "process_sql")
+    def test_build_join_predicate_uses_actual_join_table_column_case(self, process_sql_mock):
+        unreg = UnregTables.__new__(UnregTables)
+        unreg.dataset = SimpleNamespace(schema="hi_release")
+        unreg.conn = unittest.mock.MagicMock()
+        unreg.cur = unittest.mock.MagicMock()
+        unreg.source_columns_cache = {}
+        unreg.cur.fetchall.side_effect = [
+            [("FacilityId",)],
+            [("FacilityID",), ("Facility Description",)],
+        ]
+
+        predicate = unreg._build_join_predicate(
+            "tblLUSTSite",
+            "tblFacility",
+            "FacilityID",
+            None,
+            "a",
+            "b",
+        )
+
+        self.assertEqual('a."FacilityId" = b."FacilityID"', predicate)
+
+    @patch.object(utils, "process_sql")
+    def test_build_join_predicate_uses_join_fk_when_available(self, process_sql_mock):
+        unreg = UnregTables.__new__(UnregTables)
+        unreg.dataset = SimpleNamespace(schema="hi_release")
+        unreg.conn = unittest.mock.MagicMock()
+        unreg.cur = unittest.mock.MagicMock()
+        unreg.source_columns_cache = {}
+        unreg.cur.fetchall.side_effect = [
+            [("FacilityId",)],
+            [("FacilityID",)],
+        ]
+
+        predicate = unreg._build_join_predicate(
+            "tblLUSTSite",
+            "tblFacility",
+            "FacilityId",
+            "FacilityID",
+            "a",
+            "b",
+        )
+
+        self.assertEqual('a."FacilityId" = b."FacilityID"', predicate)
+
+    @patch.object(utils, "process_sql")
+    def test_append_missing_source_join_infers_common_key_columns(self, process_sql_mock):
+        unreg = UnregTables.__new__(UnregTables)
+        unreg.dataset = SimpleNamespace(schema="dc_ust")
+        unreg.conn = unittest.mock.MagicMock()
+        unreg.cur = unittest.mock.MagicMock()
+        unreg.source_columns_cache = {
+            "compartment": ["FacilityID", "TankID", "CompartmentSubstanceStored"],
+            "tank": ["FacilityID", "TankID", "TankName"],
+        }
+
+        from_sql = unreg._append_missing_source_join(
+            '\nfrom dc_ust."compartment" a',
+            {"compartment"},
+            "compartment",
+            "tank",
+            {"compartment": "a", "tank": "b"},
+        )
+
+        self.assertIn('join dc_ust."tank" b', from_sql)
+        self.assertIn('a."FacilityID" = b."FacilityID"', from_sql)
+        self.assertIn('a."TankID" = b."TankID"', from_sql)
+
+    def test_resolve_source_column_uses_single_close_match(self):
+        unreg = UnregTables.__new__(UnregTables)
+        unreg.source_columns_cache = {"tn_compartments": ["Facility Id Ust", "Tank Id"]}
+
+        self.assertEqual(
+            "Facility Id Ust",
+            unreg._resolve_source_column("tn_compartments", "Facility Id US"),
+        )
+
+    def test_create_tables_rebuilds_drop_existing_with_view_preservation(self):
+        unreg = UnregTables.__new__(UnregTables)
+        unreg.views_only = False
+        unreg.drop_existing = True
+        unreg.connect_db = unittest.mock.MagicMock()
+        unreg.disconnect_db = unittest.mock.MagicMock()
+        unreg.rebuild_tables_preserving_views = unittest.mock.MagicMock()
+
+        unreg.create_tables()
+
+        unreg.rebuild_tables_preserving_views.assert_called_once_with()
+        unreg.disconnect_db.assert_called_once_with()
+
+    def test_rebuild_tables_preserving_views_backs_up_drops_recreates_and_restores(self):
+        unreg = UnregTables.__new__(UnregTables)
+        unreg.dataset = SimpleNamespace(schema="dc_ust", ust_or_release="ust")
+        unreg.unreg_substance_table = "dc_ust.erg_unregulated_tanks"
+        unreg.unreg_parent_table = "dc_ust.erg_unregulated_facilities"
+        unreg.conn = unittest.mock.MagicMock()
+        unreg.cur = unittest.mock.MagicMock()
+        unreg._capture_dependent_view_definitions = unittest.mock.MagicMock(return_value={"v_ust_tank": "select 1 as facility_id"})
+        unreg._table_exists = unittest.mock.MagicMock(return_value=True)
+        unreg.backup_table = unittest.mock.MagicMock()
+        unreg._create_unreg_substance_table = unittest.mock.MagicMock()
+        unreg._create_unreg_parent_table = unittest.mock.MagicMock()
+        unreg._restore_schema_views = unittest.mock.MagicMock()
+
+        with patch.object(utils, "process_sql") as process_sql_mock:
+            unreg.rebuild_tables_preserving_views()
+
+        self.assertEqual(2, unreg.backup_table.call_count)
+        self.assertEqual(2, process_sql_mock.call_count)
+        self.assertIn('drop table dc_ust."erg_unregulated_tanks" cascade', process_sql_mock.call_args_list[0].args[2])
+        unreg._capture_dependent_view_definitions.assert_called_once_with([
+            "dc_ust.erg_unregulated_tanks",
+            "dc_ust.erg_unregulated_facilities",
+        ])
+        unreg._create_unreg_substance_table.assert_called_once_with()
+        unreg._create_unreg_parent_table.assert_called_once_with()
+        unreg._restore_schema_views.assert_called_once_with({"v_ust_tank": "select 1 as facility_id"})
+
+    @patch.object(utils, "process_sql")
+    def test_capture_dependent_view_definitions_filters_to_target_tables(self, process_sql_mock):
+        unreg = UnregTables.__new__(UnregTables)
+        unreg.dataset = SimpleNamespace(schema="dc_ust")
+        unreg.cur = unittest.mock.MagicMock()
+        unreg.cur.fetchall.return_value = [("v_ust_tank", "select 1")]
+
+        result = unreg._capture_dependent_view_definitions([
+            "dc_ust.erg_unregulated_tanks",
+            "dc_ust.erg_unregulated_facilities",
+        ])
+
+        sql = process_sql_mock.call_args.args[2]
+        params = process_sql_mock.call_args.kwargs["params"]
+        self.assertIn("pg_depend", sql)
+        self.assertIn("source_table.relname = any", sql)
+        self.assertEqual(("dc_ust", ["erg_unregulated_tanks", "erg_unregulated_facilities"]), params)
+        self.assertEqual({"v_ust_tank": "select 1"}, result)
+
 
 class ViewSqlTests(unittest.TestCase):
+    def test_apply_table_alias_resolves_source_column_case(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.table_aliases = {"tblLUSTSite": "a"}
+        view_sql.table_alias_fallbacks = {}
+        view_sql._source_table_columns_cache = {"tblLUSTSite": {"FacilityId"}}
+        view_sql._has_value = ViewSql._has_value.__get__(view_sql, ViewSql)
+
+        selected_column = view_sql._apply_table_alias(
+            "tblLUSTSite",
+            'nullif(trim("FacilityID"::text), \'\')::character varying(50) as facility_id',
+        )
+
+        self.assertIn('a."FacilityId"', selected_column)
+        self.assertNotIn('a."FacilityID"', selected_column)
+
+    def test_build_from_sql_resolves_join_column_case(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.dataset = SimpleNamespace(schema="hi_release")
+        view_sql.from_sql = "from hi_release.\"tblLUSTSite\" a"
+        view_sql.table_aliases = {"tblLUSTSite": "a"}
+        view_sql.used_aliases = {"a"}
+        view_sql._source_table_columns_cache = {
+            "tblLUSTSite": {"FacilityId"},
+            "tblFacility": {"FacilityID", "Facility Description"},
+        }
+        view_sql.join_info = {
+            "table_type": "org",
+            "organization_join_column": "FacilityID",
+            "organization_join_fk": "FacilityID",
+            "organization_join_column2": None,
+            "organization_join_fk2": None,
+            "organization_join_column3": None,
+            "organization_join_fk3": None,
+        }
+        view_sql._has_value = ViewSql._has_value.__get__(view_sql, ViewSql)
+
+        view_sql.build_from_sql("tblFacility", "b", "a")
+
+        self.assertIn('a."FacilityId" = b."FacilityID"', view_sql.from_sql)
+
     def test_get_column_select_sql_uses_trimmed_varchar_expression(self):
         view_sql = ViewSql.__new__(ViewSql)
         view_sql.table_name = "ust_facility"

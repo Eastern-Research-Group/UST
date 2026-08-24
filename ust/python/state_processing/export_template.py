@@ -46,11 +46,41 @@ class Template:
         self.data_only = data_only        
         self.template_only = template_only
         self.substance_mapping_only = substance_mapping_only
+        self._headers_cache = {}
+        self._public_table_columns_cache = {}
+
+
+    def _get_headers(self, table_name, schema='public'):
+        cache_key = (schema, table_name)
+        if cache_key in self._headers_cache:
+            return self._headers_cache[cache_key]
+        conn = utils.connect_db()
+        cur = conn.cursor()
+        sql = """select column_name from information_schema.columns
+                 where table_schema = %s and table_name = %s
+                 order by ordinal_position"""
+        utils.process_sql(conn, cur, sql, params=(schema, table_name))
+        headers = [row[0] for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        self._headers_cache[cache_key] = headers
+        return headers
+
+
+    def _get_public_table_columns(self, cur, table_name):
+        if table_name in self._public_table_columns_cache:
+            return self._public_table_columns_cache[table_name]
+        sql = """select column_name
+                 from information_schema.columns
+                 where table_schema = 'public' and table_name = %s"""
+        utils.process_sql(cur.connection, cur, sql, params=(table_name,))
+        columns = {row[0] for row in cur.fetchall()}
+        self._public_table_columns_cache[table_name] = columns
+        return columns
 
 
     def process(self):
         self.wb = op.Workbook()
-        self.wb.save(self.dataset.export_file_path)
         if not self.data_only:
             self.make_reference_tab()
             self.make_lookup_tabs()
@@ -75,7 +105,7 @@ class Template:
     def make_reference_tab(self):
         ws = self.wb.create_sheet('Reference')
 
-        headers = utils.get_headers(f'v_{self.dataset.ust_or_release}_elements')
+        headers = self._get_headers(f'v_{self.dataset.ust_or_release}_elements')
         for colno, header in enumerate(headers, start=1):
             ws.cell(row=1, column=colno).value = header
         conn = utils.connect_db()
@@ -189,7 +219,6 @@ class Template:
             ws.column_dimensions['H'].width = 70
 
         ws.freeze_panes = ws['A2']
-        self.wb.save(self.dataset.export_file_path)
         logger.info('Created Reference tab')
 
 
@@ -197,7 +226,6 @@ class Template:
         lookups = utils.get_lookup_tabs(ust_or_release=self.dataset.ust_or_release)
         for lookup in lookups:
             self.make_lookup_tab(lookup)
-        self.wb.save(self.dataset.export_file_path)
 
 
     def make_lookup_tab(self, lookup):
@@ -238,9 +266,9 @@ class Template:
 
 
     def _quote_identifier(self, identifier):
-        if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', identifier):
+        if identifier is None or str(identifier).strip() == '':
             raise ValueError(f'Unsafe SQL identifier: {identifier}')
-        return f'"{identifier}"'
+        return '"' + str(identifier).replace('"', '""') + '"'
 
 
     def _quote_literal(self, value):
@@ -292,6 +320,28 @@ class Template:
         return f'{self._quote_identifier(self.dataset.schema)}.{self._quote_identifier(filter_info["view_name"])}'
 
 
+    def _get_source_columns(self, cur, table_name):
+        if not hasattr(self, '_source_columns_cache'):
+            self._source_columns_cache = {}
+        if table_name in self._source_columns_cache:
+            return self._source_columns_cache[table_name]
+        sql = """select column_name
+                 from information_schema.columns
+                 where table_schema = %s and table_name = %s"""
+        utils.process_sql(cur.connection, cur, sql, params=(self.dataset.schema, table_name))
+        columns = [row[0] for row in cur.fetchall()]
+        self._source_columns_cache[table_name] = columns
+        return columns
+
+
+    def _resolve_source_column(self, cur, table_name, column_name):
+        columns = self._get_source_columns(cur, table_name)
+        if column_name in columns:
+            return column_name
+        columns_by_lower = {column.lower(): column for column in columns}
+        return columns_by_lower.get(str(column_name).lower(), column_name)
+
+
     def _get_trimmed_text_expression(self, source_expression):
         return f"nullif(trim({source_expression}::text), '')"
 
@@ -337,6 +387,7 @@ class Template:
         filter_view_sql = self._get_substance_filter_view_sql(filter_info)
         clauses = []
         for organization_table_name, organization_column_name in substance_mappings:
+            organization_column_name = self._resolve_source_column(cur, organization_table_name, organization_column_name)
             source_key_mappings = key_mappings.get(organization_table_name, {})
             if not source_key_mappings:
                 continue
@@ -346,6 +397,7 @@ class Template:
                 source_key_column = source_key_mappings.get(key_column)
                 if not source_key_column:
                     continue
+                source_key_column = self._resolve_source_column(cur, organization_table_name, source_key_column)
                 filter_column_info = filter_columns[key_column]
                 filter_column = self._quote_identifier(filter_column_info['column_name'])
                 source_expression = self._build_safe_key_expression(
@@ -353,6 +405,10 @@ class Template:
                     filter_column_info['data_type'],
                 )
                 join_predicates.append(f'{source_expression} = substance_filter.{filter_column}')
+
+            if 'substance_id' in filter_columns:
+                filter_substance_column = self._quote_identifier(filter_columns['substance_id']['column_name'])
+                join_predicates.append(f'substance_filter.{filter_substance_column} = s.substance_id')
 
             if not join_predicates:
                 continue
@@ -514,7 +570,6 @@ class Template:
         mappings = self.get_mapping_tabs()
         for mapping in mappings:
             self.make_mapping_tab(mapping)
-        self.wb.save(self.dataset.export_file_path)
 
 
     def make_mapping_tab(self, mapping):
@@ -550,13 +605,9 @@ class Template:
         conn = utils.connect_db()
         cur = conn.cursor()    
 
+        lookup_cols = self._get_public_table_columns(cur, database_lookup_table)
         wheresql = ''
-        sql = """select count(*) from information_schema.columns 
-                  where table_schema = 'public' and table_name = %s
-                  and column_name = 'inactive_flag'"""
-        utils.process_sql(conn, cur, sql, params=(database_lookup_table,))
-        cnt = cur.fetchone()[0]
-        if cnt > 0:
+        if 'inactive_flag' in lookup_cols:
             wheresql =  " where inactive_flag is null "
 
         sql = f"select {database_lookup_column} from {database_lookup_table} {wheresql} order by 1"
@@ -569,12 +620,6 @@ class Template:
         lookup_join_column = mapping_column_name
         if mapping_column_name in ('facility_type1', 'facility_type2'):
             lookup_join_column = 'facility_type_id'
-
-        lookup_cols_sql = """select column_name
-                             from information_schema.columns
-                             where table_schema = 'public' and table_name = %s"""
-        utils.process_sql(conn, cur, lookup_cols_sql, params=(database_lookup_table,))
-        lookup_cols = {r[0] for r in cur.fetchall()}
 
         if lookup_join_column not in lookup_cols:
             if database_lookup_column in lookup_cols:
@@ -709,7 +754,6 @@ class Template:
         tabs = utils.get_data_tabs(ust_or_release=self.dataset.ust_or_release)
         for tab in tabs:
             self.make_data_tab(tab)
-        self.wb.save(self.dataset.export_file_path)
 
 
     def make_data_tab(self, tab):
@@ -717,7 +761,7 @@ class Template:
         tab_name = tab[1]
         ws = self.wb.create_sheet(tab_name)
         ws.title = tab_name
-        headers = utils.get_headers(view_name)
+        headers = self._get_headers(view_name)
         green_cells = []
         orange_cells = []
         sortsql = ''
@@ -796,6 +840,7 @@ class Template:
         ws.delete_cols(1)
 
         utils.autowidth(ws)
+        utils.add_ws_filter(ws)
         ws.freeze_panes = ws['A2']
         logger.info('Created %s tab', tab_name)
 

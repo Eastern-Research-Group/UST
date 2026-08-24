@@ -144,6 +144,11 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common_dataset_args(create_unreg, include_org=True)
     create_unreg.add_argument("--drop-existing", action="store_true")
     create_unreg.add_argument("--views-only", action="store_true")
+    create_unreg.add_argument(
+        "--populate",
+        action="store_true",
+        help="Populate unregulated tables after creating/recreating tables and helper views",
+    )
     _add_yes_arg(create_unreg)
     _add_dry_run_arg(create_unreg)
 
@@ -549,6 +554,8 @@ def _main(argv=None):
     if args.command == "create-unreg":
         _apply_profile_defaults(args, required_fields=["ust_or_release"], parser=parser)
         _require_control_or_org(args, parser)
+        if args.views_only and args.populate:
+            parser.error("create-unreg --populate cannot be combined with --views-only.")
         if _dry_run(args, "Create or refresh unregulated tables/views"):
             return
         from ust.python.state_processing.create_unreg_tables import main as unreg_main
@@ -559,6 +566,17 @@ def _main(argv=None):
             drop_existing=args.drop_existing,
             views_only=args.views_only,
         )
+        if args.populate:
+            from ust.python.state_processing.populate_unreg_tables import (
+                main as populate_unreg_main,
+            )
+            populate_unreg_main(
+                ust_or_release=args.ust_or_release,
+                control_id=args.control_id,
+                organization_id=args.organization_id,
+                delete_auto_inserts=False,
+                delete_all=False,
+            )
         return
 
     if args.command == "generate-views":

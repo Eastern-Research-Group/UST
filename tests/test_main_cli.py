@@ -155,6 +155,55 @@ class MainCliTests(unittest.TestCase):
             include_details=False,
         )
 
+    @patch("ust.python.state_processing.populate_unreg_tables.main")
+    @patch("ust.python.state_processing.create_unreg_tables.main")
+    def test_create_unreg_populate_dispatches_expected_arguments(self, create_unreg_main, populate_unreg_main):
+        main.main([
+            "create-unreg",
+            "--type",
+            "ust",
+            "--control-id",
+            "123",
+            "--organization-id",
+            "DC",
+            "--drop-existing",
+            "--populate",
+            "--yes",
+        ])
+
+        create_unreg_main.assert_called_once_with(
+            ust_or_release="ust",
+            control_id=123,
+            organization_id="DC",
+            drop_existing=True,
+            views_only=False,
+        )
+        populate_unreg_main.assert_called_once_with(
+            ust_or_release="ust",
+            control_id=123,
+            organization_id="DC",
+            delete_auto_inserts=False,
+            delete_all=False,
+        )
+
+    @patch("ust.python.state_processing.populate_unreg_tables.main")
+    @patch("ust.python.state_processing.create_unreg_tables.main")
+    def test_create_unreg_populate_rejects_views_only(self, create_unreg_main, populate_unreg_main):
+        with self.assertRaises(SystemExit):
+            main.main([
+                "create-unreg",
+                "--type",
+                "ust",
+                "--control-id",
+                "123",
+                "--views-only",
+                "--populate",
+                "--yes",
+            ])
+
+        create_unreg_main.assert_not_called()
+        populate_unreg_main.assert_not_called()
+
     @patch("ust.python.state_processing.create_view_sql.main")
     def test_generate_views_preflight_dispatches_expected_arguments(self, views_main):
         main.main([

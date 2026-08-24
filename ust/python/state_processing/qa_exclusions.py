@@ -43,11 +43,15 @@ class Exclusions:
         conn = utils.connect_db()
         cur = conn.cursor()
 
+        if self.dataset.ust_or_release == 'release':
+            unregulated_tables = ['erg_unregulated_releases', 'erg_unregulated_substances']
+        else:
+            unregulated_tables = ['erg_unregulated_facilities', 'erg_unregulated_tanks']
+
         sql = """select table_name from information_schema.tables 
-                  where table_schema = %s and table_name in
-                       ('erg_unregulated_facilities','erg_unregulated_tanks','erg_unregulated_substances','erg_unregulated_releases')
+                  where table_schema = %s and table_name = any(%s)
                   order by 1"""
-        utils.process_sql(conn, cur, sql, params=(self.dataset.schema,))
+        utils.process_sql(conn, cur, sql, params=(self.dataset.schema, unregulated_tables))
         rows = cur.fetchall()
 
         if len(rows) == 0:

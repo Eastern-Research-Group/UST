@@ -2,6 +2,7 @@
 import sys
 
 import pandas as pd
+import psycopg2
 
 from ust.python.util import utils
 from ust.python.util.dataset import Dataset
@@ -55,9 +56,43 @@ class PeerReview:
         
 
     def disconnect_db(self):
-        self.cur.close()
-        self.conn.close()
+        try:
+            if self.cur:
+                self.cur.close()
+        except (psycopg2.Error, psycopg2.InterfaceError):
+            pass
+        try:
+            if self.conn:
+                self.conn.close()
+        except (psycopg2.Error, psycopg2.InterfaceError):
+            pass
+        self.cur = None
+        self.conn = None
         logger.info('Disconnected from database')
+
+
+    def _reconnect_db(self):
+        self.disconnect_db()
+        self.connect_db()
+
+
+    def _fetchone_value(self, sql, params=None):
+        try:
+            self.cur.execute(sql, params)
+            row = self.cur.fetchone()
+            return row[0] if row else None
+        except (psycopg2.Error, psycopg2.InterfaceError) as exc:
+            logger.error('Peer review query failed: %s', exc)
+            logger.error('\n\nFailed peer review SQL:\n%s\n', sql)
+            self._reconnect_db()
+            return None
+
+
+    def _add_query_failure_section(self, view, sql, context):
+        self.vsql += '\n\n\n/*********** ' + view + ' ***********/\n'
+        self.vsql += f'--Unable to complete peer review {context} for {self.dataset.schema}.{view}.\n'
+        self.vsql += '--The database connection closed while running this SQL; run it manually to diagnose the view performance or definition.\n\n'
+        self.vsql += sql.rstrip(';') + ';\n'
 
 
     def get_view_names(self):
@@ -86,11 +121,17 @@ class PeerReview:
     def compare_row_counts(self):
         for view in self.views_to_review:
             sql = f"select count(*) from {self.dataset.schema}.{view}"
-            utils.process_sql(self.conn, self.cur, sql)
-            view_rows = self.cur.fetchone()[0]
+            view_rows = self._fetchone_value(sql)
+            if view_rows is None:
+                logger.warning('Skipping peer review row-count comparison for %s.%s because the state-view count failed.', self.dataset.schema, view)
+                self._add_query_failure_section(view, sql, 'row-count comparison')
+                continue
             sql = f"select count(*) from public.{view} where {self.dataset.ust_or_release}_control_id = %s"
-            utils.process_sql(self.conn, self.cur, sql, params=(self.dataset.control_id,))
-            table_rows = self.cur.fetchone()[0]
+            table_rows = self._fetchone_value(sql, params=(self.dataset.control_id,))
+            if table_rows is None:
+                logger.warning('Skipping peer review row-count comparison for public.%s because the public-view count failed.', view)
+                self._add_query_failure_section(view, sql, 'public row-count comparison')
+                continue
             if view_rows == table_rows:
                 logger.info('Row counts match between %s.%s and public.%s: (%s)', self.dataset.schema, view, view.replace('v_',''), table_rows)
             else:
@@ -106,6 +147,43 @@ class PeerReview:
             self.view_counts[view] = num_rows            
 
 
+    def _build_row_difference_sql(self, view, key_rows, include_order=True):
+        sql = f"select * from {self.dataset.schema}.{view} a\nwhere not exists"
+        control_col = f'{self.dataset.ust_or_release}_control_id'
+        if "substance" in view:
+            if self.dataset.ust_or_release == 'ust':
+                epacol = 'Substance'
+            else:
+                epacol = 'SubstanceReleased'
+            sql = sql + f"""\n\t(select 1 from public.{view} b join public.substances c on b."{epacol}" = c.substance\n\twhere"""
+        elif "cause" in view:
+            sql = sql + f"""\n\t(select 1 from public.{view} b join public.causes c on b."CauseOfRelease" = c.cause\n\twhere"""
+        elif "source" in view:
+            sql = sql + f"""\n\t(select 1 from public.{view} b join public.sources c on b."SourceOfRelease" = c.source\n\twhere"""
+        elif "corrective_action_strategy" in view:
+            sql = sql + f"""\n\t(select 1 from public.{view} b join public.corrective_action_strategies c on b."CorrectiveActionStrategy" = c.corrective_action_strategy\n\twhere"""
+        else:
+            sql = sql + f"\n\t(select 1 from public.{view} b\n\twhere"
+        sql = sql + f' b.{control_col} = {self.dataset.control_id} and'
+        for row in key_rows:
+            if row[0] in ['substance_id','cause_id','source_id','corrective_action_strategy_id']:
+                sql = sql + ' a.' + row[0] + ' = c."' + row[0] + '" and'
+            else:
+                sql = sql + ' a.' + row[0] + ' = b."' + row[1] + '" and'
+        sql = sql[:-4] + ')'
+        if include_order:
+            sql = sql + '\norder by '
+            for row in key_rows:
+                sql = sql + 'a.' + row[0] + ','
+            sql = sql[:-1]
+        return sql + ';'
+
+
+    def _build_row_difference_count_sql(self, view, key_rows):
+        detail_sql = self._build_row_difference_sql(view, key_rows, include_order=False).rstrip(';')
+        return 'select count(*) from (\n' + detail_sql.replace('select *', 'select 1', 1) + '\n) row_diff'
+
+
     def get_sql(self):
         for view in self.error_tables:
             logger.info('Generating SQL for row differences between %s.%s and public.%s', self.dataset.schema, view, view)
@@ -117,42 +195,26 @@ class PeerReview:
                     order by a.sort_order"""
             utils.process_sql(self.conn, self.cur, sql, params=(view,))
             rows = self.cur.fetchall()
-            sql = f"select * from {self.dataset.schema}.{view} a\nwhere not exists"
-            if "substance" in view:
-                if self.dataset.ust_or_release == 'ust':
-                    epacol = 'Substance'
-                else:
-                    epacol = 'SubstanceReleased'
-                sql = sql + f"""\n\t(select 1 from public.{view} b join public.substances c on b."{epacol}" = c.substance\n\twhere"""
-            elif "cause" in view:
-                sql = sql + f"""\n\t(select 1 from public.{view} b join public.causes c on b."CauseOfRelease" = c.cause\n\twhere"""
-            elif "source" in view:
-                sql = sql + f"""\n\t(select 1 from public.{view} b join public.sources c on b."SourceOfRelease" = c.source\n\twhere"""
-            elif "corrective_action_strategy" in view:
-                sql = sql + f"""\n\t(select 1 from public.{view} b join public.corrective_action_strategies c on b."CorrectiveActionStrategy" = c.corrective_action_strategy\n\twhere"""
-            else:
-                sql = sql + f"\n\t(select 1 from public.{view} b\n\twhere"
-            for row in rows:    
-                if row[0] in ['substance_id','cause_id','source_id','corrective_action_strategy_id']:
-                    sql = sql + ' a.' + row[0] + ' = c."' + row[0] + '" and'
-                else:
-                    sql = sql + ' a.' + row[0] + ' = b."' + row[1] + '" and'
-            sql = sql[:-4] + ')\norder by '
-            for row in rows:
-                sql = sql + 'a.' + row[0] + ','
-            sql = sql[:-1] + ';'
-
-            df = pd.read_sql(sql, con=utils.get_engine())
+            sql = self._build_row_difference_sql(view, rows)
+            count_sql = self._build_row_difference_count_sql(view, rows)
+            row_count = self._fetchone_value(count_sql)
             if self.display_bad_data:
+                df = pd.read_sql(sql, con=utils.get_engine())
                 utils.pretty_print_df(df)
 
             self.vsql = self.vsql + '\n\n\n/*********** ' + view + ' ***********/\n'
-            self.vsql = self.vsql + f'--There are {len(df)} rows in {self.dataset.schema}.{view} that do not exist in public.{view}\n\n'
+            if row_count is None:
+                self.vsql += f'--Unable to count rows in {self.dataset.schema}.{view} that do not exist in public.{view}; run the SQL below manually.\n\n'
+            else:
+                self.vsql = self.vsql + f'--There are {row_count} rows in {self.dataset.schema}.{view} that do not exist in public.{view}\n\n'
             self.vsql = self.vsql + sql + f'\n\n--View definition for {self.dataset.schema}.{view}:\n'
 
             sql = f"select get_view_def('{view}','{self.dataset.schema}')"
-            utils.process_sql(self.conn, self.cur, sql)
-            self.vsql = self.vsql + self.cur.fetchone()[0]
+            view_def = self._fetchone_value(sql)
+            if view_def is None:
+                self.vsql += f'--Unable to retrieve view definition for {self.dataset.schema}.{view}.\n'
+            else:
+                self.vsql = self.vsql + view_def
 
 
     def write_sql(self):

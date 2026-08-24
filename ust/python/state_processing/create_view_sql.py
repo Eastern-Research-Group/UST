@@ -360,7 +360,7 @@ class ViewSql:
         # but do not prefix the entire expression (which breaks case/function SQL).
         qualified_expression = re.sub(
             r'(?<![\w.])"([^"]+)"',
-            lambda m: f'{alias}."{m.group(1)}"',
+            lambda m: f'{alias}."{self._resolve_source_column(organization_table_name, m.group(1))}"',
             expression,
         )
 
@@ -392,8 +392,8 @@ class ViewSql:
             return None
         alias = self.table_aliases.get(organization_table_name)
         if alias:
-            return f'{alias}."{organization_column_name}"'
-        return f'"{organization_column_name}"'
+            return f'{alias}."{self._resolve_source_column(organization_table_name, organization_column_name)}"'
+        return f'"{self._resolve_source_column(organization_table_name, organization_column_name)}"'
 
 
     def _get_element_rule_columns(self):
@@ -448,6 +448,34 @@ class ViewSql:
         columns = {row[0] for row in self.cur.fetchall()}
         self._source_table_columns_cache[table_name] = columns
         return columns
+
+
+    def _resolve_source_column(self, table_name, column_name):
+        if not self._has_value(table_name) or not self._has_value(column_name):
+            return column_name
+        if table_name not in getattr(self, '_source_table_columns_cache', {}) and (
+            not getattr(self, 'cur', None)
+            or not getattr(getattr(self, 'dataset', None), 'schema', None)
+        ):
+            return column_name
+        columns = self._get_source_table_columns(table_name)
+        if column_name in columns:
+            return column_name
+        columns_by_lower = {column.lower(): column for column in columns}
+        return columns_by_lower.get(str(column_name).lower(), column_name)
+
+
+    def _get_table_for_alias(self, alias):
+        for table_name, table_alias in self.table_aliases.items():
+            if table_alias == alias:
+                return table_name
+        return None
+
+
+    def _build_join_predicate(self, join_table, from_table, join_column, join_fk, join_alias, from_alias):
+        join_column = self._resolve_source_column(join_table, join_column)
+        from_column = self._resolve_source_column(from_table, join_fk)
+        return f'{join_alias}."{join_column}" = {from_alias}."{from_column}"'
 
 
     def _replace_outside_single_quotes(self, text, replacement_func):
@@ -1086,17 +1114,22 @@ class ViewSql:
     def build_from_sql(self, from_table, alias, join_alias):
         clause_added = False
         if self.join_info['table_type'] == 'lookup':
-            self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '.organization_value'
+            join_table = self._get_table_for_alias(join_alias)
+            join_column = self._resolve_source_column(join_table, self.join_info['organization_join_column'])
+            self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + join_column + '" = ' + alias + '.organization_value'
             clause_added = True
         else:
             if self._has_value(self.join_info['organization_join_column']) and self._has_value(self.join_info['organization_join_fk']):
-                self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + join_alias + '."' + self.join_info['organization_join_column'] + '" = ' + alias + '."' + self.join_info['organization_join_fk'] + '" '
+                join_table = self._get_table_for_alias(join_alias)
+                self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + self._build_join_predicate(join_table, from_table, self.join_info['organization_join_column'], self.join_info['organization_join_fk'], join_alias, alias) + ' '
                 clause_added = True
             if self._has_value(self.join_info['organization_join_column2']) and self._has_value(self.join_info['organization_join_fk2']):
-                self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column2'] + '" = ' + alias + '."' + self.join_info['organization_join_fk2'] + '" '
+                join_table = self._get_table_for_alias(join_alias)
+                self.from_sql = self.from_sql + 'and ' + self._build_join_predicate(join_table, from_table, self.join_info['organization_join_column2'], self.join_info['organization_join_fk2'], join_alias, alias) + ' '
                 clause_added = True
             if self._has_value(self.join_info['organization_join_column3']) and self._has_value(self.join_info['organization_join_fk3']):
-                self.from_sql = self.from_sql + 'and ' + join_alias + '."' + self.join_info['organization_join_column3'] + '" = ' + alias + '."' + self.join_info['organization_join_fk3'] + '" '
+                join_table = self._get_table_for_alias(join_alias)
+                self.from_sql = self.from_sql + 'and ' + self._build_join_predicate(join_table, from_table, self.join_info['organization_join_column3'], self.join_info['organization_join_fk3'], join_alias, alias) + ' '
                 clause_added = True
             if not clause_added and self.join_info['table_type'] == 'id':
                 join_predicates = self._get_inferred_id_join_predicates(from_table, alias, join_alias)
@@ -1133,6 +1166,7 @@ class ViewSql:
             source_alias = self.table_aliases.get(organization_table_name)
             if source_alias != join_alias:
                 continue
+            organization_column_name = self._resolve_source_column(organization_table_name, organization_column_name)
             source_expression = self._build_safe_key_expression(
                 f'{source_alias}."{organization_column_name}"',
                 key_types[epa_column_name],
