@@ -1,7 +1,5 @@
 import argparse
 
-import psycopg2
-
 from ust.python.util import cli_profiles
 
 
@@ -827,13 +825,21 @@ def _main(argv=None):
 def main(argv=None):
     try:
         return _main(argv)
-    except psycopg2.OperationalError as exc:
+    except _database_operational_error() as exc:
         print(f"Database connection failed: {exc}")
         print("Check network/VPN access and database host availability, then retry.")
         return 1
     except RuntimeError as exc:
         print(f"Error: {exc}")
         return 1
+
+
+def _database_operational_error():
+    try:
+        import psycopg2
+    except ImportError:
+        return ()
+    return (psycopg2.OperationalError,)
 
 
 if __name__ == "__main__":

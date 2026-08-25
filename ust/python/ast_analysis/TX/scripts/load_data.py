@@ -2,7 +2,9 @@ import psycopg2
 
 try:
     from .config import load_config
-except ImportError:
+except ImportError as exc:
+    if __package__:
+        raise exc
     from config import load_config
 
 

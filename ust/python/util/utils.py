@@ -10,7 +10,21 @@ from ust.python.util import config
 from ust.python.util.logger_factory import error_logger, logger
 
 
-def connect_db(db_name=config.db_name, schema='public'):
+def _require_config(*names):
+    missing = [name for name in names if not getattr(config, name, None)]
+    if missing:
+        raise RuntimeError(
+            "Missing database config values: "
+            + ", ".join(missing)
+            + ". Create ust/python/util/config.py or set the matching UST_* environment variables."
+        )
+
+
+def connect_db(db_name=None, schema='public'):
+    _require_config('db_ip', 'db_user', 'db_password')
+    db_name = db_name or getattr(config, 'db_name', None)
+    if not db_name:
+        _require_config('db_name')
     try:
         options = f'-csearch_path="{schema}"'
         conn = psycopg2.connect(
@@ -31,7 +45,11 @@ def connect_db(db_name=config.db_name, schema='public'):
     return conn
 
 
-def get_engine(db_name=config.db_name, schema='public'):
+def get_engine(db_name=None, schema='public'):
+    _require_config('db_connection_string')
+    db_name = db_name or getattr(config, 'db_name', None)
+    if not db_name:
+        _require_config('db_name')
     try:
         engine = create_engine(config.db_connection_string + db_name, connect_args={'options': f'-csearch_path="{schema}"'})
         return engine

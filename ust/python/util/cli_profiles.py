@@ -2,8 +2,6 @@ import json
 import os
 from pathlib import Path
 
-from ust.python.util import utils
-
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -97,6 +95,8 @@ def get_active_profile() -> tuple[str | None, dict | None]:
 
 
 def sync_profiles_from_db() -> list[str]:
+    from ust.python.util import utils
+
     conn = utils.connect_db()
     cur = conn.cursor()
     created_or_updated: list[str] = []
