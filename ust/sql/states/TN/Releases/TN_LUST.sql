@@ -5,7 +5,7 @@
 select distinct "Currentstatus" from "ust_all-tn-environmental-sites" order by 1;
 
 delete from "ust_all-tn-environmental-sites" where "Currentstatus" in 
-	('0a Suspected Release - Closed', '0 Suspected Release - RD records', '3 Release Investigation');
+    ('0a Suspected Release - Closed', '0 Suspected Release - RD records', '3 Release Investigation');
 
 select * from "ust_all-tn-environmental-sites";
 
@@ -170,10 +170,10 @@ insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa
 
 select * from how_release_detected ;
 
-	case when "Howdiscovered" = '5 Site Check' then 'Inspection'
-	     when "Howdiscovered" = '9 Unknown' then 'Unknown'
-	     when "Howdiscovered" like '%Tightness%' then 'Tank Tightness Testing'
-		 else 'Other' end as "HowReleaseDetected"
+    case when "Howdiscovered" = '5 Site Check' then 'Inspection'
+         when "Howdiscovered" = '9 Unknown' then 'Unknown'
+         when "Howdiscovered" like '%Tightness%' then 'Tank Tightness Testing'
+         else 'Other' end as "HowReleaseDetected"
 ----------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------
 
@@ -184,25 +184,25 @@ from information_schema.columns
 where table_schema = 'TN_LUST' and table_name = 'ust_all-tn-environmental-sites'
 order by ordinal_position ;
 
-create table "TN_LUST".tn_lust 	as
+create table "TN_LUST".tn_lust     as
 select 
-	replace('TN_' || substr("Facilityname" || '_' || 	"Sitenumber",1,40) || '_' || nextval('"TN_LUST".lustid_seq'),'__','_') as "LUSTID",
-	"Facilityid",
-	"Sitenumber",
-	"Facilityname",
-	"Facilityaddress1",
-	"Facilityaddress2",
-	"Facilitycity",
-	"Facilityzip",
-	"Facilitycounty",
-	"Casedescription",
-	"Cause",
-	"Discoverydate",
-	"Currentstatus",
-	"Productreleased",
-	"Company",
-	"Caccompany",
-	"Howdiscovered" 
+    replace('TN_' || substr("Facilityname" || '_' ||     "Sitenumber",1,40) || '_' || nextval('"TN_LUST".lustid_seq'),'__','_') as "LUSTID",
+    "Facilityid",
+    "Sitenumber",
+    "Facilityname",
+    "Facilityaddress1",
+    "Facilityaddress2",
+    "Facilitycity",
+    "Facilityzip",
+    "Facilitycounty",
+    "Casedescription",
+    "Cause",
+    "Discoverydate",
+    "Currentstatus",
+    "Productreleased",
+    "Company",
+    "Caccompany",
+    "Howdiscovered" 
 from  "TN_LUST"."ust_all-tn-environmental-sites";
 
 select count(*) From (select distinct "Facilityname" || "Sitenumber" from "TN_LUST"."ust_all-tn-environmental-sites") a;
@@ -216,38 +216,38 @@ select count(*) from "TN_LUST"."ust_all-tn-environmental-sites" where "Sitenumbe
 
 create or replace view "TN_LUST".v_lust_base as 
 select "Facilityid" as "FacilityID",
-	l."LUSTID" as "LUSTID", 
-	"Facilityname" as "SiteName",
-	"Facilityaddress1" as "SiteAddress",
-	"Facilityaddress2" as "SiteAddress2",
-	"Facilitycity" as "SiteCity",
-	case when  length("Facilityzip") > 10 then substring("Facilityzip",1,5) else "Facilityzip" end as "Zipcode",
-	"Facilitycounty" as "County",
-	'TN' as "State",
-	4 as "EPARegion",
-	ls.epa_value as "LUSTStatus",
-	"Discoverydate" as "ReportedDate",
-	sr1.epa_value as "SubstanceReleased1",
-	sr2.epa_value as "SubstanceReleased2",
-	sr3.epa_value as "SubstanceReleased3",
-	sr4.epa_value as "SubstanceReleased4",
-	sr5.epa_value as "SubstanceReleased5",
-	cr.epa_value as "CauseOfRelease1",
-	hrd.epa_value as "HowReleaseDetected"
+    l."LUSTID" as "LUSTID", 
+    "Facilityname" as "SiteName",
+    "Facilityaddress1" as "SiteAddress",
+    "Facilityaddress2" as "SiteAddress2",
+    "Facilitycity" as "SiteCity",
+    case when  length("Facilityzip") > 10 then substring("Facilityzip",1,5) else "Facilityzip" end as "Zipcode",
+    "Facilitycounty" as "County",
+    'TN' as "State",
+    4 as "EPARegion",
+    ls.epa_value as "LUSTStatus",
+    "Discoverydate" as "ReportedDate",
+    sr1.epa_value as "SubstanceReleased1",
+    sr2.epa_value as "SubstanceReleased2",
+    sr3.epa_value as "SubstanceReleased3",
+    sr4.epa_value as "SubstanceReleased4",
+    sr5.epa_value as "SubstanceReleased5",
+    cr.epa_value as "CauseOfRelease1",
+    hrd.epa_value as "HowReleaseDetected"
 from "TN_LUST".tn_lust l 
-	left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'LUSTStatus') ls on l."Currentstatus" = ls.state_value
-	left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 1) sdeagg1 on l."LUSTID" = sdeagg1."LUSTID"
-	left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased1') sr1 on sdeagg1."Productreleased" = sr1.state_value
-	left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 2) sdeagg2 on l."LUSTID" = sdeagg2."LUSTID"
-	left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased2') sr2 on sdeagg2."Productreleased" = sr2.state_value
-	left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 3) sdeagg3 on l."LUSTID" = sdeagg3."LUSTID"
-	left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased3') sr3 on sdeagg3."Productreleased" = sr3.state_value
-	left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 4) sdeagg4 on l."LUSTID" = sdeagg4."LUSTID"
-	left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased4') sr4 on sdeagg4."Productreleased" = sr4.state_value
-	left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 5) sdeagg5 on l."LUSTID" = sdeagg5."LUSTID"
-	left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased5') sr5 on sdeagg5."Productreleased" = sr5.state_value
-	left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'CauseOfRelease1') cr on l."Cause" = cr.state_value
-	left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'HowReleaseDetected') hrd on l."Howdiscovered" = hrd.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'LUSTStatus') ls on l."Currentstatus" = ls.state_value
+    left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 1) sdeagg1 on l."LUSTID" = sdeagg1."LUSTID"
+    left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased1') sr1 on sdeagg1."Productreleased" = sr1.state_value
+    left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 2) sdeagg2 on l."LUSTID" = sdeagg2."LUSTID"
+    left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased2') sr2 on sdeagg2."Productreleased" = sr2.state_value
+    left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 3) sdeagg3 on l."LUSTID" = sdeagg3."LUSTID"
+    left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased3') sr3 on sdeagg3."Productreleased" = sr3.state_value
+    left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 4) sdeagg4 on l."LUSTID" = sdeagg4."LUSTID"
+    left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased4') sr4 on sdeagg4."Productreleased" = sr4.state_value
+    left join (select * from "TN_LUST"."SubstanceReleased_deagg" where rownumber = 5) sdeagg5 on l."LUSTID" = sdeagg5."LUSTID"
+    left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'SubstanceReleased5') sr5 on sdeagg5."Productreleased" = sr5.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'CauseOfRelease1') cr on l."Cause" = cr.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'HowReleaseDetected') hrd on l."Howdiscovered" = hrd.state_value
 order by "Facilityid", l."LUSTID";
 
 
@@ -377,36 +377,36 @@ delete from lust_geocode  where organization_id = 'TN';
 insert into lust_geocode (control_id, organization_id, lust_location_id, gc_latitude, gc_longitude, gc_coordinate_source, gc_address_type)
 select distinct a.control_id, a.organization_id, a.lust_location_id, b."Latitude", b."Longitude", b."gc_coordinate_source", b."gc_address_type"
 from lust_locations a join "TN_LUST".tn_lust_geocoded b on a."LUSTID" = b."LUSTID"
-		and coalesce(a."SiteName",'X') = coalesce(b."SiteName",'X')
-			and coalesce(a."SiteAddress",'X') = coalesce(b."SiteAddress",'X')
---			and coalesce(a."SiteAddress2",'X') = coalesce(b."SiteAddress2",'X')
-			and coalesce(a."SiteCity",'X') = coalesce(b."SiteCity",'X')
---			and coalesce(a."Zipcode",'X') = coalesce(b."Zipcode",'X')
-			and coalesce(a."County",'X') = coalesce(b."County",'X')
-			and coalesce(a."State",'X') = coalesce(b."State",'X')
+        and coalesce(a."SiteName",'X') = coalesce(b."SiteName",'X')
+            and coalesce(a."SiteAddress",'X') = coalesce(b."SiteAddress",'X')
+--            and coalesce(a."SiteAddress2",'X') = coalesce(b."SiteAddress2",'X')
+            and coalesce(a."SiteCity",'X') = coalesce(b."SiteCity",'X')
+--            and coalesce(a."Zipcode",'X') = coalesce(b."Zipcode",'X')
+            and coalesce(a."County",'X') = coalesce(b."County",'X')
+            and coalesce(a."State",'X') = coalesce(b."State",'X')
 where a.organization_id = 'TN';
 
 select count(*) from 
-	(select distinct a.control_id, a.organization_id, a.lust_location_id, b."Latitude", b."Longitude", b."gc_coordinate_source", b."gc_address_type"
-	from lust_locations a join "TN_LUST".tn_lust_geocoded b on a."LUSTID" = b."LUSTID"
-			and coalesce(a."SiteName",'X') = coalesce(b."SiteName",'X')
-				and coalesce(a."SiteAddress",'X') = coalesce(b."SiteAddress",'X')
---				and coalesce(a."SiteAddress2",'X') = coalesce(b."SiteAddress2",'X')
-				and coalesce(a."SiteCity",'X') = coalesce(b."SiteCity",'X')
---				and coalesce(a."Zipcode",'X') = coalesce(b."Zipcode",'X')
-				and coalesce(a."County",'X') = coalesce(b."County",'X')
-				and coalesce(a."State",'X') = coalesce(b."State",'X')
-			) a;
+    (select distinct a.control_id, a.organization_id, a.lust_location_id, b."Latitude", b."Longitude", b."gc_coordinate_source", b."gc_address_type"
+    from lust_locations a join "TN_LUST".tn_lust_geocoded b on a."LUSTID" = b."LUSTID"
+            and coalesce(a."SiteName",'X') = coalesce(b."SiteName",'X')
+                and coalesce(a."SiteAddress",'X') = coalesce(b."SiteAddress",'X')
+--                and coalesce(a."SiteAddress2",'X') = coalesce(b."SiteAddress2",'X')
+                and coalesce(a."SiteCity",'X') = coalesce(b."SiteCity",'X')
+--                and coalesce(a."Zipcode",'X') = coalesce(b."Zipcode",'X')
+                and coalesce(a."County",'X') = coalesce(b."County",'X')
+                and coalesce(a."State",'X') = coalesce(b."State",'X')
+            ) a;
 
-		select * from lust_locations where organization_id = 'TN' and "Zipcode" is null;
-		
-	select * from "TN_LUST".tn_lust_geocoded where "Zipcode" is null;
+        select * from lust_locations where organization_id = 'TN' and "Zipcode" is null;
+        
+    select * from "TN_LUST".tn_lust_geocoded where "Zipcode" is null;
 
 select * from  "TN_LUST".tn_lust_geocoded where "LUSTID" = 'TN_Norfolk Southern Railroad Company_1_5157'
 select * from lust_locations where "LUSTID" = 'TN_Norfolk Southern Railroad Company_1_5157'
 
 
-	
+    
 select * from lust_geocode where organization_id = 'TN';
 
 select * from v_lust where organization_id = 'TN';
@@ -418,8 +418,8 @@ select * from v_lust where organization_id = 'TN' and "Latitude" is null;
 
 select state_value, count(*) from (
 select "LUSTID",
-	ls.state_value, 
-	ls.epa_value as "LUSTStatus"
+    ls.state_value, 
+    ls.epa_value as "LUSTStatus"
 from "TN_LUST".tn_lust l 
-	left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'LUSTStatus') ls on l."Currentstatus" = ls.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where organization_id = 'TN' and element_name =  'LUSTStatus') ls on l."Currentstatus" = ls.state_value
 ) a group by state_value order by 1;

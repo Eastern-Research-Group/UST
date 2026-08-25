@@ -45,9 +45,9 @@ select FacilityID,
       WHEN s.RELEASEID = 1 THEN 'Tank'
       WHEN s.RELEASEID = 7 THEN 'Unknown' END as SourceOfRelease1, --need additional mapping help; see spreadsheet
  CASE WHEN c.remcauseid = 3 THEN 'Tank corrosion'
- 	  WHEN c.remcauseid = 2 THEN 'Delivery overfill'
- 	  WHEN c.remcauseid = 1 THEN 'Human error'
-	  WHEN c.remcauseid in (4,5,6) THEN 'Other'
+       WHEN c.remcauseid = 2 THEN 'Delivery overfill'
+       WHEN c.remcauseid = 1 THEN 'Human error'
+      WHEN c.remcauseid in (4,5,6) THEN 'Other'
       WHEN c.remcauseid = 7 THEN 'Unknown' END as CauseOfRelease1, --need additional mapping help; see spreadsheet
  null as SourceOfRelease2,
  null as CauseOfRelease2,
@@ -73,13 +73,13 @@ select FacilityID,
  null as NoFurtherActionLetterURL,
  null as MilitaryDoDSite
 FROM tblFacility f 
-	LEFT JOIN tblGeoSite g ON f.FACILITYID = g.FACILITYID  
-	LEFT JOIN tblGeoSite_LatLong ll ON f.FACILITYID = ll.FACILITYID
-	LEFT JOIN tblcounty c ON g.county = c.COUNTYCODE 
-	LEFT JOIN tblRemediation r ON f.facilityid = r.facilityid
-	LEFT JOIN (SELECT DISTINCT remid FROM tblRemMediaAffected WHERE mediaaffectedid = 1) soil ON r.REMID = soil.remid
-	LEFT JOIN (SELECT DISTINCT remid FROM tblRemMediaAffected WHERE mediaaffectedid = 2) gw ON r.remid = gw.remid
-	LEFT JOIN (SELECT DISTINCT remid FROM tblRemMediaAffected WHERE mediaaffectedid = 4) sw ON r.remid = sw.remid
-	LEFT JOIN (SELECT DISTINCT remid, releaseid FROM tblRemediationSource) s ON r.remid = s.remid --IS TBLSPILLSOURCE THE RIGHT LOOKUP TABLE??; this JOIN assumes one ROW per remid, which works FOR now but may NOT ALWAYS be the case
-	LEFT JOIN (SELECT DISTINCT remid, remcauseid FROM tblRemediationCause) c ON r.remid = c.remid --IS TBLSPILLCAUSE THE RIGHT LOOKUP TABLE??; this JOIN assumes one ROW per remid, which works FOR now but may NOT ALWAYS be the case
-	LEFT JOIN (SELECT DISTINCT remid, remtechid FROM tblRemTech) t ON r.remid = t.remid --this JOIN assumes one ROW per remid, which works FOR now but may NOT ALWAYS be the case
+    LEFT JOIN tblGeoSite g ON f.FACILITYID = g.FACILITYID  
+    LEFT JOIN tblGeoSite_LatLong ll ON f.FACILITYID = ll.FACILITYID
+    LEFT JOIN tblcounty c ON g.county = c.COUNTYCODE 
+    LEFT JOIN tblRemediation r ON f.facilityid = r.facilityid
+    LEFT JOIN (SELECT DISTINCT remid FROM tblRemMediaAffected WHERE mediaaffectedid = 1) soil ON r.REMID = soil.remid
+    LEFT JOIN (SELECT DISTINCT remid FROM tblRemMediaAffected WHERE mediaaffectedid = 2) gw ON r.remid = gw.remid
+    LEFT JOIN (SELECT DISTINCT remid FROM tblRemMediaAffected WHERE mediaaffectedid = 4) sw ON r.remid = sw.remid
+    LEFT JOIN (SELECT DISTINCT remid, releaseid FROM tblRemediationSource) s ON r.remid = s.remid --IS TBLSPILLSOURCE THE RIGHT LOOKUP TABLE??; this JOIN assumes one ROW per remid, which works FOR now but may NOT ALWAYS be the case
+    LEFT JOIN (SELECT DISTINCT remid, remcauseid FROM tblRemediationCause) c ON r.remid = c.remid --IS TBLSPILLCAUSE THE RIGHT LOOKUP TABLE??; this JOIN assumes one ROW per remid, which works FOR now but may NOT ALWAYS be the case
+    LEFT JOIN (SELECT DISTINCT remid, remtechid FROM tblRemTech) t ON r.remid = t.remid --this JOIN assumes one ROW per remid, which works FOR now but may NOT ALWAYS be the case

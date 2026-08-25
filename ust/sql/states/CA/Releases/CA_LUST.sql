@@ -10,7 +10,7 @@ select * from  "CA_LUST".regulatory_activities where "ACTION_TYPE" = 'REMEDIATIO
 select "BEGIN_DATE","LEAK_REPORTED_DATE" 
 from "CA_LUST".sites
 where "GLOBAL_ID" = 'T0606700017'
-1982-03-11 00:00:00	
+1982-03-11 00:00:00    
 1982-03-11 00:00:00
 
 
@@ -177,59 +177,59 @@ insert into public.lust_element_value_mappings (element_db_mapping_id, state_val
 select * from substances_deagg ;
 
 update substances_deagg s set epa_value = 
-	(select epa_value from lust_element_value_mappings x
-	where s."POTENTIAL_CONTAMINANTS_OF_CONCERN" = x.state_value 
-	and element_db_mapping_id = 1)
+    (select epa_value from lust_element_value_mappings x
+    where s."POTENTIAL_CONTAMINANTS_OF_CONCERN" = x.state_value 
+    and element_db_mapping_id = 1)
 where exists 
-	(select 1 from lust_element_value_mappings x
-	where s."POTENTIAL_CONTAMINANTS_OF_CONCERN" = x.state_value 
-	and element_db_mapping_id = 1);
+    (select 1 from lust_element_value_mappings x
+    where s."POTENTIAL_CONTAMINANTS_OF_CONCERN" = x.state_value 
+    and element_db_mapping_id = 1);
 --
 --update global_id_substances s set "EPA_SUBSTANCE" =
---	(select "EPA_SUBSTANCE"  from substance_xwalk x 
---	where s."SUBSTANCE" = x."CA_SUBSTANCE")
+--    (select "EPA_SUBSTANCE"  from substance_xwalk x 
+--    where s."SUBSTANCE" = x."CA_SUBSTANCE")
 --where exists
---	(select "EPA_SUBSTANCE"  from substance_xwalk x 
---	where s."SUBSTANCE" = x."CA_SUBSTANCE");
+--    (select "EPA_SUBSTANCE"  from substance_xwalk x 
+--    where s."SUBSTANCE" = x."CA_SUBSTANCE");
 
 create or replace view v_epa_substances as
 select a.*, row_number() over (partition by "GLOBAL_ID" order by epa_value) rn 
 from (select distinct "GLOBAL_ID", epa_value
-	  from substances_deagg where epa_value is not null) a;
+      from substances_deagg where epa_value is not null) a;
 
 --create or replace view v_epa_substances as
 --select a.*, row_number() over (partition by "GLOBAL_ID" order by "EPA_SUBSTANCE") rn 
 --from (select distinct "GLOBAL_ID", "EPA_SUBSTANCE"
---	  from global_id_substances where "EPA_SUBSTANCE" is not null) a;	 
-	
+--      from global_id_substances where "EPA_SUBSTANCE" is not null) a;     
+    
 create or replace view v_epa_substances_cross as
 select a."GLOBAL_ID", 
-	a.epa_value substance1, b.epa_value substance2, c.epa_value substance3, d.epa_value substance4, e.epa_value substance5
+    a.epa_value substance1, b.epa_value substance2, c.epa_value substance3, d.epa_value substance4, e.epa_value substance5
 from (select "GLOBAL_ID", epa_value from v_epa_substances where rn = 1) a 
-	left join (select "GLOBAL_ID", epa_value from v_epa_substances where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_substances where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_substances where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_substances where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID";
-		  
+    left join (select "GLOBAL_ID", epa_value from v_epa_substances where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_substances where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_substances where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_substances where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID";
+          
 --create or replace view v_epa_substances_cross as
 --select a."GLOBAL_ID", 
---	a."EPA_SUBSTANCE" substance1, b."EPA_SUBSTANCE" substance2, c."EPA_SUBSTANCE" substance3, d."EPA_SUBSTANCE" substance4, e."EPA_SUBSTANCE" substance5
+--    a."EPA_SUBSTANCE" substance1, b."EPA_SUBSTANCE" substance2, c."EPA_SUBSTANCE" substance3, d."EPA_SUBSTANCE" substance4, e."EPA_SUBSTANCE" substance5
 --from (select "GLOBAL_ID", "EPA_SUBSTANCE" from v_epa_substances where rn = 1) a 
---	left join (select "GLOBAL_ID", "EPA_SUBSTANCE" from v_epa_substances where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_SUBSTANCE" from v_epa_substances where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_SUBSTANCE" from v_epa_substances where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_SUBSTANCE" from v_epa_substances where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID";
---	
+--    left join (select "GLOBAL_ID", "EPA_SUBSTANCE" from v_epa_substances where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_SUBSTANCE" from v_epa_substances where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_SUBSTANCE" from v_epa_substances where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_SUBSTANCE" from v_epa_substances where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID";
+--    
 -----------------------------------------------------------------------------------------------------------------------
 
 
 select distinct "SOURCE" from sources order by 1;
-Delivery Problem	Other
-Dispenser	Dispenser
-Other	Other
-Piping	Piping
-STP	Submersible Turbine Pump 
-Tank	Tank
+Delivery Problem    Other
+Dispenser    Dispenser
+Other    Other
+Piping    Piping
+STP    Submersible Turbine Pump 
+Tank    Tank
 
 insert into public.lust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (9,'Delivery Problem','Other');
 insert into public.lust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (9,'Other','Other');
@@ -240,55 +240,55 @@ insert into public.lust_element_value_mappings (element_db_mapping_id, state_val
 
 
 update sources_deagg s set epa_value = 
-	(select epa_value from lust_element_value_mappings x
-	where s."DISCHARGE_SOURCE" = x.state_value 
-	and element_db_mapping_id = 9)
+    (select epa_value from lust_element_value_mappings x
+    where s."DISCHARGE_SOURCE" = x.state_value 
+    and element_db_mapping_id = 9)
 where exists 
-	(select 1 from lust_element_value_mappings x
-	where s."DISCHARGE_SOURCE" = x.state_value 
-	and element_db_mapping_id = 9);
+    (select 1 from lust_element_value_mappings x
+    where s."DISCHARGE_SOURCE" = x.state_value 
+    and element_db_mapping_id = 9);
 
 create or replace view v_epa_sources as
 select a.*, row_number() over (partition by "GLOBAL_ID" order by epa_value) rn 
 from (select distinct "GLOBAL_ID", epa_value
-	  from sources_deagg where epa_value is not null) a;
+      from sources_deagg where epa_value is not null) a;
 
 --create or replace view v_epa_sources as
 --select a.*, row_number() over (partition by "GLOBAL_ID" order by "EPA_SOURCE") rn 
 --from (select distinct "GLOBAL_ID", "EPA_SOURCE"
---	  from sources where "EPA_SOURCE" is not null) a;
+--      from sources where "EPA_SOURCE" is not null) a;
 
 create or replace view v_epa_sources_cross as
 select a."GLOBAL_ID", 
-	a.epa_value source1, b.epa_value source2, c.epa_value source3, d.epa_value source4, e.epa_value source5, f.epa_value source6
+    a.epa_value source1, b.epa_value source2, c.epa_value source3, d.epa_value source4, e.epa_value source5, f.epa_value source6
 from (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 1) a 
-	left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 6) f on a."GLOBAL_ID" = f."GLOBAL_ID";
+    left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_sources where rn = 6) f on a."GLOBAL_ID" = f."GLOBAL_ID";
 
 --create or replace view v_epa_sources_cross as
 --select a."GLOBAL_ID", 
---	a."EPA_SOURCE" source1, b."EPA_SOURCE" source2, c."EPA_SOURCE" source3, d."EPA_SOURCE" source4, e."EPA_SOURCE" source5, f."EPA_SOURCE" source6
+--    a."EPA_SOURCE" source1, b."EPA_SOURCE" source2, c."EPA_SOURCE" source3, d."EPA_SOURCE" source4, e."EPA_SOURCE" source5, f."EPA_SOURCE" source6
 --from (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 1) a 
---	left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 6) f on a."GLOBAL_ID" = f."GLOBAL_ID";
+--    left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_SOURCE" from v_epa_sources where rn = 6) f on a."GLOBAL_ID" = f."GLOBAL_ID";
 
 -----------------------------------------------------------------------------------------------------------------------
 create table causes ("GLOBAL_ID" text, "CAUSE" text);
 
 select distinct "CAUSE" from causes order by 1;
-Corrosion	Corrosion
-Install Problem	Other
-Other	Other
-Overfill	Delivery Overfill
-Physc / Mech Damage	Damage to Dispenser
-Spill	Dispenser Spill
-Unknown	Unknown
+Corrosion    Corrosion
+Install Problem    Other
+Other    Other
+Overfill    Delivery Overfill
+Physc / Mech Damage    Damage to Dispenser
+Spill    Dispenser Spill
+Unknown    Unknown
 
 
 insert into public.lust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (6,'Corrosion','Corrosion');
@@ -308,41 +308,41 @@ insert into public.lust_element_value_mappings (element_db_mapping_id, state_val
 --update causes set "EPA_CAUSE" = "CAUSE";
 
 update causes_deagg s set epa_value = 
-	(select epa_value from lust_element_value_mappings x
-	where s."DISCHARGE_CAUSE" = x.state_value 
-	and element_db_mapping_id = 6)
+    (select epa_value from lust_element_value_mappings x
+    where s."DISCHARGE_CAUSE" = x.state_value 
+    and element_db_mapping_id = 6)
 where exists 
-	(select 1 from lust_element_value_mappings x
-	where s."DISCHARGE_CAUSE" = x.state_value 
-	and element_db_mapping_id = 6);
+    (select 1 from lust_element_value_mappings x
+    where s."DISCHARGE_CAUSE" = x.state_value 
+    and element_db_mapping_id = 6);
 
 
 create or replace view v_epa_causes as
 select a.*, row_number() over (partition by "GLOBAL_ID" order by epa_value) rn 
 from (select distinct "GLOBAL_ID", epa_value
-	  from causes_deagg where epa_value is not null) a;
+      from causes_deagg where epa_value is not null) a;
 
 select max(rn) from v_epa_causes;
 
 create or replace view v_epa_causes_cross as
 select a."GLOBAL_ID", 
-	a.epa_value cause1, b.epa_value cause2, c.epa_value cause3, d.epa_value cause4, e.epa_value cause5, f.epa_value cause6
+    a.epa_value cause1, b.epa_value cause2, c.epa_value cause3, d.epa_value cause4, e.epa_value cause5, f.epa_value cause6
 from (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 1) a 
-	left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID"
-	left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 6) f on a."GLOBAL_ID" = f."GLOBAL_ID";
+    left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID"
+    left join (select "GLOBAL_ID", epa_value from v_epa_causes where rn = 6) f on a."GLOBAL_ID" = f."GLOBAL_ID";
 
 --create or replace view v_epa_causes_cross as
 --select a."GLOBAL_ID", 
---	a."EPA_CAUSE" cause1, b."EPA_CAUSE" cause2, c."EPA_CAUSE" cause3, d."EPA_CAUSE" cause4, e."EPA_CAUSE" cause5, f."EPA_CAUSE" cause6
+--    a."EPA_CAUSE" cause1, b."EPA_CAUSE" cause2, c."EPA_CAUSE" cause3, d."EPA_CAUSE" cause4, e."EPA_CAUSE" cause5, f."EPA_CAUSE" cause6
 --from (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 1) a 
---	left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID"
---	left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 6) f on a."GLOBAL_ID" = f."GLOBAL_ID";
+--    left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 2) b on a."GLOBAL_ID" = b."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 3) c on a."GLOBAL_ID" = c."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 4) d on a."GLOBAL_ID" = d."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 5) e on a."GLOBAL_ID" = e."GLOBAL_ID"
+--    left join (select "GLOBAL_ID", "EPA_CAUSE" from v_epa_causes where rn = 6) f on a."GLOBAL_ID" = f."GLOBAL_ID";
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -669,30 +669,30 @@ insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa
 insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (56, 'Well used for drinking water supply, Surface water', 'Yes');
 
 
-	case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Soil%' then 'Yes' end as "MediaImpactedSoil",
-	case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Groundwater%' then 'Yes' end as "MediaImpactedGroundwater",
-	case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Surface water%' then 'Yes' end as "MediaImpactedSurfaceWater",
+    case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Soil%' then 'Yes' end as "MediaImpactedSoil",
+    case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Groundwater%' then 'Yes' end as "MediaImpactedGroundwater",
+    case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Surface water%' then 'Yes' end as "MediaImpactedSurfaceWater",
 
 ----------------------------------------------------------------------------------------------------------------------------------
 
 --corrective action mapping approved by Alex 4/12/2023
-	
-Capping					 													= Capping
-Dual Phase Extraction 														= Duel/Multi-phase extraction
-Ex Situ Biological Treatment 												= Excavation and hauling or treatment
-Ex Situ Physical/Chemical Treatment (other than P&T, SVE, or Excavation)  	= Excavation and hauling or treatment
-Ex Situ Thermal Treatment													= Excavation and hauling or treatment
-Excavation						 											= Excavation and hauling or treatment
-Free Product Removal 														= Excavation and hauling or treatment
-In Situ Biological Treatment      											= Natural source zone depletion
-In Situ Physical/Chemical Treatment (other than SVE)						= In-situ groundwater remediation
-In Situ Thermal Treatment													= In Situ Thermal Treatment
-Monitored Natural Attenuation     											= Monitored natural attenuation
-Other (Use Description Field)												= Other
-Permeable Reactive Barrier													= Sub sealing/sub slab barrier
-Pump & Treat (P&T) Groundwater 												= Pump and treat
-Soil Vapor Extraction (SVE) 												= Soil vapor extraction (SVE)
-	
+    
+Capping                                                                         = Capping
+Dual Phase Extraction                                                         = Duel/Multi-phase extraction
+Ex Situ Biological Treatment                                                 = Excavation and hauling or treatment
+Ex Situ Physical/Chemical Treatment (other than P&T, SVE, or Excavation)      = Excavation and hauling or treatment
+Ex Situ Thermal Treatment                                                    = Excavation and hauling or treatment
+Excavation                                                                     = Excavation and hauling or treatment
+Free Product Removal                                                         = Excavation and hauling or treatment
+In Situ Biological Treatment                                                  = Natural source zone depletion
+In Situ Physical/Chemical Treatment (other than SVE)                        = In-situ groundwater remediation
+In Situ Thermal Treatment                                                    = In Situ Thermal Treatment
+Monitored Natural Attenuation                                                 = Monitored natural attenuation
+Other (Use Description Field)                                                = Other
+Permeable Reactive Barrier                                                    = Sub sealing/sub slab barrier
+Pump & Treat (P&T) Groundwater                                                 = Pump and treat
+Soil Vapor Extraction (SVE)                                                 = Soil vapor extraction (SVE)
+    
 
 
 insert into lust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name)
@@ -717,7 +717,7 @@ select * from "CA_LUST".regulatory_activities where "ACTION_TYPE" = 'REMEDIATION
 select "CA_LUST"
 
 
-----------------------------------------------------------------------------------------------------------------------------------------------	
+----------------------------------------------------------------------------------------------------------------------------------------------    
 select * from v_lust_element_mapping where state = 'CA' and element_name like '%Cause%';
 
 update lust_element_value_mappings set epa_value = 'Other' where id = 81;
@@ -730,45 +730,45 @@ select * from v_lust_element_mapping where state = 'CA' order by element_name, s
 
 create view "CA_LUST".v_lust as 
 select 
-	s."GLOBAL_ID" as "FacilityID",
-	null as "TankIDAssociatedwithRelease",
-	s."RB_CASE_NUMBER" as "LUSTID",
-	null as "FederallyReportableRelease",
-	s."BUSINESS_NAME" as "SiteName",
-	s."STREET_NUMBER" || ' ' || s."STREET_NAME" as "SiteAddress",
-	null as "SiteAddress2",
-	s."CITY" as "SiteCity",
-	s."ZIP" as "Zipcode",
-	s."COUNTY" as "County",
-	s."STATE" as "State",
-	s."EPA_REGION" as "EPARegion",
-	null as "FacilityType",
-	null as "TribalSite",
-	null as "Tribe",
-	s."LATITUDE" as "Latitude",
-	s."LONGITUDE" as "Longitude",
-   	coord.epa_value as "CoordinateSource",
-	status.epa_value as "LUSTStatus",
-	"LEAK_REPORTED_DATE" as "ReportedDate",
-	"NO_FURTHER_ACTION_DATE" as "NFADate",
-	mis.epa_value as "MediaImpactedSoil",
-	mig.epa_value as "MediaImpactedGroundwater",
-	misw.epa_value as "MediaImpactedSurfaceWater",
+    s."GLOBAL_ID" as "FacilityID",
+    null as "TankIDAssociatedwithRelease",
+    s."RB_CASE_NUMBER" as "LUSTID",
+    null as "FederallyReportableRelease",
+    s."BUSINESS_NAME" as "SiteName",
+    s."STREET_NUMBER" || ' ' || s."STREET_NAME" as "SiteAddress",
+    null as "SiteAddress2",
+    s."CITY" as "SiteCity",
+    s."ZIP" as "Zipcode",
+    s."COUNTY" as "County",
+    s."STATE" as "State",
+    s."EPA_REGION" as "EPARegion",
+    null as "FacilityType",
+    null as "TribalSite",
+    null as "Tribe",
+    s."LATITUDE" as "Latitude",
+    s."LONGITUDE" as "Longitude",
+       coord.epa_value as "CoordinateSource",
+    status.epa_value as "LUSTStatus",
+    "LEAK_REPORTED_DATE" as "ReportedDate",
+    "NO_FURTHER_ACTION_DATE" as "NFADate",
+    mis.epa_value as "MediaImpactedSoil",
+    mig.epa_value as "MediaImpactedGroundwater",
+    misw.epa_value as "MediaImpactedSurfaceWater",
 b.substance1 as "SubstanceReleased1", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
-	s."QUANTITY_RELEASED_GALLONS" as "QuantityReleased1", --unable to determine quantity when multiple "potential contaminants of concern"
-	case when s."QUANTITY_RELEASED_GALLONS" is not null then 'Gallons' end as "Unit1",
+    s."QUANTITY_RELEASED_GALLONS" as "QuantityReleased1", --unable to determine quantity when multiple "potential contaminants of concern"
+    case when s."QUANTITY_RELEASED_GALLONS" is not null then 'Gallons' end as "Unit1",
 b.substance2 as "SubstanceReleased2",
-	null as "QuantityReleased2",
-	null as "Unit2",
+    null as "QuantityReleased2",
+    null as "Unit2",
 b.substance3 as "SubstanceReleased3",
-	null as "QuantityReleased3",
-	null as "Unit3",
+    null as "QuantityReleased3",
+    null as "Unit3",
 b.substance4 as "SubstanceReleased4",
-	null as "QuantityReleased4",
-	null as "Unit4",
+    null as "QuantityReleased4",
+    null as "Unit4",
 b.substance5 as "SubstanceReleased5",
-	null as "QuantityReleased5",
-	null as "Unit5",
+    null as "QuantityReleased5",
+    null as "Unit5",
 src.source1 as "SourceOfRelease1",
 c.cause1 as "CauseOfRelease1",
 src.source2 as "SourceOfRelease2",
@@ -779,25 +779,25 @@ src.source4 as "SourceOfRelease4",
 c.cause4 as "CauseOfRelease4",
 src.source5 as "SourceOfRelease5",
 c.cause5 as "CauseOfRelease5",
-	null as "HowReleaseDetected",
-	null as "RemediationStrategy1",
-	null as "RemediationStrategy1StartDate",
-	null as "RemediationStrategy2",
-	null as "RemediationStrategy2StartDate",
-	null as "RemediationStrategy3",
-	null as "RemediationStrategy3StartDate",
-	null as "ClosedWithContamination",
-	null as "NoFurtherActionLetterURL",
-	null as "MilitaryDoDSite"
+    null as "HowReleaseDetected",
+    null as "RemediationStrategy1",
+    null as "RemediationStrategy1StartDate",
+    null as "RemediationStrategy2",
+    null as "RemediationStrategy2StartDate",
+    null as "RemediationStrategy3",
+    null as "RemediationStrategy3StartDate",
+    null as "ClosedWithContamination",
+    null as "NoFurtherActionLetterURL",
+    null as "MilitaryDoDSite"
 from "CA_LUST".sites s 
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'LUSTStatus') status on s."STATUS" = status.state_value
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'CoordinateSource') coord on s."COORDINATE_SOURCE" = coord.state_value
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'MediaImpactedSoil') mis on s."POTENTIAL_MEDIA_OF_CONCERN" = mis.state_value
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'MediaImpactedGroundwater') mig on s."POTENTIAL_MEDIA_OF_CONCERN" = mig.state_value
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'MediaImpactedSurfaceWater') misw on s."POTENTIAL_MEDIA_OF_CONCERN" = misw.state_value
-	left join "CA_LUST".v_epa_substances_cross b on s."GLOBAL_ID" = b."GLOBAL_ID"
-	left join "CA_LUST".v_epa_sources_cross src on s."GLOBAL_ID" = src."GLOBAL_ID"
-	left join "CA_LUST".v_epa_causes_cross c on s."GLOBAL_ID" = c."GLOBAL_ID"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'LUSTStatus') status on s."STATUS" = status.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'CoordinateSource') coord on s."COORDINATE_SOURCE" = coord.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'MediaImpactedSoil') mis on s."POTENTIAL_MEDIA_OF_CONCERN" = mis.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'MediaImpactedGroundwater') mig on s."POTENTIAL_MEDIA_OF_CONCERN" = mig.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'CA' and element_name =  'MediaImpactedSurfaceWater') misw on s."POTENTIAL_MEDIA_OF_CONCERN" = misw.state_value
+    left join "CA_LUST".v_epa_substances_cross b on s."GLOBAL_ID" = b."GLOBAL_ID"
+    left join "CA_LUST".v_epa_sources_cross src on s."GLOBAL_ID" = src."GLOBAL_ID"
+    left join "CA_LUST".v_epa_causes_cross c on s."GLOBAL_ID" = c."GLOBAL_ID"
 where "CASE_TYPE" in ('LUST Cleanup Site','Military UST Site')
 order by s."GLOBAL_ID", "RB_CASE_NUMBER";
 
@@ -811,51 +811,51 @@ select distinct element_db_mapping_id, element_name, state_table_name, state_col
 
 --old
 select s."GLOBAL_ID" as "FacilityID",
-	   s."RB_CASE_NUMBER" as "LUSTID",
-	   s."BUSINESS_NAME" as "SiteName",
-	   s."STREET_NUMBER" || ' ' || s."STREET_NAME" as "SiteAddress",
-	   s."CITY" as "SiteCity",
-	   s."ZIP" as "Zipcode",
-	   s."COUNTY" as "County",
-	   s."STATE" as "State",
-	   s."EPA_REGION" as "EPARegion",
-	   s."LATITUDE" as "Latitude",
-	   s."LONGITUDE" as "Longitude",
-	   case when "COORDINATE_SOURCE" like '%Geocode%' then 'Geocode'
-	        when "COORDINATE_SOURCE" like '%GPS%' then 'GPS'
-			when lower("COORDINATE_SOURCE") like '% map%' or "COORDINATE_SOURCE" like '%GeoTracker%' or "COORDINATE_SOURCE" = 'Manual Entry on Screens' then 'Map Interpolation'
-			when "COORDINATE_SOURCE" like '%Unknown%' then 'Unknown'
-			when "COORDINATE_SOURCE" is not null then 'Other' end as "CoordinateSource",
-	  case when "STATUS" like '%Open%' then 'Active'
-	       when "STATUS" = 'Informational Item' then 'Other'
-		   when "STATUS" like '%Closed%' then 'No Further Action' end as "LUSTStatus",
-	  "LEAK_REPORTED_DATE" as "ReportedDate",
-	  "NO_FURTHER_ACTION_DATE" as "NFADate",
-	  case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Soil%' then 'Yes' end as "MediaImpactedSoil",
-	  case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Groundwater%' then 'Yes' end as "MediaImpactedGroundwater",
-	  case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Surface water%' then 'Yes' end as "MediaImpactedSurfaceWater",
-	  b.substance1 as "SubstanceReleased1", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
-	  s."QUANTITY_RELEASED_GALLONS" as "QuantityReleased1", --unable to determine quantity when multiple "potential contaminants of concern"
-	  case when s."QUANTITY_RELEASED_GALLONS" is not null then 'Gallons' end as "Unit1",
-	  b.substance2 as "SubstanceReleased2", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
-	  b.substance3 as "SubstanceReleased3", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
-	  b.substance4 as "SubstanceReleased4", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
-	  b.substance5 as "SubstanceReleased5", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
-	  src.source1 as "SourceOfRelease1",
-	  c.cause1 as "CauseOfRelease1",
-	  src.source2 as "SourceOfRelease2",
-	  c.cause2 as "CauseOfRelease2",
-	  src.source3 as "SourceOfRelease3",
-	  c.cause3 as "CauseOfRelease3",
-	  src.source4 as "SourceOfRelease4",
-	  c.cause4 as "CauseOfRelease4",
-	  src.source5 as "SourceOfRelease5",
-	  c.cause5 as "CauseOfRelease5",
-	  src.source6 as "SourceOfRelease6",
-	  c.cause6 as "CauseOfRelease6"
+       s."RB_CASE_NUMBER" as "LUSTID",
+       s."BUSINESS_NAME" as "SiteName",
+       s."STREET_NUMBER" || ' ' || s."STREET_NAME" as "SiteAddress",
+       s."CITY" as "SiteCity",
+       s."ZIP" as "Zipcode",
+       s."COUNTY" as "County",
+       s."STATE" as "State",
+       s."EPA_REGION" as "EPARegion",
+       s."LATITUDE" as "Latitude",
+       s."LONGITUDE" as "Longitude",
+       case when "COORDINATE_SOURCE" like '%Geocode%' then 'Geocode'
+            when "COORDINATE_SOURCE" like '%GPS%' then 'GPS'
+            when lower("COORDINATE_SOURCE") like '% map%' or "COORDINATE_SOURCE" like '%GeoTracker%' or "COORDINATE_SOURCE" = 'Manual Entry on Screens' then 'Map Interpolation'
+            when "COORDINATE_SOURCE" like '%Unknown%' then 'Unknown'
+            when "COORDINATE_SOURCE" is not null then 'Other' end as "CoordinateSource",
+      case when "STATUS" like '%Open%' then 'Active'
+           when "STATUS" = 'Informational Item' then 'Other'
+           when "STATUS" like '%Closed%' then 'No Further Action' end as "LUSTStatus",
+      "LEAK_REPORTED_DATE" as "ReportedDate",
+      "NO_FURTHER_ACTION_DATE" as "NFADate",
+      case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Soil%' then 'Yes' end as "MediaImpactedSoil",
+      case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Groundwater%' then 'Yes' end as "MediaImpactedGroundwater",
+      case when "POTENTIAL_MEDIA_OF_CONCERN" like '%Surface water%' then 'Yes' end as "MediaImpactedSurfaceWater",
+      b.substance1 as "SubstanceReleased1", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
+      s."QUANTITY_RELEASED_GALLONS" as "QuantityReleased1", --unable to determine quantity when multiple "potential contaminants of concern"
+      case when s."QUANTITY_RELEASED_GALLONS" is not null then 'Gallons' end as "Unit1",
+      b.substance2 as "SubstanceReleased2", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
+      b.substance3 as "SubstanceReleased3", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
+      b.substance4 as "SubstanceReleased4", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
+      b.substance5 as "SubstanceReleased5", --column is "potential contaminants of concern", not "substance released"; no order assigned to this comma-separated field; non-related contaminants included as well
+      src.source1 as "SourceOfRelease1",
+      c.cause1 as "CauseOfRelease1",
+      src.source2 as "SourceOfRelease2",
+      c.cause2 as "CauseOfRelease2",
+      src.source3 as "SourceOfRelease3",
+      c.cause3 as "CauseOfRelease3",
+      src.source4 as "SourceOfRelease4",
+      c.cause4 as "CauseOfRelease4",
+      src.source5 as "SourceOfRelease5",
+      c.cause5 as "CauseOfRelease5",
+      src.source6 as "SourceOfRelease6",
+      c.cause6 as "CauseOfRelease6"
 from sites s left join v_epa_substances_cross b on s."GLOBAL_ID" = b."GLOBAL_ID"
-	left join v_epa_sources_cross src on s."GLOBAL_ID" = src."GLOBAL_ID"
-	left join v_epa_causes_cross c on s."GLOBAL_ID" = c."GLOBAL_ID"
+    left join v_epa_sources_cross src on s."GLOBAL_ID" = src."GLOBAL_ID"
+    left join v_epa_causes_cross c on s."GLOBAL_ID" = c."GLOBAL_ID"
 order by 1, 2;
 
 

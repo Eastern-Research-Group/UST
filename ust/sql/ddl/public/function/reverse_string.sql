@@ -7,10 +7,10 @@ declare
     reversed_string text;
     incoming alias for $1;
 begin
-	reversed_string = '''';
-	for i in reverse char_length(incoming)..1 loop
-		reversed_string = reversed_string || substring(incoming from i for 1);
-	end loop;
+    reversed_string = '''';
+    for i in reverse char_length(incoming)..1 loop
+        reversed_string = reversed_string || substring(incoming from i for 1);
+    end loop;
 return reversed_string;
 end
 $function$

@@ -51,8 +51,8 @@ from v_release_needed_mapping
 where release_control_id = 12 and mapping_complete = 'N'
 order by 1, 2;
 /*
-ust_release	facility_type_id
-ust_release	release_status_id
+ust_release    facility_type_id
+ust_release    release_status_id
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ where release_control_id = 12 and epa_column_name = 'facility_type_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 338 || ', ''' || "FACILITY TYPE" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 338 || ', ''' || "FACILITY TYPE" || ''', '''', null);'
 from mp_release."mp_releases" order by 1;
 
 insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (338, 'Service Station', 'Retail fuel sales (non-marina)', 'Please verify');
@@ -116,7 +116,7 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 12 and epa_column_name = 'release_status_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 341 || ', ''' || "release_status" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 341 || ', ''' || "release_status" || ''', '''', null);'
 from mp_release."mp_releases" order by 1;
 
 
@@ -187,9 +187,9 @@ NOTE! The view queried below (v_release_table_population_sql) contains columns t
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 12 and epa_table_name = 'ust_release'
 order by column_sort_order;
@@ -221,8 +221,8 @@ release_status_id as release_status_id,
 9 as epa_region, 
 'MP' as state
 from "mp_releases" x 
-left join mp_release.v_release_status_xwalk	rs on x.release_status = rs.organization_value 
-left join mp_release.v_facility_type_xwalk	ft on x."FACILITY TYPE" = ft.organization_value ;
+left join mp_release.v_release_status_xwalk    rs on x.release_status = rs.organization_value 
+left join mp_release.v_facility_type_xwalk    ft on x."FACILITY TYPE" = ft.organization_value ;
 
 
 select  * from mp_release.v_ust_release;
@@ -235,9 +235,9 @@ select count(*) from mp_release.v_ust_release;
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_release_missing_view_mapping a
 where release_control_id = 12
 order by 1, 2;
@@ -258,8 +258,8 @@ set variables:
 ust_or_release = 'release' 
 control_id = 2
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -290,7 +290,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'release' 
 control_id = 2
@@ -301,7 +301,7 @@ delete_existing = False # can set to True if there is existing release data you 
 --Quick sanity check of number of rows inserted:
 select table_name, num_rows from v_release_table_row_count
 where release_control_id = 12 order by sort_order;
-ust_release	9
+ust_release    9
 
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -311,12 +311,12 @@ ust_release	9
 set variables:
 control_id = 2
 ust_or_release = 'release' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 		# Set to False to export full template including mapping and reference tabs
-template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False         # Set to False to export full template including mapping and reference tabs
+template_only = False     # Set to False to export data and mapping tabs as well as reference tab
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -328,7 +328,7 @@ export_file_name = None	# If export_file_path and export_file_dir/export_file_na
 set variables:
 control_id = 4
 ust_or_release = 'release' 
-organization_id = None  	# Can leave as None if you specify the control_id
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/

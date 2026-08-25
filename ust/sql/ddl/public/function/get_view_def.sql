@@ -4,10 +4,10 @@ CREATE OR REPLACE FUNCTION public.get_view_def(p_view_name character varying, p_
  LANGUAGE plpgsql
 AS $function$
 DECLARE
-	v_view_def text;   
-	v_view_name  varchar := p_schema || '.' || p_view_name;
+    v_view_def text;   
+    v_view_name  varchar := p_schema || '.' || p_view_name;
 BEGIN
-	select pg_get_viewdef(v_view_name) into v_view_def;
-	return v_view_def;
+    select pg_get_viewdef(v_view_name) into v_view_def;
+    return v_view_def;
 END;
 $function$

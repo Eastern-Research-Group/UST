@@ -1,13 +1,13 @@
 select * from lust.INFORMATION_SCHEMA.columns where column_name like '%County%';
 
 create table temp_active (
-	LogNumber varchar(10),
-	FacilityId int,
-	SiteName varchar(40),
-	SiteAddress varchar(40),
-	SiteCity varchar(20),
-	SiteZip varchar(5),
-	SiteCounty varchar(100));
+    LogNumber varchar(10),
+    FacilityId int,
+    SiteName varchar(40),
+    SiteAddress varchar(40),
+    SiteCity varchar(20),
+    SiteZip varchar(5),
+    SiteCounty varchar(100));
 
 insert into temp_active values('10-02-0003',2063,'101 SERVICE','985 HIGHWAY AVE','REEDSPORT',97467,'DOUGLAS');
 insert into temp_active values('26-22-0099',12688,'1623-1637 NE Broadway','1623 NE Broadway','PORTLAND',97232,'MULTNOMAH');

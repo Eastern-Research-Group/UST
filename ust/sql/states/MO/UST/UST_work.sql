@@ -1,15 +1,15 @@
 SELECT * FROM `tblFacilityType` 
-A	Above Ground
-B	Both
-U	Under Ground
+A    Above Ground
+B    Both
+U    Under Ground
 
 SELECT * FROM `tblFacilityStatus` ;
-C	Closure
-I	Inspection
-L	Remediation
-N	New Install
-O	Other
-R	Registered
+C    Closure
+I    Inspection
+L    Remediation
+N    New Install
+O    Other
+R    Registered
 
 SELECT * FROM `tblRemTech` 
 
@@ -18,16 +18,16 @@ SELECT * FROM `tblFacility` ;
 SELECT * FROM tblTank;
 
 SELECT * FROM `tblTankStatus` 
-C	Currently In Use
-N	New Install
-P	Closed In Place
-R	Removed
-S	Change In Service
-T	Out of Use
+C    Currently In Use
+N    New Install
+P    Closed In Place
+R    Removed
+S    Change In Service
+T    Out of Use
 
 SELECT * FROM tbltanktype;
-A	Above Ground
-B	Below Ground
+A    Above Ground
+B    Below Ground
 
 SELECT * FROM tbltank;
 
@@ -47,20 +47,20 @@ SELECT * FROM `tblTankPipeReleaseDet` ;
 SELECT count(*) FROM `tblTankByCompartment`;
 
 SELECT * FROM `tblTankReleaseDetection` ;
-0	Unknown
-1	Automatic Tank Gauging\ATG
-2	DIC/TTT
-3	Manual Tank Gauging\MTG
-5	Interstitial Monitoring
-6	SIR
-7	Vapor
-8	Groundwater
-9	Chemical Marker
-10	Emergency Generator
-11	None
-12	CITLDS
-13	Field Constructed Tank Method
-22	Other
+0    Unknown
+1    Automatic Tank Gauging\ATG
+2    DIC/TTT
+3    Manual Tank Gauging\MTG
+5    Interstitial Monitoring
+6    SIR
+7    Vapor
+8    Groundwater
+9    Chemical Marker
+10    Emergency Generator
+11    None
+12    CITLDS
+13    Field Constructed Tank Method
+22    Other
 
 SELECT trd.tankcompartmentpk, rd.*
 FROM `tblTankRLSDetection` trd JOIN tblTankReleaseDetection rd ON trd.TANKRELEASECODE  = rd.TANKRELEASEDETCODE
@@ -77,20 +77,20 @@ ORDER BY 1;
 
 
 SELECT * FROM `tblPipeReleaseDetection` ;
-0	Unknown
-1	Monthly ELLD testing
-2	LTT
-3	Interstitial
-4	SIR
-5	Vapor
-6	Groundwater
-7	Chemical Marker
-8	None
-9	Emergency Generator
-10	ALLD (Automatic Line Leak Detection)
-12	CITLDS
-13	Airport Hydrant Method
-22	Other
+0    Unknown
+1    Monthly ELLD testing
+2    LTT
+3    Interstitial
+4    SIR
+5    Vapor
+6    Groundwater
+7    Chemical Marker
+8    None
+9    Emergency Generator
+10    ALLD (Automatic Line Leak Detection)
+12    CITLDS
+13    Airport Hydrant Method
+22    Other
 
 SELECT trd.tankcompartmentpk, trd.ELECTRONICORMECHANICALLLD , rd.*
 FROM `tblTankPipeReleaseDet`  trd JOIN tblPipeReleaseDetection rd ON trd.PIPERELEASEDETCODE  = rd.PIPERELEASEDETCODE
@@ -106,19 +106,19 @@ SELECT * FROM `tblTankMaterial`
 SELECT * FROM `tblPipeMaterial` ;
 
 SELECT * FROM `tblPipingSystem` 
-0	Suction
-1	Pressure
-2	Safe Suction
-3	Unsafe Suction
-4	Gravity
-8	Manifold
+0    Suction
+1    Pressure
+2    Safe Suction
+3    Unsafe Suction
+4    Gravity
+8    Manifold
 
 
 SELECT * FROM `tblPipeProtection` 
-1	Impressed
-2	Sacrificial
-6	Above Ground
-15	Other
+1    Impressed
+2    Sacrificial
+6    Above Ground
+15    Other
 
 SELECT DISTINCT pipedoublewall FROM `tblTankByCompartment` ;
 
@@ -141,30 +141,30 @@ SELECT DISTINCT spillprotection FROM `tblTankByCompartment` ;
 0
 
 SELECT * FROM `tblSpillCause` ;
-1	Spill
-2	Overfill
-3	Corrosion
-4	Physical or Mechanical Damage
-5	Install Problem
-6	Other(specify)
-7	UNKNOWN
+1    Spill
+2    Overfill
+3    Corrosion
+4    Physical or Mechanical Damage
+5    Install Problem
+6    Other(specify)
+7    UNKNOWN
 
 SELECT * FROM `tblSpillSource` ;
-1	Tank
-2	Piping
-3	Dispenser
-4	Submersible Turbine Pump Area
-5	Delivery Problem
-6	Other(specify)
-7	UNKNOWN
+1    Tank
+2    Piping
+3    Dispenser
+4    Submersible Turbine Pump Area
+5    Delivery Problem
+6    Other(specify)
+7    UNKNOWN
 
 SELECT * FROM `tblOverFill` ;
-1	Auto Shutoff
-2	Ball Valve
-3	Alarm
-4	Present
-5	NotRequired
-15	NONE
+1    Auto Shutoff
+2    Ball Valve
+3    Alarm
+4    Present
+5    NotRequired
+15    NONE
 
 SELECT * FROM `tblTankOverFillProt` ;
 
@@ -173,13 +173,13 @@ FROM `tblTankByCompartment` tc JOIN `tblTankOverFillProt` op ON tc.TANKCOMPARTME
  LEFT JOIN `tblOverFill` vf ON op.TYPEOVERFILLPROT  = vf.SPILLOVERFILLCODE 
 
  SELECT * FROM `tblTankExternalProtection` ;
- 1	Impressed
-2	Sacrificial
+ 1    Impressed
+2    Sacrificial
 
 SELECT * FROM `tblTankInternalProtection` ;
-0	No
-1	Yes
-2	Other
+0    No
+1    Yes
+2    Other
 
 
 SELECT * FROM `tblRemediation` ;
@@ -203,9 +203,9 @@ L
 C
 
  CASE WHEN ot.ownerclass = 'H' THEN 'Commercial'
- 	  WHEN ot.ownerclass = 'F' THEN 'Federal Government - Non Military'
+       WHEN ot.ownerclass = 'F' THEN 'Federal Government - Non Military'
       WHEN ot.ownerclass IN ('C','L','O','Z') THEN 'Local Government'
-	  WHEN ot.ownerclass IN ('M','N','P') THEN 'Private'
+      WHEN ot.ownerclass IN ('M','N','P') THEN 'Private'
       WHEN ot.ownerclass = 'S' THEN 'State Government - Non Military' END as OwnerType,
 
       SELECT * FROM tblownertype ORDER BY ownerid;
@@ -214,18 +214,18 @@ C
      
     SELECT ownerid, count(*) FROM (
 SELECT DISTINCT o.ownerid, 
-	CASE WHEN ownerclass = 'H' THEN 'Commercial'
-	     WHEN ownerclass = 'F' THEN 'Federal Government - Non Military'
-	     WHEN ownerclass IN ('C','L','O','Z') THEN 'Local Government'
-	     WHEN ownerclass IN ('M','N','P') THEN 'Private'
-	     WHEN ownerclass = 'S' THEN 'State Government - Non Military' END AS OwnerType
+    CASE WHEN ownerclass = 'H' THEN 'Commercial'
+         WHEN ownerclass = 'F' THEN 'Federal Government - Non Military'
+         WHEN ownerclass IN ('C','L','O','Z') THEN 'Local Government'
+         WHEN ownerclass IN ('M','N','P') THEN 'Private'
+         WHEN ownerclass = 'S' THEN 'State Government - Non Military' END AS OwnerType
 FROM tblownertype o JOIN tblFacilityLookup f ON f.ownerid = o.OWNERID 
 AND f.ownerinactivewfacility = 0 AND ownerclass IS NOT NULL)
 GROUP BY ownerid HAVING count(*) > 1;
 TTG
 
 SELECT * FROM  tblOwnerType a JOIN  tblOwnerType b ON a.ownerid = b.OWNERID 
-	JOIN tblFacilityLookup o ON a.ownerid = o.OWNERID 
+    JOIN tblFacilityLookup o ON a.ownerid = o.OWNERID 
 WHERE a.ownerclass = 'F' AND a.ownerclass <> b.ownerclass
 AND o.ownerinactivewfacility = 0;
       
@@ -236,10 +236,10 @@ AND o.ownerinactivewfacility = 0
 ORDER BY 1;
 
 SELECT * FROM tblownertype WHERE ownerclass  = 'G'  AND ownerid NOT  IN
-	(SELECT ownerid FROM tblownertype WHERE ownerclass <> 'G')
+    (SELECT ownerid FROM tblownertype WHERE ownerclass <> 'G')
       
-60705	
-46251	
+60705    
+46251    
 
 
 16509
@@ -257,35 +257,35 @@ LEFT JOIN tblTank t ON f.facilityid = t.facilityid
 LEFT JOIN tblTankByCompartment tc ON t.tankpk = tc.tankpk 
 WHERE ownerinactivewfacility = 0
 LEFT JOIN (SELECT TANKPK, COUNT(*) AS NUMCOMPARTMENTS FROM `tblTankByCompartment` GROUP BY TANKPK) TN 
-	ON t.tankpk = tn.tankpk
+    ON t.tankpk = tn.tankpk
 LEFT JOIN (SELECT DISTINCT TANKCOMPARTMENTPK FROM tblTankOverFillProt WHERE TYPEOVERFILLPROT = 1) autoshutoff 
-	ON tc.TANKCOMPARTMENTPK = autoshutoff.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = autoshutoff.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT TANKCOMPARTMENTPK FROM tblTankOverFillProt WHERE TYPEOVERFILLPROT = 2) ballvalve 
-	ON tc.TANKCOMPARTMENTPK = ballvalve.TANKCOMPARTMENTPK	
+    ON tc.TANKCOMPARTMENTPK = ballvalve.TANKCOMPARTMENTPK    
 LEFT JOIN (SELECT DISTINCT TANKCOMPARTMENTPK FROM tblTankOverFillProt WHERE TYPEOVERFILLPROT = 3) alarm 
-	ON tc.TANKCOMPARTMENTPK = alarm.TANKCOMPARTMENTPK	
+    ON tc.TANKCOMPARTMENTPK = alarm.TANKCOMPARTMENTPK    
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 5) interstitial 
-	ON tc.TANKCOMPARTMENTPK = interstitial.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = interstitial.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 1) atg  
-	ON tc.TANKCOMPARTMENTPK = atg.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = atg.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 3) mtg  
-	ON tc.TANKCOMPARTMENTPK = mtg.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = mtg.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 6) sir 
-	ON tc.TANKCOMPARTMENTPK = sir.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = sir.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 2) tt 
-	ON tc.TANKCOMPARTMENTPK = tt.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = tt.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 8) gw 
-	ON tc.TANKCOMPARTMENTPK = gw.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = gw.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 7) vapor 
-	ON tc.TANKCOMPARTMENTPK = vapor.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = vapor.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankPipeReleaseDet WHERE PIPERELEASEDETCODE = 1) elld
-	ON tc.TANKCOMPARTMENTPK = elld.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = elld.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankPipeReleaseDet WHERE ELECTRONICORMECHANICALLLD = 2) alld
-	ON tc.TANKCOMPARTMENTPK = alld.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = alld.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankPipeReleaseDet WHERE PIPERELEASEDETCODE = 3) atm
-	ON tc.TANKCOMPARTMENTPK = atm.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = atm.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT FACILITYID, max(remid) remid FROM tblRemediation GROUP BY FACILITYID) rem
-	ON f.FACILITYID = rem.FACILITYID
+    ON f.FACILITYID = rem.FACILITYID
 
 select * from tblTank;
 
@@ -316,80 +316,80 @@ LEFT JOIN tblcounty c ON g.county = c.COUNTYCODE
 LEFT JOIN tblTank t ON f.facilityid = t.facilityid
 LEFT JOIN tblTankByCompartment tc ON t.tankpk = tc.tankpk 
 LEFT JOIN (SELECT TANKPK, COUNT(*) as NUMCOMPARTMENTS FROM tblTankByCompartment GROUP BY TANKPK) TN 
-	ON t.tankpk = tn.tankpk
+    ON t.tankpk = tn.tankpk
 LEFT JOIN (SELECT DISTINCT TANKCOMPARTMENTPK FROM tblTankOverFillProt WHERE TYPEOVERFILLPROT = 1) autoshutoff 
-	ON tc.TANKCOMPARTMENTPK = autoshutoff.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = autoshutoff.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT TANKCOMPARTMENTPK FROM tblTankOverFillProt WHERE TYPEOVERFILLPROT = 2) ballvalve 
-	ON tc.TANKCOMPARTMENTPK = ballvalve.TANKCOMPARTMENTPK	
+    ON tc.TANKCOMPARTMENTPK = ballvalve.TANKCOMPARTMENTPK    
 LEFT JOIN (SELECT DISTINCT TANKCOMPARTMENTPK FROM tblTankOverFillProt WHERE TYPEOVERFILLPROT = 3) alarm 
-	ON tc.TANKCOMPARTMENTPK = alarm.TANKCOMPARTMENTPK	
+    ON tc.TANKCOMPARTMENTPK = alarm.TANKCOMPARTMENTPK    
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 5) interstitial 
-	ON tc.TANKCOMPARTMENTPK = interstitial.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = interstitial.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 1) atg  
-	ON tc.TANKCOMPARTMENTPK = atg.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = atg.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 3) mtg  
-	ON tc.TANKCOMPARTMENTPK = mtg.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = mtg.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 6) sir 
-	ON tc.TANKCOMPARTMENTPK = sir.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = sir.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 2) tt 
-	ON tc.TANKCOMPARTMENTPK = tt.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = tt.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 8) gw 
-	ON tc.TANKCOMPARTMENTPK = gw.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = gw.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 7) vapor 
-	ON tc.TANKCOMPARTMENTPK = vapor.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = vapor.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankPipeReleaseDet WHERE PIPERELEASEDETCODE = 1) elld
-	ON tc.TANKCOMPARTMENTPK = elld.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = elld.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankPipeReleaseDet WHERE ELECTRONICORMECHANICALLLD = 2) alld
-	ON tc.TANKCOMPARTMENTPK = alld.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = alld.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankPipeReleaseDet WHERE PIPERELEASEDETCODE = 3) atm
-	ON tc.TANKCOMPARTMENTPK = atm.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = atm.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT FACILITYID, max(remid) remid FROM tblRemediation GROUP BY FACILITYID) rem
-	ON f.FACILITYID = rem.FACILITYID
+    ON f.FACILITYID = rem.FACILITYID
 WHERE ownerinactivewfacility = 0 and  t.status = 'S';
 
 
 
-	----------------------------------------------------------------------------
-	
-SELECT * FROM `tblMediaAffected` ;	
+    ----------------------------------------------------------------------------
+    
+SELECT * FROM `tblMediaAffected` ;    
 
 SELECT * FROM `tblReleaseSiteType` 
-A	Above Ground
-B	Both Above Below
-U	Below Ground
-X	UNKNOWN
+A    Above Ground
+B    Both Above Below
+U    Below Ground
+X    UNKNOWN
 
 SELECT * FROM `tblRemediationTechniques` WHERE id IN (SELECT remtechid FROM `tblRemTech`)
-0	Air Sparging
-1	Phase I
-2	Source Investigation
-3	CA
-4	Groundwater Monitoring
-5	Free Product Recovery
-6	Excavation
-7	Other
-8	Dual  Phase
-9	Soil Vapor Extraction
-A	Pump & Treat
-B	Natural Attenuation
-D	Land Farming
-E	Tank Closure
-F	Land Fill
-S	Exsitu Soil Wash
-T	Exsitu Thermal
-W	High Vacuum Extraction
-Z	Oxygen Releasing Material
+0    Air Sparging
+1    Phase I
+2    Source Investigation
+3    CA
+4    Groundwater Monitoring
+5    Free Product Recovery
+6    Excavation
+7    Other
+8    Dual  Phase
+9    Soil Vapor Extraction
+A    Pump & Treat
+B    Natural Attenuation
+D    Land Farming
+E    Tank Closure
+F    Land Fill
+S    Exsitu Soil Wash
+T    Exsitu Thermal
+W    High Vacuum Extraction
+Z    Oxygen Releasing Material
 
 SELECT * FROM tblremtech;
 
 SELECT releaseid, count(*) FROM `tblRemediationSource` GROUP BY releaseid;
-2	540
-7	2391
-3	54
-4	20
-5	25
-1	564
-6	54
+2    540
+7    2391
+3    54
+4    20
+5    25
+1    564
+6    54
 
 SELECT remid, releaseid, count(*) FROM (SELECT DISTINCT remid, releaseid FROM `tblRemediationSource`)
 GROUP BY remid, releaseid HAVING count(*) > 1;

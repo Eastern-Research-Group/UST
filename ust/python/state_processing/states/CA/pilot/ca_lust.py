@@ -1,15 +1,8 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from psycopg2.errors import UndefinedTable
 
-from python.util.logger_factory import logger
-from python.util.import_service import ImportService
-from python.util import utils
-
+from ust.python.util import utils
+from ust.python.util.import_service import ImportService
+from ust.python.util.logger_factory import logger
 
 state = 'CA' 
 file_path = r'C:/Users/erguser/OneDrive - Eastern Research Group/Other Projects/UST/State Data/' 
@@ -48,12 +41,12 @@ def delete_nonlust_rows():
     # cur.execute(sql)
     # print(cur.fetchone()[0])
 
-    sql = f'delete from sites where "CASE_TYPE" not in (%s,%s)'
+    sql = 'delete from sites where "CASE_TYPE" not in (%s,%s)'
     cur.execute(sql, ('LUST Cleanup Site','Military UST Site'))
     rowcount = cur.rowcount
     logger.info('Deleted %s rows from table %s.sites where CASE_TYPE not "LUST Cleanup Site" or "Military UST Site"', rowcount, schema)
 
-    sql = f"select count(*) from sites"
+    sql = "select count(*) from sites"
     cur.execute(sql)
     cnt = cur.fetchone()[0]
     logger.info('There are %s remaining rows in table %s.sites', cnt, schema)

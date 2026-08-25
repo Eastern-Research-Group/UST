@@ -166,10 +166,10 @@ from v_release_needed_mapping
 where release_control_id = 4 and mapping_complete = 'N'
 order by 1, 2;
 /*
-ust_release	facility_type_id
-ust_release	release_status_id
-ust_release_cause	cause_id
-ust_release_substance	substance_id
+ust_release    facility_type_id
+ust_release    release_status_id
+ust_release_cause    cause_id
+ust_release_substance    substance_id
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -215,7 +215,7 @@ where release_control_id = 4 and epa_column_name = 'facility_type_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 219 || ', ''' || "proptype" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 219 || ', ''' || "proptype" || ''', '''', null);'
 from sd_release."spill_reports_all" order by 1;
 
 
@@ -253,7 +253,7 @@ from v_release_needed_mapping_insert_sql
 where release_control_id = 4 and epa_column_name = 'release_status_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 222 || ', ''' || "status" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 222 || ', ''' || "status" || ''', '''', null);'
 from sd_release."spill_reports_all" order by 1;
 
 /*below I have mapped the ones I can take a reasonable guess at, but I've inserted nulls for the ones I have no idea about 
@@ -310,7 +310,7 @@ where release_control_id = 4 and epa_column_name = 'substance_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 226 || ', ''' || "material" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 226 || ', ''' || "material" || ''', '''', null);'
 from sd_release."spill_reports_all" 
 where sor_type = 'UST'
 order by 1;
@@ -329,13 +329,13 @@ order by 1;
 --NOTE! As we continue to map more states, we can check the current mapping table instead of the archive table!
 --in the case of Substances, you can check both v_lust_element_mapping and v_ust_element_mapping!
 select distinct state_value, epa_value from 
-	(select state_value, epa_value
-	from archive.v_lust_element_mapping 
-	where lower(element_name) like '%substance%' 
-	union all 
-	select state_value, epa_value
-	from archive.v_ust_element_mapping 
-	where lower(element_name) like '%substance%') x
+    (select state_value, epa_value
+    from archive.v_lust_element_mapping 
+    where lower(element_name) like '%substance%' 
+    union all 
+    select state_value, epa_value
+    from archive.v_ust_element_mapping 
+    where lower(element_name) like '%substance%') x
 where lower(state_value) like lower('%white%')
 order by 1, 2;
 
@@ -511,8 +511,8 @@ Other or mixture
 --update release_element_value_mapping with the new value
 update release_element_value_mapping a set epa_value = 'Other or mixture'
 where epa_value = 'Other' and release_element_mapping_id in 
-	(select release_element_mapping_id from release_element_mapping 
-	where release_control_id = 4 and epa_column_name = 'substance_id');
+    (select release_element_mapping_id from release_element_mapping 
+    where release_control_id = 4 and epa_column_name = 'substance_id');
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -542,7 +542,7 @@ where release_control_id = 4
 and epa_column_name = 'cause_id';
 
 select distinct 
-	'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 230 || ', ''' || "cause_type" || ''', '''', null);'
+    'insert into release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 230 || ', ''' || "cause_type" || ''', '''', null);'
 from sd_release."spill_reports_all" 
 where sor_type = 'UST'
 order by 1;
@@ -692,9 +692,9 @@ NOTE! The view queried below (v_release_table_population_sql) contains columns t
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 4 and epa_table_name = 'ust_release'
 order by column_sort_order;
@@ -730,8 +730,8 @@ rs.release_status_id as release_status_id,
 8 as epa_region, 
 'SD' as state
 from "spill_reports_all" x 
-left join sd_release.v_release_status_xwalk	rs on x."status" = rs.organization_value 
-left join sd_release.v_facility_type_xwalk	ft on x."proptype" = ft.organization_value 
+left join sd_release.v_release_status_xwalk    rs on x."status" = rs.organization_value 
+left join sd_release.v_facility_type_xwalk    ft on x."proptype" = ft.organization_value 
 where  sor_type = 'UST';
 
 select count(*) from v_ust_release ;
@@ -749,9 +749,9 @@ select count(*) from sd_release.v_ust_release;
 
 --ust_release_substance 
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 4 and epa_table_name = 'ust_release_substance'
 order by column_sort_order;
@@ -779,9 +779,9 @@ select count(*) from sd_release.v_ust_release_substance;
 --ust_release_cause 
 
 select organization_table_name_qtd, selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_release_table_population_sql
 where release_control_id = 4 and epa_table_name = 'ust_release_cause'
 order by column_sort_order;
@@ -792,7 +792,7 @@ select distinct b.cause_id ,
 from "spill_reports_all" a 
 join sd_release.v_cause_xwalk b on a.cause_type = b.organization_value 
 where  sor_type = 'UST';
-	
+    
 select * from spill_reports_all where id = '2017.019';
 Unsecured Valve
 
@@ -808,9 +808,9 @@ select count(*) from sd_release.v_ust_release_cause;
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_release_missing_view_mapping a
 where release_control_id = 4
 order by 1, 2;
@@ -831,8 +831,8 @@ set variables:
 ust_or_release = 'release' 
 control_id = 2
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -863,7 +863,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'release' 
 control_id = 2
@@ -874,9 +874,9 @@ delete_existing = False # can set to True if there is existing release data you 
 --Quick sanity check of number of rows inserted:
 select table_name, num_rows from v_release_table_row_count
 where release_control_id = 4 order by sort_order;
-ust_release	3579
-ust_release_substance	3070
-ust_release_cause	3069
+ust_release    3579
+ust_release_substance    3070
+ust_release_cause    3069
 
 --------------------------------------------------------------------------------------------------------------------------
 --export template
@@ -885,12 +885,12 @@ ust_release_cause	3069
 set variables:
 control_id = 2
 ust_or_release = 'release' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 		# Set to False to export full template including mapping and reference tabs
-template_only = False 	# Set to False to export data and mapping tabs as well as reference tab
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False         # Set to False to export full template including mapping and reference tabs
+template_only = False     # Set to False to export data and mapping tabs as well as reference tab
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -902,7 +902,36 @@ export_file_name = None	# If export_file_path and export_file_dir/export_file_na
 set variables:
 control_id = 4
 ust_or_release = 'release' 
-organization_id = None  	# Can leave as None if you specify the control_id
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+
+
+
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+
+
+
+
+
+
+select organization_value, epa_value, release_element_value_mapping_id
+from v_release_element_mapping 
+where release_control_id = 4
+and epa_column_name = 'substance_id'
+and lower(organization_value) like '%oil%'
+order by 1;
+
+select * from substances 
+where release_flag is not null and inactive_flag is null
+order by substance_group, substance;
+
+Unleaded gasoline (unknown type)
+
+update release_element_value_mapping 
+set epa_value = 'Unleaded gasoline (unknown type)'
+where release_element_value_mapping_id = 326
+
+update release_element_value_mapping
+set epa_value = 'Oil (unspecified)'
+where release_element_value_mapping_id in (354,355)

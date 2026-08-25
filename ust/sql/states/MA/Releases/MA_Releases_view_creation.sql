@@ -127,17 +127,17 @@ select distinct a."LUSTID", a.substance_released
 from  ma_release.vw_release_substances a join  ma_release.vw_release_substances b 
  on a."LUSTID" = b."LUSTID" and a.substance_released = b.substance_released 
  and (a.quantity_released < b.quantity_released
- 	or (a.quantity_released is null and b.quantity_released is not null)
- 	or (a.quantity_released is not null and b.quantity_released is null))
- 	union all 
+     or (a.quantity_released is null and b.quantity_released is not null)
+     or (a.quantity_released is not null and b.quantity_released is null))
+     union all 
   select '2-0019186', 'Petroleum product';
- 	
+     
  select * from ma_release.vw_release_substances where "LUSTID" = '2-0019186'
  
 drop view  ma_release.v_ust_release_substance
 create or replace view ma_release.v_ust_release_substance as
 select distinct
-	 a."LUSTID"::character varying(50) as release_id ,
+     a."LUSTID"::character varying(50) as release_id ,
     substance_id as substance_id, 
     case when c."LUSTID" is not null then null else "quantity_released"::double precision end as quantity_released, 
     case when c."LUSTID" is not null then null else "unit"::character varying(20) end as unit 
@@ -147,10 +147,10 @@ from ma_release."vw_release_substances" a
 ;
 
 select * from ma_release.vw_release_substances where "LUSTID" = '1-0001063'
-1-0001063	Other	29.0	UG/M3
-1-0001063	Petroleum product	651.0	UG/M3
-1-0001063	Petroleum product	6260.0	UG/M3
-1-0001063	Petroleum product	9100.0	UG/M3
+1-0001063    Other    29.0    UG/M3
+1-0001063    Petroleum product    651.0    UG/M3
+1-0001063    Petroleum product    6260.0    UG/M3
+1-0001063    Petroleum product    9100.0    UG/M3
 
 select * from ma_release.releases where "LUSTID" = '1-0001063'
 
@@ -159,16 +159,16 @@ select * from ma_release.historical_releases  where "LUSTID" = '1-0001063'
 
 
 select * from public.release_view_key_columns 
-				  where view_name = 'v_ust_release_substance' order by sort_order
+                  where view_name = 'v_ust_release_substance' order by sort_order
 
 select release_id, substance_id, count(*) 
 from ma_release.v_ust_release_substance 
 group by release_id, substance_id
 having count(*) > 1;
 
-1-0010149	46	2
-2-0019186	44	2
-3-0032379	24	2
+1-0010149    46    2
+2-0019186    44    2
+3-0032379    24    2
 
 
 select * from  ma_release.v_ust_release_substance
@@ -176,8 +176,8 @@ where release_id in ( '2-0019186')
 order by 1;
 
 
-				  
-				  
+                  
+                  
 ----------------------------------------------------------------------------------------------------------
 
 select * from lock_monitor;

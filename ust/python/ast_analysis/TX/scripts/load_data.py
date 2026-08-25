@@ -1,5 +1,9 @@
 import psycopg2
-from config import load_config
+
+try:
+    from .config import load_config
+except ImportError:
+    from config import load_config
 
 
 def insert_vendor(xml_content):
@@ -19,11 +23,9 @@ def insert_vendor(xml_content):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
-file_path = r"C:\Users\JChilton\OneDrive - Eastern Research Group\Desktop\UST\Texas\Analysis\data\contacts.txt"
-#file_path = r"C:\Users\JChilton\OneDrive - Eastern Research Group\Desktop\UST\Texas\Analysis\fac\facility4.txt"
-
-with open(file_path, 'r', encoding="utf8") as file:
-	file_content = file.read()
-
 if __name__ == '__main__':
+    file_path = r"C:\Users\JChilton\OneDrive - Eastern Research Group\Desktop\UST\Texas\Analysis\data\contacts.txt"
+    # file_path = r"C:\Users\JChilton\OneDrive - Eastern Research Group\Desktop\UST\Texas\Analysis\fac\facility4.txt"
+    with open(file_path, 'r', encoding="utf8") as file:
+        file_content = file.read()
     insert_vendor(file_content)

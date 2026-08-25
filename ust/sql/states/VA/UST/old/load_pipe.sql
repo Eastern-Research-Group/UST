@@ -9,26 +9,26 @@ delete from va_ust.ustpipematerials where index is null;
 
 
 insert
-	into
-	ust_piping(ust_compartment_id,
-	piping_id,
-	piping_style_id,
-	piping_material_frp,
-	piping_material_gal_steel,
-	piping_material_copper,
-	piping_material_flex,
-	piping_material_other,
-	piping_material_unknown,
-	piping_line_leak_detector,
-	piping_automated_intersticial_monitoring,
-	piping_groundwater_monitoring,
-	piping_vapor_monitoring,
-	piping_statistical_inventory_reconciliation,
-	pipe_secondary_containment_other)
+    into
+    ust_piping(ust_compartment_id,
+    piping_id,
+    piping_style_id,
+    piping_material_frp,
+    piping_material_gal_steel,
+    piping_material_copper,
+    piping_material_flex,
+    piping_material_other,
+    piping_material_unknown,
+    piping_line_leak_detector,
+    piping_automated_intersticial_monitoring,
+    piping_groundwater_monitoring,
+    piping_vapor_monitoring,
+    piping_statistical_inventory_reconciliation,
+    pipe_secondary_containment_other)
 select
-	*
+    *
 from
-	vw_va_ust_pipe;
+    vw_va_ust_pipe;
 
 commit;
 

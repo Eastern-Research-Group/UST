@@ -187,7 +187,7 @@ alter table tanks rename column "ï»¿Facility ID" to "Facility ID";
 alter table facilities rename column "ï»¿Facility ID" to "Facility ID";
 
 select * from information_schema.columns a where table_name = 'facilities' and not exists
-	(select 1 from information_schema.columns b where a.column_name = b.column_name and b.table_name = 'tanks');
+    (select 1 from information_schema.columns b where a.column_name = b.column_name and b.table_name = 'tanks');
 Owner St.
 Curr in Use
 Temp Out Use
@@ -377,30 +377,30 @@ insert into substance_lookup values ('Used Oil','Used oil/waste oil');
 
 
 
-Fiberglass Reinforced Plastic Coated, Galvanic/Sacrificial Current Cathodic Protection	TankCorrosionProtectionSacrificialAnode	
-Fiberglass Reinforced Plastic Coated, Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection	TankCorrosionProtectionSacrificialAnode	
-Fiberglass Reinforced Plastic Coated, Impressed Current Cathodic Protection		TankCorrosionProtectionImpressedCurrent
-Galvanic/Sacrificial Current Cathodic Protection	TankCorrosionProtectionSacrificialAnode	TankCorrosionProtectionImpressedCurrent
-Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection	TankCorrosionProtectionSacrificialAnode	TankCorrosionProtectionImpressedCurrent
-Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, Painted(e.g., asphaltic)	TankCorrosionProtectionSacrificialAnode	TankCorrosionProtectionImpressedCurrent
-Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, Painted(e.g., asphaltic), STIP 3	TankCorrosionProtectionSacrificialAnode	TankCorrosionProtectionImpressedCurrent
-Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, STIP3	TankCorrosionProtectionSacrificialAnode	TankCorrosionProtectionImpressedCurrent
-Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, STIP3 Tank	TankCorrosionProtectionSacrificialAnode	TankCorrosionProtectionImpressedCurrent
-Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, URATHANE COAT	TankCorrosionProtectionSacrificialAnode	TankCorrosionProtectionImpressedCurrent
-Galvanic/Sacrificial Current Cathodic Protection, Painted(e.g., asphaltic)	TankCorrosionProtectionSacrificialAnode	
-Galvanic/Sacrificial Current Cathodic Protection, Painted(e.g., asphaltic), Split compartment	TankCorrosionProtectionSacrificialAnode	
-Galvanic/Sacrificial Current Cathodic Protection, Painted(e.g., asphaltic), STIP3 Tank	TankCorrosionProtectionSacrificialAnode	
-Galvanic/Sacrificial Current Cathodic Protection, STIP3	TankCorrosionProtectionSacrificialAnode	
-Galvanic/Sacrificial Current Cathodic Protection, STIP3 Tank	TankCorrosionProtectionSacrificialAnode	
-Galvanic/Sacrificial Current Cathodic Protection, STIP3, STIP3 Tank	TankCorrosionProtectionSacrificialAnode	
-IMPRESSED CURRENT 97, Impressed Current Cathodic Protection, Painted(e.g., asphaltic)		TankCorrosionProtectionImpressedCurrent
-Impressed Current Cathodic Protection		TankCorrosionProtectionImpressedCurrent
-Impressed Current Cathodic Protection, Impressed current installed August 2011, Painted(e.g., asphaltic)		TankCorrosionProtectionImpressedCurrent
-Impressed Current Cathodic Protection, Impressed Current installed August 2011, Painted(e.g., asphaltic)		TankCorrosionProtectionImpressedCurrent
-Impressed Current Cathodic Protection, Painted(e.g., asphaltic)		TankCorrosionProtectionImpressedCurrent
-Impressed Current Cathodic Protection, Painted(e.g., asphaltic), STIP3 Tank		TankCorrosionProtectionImpressedCurrent
-Impressed Current Cathodic Protection, STIP3 Tank		TankCorrosionProtectionImpressedCurrent
-IMPRESSED CURRENT, Impressed Current Cathodic Protection		TankCorrosionProtectionImpressedCurrent
+Fiberglass Reinforced Plastic Coated, Galvanic/Sacrificial Current Cathodic Protection    TankCorrosionProtectionSacrificialAnode    
+Fiberglass Reinforced Plastic Coated, Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection    TankCorrosionProtectionSacrificialAnode    
+Fiberglass Reinforced Plastic Coated, Impressed Current Cathodic Protection        TankCorrosionProtectionImpressedCurrent
+Galvanic/Sacrificial Current Cathodic Protection    TankCorrosionProtectionSacrificialAnode    TankCorrosionProtectionImpressedCurrent
+Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection    TankCorrosionProtectionSacrificialAnode    TankCorrosionProtectionImpressedCurrent
+Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, Painted(e.g., asphaltic)    TankCorrosionProtectionSacrificialAnode    TankCorrosionProtectionImpressedCurrent
+Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, Painted(e.g., asphaltic), STIP 3    TankCorrosionProtectionSacrificialAnode    TankCorrosionProtectionImpressedCurrent
+Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, STIP3    TankCorrosionProtectionSacrificialAnode    TankCorrosionProtectionImpressedCurrent
+Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, STIP3 Tank    TankCorrosionProtectionSacrificialAnode    TankCorrosionProtectionImpressedCurrent
+Galvanic/Sacrificial Current Cathodic Protection, Impressed Current Cathodic Protection, URATHANE COAT    TankCorrosionProtectionSacrificialAnode    TankCorrosionProtectionImpressedCurrent
+Galvanic/Sacrificial Current Cathodic Protection, Painted(e.g., asphaltic)    TankCorrosionProtectionSacrificialAnode    
+Galvanic/Sacrificial Current Cathodic Protection, Painted(e.g., asphaltic), Split compartment    TankCorrosionProtectionSacrificialAnode    
+Galvanic/Sacrificial Current Cathodic Protection, Painted(e.g., asphaltic), STIP3 Tank    TankCorrosionProtectionSacrificialAnode    
+Galvanic/Sacrificial Current Cathodic Protection, STIP3    TankCorrosionProtectionSacrificialAnode    
+Galvanic/Sacrificial Current Cathodic Protection, STIP3 Tank    TankCorrosionProtectionSacrificialAnode    
+Galvanic/Sacrificial Current Cathodic Protection, STIP3, STIP3 Tank    TankCorrosionProtectionSacrificialAnode    
+IMPRESSED CURRENT 97, Impressed Current Cathodic Protection, Painted(e.g., asphaltic)        TankCorrosionProtectionImpressedCurrent
+Impressed Current Cathodic Protection        TankCorrosionProtectionImpressedCurrent
+Impressed Current Cathodic Protection, Impressed current installed August 2011, Painted(e.g., asphaltic)        TankCorrosionProtectionImpressedCurrent
+Impressed Current Cathodic Protection, Impressed Current installed August 2011, Painted(e.g., asphaltic)        TankCorrosionProtectionImpressedCurrent
+Impressed Current Cathodic Protection, Painted(e.g., asphaltic)        TankCorrosionProtectionImpressedCurrent
+Impressed Current Cathodic Protection, Painted(e.g., asphaltic), STIP3 Tank        TankCorrosionProtectionImpressedCurrent
+Impressed Current Cathodic Protection, STIP3 Tank        TankCorrosionProtectionImpressedCurrent
+IMPRESSED CURRENT, Impressed Current Cathodic Protection        TankCorrosionProtectionImpressedCurrent
 
 
 
@@ -409,45 +409,45 @@ IMPRESSED CURRENT, Impressed Current Cathodic Protection		TankCorrosionProtectio
 
 
 select t."Facility ID" as "FacilityID", t."Facility Name" as "FacilityName", t."Facility Address" as "FacilityAddress1",
-	t."Facility City" as "FacilityCity", t."Facility County" as "FacilityCounty", t."Facility Zip" as "FacilityZipCode", 
-	'NE' as "FacilityState", 7 as "FacilityEPARegion", 
-	t."Owner Name" as "FacilityOwnerLastName", --did we decide how to handle company names???
+    t."Facility City" as "FacilityCity", t."Facility County" as "FacilityCounty", t."Facility Zip" as "FacilityZipCode", 
+    'NE' as "FacilityState", 7 as "FacilityEPARegion", 
+    t."Owner Name" as "FacilityOwnerLastName", --did we decide how to handle company names???
     t."Owner Address" as "FacilityOwnerAddress1", t."Owner City" as FacilityOwnerCity, t."Owner State" as "FacilityOwnerState",
-	t."Owner Zip" as "FacilityOwnerZipCode",
-	t."Tank #" as "TankID", 
-	case when t."Tank Type" = 'Federally Regulated' then 'Yes' end as "FederallyRegulated",
-	case when t."Tank Usage Status" = 'Currently in Use' then 'Currently in use' 
-		 when t."Tank Usage Status" = 'Temporarily Out of Use' then 'Temporarily out of service' 
-	     when t."Tank Usage Status" = 'Permanently Out of Use' and f."Tanks Removed" > 0 then 'Closed (removed from ground)' 
-		 when t."Tank Usage Status" = 'Permanently Out of Use' and f."Closed In Place" > 0 then 'Closed (in place)' 
-		 when t."Tank Usage Status" = 'Permanently Out of Use' then 'Closed (status unknown)' end as "TankStatus",
-	t."Tank Installed" as "InstallationDate",
-	sl.epa_substance as "TankSubstanceStored",
-	t."Tank Size" as "TankCapacityGallons", --assume gallons?
-	case when lower(t."Tank Sec Contain") like '%excavation%' then 'Yes' end as "ExcavationLiner",
-	case when lower(t."Tank Int Prot") like '%double%' or lower(t."Tank Ext Prot") like '%double%' or lower(t."Tank Sec Contain") like '%double%' then 'Double' end as "TankWallType", 
-	case when t."Tank Constr." = 'Composite' then 'Composite/Clad (Steel w/Fiberglass Reinforced Plastic)'
-	     when t."Tank Constr." = 'Fiberglass Reinforced Plastic' then 'Fiberglass Reinforced Plastic'
-	     when t."Tank Constr." = 'Jacketed' then 'Jacketed Steel'
-	     when t."Tank Constr." = 'NEW INSTALL' then 'Unknown'
-	     when t."Tank Constr." = 'Stainless Steel' then 'Steel (NEC)'
-	     when t."Tank Constr." = 'Steel' then 'Steel (NEC)'
-	     when t."Tank Constr." = 'Unknown' then 'Unknown' end as "MaterialDescription",
-	case when lower(t."Piping Const. Material") like '%fiberglass reinforced%' then 'Fiberglass Reinforced Plastic' 	 
-		 when lower(t."Piping Const. Material") like '%copper%' then 'Copper' 
-		 when lower(t."Piping Const. Material") like '%stainless steel%' then 'Stainless Steel' 
-		 when lower(t."Piping Const. Material") like '%galvanized%' then 'Galvanized Steel' 
-		 when lower(t."Piping Const. Material") like '%steel%' then 'Steel' 
-		 when lower(t."Piping Const. Material") like '%flex%' or (t."Piping Const. Material") like '%APT%' then 'Flex Piping' 
-		 when lower(t."Piping Const. Material") like '%unknown%' then 'Unknown' 
-		 when t."Piping Const. Material" is not null then 'Other' end as "PipingMaterialDescription",
-	case when lower(t."Piping Const. Material") like '%double%'	then 'Double Walled' end as "PipingWallType", 
+    t."Owner Zip" as "FacilityOwnerZipCode",
+    t."Tank #" as "TankID", 
+    case when t."Tank Type" = 'Federally Regulated' then 'Yes' end as "FederallyRegulated",
+    case when t."Tank Usage Status" = 'Currently in Use' then 'Currently in use' 
+         when t."Tank Usage Status" = 'Temporarily Out of Use' then 'Temporarily out of service' 
+         when t."Tank Usage Status" = 'Permanently Out of Use' and f."Tanks Removed" > 0 then 'Closed (removed from ground)' 
+         when t."Tank Usage Status" = 'Permanently Out of Use' and f."Closed In Place" > 0 then 'Closed (in place)' 
+         when t."Tank Usage Status" = 'Permanently Out of Use' then 'Closed (status unknown)' end as "TankStatus",
+    t."Tank Installed" as "InstallationDate",
+    sl.epa_substance as "TankSubstanceStored",
+    t."Tank Size" as "TankCapacityGallons", --assume gallons?
+    case when lower(t."Tank Sec Contain") like '%excavation%' then 'Yes' end as "ExcavationLiner",
+    case when lower(t."Tank Int Prot") like '%double%' or lower(t."Tank Ext Prot") like '%double%' or lower(t."Tank Sec Contain") like '%double%' then 'Double' end as "TankWallType", 
+    case when t."Tank Constr." = 'Composite' then 'Composite/Clad (Steel w/Fiberglass Reinforced Plastic)'
+         when t."Tank Constr." = 'Fiberglass Reinforced Plastic' then 'Fiberglass Reinforced Plastic'
+         when t."Tank Constr." = 'Jacketed' then 'Jacketed Steel'
+         when t."Tank Constr." = 'NEW INSTALL' then 'Unknown'
+         when t."Tank Constr." = 'Stainless Steel' then 'Steel (NEC)'
+         when t."Tank Constr." = 'Steel' then 'Steel (NEC)'
+         when t."Tank Constr." = 'Unknown' then 'Unknown' end as "MaterialDescription",
+    case when lower(t."Piping Const. Material") like '%fiberglass reinforced%' then 'Fiberglass Reinforced Plastic'      
+         when lower(t."Piping Const. Material") like '%copper%' then 'Copper' 
+         when lower(t."Piping Const. Material") like '%stainless steel%' then 'Stainless Steel' 
+         when lower(t."Piping Const. Material") like '%galvanized%' then 'Galvanized Steel' 
+         when lower(t."Piping Const. Material") like '%steel%' then 'Steel' 
+         when lower(t."Piping Const. Material") like '%flex%' or (t."Piping Const. Material") like '%APT%' then 'Flex Piping' 
+         when lower(t."Piping Const. Material") like '%unknown%' then 'Unknown' 
+         when t."Piping Const. Material" is not null then 'Other' end as "PipingMaterialDescription",
+    case when lower(t."Piping Const. Material") like '%double%'    then 'Double Walled' end as "PipingWallType", 
     case when lower(t."Tank Ext Prot") like '%sacrificial%' then 'Yes' end as "TankCorrosionProtectionSacrificialAnode",
-	case when lower(t."Tank Ext Prot") like '%sacrificial%' then 'Unknown' end as "TankCorrosionProtectionSacrificialAnodeInstalledOrRetrofitted",
+    case when lower(t."Tank Ext Prot") like '%sacrificial%' then 'Unknown' end as "TankCorrosionProtectionSacrificialAnodeInstalledOrRetrofitted",
     case when lower(t."Tank Ext Prot") like '%impressed%' then 'Yes' end as "TankCorrosionProtectionImpressedCurrent",
-	case when lower(t."Tank Ext Prot") like '%sacrificial%' then 'Unknown' end as "TankCorrosionProtectionImpressedCurrentInstalledOrRetrofitted"
+    case when lower(t."Tank Ext Prot") like '%sacrificial%' then 'Unknown' end as "TankCorrosionProtectionImpressedCurrentInstalledOrRetrofitted"
 from tanks t left join facilities f on t."Facility ID" = f."Facility ID"
-	left join substance_lookup sl on t."Tank Contents" = sl.tank_contents
+    left join substance_lookup sl on t."Tank Contents" = sl.tank_contents
 order by t."Facility ID", t."Tank #";
 
 

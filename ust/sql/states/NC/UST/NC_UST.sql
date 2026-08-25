@@ -176,7 +176,7 @@ select id, element_name from ust_element_db_mapping where state = 'NC' and eleme
 
 select * from ust_element_value_mappings 
 where element_db_mapping_id in 
-	(select id from ust_element_db_mapping where state = 'NC' and element_name like 'Finan%');
+    (select id from ust_element_db_mapping where state = 'NC' and element_name like 'Finan%');
 
 delete from ust_element_db_mapping where id in (46, 52);
 
@@ -206,9 +206,9 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_code, state
 values (56, '0', 'None', 'Yes', 'Y');
 
 case when "TANK_CONSTR" like 'Double Wall%' then 'Double' 
-			 when "TANK_CONSTR" like 'Single Wall%' then 'Single' end as "TankWallType",
-			 
-select * from information_schema.columns where column_name = 'TANK_CONSTR'			 
+             when "TANK_CONSTR" like 'Single Wall%' then 'Single' end as "TankWallType",
+             
+select * from information_schema.columns where column_name = 'TANK_CONSTR'             
 
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
 values ('NC','2023-12-01','TankWallType', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'TANK_CONSTR');
@@ -239,21 +239,21 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 values (57, 'Single Wall Steel/Polyurethane', 'Single', 'Y');
 
 
-	case when "PIPING_CONSTR" like '%FRP%' then 'Fiberglass Reinforced Plastic'
-		     when "PIPING_CONSTR" like '%Flex%' then 'Flex Piping'
-			 when "PIPING_CONSTR" like '%Copper%' then 'Copper'
-			 when "PIPING_CONSTR" like '%PVC%' then 'Other' --OK??
-			 when "PIPING_CONSTR" like '%Plastic%' then 'Other' --OK??
-			 when "PIPING_CONSTR" in ('UNK','Unknown') then 'Unknown' end as "PipingMaterialDescription",
+    case when "PIPING_CONSTR" like '%FRP%' then 'Fiberglass Reinforced Plastic'
+             when "PIPING_CONSTR" like '%Flex%' then 'Flex Piping'
+             when "PIPING_CONSTR" like '%Copper%' then 'Copper'
+             when "PIPING_CONSTR" like '%PVC%' then 'Other' --OK??
+             when "PIPING_CONSTR" like '%Plastic%' then 'Other' --OK??
+             when "PIPING_CONSTR" in ('UNK','Unknown') then 'Unknown' end as "PipingMaterialDescription",
 
 
-select distinct "PIPING_CONSTR" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;		 
+select distinct "PIPING_CONSTR" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;         
 
 select * from ust_element_db_mapping where state = 'NC' order by 1 desc;
 
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-12-01','PipingMaterialDescription', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'PIPING_CONSTR');			 
-		
+values ('NC','2023-12-01','PipingMaterialDescription', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'PIPING_CONSTR');             
+        
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value, epa_approved)
 values (58, 'Double Wall FRP', 'Fiberglass Reinforced Plastic', 'Y'); 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value, epa_approved)
@@ -283,12 +283,12 @@ values (58, 'Single Wall Steel', 'Steel', 'Y');
 
 
 case when "PIPING_SYSTEM" like '%Suction%' then 'Suction'
-		     when "PIPING_SYSTEM" like '%Pressur%' then 'Pressure'
-			 when upper("PIPING_SYSTEM") like '%GRAVITY%' then 'Non-operational ( e.g., fill line, vent line, gravity)'
-		     when "PIPING_SYSTEM" like '%Manifold Bar%' then 'Other' end as "PipingStyle",
+             when "PIPING_SYSTEM" like '%Pressur%' then 'Pressure'
+             when upper("PIPING_SYSTEM") like '%GRAVITY%' then 'Non-operational ( e.g., fill line, vent line, gravity)'
+             when "PIPING_SYSTEM" like '%Manifold Bar%' then 'Other' end as "PipingStyle",
 
-	
-select distinct "PIPING_SYSTEM" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;		 
+    
+select distinct "PIPING_SYSTEM" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;         
 European Suction
 Gravity
 GRAVITY
@@ -300,7 +300,7 @@ Suction System
 Unknown
 
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-12-01','PipingStyle', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'PIPING_SYSTEM');			 
+values ('NC','2023-12-01','PipingStyle', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'PIPING_SYSTEM');             
 
 select * from ust_element_db_mapping where state = 'NC' order by 1 desc;
 
@@ -323,14 +323,14 @@ values (59, 'Pressurized System', 'Pressure', 'Y');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value, epa_approved)
 values (59, 'Suction System', 'Suction', 'Y');  
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value, epa_approved)
-values (59, 'Unknown', 'Unknown', 'Y');  	     
-		     
+values (59, 'Unknown', 'Unknown', 'Y');           
+             
 
 
-		case when "PIPING_CONSTR" like 'Double Wall' then 'Double'
+        case when "PIPING_CONSTR" like 'Double Wall' then 'Double'
              when "PIPING_CONSTR" like 'Single Wall' or "PIPING_CONSTR" like 'SW%' then 'Single' end as "PipingWallType",
 
-select distinct "PIPING_CONSTR" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;		 
+select distinct "PIPING_CONSTR" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;         
 Copper
 Double Wall Flex
 Double Wall FRP
@@ -348,7 +348,7 @@ Unknown
 
 
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-12-01','PipingWallType', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'PIPING_CONSTR');			 
+values ('NC','2023-12-01','PipingWallType', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'PIPING_CONSTR');             
 
 select * from ust_element_db_mapping where state = 'NC' order by 1 desc;
 
@@ -377,20 +377,20 @@ values (60, 'SW Steel/FRP', 'Single walled', 'Y');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value, epa_approved)
 values (60, 'Unknown', 'Unknown', 'Y');
 
-		case when "OVERFILL_PROTECTION" = 'Auto Shutoff Device' then 'Yes' end as "AutomaticShutoffDevice",
-		case when "OVERFILL_PROTECTION" = 'Overfill Alarm' then 'Yes' end as "OverfillAlarm",
-		case when "OVERFILL_PROTECTION" = 'Ball Float Valve' then 'Yes' end as "BallFloatValve",
-		case when "OVERFILL_PROTECTION" = 'Auto Shutoff Device' then 'Automatic Shutoff Device' 
-			 when "OVERFILL_PROTECTION" = 'Overfill Alarm' then 'Overfill Alarm' 
-			 when "OVERFILL_PROTECTION" = 'Ball Float Valve' then 'Ball Float Valve'
-			 when "OVERFILL_PROTECTION" = 'Unknown' then 'Unknown'
-			 when "OVERFILL_PROTECTION" = '25 Gal or Less Transfer' then 'Not Required' end as "OverfillProtectionMeans",
-		case when "SPILL_PROTECTION" = 'Catchment Basin' then 'Yes' end as "SpillBucketInstalled",
+        case when "OVERFILL_PROTECTION" = 'Auto Shutoff Device' then 'Yes' end as "AutomaticShutoffDevice",
+        case when "OVERFILL_PROTECTION" = 'Overfill Alarm' then 'Yes' end as "OverfillAlarm",
+        case when "OVERFILL_PROTECTION" = 'Ball Float Valve' then 'Yes' end as "BallFloatValve",
+        case when "OVERFILL_PROTECTION" = 'Auto Shutoff Device' then 'Automatic Shutoff Device' 
+             when "OVERFILL_PROTECTION" = 'Overfill Alarm' then 'Overfill Alarm' 
+             when "OVERFILL_PROTECTION" = 'Ball Float Valve' then 'Ball Float Valve'
+             when "OVERFILL_PROTECTION" = 'Unknown' then 'Unknown'
+             when "OVERFILL_PROTECTION" = '25 Gal or Less Transfer' then 'Not Required' end as "OverfillProtectionMeans",
+        case when "SPILL_PROTECTION" = 'Catchment Basin' then 'Yes' end as "SpillBucketInstalled",
 
 
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','MaterialDescription', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'TANK_CONSTR');				
-		
+values ('NC','2023-02-21','MaterialDescription', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'TANK_CONSTR');                
+        
 select * from ust_element_db_mapping order by 1 desc;
 
 select distinct "TANK_CONSTR" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;
@@ -416,25 +416,25 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (92, '', '');
 
 select * from information_schema.columns where column_name = 'OVERFILL_PROTECTION'
-		
+        
 
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','BallFloatValve', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'OVERFILL_PROTECTION');				
+values ('NC','2023-02-21','BallFloatValve', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'OVERFILL_PROTECTION');                
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','FlowShutoffDevice', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'OVERFILL_PROTECTION');				
+values ('NC','2023-02-21','FlowShutoffDevice', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'OVERFILL_PROTECTION');                
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','HighLevelAlarm', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'OVERFILL_PROTECTION');				
+values ('NC','2023-02-21','HighLevelAlarm', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'OVERFILL_PROTECTION');                
 
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','OverfillProtectionPrimary', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'OVERFILL_PROTECTION');		
+values ('NC','2023-02-21','OverfillProtectionPrimary', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'OVERFILL_PROTECTION');        
 
 select id, element_name, state_table_name, state_column_name
 from ust_element_db_mapping where state = 'NC' order by 1 desc;
-95	HighLevelAlarm
-94	FlowShutoffDevice
-93	BallFloatValve
+95    HighLevelAlarm
+94    FlowShutoffDevice
+93    BallFloatValve
 
-96	OverfillProtectionPrimary
+96    OverfillProtectionPrimary
 
 select distinct "OVERFILL_PROTECTION" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;
 25 Gal or Less Transfer
@@ -459,31 +459,31 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (96, 'Overfill Alarm', 'High level alarm');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (96, 'Unknown', 'Unknown');
 
-		case when "SPILL_PROTECTION" = 'Catchment Basin' then 'Yes' end as "SpillBucketInstalled",		
+        case when "SPILL_PROTECTION" = 'Catchment Basin' then 'Yes' end as "SpillBucketInstalled",        
 
-		
+        
 select * from information_schema.columns where column_name = 'LD_INTERSTL_PIP_SYSTEM_KEY'
-		
+        
 
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','SpillBucketInstalled', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'SPILL_PROTECTION');				
+values ('NC','2023-02-21','SpillBucketInstalled', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'SPILL_PROTECTION');                
 
 
 select id, element_name, state_table_name, state_column_name
 from ust_element_db_mapping where state = 'NC' order by 1 desc;
-97	SpillBucketInstalled
+97    SpillBucketInstalled
 
 select distinct "SPILL_PROTECTION" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (97, 'Catchment Basin', 'Yes');
-	
+    
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','InterstitialMonitoringContinualElectric', 'USTF_LD_INTERSTL_PIP_SYSTEM_CD', 'LD_INTERSTL_PIP_SYSTEM_KEY');				
+values ('NC','2023-02-21','InterstitialMonitoringContinualElectric', 'USTF_LD_INTERSTL_PIP_SYSTEM_CD', 'LD_INTERSTL_PIP_SYSTEM_KEY');                
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
 values ('NC','2023-02-21','InterstitialMonitoringManual', 'USTF_LD_INTERSTL_PIP_SYSTEM_CD', 'LD_INTERSTL_PIP_SYSTEM_KEY');
 
-99	InterstitialMonitoringManual	USTF_LD_INTERSTL_PIP_SYSTEM_CD	LD_INTERSTL_PIP_SYSTEM_KEY
-98	InterstitialMonitoringContinualElectric	USTF_LD_INTERSTL_PIP_SYSTEM_CD	LD_INTERSTL_PIP_SYSTEM_KEY
+99    InterstitialMonitoringManual    USTF_LD_INTERSTL_PIP_SYSTEM_CD    LD_INTERSTL_PIP_SYSTEM_KEY
+98    InterstitialMonitoringContinualElectric    USTF_LD_INTERSTL_PIP_SYSTEM_CD    LD_INTERSTL_PIP_SYSTEM_KEY
 
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (98, 'Sump Sensor', 'Yes');
@@ -495,24 +495,24 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 
 ----------------------------------------------------------------------------------------------------------------------------
 select * from information_schema.columns where column_name = 'LD_SYSTEM_TANK';
-		
+        
 
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','AutomaticTankGauging', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_TANK');		
+values ('NC','2023-02-21','AutomaticTankGauging', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_TANK');        
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','ManualTankGauging', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_TANK');		
+values ('NC','2023-02-21','ManualTankGauging', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_TANK');        
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','StatisticalInventoryReconciliation', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_TANK');		
+values ('NC','2023-02-21','StatisticalInventoryReconciliation', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_TANK');        
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','TankTightnessTesting', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_TANK');				
+values ('NC','2023-02-21','TankTightnessTesting', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_TANK');                
 
 
 select id, element_name, state_table_name, state_column_name
 from ust_element_db_mapping where state = 'NC' order by 1 desc;
-103	TankTightnessTesting
-102	StatisticalInventoryReconciliation
-101	ManualTankGauging
-100	AutomaticTankGauging
+103    TankTightnessTesting
+102    StatisticalInventoryReconciliation
+101    ManualTankGauging
+100    AutomaticTankGauging
 
 select distinct "LD_SYSTEM_TANK" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;
 
@@ -520,25 +520,25 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (101, 'Manual Tank Gauging', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (102, 'Statistical Inventory Reconciliation (SIR)', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (103, 'Inventory Control & TTT', 'Yes');
-	
+    
 ----------------------------------------------------------------------------------------------------------------------------
 select * from information_schema.columns where column_name = 'LD_SYSTEM_PIPE';
-		
+        
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','ElectronicLineLeak', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');		
+values ('NC','2023-02-21','ElectronicLineLeak', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');        
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','MechanicalLineLeak', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');		
+values ('NC','2023-02-21','MechanicalLineLeak', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');        
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','SafeSuction', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');		
+values ('NC','2023-02-21','SafeSuction', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');        
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','PrimaryReleaseDetectionType', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');		
+values ('NC','2023-02-21','PrimaryReleaseDetectionType', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');        
 
 select id, element_name, state_table_name, state_column_name
 from ust_element_db_mapping where state = 'NC' order by 1 desc;
-107	PrimaryReleaseDetectionType
-106	SafeSuction
-105	MechanicalLineLeak
-104	ElectronicLineLeak
+107    PrimaryReleaseDetectionType
+106    SafeSuction
+105    MechanicalLineLeak
+104    ElectronicLineLeak
 
 select distinct "LD_SYSTEM_PIPE" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1;
 ELLD
@@ -565,9 +565,9 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 
 ----------------------------------------------------------------------------------------------------------------------------
 select * from information_schema.columns where column_name = 'LD_SYSTEM_PIPE';
-		
+        
 insert into  ust_element_db_mapping (state, mapping_date, element_name, state_table_name, state_column_name) 
-values ('NC','2023-02-21','ElectronicLineLeak', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');		
+values ('NC','2023-02-21','ElectronicLineLeak', 'VW_USTF_TANK_DETAIL_DATA_VIEW', 'LD_SYSTEM_PIPE');        
 
 select id, element_name, state_table_name, state_column_name
 from ust_element_db_mapping where state = 'NC' order by 1 desc;
@@ -577,205 +577,205 @@ select distinct "LD_SYSTEM_PIPE" from "VW_USTF_TANK_DETAIL_DATA_VIEW" order by 1
 
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (104, 'ELLD', 'Yes');
-		case when "LD_SYSTEM_PIPE" in ('ELLD','MLLD') then 'Line Test'
-		     when "LD_SYSTEM_PIPE" = 'Statistical Inventory Reconciliation (SIR)' then 'SIR'
-		     when "LD_SYSTEM_PIPE" = 'Vapor Monitoring' then 'Vapor Monitoring'
-		     when "LD_SYSTEM_PIPE" = 'Other' then 'Other'
-		     when "LD_SYSTEM_PIPE" = 'UNK' then 'Unknown' end as "PrimaryReleaseDetectionType",
+        case when "LD_SYSTEM_PIPE" in ('ELLD','MLLD') then 'Line Test'
+             when "LD_SYSTEM_PIPE" = 'Statistical Inventory Reconciliation (SIR)' then 'SIR'
+             when "LD_SYSTEM_PIPE" = 'Vapor Monitoring' then 'Vapor Monitoring'
+             when "LD_SYSTEM_PIPE" = 'Other' then 'Other'
+             when "LD_SYSTEM_PIPE" = 'UNK' then 'Unknown' end as "PrimaryReleaseDetectionType",
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 select count(*) from (
 select distinct 
-	   fown."FACILITY_ID" as "FacilityID",
-	   f."FACILITY_NAME" as "FacilityName",
-	   ot.epa_value as "OwnerType",
-	   null as "FacilityType1",
-	   null as "FacilityType2",
-	   f."ADDRESS1" as "FacilityAddress1",
-	   f."ADDRESS2" as "FacilityAddress2",
-	   f."CITY" as "FacilityCity",
-	   fcc."FIPS_COUNTY_DESC" as "FacilityCounty",
-	   f."ZIP" as "FacilityZipCode",
-	   f."PHONE" as "FacilityPhoneNumber",
-	   f."STATE" as "FacilityState",
-	   4 as "FacilityEPARegion",
-	   null as "FacilityTribalSite",
-	   null as "FacilityTribe",
-	   f."LATITUDE" as "FacilityLatitude",
-	   f."LONGITUDE" as "FacilityLongitude",
-	   null as "StateCoordinateSource",
-	   fown."OWNER_NAME" as "FacilityOwnerCompanyName",
-	   null as "FacilityOwnerLastName",
-	   null as "FacilityOwnerFirstName",
-	   fown."ADDRESS1" as "FacilityOwnerAddress1",
-	   fown."ADDRESS2" as "FacilityOwnerAddress2",
-	   fown."CITY" as "FacilityOwnerCity",
-	   fown."COUNTY_DESC" as "FacilityOwnerCounty",
-	   fown."ZIP" as "FacilityOwnerZipCode",
-	   fown."STATE" as "FacilityOwnerState",
-	   fown."PHONE" as "FacilityOwnerPhoneNumber",
-	   fown."EMAIL_ADDR" as "FacilityOwnerEmail",	   
-	   fopr."OPERATOR_NAME" as "FacilityOperatorCompanyName",
-	   null as "FacilityOperatorLastName",
-	   null as "FacilityOperatorFirstName", 
-	   fopr."ADDRESS1" as "FacilityOperatorAddress1",
-	   fopr."ADDRESS2" as "FacilityOperatorAddress2",
-	   fopr."CITY" as "FacilityOperatorCity",
-	   fopr."COUNTY_DESC" as "FacilityOperatorCounty",
-	   fopr."ZIP" as "FacilityOperatorZipCode",
-	   fopr."STATE" as "FacilityOperatorState",
-	   fopr."PHONE" as "FacilityOperatorPhoneNumber",
-	   fopr."EMAIL_ADDR" as "FacilityOperatorEmail",	  
---	   case when tfd."FINANCIAL_RESPONSIBILITY" = 7 then 'Yes' end as "FinancialResponsibilityBondRatingTest",
---	   null as "FinancialResponsibilityCommercialInsurance", --can we can this from the lookup?
---	   case when tfd."FINANCIAL_RESPONSIBILITY" in (1,9) then 'Yes' end as "FinancialResponsibilityGuarantee", 
---	   case when tfd."FINANCIAL_RESPONSIBILITY" = 4 then 'Yes' end as "FinancialResponsibilityLetterOfCredit", 
---	   case when tfd."FINANCIAL_RESPONSIBILITY" = 8 then 'Yes' end as "FinancialResponsibilityLocalGovernmentFinancialTest", 
---	   case when tfd."FINANCIAL_RESPONSIBILITY" = 2 then 'Yes' end as "FinancialResponsibilityRiskRetentionGroup", 
---	   case when tfd."FINANCIAL_RESPONSIBILITY" = 11 then 'Yes' end as "FinancialResponsibilitySelfInsuranceFinancialTest", 
---	   null as "FinancialResponsibilityStateFund", 
---	   case when tfd."FINANCIAL_RESPONSIBILITY" = 3 then 'Yes' end as "FinancialResponsibilitySuretyBond", 
---	   case when tfd."FINANCIAL_RESPONSIBILITY" = 6 then 'Yes' end as "FinancialResponsibilityTrustFund", 
---	   case when tfd."FINANCIAL_RESPONSIBILITY" in (5,10) then 'Yes' end as "FinancialResponsibilityOtherMethod", --5 / Insurance Pools and 10 / Local Gov. Dedicated Fund
---	   case when tfd."FINANCIAL_RESPONSIBILITY" = 0 then 'Yes' end as "FinancialResponsibilityNotRequired", 
-	   null as "FinancialResponsibilityObtained",
-	   null as "Compliance",
-	   ft."TANK_ID" as "TankID",
-	   null as "TankLocation",
-	   ft."REGULATED" as "FederallyRegulated",
-	   null as "CompartmentID",
---	   case when ft."TANK_STATUS" = 'Abandoned' then 'Abandoned'
---			when ft."TANK_STATUS" = 'Current' then 'Currently in use'
---			when ft."TANK_STATUS" = 'Removed' then 'Closed (removed from ground)'
---			when ft."TANK_STATUS" = 'Temporarily Closed' then 'Temporarily out of service' end as "TankStatus",	
-	   null as "FieldConstructed",
-	   null as "EmergencyGenerator",
-	   null as "AirportHydrantSystem",
-	   ft."MANIFOLD_TANK" as "MultipleTanks",
-	   ft."PERM_CLOSE_DATE" as "ClosureDate",
-	   ft."INSTALLATION_DATE" as "InstallationDate",
-	   ft."COMPARTMENT_TANK" as "CompartmentalizedUST",
-	   null as "NumberOfCompartments",
---	   sm.epa_substance as "TankSubstanceStored",
-		null as "CompartmentSubstanceStored",
-		ft."CAPACITY" as "TankCapacityGallons", -- assume gallons	
-		null as "CompartmentCapacityGallons",
-		null as "LinedTank",
-		null as "ExcavationLiner",
---		case when "TANK_CONSTR" like 'Double Wall%' then 'Double' 
---			 when "TANK_CONSTR" like 'Single Wall%' then 'Single' end as "TankWallType",
---		case when upper("TANK_CONSTR") like '%CONCRETE%' then 'Concrete' 	 
---	         when "TANK_CONSTR" like '%Steel%FRP%' then 'Composite/Clad (Steel w/Fiberglass Reinforced Plastic)'
---			 when "TANK_CONSTR" like '%FRP%' then 'Fiberglass Reinforced Plastic'
---	         when "TANK_CONSTR" like '%Jacketed%' then 'Jacketed Steel'
---	         when "TANK_CONSTR" like '%Polyurethane%' then 'Coated and Cathodically Protected Steel' --IS THIS RIGHT??
---			 when "TANK_CONSTR" like '%Steel%' then '' end as "MaterialDescription",
-		null as "TankRepaired",
-	    null as "TankRepairDate",
---		case when "PIPING_CONSTR" like '%FRP%' then 'Fiberglass Reinforced Plastic'
---		     when "PIPING_CONSTR" like '%Flex%' then 'Flex Piping'
---			 when "PIPING_CONSTR" like '%Copper%' then 'Copper'
---			 when "PIPING_CONSTR" like '%PVC%' then 'Other' --OK??
---			 when "PIPING_CONSTR" like '%Plastic%' then 'Other' --OK??
-			 when "PIPING_CONSTR" in ('UNK','Unknown') then 'Unknown' end as "PipingMaterialDescription",
-		"FLEX_CONNECTOR_TANK" as "PipingFlexConnector",
---		case when "PIPING_SYSTEM" like '%Suction%' then 'Suction'
---		     when "PIPING_SYSTEM" like '%Pressur%' then 'Pressure'
---			 when upper("PIPING_SYSTEM") like '%GRAVITY%' then 'Non-operational ( e.g., fill line, vent line, gravity)'
---		     when "PIPING_SYSTEM" like '%Manifold Bar%' then 'Other' end as "PipingStyle",
---		case when "PIPING_CONSTR" like 'Double Wall' then 'Double'
+       fown."FACILITY_ID" as "FacilityID",
+       f."FACILITY_NAME" as "FacilityName",
+       ot.epa_value as "OwnerType",
+       null as "FacilityType1",
+       null as "FacilityType2",
+       f."ADDRESS1" as "FacilityAddress1",
+       f."ADDRESS2" as "FacilityAddress2",
+       f."CITY" as "FacilityCity",
+       fcc."FIPS_COUNTY_DESC" as "FacilityCounty",
+       f."ZIP" as "FacilityZipCode",
+       f."PHONE" as "FacilityPhoneNumber",
+       f."STATE" as "FacilityState",
+       4 as "FacilityEPARegion",
+       null as "FacilityTribalSite",
+       null as "FacilityTribe",
+       f."LATITUDE" as "FacilityLatitude",
+       f."LONGITUDE" as "FacilityLongitude",
+       null as "StateCoordinateSource",
+       fown."OWNER_NAME" as "FacilityOwnerCompanyName",
+       null as "FacilityOwnerLastName",
+       null as "FacilityOwnerFirstName",
+       fown."ADDRESS1" as "FacilityOwnerAddress1",
+       fown."ADDRESS2" as "FacilityOwnerAddress2",
+       fown."CITY" as "FacilityOwnerCity",
+       fown."COUNTY_DESC" as "FacilityOwnerCounty",
+       fown."ZIP" as "FacilityOwnerZipCode",
+       fown."STATE" as "FacilityOwnerState",
+       fown."PHONE" as "FacilityOwnerPhoneNumber",
+       fown."EMAIL_ADDR" as "FacilityOwnerEmail",       
+       fopr."OPERATOR_NAME" as "FacilityOperatorCompanyName",
+       null as "FacilityOperatorLastName",
+       null as "FacilityOperatorFirstName", 
+       fopr."ADDRESS1" as "FacilityOperatorAddress1",
+       fopr."ADDRESS2" as "FacilityOperatorAddress2",
+       fopr."CITY" as "FacilityOperatorCity",
+       fopr."COUNTY_DESC" as "FacilityOperatorCounty",
+       fopr."ZIP" as "FacilityOperatorZipCode",
+       fopr."STATE" as "FacilityOperatorState",
+       fopr."PHONE" as "FacilityOperatorPhoneNumber",
+       fopr."EMAIL_ADDR" as "FacilityOperatorEmail",      
+--       case when tfd."FINANCIAL_RESPONSIBILITY" = 7 then 'Yes' end as "FinancialResponsibilityBondRatingTest",
+--       null as "FinancialResponsibilityCommercialInsurance", --can we can this from the lookup?
+--       case when tfd."FINANCIAL_RESPONSIBILITY" in (1,9) then 'Yes' end as "FinancialResponsibilityGuarantee", 
+--       case when tfd."FINANCIAL_RESPONSIBILITY" = 4 then 'Yes' end as "FinancialResponsibilityLetterOfCredit", 
+--       case when tfd."FINANCIAL_RESPONSIBILITY" = 8 then 'Yes' end as "FinancialResponsibilityLocalGovernmentFinancialTest", 
+--       case when tfd."FINANCIAL_RESPONSIBILITY" = 2 then 'Yes' end as "FinancialResponsibilityRiskRetentionGroup", 
+--       case when tfd."FINANCIAL_RESPONSIBILITY" = 11 then 'Yes' end as "FinancialResponsibilitySelfInsuranceFinancialTest", 
+--       null as "FinancialResponsibilityStateFund", 
+--       case when tfd."FINANCIAL_RESPONSIBILITY" = 3 then 'Yes' end as "FinancialResponsibilitySuretyBond", 
+--       case when tfd."FINANCIAL_RESPONSIBILITY" = 6 then 'Yes' end as "FinancialResponsibilityTrustFund", 
+--       case when tfd."FINANCIAL_RESPONSIBILITY" in (5,10) then 'Yes' end as "FinancialResponsibilityOtherMethod", --5 / Insurance Pools and 10 / Local Gov. Dedicated Fund
+--       case when tfd."FINANCIAL_RESPONSIBILITY" = 0 then 'Yes' end as "FinancialResponsibilityNotRequired", 
+       null as "FinancialResponsibilityObtained",
+       null as "Compliance",
+       ft."TANK_ID" as "TankID",
+       null as "TankLocation",
+       ft."REGULATED" as "FederallyRegulated",
+       null as "CompartmentID",
+--       case when ft."TANK_STATUS" = 'Abandoned' then 'Abandoned'
+--            when ft."TANK_STATUS" = 'Current' then 'Currently in use'
+--            when ft."TANK_STATUS" = 'Removed' then 'Closed (removed from ground)'
+--            when ft."TANK_STATUS" = 'Temporarily Closed' then 'Temporarily out of service' end as "TankStatus",    
+       null as "FieldConstructed",
+       null as "EmergencyGenerator",
+       null as "AirportHydrantSystem",
+       ft."MANIFOLD_TANK" as "MultipleTanks",
+       ft."PERM_CLOSE_DATE" as "ClosureDate",
+       ft."INSTALLATION_DATE" as "InstallationDate",
+       ft."COMPARTMENT_TANK" as "CompartmentalizedUST",
+       null as "NumberOfCompartments",
+--       sm.epa_substance as "TankSubstanceStored",
+        null as "CompartmentSubstanceStored",
+        ft."CAPACITY" as "TankCapacityGallons", -- assume gallons    
+        null as "CompartmentCapacityGallons",
+        null as "LinedTank",
+        null as "ExcavationLiner",
+--        case when "TANK_CONSTR" like 'Double Wall%' then 'Double' 
+--             when "TANK_CONSTR" like 'Single Wall%' then 'Single' end as "TankWallType",
+--        case when upper("TANK_CONSTR") like '%CONCRETE%' then 'Concrete'      
+--             when "TANK_CONSTR" like '%Steel%FRP%' then 'Composite/Clad (Steel w/Fiberglass Reinforced Plastic)'
+--             when "TANK_CONSTR" like '%FRP%' then 'Fiberglass Reinforced Plastic'
+--             when "TANK_CONSTR" like '%Jacketed%' then 'Jacketed Steel'
+--             when "TANK_CONSTR" like '%Polyurethane%' then 'Coated and Cathodically Protected Steel' --IS THIS RIGHT??
+--             when "TANK_CONSTR" like '%Steel%' then '' end as "MaterialDescription",
+        null as "TankRepaired",
+        null as "TankRepairDate",
+--        case when "PIPING_CONSTR" like '%FRP%' then 'Fiberglass Reinforced Plastic'
+--             when "PIPING_CONSTR" like '%Flex%' then 'Flex Piping'
+--             when "PIPING_CONSTR" like '%Copper%' then 'Copper'
+--             when "PIPING_CONSTR" like '%PVC%' then 'Other' --OK??
+--             when "PIPING_CONSTR" like '%Plastic%' then 'Other' --OK??
+             when "PIPING_CONSTR" in ('UNK','Unknown') then 'Unknown' end as "PipingMaterialDescription",
+        "FLEX_CONNECTOR_TANK" as "PipingFlexConnector",
+--        case when "PIPING_SYSTEM" like '%Suction%' then 'Suction'
+--             when "PIPING_SYSTEM" like '%Pressur%' then 'Pressure'
+--             when upper("PIPING_SYSTEM") like '%GRAVITY%' then 'Non-operational ( e.g., fill line, vent line, gravity)'
+--             when "PIPING_SYSTEM" like '%Manifold Bar%' then 'Other' end as "PipingStyle",
+--        case when "PIPING_CONSTR" like 'Double Wall' then 'Double'
 --             when "PIPING_CONSTR" like 'Single Wall' or "PIPING_CONSTR" like 'SW%' then 'Single' end as "PipingWallType",
-		null as "PipingUDCForEveryDispenser",
-		null as "PipingRepaired",
-		null as "PipingRepairDate",
-		null as "TankCorrosionProtectionSacrificialAnode",
-		null as "TankCorrosionProtectionAnodesInstalledOrRetrofitted",
-		null as "TankCorrosionProtectionImpressedCurrent",
-		null as "TankCorrosionProtectionImpressedCurrentInstalledOrRetrofitted",
-		null as "TankCorrosionProtectionCathodicNotRequired",
-		null as "TankCorrosionProtectionInteriorLining",
-		null as "TankCorrosionProtectionReason",
-		null as "TankCorrosionProtectionLinedPostinstallation",
-		null as "TankCorrosionProtectionOther",
-		null as "TankCorrosionProtectionUnknown",
-		null as "TankCorrosionProtectionLinedPostinstallation",
-		null as "PipingCorrosionProtectionSacrificialAnodes",
-		null as "PipingCorrosionProtectionAnodesInstalledOrRetrofitted",
-		null as "PipingCorrosionProtectionImpressedCurrent",
-		null as "PipingCorrosionProtectionImpressedCurrentInstalledOrRetrofitted",
-		null as "PipingCorrosionProtectionCathodicNotRequired",
-		null as "PipingCorrosionProtectionExternalCoating",
-		null as "PipingCorrosionProtectionOther",
-		null as "PipingCorrosionProtectionUnknown",
---		null as "BallFloatValve",
---		null as "FlowShutoffDevice",
---		null as "HighLevelAlarm",
---		null as "OverfillProtectionPrimary",
---		null as "OverfillProtectionSecondary",
---		case when "OVERFILL_PROTECTION" = 'Auto Shutoff Device' then 'Yes' end as "AutomaticShutoffDevice",
---		case when "OVERFILL_PROTECTION" = 'Overfill Alarm' then 'Yes' end as "OverfillAlarm",
---		case when "OVERFILL_PROTECTION" = 'Ball Float Valve' then 'Yes' end as "BallFloatValve",
---		case when "OVERFILL_PROTECTION" = 'Auto Shutoff Device' then 'Automatic Shutoff Device' 
---			 when "OVERFILL_PROTECTION" = 'Overfill Alarm' then 'Overfill Alarm' 
---			 when "OVERFILL_PROTECTION" = 'Ball Float Valve' then 'Ball Float Valve'
---			 when "OVERFILL_PROTECTION" = 'Unknown' then 'Unknown'
---			 when "OVERFILL_PROTECTION" = '25 Gal or Less Transfer' then 'Not Required' end as "OverfillProtectionMeans",
---		case when "SPILL_PROTECTION" = 'Catchment Basin' then 'Yes' end as "SpillBucketInstalled",
-		null as "SpillBucketWallType",
-		null as "DrainPresent",
-		null as "PumpPresent",
---		case when t."LD_INTERSTL_TK_SYSTEM_KEY" in (3,4) or t."LD_INTERSTL_PIP_SYSTEM_KEY" in (1,2,3,4) then 'Yes' end as "InterstitialMonitoringContinualElectric",
---		case when t."LD_INTERSTL_TK_SYSTEM_KEY" not in (3,4) and t."LD_INTERSTL_PIP_SYSTEM_KEY" not in (1,2,3,4) then 'Yes' end as "InterstitialMonitoringManual", --is this OK?
---		case when "LD_SYSTEM_TANK" = 'Automatic Tank Gauging' then 'Yes' end as "AutomaticTankGauging",
---		case when "LD_SYSTEM_TANK" = 'Manual Tank Gauging' then 'Yes' end as "ManualTankGauging",
---		case when "LD_SYSTEM_TANK" = 'Statistical Inventory Reconciliation (SIR)' then 'Yes' end as "StatisticalInventoryReconciliation",
---		case when "LD_SYSTEM_TANK" like '%TTT%' then 'Yes' end as "TankTightnessTesting",
-		null as "GroundwaterMonitoring",
-		null as "SubpartK",
-		null as "VaporMonitoring",
---		case when "LD_SYSTEM_PIPE" = 'ELLD' then 'Yes' end as "ElectronicLineLeak",
---		case when "LD_SYSTEM_PIPE" = 'MLLD' then 'Yes' end as "MechanicalLineLeak",
-		null as "AutomatedIntersticialMonitoring",
---		case when "LD_SYSTEM_PIPE" = 'Exempt (European Style)' then 'Yes' end as "SafeSuction", --is this right??
-		null as "AmericanSuction",
-		null as "PipingSubpartK",
-		null as "HighPressure",
---		case when "LD_SYSTEM_PIPE" in ('ELLD','MLLD') then 'Line Test'
---		     when "LD_SYSTEM_PIPE" = 'Statistical Inventory Reconciliation (SIR)' then 'SIR'
---		     when "LD_SYSTEM_PIPE" = 'Vapor Monitoring' then 'Vapor Monitoring'
---		     when "LD_SYSTEM_PIPE" = 'Other' then 'Other'
---		     when "LD_SYSTEM_PIPE" = 'UNK' then 'Unknown' end as "PrimaryReleaseDetectionType",
-		null as "SecondReleaseDetectionType",
-		null as "PipeSecondaryContainment",
-		null as "PipeInstallDate",
-		case when lust.facility_id is not null then 'Yes' end as "USTReportedRelease",
-		lust.lust_id as "AssociatedLUSTID",
-		null as "LastInspectionDate"
+        null as "PipingUDCForEveryDispenser",
+        null as "PipingRepaired",
+        null as "PipingRepairDate",
+        null as "TankCorrosionProtectionSacrificialAnode",
+        null as "TankCorrosionProtectionAnodesInstalledOrRetrofitted",
+        null as "TankCorrosionProtectionImpressedCurrent",
+        null as "TankCorrosionProtectionImpressedCurrentInstalledOrRetrofitted",
+        null as "TankCorrosionProtectionCathodicNotRequired",
+        null as "TankCorrosionProtectionInteriorLining",
+        null as "TankCorrosionProtectionReason",
+        null as "TankCorrosionProtectionLinedPostinstallation",
+        null as "TankCorrosionProtectionOther",
+        null as "TankCorrosionProtectionUnknown",
+        null as "TankCorrosionProtectionLinedPostinstallation",
+        null as "PipingCorrosionProtectionSacrificialAnodes",
+        null as "PipingCorrosionProtectionAnodesInstalledOrRetrofitted",
+        null as "PipingCorrosionProtectionImpressedCurrent",
+        null as "PipingCorrosionProtectionImpressedCurrentInstalledOrRetrofitted",
+        null as "PipingCorrosionProtectionCathodicNotRequired",
+        null as "PipingCorrosionProtectionExternalCoating",
+        null as "PipingCorrosionProtectionOther",
+        null as "PipingCorrosionProtectionUnknown",
+--        null as "BallFloatValve",
+--        null as "FlowShutoffDevice",
+--        null as "HighLevelAlarm",
+--        null as "OverfillProtectionPrimary",
+--        null as "OverfillProtectionSecondary",
+--        case when "OVERFILL_PROTECTION" = 'Auto Shutoff Device' then 'Yes' end as "AutomaticShutoffDevice",
+--        case when "OVERFILL_PROTECTION" = 'Overfill Alarm' then 'Yes' end as "OverfillAlarm",
+--        case when "OVERFILL_PROTECTION" = 'Ball Float Valve' then 'Yes' end as "BallFloatValve",
+--        case when "OVERFILL_PROTECTION" = 'Auto Shutoff Device' then 'Automatic Shutoff Device' 
+--             when "OVERFILL_PROTECTION" = 'Overfill Alarm' then 'Overfill Alarm' 
+--             when "OVERFILL_PROTECTION" = 'Ball Float Valve' then 'Ball Float Valve'
+--             when "OVERFILL_PROTECTION" = 'Unknown' then 'Unknown'
+--             when "OVERFILL_PROTECTION" = '25 Gal or Less Transfer' then 'Not Required' end as "OverfillProtectionMeans",
+--        case when "SPILL_PROTECTION" = 'Catchment Basin' then 'Yes' end as "SpillBucketInstalled",
+        null as "SpillBucketWallType",
+        null as "DrainPresent",
+        null as "PumpPresent",
+--        case when t."LD_INTERSTL_TK_SYSTEM_KEY" in (3,4) or t."LD_INTERSTL_PIP_SYSTEM_KEY" in (1,2,3,4) then 'Yes' end as "InterstitialMonitoringContinualElectric",
+--        case when t."LD_INTERSTL_TK_SYSTEM_KEY" not in (3,4) and t."LD_INTERSTL_PIP_SYSTEM_KEY" not in (1,2,3,4) then 'Yes' end as "InterstitialMonitoringManual", --is this OK?
+--        case when "LD_SYSTEM_TANK" = 'Automatic Tank Gauging' then 'Yes' end as "AutomaticTankGauging",
+--        case when "LD_SYSTEM_TANK" = 'Manual Tank Gauging' then 'Yes' end as "ManualTankGauging",
+--        case when "LD_SYSTEM_TANK" = 'Statistical Inventory Reconciliation (SIR)' then 'Yes' end as "StatisticalInventoryReconciliation",
+--        case when "LD_SYSTEM_TANK" like '%TTT%' then 'Yes' end as "TankTightnessTesting",
+        null as "GroundwaterMonitoring",
+        null as "SubpartK",
+        null as "VaporMonitoring",
+--        case when "LD_SYSTEM_PIPE" = 'ELLD' then 'Yes' end as "ElectronicLineLeak",
+--        case when "LD_SYSTEM_PIPE" = 'MLLD' then 'Yes' end as "MechanicalLineLeak",
+        null as "AutomatedIntersticialMonitoring",
+--        case when "LD_SYSTEM_PIPE" = 'Exempt (European Style)' then 'Yes' end as "SafeSuction", --is this right??
+        null as "AmericanSuction",
+        null as "PipingSubpartK",
+        null as "HighPressure",
+--        case when "LD_SYSTEM_PIPE" in ('ELLD','MLLD') then 'Line Test'
+--             when "LD_SYSTEM_PIPE" = 'Statistical Inventory Reconciliation (SIR)' then 'SIR'
+--             when "LD_SYSTEM_PIPE" = 'Vapor Monitoring' then 'Vapor Monitoring'
+--             when "LD_SYSTEM_PIPE" = 'Other' then 'Other'
+--             when "LD_SYSTEM_PIPE" = 'UNK' then 'Unknown' end as "PrimaryReleaseDetectionType",
+        null as "SecondReleaseDetectionType",
+        null as "PipeSecondaryContainment",
+        null as "PipeInstallDate",
+        case when lust.facility_id is not null then 'Yes' end as "USTReportedRelease",
+        lust.lust_id as "AssociatedLUSTID",
+        null as "LastInspectionDate"
 from "USTF_FACILITY_DATA_TABLE" f 
-	left join "VW_USTF_FACILITY_OWNER_DTLS_DATA_VIEW" fown on f."FACILITY_KEY" = fown."FACILITY_KEY"
-	left join "VW_USTF_FACILITY_OPERATOR_DTLS_DATA_VIEW" fopr on f."FACILITY_KEY" = fopr."FACILITY_KEY"
-	left join "VW_USTF_TANK_DETAIL_DATA_VIEW" ft on f."FACILITY_KEY" = ft."FACILITY_KEY"
-	left join "USTF_TANK_DETAIL_DATA_TABLE" t on ft."TANK_KEY" = t."TANK_KEY"
-	left join lust_lookup lust on fown."FACILITY_ID" = lust.facility_id
-	left join "USTF_TANK_FACILITY_DATA_TABLE" tfd on f."FACILITY_KEY" = tfd."FACILITY_KEY"
-	left join "USTF_TYPE_OWNER_CD" toc on tfd."TYPE_OWNER_KEY" = toc."TYPE_OWNER_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where state = 'NC' and element_name = 'OwnerType') ot 
-		on toc."TYPE_OWNER_KEY" = ot.state_value
-	
+    left join "VW_USTF_FACILITY_OWNER_DTLS_DATA_VIEW" fown on f."FACILITY_KEY" = fown."FACILITY_KEY"
+    left join "VW_USTF_FACILITY_OPERATOR_DTLS_DATA_VIEW" fopr on f."FACILITY_KEY" = fopr."FACILITY_KEY"
+    left join "VW_USTF_TANK_DETAIL_DATA_VIEW" ft on f."FACILITY_KEY" = ft."FACILITY_KEY"
+    left join "USTF_TANK_DETAIL_DATA_TABLE" t on ft."TANK_KEY" = t."TANK_KEY"
+    left join lust_lookup lust on fown."FACILITY_ID" = lust.facility_id
+    left join "USTF_TANK_FACILITY_DATA_TABLE" tfd on f."FACILITY_KEY" = tfd."FACILITY_KEY"
+    left join "USTF_TYPE_OWNER_CD" toc on tfd."TYPE_OWNER_KEY" = toc."TYPE_OWNER_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where state = 'NC' and element_name = 'OwnerType') ot 
+        on toc."TYPE_OWNER_KEY" = ot.state_value
+    
 
-		select * from information_schema.columns where column_name = 'TYPE_OWNER_KEY'
-	
-	select * from v_ust_element_mapping 
-	where state = 'NC' and element_name = 'OwnerType'
+        select * from information_schema.columns where column_name = 'TYPE_OWNER_KEY'
+    
+    select * from v_ust_element_mapping 
+    where state = 'NC' and element_name = 'OwnerType'
 
-	select * from public.ust_element_db_mapping where id = 43;
+    select * from public.ust_element_db_mapping where id = 43;
 update ust_element_db_mapping set state_table_name = 'USTF_TYPE_OWNER_CD' where id = 43;
 
-	
-	update public.ust_element_db_mapping 
-	
-	left join "FIPS_COUNTY_CODES" fcc on f."COUNTY_KEY" = fcc."FIPS_COUNTY_CODE"
+    
+    update public.ust_element_db_mapping 
+    
+    left join "FIPS_COUNTY_CODES" fcc on f."COUNTY_KEY" = fcc."FIPS_COUNTY_CODE"
 where "TANK_STATUS" not in ('Intent to Install','Never Installed','Transfer')
 and "PRODUCT" <> 'ETHANOL' and f."FACILITY_TYPE_KEY" = 0  
 ) a 
@@ -790,8 +790,8 @@ select * from "VW_USTF_TANK_DETAIL_DATA_VIEW" where "TANK_STATUS"  in ('Intent t
 
 select count(*) 
 from "USTF_FACILITY_DATA_TABLE" f 
-	--join "VW_USTF_REG_FACILITY_DATA_VIEW" reg on f."FACILITY_KEY" = reg."FACILITY_KEY"
-	left join "VW_USTF_TANK_DETAIL_DATA_VIEW" ft on f."FACILITY_KEY" = ft."FACILITY_KEY"
+    --join "VW_USTF_REG_FACILITY_DATA_VIEW" reg on f."FACILITY_KEY" = reg."FACILITY_KEY"
+    left join "VW_USTF_TANK_DETAIL_DATA_VIEW" ft on f."FACILITY_KEY" = ft."FACILITY_KEY"
 where "TANK_STATUS" not in ('Intent to Install','Never Installed','Transfer')
 and "PRODUCT" <> 'ETHANOL'
 and f."FACILITY_TYPE_KEY" = 0;

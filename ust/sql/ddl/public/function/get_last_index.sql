@@ -4,9 +4,9 @@ CREATE OR REPLACE FUNCTION public.get_last_index(search_string text, search_char
  LANGUAGE plpgsql
 AS $function$
 declare
-	i integer;
+    i integer;
 begin 
-	select length(search_string) - position(search_char in reverse_string(search_string)) + 1 into i;
-	return i;
+    select length(search_string) - position(search_char in reverse_string(search_string)) + 1 into i;
+    return i;
 end
 $function$

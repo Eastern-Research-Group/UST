@@ -84,25 +84,25 @@ create index piping_fk_idx on az_ust.piping("FacilityID","TankName","Compartment
 
 
 select 'insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values ({self.control_id}, ''' ||
-	c.table_name || ''',''' || b.database_column_name || ''',''' || a.table_name || ''',''' || a.column_name || ''',''Direct mapping to EPA template per state'');'
+    c.table_name || ''',''' || b.database_column_name || ''',''' || a.table_name || ''',''' || a.column_name || ''',''Direct mapping to EPA template per state'');'
 from information_schema.columns a join ust_elements b on a.column_name = b.element_name 
-	join ust_elements_tables c on b.element_id = c.element_id 
+    join ust_elements_tables c on b.element_id = c.element_id 
 where table_schema = 'az_ust' and not exists
-	(select 1 from ust_element_mapping c 
-	where c.ust_control_id = 14 and a.table_name = c.organization_table_name and a.column_name = c.organization_column_name)
+    (select 1 from ust_element_mapping c 
+    where c.ust_control_id = 14 and a.table_name = c.organization_table_name and a.column_name = c.organization_column_name)
 order by a.table_name, a.ordinal_position
 
 select 'insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) values ({self.control_id}, ''' ||
-	epa_table_name || ''',''' || epa_column_name || ''',''' || org_table_name || ''',''' || org_column_name || ''',''Direct mapping to EPA template per state'');'
+    epa_table_name || ''',''' || epa_column_name || ''',''' || org_table_name || ''',''' || org_column_name || ''',''Direct mapping to EPA template per state'');'
 from 
-	(select distinct c.table_name as epa_table_name, b.database_column_name as epa_column_name, 
-		a.table_name as org_table_name, a.column_name as org_column_name, a.ordinal_position
-	from information_schema.columns a join ust_elements b on a.column_name = b.element_name 
-		join ust_elements_tables c on b.element_id = c.element_id 
-	where table_schema = 'az_ust') x 
+    (select distinct c.table_name as epa_table_name, b.database_column_name as epa_column_name, 
+        a.table_name as org_table_name, a.column_name as org_column_name, a.ordinal_position
+    from information_schema.columns a join ust_elements b on a.column_name = b.element_name 
+        join ust_elements_tables c on b.element_id = c.element_id 
+    where table_schema = 'az_ust') x 
 where not exists
-	(select 1 from ust_element_mapping d 
-	where d.ust_control_id = 14 and x.org_table_name = d.organization_table_name and x.org_column_name = d.organization_column_name)
+    (select 1 from ust_element_mapping d 
+    where d.ust_control_id = 14 and x.org_table_name = d.organization_table_name and x.org_column_name = d.organization_column_name)
 order by org_table_name, ordinal_position;
 
 select * from ust_element_mapping where ust_control_id = 14
@@ -130,16 +130,16 @@ order by 1, 2;
 
 select table_name, column_name 
 from information_schema.columns a
-where table_schema = 'az_ust' and not exists 	
-	(select 1 from ust_element_mapping b 
-	where ust_control_id = 14 
-	and a.table_name = b.organization_table_name
-	and a.column_name = b.organization_column_name)
-	
-	select * from ust_elements where element_name like 'Associa%'
-	
-	select * from ust_element_value_mapping 
-	
+where table_schema = 'az_ust' and not exists     
+    (select 1 from ust_element_mapping b 
+    where ust_control_id = 14 
+    and a.table_name = b.organization_table_name
+    and a.column_name = b.organization_column_name)
+    
+    select * from ust_elements where element_name like 'Associa%'
+    
+    select * from ust_element_value_mapping 
+    
 alter table ust_element_value_mapping add constraint ust_element_value_mapping_unique unique (ust_element_mapping_id, organization_value, epa_value);
 alter table release_element_value_mapping add constraint release_element_value_mapping_unique unique (release_element_mapping_id, organization_value, epa_value);
 
@@ -158,10 +158,10 @@ section below where we generate SQL to perform the mapping
 
 select organization_table_name, organization_column_name
 from 
-	(select distinct organization_table_name, organization_column_name, epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from v_ust_needed_mapping 
-	where ust_control_id = 14 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct organization_table_name, organization_column_name, epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from v_ust_needed_mapping 
+    where ust_control_id = 14 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
 
 select distinct "FacilityCoordinateSource" from az_ust.ust_facility ;
 select distinct "SpillBucketWallType" from az_ust.ust_compartment ;
@@ -169,12 +169,12 @@ select distinct "PipeTankTopSumpWallType" from az_ust.ust_piping ;
 select distinct coordinate_source_id from az_ust.ust_facility ;
 select distinct coordinate_source_id from az_ust.ust_facility ;
 /*
-ust_facility		owner_type_id
-ust_facility		facility_type1
-ust_tank			tank_status_id
-ust_tank			tank_material_description_id
-ust_tank_substance	substance_id
-ust_compartment		compartment_status_id
+ust_facility        owner_type_id
+ust_facility        facility_type1
+ust_tank            tank_status_id
+ust_tank            tank_material_description_id
+ust_tank_substance    substance_id
+ust_compartment        compartment_status_id
 */
 
 
@@ -291,10 +291,10 @@ NOTE! The view queried below (v_ust_table_population_sql) contains columns that 
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 14 and epa_table_name = 'ust_facility'
 order by column_sort_order;
@@ -310,37 +310,37 @@ order by column_sort_order;
     safe for you to insert these yourself, so add them! (facility_state is a required field! */
 create or replace view az_ust.v_ust_facility as 
 select distinct 
-	"FacilityID"::character varying(50) as facility_id,
-	"FacilityName"::character varying(100) as facility_name,
-	owner_type_id as owner_type_id,
-	"FacilityAddress1"::character varying(100) as facility_address1,
-	"FacilityAddress2"::character varying(100) as facility_address2,
-	"FacilityCity"::character varying(100) as facility_city,
-	"FacilityCounty"::character varying(100) as facility_county,
-	"FacilityZipCode"::character varying(10) as facility_zip_code,
-	"FacilityState" as facility_state,
-	"FacilityEPARegion"::integer as facility_epa_region,
-	"FacilityTribalSite"::character varying(3) as facility_tribal_site,
-	"FacilityTribe"::character varying(200) as facility_tribe,
-	"FacilityLatitude"::double precision as facility_latitude,
-	"FacilityLongitude"::double precision as facility_longitude,
-	"FacilityOwnerCompanyName"::character varying(100) as facility_owner_company_name,
-	"FacilityOperatorCompanyName"::character varying(100) as facility_operator_company_name,
-	"FinancialResponsibilityObtained"::character varying(7) as financial_responsibility_obtained,
-	"FinancialResponsibilityBondRatingTest"::character varying(3) as financial_responsibility_bond_rating_test,
-	"FinancialResponsibilityCommercialInsurance"::character varying(3) as financial_responsibility_commercial_insurance,
-	"FinancialResponsibilityGuarantee"::character varying(3) as financial_responsibility_guarantee,
-	"FinancialResponsibilityLetterOfCredit"::character varying(3) as financial_responsibility_letter_of_credit,
-	"FinancialResponsibilityLocalGovernmentFinancialTest"::character varying(3) as financial_responsibility_local_government_financial_test,
-	"FinancialResponsibilityRiskRetentionGroup"::character varying(3) as financial_responsibility_risk_retention_group,
-	"FinancialResponsibilitySelfInsuranceFinancialTest"::character varying(3) as financial_responsibility_self_insurance_financial_test,
-	"FinancialResponsibilityStateFund"::character varying(3) as financial_responsibility_state_fund,
-	"FinancialResponsibilitySuretyBond"::character varying(3) as financial_responsibility_surety_bond,
-	"FinancialResponsibilityTrustFund"::character varying(3) as financial_responsibility_trust_fund,
-	"FinancialResponsibilityOtherMethod"::character varying(500) as financial_responsibility_other_method,
-	"USTReportedRelease"::character varying(7) as ust_reported_release
+    "FacilityID"::character varying(50) as facility_id,
+    "FacilityName"::character varying(100) as facility_name,
+    owner_type_id as owner_type_id,
+    "FacilityAddress1"::character varying(100) as facility_address1,
+    "FacilityAddress2"::character varying(100) as facility_address2,
+    "FacilityCity"::character varying(100) as facility_city,
+    "FacilityCounty"::character varying(100) as facility_county,
+    "FacilityZipCode"::character varying(10) as facility_zip_code,
+    "FacilityState" as facility_state,
+    "FacilityEPARegion"::integer as facility_epa_region,
+    "FacilityTribalSite"::character varying(3) as facility_tribal_site,
+    "FacilityTribe"::character varying(200) as facility_tribe,
+    "FacilityLatitude"::double precision as facility_latitude,
+    "FacilityLongitude"::double precision as facility_longitude,
+    "FacilityOwnerCompanyName"::character varying(100) as facility_owner_company_name,
+    "FacilityOperatorCompanyName"::character varying(100) as facility_operator_company_name,
+    "FinancialResponsibilityObtained"::character varying(7) as financial_responsibility_obtained,
+    "FinancialResponsibilityBondRatingTest"::character varying(3) as financial_responsibility_bond_rating_test,
+    "FinancialResponsibilityCommercialInsurance"::character varying(3) as financial_responsibility_commercial_insurance,
+    "FinancialResponsibilityGuarantee"::character varying(3) as financial_responsibility_guarantee,
+    "FinancialResponsibilityLetterOfCredit"::character varying(3) as financial_responsibility_letter_of_credit,
+    "FinancialResponsibilityLocalGovernmentFinancialTest"::character varying(3) as financial_responsibility_local_government_financial_test,
+    "FinancialResponsibilityRiskRetentionGroup"::character varying(3) as financial_responsibility_risk_retention_group,
+    "FinancialResponsibilitySelfInsuranceFinancialTest"::character varying(3) as financial_responsibility_self_insurance_financial_test,
+    "FinancialResponsibilityStateFund"::character varying(3) as financial_responsibility_state_fund,
+    "FinancialResponsibilitySuretyBond"::character varying(3) as financial_responsibility_surety_bond,
+    "FinancialResponsibilityTrustFund"::character varying(3) as financial_responsibility_trust_fund,
+    "FinancialResponsibilityOtherMethod"::character varying(500) as financial_responsibility_other_method,
+    "USTReportedRelease"::character varying(7) as ust_reported_release
 from az_ust.ust_facility x 
-	left join az_ust.v_owner_type_xwalk ot on x."OwnerType" = ot.organization_value;
+    left join az_ust.v_owner_type_xwalk ot on x."OwnerType" = ot.organization_value;
 
 
 
@@ -353,10 +353,10 @@ select count(*) from az_ust.v_ust_facility;
 
 --ust_tank 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 14 and epa_table_name = 'ust_tank'
 order by column_sort_order;
@@ -377,34 +377,34 @@ drop view az_ust.v_ust_tank;
 
 create or replace view az_ust.v_ust_tank as 
 select distinct 
-	"FacilityID"::character varying(50) as facility_id, 
-	"TankName"::integer as tank_id,
-	"TankName"::character varying(50) as tank_name,
-	tank_location_id as tank_location_id,
-	tank_status_id as tank_status_id,
-	"FederallyRegulated"::character varying(7) as federally_regulated,
-	"FieldConstructed"::character varying(7) as field_constructed,
-	"EmergencyGenerator"::character varying(7) as emergency_generator,
-	"AirportHydrantSystem"::character varying(7) as airport_hydrant_system,
-	"MultipleTanks"::character varying(7) as multiple_tanks,
-	"TankClosureDate"::date as tank_closure_date,
-	"TankInstallationDate"::date as tank_installation_date,
-	"CompartmentalizedUST"::character varying(7) as compartmentalized_ust,
-	"NumberOfCompartments"::integer as number_of_compartments,
-	tank_material_description_id as tank_material_description_id,
-	"TankCorrosionProtectionSacrificialAnode"::character varying(7) as tank_corrosion_protection_sacrificial_anode,
-	"TankCorrosionProtectionImpressedCurrent"::character varying(7) as tank_corrosion_protection_impressed_current,
-	"TankCorrosionProtectionCathodicNotRequired"::character varying(7) as tank_corrosion_protection_cathodic_not_required,
-	"TankCorrosionProtectionInteriorLining"::character varying(7) as tank_corrosion_protection_interior_lining,
-	"TankCorrosionProtectionOther"::character varying(7) as tank_corrosion_protection_other,
-	"TankCorrosionProtectionUnknown"::character varying(7) as tank_corrosion_protection_unknown,
-	tank_secondary_containment_id as tank_secondary_containment_id,
-	"CertOfInstallationOther"::character varying(1000) as cert_of_installation_other
+    "FacilityID"::character varying(50) as facility_id, 
+    "TankName"::integer as tank_id,
+    "TankName"::character varying(50) as tank_name,
+    tank_location_id as tank_location_id,
+    tank_status_id as tank_status_id,
+    "FederallyRegulated"::character varying(7) as federally_regulated,
+    "FieldConstructed"::character varying(7) as field_constructed,
+    "EmergencyGenerator"::character varying(7) as emergency_generator,
+    "AirportHydrantSystem"::character varying(7) as airport_hydrant_system,
+    "MultipleTanks"::character varying(7) as multiple_tanks,
+    "TankClosureDate"::date as tank_closure_date,
+    "TankInstallationDate"::date as tank_installation_date,
+    "CompartmentalizedUST"::character varying(7) as compartmentalized_ust,
+    "NumberOfCompartments"::integer as number_of_compartments,
+    tank_material_description_id as tank_material_description_id,
+    "TankCorrosionProtectionSacrificialAnode"::character varying(7) as tank_corrosion_protection_sacrificial_anode,
+    "TankCorrosionProtectionImpressedCurrent"::character varying(7) as tank_corrosion_protection_impressed_current,
+    "TankCorrosionProtectionCathodicNotRequired"::character varying(7) as tank_corrosion_protection_cathodic_not_required,
+    "TankCorrosionProtectionInteriorLining"::character varying(7) as tank_corrosion_protection_interior_lining,
+    "TankCorrosionProtectionOther"::character varying(7) as tank_corrosion_protection_other,
+    "TankCorrosionProtectionUnknown"::character varying(7) as tank_corrosion_protection_unknown,
+    tank_secondary_containment_id as tank_secondary_containment_id,
+    "CertOfInstallationOther"::character varying(1000) as cert_of_installation_other
 from az_ust.ust_tank x 
-	left join az_ust.v_tank_location_xwalk tl on x."TankLocation" = tl.organization_value
-	left join az_ust.v_tank_status_xwalk ts on x."TankStatus" = ts.organization_value
-	left join az_ust.v_tank_material_description_xwalk md on x."TankMaterialDescription" = md.organization_value
-	left join az_ust.v_tank_secondary_containment_xwalk sc on x."TankSecondaryContainment" = sc.organization_value;
+    left join az_ust.v_tank_location_xwalk tl on x."TankLocation" = tl.organization_value
+    left join az_ust.v_tank_status_xwalk ts on x."TankStatus" = ts.organization_value
+    left join az_ust.v_tank_material_description_xwalk md on x."TankMaterialDescription" = md.organization_value
+    left join az_ust.v_tank_secondary_containment_xwalk sc on x."TankSecondaryContainment" = sc.organization_value;
 
 select * from az_ust.v_ust_tank;
 select count(*) from az_ust.v_ust_tank;
@@ -414,10 +414,10 @@ select count(*) from az_ust.v_ust_tank;
 --ust_tank_substance
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 14 and epa_table_name = 'ust_tank_substance'
 order by column_sort_order;
@@ -430,11 +430,11 @@ drop view az_ust.v_ust_tank_substance
 
 create or replace view az_ust.v_ust_tank_substance as 
 select distinct 
-	"FacilityID"::character varying(50) as facility_id, 
-	"TankName"::integer as tank_id,
-	sx.substance_id as substance_id
+    "FacilityID"::character varying(50) as facility_id, 
+    "TankName"::integer as tank_id,
+    sx.substance_id as substance_id
 from az_ust.ust_compartment x 
-	left join az_ust.v_substance_xwalk sx on x."CompartmentSubstanceStored" = sx.organization_value
+    left join az_ust.v_substance_xwalk sx on x."CompartmentSubstanceStored" = sx.organization_value
 where x."CompartmentSubstanceStored" is not null; 
 
 select * from az_ust.v_substance_xwalk;
@@ -452,10 +452,10 @@ select * from az_ust.v_substance_xwalk;
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 14 and epa_table_name = 'ust_compartment'
 order by column_sort_order;
@@ -477,39 +477,39 @@ drop view az_ust.v_ust_compartment;
 
 create or replace view az_ust.v_ust_compartment as 
 select distinct 
-	"FacilityID"::character varying(50) as facility_id, 
-	"TankName"::integer as tank_id,
-	compartment_id,
-	"CompartmentName"::character varying(50) as compartment_name,
-	compartment_status_id as compartment_status_id,
-	"CompartmentCapacityGallons"::integer as compartment_capacity_gallons,
-	"OverfillPreventionBallFloatValve"::character varying(7) as overfill_prevention_ball_float_valve,
-	"OverfillPreventionFlowShutoffDevice"::character varying(7) as overfill_prevention_flow_shutoff_device,
-	"OverfillPreventionHighLevelAlarm"::character varying(7) as overfill_prevention_high_level_alarm,
-	"OverfillPreventionOther"::character varying(7) as overfill_prevention_other,
-	"OverfillPreventionUnknown"::character varying(7) as overfill_prevention_unknown,
-	"OverfillPreventionNotRequired"::character varying(7) as overfill_prevention_not_required,
-	"SpillBucketInstalled"::character varying(3) as spill_bucket_installed,
-	"ConcreteBermInstalled"::character varying(3) as concrete_berm_installed,
-	"SpillPreventionOther"::character varying(3) as spill_prevention_other,
-	"SpillPreventionNotRequired"::character varying(3) as spill_prevention_not_required,
-	"TankInterstitialMonitoring"::character varying(7) as tank_interstitial_monitoring,
-	"TankAutomaticTankGaugingReleaseDetection"::character varying(7) as tank_automatic_tank_gauging_release_detection,
-	"AutomaticTankGaugingContinuousLeakDetection"::character varying(7) as automatic_tank_gauging_continuous_leak_detection,
-	"TankManualTankGauging"::character varying(7) as tank_manual_tank_gauging,
-	"TankStatisticalInventoryReconciliation"::character varying(7) as tank_statistical_inventory_reconciliation,
-	"TankTightnessTesting"::character varying(7) as tank_tightness_testing,
-	"TankInventoryControl"::character varying(7) as tank_inventory_control,
-	"TankGroundwaterMonitoring"::character varying(7) as tank_groundwater_monitoring,
-	"TankVaporMonitoring"::character varying(7) as tank_vapor_monitoring,
-	"TankSubpartKTightnessTesting"::character varying(7) as tank_subpart_k_tightness_testing,
-	"TankSubpartKOther"::character varying(7) as tank_subpart_k_other,
-	"TankOtherReleaseDetection"::character varying(7) as tank_other_release_detection
+    "FacilityID"::character varying(50) as facility_id, 
+    "TankName"::integer as tank_id,
+    compartment_id,
+    "CompartmentName"::character varying(50) as compartment_name,
+    compartment_status_id as compartment_status_id,
+    "CompartmentCapacityGallons"::integer as compartment_capacity_gallons,
+    "OverfillPreventionBallFloatValve"::character varying(7) as overfill_prevention_ball_float_valve,
+    "OverfillPreventionFlowShutoffDevice"::character varying(7) as overfill_prevention_flow_shutoff_device,
+    "OverfillPreventionHighLevelAlarm"::character varying(7) as overfill_prevention_high_level_alarm,
+    "OverfillPreventionOther"::character varying(7) as overfill_prevention_other,
+    "OverfillPreventionUnknown"::character varying(7) as overfill_prevention_unknown,
+    "OverfillPreventionNotRequired"::character varying(7) as overfill_prevention_not_required,
+    "SpillBucketInstalled"::character varying(3) as spill_bucket_installed,
+    "ConcreteBermInstalled"::character varying(3) as concrete_berm_installed,
+    "SpillPreventionOther"::character varying(3) as spill_prevention_other,
+    "SpillPreventionNotRequired"::character varying(3) as spill_prevention_not_required,
+    "TankInterstitialMonitoring"::character varying(7) as tank_interstitial_monitoring,
+    "TankAutomaticTankGaugingReleaseDetection"::character varying(7) as tank_automatic_tank_gauging_release_detection,
+    "AutomaticTankGaugingContinuousLeakDetection"::character varying(7) as automatic_tank_gauging_continuous_leak_detection,
+    "TankManualTankGauging"::character varying(7) as tank_manual_tank_gauging,
+    "TankStatisticalInventoryReconciliation"::character varying(7) as tank_statistical_inventory_reconciliation,
+    "TankTightnessTesting"::character varying(7) as tank_tightness_testing,
+    "TankInventoryControl"::character varying(7) as tank_inventory_control,
+    "TankGroundwaterMonitoring"::character varying(7) as tank_groundwater_monitoring,
+    "TankVaporMonitoring"::character varying(7) as tank_vapor_monitoring,
+    "TankSubpartKTightnessTesting"::character varying(7) as tank_subpart_k_tightness_testing,
+    "TankSubpartKOther"::character varying(7) as tank_subpart_k_other,
+    "TankOtherReleaseDetection"::character varying(7) as tank_other_release_detection
 from az_ust.ust_compartment  x 
-	join az_ust.erg_compartment c on x."FacilityID" = c.facility_id and x."TankName"::int = c.tank_id and x."CompartmentName" = c.compartment_name
-	 left join az_ust.v_compartment_status_xwalk cx on x."CompartmentStatus" = cx.organization_value;
-	
-	
+    join az_ust.erg_compartment c on x."FacilityID" = c.facility_id and x."TankName"::int = c.tank_id and x."CompartmentName" = c.compartment_name
+     left join az_ust.v_compartment_status_xwalk cx on x."CompartmentStatus" = cx.organization_value;
+    
+    
 select * from az_ust.v_ust_compartment order by 1, 2, 3;
 select count(*) from az_ust.v_ust_compartment;
 --30793
@@ -527,10 +527,10 @@ In the case of AZ, they don't report at the compartment level and have
 a one-to-many relationship between tanks and substances. 
 */
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, programmer_comments, 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 14 and epa_table_name = 'ust_compartment_substance'
 order by column_sort_order;
@@ -539,15 +539,15 @@ drop view az_ust.v_ust_compartment_substance
 
 create or replace view az_ust.v_ust_compartment_substance as 
 select distinct 
-	"FacilityID"::character varying(50) as facility_id, 
-	"TankName"::integer as tank_id,
-	compartment_id,
-	substance_id,
-	organization_value as substance_comment
+    "FacilityID"::character varying(50) as facility_id, 
+    "TankName"::integer as tank_id,
+    compartment_id,
+    substance_id,
+    organization_value as substance_comment
 from az_ust.ust_compartment x 
-	join az_ust.erg_compartment c on x."FacilityID" = c.facility_id and x."TankName"::int = c.tank_id and x."CompartmentName" = c.compartment_name
-	left join az_ust.v_substance_xwalk sx on x."CompartmentSubstanceStored" = sx.organization_value
-	where x."CompartmentSubstanceStored" is not null; 
+    join az_ust.erg_compartment c on x."FacilityID" = c.facility_id and x."TankName"::int = c.tank_id and x."CompartmentName" = c.compartment_name
+    left join az_ust.v_substance_xwalk sx on x."CompartmentSubstanceStored" = sx.organization_value
+    where x."CompartmentSubstanceStored" is not null; 
 
 
 select * from az_ust.v_substance_xwalk 
@@ -566,10 +566,10 @@ select * from ust_compartment_substance
 --------------------------------------------------------------------------------------------------------------------------
 --ust_piping
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, programmer_comments, 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 14 and epa_table_name = 'ust_piping'
 order by column_sort_order;
@@ -580,7 +580,7 @@ create table az_ust.erg_piping (facility_id varchar(50), tank_id int, compartmen
 insert into az_ust.erg_piping (facility_id, tank_id, compartment_id, compartment_name)
 select distinct "FacilityID", tank_id, compartment_id, "CompartmentName"
 from az_ust.ust_piping a join az_ust.erg_compartment b on a."FacilityID" = b.facility_id 
-	and a."TankName"::int = b.tank_id and a."CompartmentName" = b.compartment_name;
+    and a."TankName"::int = b.tank_id and a."CompartmentName" = b.compartment_name;
 
 select * from  az_ust.erg_piping ;
 
@@ -591,50 +591,50 @@ and table_name = 'ust_piping'
 
 create or replace view az_ust.v_ust_piping as 
 select distinct 
-	"FacilityID"::character varying(50) as facility_id, 
-	"TankName"::integer as tank_id,
-	compartment_id,
-	piping_id::varchar(50) as piping_id,
-	piping_style_id as piping_style_id,
-	"SafeSuction"::character varying(7) as safe_suction,
-	"AmericanSuction"::character varying(7) as american_suction,
-	"HighPressureOrBulkPiping"::character varying(7) as high_pressure_or_bulk_piping,
-	"PipingMaterialFRP"::character varying(3) as piping_material_frp,
-	"PipingMaterialGalSteel"::character varying(3) as piping_material_gal_steel,
-	"PipingMaterialStainlessSteel"::character varying(3) as piping_material_stainless_steel,
-	"PipingMaterialSteel"::character varying(3) as piping_material_steel,
-	"PipingMaterialCopper"::character varying(3) as piping_material_copper,
-	"PipingMaterialFlex"::character varying(3) as piping_material_flex,
-	"PipingMaterialNoPiping"::character varying(3) as piping_material_no_piping,
-	"PipingMaterialOther"::character varying(3) as piping_material_other,
-	"PipingMaterialUnknown"::character varying(3) as piping_material_unknown,
-	"PipingFlexConnector"::character varying(7) as piping_flex_connector,
-	"PipingCorrosionProtectionSacrificialAnode"::character varying(7) as piping_corrosion_protection_sacrificial_anode,
-	"PipingCorrosionProtectionImpressedCurrent"::character varying(7) as piping_corrosion_protection_impressed_current,
-	"PipingCorrosionProtectionCathodicNotRequired"::character varying(7) as piping_corrosion_protection_cathodic_not_required,
-	"PipingCorrosionProtectionOther"::character varying(7) as piping_corrosion_protection_other,
-	"PipingCorrosionProtectionUnknown"::character varying(7) as piping_corrosion_protection_unknown,
-	"PipingLineLeakDetector"::character varying(7) as piping_line_leak_detector,
-	"PipingAutomatedIntersticialMonitoring"::character varying(7) as piping_automated_intersticial_monitoring,
-	"PipingLineTestAnnual"::character varying(7) as piping_line_test_annual,
-	"PipingLineTest3yr"::character varying(7) as piping_line_test3yr,
-	"PipingGroundwaterMonitoring"::character varying(7) as piping_groundwater_monitoring,
-	"PipingVaporMonitoring"::character varying(7) as piping_vapor_monitoring,
-	"PipingInterstitialMonitoring"::character varying(7) as piping_interstitial_monitoring,
-	"PipingStatisticalInventoryReconciliation"::character varying(7) as piping_statistical_inventory_reconciliation,
-	"PipingReleaseDetectionOther"::character varying(7) as piping_release_detection_other,
-	"PipingSubpartKLineTest"::character varying(7) as piping_subpart_k_line_test,
-	"PipingSubpartKOther"::character varying(7) as piping_subpart_k_other,
-	"PipeTankTopSump"::character varying(7) as pipe_tank_top_sump,
-	piping_wall_type_id as piping_wall_type_id,
-	"PipeTrenchLiner"::character varying(7) as pipe_trench_liner,
-	"PipeSecondaryContainmentOther"::character varying(7) as pipe_secondary_containment_other,
-	"PipeSecondaryContainmentUnknown"::character varying(7) as pipe_secondary_containment_unknown
+    "FacilityID"::character varying(50) as facility_id, 
+    "TankName"::integer as tank_id,
+    compartment_id,
+    piping_id::varchar(50) as piping_id,
+    piping_style_id as piping_style_id,
+    "SafeSuction"::character varying(7) as safe_suction,
+    "AmericanSuction"::character varying(7) as american_suction,
+    "HighPressureOrBulkPiping"::character varying(7) as high_pressure_or_bulk_piping,
+    "PipingMaterialFRP"::character varying(3) as piping_material_frp,
+    "PipingMaterialGalSteel"::character varying(3) as piping_material_gal_steel,
+    "PipingMaterialStainlessSteel"::character varying(3) as piping_material_stainless_steel,
+    "PipingMaterialSteel"::character varying(3) as piping_material_steel,
+    "PipingMaterialCopper"::character varying(3) as piping_material_copper,
+    "PipingMaterialFlex"::character varying(3) as piping_material_flex,
+    "PipingMaterialNoPiping"::character varying(3) as piping_material_no_piping,
+    "PipingMaterialOther"::character varying(3) as piping_material_other,
+    "PipingMaterialUnknown"::character varying(3) as piping_material_unknown,
+    "PipingFlexConnector"::character varying(7) as piping_flex_connector,
+    "PipingCorrosionProtectionSacrificialAnode"::character varying(7) as piping_corrosion_protection_sacrificial_anode,
+    "PipingCorrosionProtectionImpressedCurrent"::character varying(7) as piping_corrosion_protection_impressed_current,
+    "PipingCorrosionProtectionCathodicNotRequired"::character varying(7) as piping_corrosion_protection_cathodic_not_required,
+    "PipingCorrosionProtectionOther"::character varying(7) as piping_corrosion_protection_other,
+    "PipingCorrosionProtectionUnknown"::character varying(7) as piping_corrosion_protection_unknown,
+    "PipingLineLeakDetector"::character varying(7) as piping_line_leak_detector,
+    "PipingAutomatedIntersticialMonitoring"::character varying(7) as piping_automated_intersticial_monitoring,
+    "PipingLineTestAnnual"::character varying(7) as piping_line_test_annual,
+    "PipingLineTest3yr"::character varying(7) as piping_line_test3yr,
+    "PipingGroundwaterMonitoring"::character varying(7) as piping_groundwater_monitoring,
+    "PipingVaporMonitoring"::character varying(7) as piping_vapor_monitoring,
+    "PipingInterstitialMonitoring"::character varying(7) as piping_interstitial_monitoring,
+    "PipingStatisticalInventoryReconciliation"::character varying(7) as piping_statistical_inventory_reconciliation,
+    "PipingReleaseDetectionOther"::character varying(7) as piping_release_detection_other,
+    "PipingSubpartKLineTest"::character varying(7) as piping_subpart_k_line_test,
+    "PipingSubpartKOther"::character varying(7) as piping_subpart_k_other,
+    "PipeTankTopSump"::character varying(7) as pipe_tank_top_sump,
+    piping_wall_type_id as piping_wall_type_id,
+    "PipeTrenchLiner"::character varying(7) as pipe_trench_liner,
+    "PipeSecondaryContainmentOther"::character varying(7) as pipe_secondary_containment_other,
+    "PipeSecondaryContainmentUnknown"::character varying(7) as pipe_secondary_containment_unknown
 from az_ust.ust_piping x 
-	left join az_ust.erg_piping p on x."FacilityID" = p.facility_id and x."TankName"::int = p.tank_id and x."CompartmentName" = p.compartment_name 
-	left join az_ust.v_piping_style_xwalk ps on x."PipingStyle" = ps.organization_value
-	left join az_ust.v_piping_wall_type_xwalk pw on x."PipingWallType" = pw.organization_value;
-	
+    left join az_ust.erg_piping p on x."FacilityID" = p.facility_id and x."TankName"::int = p.tank_id and x."CompartmentName" = p.compartment_name 
+    left join az_ust.v_piping_style_xwalk ps on x."PipingStyle" = ps.organization_value
+    left join az_ust.v_piping_wall_type_xwalk pw on x."PipingWallType" = pw.organization_value;
+    
 select * from az_ust.v_ust_piping order by 1, 2, 3;
 select count(*) from az_ust.v_ust_piping;
 --30793
@@ -647,9 +647,9 @@ select count(*) from az_ust.v_ust_piping;
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_ust_missing_view_mapping a
 where ust_control_id = 14
 order by 1, 2;
@@ -696,8 +696,8 @@ set variables:
 ust_or_release = 'ust' 
 control_id = 14
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -728,7 +728,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'ust' 
 control_id = 14
@@ -742,12 +742,12 @@ from v_ust_table_row_count
 where ust_control_id = 14 
 order by sort_order;
 /*
-ust_facility				 9749
-ust_tank					29853
-ust_tank_substance			30519
-ust_compartment				30793
-ust_compartment_substance	30745
-ust_piping					30793
+ust_facility                 9749
+ust_tank                    29853
+ust_tank_substance            30519
+ust_compartment                30793
+ust_compartment_substance    30745
+ust_piping                    30793
 */
 
 select * from ust_compartment_substance
@@ -756,21 +756,21 @@ select count(*) from v_ust_compartment_substance where ust_control_id = 14;
 32232
 
 select count(*) from ust_compartment_substance where ust_compartment_id in 
-	(select ust_compartment_id from ust_compartment where ust_tank_id in 
-		(select ust_tank_id from ust_tank where ust_facility_id in
-			(select ust_facility_id from ust_facility where ust_control_id = 14)));
+    (select ust_compartment_id from ust_compartment where ust_tank_id in 
+        (select ust_tank_id from ust_tank where ust_facility_id in
+            (select ust_facility_id from ust_facility where ust_control_id = 14)));
 30745
 
 select * from az_ust.v_ust_compartment_substance where  facility_id = '0-000138' and tank_id =  12;
-1799	16	Diesel
-8060	22	Premium Unleaded Gasoline
+1799    16    Diesel
+8060    22    Premium Unleaded Gasoline
 
 select * from v_ust_compartment_substance a where ust_control_id = 14 and not exists  
-	(select 1 from  az_ust.v_ust_compartment_substance b join substances c on b.substance_id = c.substance_id
-	where  a."FacilityID" = b.facility_id and a."TankID" = b.tank_id and a."CompartmentID" = b.compartment_id and a."Substance" = c.substance);
+    (select 1 from  az_ust.v_ust_compartment_substance b join substances c on b.substance_id = c.substance_id
+    where  a."FacilityID" = b.facility_id and a."TankID" = b.tank_id and a."CompartmentID" = b.compartment_id and a."Substance" = c.substance);
 --these are wrong:
-0-000138	12	12	1799	COMPARTMENT B	Ethanol blend gasoline (e-unknown)	
-0-000138	12	12	8060	COMPARTMENT A	Diesel fuel (b-unknown)	
+0-000138    12    12    1799    COMPARTMENT B    Ethanol blend gasoline (e-unknown)    
+0-000138    12    12    8060    COMPARTMENT A    Diesel fuel (b-unknown)    
 
 select * from ust_facility where facility_id = '0-000138'
 557528
@@ -783,23 +783,23 @@ select * from ust_tank_substance where ust_tank_id = 1924829;
 22
 
 select * from ust_compartment where  ust_tank_id = 1924829;
-1799	COMPARTMENT B
-8060	COMPARTMENT A
+1799    COMPARTMENT B
+8060    COMPARTMENT A
 
 select * from ust_compartment_substance where ust_compartment_id = 1081597;
 select * from ust_compartment_substance where ust_compartment_id = 1081598;
 
 select * from az_ust.ust_compartment where "FacilityID" = '0-000138' and "TankName" = '12'
-COMPARTMENT A		Premium Unleaded Gasoline
-COMPARTMENT B		Diesel
+COMPARTMENT A        Premium Unleaded Gasoline
+COMPARTMENT B        Diesel
 
 select count(*) from az_ust.ust_compartment 
 
 
 select * From az_ust.erg_compartment
 where  facility_id = '0-000138' and tank_id = 12;
-0-000138	12	COMPARTMENT B	1799
-0-000138	12	COMPARTMENT A	8060
+0-000138    12    COMPARTMENT B    1799
+0-000138    12    COMPARTMENT A    8060
 
 select * from az_ust.v_ust_compartment where facility_id = '0-000138' and tank_id = 12;
 
@@ -812,12 +812,12 @@ select * from az_ust.ust_compartment where  "FacilityID"  = '0-000138' and "Tank
 set variables:
 control_id = 14
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 			# Set to False to export full template including mapping and reference tabs
-template_only = False 		# Set to False to export data and mapping tabs as well as reference tab
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False             # Set to False to export full template including mapping and reference tabs
+template_only = False         # Set to False to export data and mapping tabs as well as reference tab
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -827,10 +827,10 @@ export_file_name = None		# If export_file_path and export_file_dir/export_file_n
 set variables:
 control_id = 14
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 --------------------------------------------------------------------------------------------------------------------------
 

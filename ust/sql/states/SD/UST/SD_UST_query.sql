@@ -60,7 +60,7 @@ select distinct "SD_UST" from "SD_UST"."UST" order by 1;
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (184, ''' || "OwnerType" ||  ''', '''');'
 from "SD_UST"."UST" 
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (184, 'Commercial', 'Commercial');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (184, 'Federal Government', 'Federal Government - Non Military');
@@ -78,7 +78,7 @@ select distinct "SD_UST" from "SD_UST"."UST" order by 1;
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (185, ''' || "TankStatus" ||  ''', '''');'
 from "SD_UST"."UST" 
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (185, 'Abandoned in Place', 'Abandoned');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (185, 'Current', 'Currently in use');
@@ -206,17 +206,17 @@ drop view  "SD_UST".v_ust_base;
 select distinct "SpillBucketInstalled" from "SD_UST"."UST" order by 1;
 
 select "InstallationDate",
-	case when "InstallationDate" = 0 or "InstallationDate" is null then null 
-	else ("InstallationDate" || '-01-01')::date end
+    case when "InstallationDate" = 0 or "InstallationDate" is null then null 
+    else ("InstallationDate" || '-01-01')::date end
 from "SD_UST"."UST" 
-	     
+         
 
 select "FacilityID", "FederallyRegulated" 
-		           from "SD_UST".v_ust_base 
-		           where length("FederallyRegulated") > 7
+                   from "SD_UST".v_ust_base 
+                   where length("FederallyRegulated") > 7
 
-select distinct 	"ElectronicLineLeak" from 	"SD_UST".v_ust_base            
-		     
+select distinct     "ElectronicLineLeak" from     "SD_UST".v_ust_base            
+             
 select * from 
 
 drop view "SD_UST".v_ust_base;
@@ -320,11 +320,11 @@ AS SELECT DISTINCT u."FacilityNumber" AS "FacilityID",
 select distinct element_db_mapping_id, element_name, state_table_name, state_column_name from v_ust_element_mapping where state = 'SD' order by 1;
 
 
-Abandoned in Place	Abandoned
-Current	Currently in use
-Removed	Closed (removed from ground)
-Temporarily Out Of Use	Temporarily out of service
-Temporary Closure	Temporarily out of service
+Abandoned in Place    Abandoned
+Current    Currently in use
+Removed    Closed (removed from ground)
+Temporarily Out Of Use    Temporarily out of service
+Temporary Closure    Temporarily out of service
 
 select distinct "TankStatus" from "SD_UST"."UST";
 

@@ -1,10 +1,7 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
-from python.util import utils
+import sys
+
+from ust.python.util import utils
 
 path = r'C:\Users\erguser\OneDrive - Eastern Research Group\Other Projects\UST\State Data\TX\Originals\\'
 
@@ -16,7 +13,7 @@ financial_assurance_filename = 'pst_fin_assur.txt'
 
 
 
-class DataLine():
+class DataLine:
     def __init__(self, string):
         self.string = string 
         self.start_index = 0 
@@ -46,7 +43,7 @@ def main(table_name):
         file_path = path + financial_assurance_filename
     else:
         print('Unknown table name ' + table_name)
-        exit()
+        sys.exit()
 
 
     with open(file_path, 'r') as f:

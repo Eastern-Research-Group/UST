@@ -1,13 +1,8 @@
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
-from datetime import datetime
+import sys
+from datetime import UTC, datetime
 
-from python.util.logger_factory import logger
-from python.util import utils
-
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 organization_id = 'PA'
 system_type = 'release' # Accepted values are 'ust' or 'release'
@@ -22,13 +17,13 @@ class ControlTable:
                  system_type,
                  organization_id, 
                  data_source, 
-                 date_received=datetime.today(), 
-                 date_processed=datetime.today(), 
+                 date_received=None, 
+                 date_processed=None, 
                  comments=None):
 
         if system_type.lower() not in ['ust','release']:
             logger.critical("System type '%s' not recognized, aborting.", system_type)
-            exit()
+            sys.exit()
 
         self.system_type = system_type.lower()
         self.organization_id = organization_id
@@ -36,11 +31,11 @@ class ControlTable:
         if date_received:
             self.date_received = date_received
         else:
-            self.date_received = datetime.today()
+            self.date_received = datetime.now(tz=UTC)
         if date_processed:
             self.date_processed = date_processed
         else:
-            self.date_processed = datetime.today()
+            self.date_processed = datetime.now(tz=UTC)
         self.comments = comments
         self.control_id = None
 

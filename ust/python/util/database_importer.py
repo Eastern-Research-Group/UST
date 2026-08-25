@@ -1,16 +1,13 @@
 import glob
+import sys
 from pathlib import Path
-import os
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
-from psycopg2.errors import DuplicateSchema, UndefinedTable
+from psycopg2.errors import DuplicateSchema
+from sqlalchemy.exc import SQLAlchemyError
 
-from python.util import config, utils
-from python.util.logger_factory import logger
-
+from ust.python.util import config, utils
+from ust.python.util.logger_factory import logger
 
 
 class DatabaseImporter:
@@ -65,8 +62,8 @@ class DatabaseImporter:
         
         
     def get_table_name_from_file_name(self, file_path):
-        table_name = file_path.rsplit('\\', 1)[1]
-        table_name = table_name.replace(' ','_').replace('.xlsx','').replace('.xls','').replace('.csv','').replace('.txt','')
+        table_path = Path(file_path)
+        table_name = table_path.stem.replace(' ', '_')
         return table_name
         
         
@@ -83,7 +80,7 @@ class DatabaseImporter:
             try:
                 df.to_sql(table_name, engine, index=False)
                 logger.info('Created table %s', table_name)       
-            except error as e:
+            except (SQLAlchemyError, ValueError, OSError, TypeError) as e:
                 self.bad_file_list.append(table_name)
                 logger.error('Unable to load table %s; adding to bad_file_list: %s: %s', table_name, e)
         return True
@@ -104,7 +101,7 @@ class DatabaseImporter:
                     logger.debug('%s read into dataframe', file_path)
                 except ValueError as e:
                     logger.error('Error opening %s; skipping: %s', file_path, e) 
-                    self.bad_file_list.append(table_name)
+                    self.bad_file_list.append(self.get_table_name_from_file_name(file_path))
                     return False
                 self.save_table_to_db(df, table_name=self.get_table_name_from_file_name(file_path))
         elif file_path[-3:] == 'csv':
