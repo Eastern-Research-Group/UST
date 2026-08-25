@@ -1319,8 +1319,16 @@ class ViewSqlTests(unittest.TestCase):
         self.assertEqual({"blocking": 3}, result["suggested_fix_severity_counts"])
 
     @patch("builtins.print")
+    @patch.object(utils, "get_schema_from_control_id", return_value="dc_ust")
+    @patch.object(utils, "get_org_from_control_id", return_value="DC")
     @patch("ust.python.state_processing.create_view_sql._collect_table_preflight")
-    def test_preflight_report_prints_recipe_override_summary(self, collect_preflight_mock, print_mock):
+    def test_preflight_report_prints_recipe_override_summary(
+        self,
+        collect_preflight_mock,
+        _get_org_mock,
+        _get_schema_mock,
+        print_mock,
+    ):
         collect_preflight_mock.return_value = {
             "table_name": "ust_tank",
             "join_count": 2,
@@ -1356,8 +1364,16 @@ class ViewSqlTests(unittest.TestCase):
         print_mock.assert_any_call("\nPreflight totals: warnings=0, errors=0, suggested_fixes=1 (blocking=1)")
 
     @patch("builtins.print")
+    @patch.object(utils, "get_schema_from_control_id", return_value="dc_ust")
+    @patch.object(utils, "get_org_from_control_id", return_value="DC")
     @patch("ust.python.state_processing.create_view_sql._collect_table_preflight")
-    def test_preflight_report_prints_clean_summary_when_no_findings(self, collect_preflight_mock, print_mock):
+    def test_preflight_report_prints_clean_summary_when_no_findings(
+        self,
+        collect_preflight_mock,
+        _get_org_mock,
+        _get_schema_mock,
+        print_mock,
+    ):
         collect_preflight_mock.return_value = {
             "table_name": "ust_tank",
             "join_count": 2,
