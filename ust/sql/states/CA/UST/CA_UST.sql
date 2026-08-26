@@ -239,16 +239,16 @@ from v_ust_available_mapping
 where ust_control_id = 18
 order by table_sort_order, column_sort_order;
 /*
-ust_facility		facility_type1
-ust_tank			tank_status_id
-ust_tank			tank_material_description_id
-ust_tank			tank_secondary_containment_id
-ust_tank_substance	substance_id
-ust_tank_substance	substance_id
-ust_tank_substance	substance_id
-ust_piping			piping_style_id
-ust_piping			pipe_tank_top_sump_wall_type_id
-ust_piping			piping_wall_type_id
+ust_facility        facility_type1
+ust_tank            tank_status_id
+ust_tank            tank_material_description_id
+ust_tank            tank_secondary_containment_id
+ust_tank_substance    substance_id
+ust_tank_substance    substance_id
+ust_tank_substance    substance_id
+ust_piping            piping_style_id
+ust_piping            pipe_tank_top_sump_wall_type_id
+ust_piping            piping_wall_type_id
 */
 
 /*
@@ -259,19 +259,19 @@ section below where we generate SQL to perform the mapping
 */
 select epa_table_name, epa_column_name 
 from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from v_ust_needed_mapping 
-	where ust_control_id = 18 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from v_ust_needed_mapping 
+    where ust_control_id = 18 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
 /*
-ust_facility		facility_type1
-ust_tank			tank_status_id
-ust_tank			tank_material_description_id
-ust_tank			tank_secondary_containment_id
-ust_tank_substance	substance_id
-ust_piping			piping_style_id
-ust_piping			pipe_tank_top_sump_wall_type_id
-ust_piping			piping_wall_type_id
+ust_facility        facility_type1
+ust_tank            tank_status_id
+ust_tank            tank_material_description_id
+ust_tank            tank_secondary_containment_id
+ust_tank_substance    substance_id
+ust_piping            piping_style_id
+ust_piping            pipe_tank_top_sump_wall_type_id
+ust_piping            piping_wall_type_id
 */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -309,7 +309,7 @@ where ust_control_id = 18 and epa_column_name = 'facility_type1';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1099 || ', ''' || "UST Facility Type" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1099 || ', ''' || "UST Facility Type" || ''', '''', null);'
 from ca_ust."facility" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
@@ -368,7 +368,7 @@ where ust_control_id = 18 and epa_column_name = 'tank_status_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1130 || ', ''' || "Type of Action" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1130 || ', ''' || "Type of Action" || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
@@ -430,7 +430,7 @@ where ust_control_id = 18 and epa_column_name = 'tank_status_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1173 || ', ''' || "Type of Action" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1173 || ', ''' || "Type of Action" || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 select * from ust_element_mapping order by 1 desc;
@@ -487,7 +487,7 @@ where ust_element_mapping_id = 1136;
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1136 || ', ''' || "Tank Primary _Containment _Construction " || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1136 || ', ''' || "Tank Primary _Containment _Construction " || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
@@ -546,7 +546,7 @@ where ust_control_id = 18 and epa_column_name = 'tank_secondary_containment_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1140 || ', ''' || "Tank Secondary _Containment _Construction " || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1140 || ', ''' || "Tank Secondary _Containment _Construction " || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
@@ -603,17 +603,17 @@ where ust_control_id = 18 and epa_column_name = 'substance_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1141 || ', ''' || "Tank Contents " || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1141 || ', ''' || "Tank Contents " || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1142 || ', ''' || "Specify _Other _Petroleum" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1142 || ', ''' || "Specify _Other _Petroleum" || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 delete from ust_element_value_mapping where ust_element_mapping_id in (1142,1143);
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1143 || ', ''' || "Specify _Other _Non-Petroleum" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1143 || ', ''' || "Specify _Other _Non-Petroleum" || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
@@ -681,7 +681,7 @@ where ust_control_id = 18 and epa_column_name = 'piping_style_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1161 || ', ''' || "Piping_System Type" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1161 || ', ''' || "Piping_System Type" || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
@@ -738,7 +738,7 @@ where ust_control_id = 18 and epa_column_name = 'pipe_tank_top_sump_wall_type_id
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1168 || ', ''' || "Piping/Turbine _Containment _Sump" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1168 || ', ''' || "Piping/Turbine _Containment _Sump" || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
@@ -792,7 +792,7 @@ where ust_control_id = 18 and epa_column_name = 'piping_wall_type_id';
 
 --paste the insert_sql from the first row below, then run the query:
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1169 || ', ''' || "Piping_Construction" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 1169 || ', ''' || "Piping_Construction" || ''', '''', null);'
 from ca_ust."tank" order by 1;
 
 /*paste the generated insert statements from the query above below, then manually update each one to fill in the missing epa_value
@@ -899,10 +899,10 @@ NOTE! The view queried below (v_ust_table_population_sql) contains columns that 
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 18 and epa_table_name = 'ust_facility'
 order by column_sort_order;
@@ -919,33 +919,33 @@ order by column_sort_order;
 drop view  ca_ust.v_ust_facility ;
 create or replace view ca_ust.v_ust_facility as 
 select distinct 
-	"CERS ID"::character varying(50) as facility_id,
-	"Facility Name"::character varying(100) as facility_name,
-	ft.facility_type_id as facility_type1,
-	"Facility Street Address"::character varying(100) as facility_address1,
-	"Facility City"::character varying(100) as facility_city,
-	"Facility_ZIP Code"::character varying(10) as facility_zip_code,
-	'CA' as facility_state,
-	9 as facility_epa_region,
-	"Indian or _Trust Land"::character varying(3) as facility_tribal_site,
-	"Latitude_Measure"::double precision as facility_latitude,
-	"Longitude Measure"::double precision as facility_longitude,
-	"Organization Name"::character varying(100) as facility_owner_company_name,
-	case when "Insurance" = 'Yes' or "Guarantee" = 'Yes' or "Letter of _Credit" = 'Yes' 
-		or "Local_Government_Mechanism" = 'Yes' or "Self-_Insured" = 'Yes' or "State Fund _and _CFO letter" = 'Yes'
-		or "State Fund _and _CD" = 'Yes' or "Surety_Bond"= 'Yes' or "Other" = 'Yes' then 'Yes'
-		end as financial_responsibility_obtained,
-	"Insurance"::character varying(3) as financial_responsibility_commercial_insurance,
-	"Guarantee"::character varying(3) as financial_responsibility_guarantee,
-	"Letter of _Credit"::character varying(3) as financial_responsibility_letter_of_credit,
-	"Local_Government_Mechanism"::character varying(3) as financial_responsibility_local_government_financial_test,
-	"Self-_Insured"::character varying(3) as financial_responsibility_self_insurance_financial_test,
-	case when "State Fund _and _CFO letter" = 'Yes' or "State Fund _and _CD" = 'Yes' then 'Yes'
-		 when "State Fund _and _CFO letter" = 'No' or "State Fund _and _CD" = 'No' then 'No' end as financial_responsibility_state_fund,
-	"Surety_Bond"::character varying(3) as financial_responsibility_surety_bond,
-	"Other"::character varying(500) as financial_responsibility_other_method
+    "CERS ID"::character varying(50) as facility_id,
+    "Facility Name"::character varying(100) as facility_name,
+    ft.facility_type_id as facility_type1,
+    "Facility Street Address"::character varying(100) as facility_address1,
+    "Facility City"::character varying(100) as facility_city,
+    "Facility_ZIP Code"::character varying(10) as facility_zip_code,
+    'CA' as facility_state,
+    9 as facility_epa_region,
+    "Indian or _Trust Land"::character varying(3) as facility_tribal_site,
+    "Latitude_Measure"::double precision as facility_latitude,
+    "Longitude Measure"::double precision as facility_longitude,
+    "Organization Name"::character varying(100) as facility_owner_company_name,
+    case when "Insurance" = 'Yes' or "Guarantee" = 'Yes' or "Letter of _Credit" = 'Yes' 
+        or "Local_Government_Mechanism" = 'Yes' or "Self-_Insured" = 'Yes' or "State Fund _and _CFO letter" = 'Yes'
+        or "State Fund _and _CD" = 'Yes' or "Surety_Bond"= 'Yes' or "Other" = 'Yes' then 'Yes'
+        end as financial_responsibility_obtained,
+    "Insurance"::character varying(3) as financial_responsibility_commercial_insurance,
+    "Guarantee"::character varying(3) as financial_responsibility_guarantee,
+    "Letter of _Credit"::character varying(3) as financial_responsibility_letter_of_credit,
+    "Local_Government_Mechanism"::character varying(3) as financial_responsibility_local_government_financial_test,
+    "Self-_Insured"::character varying(3) as financial_responsibility_self_insurance_financial_test,
+    case when "State Fund _and _CFO letter" = 'Yes' or "State Fund _and _CD" = 'Yes' then 'Yes'
+         when "State Fund _and _CFO letter" = 'No' or "State Fund _and _CD" = 'No' then 'No' end as financial_responsibility_state_fund,
+    "Surety_Bond"::character varying(3) as financial_responsibility_surety_bond,
+    "Other"::character varying(500) as financial_responsibility_other_method
 from ca_ust.facility x 
-	left join ca_ust.v_facility_type_xwalk ft on x."UST Facility Type" = ft.organization_value;
+    left join ca_ust.v_facility_type_xwalk ft on x."UST Facility Type" = ft.organization_value;
 
 
 --review: 
@@ -957,10 +957,10 @@ select count(*) from ca_ust.v_ust_facility;
 
 --ust_tank 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 18 and epa_table_name = 'ust_tank'
 order by column_sort_order;
@@ -981,36 +981,36 @@ tank_id int generated always as identity);
 
 insert into ca_ust.erg_tank_id 
 select distinct "CERS ID"::character varying(50) as facility_id,
-	"CERS TankID"::character varying(50)
-	from ca_ust.tank;
-	
+    "CERS TankID"::character varying(50)
+    from ca_ust.tank;
+    
 drop view ca_ust.v_ust_tank;
 create or replace view ca_ust.v_ust_tank as 
 select distinct 
-	"CERS ID"::character varying(50) as facility_id,
-	t.tank_id as tank_id,
-	"CERS TankID"::character varying(50) as tank_name,
-	tank_status_id as tank_status_id,
-	case when "Tank Use" = 'Airport Hydrant System' then 'Yes' end as airport_hydrant_system,
-	"Date UST _Permanently _Closed"::date as tank_closure_date,
-	"Date UST _System _Installed"::date as tank_installation_date,
-	case when "Tank _Configuration" = 'One in a Compartmented Unit' then 'Yes' 
-	     when  "Tank _Configuration" = 'A Stand-alone Tank' then 'No' end as compartmentalized_ust,
-	"Number of _Compartments _in the Unit"::integer as number_of_compartments,
-	tank_material_description_id as tank_material_description_id,
-	"Sacrificial_Anode"::character varying(7) as tank_corrosion_protection_sacrificial_anode,
-	"Impressed_Current"::character varying(7) as tank_corrosion_protection_impressed_current,
-	"Isolation"::character varying(7) as tank_corrosion_protection_other,
-	tank_secondary_containment_id as tank_secondary_containment_id
+    "CERS ID"::character varying(50) as facility_id,
+    t.tank_id as tank_id,
+    "CERS TankID"::character varying(50) as tank_name,
+    tank_status_id as tank_status_id,
+    case when "Tank Use" = 'Airport Hydrant System' then 'Yes' end as airport_hydrant_system,
+    "Date UST _Permanently _Closed"::date as tank_closure_date,
+    "Date UST _System _Installed"::date as tank_installation_date,
+    case when "Tank _Configuration" = 'One in a Compartmented Unit' then 'Yes' 
+         when  "Tank _Configuration" = 'A Stand-alone Tank' then 'No' end as compartmentalized_ust,
+    "Number of _Compartments _in the Unit"::integer as number_of_compartments,
+    tank_material_description_id as tank_material_description_id,
+    "Sacrificial_Anode"::character varying(7) as tank_corrosion_protection_sacrificial_anode,
+    "Impressed_Current"::character varying(7) as tank_corrosion_protection_impressed_current,
+    "Isolation"::character varying(7) as tank_corrosion_protection_other,
+    tank_secondary_containment_id as tank_secondary_containment_id
 from ca_ust.tank x 
-	join ca_ust.erg_tank_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
-	left join ca_ust.v_tank_status_xwalk ts on x."Type of Action" = ts.organization_value
-	left join ca_ust.v_tank_material_description_xwalk md on x."Tank Primary _Containment _Construction " = md.organization_value
-	left join ca_ust.v_tank_secondary_containment_xwalk sc on x."Tank Secondary _Containment _Construction " = sc.organization_value;
+    join ca_ust.erg_tank_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
+    left join ca_ust.v_tank_status_xwalk ts on x."Type of Action" = ts.organization_value
+    left join ca_ust.v_tank_material_description_xwalk md on x."Tank Primary _Containment _Construction " = md.organization_value
+    left join ca_ust.v_tank_secondary_containment_xwalk sc on x."Tank Secondary _Containment _Construction " = sc.organization_value;
 
 
 select organization_table_name, organization_column_name, 
-	   organization_join_table, 
+       organization_join_table, 
        organization_join_column, organization_join_fk, 
        organization_join_column2, organization_join_fk2, 
        organization_join_column3, organization_join_fk3,
@@ -1021,10 +1021,10 @@ where ust_control_id = 18 and epa_column_name = 'tank_id'
 
 update ust_element_mapping 
 set organization_join_table = 'tank',
-	organization_join_column2 = 'CERS TankID',
-	organization_join_fk2 = 'tank_name',
-	organization_join_column = 'facility_id',
-	organization_join_fk = 'CERS TankID'
+    organization_join_column2 = 'CERS TankID',
+    organization_join_fk2 = 'tank_name',
+    organization_join_column = 'facility_id',
+    organization_join_fk = 'CERS TankID'
 where ust_element_mapping_id = 1175;
 
 
@@ -1055,10 +1055,10 @@ select count(*) from ca_ust.v_ust_tank;
 --ust_tank_substance
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 18 and epa_table_name = 'ust_tank_substance'
 order by column_sort_order;
@@ -1069,12 +1069,12 @@ NOTE: ADD facility_id::character varying(50) and tank_id::int!!!!
 drop view ca_ust.v_ust_tank_substance;
 create or replace view ca_ust.v_ust_tank_substance as 
 select distinct 
-	"CERS ID"::character varying(50) as facility_id,
-	t.tank_id as tank_id,
-	sx.substance_id as substance_id
+    "CERS ID"::character varying(50) as facility_id,
+    t.tank_id as tank_id,
+    sx.substance_id as substance_id
 from ca_ust.tank x 
-	join ca_ust.erg_tank_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
-	left join ca_ust.v_substance_xwalk sx on x."Tank Contents " = sx.organization_value
+    join ca_ust.erg_tank_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
+    left join ca_ust.v_substance_xwalk sx on x."Tank Contents " = sx.organization_value
 where x."Tank Contents " is not null; 
 
 select * from ca_ust.v_ust_tank_substance;
@@ -1084,10 +1084,10 @@ select count(*) from ca_ust.v_ust_tank_substance;
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 18 and epa_table_name = 'ust_compartment'
 order by column_sort_order;
@@ -1118,26 +1118,26 @@ values (18,'2024-08-20','ust_tank','compartment_status_id','tank','Type of Actio
 drop view ca_ust.v_ust_compartment ;
 create or replace view ca_ust.v_ust_compartment as 
 select distinct 
-	"CERS ID"::character varying(50) as facility_id,
-	t.tank_id as tank_id,
-	t.compartment_id,
-	compartment_status_id as compartment_status_id, 
-	"Tank _Capacity _In Gallons"::integer as compartment_capacity_gallons,
-	"Ball Float"::character varying(7) as overfill_prevention_ball_float_valve,
-	"Fill Tube _Shut-Off _Valve"::character varying(7) as overfill_prevention_flow_shutoff_device,
-	"Audible/_Visual _Alarms"::character varying(7) as overfill_prevention_high_level_alarm,
-	"Exempt"::character varying(7) as overfill_prevention_not_required,
-	"Spill Bucket _Installed"::character varying(3) as spill_bucket_installed,
-	"Automatic _Tank _Gauging"::character varying(7) as tank_automatic_tank_gauging_release_detection,
-	"Continuous _Electronic _Tank Monitoring"::character varying(7) as automatic_tank_gauging_continuous_leak_detection,
-	"Weekly_Manual _Tank Gauge"::character varying(7) as tank_manual_tank_gauging,
-	"Monthly Statistical _Inventory _Reconciliation"::character varying(7) as tank_statistical_inventory_reconciliation,
-	"Tank _Integrity _Testing"::character varying(7) as tank_tightness_testing,
-	"Other_Monitoring"::character varying(7) as tank_other_release_detection
+    "CERS ID"::character varying(50) as facility_id,
+    t.tank_id as tank_id,
+    t.compartment_id,
+    compartment_status_id as compartment_status_id, 
+    "Tank _Capacity _In Gallons"::integer as compartment_capacity_gallons,
+    "Ball Float"::character varying(7) as overfill_prevention_ball_float_valve,
+    "Fill Tube _Shut-Off _Valve"::character varying(7) as overfill_prevention_flow_shutoff_device,
+    "Audible/_Visual _Alarms"::character varying(7) as overfill_prevention_high_level_alarm,
+    "Exempt"::character varying(7) as overfill_prevention_not_required,
+    "Spill Bucket _Installed"::character varying(3) as spill_bucket_installed,
+    "Automatic _Tank _Gauging"::character varying(7) as tank_automatic_tank_gauging_release_detection,
+    "Continuous _Electronic _Tank Monitoring"::character varying(7) as automatic_tank_gauging_continuous_leak_detection,
+    "Weekly_Manual _Tank Gauge"::character varying(7) as tank_manual_tank_gauging,
+    "Monthly Statistical _Inventory _Reconciliation"::character varying(7) as tank_statistical_inventory_reconciliation,
+    "Tank _Integrity _Testing"::character varying(7) as tank_tightness_testing,
+    "Other_Monitoring"::character varying(7) as tank_other_release_detection
 from ca_ust.tank x 
-	join ca_ust.erg_compartment_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
-	left join ca_ust.v_compartment_status_xwalk cx on x."Type of Action"  = cx.organization_value;
-	
+    join ca_ust.erg_compartment_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
+    left join ca_ust.v_compartment_status_xwalk cx on x."Type of Action"  = cx.organization_value;
+    
 select * from ca_ust.v_ust_compartment order by 1, 2, 3;
 select count(*) from ca_ust.v_ust_compartment;
 --43145
@@ -1146,10 +1146,10 @@ select count(*) from ca_ust.v_ust_compartment;
 
 --ust_piping
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, programmer_comments, 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 18 and epa_table_name = 'ust_piping'
 order by column_sort_order;
@@ -1169,26 +1169,26 @@ from ca_ust.erg_compartment_id;
 drop view ca_ust.v_ust_piping;
 create or replace view ca_ust.v_ust_piping as 
 select distinct 
-	"CERS ID"::character varying(50) as facility_id,
-	t.tank_id as tank_id,
-	t.compartment_id,
-	t.piping_id::character varying(50) as piping_id,
-	piping_style_id as piping_style_id,
-	case when "Primary_Containment_Construction" = 'Fiberglass' then 'Yes' end as piping_material_frp,
-	case when "Primary_Containment_Construction" = 'Steel' then 'Yes' end as piping_material_steel,
-	case when "Primary_Containment_Construction" = 'Flexible' then 'Yes' end as piping_material_flex,
-	case when "Primary_Containment_Construction" = 'Other' then 'Yes' end as piping_material_other,
-	case when "Primary_Containment_Construction" = 'Unknown' then 'Yes' end as piping_material_unknown,
-	"Containment _Sump"::character varying(7) as pipe_tank_top_sump,
-	pipe_tank_top_sump_wall_type_id as pipe_tank_top_sump_wall_type_id,
-	piping_wall_type_id as piping_wall_type_id,
-	case when "Secondary _Containment _Construction" is not null then 'Yes' end as pipe_secondary_containment_other
+    "CERS ID"::character varying(50) as facility_id,
+    t.tank_id as tank_id,
+    t.compartment_id,
+    t.piping_id::character varying(50) as piping_id,
+    piping_style_id as piping_style_id,
+    case when "Primary_Containment_Construction" = 'Fiberglass' then 'Yes' end as piping_material_frp,
+    case when "Primary_Containment_Construction" = 'Steel' then 'Yes' end as piping_material_steel,
+    case when "Primary_Containment_Construction" = 'Flexible' then 'Yes' end as piping_material_flex,
+    case when "Primary_Containment_Construction" = 'Other' then 'Yes' end as piping_material_other,
+    case when "Primary_Containment_Construction" = 'Unknown' then 'Yes' end as piping_material_unknown,
+    "Containment _Sump"::character varying(7) as pipe_tank_top_sump,
+    pipe_tank_top_sump_wall_type_id as pipe_tank_top_sump_wall_type_id,
+    piping_wall_type_id as piping_wall_type_id,
+    case when "Secondary _Containment _Construction" is not null then 'Yes' end as pipe_secondary_containment_other
 from ca_ust.tank x 
-	join ca_ust.erg_piping_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
-	left join ca_ust.v_piping_style_xwalk ps on x."Piping_System Type" = ps.organization_value
-	left join ca_ust.v_pipe_tank_top_sump_wall_type_xwalk tt on x."Piping/Turbine _Containment _Sump" = tt.organization_value
-	left join ca_ust.v_piping_wall_type_xwalk wt on x."Piping_Construction"= wt.organization_value
-	;
+    join ca_ust.erg_piping_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
+    left join ca_ust.v_piping_style_xwalk ps on x."Piping_System Type" = ps.organization_value
+    left join ca_ust.v_pipe_tank_top_sump_wall_type_xwalk tt on x."Piping/Turbine _Containment _Sump" = tt.organization_value
+    left join ca_ust.v_piping_wall_type_xwalk wt on x."Piping_Construction"= wt.organization_value
+    ;
 
 select * from ust_element_mapping where ust_control_id = 18 and organization_column_name = 'Primary_Containment_Construction'
 
@@ -1201,7 +1201,7 @@ update ust_element_mapping set programmer_comments = 'if "Primary_Containment_Co
 select distinct "Secondary _Containment _Construction" from ca_ust.tank ;
 
 select * from ca_ust.v_piping_style_xwalk;
-	
+    
 select * from ca_ust.v_ust_compartment order by 1, 2, 3;
 select count(*) from ca_ust.v_ust_compartment;
 --43145
@@ -1221,10 +1221,10 @@ from ca_ust.erg_compartment_id;
 
 --ust_compartment_dispenser
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, programmer_comments, 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 18 and epa_table_name = 'ust_compartment_dispenser'
 order by column_sort_order;
@@ -1235,18 +1235,18 @@ where table_schema = 'public' and column_name = 'piping_id'
 drop view ca_ust.v_ust_compartment_dispenser;
 create or replace view ca_ust.v_ust_compartment_dispenser as 
 select distinct 
-	"CERS ID"::character varying(50) as facility_id,
-	t.tank_id as tank_id,
-	t.compartment_id,
-	t.dispenser_id::character varying(50) as dispenser_id,
-	case when "Construction_Type" in ('Single-walled', 'Double-walled') then 'Yes' 
-	    when  "Construction_Type" = 'No Dispensers' then 'No' end as dispenser_udc,
-	dispenser_udc_wall_type_id as dispenser_udc_wall_type_id
+    "CERS ID"::character varying(50) as facility_id,
+    t.tank_id as tank_id,
+    t.compartment_id,
+    t.dispenser_id::character varying(50) as dispenser_id,
+    case when "Construction_Type" in ('Single-walled', 'Double-walled') then 'Yes' 
+        when  "Construction_Type" = 'No Dispensers' then 'No' end as dispenser_udc,
+    dispenser_udc_wall_type_id as dispenser_udc_wall_type_id
 from ca_ust.tank x 
-	join ca_ust.erg_dispenser_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
-	left join ca_ust.v_dispenser_udc_wall_type_xwalk wt on x."Construction_Type" = wt.organization_value
-	where "Construction_Type"  is not null 
-	;
+    join ca_ust.erg_dispenser_id t on x."CERS ID"::varchar(50) = t.facility_id and x."CERS TankID"::varchar(50) = t.tank_name
+    left join ca_ust.v_dispenser_udc_wall_type_xwalk wt on x."Construction_Type" = wt.organization_value
+    where "Construction_Type"  is not null 
+    ;
 
 select * From ca_ust.v_ust_compartment_dispenser
 
@@ -1279,7 +1279,7 @@ select distinct "Construction_Type" from ca_ust.tank ;
 select * from dispenser_udc_wall_types 
 
 select * from ca_ust.v_piping_style_xwalk;
-	
+    
 update ust_element_mapping set organization_column_name = 'Construction_Type' where ust_element_mapping_id = 1172;
 
 select * from ca_ust.v_ust_compartment_dispenser order by 1, 2, 3;
@@ -1294,13 +1294,13 @@ select count(*) from ca_ust.v_ust_compartment_dispenser;
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_ust_missing_view_mapping a
 where ust_control_id = 18
 order by 1, 2;
-ust_compartment_dispenser	dispenser_udc_wall_type	tank	Construction_Type
+ust_compartment_dispenser    dispenser_udc_wall_type    tank    Construction_Type
 
 select * from ust_element_mapping order by 1 desc;
 
@@ -1331,8 +1331,8 @@ set variables:
 ust_or_release = 'ust' 
 control_id = 18
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -1363,7 +1363,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'ust' 
 control_id = 18
@@ -1377,14 +1377,14 @@ from v_ust_table_row_count
 where ust_control_id = 18 
 order by sort_order;
 /*
-ust_facility	14949
-ust_tank	43145
-ust_tank_substance	43145
-ust_compartment	43145
-ust_piping	43145
-ust_compartment_dispenser	43141
+ust_facility    14949
+ust_tank    43145
+ust_tank_substance    43145
+ust_compartment    43145
+ust_piping    43145
+ust_compartment_dispenser    43141
 */
-	
+    
 --------------------------------------------------------------------------------------------------------------------------
 --export template
 
@@ -1392,12 +1392,12 @@ ust_compartment_dispenser	43141
 set variables:
 control_id = 18
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 			# Set to False to export full template including mapping and reference tabs
-template_only = False 		# Set to False to export data and mapping tabs as well as reference tab
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False             # Set to False to export full template including mapping and reference tabs
+template_only = False         # Set to False to export data and mapping tabs as well as reference tab
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -1407,9 +1407,9 @@ export_file_name = None		# If export_file_path and export_file_dir/export_file_n
 set variables:
 control_id = 18
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 --------------------------------------------------------------------------------------------------------------------------

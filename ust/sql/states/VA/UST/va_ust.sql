@@ -19,17 +19,17 @@ select * from public.facility_types ft
  * manipulating them!)
 
 select epa_column_name from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from public.v_ust_needed_mapping 
-	where ust_control_id = 8 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from public.v_ust_needed_mapping 
+    where ust_control_id = 8 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
  
  * To generate the SQL that will assist you in doing the value mapping, run the script 
  * generate_value_mapping_sql.py. Set the following variables before running the script:
  
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True   		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+only_incomplete = True           # Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 overwrite_existing = False      # Boolean, defaults to False. Set to True to overwrite existing generated SQL file. If False, will append an existing file.
  
  * This script will output a SQL file (located by default in the repo at 
@@ -442,27 +442,27 @@ order by 1, 2;
  */
 
 insert into public.ust_element_mapping
-	(ust_control_id, epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_fk, organization_join_column2, organization_join_fk2, organization_join_column3, organization_join_fk3,
-	query_logic, inferred_value_comment)
+    (ust_control_id, epa_table_name, epa_column_name, 
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_fk, organization_join_column2, organization_join_fk2, organization_join_column3, organization_join_fk3,
+    query_logic, inferred_value_comment)
 select ust_control_id, 'ust_tank', 'tank_corrosion_protection_sacrificial_anode', organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_fk, organization_join_column2, organization_join_fk2, organization_join_column3, organization_join_fk3,
-	'when tank_material_description_id in (5,6) then ''Yes'' else null', 'Inferred from tank material'
+    organization_join_table, organization_join_fk, organization_join_column2, organization_join_fk2, organization_join_column3, organization_join_fk3,
+    'when tank_material_description_id in (5,6) then ''Yes'' else null', 'Inferred from tank material'
 from public.ust_element_mapping a
 where ust_control_id = 8 and epa_column_name = 'tank_material_description_id'
 and exists 
-	(select 1 from public.ust_element_value_mapping b 
-	where a.ust_element_mapping_id = b.ust_element_mapping_id 
-	and epa_value like '%athod%')
+    (select 1 from public.ust_element_value_mapping b 
+    where a.ust_element_mapping_id = b.ust_element_mapping_id 
+    and epa_value like '%athod%')
 and not exists 
-	(select 1 from public.ust_element_mapping b 
-	where a.ust_control_id = b.ust_control_id
-	and b.epa_column_name like 'tank_corrosion_protection%')
+    (select 1 from public.ust_element_mapping b 
+    where a.ust_control_id = b.ust_control_id
+    and b.epa_column_name like 'tank_corrosion_protection%')
 and not exists
-	(select 1 from public.ust_element_mapping b 
-	where a.ust_control_id = b.ust_control_id
-	and b.epa_column_name = 'tank_corrosion_protection_sacrificial_anode');
+    (select 1 from public.ust_element_mapping b 
+    where a.ust_control_id = b.ust_control_id
+    and b.epa_column_name = 'tank_corrosion_protection_sacrificial_anode');
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -481,9 +481,9 @@ and not exists
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
-send_email = True				# Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
+send_email = True                # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -501,7 +501,7 @@ export_file_name = None
  * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
  * Set these variables in the script:
  
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
   
  * To see the crosswalk views after running the script:
@@ -522,9 +522,9 @@ and table_name like '%_xwalk' order by 1;
  * are missing and to create an ERG table containing generated IDs if necessary. 
  * Set these variables in the script:
 
-ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
+ust_or_release = 'ust'              # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the ust_control_id
-drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = False              # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -540,7 +540,7 @@ overwrite_sql_file = False       # Boolean, defaults to False. Set to True to ov
 --check to see if the script generated any tables 
 select epa_table_name, epa_column_name, organization_table_name 
 from public.v_ust_element_mapping a join public.ust_template_data_tables b 
-	on a.epa_table_name = b.table_name 
+    on a.epa_table_name = b.table_name 
 where ust_control_id = 8 and organization_table_name like 'erg%'
 order by sort_order;
 
@@ -619,12 +619,12 @@ select distinct a.tank_facility_id::character varying(50) AS facility_id,
      tank_material_description_id as tank_material_description_id,   
      case when tank_material_description_id in (5,6) then 'Yes' else null end as tank_corrosion_protection_sacrificial_anode,   
      case when "tank_material_impressed_current" = 'Y' then 'Yes' when "tank_material_impressed_current" = 'N' then 'No' else null end  as tank_corrosion_protection_impressed_current, 
- 	 case when "tank_material_lined_interior" = 'Y' then 'Yes' when "tank_material_lined_interior" = 'N' then 'No' else null end  as tank_corrosion_protection_interior_lining, 
+      case when "tank_material_lined_interior" = 'Y' then 'Yes' when "tank_material_lined_interior" = 'N' then 'No' else null end  as tank_corrosion_protection_interior_lining, 
     tank_secondary_containment_id as tank_secondary_containment_id 
 from va_ust."tanks" a
-	left join va_ust.erg_va_tank_materials z on a.index=z.index
-	left join va_ust.erg_va_tank_secondary_containment y on a.index=y.index 
-	    left join va_ust.usttankmaterials x on a.index=x.index
+    left join va_ust.erg_va_tank_materials z on a.index=z.index
+    left join va_ust.erg_va_tank_secondary_containment y on a.index=y.index 
+        left join va_ust.usttankmaterials x on a.index=x.index
     left join va_ust.v_tank_material_description_xwalk c on z."tank_material_description" = c.organization_value
     left join va_ust.v_tank_secondary_containment_xwalk d on y."secondary_containment" = d.organization_value
     left join va_ust.v_tank_status_xwalk e on a."tank_status" = e.organization_value
@@ -650,29 +650,29 @@ drop view va_ust.v_ust_compartment;
 
 create or replace view va_ust.v_ust_compartment as
 select distinct
-	b.tank_facility_id facility_id,
-	b.index::integer tank_id,
+    b.tank_facility_id facility_id,
+    b.index::integer tank_id,
     a."index"::integer as compartment_id, 
     compartment_status_id as compartment_status_id, 
     "capacity"::integer as compartment_capacity_gallons, 
-	case when overfill_type in ('ALARM-BALL FLOAT','BALL FLOAT', 'AUTOMATIC SHUTOFF-BALL FLOAT') then 'Yes' end  as overfill_prevention_ball_float_valve,
-	case when overfill_type in ('AUTOMATIC SHUTOFF', 'AUTOMATIC SHUTOFF-BALL FLOAT') then 'Yes'  end as overfill_prevention_flow_shutoff_device,
-	case when overfill_type in ('ALARM-BALL FLOAT','ALARM', 'ALARM-AUTOMATIC SHUTOFF') then 'Yes' end as overfill_prevention_high_level_alarm,
-	case when overfill_type in ('OTHER') then 'Yes' end as  overfill_prevention_other,
-	case when overfill_type in ('NONE') then 'Yes'  end as  overfill_prevention_not_required,	
-	case when "spill_device_installed" = 'Y' then 'Yes' when "spill_device_installed" = 'N' then 'No' end  as spill_bucket_installed,
-	case when "overfill_other_specify" = 'Y' then 'Yes'  when "overfill_other_specify" = 'N' then 'No' end as spill_prevention_other,
-	case when overfill_other_specify in ('Not Required','Not required') then 'Yes' else 'No' end as  spill_prevention_not_required,
+    case when overfill_type in ('ALARM-BALL FLOAT','BALL FLOAT', 'AUTOMATIC SHUTOFF-BALL FLOAT') then 'Yes' end  as overfill_prevention_ball_float_valve,
+    case when overfill_type in ('AUTOMATIC SHUTOFF', 'AUTOMATIC SHUTOFF-BALL FLOAT') then 'Yes'  end as overfill_prevention_flow_shutoff_device,
+    case when overfill_type in ('ALARM-BALL FLOAT','ALARM', 'ALARM-AUTOMATIC SHUTOFF') then 'Yes' end as overfill_prevention_high_level_alarm,
+    case when overfill_type in ('OTHER') then 'Yes' end as  overfill_prevention_other,
+    case when overfill_type in ('NONE') then 'Yes'  end as  overfill_prevention_not_required,    
+    case when "spill_device_installed" = 'Y' then 'Yes' when "spill_device_installed" = 'N' then 'No' end  as spill_bucket_installed,
+    case when "overfill_other_specify" = 'Y' then 'Yes'  when "overfill_other_specify" = 'N' then 'No' end as spill_prevention_other,
+    case when overfill_other_specify in ('Not Required','Not required') then 'Yes' else 'No' end as  spill_prevention_not_required,
     spill_bucket_wall_type_id as spill_bucket_wall_type_id,   
-	case when "tank_rd_im_secondary_containment" = 'Y' then 'Yes' when "tank_rd_im_secondary_containment" = 'N' then 'No' end  as tank_interstitial_monitoring,
-	case when "tank_rd_atg" = 'Y' then 'Yes' when "tank_rd_atg" = 'N' then 'No' end  as tank_automatic_tank_gauging_release_detection,
-	case when "tank_rd_manual_gauging" = 'Y' then 'Yes' when "tank_rd_manual_gauging" = 'N' then 'No' end  as tank_manual_tank_gauging,
-	case when "tank_rd_sir" = 'Y' then 'Yes' when "tank_rd_sir" = 'N' then 'No' end  as tank_statistical_inventory_reconciliation,
-	case when "tank_rd_tightness_testing" = 'Y' then 'Yes' when "tank_rd_tightness_testing" = 'N' then 'No' end  as tank_tightness_testing,
-	case when "tank_rd_inventory_control" = 'Y' then 'Yes' when "tank_rd_inventory_control" = 'N' then 'No' end  as tank_inventory_control,
-	case when "tank_rd_groundwater_monitoring" = 'Y' then 'Yes' when "tank_rd_groundwater_monitoring" = 'N' then 'No' end  as tank_groundwater_monitoring,	
-	case when "tank_rd_vapor_monitoring" = 'Y' then 'Yes' when "tank_rd_vapor_monitoring" = 'N' then 'No' end  as tank_vapor_monitoring,
-	case when "tank_rd_other" = 'Y' then 'Yes' when "tank_rd_other" = 'N' then 'No' end  as tank_other_release_detection	
+    case when "tank_rd_im_secondary_containment" = 'Y' then 'Yes' when "tank_rd_im_secondary_containment" = 'N' then 'No' end  as tank_interstitial_monitoring,
+    case when "tank_rd_atg" = 'Y' then 'Yes' when "tank_rd_atg" = 'N' then 'No' end  as tank_automatic_tank_gauging_release_detection,
+    case when "tank_rd_manual_gauging" = 'Y' then 'Yes' when "tank_rd_manual_gauging" = 'N' then 'No' end  as tank_manual_tank_gauging,
+    case when "tank_rd_sir" = 'Y' then 'Yes' when "tank_rd_sir" = 'N' then 'No' end  as tank_statistical_inventory_reconciliation,
+    case when "tank_rd_tightness_testing" = 'Y' then 'Yes' when "tank_rd_tightness_testing" = 'N' then 'No' end  as tank_tightness_testing,
+    case when "tank_rd_inventory_control" = 'Y' then 'Yes' when "tank_rd_inventory_control" = 'N' then 'No' end  as tank_inventory_control,
+    case when "tank_rd_groundwater_monitoring" = 'Y' then 'Yes' when "tank_rd_groundwater_monitoring" = 'N' then 'No' end  as tank_groundwater_monitoring,    
+    case when "tank_rd_vapor_monitoring" = 'Y' then 'Yes' when "tank_rd_vapor_monitoring" = 'N' then 'No' end  as tank_vapor_monitoring,
+    case when "tank_rd_other" = 'Y' then 'Yes' when "tank_rd_other" = 'N' then 'No' end  as tank_other_release_detection    
 from va_ust."usttankpipereleasedetection" a
 join va_ust.tanks b on a.tank_facility_id=b.tank_facility_id and a.tank_number=b.tank_number and a.tank_owner_id=b.tank_owner_id
 left join va_ust.erg_tank_spill_bucket_wall  z on a.index=z.index and a.tank_number=z.tank_number and a.tank_facility_id=z.tank_facility_id
@@ -681,7 +681,7 @@ left join va_ust.erg_tank_spill_bucket_wall  z on a.index=z.index and a.tank_num
   WHERE a.tank_type::text = 'UST'::text AND b.federally_regulated_tank::text = 'Yes'::text;
   
   
- 	
+     
  select * from va_ust.v_ust_compartment; 70477
  
  
@@ -691,7 +691,7 @@ left join va_ust.erg_tank_spill_bucket_wall  z on a.index=z.index and a.tank_num
 
 create or replace view va_ust.v_ust_piping as
 select distinct
-	z.tank_facility_id facility_id,
+    z.tank_facility_id facility_id,
     z.index::integer tank_id,
     y.index::integer compartment_id,    
     a."index"::character varying(50) as piping_id, 
@@ -707,23 +707,23 @@ select distinct
             ELSE NULL::text
         END AS piping_material_gal_steel,
     case when lower(pipe_material_other_specify) like '%stainless%steel%' then 'Yes' else null end  as piping_material_stainless_steel,    
-	   CASE
-	        WHEN a.pipe_material_cathodically_protected::text = 'Y'::text THEN 'Yes'::text
-	        WHEN a.pipe_material_cathodically_protected::text = 'N'::text THEN 'No'::text
-	        ELSE NULL::text
-	    END AS piping_material_steel,        
-	    CASE
-	        WHEN a.pipe_material_copper::text = 'Y'::text THEN 'Yes'::text
-	        WHEN a.pipe_material_copper::text = 'N'::text THEN 'No'::text
-	        ELSE NULL::text
-	    END AS piping_material_copper,
-  		CASE
+       CASE
+            WHEN a.pipe_material_cathodically_protected::text = 'Y'::text THEN 'Yes'::text
+            WHEN a.pipe_material_cathodically_protected::text = 'N'::text THEN 'No'::text
+            ELSE NULL::text
+        END AS piping_material_steel,        
+        CASE
+            WHEN a.pipe_material_copper::text = 'Y'::text THEN 'Yes'::text
+            WHEN a.pipe_material_copper::text = 'N'::text THEN 'No'::text
+            ELSE NULL::text
+        END AS piping_material_copper,
+          CASE
             WHEN a.pipe_material_polyflexible::text = 'Y'::text THEN 'Yes'::text
             WHEN a.pipe_material_polyflexible::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_material_flex,
     case when lower(pipe_material_other_specify) = 'no piping' then 'Yes' else null end as piping_material_no_piping, 
-		CASE
+        CASE
             WHEN a.pipe_material_other::text = 'Y'::text THEN 'Yes'::text
             WHEN a.pipe_material_other::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
@@ -733,58 +733,58 @@ select distinct
             WHEN a.pipe_material_unknown::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_material_unknown,
-    	case when lower(pipe_material_other_specify) like '%flex%connector%' then 'Yes' else null end as piping_flex_connector,  
-		CASE
+        case when lower(pipe_material_other_specify) like '%flex%connector%' then 'Yes' else null end as piping_flex_connector,  
+        CASE
             WHEN a.pipe_material_cathodically_protected::text = 'Y'::text THEN 'Yes'::text
             WHEN a.pipe_material_cathodically_protected::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_corrosion_protection_sacrificial_anode,
-		CASE
+        CASE
             WHEN a.pipe_material_impressed_current::text = 'Y'::text THEN 'Yes'::text
             WHEN a.pipe_material_impressed_current::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_corrosion_protection_impressed_current,
-		CASE
+        CASE
             WHEN a.pipe_material_other::text = 'Y'::text THEN 'Yes'::text
             WHEN a.pipe_material_other::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_corrosion_protection_other,
-		CASE
+        CASE
             WHEN a.pipe_material_unknown::text = 'Y'::text THEN 'Yes'::text
             WHEN a.pipe_material_unknown::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_corrosion_protection_unknown,
-		CASE
+        CASE
             WHEN y.pipe_rd_alld::text = 'Y'::text THEN 'Yes'::text
             WHEN y.pipe_rd_alld::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_line_leak_detector,
-		CASE
+        CASE
             WHEN y.pipe_rd_tightness_testing::text = 'Y'::text THEN 'Yes'::text
             WHEN y.pipe_rd_tightness_testing::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_line_test_annual,
-		CASE
+        CASE
             WHEN y.pipe_rd_groundwater_monitoring::text = 'Y'::text THEN 'Yes'::text
             WHEN y.pipe_rd_groundwater_monitoring::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_groundwater_monitoring,
-		CASE
+        CASE
             WHEN y.pipe_rd_vapor_monitoring::text = 'Y'::text THEN 'Yes'::text
             WHEN y.pipe_rd_vapor_monitoring::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_vapor_monitoring,
-		CASE
+        CASE
             WHEN y.pipe_rd_im_secondary_containment::text = 'Y'::text THEN 'Yes'::text
             WHEN y.pipe_rd_im_secondary_containment::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_interstitial_monitoring,
-		CASE
+        CASE
             WHEN y.pipe_rd_sir::text = 'Y'::text THEN 'Yes'::text
             WHEN y.pipe_rd_sir::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
         END AS piping_statistical_inventory_reconciliation,
-		CASE
+        CASE
             WHEN y.pipe_rd_other::text = 'Y'::text THEN 'Yes'::text
             WHEN y.pipe_rd_other::text = 'N'::text THEN 'No'::text
             ELSE NULL::text
@@ -812,7 +812,7 @@ select count(*) from va_ust.v_ust_piping; --70442
  * adhere to all business and logic rules.  
  * Set these variables in the script:
 
-ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
+ust_or_release = 'ust'              # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the ust_control_id
 
  * This script will check the views you just created in the state schema for the following:
@@ -859,9 +859,9 @@ control_id = ZZ                  # Enter an integer that is the ust_control_id
  * 
  * Set these variables in the script: 
  
-ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
+ust_or_release = 'ust'              # Valid values are 'ust' or 'release' 
 control_id = ZZ                  # Enter an integer that is the ust_control_id
-delete_existing = False 		 # can set to True if there is existing UST data you need to delete before inserting new
+delete_existing = False          # can set to True if there is existing UST data you need to delete before inserting new
 
  * Do a quick sanity check of number of rows inserted:
 */
@@ -881,7 +881,7 @@ order by sort_order;
  * 
  * Set these variables in the script: 
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
@@ -901,7 +901,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * 
  * Set these variables in the script: 
 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 
  * 
@@ -973,7 +973,7 @@ control_id = ZZ                 # Enter an integer that is the ust_control_id or
  * 
  * Set these variables in the script: 
  * 
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = ZZ                 # Enter an integer that is the ust_control_id or release_control_id
 all_tables = True               # Boolean, defaults to True. If True will export all source data tables; if False will only export those referenced in ust_element_mapping or release_element_mapping.
 tables_to_exclude = []          # Python list of strings; defaults to empty list. Populate with table names in the organization schema that should be excluded from the export. (NOTE: ERG-created tables will not be exported regardless of the values in this list.)
@@ -995,13 +995,13 @@ empty_export_dir = True         # Boolean, defaults to True. If True, will delet
 /*
  * 
  * 
-create table erg_tank_spill_bucket_wall as
+create view va_ust.vw_tank_spill_bucket_wall as
 select distinct index, tank_number, tank_facility_id, 
 case when tank_rd_im_double_walled = 'Y' then 'tank_rd_im_double_walled'
 when tank_rd_im_secondary_containment = 'Y' then 'tank_rd_im_secondary_containment'
 else null
 end tank_spill_bucket_wall
-from usttankpipereleasedetection;
+from va_ust.usttankpipereleasedetection;
 
 
 select distinct tank_rd_other_specify from usttankpipereleasedetection order by 1;
@@ -1035,7 +1035,7 @@ set programmer_comments = 'The logic to differentiate between military and non-m
 where ust_element_mapping_id=7 and organization_value = 'FEDERAL';
 Federal government, non-military
 
-select fac_name from registered_petroleum_tank_facilities	
+select fac_name from registered_petroleum_tank_facilities    
 
 select * from ust_element_mapping where ust_control_id = 8 order by epa_table_name;
 
@@ -1047,7 +1047,7 @@ select distinct tank_material_secondary_containment from usttankmaterials u  ord
 select distinct tank_material_other_specify from usttankmaterials where lower(tank_material_other_specify) like '%steel%' 
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 772 || ', ''' || "contents" || ''', '''', null);'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments) values (' || 772 || ', ''' || "contents" || ''', '''', null);'
 from va_ust."tanks" order by 1;
 
 select * from public.substances where lower(substance) like lower('%petroleum product%')
@@ -1077,7 +1077,7 @@ from usttankmaterials
 
 
 
-create table erg_va_tank_secondary_containment as
+create view va_ust.vw_va_tank_secondary_containment as
 select distinct
 index,
 tank_facility_id,
@@ -1088,11 +1088,12 @@ tank_status,
 case when "tank_material_double_walled" = 'Y' then 'tank_material_double_walled'
 when "tank_material_excavation_liner" = 'Y' then 'tank_material_excavation_liner'
 when "tank_material_secondary_containment" = 'Y' then 'tank_material_secondary_containment'
+when "tank_material_polyethylene_tank_jacket" = 'Y' then 'tank_material_polyethylene_tank_jacket'
 else null end secondary_containment
-from usttankmaterials
+from va_ust.usttankmaterials
 ;
 
-create table erg_va_tank_materials as
+create view va_ust.vw_va_tank_materials as
 select distinct
 index,
 tank_facility_id,
@@ -1111,7 +1112,7 @@ when "tank_material_unknown" = 'Y' then 'tank_material_unknown'
 when lower("tank_material_other_specify") like '%epoxy%coated%steel%' then 'epoxy coated steel: ='||tank_material_other_specify
 when lower("tank_material_other_specify") like '%concrete%' then 'concrete: ='||tank_material_other_specify
 else null end tank_material_description
-from usttankmaterials
+from va_ust.usttankmaterials
 
 
 
@@ -1172,7 +1173,7 @@ and lower(state_value) like lower('%HYDRAULIC%');
 select database_lookup_table, epa_value 
 from v_ust_bad_mapping 
 where ust_control_id = 8 order by 1, 2;
-tank_statuses	Closed (general) 
+tank_statuses    Closed (general) 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1205,10 +1206,10 @@ NOTE! The view queried below (v_ust_table_population_sql) contains columns that 
       In particular, check out the organization_join_table and organization_join_column 
       are used!!*/
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 8 and epa_table_name = 'ust_facility'
 order by column_sort_order;
@@ -1262,10 +1263,10 @@ select count(*) from va_ust.v_ust_facility;
 
 --ust_tank 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 8 and epa_table_name = 'ust_tank'
 order by column_sort_order;
@@ -1319,21 +1320,21 @@ select count(*) from va_ust.v_ust_tank;
 --ust_tank_substance
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 8 and epa_table_name = 'ust_tank_substance'
 order by column_sort_order;
 /*
-"tanks"	
-"Substance"	
-substance_id as substance_id,	
-integer			
-substances	
-substance	
-erg_substance_deagg	
+"tanks"    
+"Substance"    
+substance_id as substance_id,    
+integer            
+substances    
+substance    
+erg_substance_deagg    
 Substance
 */
 
@@ -1342,9 +1343,9 @@ NOTE: ADD facility_id::character varying(50) and tank_id::int!!!!
 */
 create or replace view va_ust.v_ust_tank_substance as 
 select distinct 
-	"tank_facility_id"::character varying(50) as facility_id,
-	c.tank_id as tank_id,
-	sx.substance_id as substance_id
+    "tank_facility_id"::character varying(50) as facility_id,
+    c.tank_id as tank_id,
+    sx.substance_id as substance_id
 from va_ust."tanks" x
 join va_ust.v_ust_tank c on x."index"::int = c.tank_id::int
 left join va_ust.v_substance_xwalk sx on x."contents" = sx.organization_value
@@ -1360,10 +1361,10 @@ select count(*) from va_ust.v_ust_tank_substance;
 --------------------------------------------------------------------------------------------------------------------------
 --ust_compartment
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 8 and epa_table_name = 'ust_compartment'
 order by column_sort_order;
@@ -1430,10 +1431,10 @@ select distinct facility_id,tank_id,compartment_id from va_ust.v_ust_compartment
 
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, programmer_comments, 
-	database_lookup_table, database_lookup_column,
-	--organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name 
+    selected_column, programmer_comments, 
+    database_lookup_table, database_lookup_column,
+    --organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name 
 from v_ust_table_population_sql
 where ust_control_id = 8 and epa_table_name = 'ust_piping'
 order by column_sort_order;
@@ -1499,9 +1500,9 @@ select * from v_ust_piping;
 --check that you didn't miss any columns when creating the data population views:
 --if any rows are returned by this query, fix the appropriate view by adding the missing columns!
 select epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name, 
-	organization_join_table, organization_join_column, 
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name, 
+    organization_join_table, organization_join_column, 
+    deagg_table_name, deagg_column_name
 from v_ust_missing_view_mapping a
 where ust_control_id = 8
 order by 1, 2;
@@ -1513,8 +1514,8 @@ set variables:
 ust_or_release = 'ust' 
 control_id = 11
 export_file_path = None # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None    # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
 
 This script will check the views you just created in the state schema for the following:
 1) Missing views - will check that if you created a child view (for example, v_ust_compartment), that the parent view(s) (for example, v_ust_tank)
@@ -1547,7 +1548,7 @@ then re-run the qa script, and proceed when all errors have been resolved. */
 --------------------------------------------------------------------------------------------------------------------------
 --insert data into the EPA schema 
 
-/*run script populate_epa_data_tables.py	
+/*run script populate_epa_data_tables.py    
 set variables:
 ust_or_release = 'ust' 
 control_id = 11
@@ -1561,20 +1562,20 @@ from v_ust_table_row_count
 where ust_control_id = 8 
 order by sort_order;
 /*
-ust_facility	20321
-ust_tank	70447
-ust_tank_substance	70413
-ust_compartment	70477
-ust_piping	70417
+ust_facility    20321
+ust_tank    70447
+ust_tank_substance    70413
+ust_compartment    70477
+ust_piping    70417
 */
 70442
 
 
-		select distinct ust_compartment_id, piping_id, piping_style_id, piping_material_frp, piping_material_gal_steel, piping_material_stainless_steel, piping_material_steel, piping_material_copper, piping_material_flex, piping_material_no_piping, piping_material_other, piping_material_unknown, piping_flex_connector, piping_corrosion_protection_sacrificial_anode, piping_corrosion_protection_impressed_current, piping_corrosion_protection_other, piping_corrosion_protection_unknown, piping_line_leak_detector, piping_line_test_annual, piping_groundwater_monitoring, piping_vapor_monitoring, piping_interstitial_monitoring, piping_statistical_inventory_reconciliation, piping_release_detection_other, piping_wall_type_id from va_ust.v_ust_piping a 
-										join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = 8) b
-											on a.facility_id = b.facility_id
-										join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
-										join ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id
+        select distinct ust_compartment_id, piping_id, piping_style_id, piping_material_frp, piping_material_gal_steel, piping_material_stainless_steel, piping_material_steel, piping_material_copper, piping_material_flex, piping_material_no_piping, piping_material_other, piping_material_unknown, piping_flex_connector, piping_corrosion_protection_sacrificial_anode, piping_corrosion_protection_impressed_current, piping_corrosion_protection_other, piping_corrosion_protection_unknown, piping_line_leak_detector, piping_line_test_annual, piping_groundwater_monitoring, piping_vapor_monitoring, piping_interstitial_monitoring, piping_statistical_inventory_reconciliation, piping_release_detection_other, piping_wall_type_id from va_ust.v_ust_piping a 
+                                        join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = 8) b
+                                            on a.facility_id = b.facility_id
+                                        join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
+                                        join ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id
 
 
 
@@ -1600,12 +1601,12 @@ select * from public.v_ust_piping where "FacilityID" = '1018286' and "TankID" = 
 set variables:
 control_id = 8
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-data_only = False 			# Set to False to export full template including mapping and reference tabs
-template_only = False 		# Set to False to export data and mapping tabs as well as reference tab
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+data_only = False             # Set to False to export full template including mapping and reference tabs
+template_only = False         # Set to False to export data and mapping tabs as well as reference tab
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -1615,10 +1616,10 @@ export_file_name = None		# If export_file_path and export_file_dir/export_file_n
 set variables:
 control_id = 8
 ust_or_release = 'ust' 
-organization_id = None  	# Can leave as None if you specify the control_id
-export_file_path = None 	# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_dir = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
-export_file_name = None		# If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
+organization_id = None      # Can leave as None if you specify the control_id
+export_file_path = None     # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_dir = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo
+export_file_name = None        # If export_file_path and export_file_dir/export_file_name are None, defaults to exporting to export directory of repo*/
 
 --------------------------------------------------------------------------------------------------------------------------
 
@@ -1628,3 +1629,423 @@ export_file_name = None		# If export_file_path and export_file_dir/export_file_n
 */
 
 
+
+
+
+
+
+select * from tank_material_descriptions;
+
+
+select * from tank_secondary_containments 
+
+
+select * from ust_control where organization_id = 'VA'
+8
+
+select * from v_ust_element_mapping 
+where ust_control_id = 8
+and epa_column_name = 'tank_secondary_containment_id'
+
+update ust_element_value_mapping 
+set epa_value = 'Double wall'
+where ust_element_value_mapping_id = 2462;
+
+select distinct secondary_containment
+from va_ust.vw_va_tank_secondary_containment
+
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value )
+values (2846,'tank_material_polyethylene_tank_jacket','Jacketed')
+
+select * from tank_secondary_containments 
+
+select * from information_schema.columns 
+where table_schema = 'va_ust'
+and column_name like '%poly%'
+
+
+select * from ust_element_mapping where ust_control_id = 8
+and organization_table_name like 'erg%'
+
+
+update ust_element_mapping
+set organization_table_name = 'vw_va_tank_materials' 
+where ust_control_id = 8 and organization_table_name = 'erg_va_tank_materials';
+
+update ust_element_mapping
+set organization_table_name = 'vw_va_tank_secondary_containment' 
+where ust_control_id = 8 and organization_table_name = 'erg_va_tank_secondary_containment';
+
+update ust_element_mapping
+set organization_table_name = 'vw_tank_spill_bucket_wall' 
+where ust_control_id = 8 and organization_table_name = 'erg_tank_spill_bucket_wall';
+
+
+
+select * from v_ust_element_mapping 
+where ust_control_id = 8
+and epa_column_name like '%spill%'
+
+
+delete from ust_element_value_mapping 
+where ust_element_mapping_id = 2872;
+
+select * From ust_element_mapping where ust_element_mapping_id = 2872;
+
+delete from ust_element_mapping where  ust_element_mapping_id = 2872;
+
+
+drop view va_ust.v_ust_compartment
+drop view va_ust.v_ust_compartment_orig;
+
+drop view va_ust.v_ust_tank_substance_orig;
+
+
+select * from v_view_names
+where schema_name = 'public'
+
+select * from ust_elements_tables 
+
+select * from ust_template_lookup_tables 
+
+select * from ust_element_lookup_tables 
+
+select * from release_element_lookup_tables;
+
+
+create table release_element_lookup_tables 
+(release_element_lookup_table_id int generated always as identity,
+database_lookup_table varchar(100), 
+id_column_name varchar(100),
+description_column_name varchar(100),
+template_lookup_page varchar(1));
+
+select * From information_schema.tables 
+where table_schema = 'public' and table_name like '%s'
+and table_name not in (select database_lookup_table from ust_element_lookup_tables)
+order by table_name;
+
+insert into release_element_lookup_tables (database_lookup_table, id_column_name, description_column_name)
+values ('causes','cause_id','cause');
+insert into release_element_lookup_tables (database_lookup_table, id_column_name, description_column_name)
+values ('corrective_action_strategies','corrective_action_strategy_id','corrective_action_strategy');
+insert into release_element_lookup_tables (database_lookup_table, id_column_name, description_column_name)
+values ('sources','source_id','source');
+insert into release_element_lookup_tables (database_lookup_table, id_column_name, description_column_name)
+values ('substances','substance_id','substance');
+
+select * from release_element_lookup_tables;
+
+select * from dispenser_udc_wall_types
+
+insert into ust_element_lookup_tables (database_lookup_table, id_column_name, description_column_name)
+values ('dispenser_udc_wall_types','dispenser_udc_wall_type_id','dispenser_udc_wall_type');
+insert into ust_element_lookup_tables (database_lookup_table, id_column_name, description_column_name)
+values ('cert_of_installations','cert_of_installation_id','cert_of_installation');
+
+select * from ust_elements where element_name like '%ert%'
+
+
+select 'facility_types' as table_name, 'facility_type_id' as column_name, facility_type as epa_value from facility_types
+
+select 'select ''' || database_lookup_table || ''' as table_name, ''' || id_column_name || ''' as column_name, ' || 
+    description_column_name || ' as epa_value from public.' || database_lookup_table || ' union all '
+from ust_element_lookup_tables
+order by database_lookup_table;
+
+
+select 'select ''' || database_lookup_table || ''' as table_name, ''' || id_column_name || ''' as column_name, ' || 
+    description_column_name || ' as epa_value from public.' || database_lookup_table || ' union all '
+from release_element_lookup_tables
+order by database_lookup_table;
+
+create view public.vw_lookup_values as 
+select 'cert_of_installations' as table_name, 'cert_of_installation_id' as column_name, cert_of_installation as epa_value from public.cert_of_installations union all 
+select 'compartment_statuses' as table_name, 'compartment_status_id' as column_name, compartment_status as epa_value from public.compartment_statuses union all 
+select 'coordinate_sources' as table_name, 'coordinate_source_id' as column_name, coordinate_source as epa_value from public.coordinate_sources union all 
+select 'dispenser_udc_wall_types' as table_name, 'dispenser_udc_wall_type_id' as column_name, dispenser_udc_wall_type as epa_value from public.dispenser_udc_wall_types union all 
+select 'facility_types' as table_name, 'facility_type_id' as column_name, facility_type as epa_value from facility_types union all 
+select 'owner_types' as table_name, 'owner_type_id' as column_name, owner_type as epa_value from public.owner_types union all 
+select 'pipe_tank_top_sump_wall_types' as table_name, 'pipe_tank_top_sump_wall_type_id' as column_name, pipe_tank_top_sump_wall_type as epa_value from public.pipe_tank_top_sump_wall_types union all 
+select 'piping_styles' as table_name, 'piping_style_id' as column_name, piping_style as epa_value from public.piping_styles union all 
+select 'piping_wall_types' as table_name, 'piping_wall_type_id' as column_name, piping_wall_type as epa_value from public.piping_wall_types union all 
+select 'spill_bucket_wall_types' as table_name, 'spill_bucket_wall_type_id' as column_name, spill_bucket_wall_type as epa_value from public.spill_bucket_wall_types union all 
+select 'substances' as table_name, 'substance_id' as column_name, substance as epa_value from public.substances union all 
+select 'tank_locations' as table_name, 'tank_location_id' as column_name, tank_location as epa_value from public.tank_locations union all 
+select 'tank_material_descriptions' as table_name, 'tank_material_description_id' as column_name, tank_material_description as epa_value from public.tank_material_descriptions union all 
+select 'tank_secondary_containments' as table_name, 'tank_secondary_containment_id' as column_name, tank_secondary_containment as epa_value from public.tank_secondary_containments union all 
+select 'tank_statuses' as table_name, 'tank_status_id' as column_name, tank_status as epa_value from public.tank_statuses union all 
+select 'causes' as table_name, 'cause_id' as column_name, cause as epa_value from public.causes union all 
+select 'corrective_action_strategies' as table_name, 'corrective_action_strategy_id' as column_name, corrective_action_strategy as epa_value from public.corrective_action_strategies union all 
+select 'sources' as table_name, 'source_id' as column_name, source as epa_value from public.sources;
+
+
+select * from vw_lookup_values where epa_value like '%uction%'
+
+
+
+select database_column_name, table_name
+from ust_elements a join ust_elements_tables b on a.element_id = b.element_id
+where element_name like '%uction%'
+safe_suction    ust_piping
+american_suction    ust_piping
+
+
+select * from v_ust_element_mapping 
+where ust_control_id = 8
+and organization_value = 'NO VALVE SUCTION'
+
+select * from ust_element_mapping 
+where ust_control_id = 8
+and epa_table_name = 'ust_piping'
+order by 1 desc;
+
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic )
+values (8, 'ust_piping','safe_suction','ustpipematerials','piping_type','when piping_type = "NO VALVE SUCTION" then "Y"');
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic )
+values (8, 'ust_piping','american_suction','ustpipematerials','piping_type','when piping_type = "VALVE SUCTION" then "Y"');
+
+
+
+insert into ust_element_value_mapping(ust_element_mapping_id, organization_value, epa_value) 
+values (4151,'NO VALVE SUCTION','Y');
+insert into ust_element_value_mapping(ust_element_mapping_id, organization_value, epa_value) 
+values (4152,'VALVE SUCTION','Y');
+
+
+
+If any Tank Materials are Jacketed, need to add "Jacketed" here.  
+
+There are over 1000 tank_rd_IM_Secondary containment values as opposed to 
+6 Tank_ Material_Secondary_ Containment. 
+
+Suggest using the tank_rd_IM_secondary_containment for this data field. 
+Map anything listed as “Secondary Containment” as Double Walled. 
+(Note there are more double wall entrys under tank materials than tank_rd_IM-DW so keep the DW data using tank materials.)  
+
+In general, Tank "Secondary Containment" should be mapped to Double Wall.
+
+
+select tank_material_secondary_containment, count(*)
+from va_ust.usttankmaterials
+group by tank_material_secondary_containment
+
+Y    396
+N    74151
+    30
+
+select * from information_schema.columns 
+where table_schema = 'va_ust' and column_name like '%im%'
+
+select tank_rd_im_secondary_containment, count(*)
+from va_ust.usttankpipereleasedetection
+group by tank_rd_im_secondary_containment    
+
+Y    1122
+N    73394
+    36
+
+select count(*) from 
+(select distinct tank_facility_id, tank_number
+from  va_ust.usttankpipereleasedetection
+where tank_rd_im_secondary_containment = 'Y') x;
+1122
+
+select count(*) from 
+(select distinct tank_facility_id, tank_number
+from  va_ust.usttankmaterials
+where tank_material_secondary_containment = 'Y') x;
+396
+
+select distinct a.tank_facility_id, a.tank_number,
+    a.tank_rd_im_secondary_containment, b.tank_rd_im_secondary_containment,
+    a.tank_status, b.tank_status 
+from va_ust.usttankpipereleasedetection a join va_ust.usttankpipereleasedetection b 
+    on a.tank_facility_id = b.tank_facility_id and a.tank_number = b.tank_number 
+where a.tank_rd_im_secondary_containment < b.tank_rd_im_secondary_containment
+
+select count(*) from (
+select distinct a.tank_facility_id, a.tank_number, a.tank_material_secondary_containment, b.tank_rd_im_secondary_containment
+from va_ust.usttankmaterials a join va_ust.usttankpipereleasedetection b 
+    on a.tank_facility_id = b.tank_facility_id and a.tank_number = b.tank_number
+where a.tank_material_secondary_containment = b.tank_rd_im_secondary_containment
+and a.tank_material_secondary_containment = 'Y') x;
+911
+212
+
+select 911 + 212;
+
+
+select distinct a.tank_facility_id, a.tank_number
+from va_ust.usttankmaterials a join va_ust.usttankpipereleasedetection b 
+    on a.tank_facility_id = b.tank_facility_id and a.tank_number = b.tank_number
+where a.tank_material_secondary_containment = 'Y'
+ and b.tank_rd_im_secondary_containment = 'Y'
+184
+
+
+select * from v_ust_element_mapping 
+where ust_control_id = 8
+and epa_column_name = 'spill_prevention_other'
+
+where overfill_other_specify <>  not required
+
+delete from ust_element_mapping where ust_element_mapping_id = 2861;
+
+
+
+select * from v_ust_element_mapping 
+where ust_control_id = 8
+and epa_column_name like '%intersti%'
+
+select * from information_schema.columns 
+where table_schema = 'va_ust'
+and column_name like '%tank%im%'
+
+create or replace view va_ust.vw_interstitial_monitoring as
+select distinct tank_facility_id, tank_number,
+    tank_rd_im_double_walled, tank_rd_im_secondary_containment,
+    'Y' as tank_intersitial_monitoring 
+from va_ust.usttankpipereleasedetection 
+where tank_rd_im_double_walled = 'Y' or tank_rd_im_secondary_containment = 'Y';
+
+update ust_element_mapping 
+set organization_table_name = 'vw_interstitial_monitoring', 
+    organization_column_name = 'tank_intersitial_monitoring',
+    programmer_comments = 'Created view to combine all rows where tank_rd_im_double_walled or tank_rd_im_secondary_containment = "Y"',
+    query_logic = 'create or replace view va_ust.vw_interstitial_monitoring as
+select distinct tank_facility_id, tank_number,
+    tank_rd_im_double_walled, tank_rd_im_secondary_containment,
+    ''Y'' as tank_intersitial_monitoring 
+from va_ust.usttankpipereleasedetection 
+where tank_rd_im_double_walled = ''Y'' or tank_rd_im_secondary_containment = ''Y'';'
+where ust_element_mapping_id = 2863;
+
+select *
+from v_ust_mapping 
+where ust_control_id = 8
+and epa_column_name like 'piping_line_test_annual'
+
+select *
+from v_ust_mapping 
+where ust_control_id = 8
+and epa_column_name like 'piping_style%'
+
+
+select * from ust_elements where element_name like 'PipingLineTest%'
+piping_line_test_annual
+piping_line_test3yr
+
+PRESSURE
+
+update ust_element_mapping 
+set query_logic = 'where ustpipematerials.piping_type like ''%SUCTION%'''
+where ust_element_mapping_id = 2912;
+
+insert into ust_element_mapping 
+    (ust_control_id, epa_table_name, epa_column_name, 
+    organization_table_name, organization_column_name, 
+    query_logic)
+values (8,'ust_piping','piping_line_test3yr','usttankpipereleasedetection','pipe_rd_tightness_testing',
+ 'where ustpipematerials.piping_type like ''%PRESSURE%''');
+
+
+
+
+select * from ma_release.vw_release_causes where cause is null;
+
+select distinct cause
+from ma_release.vw_release_causes
+order by 1;
+Damage to dispenser
+Delivery overfill
+Delivery problem
+Human error
+Motor vehicle accident
+Other
+Piping failure
+Spill bucket failure
+Tank corrosion
+Tank damage
+Tank Damage
+Tank removal
+Unknown
+Weather/natural disaster
+
+select table_name
+from information_schema.tables 
+where table_schema = 'public' and table_name like 'v%map%' 
+order by 1;
+
+alter view v_releease_mapping rename to v_release_mapping
+
+select * from v_release_mapping 
+where organization_id = 'MA'
+and epa_column_name = 'source_id'
+
+
+
+select * from v_release_mapping
+where epa_value = 'Other or mixture'
+and epa_column_name <> 'substance_id';
+
+
+update release_element_value_mapping 
+set epa_value = 'Other'
+where epa_value = 'Other or mixture' and 
+release_element_mapping_id in 
+    (select release_element_mapping_id 
+    from release_element_mapping 
+    where epa_column_name <> 'substance_id');
+
+select * from corrective_action_strategies
+
+update corrective_action_strategies 
+set corrective_action_strategy  = 'Air sparging or bio sparging'
+where corrective_action_strategy = 'Air sparging/bio sparging';
+
+update corrective_action_strategies 
+set corrective_action_strategy  = 'Air sparging and soil vapor extraction'
+where corrective_action_strategy = 'Air sparging/soil vapor extraction';
+
+select * from v_release_mapping where epa_value = 'Air sparging/bio sparging'
+
+update release_element_value_mapping 
+set epa_value = 'Air sparging or bio sparging' 
+where epa_value = 'Air sparging/bio sparging'
+
+
+select * from substances where substance_group = 'Diesel'
+
+update substances set substance = 'Diesel blend (b-unknown)' where substance = 'Diesel Blend (b-unknown)';
+
+
+update release_element_value_mapping set epa_value = 'Diesel blend (b-unknown)' where epa_value = 'Diesel Blend (b-unknown)';
+update ust_element_value_mapping set epa_value = 'Diesel blend (b-unknown)' where epa_value = 'Diesel Blend (b-unknown)';
+
+update release_element_value_mapping set epa_value = 'ASTM D975 diesel (known 100% renewable diesel)' 
+where organization_value = 'Diesel fuel (b-unknown)'
+
+
+update ust_element_value_mapping set epa_value = 'ASTM D975 diesel (known 100% renewable diesel)' 
+where organization_value = 'Diesel fuel (b-unknown)'
+
+
+select * from ma_release."MassDEP BWSC Notes"
+
+
+select * from corrective_action_strategies ;
+
+
+update corrective_action_strategies set corrective_action_strategy = 'Enhanced vacuum recovery (vacuum truck events with or without surfactant injection/recovery)'
+where corrective_action_strategy = 'Enhanced vacuum recovery (vacuum truck events with or without surfactant injection/recovery'
+
+update release_element_value_mapping set epa_value = 'Enhanced vacuum recovery (vacuum truck events with or without surfactant injection/recovery)'
+where epa_value = 'Enhanced vacuum recovery (vacuum truck events with or without surfactant injection/recovery'
+
+
+
+
+select * from v_ust_release where "ReleaseID" = '97.052'
+
+select * from v_ust_release_substance where  "ReleaseID" = '97.052'

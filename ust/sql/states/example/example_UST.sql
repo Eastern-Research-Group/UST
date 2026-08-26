@@ -69,80 +69,80 @@ order by table_name;
 
  */
 CREATE TABLE example."Facilities" (
-	"Facility ID" varchar(100) NULL,
-	"Facility Name" varchar(100) NULL,
-	"Address" varchar(100) NULL,
-	"City" varchar(100) NULL,
-	"Zip Code" int4 NULL,
-	"Latitude" float8 NULL,
-	"Longitude" float8 NULL,
-	"Owner Name" varchar(100) NULL
+    "Facility ID" varchar(100) NULL,
+    "Facility Name" varchar(100) NULL,
+    "Address" varchar(100) NULL,
+    "City" varchar(100) NULL,
+    "Zip Code" int4 NULL,
+    "Latitude" float8 NULL,
+    "Longitude" float8 NULL,
+    "Owner Name" varchar(100) NULL
 );
 CREATE TABLE example."Tanks" (
-	"Facility Id" varchar(100) NULL,
-	"Tank Name" varchar(100) NULL,
-	"Tank Status Id" int4 NULL,
-	"Closure Date" date NULL,
-	"Install Date" date NULL,
-	"Tank Substance" varchar(100) NULL,
-	"Tank Type" varchar(100) NULL
+    "Facility Id" varchar(100) NULL,
+    "Tank Name" varchar(100) NULL,
+    "Tank Status Id" int4 NULL,
+    "Closure Date" date NULL,
+    "Install Date" date NULL,
+    "Tank Substance" varchar(100) NULL,
+    "Tank Type" varchar(100) NULL
 );
 CREATE TABLE example."Tank Piping" (
-	"Facility Id" varchar(100) NULL,
-	"Tank Name" varchar(100) NULL,
-	"Piping Material Id" int4 NULL
+    "Facility Id" varchar(100) NULL,
+    "Tank Name" varchar(100) NULL,
+    "Piping Material Id" int4 NULL
 );
 create table example."Dispensers" (
-	"Facility Id" varchar(100) NULL, 
-	"Tank name" varchar(100) NULL, 
-	"UDC" varchar(1) NULL
+    "Facility Id" varchar(100) NULL, 
+    "Tank name" varchar(100) NULL, 
+    "UDC" varchar(1) NULL
 );
 CREATE TABLE example."Tank Status Lookup" (
-	"Tank Status ID" int4 NULL,
-	"Tank Status Desc" varchar(100) NULL
+    "Tank Status ID" int4 NULL,
+    "Tank Status Desc" varchar(100) NULL
 );
 CREATE TABLE example."Piping Material Lookup" (
-	"Piping Material ID" int4 NULL,
-	"Piping Material Desc" varchar(100) NULL
+    "Piping Material ID" int4 NULL,
+    "Piping Material Desc" varchar(100) NULL
 );
 INSERT INTO example."Tank Status Lookup" ("Tank Status ID","Tank Status Desc") VALUES
-	 (1,'Open'),
-	 (2,'Temporarily Closed'),
-	 (3,'Closed');
+     (1,'Open'),
+     (2,'Temporarily Closed'),
+     (3,'Closed');
 INSERT INTO example."Piping Material Lookup" ("Piping Material ID","Piping Material Desc") VALUES
-	 (1,'Fiberglass Reinforced Plastic'),
-	 (2,'Copper'),
-	 (3,'Stainless Steel'),
-	 (4,'Steel'),
-	 (5,'Flex Piping'),
-	 (6,'Other');
+     (1,'Fiberglass Reinforced Plastic'),
+     (2,'Copper'),
+     (3,'Stainless Steel'),
+     (4,'Steel'),
+     (5,'Flex Piping'),
+     (6,'Other');
 INSERT INTO example."Facilities" ("Facility ID","Facility Name","Address","City","Zip Code","Latitude","Longitude","Owner Name") VALUES
-	 ('ABCD1234','Gomez Gas','123 Main St.','Berkeley',95294,37.871666,-122.272781,'Gomez Gasoline Incorporated'),
-	 ('WXYZ8877','Gas Station #1','7654 40th St','Santa Cruz',98765,36.974117,122.030792,'Luna Petrol');
+     ('ABCD1234','Gomez Gas','123 Main St.','Berkeley',95294,37.871666,-122.272781,'Gomez Gasoline Incorporated'),
+     ('WXYZ8877','Gas Station #1','7654 40th St','Santa Cruz',98765,36.974117,122.030792,'Luna Petrol');
 INSERT INTO example."Tanks" ("Facility Id","Tank Name","Tank Status Id","Closure Date","Install Date","Tank Substance","Tank Type") VALUES
-	 ('WXYZ8877','C',1,NULL,'2016-03-17','Diesel','AST'),
-	 ('ABCD1234','Tank #2',1,NULL,'2000-05-24','Unleaded Gasoline, Antifreeze, Racing Gasoline','UST'),
-	 ('ABCD1234','Tank #3',1,NULL,'2018-09-15','Premium Gasoline, Motor Oil','UST'),
-	 ('WXYZ8877','A',1,NULL,'1999-11-23','Premium Gasoline, Used Motor Oil','UST'),
-	 ('WXYZ8877','B',2,NULL,'2003-11-24','Diesel','UST'),
-	 ('ABCD1234','Tank #1',3,'2024-04-13','1978-06-04','Leaded Gasoline','UST');
+     ('WXYZ8877','C',1,NULL,'2016-03-17','Diesel','AST'),
+     ('ABCD1234','Tank #2',1,NULL,'2000-05-24','Unleaded Gasoline, Antifreeze, Racing Gasoline','UST'),
+     ('ABCD1234','Tank #3',1,NULL,'2018-09-15','Premium Gasoline, Motor Oil','UST'),
+     ('WXYZ8877','A',1,NULL,'1999-11-23','Premium Gasoline, Used Motor Oil','UST'),
+     ('WXYZ8877','B',2,NULL,'2003-11-24','Diesel','UST'),
+     ('ABCD1234','Tank #1',3,'2024-04-13','1978-06-04','Leaded Gasoline','UST');
 INSERT INTO example."Tank Piping" ("Facility Id","Tank Name","Piping Material Id") VALUES
-	 ('ABCD1234','Tank #1',4),
-	 ('ABCD1234','Tank #2',1),
-	 ('ABCD1234','Tank #2',3),
-	 ('ABCD1234','Tank #2',6),
-	 ('ABCD1234','Tank #3',2),
-	 ('WXYZ8877','A',6),
-	 ('WXYZ8877','B',5),
-	 ('WXYZ8877','B',1);
+     ('ABCD1234','Tank #1',4),
+     ('ABCD1234','Tank #2',1),
+     ('ABCD1234','Tank #2',3),
+     ('ABCD1234','Tank #2',6),
+     ('ABCD1234','Tank #3',2),
+     ('WXYZ8877','A',6),
+     ('WXYZ8877','B',5),
+     ('WXYZ8877','B',1);
 INSERT INTO example."Dispensers" ("Facility Id","Tank name","UDC") VALUES
-	 ('ABCD1234','Tank #1','N'),
-	 ('ABCD1234','Tank #2','Y'),
-	 ('ABCD1234','Tank #3','Y'),
-	 ('WXYZ8877','A','Y'),
-	 ('WXYZ8877','B','N'),
-	 ('WXYZ8877','C','Y');
-	
+     ('ABCD1234','Tank #1','N'),
+     ('ABCD1234','Tank #2','Y'),
+     ('ABCD1234','Tank #3','Y'),
+     ('WXYZ8877','A','Y'),
+     ('WXYZ8877','B','N'),
+     ('WXYZ8877','C','Y');
+    
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -254,7 +254,7 @@ order by 1;
 /* Table example.ust_element_mapping documents the mapping of the source data elements
  * to the EPA template data elements. 
  * Go through each generated SQL statement and do the following:
- * 	1) If there is no matching column in the state's data, delete the SQL statement.
+ *     1) If there is no matching column in the state's data, delete the SQL statement.
  *  2) If there is a matching column in the state's data, update the ORG_TAB_NAME
  *     and ORG_COL_NAME variables to match the state's data. 
  *  3) If you have questions or comments about the mapping, replace "null" with your 
@@ -274,17 +274,17 @@ order by 1;
  *     in table "facilities" and column "fr_type", with a list of possible values like
  *     ["credit", "guarantee", "local gov't", "self insurance", "state fund", "other"]. 
  *     Map EPA fields financial_responsibility_obtained,
- * 	   financial_responsibility_letter_of_credit, financial_responsibility_guarantee,
- * 	   financial_responsibility_local_government_financial_test, 
- * 	   financial_responsibility_self_insurance_financial_test, and financial_responsibility_other_method
+ *        financial_responsibility_letter_of_credit, financial_responsibility_guarantee,
+ *        financial_responsibility_local_government_financial_test, 
+ *        financial_responsibility_self_insurance_financial_test, and financial_responsibility_other_method
  *     ALL to state column "fr_type", and set the programmer_comments field as follows:
- *     financial_responsibility_obtained: "if not null then 'Yes'"	      
- * 	   financial_responsibility_letter_of_credit: "if = 'credit' then 'Yes'"	
- *     financial_responsibility_guarantee: "if = 'guarantee' then 'Yes'"	
- *     financial_responsibility_local_government_financial_test: "if = 'local gov't' then 'Yes'"	
- *     financial_responsibility_self_insurance_financial_test: "if = 'self insurance' then 'Yes'"	
+ *     financial_responsibility_obtained: "if not null then 'Yes'"          
+ *        financial_responsibility_letter_of_credit: "if = 'credit' then 'Yes'"    
+ *     financial_responsibility_guarantee: "if = 'guarantee' then 'Yes'"    
+ *     financial_responsibility_local_government_financial_test: "if = 'local gov't' then 'Yes'"    
+ *     financial_responsibility_self_insurance_financial_test: "if = 'self insurance' then 'Yes'"    
  *     financial_responsibility_state_fund: "if = 'state fun' then 'Yes'"
- * 	   financial_responsibility_other_method: "if = 'state fund' then 'Yes'"	
+ *        financial_responsibility_other_method: "if = 'state fund' then 'Yes'"    
  * After you've adjusted all the SQL statements for elements you are able to map and deleted those
  * you can't, run the SQL statements to perform the inserts.  
  * 
@@ -325,8 +325,8 @@ order by 1;
  * For examples of how to do this, run this query:
  * 
 select ust_control_id, epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name,
-	organization_join_table, organization_join_column
+    organization_table_name, organization_column_name,
+    organization_join_table, organization_join_column
 from example.ust_element_mapping
 where organization_join_table is not null 
 order by 1, 2, 3, 4, 5;
@@ -349,8 +349,8 @@ order by 1;
  * populated for these fields. 
 
 select ust_control_id, epa_table_name, epa_column_name, 
-	organization_table_name, organization_column_name,
-	deagg_table_name, deagg_column_name
+    organization_table_name, organization_column_name,
+    deagg_table_name, deagg_column_name
 from example.ust_element_mapping
 where deagg_table_name is not null 
 order by 1, 2, 3, 4, 5;
@@ -389,7 +389,7 @@ values (1,'ust_tank','facility_id','Tanks','Facility Id',null);
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (1,'ust_tank','tank_name','Tanks','Tank Name',null);
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments,
-	organization_join_table, organization_join_column, organization_join_fk) 
+    organization_join_table, organization_join_column, organization_join_fk) 
 values (1,'ust_tank','tank_status_id','Tank Status Lookup','Tank Status Desc', null, 'Tanks','Tank Status Id','Tank Status ID');
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (1,'ust_tank','tank_closure_date','Tanks','Closure Date',null);
@@ -421,45 +421,45 @@ insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_col
 values (1,'ust_compartment','tank_name','Tanks','Tank Name',null);
 --NOTE: Compartment Status is a required field. If the state does not report compartments, use the same element mapping as Tank Status
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments,
-	organization_join_table, organization_join_column, organization_join_fk) 
+    organization_join_table, organization_join_column, organization_join_fk) 
 values (1,'ust_compartment','compartment_status_id','Tank Status Lookup','Tank Status Desc', 
-		'State does not report compartments; copied from Tank Status', 'Tanks','Tank Status Id','Tank Status ID');
-	
+        'State does not report compartments; copied from Tank Status', 'Tanks','Tank Status Id','Tank Status ID');
+    
 --ust_piping: This table is OPTIONAL, do not map if there is no piping data in the source data
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
 values (1,'ust_piping','facility_id','Tank Piping','Facility Id',null);
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments) 
-values (1,'ust_piping','tank_name','Tank Piping','Tank Name',null);	
+values (1,'ust_piping','tank_name','Tank Piping','Tank Name',null);    
 --NOTE: Piping ID is a required field but if there is no INTEGER field in the source data that uniquely identifies each
 --piping run per Facility/Tank (non-compartment states) or Facility/Tank/Compartment (compartment states),
 --we will be constructing a Piping ID in a later step so don't map it now.
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments,
-	organization_join_table, organization_join_column, organization_join_fk) 
+    organization_join_table, organization_join_column, organization_join_fk) 
 values (1,'ust_piping','piping_material_frp','Piping Material Lookup','Piping Material Desc',
         'if "Piping Material Desc" = "Fiberglass Reinforced Plastic" then "Yes"',
        'Tank Piping','Piping Material Id','Piping Material ID');
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments,
-	organization_join_table, organization_join_column, organization_join_fk) 
+    organization_join_table, organization_join_column, organization_join_fk) 
 values (1,'ust_piping','piping_material_stainless_steel','Piping Material Lookup','Piping Material Desc',
         'if "Piping Material Desc" = "Stainless Steel" then "Yes"',
        'Tank Piping','Piping Material Id','Piping Material ID');
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments,
-	organization_join_table, organization_join_column, organization_join_fk) 
+    organization_join_table, organization_join_column, organization_join_fk) 
 values (1,'ust_piping','piping_material_steel','Piping Material Lookup','Piping Material Desc',
         'if "Piping Material Desc" = "Steel" then "Yes"',
        'Tank Piping','Piping Material Id','Piping Material ID');
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments,
-	organization_join_table, organization_join_column, organization_join_fk) 
+    organization_join_table, organization_join_column, organization_join_fk) 
 values (1,'ust_piping','piping_material_copper','Piping Material Lookup','Piping Material Desc',
         'if "Piping Material Desc" = "Copper" then "Yes"',
        'Tank Piping','Piping Material Id','Piping Material ID');
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments,
-	organization_join_table, organization_join_column, organization_join_fk) 
+    organization_join_table, organization_join_column, organization_join_fk) 
 values (1,'ust_piping','piping_material_flex','Piping Material Lookup','Piping Material Desc',
         'if "Piping Material Desc" = "Flex Piping" then "Yes"',
        'Tank Piping','Piping Material Id','Piping Material ID');
 insert into example.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments,
-	organization_join_table, organization_join_column, organization_join_fk) 
+    organization_join_table, organization_join_column, organization_join_fk) 
 values (1,'ust_piping','piping_material_other','Piping Material Lookup','Piping Material Desc',
         'if "Piping Material Desc" = "Other" then "Yes"',
        'Tank Piping','Piping Material Id','Piping Material ID');
@@ -488,9 +488,9 @@ values (1,'ust_tank_dispenser','dispenser_udc','Dispensers','UDC','If "Y" then "
  * in this format, and then perform the deaggregation if necessary. 
  * Set the following variables before running the script:
  
-ust_or_release = 'ust' 			# valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # valid values are 'ust' or 'release'
 control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = True 			# Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
+only_incomplete = True             # Boolean, set to True to restrict the output to EPA columns that have not yet been value mapped or False to output mapping for all columns
 
  * If - and only if - this script identifies possible aggregrated data, it will output SQL file in the repo at
  * /ust/sql/XX/UST/example_deagg.sql). Open the generated file in your database console and step through it.  
@@ -512,17 +512,17 @@ only_incomplete = True 			# Boolean, set to True to restrict the output to EPA c
  * manipulating them!)
 
 select epa_column_name from 
-	(select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
-	from example.v_ust_needed_mapping 
-	where ust_control_id = 1 and mapping_complete = 'N'
-	order by table_sort_order, column_sort_order) x;
+    (select distinct epa_table_name, epa_column_name, table_sort_order, column_sort_order
+    from example.v_ust_needed_mapping 
+    where ust_control_id = 1 and mapping_complete = 'N'
+    order by table_sort_order, column_sort_order) x;
  
  * To generate the SQL that will assist you in doing the value mapping, run the script 
  * generate_value_mapping.sql. Set the following variables before running the script:
  
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 1                 # Enter an integer that is the ust_control_id or release_control_id
-only_incomplete = False 		# Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
+only_incomplete = False         # Boolean, defaults to True. Set to False to output mapping for all columns regardless if mapping was previously done. 
 
  * 
  * This script will output a SQL file (located by default in the repo at 
@@ -539,7 +539,7 @@ only_incomplete = False 		# Boolean, defaults to True. Set to False to output ma
  * Run script org_mapping_xwalks.py to create crosswalk views for all lookup tables.
  * Set these variables in the script:
  
-ust_or_release = 'ust' 			# Valid values are 'ust' or 'release'
+ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 1                  # Enter an integer that is the ust_control_id or release_control_id
   
  * To see the crosswalk views after running the script:
@@ -560,9 +560,9 @@ and table_name like '%_xwalk' order by 1;
  * are missing and to create an ERG table containing generated IDs if necessary. 
  * Set these variables in the script:
 
-ust_or_release = 'ust' 			 # Valid values are 'ust' or 'release' 
+ust_or_release = 'ust'              # Valid values are 'ust' or 'release' 
 control_id = 1                   # Enter an integer that is the ust_control_id
-drop_existing = False 		     # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
+drop_existing = False              # Boolean, defaults to False. Set to True to drop the table if it exists before creating it new.
 write_sql = True                 # Boolean, defaults to True. If True, writes a SQL script recording the queries it ran to generate the tables.
 overwrite_sql_file = False       # Boolean, defaults to False. Set to True to overwrite an existing SQL file if it exists. This parameter has no effect if write_sql = False. 
 
@@ -578,7 +578,7 @@ overwrite_sql_file = False       # Boolean, defaults to False. Set to True to ov
 --check to see if the script generated any tables 
 select epa_table_name, epa_column_name, organization_table_name 
 from example.v_ust_element_mapping a join public.ust_template_data_tables b 
-	on a.epa_table_name = b.table_name 
+    on a.epa_table_name = b.table_name 
 where ust_control_id = 1 and organization_table_name like 'erg%'
 order by sort_order;
 

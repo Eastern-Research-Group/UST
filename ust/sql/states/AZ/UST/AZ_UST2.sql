@@ -6,7 +6,7 @@ where ust_control_id = 14
 and epa_column_name like 'owner%'
 
 update ust_element_mapping set organization_comments = 
-	'Per the state, federal government and military, and state government and military, are combined. To distinguish them, look at Owner Name. Create a crosswalk based on Owner Name and send to state for review.'
+    'Per the state, federal government and military, and state government and military, are combined. To distinguish them, look at Owner Name. Create a crosswalk based on Owner Name and send to state for review.'
 where ust_element_mapping_id = 568;
 
 select * from ust_element_value_mapping 
@@ -18,17 +18,17 @@ select * from v_ust_element_mapping where  ust_element_mapping_id = 568;
 drop table az_ust.erg_ower_type_military_mapping cascade;
 
 select distinct "OwnerType", "FacilityOwnerCompanyName",
-	case when "FacilityOwnerCompanyName" like '%NATIONAL%GUARD%' then 'Y'
-	     when "FacilityOwnerCompanyName" like '%AIR FORCE%' then 'Y'
-	     when "FacilityOwnerCompanyName" like '%ARMY%' then 'Y'
-	     when "FacilityOwnerCompanyName" like '%NAVY%' then 'Y'
-	     when "FacilityOwnerCompanyName" like '%NAVAL%' then 'Y'
-		 when "FacilityOwnerCompanyName" like '%USAF%' then 'Y'
-		 when "FacilityOwnerCompanyName" like '%USMC%' then 'Y'
-	     when "FacilityOwnerCompanyName" like '%USAG FORT HUACHUCA%' then 'Y'
-	     when "FacilityOwnerCompanyName" like '%USANG AIR NATL AZ 162 TAC FTR GP%' then 'Y'
-	     when "FacilityOwnerCompanyName" like '%ARIZONA DEPARTMENT OF EMERGENCY AND MILITARY AFFAIRS%' then 'Y'
-	 else 'N' end "MilitaryFlag"
+    case when "FacilityOwnerCompanyName" like '%NATIONAL%GUARD%' then 'Y'
+         when "FacilityOwnerCompanyName" like '%AIR FORCE%' then 'Y'
+         when "FacilityOwnerCompanyName" like '%ARMY%' then 'Y'
+         when "FacilityOwnerCompanyName" like '%NAVY%' then 'Y'
+         when "FacilityOwnerCompanyName" like '%NAVAL%' then 'Y'
+         when "FacilityOwnerCompanyName" like '%USAF%' then 'Y'
+         when "FacilityOwnerCompanyName" like '%USMC%' then 'Y'
+         when "FacilityOwnerCompanyName" like '%USAG FORT HUACHUCA%' then 'Y'
+         when "FacilityOwnerCompanyName" like '%USANG AIR NATL AZ 162 TAC FTR GP%' then 'Y'
+         when "FacilityOwnerCompanyName" like '%ARIZONA DEPARTMENT OF EMERGENCY AND MILITARY AFFAIRS%' then 'Y'
+     else 'N' end "MilitaryFlag"
 into az_ust.erg_ower_type_military_mapping 
 from az_ust.ust_facility 
 where "OwnerType" is not null and "OwnerType" in ('Federal Government','State Government')
@@ -36,11 +36,11 @@ order by 1, 2;
 
 create view az_ust.v_owner_type_mapping as
 select distinct "FacilityID", a."FacilityOwnerCompanyName", 
-	case when b."MilitaryFlag" = 'Y' then 'Military' 
-	     when b."MilitaryFlag" = 'N' then b."OwnerType" || ' - Non Military'
-	 else a."OwnerType" end "OwnerType"
+    case when b."MilitaryFlag" = 'Y' then 'Military' 
+         when b."MilitaryFlag" = 'N' then b."OwnerType" || ' - Non Military'
+     else a."OwnerType" end "OwnerType"
 from az_ust.ust_facility a left join az_ust.erg_ower_type_military_mapping b 
-	on a."FacilityOwnerCompanyName" = b."FacilityOwnerCompanyName" and a."OwnerType" = b."OwnerType"
+    on a."FacilityOwnerCompanyName" = b."FacilityOwnerCompanyName" and a."OwnerType" = b."OwnerType"
 where a."OwnerType" is not null;
 
 
@@ -58,30 +58,30 @@ select * from ust_element_mapping where ust_element_mapping_id = 568;
 
 update ust_element_mapping 
 set organization_table_name = 'v_owner_type_mapping', 
-	organization_column_name = 'OwnerType',
-	programmer_comments = 'select distinct "OwnerType", "FacilityOwnerCompanyName",
-	case when "FacilityOwnerCompanyName" like ''%NATIONAL%GUARD%'' then ''Y''
-	     when "FacilityOwnerCompanyName" like ''%AIR FORCE%'' then ''Y''
-	     when "FacilityOwnerCompanyName" like ''%ARMY%'' then ''Y''
-	     when "FacilityOwnerCompanyName" like ''%NAVY%'' then ''Y''
-	     when "FacilityOwnerCompanyName" like ''%NAVAL%'' then ''Y''
-		 when "FacilityOwnerCompanyName" like ''%USAF%'' then ''Y''
-		 when "FacilityOwnerCompanyName" like ''%USMC%'' then ''Y''
-	     when "FacilityOwnerCompanyName" like ''%USAG FORT HUACHUCA%'' then ''Y''
-	     when "FacilityOwnerCompanyName" like ''%USANG AIR NATL AZ 162 TAC FTR GP%'' then ''Y''
-	     when "FacilityOwnerCompanyName" like ''%ARIZONA DEPARTMENT OF EMERGENCY AND MILITARY AFFAIRS%'' then ''Y''
-	 else ''N'' end "MilitaryFlag"
+    organization_column_name = 'OwnerType',
+    programmer_comments = 'select distinct "OwnerType", "FacilityOwnerCompanyName",
+    case when "FacilityOwnerCompanyName" like ''%NATIONAL%GUARD%'' then ''Y''
+         when "FacilityOwnerCompanyName" like ''%AIR FORCE%'' then ''Y''
+         when "FacilityOwnerCompanyName" like ''%ARMY%'' then ''Y''
+         when "FacilityOwnerCompanyName" like ''%NAVY%'' then ''Y''
+         when "FacilityOwnerCompanyName" like ''%NAVAL%'' then ''Y''
+         when "FacilityOwnerCompanyName" like ''%USAF%'' then ''Y''
+         when "FacilityOwnerCompanyName" like ''%USMC%'' then ''Y''
+         when "FacilityOwnerCompanyName" like ''%USAG FORT HUACHUCA%'' then ''Y''
+         when "FacilityOwnerCompanyName" like ''%USANG AIR NATL AZ 162 TAC FTR GP%'' then ''Y''
+         when "FacilityOwnerCompanyName" like ''%ARIZONA DEPARTMENT OF EMERGENCY AND MILITARY AFFAIRS%'' then ''Y''
+     else ''N'' end "MilitaryFlag"
 into az_ust.erg_ower_type_military_mapping 
 from az_ust.ust_facility 
 where "OwnerType" is not null and "OwnerType" in (''Federal Government'',''State Government'')
 order by 1, 2;
 create view az_ust.v_owner_type_mapping as
 select distinct "FacilityID", a."FacilityOwnerCompanyName", 
-	case when b."MilitaryFlag" = ''Y'' then ''Military'' 
-	     when b."MilitaryFlag" = ''N'' then b."OwnerType" || '' - Non Military''
-	 else a."OwnerType" end "OwnerType"
+    case when b."MilitaryFlag" = ''Y'' then ''Military'' 
+         when b."MilitaryFlag" = ''N'' then b."OwnerType" || '' - Non Military''
+     else a."OwnerType" end "OwnerType"
 from az_ust.ust_facility a left join az_ust.erg_ower_type_military_mapping b 
-	on a."FacilityOwnerCompanyName" = b."FacilityOwnerCompanyName" and a."OwnerType" = b."OwnerType"
+    on a."FacilityOwnerCompanyName" = b."FacilityOwnerCompanyName" and a."OwnerType" = b."OwnerType"
 where a."OwnerType" is not null;'
 where ust_element_mapping_id = 568;
 

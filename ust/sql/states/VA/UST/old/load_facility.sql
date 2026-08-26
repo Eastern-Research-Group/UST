@@ -13,25 +13,25 @@ ANALYZE va_ust."registered_petroleum_tank_facilities";
 --select * from public.v_ust_available_mapping where ust_control_id =8;
 
 insert
-	into
-	public.ust_facility(facility_id,
-	owner_type_id,
-	facility_name,
-	facility_type1,
-	facility_address1,
-	facility_address2,
-	facility_city,
-	facility_zip_code,
-	facility_state,
-	facility_latitude,
-	facility_longitude,
-	facility_owner_company_name,
-	ust_control_id,
-	facility_epa_region) 
+    into
+    public.ust_facility(facility_id,
+    owner_type_id,
+    facility_name,
+    facility_type1,
+    facility_address1,
+    facility_address2,
+    facility_city,
+    facility_zip_code,
+    facility_state,
+    facility_latitude,
+    facility_longitude,
+    facility_owner_company_name,
+    ust_control_id,
+    facility_epa_region) 
 select
-	*
+    *
 from
-	vw_va_ust_facility;
+    vw_va_ust_facility;
 
 commit;
 

@@ -1,13 +1,7 @@
-from datetime import datetime
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
+from datetime import UTC, datetime
 
-from python.util import utils
-from python.util.logger_factory import logger
-
+from ust.python.util import utils
+from ust.python.util.logger_factory import logger
 
 organization_id = ''                    # Enter the two-character code for the state, or "TRUSTD" for the tribes database 
 ust_or_release = ''                     # Valid values are 'ust' or 'release'
@@ -23,8 +17,8 @@ class ControlTable:
                  ust_or_release,
                  organization_id, 
                  data_source, 
-                 date_received=datetime.today(), 
-                 date_processed=datetime.today(), 
+                 date_received=None, 
+                 date_processed=None, 
                  comments=None,
                  organization_compartment_flag=None):
 
@@ -34,11 +28,11 @@ class ControlTable:
         if date_received:
             self.date_received = date_received
         else:
-            self.date_received = datetime.today()
+            self.date_received = datetime.now(tz=UTC)
         if date_processed:
             self.date_processed = date_processed
         else:
-            self.date_processed = datetime.today()
+            self.date_processed = datetime.now(tz=UTC)
         self.comments = comments
         self.organization_compartment_flag = organization_compartment_flag
         self.control_id = None

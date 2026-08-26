@@ -2,16 +2,16 @@
 7085 WINCHESTER RD & BUDDY WILIAMSON, NEW MARKET, AL, 35761, US
 
 create or replace function parse_address(address_string varchar, address_part varchar) returns varchar as $$
-	declare 
-		r varchar;
-	begin
-		case when address_part = 'street' then 
-			r = charindex(',', address_string, (charindex(',', address_string, 1))+1)
-		end case;
-		return r;
-	end;
+    declare 
+        r varchar;
+    begin
+        case when address_part = 'street' then 
+            r = charindex(',', address_string, (charindex(',', address_string, 1))+1)
+        end case;
+        return r;
+    end;
 $$ LANGUAGE SQL;
-	
+    
 select parse_address('7085 WINCHESTER RD & BUDDY WILIAMSON, NEW MARKET, AL, 35761, US', 'street')
 
 
@@ -23,7 +23,7 @@ NEW MARKET
 AL
 35761
 
-charindex('_', [TEXT], (charindex('_', [TEXT], 1))+1)	
+charindex('_', [TEXT], (charindex('_', [TEXT], 1))+1)    
 
 
 select distinct s."Address", split_part(s."Address", ', ',3) from "USTSites" s 
@@ -37,12 +37,12 @@ select distinct "Site Types" from "USTSites" u
 
 --zip
 select "Address",
-		split_part(s."Address", ', ',1) as "FacilityAddress1",
-		case when (char_length("Address")-char_length(replace("Address",', ','')))/char_length(', ' ) = 5 
+        split_part(s."Address", ', ',1) as "FacilityAddress1",
+        case when (char_length("Address")-char_length(replace("Address",', ','')))/char_length(', ' ) = 5 
             then split_part(s."Address", ', ',2) end as "FacilityAddress2",
-		case when (char_length("Address")-char_length(replace("Address",', ','')))/char_length(', ' ) = 4 
+        case when (char_length("Address")-char_length(replace("Address",', ','')))/char_length(', ' ) = 4 
             then split_part(s."Address", ', ',3) else split_part(s."Address", ', ',4) end as "FacilityState",
-		case when (char_length("Address")-char_length(replace("Address",', ','')))/char_length(', ' ) = 4 
+        case when (char_length("Address")-char_length(replace("Address",', ','')))/char_length(', ' ) = 4 
             then split_part(s."Address", ', ',4) else split_part(s."Address", ', ',5) end as "FacilityZipCode"
 from "USTSites" s
  where "Address" = '3300 CRESTWOOD BLVD, SUITE 104, IRONDALE, AL, 35210, US'
@@ -76,12 +76,12 @@ create table substance_mapping(al_substance varchar(400), epa_substance varchar(
 
 
 select t."Petroleum Product", count(*) from "UTanks" t where  t."Petroleum Product" not in 
-	(select al_substance from substance_mapping sm)
+    (select al_substance from substance_mapping sm)
 group by t."Petroleum Product";
 
 delete from substance_mapping;
 
-insert into substance_mapping values ('Other, DEF - 	Diesel Exhaust Fluid','Diesel exhaust fluid (DEF, not federally regulated)');
+insert into substance_mapping values ('Other, DEF -     Diesel Exhaust Fluid','Diesel exhaust fluid (DEF, not federally regulated)');
 insert into substance_mapping values ('100% biodiesel (Not Regulated)','100% biodiesel (not federally regulated)');
 insert into substance_mapping values ('Aviation fuel (JP-4; etc.)','Unknown aviation gas or jet fuel');
 insert into substance_mapping values ('Diesel containing greater than 20% biodiesel','Diesel blend containing greater than 20% and less than 99% biodiesel');

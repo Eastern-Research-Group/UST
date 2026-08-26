@@ -1,20 +1,31 @@
+import os
+
 import pandas as pd
-from sodapy import Socrata
 
 # Unauthenticated client only works with public data sets. Note 'None'
 # in place of application token, and no username or password:
 # client = Socrata("data.ny.gov", None)
 
-# Example authenticated client (needed for non-public datasets):
-client = Socrata('data.ny.gov',
-                 'VU8AUug91OeDZmzjHhXB4KCaz',
-                 username="renae.myers@erg.com",
-                 password="TiggerSims1019!")
+def get_client():
+    try:
+        from sodapy import Socrata
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError('NY_API requires the sodapy package to be installed.') from exc
 
-# First 2000 results, returned as JSON from API / converted to Python list of
-# dictionaries by sodapy.
-results = client.get("pteg-c78n", limit=2000)
+    app_token = os.getenv('NY_SOCRATA_APP_TOKEN')
+    username = os.getenv('NY_SOCRATA_USERNAME')
+    password = os.getenv('NY_SOCRATA_PASSWORD')
 
-# Convert to pandas DataFrame
-results_df = pd.DataFrame.from_records(results)
-print(results_df)
+    if app_token and username and password:
+        return Socrata('data.ny.gov', app_token, username=username, password=password)
+    return Socrata('data.ny.gov', None)
+
+def main():
+    client = get_client()
+    results = client.get('pteg-c78n', limit=2000)
+    results_df = pd.DataFrame.from_records(results)
+    print(results_df)
+
+
+if __name__ == '__main__':
+    main()

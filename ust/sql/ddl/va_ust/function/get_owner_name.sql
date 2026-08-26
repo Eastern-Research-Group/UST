@@ -6,17 +6,17 @@ AS $function$
 Declare  
  return_id varchar;  
  return_name varchar;
-	
+    
 Begin  
-	select max("Owner_ID")
-	into return_id
-	from va_ust.owner_data
-	where "Fac_Id" = fac_id;
+    select max("Owner_ID")
+    into return_id
+    from va_ust.owner_data
+    where "Fac_Id" = fac_id;
 
-	select "Owner_Name"
-	into return_name
-	from va_ust.owner_data
-	where "Owner_ID" = return_id;
+    select "Owner_Name"
+    into return_name
+    from va_ust.owner_data
+    where "Owner_ID" = return_id;
 
    return return_name;  
 End;  

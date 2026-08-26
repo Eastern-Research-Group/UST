@@ -325,13 +325,13 @@ Third party (well water, vapor instrusion, etc.)
  * If you have any questions about the mapping, replace "null" with your question or comment. See below for a list of the valid EPA values.
  */
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (616, 'At tank removal', 'At tank system closure/removal',  'OUST key vocabulary mapping'	);
+values (616, 'At tank removal', 'At tank system closure/removal',  'OUST key vocabulary mapping'    );
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (616, 'GW monitoring well', 'Groundwater monitoring',  'OUST key vocabulary mapping'	);
+values (616, 'GW monitoring well', 'Groundwater monitoring',  'OUST key vocabulary mapping'    );
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (616, 'Inspection', 'Compliance inspection',  'OUST key vocabulary mapping'	);
+values (616, 'Inspection', 'Compliance inspection',  'OUST key vocabulary mapping'    );
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (616, 'Interstial monitor', 'Interstitial monitoring',  'OUST key vocabulary mapping'	);
+values (616, 'Interstial monitor', 'Interstitial monitoring',  'OUST key vocabulary mapping'    );
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (616, 'Other', 'Other', null);
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -339,7 +339,7 @@ values (616, 'Statistical inventory Reconciliation (SIR)', 'Statistical Inventor
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (616, 'Tank tightness testing', 'Tank tightness testing', null);
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (616, 'Third party (well water, vapor instrusion, etc.)', 'Off-site impact/third party (general)',  'OUST key vocabulary mapping'	);
+values (616, 'Third party (well water, vapor instrusion, etc.)', 'Off-site impact/third party (general)',  'OUST key vocabulary mapping'    );
 
 delete from  public.release_element_value_mapping where 
  release_element_mapping_id = 616 and organization_value  = 'Third party (well water, vapor instrusion, etc.)'
@@ -598,7 +598,7 @@ values (613, 'Damage to dispenser', 'Damage to dispenser', null);
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (613, 'Delivery overfill', 'Delivery overfill', null);
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (613, 'Delivery problem', 'Delivery overfill', 'OUST key vocabulary mapping'	);
+values (613, 'Delivery problem', 'Delivery overfill', 'OUST key vocabulary mapping'    );
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (613, 'Human error', 'Human error', null);
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
@@ -620,7 +620,7 @@ values (613, 'Tank removal', 'Tank removal', null);
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (613, 'Unknown', 'Unknown', null);
 insert into public.release_element_value_mapping (release_element_mapping_id, organization_value, epa_value, programmer_comments)
-values (613, 'Weather/natural disaster', 'Weather/natural disaster (i.e., hurricane, flooding, fire, earthquake)',  'OUST key vocabulary mapping'	);
+values (613, 'Weather/natural disaster', 'Weather/natural disaster (i.e., hurricane, flooding, fire, earthquake)',  'OUST key vocabulary mapping'    );
 
 --select cause from public.causes;
 /* Valid EPA values are:

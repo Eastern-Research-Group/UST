@@ -10,22 +10,22 @@ values ('TRUSTD','2023-07-21','2023-07-21','TrUSTD Oracle database on EPA server
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  left join (select land_location_id, land_use_type_desc from 
-				(select a.land_location_id, b.land_use_type_desc,
-					row_number() over (partition by a.land_location_id order by a.date_observed) rn 
-			     from "TRUSTD_UST".ut_land_use_hist a join "TRUSTD_UST".ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
-			     where a.end_date is null) w where rn = 2) luh2 on ll.land_location_id = luh2.land_location_id
+                (select a.land_location_id, b.land_use_type_desc,
+                    row_number() over (partition by a.land_location_id order by a.date_observed) rn 
+                 from "TRUSTD_UST".ut_land_use_hist a join "TRUSTD_UST".ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
+                 where a.end_date is null) w where rn = 2) luh2 on ll.land_location_id = luh2.land_location_id
 
 select land_location_id , count(*)
 from "TRUSTD_UST".ut_land_use_hist 
-where end_date is null 	     
-group by land_location_id having count(*) > 1;			     
+where end_date is null          
+group by land_location_id having count(*) > 1;                 
 
 select b.land_use_type_desc, a.* 
 from "TRUSTD_UST".ut_land_use_hist  a join "TRUSTD_UST".ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
 where land_location_id in  
-	(select land_location_id from "TRUSTD_UST".ut_land_use_hist 
-	where end_date is null 	     
-	group by land_location_id having count(*) > 1)
+    (select land_location_id from "TRUSTD_UST".ut_land_use_hist 
+    where end_date is null          
+    group by land_location_id having count(*) > 1)
 and end_date is null order by land_location_id ;
 --there are very few facilities with multiple current land uses, and of those few, many are actually both the same (gas station usually) so not going to do a FacilityType2
 
@@ -36,24 +36,24 @@ and end_date is null order by land_location_id ;
 create or replace view "TRUSTD_UST".v_most_recent_land_use_type as
 select b.land_location_id, b.land_use_type_id 
 from 
-	(select land_location_id, max(coalesce(date_observed,'2023-01-01')) as date_observed from "TRUSTD_UST".ut_land_use_hist 
-	where end_date is null group by land_location_id) a 
-	join "TRUSTD_UST".ut_land_use_hist b 
-		on a.land_location_id = b.land_location_id 
-			and coalesce(a.date_observed,'2023-01-01') = coalesce(b.date_observed,'2023-01-01')
-			and b.end_date is null;
+    (select land_location_id, max(coalesce(date_observed,'2023-01-01')) as date_observed from "TRUSTD_UST".ut_land_use_hist 
+    where end_date is null group by land_location_id) a 
+    join "TRUSTD_UST".ut_land_use_hist b 
+        on a.land_location_id = b.land_location_id 
+            and coalesce(a.date_observed,'2023-01-01') = coalesce(b.date_observed,'2023-01-01')
+            and b.end_date is null;
 
 create or replace view "TRUSTD_UST".v_ut_tank_system as 
 select b.* from 
 (select facility_id, tank_name, max(coalesce(date_installed,current_date::text)) date_installed 
 from "TRUSTD_UST".ut_tank_system group by facility_id, tank_name) a join "TRUSTD_UST".ut_tank_system b  
-	on a.facility_id = b.facility_id and a.tank_name = b.tank_name and a.date_installed = coalesce(b.date_installed,current_date::text);	
-		
+    on a.facility_id = b.facility_id and a.tank_name = b.tank_name and a.date_installed = coalesce(b.date_installed,current_date::text);    
+        
 create or replace view "TRUSTD_UST".v_tank_status as 
 select distinct facility_id, tank_name, 
-	case when tank_status = 'Permanently Out of Use' then 
-		case when closure_status_desc in ('Tank closed in place','Tank removed','Tank removed from ground') then closure_status_desc end 
-	else tank_status end as tank_status
+    case when tank_status = 'Permanently Out of Use' then 
+        case when closure_status_desc in ('Tank closed in place','Tank removed','Tank removed from ground') then closure_status_desc end 
+    else tank_status end as tank_status
 from "TRUSTD_UST".v_ut_tank_system ;
 
 drop view "TRUSTD_UST".v_tank_attributes cascade;
@@ -94,13 +94,13 @@ from "TRUSTD_UST".ut_tank_system_comp, unnest(string_to_array(substances, ':')) 
 create or replace view "TRUSTD_UST".v_compartments as
 select tank_system_id, num_compartments, case when compartmentalized is not null or num_compartments > 1 then 'Yes' end as compartmentalized
 from 
-	(select a.tank_system_id, case when b.tank_system_id is not null then 'Yes' end as compartmentalized, num_compartments
-	from (select tank_system_id, count(*) as num_compartments from "TRUSTD_UST".ut_tank_system_comp group by tank_system_id) a 
-		left join 
-		(select tank_system_id 
-		 from "TRUSTD_UST".v_tank_attributes x 
-		 	join "TRUSTD_UST".ut_tank_attribute_type y on x.ut_tank_attribute_type_id::int = y.ut_tank_attribute_type_id
-		 where ut_tank_attribute_desc = 'Compartmentalized') b on a.tank_system_id = b.tank_system_id) c;
+    (select a.tank_system_id, case when b.tank_system_id is not null then 'Yes' end as compartmentalized, num_compartments
+    from (select tank_system_id, count(*) as num_compartments from "TRUSTD_UST".ut_tank_system_comp group by tank_system_id) a 
+        left join 
+        (select tank_system_id 
+         from "TRUSTD_UST".v_tank_attributes x 
+             join "TRUSTD_UST".ut_tank_attribute_type y on x.ut_tank_attribute_type_id::int = y.ut_tank_attribute_type_id
+         where ut_tank_attribute_desc = 'Compartmentalized') b on a.tank_system_id = b.tank_system_id) c;
 
  
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -597,13 +597,13 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	
+    
          
 select * from ust_elements;
 
 select * from "TRUSTD_UST".ut_facility;
 select * From "TRUSTD_UST".ut_land_location;
-select * from "TRUSTD_UST".ut_land_use_hist;	     
+select * from "TRUSTD_UST".ut_land_use_hist;         
 
 
 
@@ -620,57 +620,57 @@ drop view "TRUSTD_UST".v_ust_base;
 
 create or replace view "TRUSTD_UST".v_ust_base as
 select distinct 
-	f.land_location_id::text as "FacilityID", --use land_location_id instead of facility_id per OUST
+    f.land_location_id::text as "FacilityID", --use land_location_id instead of facility_id per OUST
     left(f.facility_desc,100) as "FacilityName",
-	ot.epa_value as "OwnerType",
-	ft.epa_value as "FacilityType1",
-	left(ll.address_1,100) as "FacilityAddress1", 
-	ll.address_2 as "FacilityAddress2", 
-	ll.city as "FacilityCity",
-	ll.zip::text as "FacilityZipCode", 
-	ll.county as "FacilityCounty",
-	left(ll.phone,40) as "FacilityPhoneNumber", 
-	ll.state as "FacilityState",
-	case when rg.region_key like 'R%' then replace(rg.region_key,'R','')::int end as "FacilityEPARegion",
-	case when ll.tribe_owned in ('True','TRUE','Y') or ll.tribe_id is not null then 'Yes' 
-	     when ll.tribe_owned in ('False','FALSE','N') then 'No' else null end as "FacilityTribalSite", 
-	case when ll.tribe is not null and t.current_name is null then left(ll.tribe,200) 
-	     when t.current_name is not null then left(t.current_name,200) else null end as "FacilityTribe",
-	ll.latitude as "FacilityLatitude", 
-	ll.longitude as "FacilityLongitude", 
-	fcs.epa_value as "FacilityCoordinateSource",
-	substr(fo.responsible_entity_name,1,100) as "FacilityOwnerCompanyName", 
-	fo.address_1 as "FacilityOwnerAddress1", 
-	fo.address_2 as "FacilityOwnerAddress2",
-	fo.city as "FacilityOwnerCity",
-	fo.county as "FacilityOwnerCounty", 
-	fo.zip::text as "FacilityOwnerZipCode",
-	fo.state as "FacilityOwnerState", 
-	fo.phone as "FacilityOwnerPhoneNumber",
-	fo.email_addr as "FacilityOwnerEmail",
-	--1:MANY between facility and operator; currently using highest operator ID     
-	substr(fop.facility_operator_name,1,100) as "FacilityOperatorCompanyName", 
-	fop.address_1 as "FacilityOperatorAddress1",
-	fop.address_2 as "FacilityOperatorAddress2",
-	fop.city as "FacilityOperatorCity", 
-	fop.county as "FacilityOperatorCounty", 
-	fop.zip::text as "FacilityOperatorZipCode",
-	fop.state as "FacilityOperatorState",
-	fop.phone as "FacilityOperatorPhoneNumber",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Local Govt. Bond Rating Test' and fr.facility_id = f.facility_id) as "FinancialResponsibilityBondRatingTest",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Insurance' and fr.facility_id = f.facility_id) as "FinancialResponsibilityCommercialInsurance",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Guarantee' and fr.facility_id = f.facility_id) as "FinancialResponsibilityGuarantee",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Letter of Credit' and fr.facility_id = f.facility_id) as "FinancialResponsibilityLetterOfCredit",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Local Govt. Financial Test' and fr.facility_id = f.facility_id) as "FinancialResponsibilityLocalGovernmentFinancialTest",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Risk Retention Group' and fr.facility_id = f.facility_id) as "FinancialResponsibilityRiskRetentionGroup",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Self Insured' and fr.facility_id = f.facility_id) as "FinancialResponsibilitySelfInsuranceFinancialTest",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'State Fund' and fr.facility_id = f.facility_id) as "FinancialResponsibilityStateFund",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Surety Bond' and fr.facility_id = f.facility_id) as "FinancialResponsibilitySuretyBond",
-	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type in ('Trust Fund','Standby Trust Fund') and fr.facility_id = f.facility_id) as "FinancialResponsibilityTrustFund",
-	(select string_agg(distinct fr_type, '; ' order by fr_type) as fr_type from "TRUSTD_UST".ut_financial_responsibility fr where fr_type not in 
-		('Guarantee','Insurance','Letter of Credit','Local Govt. Bond Rating Test','Local Govt. Financial Test','Risk Retention Group',
- 		'Self Insured','Standby Trust Fund','State Fund','Surety Bond','Trust Fund','Govt. Entity: Federal Covered','Govt. Entity: State Covered') and fr.facility_id = f.facility_id) as "FinancialResponsibilityOtherMethod",
- 	(select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type like 'Govt. Entity%' and fr.facility_id = f.facility_id) as "FinancialResponsibilityNotRequired",
+    ot.epa_value as "OwnerType",
+    ft.epa_value as "FacilityType1",
+    left(ll.address_1,100) as "FacilityAddress1", 
+    ll.address_2 as "FacilityAddress2", 
+    ll.city as "FacilityCity",
+    ll.zip::text as "FacilityZipCode", 
+    ll.county as "FacilityCounty",
+    left(ll.phone,40) as "FacilityPhoneNumber", 
+    ll.state as "FacilityState",
+    case when rg.region_key like 'R%' then replace(rg.region_key,'R','')::int end as "FacilityEPARegion",
+    case when ll.tribe_owned in ('True','TRUE','Y') or ll.tribe_id is not null then 'Yes' 
+         when ll.tribe_owned in ('False','FALSE','N') then 'No' else null end as "FacilityTribalSite", 
+    case when ll.tribe is not null and t.current_name is null then left(ll.tribe,200) 
+         when t.current_name is not null then left(t.current_name,200) else null end as "FacilityTribe",
+    ll.latitude as "FacilityLatitude", 
+    ll.longitude as "FacilityLongitude", 
+    fcs.epa_value as "FacilityCoordinateSource",
+    substr(fo.responsible_entity_name,1,100) as "FacilityOwnerCompanyName", 
+    fo.address_1 as "FacilityOwnerAddress1", 
+    fo.address_2 as "FacilityOwnerAddress2",
+    fo.city as "FacilityOwnerCity",
+    fo.county as "FacilityOwnerCounty", 
+    fo.zip::text as "FacilityOwnerZipCode",
+    fo.state as "FacilityOwnerState", 
+    fo.phone as "FacilityOwnerPhoneNumber",
+    fo.email_addr as "FacilityOwnerEmail",
+    --1:MANY between facility and operator; currently using highest operator ID     
+    substr(fop.facility_operator_name,1,100) as "FacilityOperatorCompanyName", 
+    fop.address_1 as "FacilityOperatorAddress1",
+    fop.address_2 as "FacilityOperatorAddress2",
+    fop.city as "FacilityOperatorCity", 
+    fop.county as "FacilityOperatorCounty", 
+    fop.zip::text as "FacilityOperatorZipCode",
+    fop.state as "FacilityOperatorState",
+    fop.phone as "FacilityOperatorPhoneNumber",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Local Govt. Bond Rating Test' and fr.facility_id = f.facility_id) as "FinancialResponsibilityBondRatingTest",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Insurance' and fr.facility_id = f.facility_id) as "FinancialResponsibilityCommercialInsurance",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Guarantee' and fr.facility_id = f.facility_id) as "FinancialResponsibilityGuarantee",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Letter of Credit' and fr.facility_id = f.facility_id) as "FinancialResponsibilityLetterOfCredit",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Local Govt. Financial Test' and fr.facility_id = f.facility_id) as "FinancialResponsibilityLocalGovernmentFinancialTest",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Risk Retention Group' and fr.facility_id = f.facility_id) as "FinancialResponsibilityRiskRetentionGroup",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Self Insured' and fr.facility_id = f.facility_id) as "FinancialResponsibilitySelfInsuranceFinancialTest",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'State Fund' and fr.facility_id = f.facility_id) as "FinancialResponsibilityStateFund",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type = 'Surety Bond' and fr.facility_id = f.facility_id) as "FinancialResponsibilitySuretyBond",
+    (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type in ('Trust Fund','Standby Trust Fund') and fr.facility_id = f.facility_id) as "FinancialResponsibilityTrustFund",
+    (select string_agg(distinct fr_type, '; ' order by fr_type) as fr_type from "TRUSTD_UST".ut_financial_responsibility fr where fr_type not in 
+        ('Guarantee','Insurance','Letter of Credit','Local Govt. Bond Rating Test','Local Govt. Financial Test','Risk Retention Group',
+         'Self Insured','Standby Trust Fund','State Fund','Surety Bond','Trust Fund','Govt. Entity: Federal Covered','Govt. Entity: State Covered') and fr.facility_id = f.facility_id) as "FinancialResponsibilityOtherMethod",
+     (select distinct 'Yes' from "TRUSTD_UST".ut_financial_responsibility fr where fr_type like 'Govt. Entity%' and fr.facility_id = f.facility_id) as "FinancialResponsibilityNotRequired",
     ts.tank_name as "TankID", 
     'Yes' as "FederallyRegulated", --we are excluding those that are FALSE.
     tsc.compartment_name as "CompartmentID",
@@ -711,156 +711,156 @@ select distinct
     vm.epa_value as "VaporMonitoring",
     elld.epa_value as "ElectronicLineLeakDetector",
     mlld.epa_value as "MechanicalLineLeakDetector",
-	case when r.release_id is not null then 'Yes' end as "USTReportedRelease",
+    case when r.release_id is not null then 'Yes' end as "USTReportedRelease",
     r.release_id as "AssociatedLUSTID" 
 from
-	"TRUSTD_UST".ut_facility f
-	left join "TRUSTD_UST".v_most_recent_land_use_type lu on f.land_location_id = lu.land_location_id --ERG view to get current land use
-	left join "TRUSTD_UST".ut_land_use_type lut on lut.land_use_type_id  = lu.land_use_type_id --lookup table
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'OwnerType') ot on lut.land_use_type_desc = ot.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'FacilityType1') ft on lut.land_use_type_desc = ft.state_value
-	left join "TRUSTD_UST".ut_land_location ll on f.land_location_id = ll.land_location_id --1:1
-	left join "TRUSTD_UST".ut_tribes t on ll.tribe_id = t.tribe_id
+    "TRUSTD_UST".ut_facility f
+    left join "TRUSTD_UST".v_most_recent_land_use_type lu on f.land_location_id = lu.land_location_id --ERG view to get current land use
+    left join "TRUSTD_UST".ut_land_use_type lut on lut.land_use_type_id  = lu.land_use_type_id --lookup table
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'OwnerType') ot on lut.land_use_type_desc = ot.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'FacilityType1') ft on lut.land_use_type_desc = ft.state_value
+    left join "TRUSTD_UST".ut_land_location ll on f.land_location_id = ll.land_location_id --1:1
+    left join "TRUSTD_UST".ut_tribes t on ll.tribe_id = t.tribe_id
     left join "TRUSTD_UST".st_regions rg on t.region_id = rg.region_id
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'FacilityCoordinateSource') fcs on ll.lat_lon_source = fcs.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'FacilityCoordinateSource') fcs on ll.lat_lon_source = fcs.state_value
     left join (select * from (select fh.facility_id, lre.responsible_entity_name, lre.address_1, lre.address_2, 
-    							     lre.city, lre.state, lre.zip, lre.county, lre.phone, lre.email_addr,
-       				            	 row_number() over (partition by fh.facility_id order by fh.end_date desc nulls first, 
-       				            							fh.date_observed desc nulls last, fh.ut_facility_owner_hist_id desc) rn
-			  				 from "TRUSTD_UST".ut_facility_owner_hist fh 
-			  				 	join "TRUSTD_UST".ut_legally_responsible_entity lre on lre.responsible_entity_id = fh.responsible_entity_id) lre
-			  				 where rn = 1) fo on f.facility_id = fo.facility_id 
+                                     lre.city, lre.state, lre.zip, lre.county, lre.phone, lre.email_addr,
+                                        row_number() over (partition by fh.facility_id order by fh.end_date desc nulls first, 
+                                                               fh.date_observed desc nulls last, fh.ut_facility_owner_hist_id desc) rn
+                               from "TRUSTD_UST".ut_facility_owner_hist fh 
+                                   join "TRUSTD_UST".ut_legally_responsible_entity lre on lre.responsible_entity_id = fh.responsible_entity_id) lre
+                               where rn = 1) fo on f.facility_id = fo.facility_id 
     left join (select c.facility_id, d.* from "TRUSTD_UST".ut_facility_operator d join        
                 (select a.facility_id, facility_operator_id from "TRUSTD_UST".ut_facility_oper_hist a join         
                     (select facility_id, max(ut_facility_oper_hist_id) as ut_facility_oper_hist_id 
                      from "TRUSTD_UST".ut_facility_oper_hist where end_date is null group by facility_id) b        
                         on a.ut_facility_oper_hist_id = b.ut_facility_oper_hist_id) c on c.facility_operator_id = d.facility_operator_id) fop
-            on f.facility_id = fop.facility_id    	
+            on f.facility_id = fop.facility_id        
     left join "TRUSTD_UST".v_ut_tank_system ts on f.facility_id = ts.facility_id
     left join "TRUSTD_UST".ut_tank_system_comp tsc on ts.tank_system_id = tsc.tank_system_id
     left join "TRUSTD_UST".v_compartments vc on tsc.tank_system_id = vc.tank_system_id
     left join "TRUSTD_UST".v_tank_status vts on ts.facility_id = vts.facility_id and ts.tank_name = vts.tank_name
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'TankStatus') tst on vts.tank_status = tst.state_value
-	left join "TRUSTD_UST".v_substances vs on tsc.tank_system_comp_id = vs.tank_system_comp_id
-	left join "TRUSTD_UST".ut_substance_type st on vs.ut_substance_type_id::int = st.ut_substance_type_id 
-	left join (select state_value, epa_value, exclude_from_query from v_ust_element_mapping where control_id = 18 and element_name = 'CompartmentSubstanceStored') css on st.ut_substance_desc = css.state_value 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'PipingRepaired') pr on tsc.pipe_repaired::text = pr.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'SpillBucketInstalled') sbi on tsc.spill_installed = sbi.state_value
-	left join "TRUSTD_UST".ut_spill_prevention_type spt on tsc.spill_preventions = spt.ut_spill_prevention_type_id
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'SpillBucketWallType') sbwt on spt.ut_spill_prevention_desc = sbwt.state_value
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_id
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
-			   		join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
-			   where a.control_id = 18 and a.element_name = 'TankWallType') twt on ts.tank_system_id = twt.tank_system_id
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_id
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
-			   		join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
-			   where a.control_id = 18 and a.element_name = 'ManifoldedTanks') mt on ts.tank_system_id = mt.tank_system_id
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_id
-				from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
-			   		join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
-				where a.control_id = 18 and a.element_name = 'MaterialDescription') md on ts.tank_system_id = md.tank_system_id
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_id 
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
-			   		join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
-			   where a.control_id = 18 and a.element_name = 'ExcavationLiner') el on ts.tank_system_id = el.tank_system_id	
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_id
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
-			   		join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
-			   where a.control_id = 18 and a.element_name = 'TankCorrosionProtectionImpressedCurrent') tcpic on ts.tank_system_id = tcpic.tank_system_id
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_id 
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
-			   		join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
-			   where a.control_id = 18 and a.element_name = 'TankCorrosionProtectionSacrificialAnode') tcpsa on ts.tank_system_id = tcpsa.tank_system_id				
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_comp_id 
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_piping_attribute_type b on a.state_value = b.ut_piping_attribute_desc 
-			   		join "TRUSTD_UST".v_piping_attributes c on b.ut_piping_attribute_type_id = c.ut_piping_attribute_type_id::int
-			   where a.control_id = 18 and a.element_name = 'PipingMaterialDescription') pmd on tsc.tank_system_comp_id = pmd.tank_system_comp_id	
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_comp_id  
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_piping_attribute_type b on a.state_value = b.ut_piping_attribute_desc 
-			   		join "TRUSTD_UST".v_piping_attributes c on b.ut_piping_attribute_type_id = c.ut_piping_attribute_type_id::int
-			   where a.control_id = 18 and a.element_name = 'PipingWallType') pwt on tsc.tank_system_comp_id = pwt.tank_system_comp_id	
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_comp_id  
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_piping_attribute_type b on a.state_value = b.ut_piping_attribute_desc 
-			   		join "TRUSTD_UST".v_piping_attributes c on b.ut_piping_attribute_type_id = c.ut_piping_attribute_type_id::int
-			   where a.control_id = 18 and a.element_name = 'PipingCorrosionProtectionImpressedCurrent') pcpic on tsc.tank_system_comp_id = pcpic.tank_system_comp_id	
-	left join (select distinct a.state_value, a.epa_value, c.tank_system_comp_id  
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_piping_attribute_type b on a.state_value = b.ut_piping_attribute_desc 
-			   		join "TRUSTD_UST".v_piping_attributes c on b.ut_piping_attribute_type_id = c.ut_piping_attribute_type_id::int
-			   where a.control_id = 18 and a.element_name = 'PipingCorrosionProtectionSacrificialAnode') pcpsa on tsc.tank_system_comp_id = pcpsa.tank_system_comp_id		
-	left join "TRUSTD_UST".v_piping_deliveries vpd on tsc.tank_system_comp_id = vpd.tank_system_comp_id		   
-	left join "TRUSTD_UST".ut_piping_delivery_type pdt on vpd.ut_piping_delivery_type_id::int = pdt.ut_piping_delivery_type_id 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'PipingStyle') ps on pdt.ut_piping_delivery_desc = ps.state_value
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_overfill_protection_type b on a.state_value = b.ut_overfill_protection_desc 
-			   		join "TRUSTD_UST".v_overfill_protections c on b.ut_overfill_protection_type_id = c.ut_overfill_protection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'FlowShutoffDevice') fsd on tsc.tank_system_comp_id = fsd.tank_system_comp_id	
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_overfill_protection_type b on a.state_value = b.ut_overfill_protection_desc 
-			   		join "TRUSTD_UST".v_overfill_protections c on b.ut_overfill_protection_type_id = c.ut_overfill_protection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'BallFloatValve') bfv on tsc.tank_system_comp_id = bfv.tank_system_comp_id	
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_overfill_protection_type b on a.state_value = b.ut_overfill_protection_desc 
-			   		join "TRUSTD_UST".v_overfill_protections c on b.ut_overfill_protection_type_id = c.ut_overfill_protection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'HighLevelAlarm') hla on tsc.tank_system_comp_id = hla.tank_system_comp_id		
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc
-			   		join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'AutomaticTankGauging') atg on tsc.tank_system_comp_id = atg.tank_system_comp_id		
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
-			   		join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'ManualTankGauging') mtg on tsc.tank_system_comp_id = mtg.tank_system_comp_id		
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
-			   		join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'StatisticalInventoryReconciliation') sir on tsc.tank_system_comp_id = sir.tank_system_comp_id		
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
-			   		join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'TankTightnessTesting') ttt on tsc.tank_system_comp_id = ttt.tank_system_comp_id		
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
-			   		join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'GroundwaterMonitoring') gm on tsc.tank_system_comp_id = gm.tank_system_comp_id		
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
-			   		join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'VaporMonitoring') vm on tsc.tank_system_comp_id = vm.tank_system_comp_id		
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
-			   		join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'ElectronicLineLeakDetector') elld on tsc.tank_system_comp_id = elld.tank_system_comp_id		
-	left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
-			   from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
-			   		join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
-			   where a.control_id = 18 and a.element_name = 'MechanicalLineLeakDetector') mlld on tsc.tank_system_comp_id = mlld.tank_system_comp_id		
-	left join (select a.land_location_id, max(a.release_id) as release_id
-				from "TRUSTD_UST".ut_release a join 
-					(select release_id, max(event_date) event_date 
-					from "TRUSTD_UST".ut_release_event re join "TRUSTD_UST".ut_release_event_type ret on re.release_event_type_id = ret.release_event_type_id 
-					where ret.release_event_desc = 'Confirmed Release' and release_id not in 
-						(select release_id from "TRUSTD_UST".ut_release_event re join "TRUSTD_UST".ut_release_event_type ret on re.release_event_type_id = ret.release_event_type_id 
-						where ret.release_event_desc = 'Determination of Non-Jurisdiction')
-					group by release_id) b on a.release_id = b.release_id group by a.land_location_id) r on f.land_location_id = r.land_location_id	
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'TankStatus') tst on vts.tank_status = tst.state_value
+    left join "TRUSTD_UST".v_substances vs on tsc.tank_system_comp_id = vs.tank_system_comp_id
+    left join "TRUSTD_UST".ut_substance_type st on vs.ut_substance_type_id::int = st.ut_substance_type_id 
+    left join (select state_value, epa_value, exclude_from_query from v_ust_element_mapping where control_id = 18 and element_name = 'CompartmentSubstanceStored') css on st.ut_substance_desc = css.state_value 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'PipingRepaired') pr on tsc.pipe_repaired::text = pr.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'SpillBucketInstalled') sbi on tsc.spill_installed = sbi.state_value
+    left join "TRUSTD_UST".ut_spill_prevention_type spt on tsc.spill_preventions = spt.ut_spill_prevention_type_id
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'SpillBucketWallType') sbwt on spt.ut_spill_prevention_desc = sbwt.state_value
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_id
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
+                       join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
+               where a.control_id = 18 and a.element_name = 'TankWallType') twt on ts.tank_system_id = twt.tank_system_id
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_id
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
+                       join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
+               where a.control_id = 18 and a.element_name = 'ManifoldedTanks') mt on ts.tank_system_id = mt.tank_system_id
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_id
+                from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
+                       join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
+                where a.control_id = 18 and a.element_name = 'MaterialDescription') md on ts.tank_system_id = md.tank_system_id
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_id 
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
+                       join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
+               where a.control_id = 18 and a.element_name = 'ExcavationLiner') el on ts.tank_system_id = el.tank_system_id    
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_id
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
+                       join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
+               where a.control_id = 18 and a.element_name = 'TankCorrosionProtectionImpressedCurrent') tcpic on ts.tank_system_id = tcpic.tank_system_id
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_id 
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_tank_attribute_type b on a.state_value = b.ut_tank_attribute_desc 
+                       join "TRUSTD_UST".v_tank_attributes c on b.ut_tank_attribute_type_id = c.ut_tank_attribute_type_id::int
+               where a.control_id = 18 and a.element_name = 'TankCorrosionProtectionSacrificialAnode') tcpsa on ts.tank_system_id = tcpsa.tank_system_id                
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_comp_id 
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_piping_attribute_type b on a.state_value = b.ut_piping_attribute_desc 
+                       join "TRUSTD_UST".v_piping_attributes c on b.ut_piping_attribute_type_id = c.ut_piping_attribute_type_id::int
+               where a.control_id = 18 and a.element_name = 'PipingMaterialDescription') pmd on tsc.tank_system_comp_id = pmd.tank_system_comp_id    
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_comp_id  
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_piping_attribute_type b on a.state_value = b.ut_piping_attribute_desc 
+                       join "TRUSTD_UST".v_piping_attributes c on b.ut_piping_attribute_type_id = c.ut_piping_attribute_type_id::int
+               where a.control_id = 18 and a.element_name = 'PipingWallType') pwt on tsc.tank_system_comp_id = pwt.tank_system_comp_id    
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_comp_id  
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_piping_attribute_type b on a.state_value = b.ut_piping_attribute_desc 
+                       join "TRUSTD_UST".v_piping_attributes c on b.ut_piping_attribute_type_id = c.ut_piping_attribute_type_id::int
+               where a.control_id = 18 and a.element_name = 'PipingCorrosionProtectionImpressedCurrent') pcpic on tsc.tank_system_comp_id = pcpic.tank_system_comp_id    
+    left join (select distinct a.state_value, a.epa_value, c.tank_system_comp_id  
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_piping_attribute_type b on a.state_value = b.ut_piping_attribute_desc 
+                       join "TRUSTD_UST".v_piping_attributes c on b.ut_piping_attribute_type_id = c.ut_piping_attribute_type_id::int
+               where a.control_id = 18 and a.element_name = 'PipingCorrosionProtectionSacrificialAnode') pcpsa on tsc.tank_system_comp_id = pcpsa.tank_system_comp_id        
+    left join "TRUSTD_UST".v_piping_deliveries vpd on tsc.tank_system_comp_id = vpd.tank_system_comp_id           
+    left join "TRUSTD_UST".ut_piping_delivery_type pdt on vpd.ut_piping_delivery_type_id::int = pdt.ut_piping_delivery_type_id 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 18 and element_name = 'PipingStyle') ps on pdt.ut_piping_delivery_desc = ps.state_value
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_overfill_protection_type b on a.state_value = b.ut_overfill_protection_desc 
+                       join "TRUSTD_UST".v_overfill_protections c on b.ut_overfill_protection_type_id = c.ut_overfill_protection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'FlowShutoffDevice') fsd on tsc.tank_system_comp_id = fsd.tank_system_comp_id    
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_overfill_protection_type b on a.state_value = b.ut_overfill_protection_desc 
+                       join "TRUSTD_UST".v_overfill_protections c on b.ut_overfill_protection_type_id = c.ut_overfill_protection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'BallFloatValve') bfv on tsc.tank_system_comp_id = bfv.tank_system_comp_id    
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_overfill_protection_type b on a.state_value = b.ut_overfill_protection_desc 
+                       join "TRUSTD_UST".v_overfill_protections c on b.ut_overfill_protection_type_id = c.ut_overfill_protection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'HighLevelAlarm') hla on tsc.tank_system_comp_id = hla.tank_system_comp_id        
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc
+                       join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'AutomaticTankGauging') atg on tsc.tank_system_comp_id = atg.tank_system_comp_id        
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
+                       join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'ManualTankGauging') mtg on tsc.tank_system_comp_id = mtg.tank_system_comp_id        
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
+                       join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'StatisticalInventoryReconciliation') sir on tsc.tank_system_comp_id = sir.tank_system_comp_id        
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
+                       join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'TankTightnessTesting') ttt on tsc.tank_system_comp_id = ttt.tank_system_comp_id        
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
+                       join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'GroundwaterMonitoring') gm on tsc.tank_system_comp_id = gm.tank_system_comp_id        
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
+                       join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'VaporMonitoring') vm on tsc.tank_system_comp_id = vm.tank_system_comp_id        
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id  
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
+                       join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'ElectronicLineLeakDetector') elld on tsc.tank_system_comp_id = elld.tank_system_comp_id        
+    left join (select a.state_value, a.epa_value, c.tank_system_comp_id   
+               from v_ust_element_mapping a join "TRUSTD_UST".ut_release_detection_type b on a.state_value = b.ut_release_detection_desc 
+                       join "TRUSTD_UST".v_tank_release_detections c on b.ut_release_detection_type_id = c.ut_release_detection_type_id::int 
+               where a.control_id = 18 and a.element_name = 'MechanicalLineLeakDetector') mlld on tsc.tank_system_comp_id = mlld.tank_system_comp_id        
+    left join (select a.land_location_id, max(a.release_id) as release_id
+                from "TRUSTD_UST".ut_release a join 
+                    (select release_id, max(event_date) event_date 
+                    from "TRUSTD_UST".ut_release_event re join "TRUSTD_UST".ut_release_event_type ret on re.release_event_type_id = ret.release_event_type_id 
+                    where ret.release_event_desc = 'Confirmed Release' and release_id not in 
+                        (select release_id from "TRUSTD_UST".ut_release_event re join "TRUSTD_UST".ut_release_event_type ret on re.release_event_type_id = ret.release_event_type_id 
+                        where ret.release_event_desc = 'Determination of Non-Jurisdiction')
+                    group by release_id) b on a.release_id = b.release_id group by a.land_location_id) r on f.land_location_id = r.land_location_id    
 where ll.land_status <> 'Not Indian Country' --per OUST
 and ts.federal_regulated_tank = True 
 and coalesce(css.exclude_from_query,'X') <> 'Y' --exclude non-federally regulated substances
 order by f.land_location_id::text;
-	
+    
 
-			   select pg_get_viewdef('"TRUSTD_UST".v_ust_base', true)
-			   
-select * from ust where organization_id = 'TRUSTD'			   
+               select pg_get_viewdef('"TRUSTD_UST".v_ust_base', true)
+               
+select * from ust where organization_id = 'TRUSTD'               
 
 
 select column_name from information_schema.columns 
-	         where table_schema ='TRUSTD_UST' and table_name = 'v_ust_base'
+             where table_schema ='TRUSTD_UST' and table_name = 'v_ust_base'
              and column_name in ('FacilityName', 'FacilityAddress1', 'FacilityAddress2', 'FacilityCity',
                                  'FacilityCounty', 'FacilityZipCode', 'FacilityLatitude', 'FacilityLongitude',
                                  'SiteName', 'SiteAddress', 'SiteAddress2', 'SiteCity', 'Zipcode', 'County', 'State',
                                  'Latitude', 'Longitude') 
-	         order by ordinal_position
+             order by ordinal_position
 
 
 select * from ust_control;
@@ -899,7 +899,7 @@ select * from ust_geocode where control_id = 15;
 insert into ust_geocode (control_id, organization_id, ust_facilities_id, gc_latitude, gc_longitude, gc_coordinate_source, gc_address_type)
 select b.control_id, b.organization_id, b.ust_facilities_id, a.gc_latitude, a.gc_longitude, a.gc_coordinate_source, a.gc_address_type
 from ust_geocode a join ust_facilities x on a.control_id = x.control_id and x.ust_facilities_id = a.ust_facilities_id 
-	join ust_facilities b on b."FacilityID" = x."FacilityID"
+    join ust_facilities b on b."FacilityID" = x."FacilityID"
 where a.control_id = 15 and b.control_id = 18;
 
 select count(*) from ust_facilities where control_id = 18;
@@ -1092,7 +1092,7 @@ a."FacilityLongitude",
 "USTReportedRelease",
 "AssociatedLUSTID"
 from "TRUSTD_UST".v_ust_base a left join ust_facilities b 
-	on a."FacilityID" = b."FacilityID"
+    on a."FacilityID" = b."FacilityID"
 where b.control_id = 18;
 
 
@@ -1154,7 +1154,7 @@ select * from "TRUSTD_UST".v_ut_tank_system where facility_id = 1694 and tank_na
 6:12:5
 
 select * from "TRUSTD_UST".v_tank_attributes a join "TRUSTD_UST".ut_tank_attribute_type b 
-	on a.ut_tank_attribute_type_id::int = b.ut_tank_attribute_type_id
+    on a.ut_tank_attribute_type_id::int = b.ut_tank_attribute_type_id
 where tank_system_id = 3539;
 
 
@@ -1175,7 +1175,7 @@ select * from v_ust_element_mapping where control_id = 18 and element_name = 'Ma
 
 
 select distinct f.land_location_id as "FacilityID", 
-	f.facility_desc as "FacilityName",  
+    f.facility_desc as "FacilityName",  
     case when luh1.land_use_type_desc in ('Utilities','Commercial Airport or Airline','Industrial','Truck/Transporter',
                                         'Railroad', 'Commercial','Petroleum Distributor','Auto Dealership','Casino',
                                         'Contractor','Hospital','Marina') then 'Commercial'
@@ -1241,7 +1241,7 @@ select distinct f.land_location_id as "FacilityID",
          --1:MANY between facility and operator; currently using highest operator ID     
          substr(fop.facility_operator_name,1,100) as "FacilityOperatorCompanyName", 
          fop.address_1 as "FacilityOperatorAddress1",
-		 fop.address_2 as "FacilityOperatorAddress2",
+         fop.address_2 as "FacilityOperatorAddress2",
          fop.city as "FacilityOperatorCity", 
          fop.county as "FacilityOperatorCounty", 
          fop.zip as "FacilityOperatorZipCode",
@@ -1346,24 +1346,24 @@ select distinct f.land_location_id as "FacilityID",
         r.release_id as "AssociatedLUSTID" --!! does release_id relate to a LUST ID?
 from "TRUSTD_UST".ut_facility f left join "TRUSTD_UST".ut_land_location ll on f.land_location_id = ll.land_location_id
     left join (select land_location_id, land_use_type_desc from 
-				(select a.land_location_id, b.land_use_type_desc,
-					row_number() over (partition by a.land_location_id order by a.date_observed) rn 
-			     from "TRUSTD_UST".ut_land_use_hist a join "TRUSTD_UST".ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
-			     where a.end_date is null) w where rn = 1) luh1 on ll.land_location_id = luh1.land_location_id
+                (select a.land_location_id, b.land_use_type_desc,
+                    row_number() over (partition by a.land_location_id order by a.date_observed) rn 
+                 from "TRUSTD_UST".ut_land_use_hist a join "TRUSTD_UST".ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
+                 where a.end_date is null) w where rn = 1) luh1 on ll.land_location_id = luh1.land_location_id
     left join (select land_location_id, land_use_type_desc from 
-				(select a.land_location_id, b.land_use_type_desc,
-					row_number() over (partition by a.land_location_id order by a.date_observed) rn 
-			     from "TRUSTD_UST".ut_land_use_hist a join "TRUSTD_UST".ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
-			     where a.end_date is null) w where rn = 2) luh2 on ll.land_location_id = luh2.land_location_id
+                (select a.land_location_id, b.land_use_type_desc,
+                    row_number() over (partition by a.land_location_id order by a.date_observed) rn 
+                 from "TRUSTD_UST".ut_land_use_hist a join "TRUSTD_UST".ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
+                 where a.end_date is null) w where rn = 2) luh2 on ll.land_location_id = luh2.land_location_id
     left join "TRUSTD_UST".ut_tribes t on ll.tribe_id = t.tribe_id
     left join "TRUSTD_UST".st_regions rg on t.region_id = rg.region_id
     left join (select * from (select fh.facility_id, lre.responsible_entity_name, lre.address_1, lre.address_2, 
-    							     lre.city, lre.state, lre.zip, lre.county, lre.phone, lre.email_addr,
-       				            	 row_number() over (partition by fh.facility_id order by fh.end_date desc nulls first, 
-       				            							fh.date_observed desc nulls last, fh.ut_facility_owner_hist_id desc) rn
-			  				 from "TRUSTD_UST".ut_facility_owner_hist fh 
-			  				 	join "TRUSTD_UST".ut_legally_responsible_entity lre on lre.responsible_entity_id = fh.responsible_entity_id) lre
-			  				 where rn = 1) fo on f.facility_id = fo.facility_id 
+                                     lre.city, lre.state, lre.zip, lre.county, lre.phone, lre.email_addr,
+                                        row_number() over (partition by fh.facility_id order by fh.end_date desc nulls first, 
+                                                               fh.date_observed desc nulls last, fh.ut_facility_owner_hist_id desc) rn
+                               from "TRUSTD_UST".ut_facility_owner_hist fh 
+                                   join "TRUSTD_UST".ut_legally_responsible_entity lre on lre.responsible_entity_id = fh.responsible_entity_id) lre
+                               where rn = 1) fo on f.facility_id = fo.facility_id 
     left join (select c.facility_id, d.* from "TRUSTD_UST".ut_facility_operator d join        
                 (select a.facility_id, facility_operator_id from "TRUSTD_UST".ut_facility_oper_hist a join         
                     (select facility_id, max(ut_facility_oper_hist_id) as ut_facility_oper_hist_id 
@@ -1380,10 +1380,10 @@ from "TRUSTD_UST".ut_facility f left join "TRUSTD_UST".ut_land_location ll on f.
     left join (select tank_system_id, ':' || pipe_release_detections || ':' as pipe_release_detections from "TRUSTD_UST".ut_tank_system_comp) prd on ts.tank_system_id = prd.tank_system_id
 --    left join (select tank_system_id, case when substances like '%:%' then substr(substances,0,instr(substances,':')-1) else substances end as substances from "TRUSTD_UST".ut_tank_system_comp) sub on ts.tank_system_id = sub.tank_system_id
     left join (select distinct a.land_location_id, a.release_id from "TRUSTD_UST".ut_release a 
-				join (select release_id, max(event_date) from "TRUSTD_UST".ut_release_event 
-				      where release_event_type_id = 2 and release_id not in 
-				      	(select release_id from "TRUSTD_UST".ut_release_event where release_event_type_id = 6)
-				      group by release_id) b on a.release_id = b.release_id) r on f.land_location_id = r.land_location_id 
+                join (select release_id, max(event_date) from "TRUSTD_UST".ut_release_event 
+                      where release_event_type_id = 2 and release_id not in 
+                          (select release_id from "TRUSTD_UST".ut_release_event where release_event_type_id = 6)
+                      group by release_id) b on a.release_id = b.release_id) r on f.land_location_id = r.land_location_id 
 where ll.land_status <> 'Not Indian Country' 
 and ts.federal_regulated_tank = True
 order by 1;
@@ -1410,7 +1410,7 @@ select * from ust_elements
 --ut_financial_responsibility
 
 select count(*) from (
-	select distinct "FacilityID", "TankID", "CompartmentID" from v_ust where organization_id = 'TRUSTD'
+    select distinct "FacilityID", "TankID", "CompartmentID" from v_ust where organization_id = 'TRUSTD'
 ) a;
 
 
@@ -1418,11 +1418,11 @@ select distinct "TANK_STATUS" from "TRUSTD_UST"."UT_TANK_SYSTEM"
 
 select tank_status, count(*) from (
    SELECT DISTINCT F."LAND_LOCATION_ID" AS "FACILITYID", TS."TANK_NAME", TSC."COMPARTMENT_NAME", 
-   		case when ts."TANK_STATUS" in ('Currently in Use', 'Temporarily Out of Use','Abandoned') then 'Active'
-   		     when ts."TANK_STATUS" = 'Permanently Out of Use' then 'Closed' end as tank_status
+           case when ts."TANK_STATUS" in ('Currently in Use', 'Temporarily Out of Use','Abandoned') then 'Active'
+                when ts."TANK_STATUS" = 'Permanently Out of Use' then 'Closed' end as tank_status
    FROM  "TRUSTD_UST"."UT_FACILITY" F LEFT JOIN "TRUSTD_UST"."UT_LAND_LOCATION" LL ON F."LAND_LOCATION_ID" = LL."LAND_LOCATION_ID"
-   		LEFT JOIN "TRUSTD_UST"."UT_TANK_SYSTEM" TS ON F."FACILITY_ID" = TS."FACILITY_ID"
-		LEFT JOIN "TRUSTD_UST"."UT_TANK_SYSTEM_COMP" TSC ON TS."TANK_SYSTEM_ID" = TSC."TANK_SYSTEM_ID"
+           LEFT JOIN "TRUSTD_UST"."UT_TANK_SYSTEM" TS ON F."FACILITY_ID" = TS."FACILITY_ID"
+        LEFT JOIN "TRUSTD_UST"."UT_TANK_SYSTEM_COMP" TSC ON TS."TANK_SYSTEM_ID" = TSC."TANK_SYSTEM_ID"
    WHERE LL."LAND_STATUS" <> 'Not Indian Country'
    AND TS."FEDERAL_REGULATED_TANK" = 'TRUE'
 ) a
@@ -1431,12 +1431,12 @@ group by tank_status;
 drop table temp_trustd;
 
 SELECT DISTINCT F."LAND_LOCATION_ID" AS "FACILITYID", TS."TANK_NAME", TSC."COMPARTMENT_NAME", 
-	case when ts."TANK_STATUS" in ('Currently in Use', 'Temporarily Out of Use','Abandoned') then 'Active'
-   		 when ts."TANK_STATUS" = 'Permanently Out of Use' then 'Closed' end as tank_status
+    case when ts."TANK_STATUS" in ('Currently in Use', 'Temporarily Out of Use','Abandoned') then 'Active'
+            when ts."TANK_STATUS" = 'Permanently Out of Use' then 'Closed' end as tank_status
 into temp_trustd
 FROM  "TRUSTD_UST"."UT_FACILITY" F LEFT JOIN "TRUSTD_UST"."UT_LAND_LOCATION" LL ON F."LAND_LOCATION_ID" = LL."LAND_LOCATION_ID"
-	LEFT JOIN "TRUSTD_UST"."UT_TANK_SYSTEM" TS ON F."FACILITY_ID" = TS."FACILITY_ID"
-	LEFT JOIN "TRUSTD_UST"."UT_TANK_SYSTEM_COMP" TSC ON TS."TANK_SYSTEM_ID" = TSC."TANK_SYSTEM_ID"
+    LEFT JOIN "TRUSTD_UST"."UT_TANK_SYSTEM" TS ON F."FACILITY_ID" = TS."FACILITY_ID"
+    LEFT JOIN "TRUSTD_UST"."UT_TANK_SYSTEM_COMP" TSC ON TS."TANK_SYSTEM_ID" = TSC."TANK_SYSTEM_ID"
 WHERE LL."LAND_STATUS" <> 'Not Indian Country'
 AND TS."FEDERAL_REGULATED_TANK" = 'TRUE';
 
@@ -1446,8 +1446,8 @@ select * from "TRUSTD_UST"."UT_FACILITY"  where "LAND_LOCATION_ID" <> "FACILITY_
        
   select distinct "FacilityID",  "TankID", "CompartmentID"
   from v_ust a where organization_id = 'TRUSTD' and not exists 
-  	(select 1 from temp_trustd b
-  	where a."FacilityID"  = b."FACILITYID"::text and a."TankID" = b."TANK_NAME" and a."CompartmentID" = b."COMPARTMENT_NAME");
+      (select 1 from temp_trustd b
+      where a."FacilityID"  = b."FACILITYID"::text and a."TankID" = b."TANK_NAME" and a."CompartmentID" = b."COMPARTMENT_NAME");
 
 
 select count(*) from temp_trustd;
@@ -1455,15 +1455,15 @@ select count(*) from temp_trustd;
 
 
 select count(*) from (
-	select distinct a.*, f.*, ts.*, tsc.*
-	from temp_trustd a 
-		left join "TRUSTD_UST"."UT_FACILITY" f on a."FACILITYID" = f."FACILITY_ID"
-		left join "TRUSTD_UST"."UT_LAND_LOCATION" LL ON F."LAND_LOCATION_ID" = LL."LAND_LOCATION_ID"
-		left join "TRUSTD_UST"."UT_TANK_SYSTEM" TS ON f."FACILITY_ID" = TS."FACILITY_ID" and a."TANK_NAME" = ts."TANK_NAME"
-		left join "TRUSTD_UST"."UT_TANK_SYSTEM_COMP" TSC ON TS."TANK_SYSTEM_ID" = TSC."TANK_SYSTEM_ID"
-	where LL."LAND_STATUS" <> 'Not Indian Country'
-	AND TS."FEDERAL_REGULATED_TANK" = 'TRUE'
-	order by 1, 2, 3
+    select distinct a.*, f.*, ts.*, tsc.*
+    from temp_trustd a 
+        left join "TRUSTD_UST"."UT_FACILITY" f on a."FACILITYID" = f."FACILITY_ID"
+        left join "TRUSTD_UST"."UT_LAND_LOCATION" LL ON F."LAND_LOCATION_ID" = LL."LAND_LOCATION_ID"
+        left join "TRUSTD_UST"."UT_TANK_SYSTEM" TS ON f."FACILITY_ID" = TS."FACILITY_ID" and a."TANK_NAME" = ts."TANK_NAME"
+        left join "TRUSTD_UST"."UT_TANK_SYSTEM_COMP" TSC ON TS."TANK_SYSTEM_ID" = TSC."TANK_SYSTEM_ID"
+    where LL."LAND_STATUS" <> 'Not Indian Country'
+    AND TS."FEDERAL_REGULATED_TANK" = 'TRUE'
+    order by 1, 2, 3
 ) x;
 5111
 
@@ -1475,24 +1475,24 @@ select * from "TRUSTD_UST"."UT_TANK_SYSTEM" where "FEDERAL_REGULATED_TANK" is nu
        
 select distinct "FacilityID",  "TankID", "CompartmentID"
 from v_ust a where organization_id = 'TRUSTD' and not exists 
-	(select 1 from temp_trustd b
-	where a."FacilityID"  = b."FACILITYID"::text and a."TankID" = b."TANK_NAME" 
-	and a."CompartmentID" = b."COMPARTMENT_NAME");
+    (select 1 from temp_trustd b
+    where a."FacilityID"  = b."FACILITYID"::text and a."TankID" = b."TANK_NAME" 
+    and a."CompartmentID" = b."COMPARTMENT_NAME");
 
-1010	1	1 Compartment
-1010	2a	2a Compartment
-1010	2b	2b Compartment
-1011		
+1010    1    1 Compartment
+1010    2a    2a Compartment
+1010    2b    2b Compartment
+1011        
 select * from "TRUSTD_UST"."UT_FACILITY" where "LAND_LOCATION_ID" = '1010'
 
 
 select * from "TRUSTD_UST"."UT_FACILITY" 
 where "LAND_LOCATION_ID"::text in   
-	(select distinct "FacilityID"
-	from v_ust a where organization_id = 'TRUSTD' and not exists 
-		(select 1 from temp_trustd b
-		where a."FacilityID"  = b."FACILITYID"::text and a."TankID" = b."TANK_NAME" 
-		and a."CompartmentID" = b."COMPARTMENT_NAME"));
+    (select distinct "FacilityID"
+    from v_ust a where organization_id = 'TRUSTD' and not exists 
+        (select 1 from temp_trustd b
+        where a."FacilityID"  = b."FACILITYID"::text and a."TankID" = b."TANK_NAME" 
+        and a."CompartmentID" = b."COMPARTMENT_NAME"));
 
 
 select * from "TRUSTD_UST"."UT_TANK_SYSTEM" where "TANK_NAME" 
@@ -1512,6 +1512,6 @@ select count(*) from "TRUSTD_UST"."UT_TANK_SYSTEM_COMP"
 
 delete
 from ust where organization_id = 'TRUSTD' and "FacilityID" in 
-	(select "FACILITY_ID"::text from "TRUSTD_UST"."UT_FACILITY" f join  "TRUSTD_UST"."UT_LAND_LOCATION" ll on f."LAND_LOCATION_ID" = ll."LAND_LOCATION_ID"
-	where "LAND_STATUS" = 'Not Indian Country');
+    (select "FACILITY_ID"::text from "TRUSTD_UST"."UT_FACILITY" f join  "TRUSTD_UST"."UT_LAND_LOCATION" ll on f."LAND_LOCATION_ID" = ll."LAND_LOCATION_ID"
+    where "LAND_STATUS" = 'Not Indian Country');
 

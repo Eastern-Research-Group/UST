@@ -1,13 +1,9 @@
 import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
 
 import pandas as pd
 
-from python.util.import_service import ImportService
-from python.util import config, utils
+from ust.python.util import config, utils
+from ust.python.util.import_service import ImportService
 
 state = 'OR' 
 ust_folder = 'OR_LUST_tables/'
@@ -35,7 +31,7 @@ def get_csv_row_count(csv_path):
 
 
 def get_summary():
-    conn = conn = utils.connect_db(config.db_name)
+    conn = utils.connect_db(config.db_name)
     cur = conn.cursor()
 
     results = []

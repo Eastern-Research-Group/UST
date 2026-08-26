@@ -11,7 +11,7 @@ insert into ca_ust.erg_tank_id2 (facility_id, tank_name) select distinct "CERS I
 --Record new mapping in public. ust_element_mapping
 
 insert into public.ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_column_name, organization_table_name, programmer_comments)
-		          values (18, 'ust_tank', 'tank_id', 'erg_tank_id2', 'tank_id', 'This required field is not present in the source data. Table erg_tank_id2 was created by ERG so the data can conform to the EPA template structure.');
+                  values (18, 'ust_tank', 'tank_id', 'erg_tank_id2', 'tank_id', 'This required field is not present in the source data. Table erg_tank_id2 was created by ERG so the data can conform to the EPA template structure.');
 
 
 ------------------------------------------------------------------------------------------------------------------------------------

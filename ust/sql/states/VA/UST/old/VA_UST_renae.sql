@@ -13,7 +13,7 @@ order by ;
 select distinct contents from va_ust.tanks order by 1;
 
 select distinct 
-	'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value) values (' || 55 || ', ''' || contents || ''', '''');'
+    'insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value) values (' || 55 || ', ''' || contents || ''', '''');'
 from va_ust.tanks 
 order by 1;
  
@@ -61,7 +61,7 @@ insert into ust_element_value_mapping (ust_element_mapping_id, organization_valu
 
 select epa_value from ust_element_value_mapping
 where ust_element_mapping_id = 55 and epa_value not in   
-	(select substance from substances)
+    (select substance from substances)
 order by 1;
 
 select substance
@@ -92,32 +92,32 @@ order by 1, 2;
 
 --update ust_element_mapping 
 --set epa_table_name = 'compartment_statuses',
---	epa_column_name = 'compartment_status'
+--    epa_column_name = 'compartment_status'
 --where ust_control_id = 8 and epa_column_name = 'compartment_status_id';
 --update ust_element_mapping 
 --set epa_table_name = 'substances',
---	epa_column_name = 'substance'
+--    epa_column_name = 'substance'
 --where ust_control_id = 8 and epa_column_name = 'substance_id';
 --update ust_element_mapping 
 --set epa_table_name = 'owner_types',
---	epa_column_name = 'owner_type'
+--    epa_column_name = 'owner_type'
 --where ust_control_id = 8 and epa_column_name = 'owner_type_id';
 --update ust_element_mapping 
 --set epa_table_name = 'piping_styles',
---	epa_column_name = 'piping_style'
+--    epa_column_name = 'piping_style'
 --where ust_control_id = 8 and epa_column_name = 'piping_style_id';
 --update ust_element_mapping 
 --set epa_table_name = 'tank_statuses',
---	epa_column_name = 'tank_status'
+--    epa_column_name = 'tank_status'
 --where ust_control_id = 8 and epa_column_name = 'tank_status_id';
 
 
 select 'update ust_element_mapping set epa_table_name = ''' || table_name || ''', epa_column_name = ''' || 
-	database_column_name || ''' where ust_element_mapping_id = ' || ust_element_mapping_id || ';'
+    database_column_name || ''' where ust_element_mapping_id = ' || ust_element_mapping_id || ';'
 from 
-	(select ust_element_mapping_id, epa_table_name, epa_column_name, database_column_name, table_name
-	from ust_element_mapping a join ust_elements b on a.epa_table_name = b.database_lookup_table
-		join ust_elements_tables c on b.element_id = c.element_id) x
+    (select ust_element_mapping_id, epa_table_name, epa_column_name, database_column_name, table_name
+    from ust_element_mapping a join ust_elements b on a.epa_table_name = b.database_lookup_table
+        join ust_elements_tables c on b.element_id = c.element_id) x
 
 update ust_element_mapping set epa_table_name = 'ust_facility', epa_column_name = 'owner_type_id' where ust_element_mapping_id = 7;
 update ust_element_mapping set epa_table_name = 'ust_facility', epa_column_name = 'owner_type_id' where ust_element_mapping_id = 2;
@@ -125,6 +125,6 @@ update ust_element_mapping set epa_table_name = 'ust_compartment', epa_column_na
 update ust_element_mapping set epa_table_name = 'ust_tank', epa_column_name = 'tank_location_id' where ust_element_mapping_id = 3;
 update ust_element_mapping set epa_table_name = 'ust_tank', epa_column_name = 'tank_status_id' where ust_element_mapping_id = 31;
 update ust_element_mapping set epa_table_name = 'ust_piping', epa_column_name = 'piping_style_id' where ust_element_mapping_id = 59;
-		
-		
+        
+        
 

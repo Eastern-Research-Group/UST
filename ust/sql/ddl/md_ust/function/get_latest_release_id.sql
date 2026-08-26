@@ -10,10 +10,10 @@ Begin
    FOR f IN
      select release_id from md_ust.md_release_linkages where ust_facility_id = p_ust_facility_id order by date_open
    LOOP
-		return_val := f.release_id;
-	end loop;
+        return_val := f.release_id;
+    end loop;
 
-	
+    
    return return_val;  
 End;  
 $function$

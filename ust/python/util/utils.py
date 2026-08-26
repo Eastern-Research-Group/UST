@@ -1,21 +1,30 @@
-from datetime import datetime
-import os
-from pathlib import Path
 import re
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
+import string
+from datetime import UTC, datetime
 
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy import create_engine
-import string
 
-from python.util import config
-from python.util.logger_factory import logger, error_logger
+from ust.python.util import config
+from ust.python.util.logger_factory import error_logger, logger
 
 
-def connect_db(db_name=config.db_name, schema='public'):
+def _require_config(*names):
+    missing = [name for name in names if not getattr(config, name, None)]
+    if missing:
+        raise RuntimeError(
+            "Missing database config values: "
+            + ", ".join(missing)
+            + ". Create ust/python/util/config.py or set the matching UST_* environment variables."
+        )
+
+
+def connect_db(db_name=None, schema='public'):
+    _require_config('db_ip', 'db_user', 'db_password')
+    db_name = db_name or getattr(config, 'db_name', None)
+    if not db_name:
+        _require_config('db_name')
     try:
         options = f'-csearch_path="{schema}"'
         conn = psycopg2.connect(
@@ -36,27 +45,34 @@ def connect_db(db_name=config.db_name, schema='public'):
     return conn
 
 
-def get_engine(db_name=config.db_name, schema='public'):
+def get_engine(db_name=None, schema='public'):
+    _require_config('db_connection_string')
+    db_name = db_name or getattr(config, 'db_name', None)
+    if not db_name:
+        _require_config('db_name')
     try:
         engine = create_engine(config.db_connection_string + db_name, connect_args={'options': f'-csearch_path="{schema}"'})
         return engine
     except Exception as e:
         logger.error('Error creating database engine: %s', e)
+        raise
 
 
 def get_sqlserver_connection_string(host, db, user, passwd, driver = 'ODBC Driver 18 for SQL Server'):
     return f"DRIVER={{{driver}}};SERVER={host};DATABASE={db};uid={user};pwd={passwd};TrustServerCertificate=yes;Encrypt=no;"
 
 
-def connect_sqlserver_db():
-    conn_str = get_sqlserver_connection_string()
+def connect_sqlserver_db(host, db, user, passwd, driver='ODBC Driver 18 for SQL Server'):
+    import pyodbc
+
+    conn_str = get_sqlserver_connection_string(host, db, user, passwd, driver=driver)
     conn =  pyodbc.connect(conn_str) 
-    logger.info('Connected to %s', or_db)
+    logger.info('Connected to %s', db)
     return conn
 
 
-def get_sqlserver_engine():
-    conn_str = get_sqlserver_connection_string()
+def get_sqlserver_engine(host, db, user, passwd, driver='ODBC Driver 18 for SQL Server'):
+    conn_str = get_sqlserver_connection_string(host, db, user, passwd, driver=driver)
     return create_engine(f"mssql+pyodbc:///?odbc_connect={conn_str}", fast_executemany=True)    
 
 
@@ -119,11 +135,10 @@ def autowidth_column(worksheet, column):
     max_length = 0
     column_letter = column[0].column_letter # get the column name
     for cell in column:
-        try: # necessary to avoid error on empty cells
-            if len(str(cell.value)) > max_length:
-                max_length = len(str(cell.value))
-        except:
-            pass
+        value = cell.value
+        if value is None:
+            continue
+        max_length = max(max_length, len(str(value)))
         adjusted_width = (max_length + 2) * 1.2
         worksheet.column_dimensions[column_letter].width = adjusted_width    
 
@@ -133,7 +148,7 @@ def add_ws_filter(worksheet):
 
 
 def get_today_string():
-    return datetime.today().strftime('%Y-%m-%d')
+    return datetime.now(tz=UTC).strftime('%Y-%m-%d')
 
 
 def get_control_id(ust_or_release, organization_id):
@@ -146,7 +161,9 @@ def get_control_id(ust_or_release, organization_id):
     cnt = cur.fetchone()[0]
     if cnt == 0:
         logger.error('No data in %s_control; unable to proceed.',ust_or_release)
-        exit()
+        cur.close()
+        conn.close()
+        raise LookupError(f'No rows found in public.{ust_or_release}_control for organization_id {organization_id!r}.')
     sql = f"select max({ust_or_release}_control_id) from public.{ust_or_release}_control where organization_id = %s"
     process_sql(conn, cur, sql, params=(organization_id, ))
     control_id = cur.fetchone()[0]
@@ -165,23 +182,21 @@ def get_control_id(ust_or_release, organization_id):
 def get_table_existence(table_name, table_schema='public'):
     conn = connect_db()
     cur = conn.cursor()
-    sql = f"""select count(*) from information_schema.tables 
+    sql = """select count(*) from information_schema.tables 
               where table_schema = %s and table_name = %s"""
     process_sql(conn, cur, sql, params=(table_schema, table_name))
     cnt = cur.fetchone()[0]
     cur.close()
     conn.close()
-    if cnt == 0:
-        return False 
-    else:
-        return True
+    return cnt != 0
 
 
 def get_selenium_driver(url):
+    import time
+
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     from selenium.webdriver.chrome.service import Service
-    import time
 
     options = Options()
     service = Service()
@@ -200,7 +215,7 @@ def get_selenium_driver(url):
 def get_org_from_control_id(control_id, ust_or_release):
     if ust_or_release.lower() not in ['ust','release']:
         logger.error('Invalid value %s for ust_or_release. Valid values are ust or release. Exiting...', ust_or_release)
-        exit()        
+        raise ValueError(f"Invalid ust_or_release {ust_or_release!r}; expected 'ust' or 'release'.")
     conn = connect_db()
     cur = conn.cursor()    
     table_name = ust_or_release.lower() + '_control'
@@ -219,7 +234,7 @@ def get_org_from_control_id(control_id, ust_or_release):
     if ok:
         return org  
     else:
-        exit()
+        raise LookupError(f'No {column_name} value {control_id!r} found in {table_name}.')
 
 
 def delete_all_release_data(control_id):
@@ -400,8 +415,7 @@ def get_headers(table_name, schema='public'):
 
 
 def get_timestamp_str():
-    from datetime import datetime 
-    now = datetime.now()
+    now = datetime.now(tz=UTC)
     return now.strftime('%Y%m%d%H%M%S')
 
 
@@ -427,10 +441,7 @@ def get_table_values(table_name, column_name, schema='public'):
 
 
 def is_excel(file_path):
-    if file_path.lower()[-4:] == 'xlsx' or file_path.lower()[-3:] == 'xls':
-        return True 
-    else:
-        return False
+    return file_path.lower()[-4:] == 'xlsx' or file_path.lower()[-3:] == 'xls'
 
 
 def get_pretty_ust_or_release(ust_or_release):
@@ -446,7 +457,7 @@ def get_pretty_ust_or_release(ust_or_release):
 def verify_ust_or_release(ust_or_release):
     if ust_or_release.lower() not in ['ust','release']:
         logger.error("Unknown value '%s' for ust_or_release; valid values are 'ust' and 'release'. Exiting...", ust_or_release)
-        exit()
+        raise ValueError(f"Unknown ust_or_release {ust_or_release!r}; expected 'ust' or 'release'.")
     else:
         return ust_or_release.lower()
 
@@ -466,7 +477,7 @@ def get_epa_region(organization_id):
     process_sql(conn, cur, sql, params=(organization_id,))
     try:
         epa_region =  cur.fetchone()[0]
-    except:
+    except TypeError:
         logger.warning('No such organization_id in table public.epa_regions: %s', organization_id)
         epa_region = None 
     cur.close()
@@ -478,18 +489,18 @@ def get_datatype_sql(data_type, character_maximum_length=None):
     datatype_sql = None 
     if data_type == 'character varying' and not character_maximum_length:
         logger.error('character_maximum_length is required if data_type = character varying')
-        exit()
+        raise ValueError('character_maximum_length is required when data_type is character varying.')
     elif character_maximum_length:
         try:
             int(character_maximum_length)
-        except:
+        except (TypeError, ValueError):
             logger.error('character_maximum_length must be an integer (received %s)', character_maximum_length)
-            exit()
+            raise ValueError(f'character_maximum_length must be an integer, received {character_maximum_length!r}.')
     if data_type == 'character varying':
         datatype_sql = data_type + '(' + str(character_maximum_length) + ')'
     else:
         datatype_sql = data_type 
-    return data_type
+    return datatype_sql
 
 
 def remove_extra_whitespace(string):
@@ -499,7 +510,7 @@ def remove_extra_whitespace(string):
 def get_pretty_query(cursor):
     try:
         query = cursor.query.decode('utf-8')
-    except AttributeError as e:
+    except (AttributeError, UnicodeDecodeError) as e:
         logger.warning('Wrote input to cursor.query; unable to print: %s', e)
         return
     query = remove_extra_whitespace(query) + ';'
@@ -525,10 +536,11 @@ def comment_every_line(ql_string):
 
 
 def get_join_info(dataset, epa_table_name, wheresql, schema='public'):
-    join_info = {}
+    joins = []
     conn = connect_db()
     cur = conn.cursor() 
-    sql = f"""select organization_table_name, organization_join_table,
+    sql = f"""select case when deagg_table_name is not null then deagg_table_name else organization_table_name end as organization_table_name, 
+                    organization_join_table,
                     organization_join_column, organization_join_fk,
                     organization_join_column2, organization_join_fk2,
                     organization_join_column3, organization_join_fk3,
@@ -537,7 +549,7 @@ def get_join_info(dataset, epa_table_name, wheresql, schema='public'):
             where {dataset.ust_or_release}_control_id = %s 
             and epa_table_name = %s """
     sql = sql + wheresql
-    sql = sql + """\ngroup by organization_table_name, 
+    sql = sql + """\ngroup by case when deagg_table_name is not null then deagg_table_name else organization_table_name end, 
                     organization_join_table,
                     organization_join_column, organization_join_fk,
                     organization_join_column2, organization_join_fk2,
@@ -545,6 +557,7 @@ def get_join_info(dataset, epa_table_name, wheresql, schema='public'):
     sql = sql + "\norder by 9"
     process_sql(conn, cur, sql, params=(dataset.control_id, epa_table_name))
     for row in cur.fetchall():
+        join_info = {}
         join_info['organization_table_name'] = row[0]
         join_info['organization_join_table'] = row[1]
         join_info['organization_join_column'] = row[2]
@@ -553,9 +566,10 @@ def get_join_info(dataset, epa_table_name, wheresql, schema='public'):
         join_info['organization_join_fk2'] = row[5]
         join_info['organization_join_column3'] = row[6]
         join_info['organization_join_fk3'] = row[7]
+        joins.append(join_info)
     cur.close()
     conn.close()    
-    return join_info
+    return joins
 
 
 def get_lookup_info(dataset, epa_table_name, schema='public'):
@@ -594,34 +608,39 @@ def get_join_tables(dataset, epa_table_name, schema='public'):
     joins = []
 
     key_wheresql = " and primary_key is not null and organization_table_name not like 'erg_%%' "
-    join_info = get_join_info(dataset, epa_table_name, key_wheresql, schema)
-
-    if join_info and join_info['organization_table_name'] not in tables:
-        tables.append(join_info['organization_table_name'])
-        join_info['table_type'] = 'key'
-        join_info['alias'] = aliases[i]
-        i += 1
-        joins.append(join_info)
+    join_infos = get_join_info(dataset, epa_table_name, key_wheresql, schema)
+    for join_info in join_infos:
+        if join_info and join_info['organization_table_name'] not in tables:
+            tables.append(join_info['organization_table_name'])
+            join_info['table_type'] = 'key'
+            join_info['alias'] = aliases[i]
+            i += 1
+            joins.append(join_info)
 
     org_wheresql = " and organization_table_name not like 'erg_%%' and database_lookup_column is null "
-    join_info = get_join_info(dataset, epa_table_name, org_wheresql, schema)
-    if join_info and join_info['organization_table_name'] not in tables:
-        tables.append(join_info['organization_table_name'])
-        join_info['table_type'] = 'org'
-        join_info['alias'] = aliases[i]
-        i += 1
-        joins.append(join_info)
+    join_infos = get_join_info(dataset, epa_table_name, org_wheresql, schema)
+    for join_info in join_infos:
+        if join_info and join_info['organization_table_name'] not in tables:
+            tables.append(join_info['organization_table_name'])
+            join_info['table_type'] = 'org'
+            join_info['alias'] = aliases[i]
+            i += 1
+            joins.append(join_info)
 
     id_wheresql = " and organization_table_name like 'erg_%%' "
-    join_info = get_join_info(dataset, epa_table_name, id_wheresql, schema)
-    if join_info and join_info['organization_table_name'] not in tables:
-        tables.append(join_info['organization_table_name'])
-        join_info['table_type'] = 'id'
-        join_info['alias'] = aliases[i]
-        i += 1
-        joins.append(join_info)
+    join_infos = get_join_info(dataset, epa_table_name, id_wheresql, schema)
+    for join_info in join_infos:
+        if join_info and join_info['organization_table_name'] not in tables:
+            tables.append(join_info['organization_table_name'])
+            join_info['table_type'] = 'id'
+            join_info['alias'] = aliases[i]
+            i += 1
+            joins.append(join_info)
 
     lookups = get_lookup_info(dataset, epa_table_name)
+    if not tables and lookups:
+        logger.warning('No base join table found for %s; skipping lookup joins.', epa_table_name)
+        return joins
     for join_info in lookups:
         join_info['organization_join_table'] = tables[0]
         join_info['alias'] = aliases[i]
@@ -645,7 +664,7 @@ def process_sql(conn, cur, sql, params=None, print_sql=False, exit_on_fail=True)
             cur.close()
             conn.close()     
             error_logger.error('\n\nEXITING DUE TO SQL ERROR....\n\n')  
-            exit()  
+            raise RuntimeError('SQL execution failed; see logged SQL and database error details.') from e
     if print_sql:
         print(get_pretty_query(cur))
 

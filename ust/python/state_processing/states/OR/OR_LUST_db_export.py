@@ -1,8 +1,8 @@
 import os
+
 import pandas as pd
 import pyodbc
 from sqlalchemy import create_engine
-
 
 conn_str = (
     r'driver={SQL Server};'

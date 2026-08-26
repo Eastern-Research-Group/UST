@@ -1,0 +1,225 @@
+{
+  "active_profile": "tn-ust",
+  "profiles": {
+    "as-ust": {
+      "control_id": 34,
+      "organization_id": "AS",
+      "ust_or_release": "ust"
+    },
+    "az-release": {
+      "control_id": 6,
+      "organization_id": "AZ",
+      "ust_or_release": "release"
+    },
+    "az-ust": {
+      "control_id": 14,
+      "organization_id": "AZ",
+      "ust_or_release": "ust"
+    },
+    "ca-ust": {
+      "control_id": 18,
+      "organization_id": "CA",
+      "ust_or_release": "ust"
+    },
+    "dc-release": {
+      "control_id": 18,
+      "organization_id": "DC",
+      "ust_or_release": "release"
+    },
+    "dc-ust": {
+      "control_id": 30,
+      "organization_id": "DC",
+      "ust_or_release": "ust"
+    },
+    "de-release": {
+      "control_id": 20,
+      "organization_id": "DE",
+      "ust_or_release": "release"
+    },
+    "de-ust": {
+      "control_id": 29,
+      "organization_id": "DE",
+      "ust_or_release": "ust"
+    },
+    "ga-release": {
+      "control_id": 15,
+      "organization_id": "GA",
+      "ust_or_release": "release"
+    },
+    "ga-ust": {
+      "control_id": 41,
+      "organization_id": "GA",
+      "ust_or_release": "ust"
+    },
+    "gu-ust": {
+      "control_id": 38,
+      "organization_id": "GU",
+      "ust_or_release": "ust"
+    },
+    "hi-release": {
+      "control_id": 24,
+      "organization_id": "HI",
+      "ust_or_release": "release"
+    },
+    "hi-ust": {
+      "control_id": 37,
+      "organization_id": "HI",
+      "ust_or_release": "ust"
+    },
+    "ia-release": {
+      "control_id": 16,
+      "organization_id": "IA",
+      "ust_or_release": "release"
+    },
+    "ia-ust": {
+      "control_id": 32,
+      "organization_id": "IA",
+      "ust_or_release": "ust"
+    },
+    "il-ust": {
+      "control_id": 27,
+      "organization_id": "IL",
+      "ust_or_release": "ust"
+    },
+    "ks-release": {
+      "control_id": 23,
+      "organization_id": "KS",
+      "ust_or_release": "release"
+    },
+    "ma-release": {
+      "control_id": 22,
+      "organization_id": "MA",
+      "ust_or_release": "release"
+    },
+    "ma-ust": {
+      "control_id": 42,
+      "organization_id": "MA",
+      "ust_or_release": "ust"
+    },
+    "md-release": {
+      "control_id": 8,
+      "organization_id": "MD",
+      "ust_or_release": "release"
+    },
+    "md-ust": {
+      "control_id": 16,
+      "organization_id": "MD",
+      "ust_or_release": "ust"
+    },
+    "me-release": {
+      "control_id": 21,
+      "organization_id": "ME",
+      "ust_or_release": "release"
+    },
+    "me-ust": {
+      "control_id": 31,
+      "organization_id": "ME",
+      "ust_or_release": "ust"
+    },
+    "mp-release": {
+      "control_id": 12,
+      "organization_id": "MP",
+      "ust_or_release": "release"
+    },
+    "mp-ust": {
+      "control_id": 22,
+      "organization_id": "MP",
+      "ust_or_release": "ust"
+    },
+    "nh-release": {
+      "control_id": 9,
+      "organization_id": "NH",
+      "ust_or_release": "release"
+    },
+    "nh-ust": {
+      "control_id": 17,
+      "organization_id": "NH",
+      "ust_or_release": "ust"
+    },
+    "nj-ust": {
+      "control_id": 36,
+      "organization_id": "NJ",
+      "ust_or_release": "ust"
+    },
+    "nm-ust": {
+      "control_id": 39,
+      "organization_id": "NM",
+      "ust_or_release": "ust"
+    },
+    "ok-release": {
+      "control_id": 13,
+      "organization_id": "OK",
+      "ust_or_release": "release"
+    },
+    "ok-ust": {
+      "control_id": 23,
+      "organization_id": "OK",
+      "ust_or_release": "ust"
+    },
+    "pa-release": {
+      "control_id": 2,
+      "organization_id": "PA",
+      "ust_or_release": "release"
+    },
+    "pa-ust": {
+      "control_id": 40,
+      "organization_id": "PA",
+      "ust_or_release": "ust"
+    },
+    "sd-release": {
+      "control_id": 4,
+      "organization_id": "SD",
+      "ust_or_release": "release"
+    },
+    "sd-ust": {
+      "control_id": 9,
+      "organization_id": "SD",
+      "ust_or_release": "ust"
+    },
+    "tn-release": {
+      "control_id": 5,
+      "organization_id": "TN",
+      "ust_or_release": "release"
+    },
+    "tn-ust": {
+      "control_id": 35,
+      "organization_id": "TN",
+      "ust_or_release": "ust"
+    },
+    "ut-release": {
+      "control_id": 11,
+      "organization_id": "UT",
+      "ust_or_release": "release"
+    },
+    "ut-ust": {
+      "control_id": 19,
+      "organization_id": "UT",
+      "ust_or_release": "ust"
+    },
+    "va-release": {
+      "control_id": 3,
+      "organization_id": "VA",
+      "ust_or_release": "release"
+    },
+    "va-ust": {
+      "control_id": 8,
+      "organization_id": "VA",
+      "ust_or_release": "ust"
+    },
+    "vt-ust": {
+      "control_id": 26,
+      "organization_id": "VT",
+      "ust_or_release": "ust"
+    },
+    "wv-release": {
+      "control_id": 10,
+      "organization_id": "WV",
+      "ust_or_release": "release"
+    },
+    "wv-ust": {
+      "control_id": 11,
+      "organization_id": "WV",
+      "ust_or_release": "ust"
+    }
+  }
+}

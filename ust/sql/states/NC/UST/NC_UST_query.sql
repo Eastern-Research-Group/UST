@@ -11,11 +11,11 @@ language plpgsql
 as 
 $$
 declare 
-	p1 text := lpad(multi_facility_id,2,'0');
-	p2 text := multi_owner_id::text;
-	p3 text := lpad(base_facility_id::text,10,'0');
+    p1 text := lpad(multi_facility_id,2,'0');
+    p2 text := multi_owner_id::text;
+    p3 text := lpad(base_facility_id::text,10,'0');
 begin
-	return p1 || '-' || p2 || '-' || p3;
+    return p1 || '-' || p2 || '-' || p3;
 end;
 $$
 
@@ -25,9 +25,9 @@ select  "NC_UST".build_facility_id('0',0,224);
 ----------------------------------------------------------------------------------------------------------------------------------------------
 create view "NC_UST".v_USTF_TANK_DETAIL_DATA_TABLE as
 select b.* from 
-	(select "TANK_KEY", max("INFO_SOURCE_DATE") "INFO_SOURCE_DATE"
-	from "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" group by "TANK_KEY") a
-	join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" b on a."TANK_KEY" = b."TANK_KEY" and a."INFO_SOURCE_DATE" = b."INFO_SOURCE_DATE";	
+    (select "TANK_KEY", max("INFO_SOURCE_DATE") "INFO_SOURCE_DATE"
+    from "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" group by "TANK_KEY") a
+    join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" b on a."TANK_KEY" = b."TANK_KEY" and a."INFO_SOURCE_DATE" = b."INFO_SOURCE_DATE";    
 ----------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ select distinct "TYPE_OWNER_NAME" from "NC_UST"."USTF_TYPE_OWNER_CD" order by 1;
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (267, ''' || "TYPE_OWNER_NAME" ||  ''', '''');'
 from "NC_UST"."USTF_TYPE_OWNER_CD"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (267, 'Federal-Billable', 'Federal Government - Non Military');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (267, 'Federal-Non Billable', 'Federal Government - Non Military');
@@ -79,7 +79,7 @@ values (17, '2023-06-29', 'FinancialResponsibilityNotRequired', 'USTF_FINANCIAL_
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (268, ''' || "" ||  ''', '''');'
 from "NC_UST".""
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (268, 'Local Gov. Bond Rating Test', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (269, 'Corporate Guarantee', 'Yes');
@@ -95,25 +95,25 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (277, 'None', 'Yes');
 
 select * from "NC_UST"."USTF_FINANCIAL_MECH_CD"
-0	None
-1	Corporate Guarantee
-2	Insurance & Risk Retension
-3	Surety Bond
-4	Letter of Credit
-5	Insurance Pools
-6	Private Trust Fund
-7	Local Gov. Bond Rating Test
-8	Local Gov. Financial Test
-9	Local Gov. Guarantee
-10	Local Gov. Dedicated Fund
-11	Self-Insurance
+0    None
+1    Corporate Guarantee
+2    Insurance & Risk Retension
+3    Surety Bond
+4    Letter of Credit
+5    Insurance Pools
+6    Private Trust Fund
+7    Local Gov. Bond Rating Test
+8    Local Gov. Financial Test
+9    Local Gov. Guarantee
+10    Local Gov. Dedicated Fund
+11    Self-Insurance
 
 select a."FACILITY_KEY", b."DESCRIPTION"
 from "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b 
-	on a."FINANCIAL_RESPONSIBILITY" = b."FINANCIAL_MECH_KEY"
+    on a."FINANCIAL_RESPONSIBILITY" = b."FINANCIAL_MECH_KEY"
 
-	
-	select * from ust_element_db_mapping order by 1 desc;
+    
+    select * from ust_element_db_mapping order by 1 desc;
 
 update ust_element_db_mapping set state_join_table = 'USTF_TANK_FACILITY_DATA_TABLE', state_join_column = 'FINANCIAL_RESPONSIBILITY'
 where control_id = 17 and element_name like 'Financial%'
@@ -138,7 +138,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (279, ''' || "TANK_STATUS_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_TANK_STATUS_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (279, 'Abandoned', 'Abandoned');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (279, 'Chg. In Service', 'Closed (general)');
@@ -160,9 +160,9 @@ select * from v_ust_element_mapping where organization_id = 'NC' and element_nam
 
 select * from v_ust_element_mapping where element_name = 'TankStatus';
 
-USTF_TANK_DETAIL_DATA_TABLE	TANK_STATUS_KEY
-USTF_TANK_STATUS_CD_DATA_TABLE	TANK_STATUS_KEY
-USTF_TANK_STATUS_CD_DATA_TABLE	TANK_STATUS_NAME
+USTF_TANK_DETAIL_DATA_TABLE    TANK_STATUS_KEY
+USTF_TANK_STATUS_CD_DATA_TABLE    TANK_STATUS_KEY
+USTF_TANK_STATUS_CD_DATA_TABLE    TANK_STATUS_NAME
 ----------------------------------------------------------------------------------------------------------------------------------
 insert into ust_element_db_mapping (control_id, mapping_date, element_name, state_table_name, state_column_name)
 values (17, '2023-06-29', 'MultipleTanks', 'USTF_TANK_DETAIL_DATA_TABLE', 'MANIFOLD_TANK')
@@ -192,7 +192,7 @@ select * from ust_element_db_mapping where id in (279,282);
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (282, ''' || "PRODUCT_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_PRODUCT_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 
 select * from "NC_UST"."USTF_PRODUCT_CD_DATA_TABLE"
@@ -245,7 +245,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (283, ''' || "TANK_CONSTR_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_TANK_CONST_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (283, 'Double Wall FRP', 'Double');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (283, 'Double Wall Steel', 'Double');
@@ -277,7 +277,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (284, ''' || "TANK_CONSTR_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_TANK_CONST_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (284, 'Double Wall FRP', 'Fiberglass reinforced plastic');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (284, 'Double Wall Steel', 'Steel (NEC)');
@@ -310,7 +310,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (285, ''' || "PIPING_CONSTR_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_PIPING_CONSTR_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (285, 'Double Wall Flex', 'Flex piping');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (285, 'Double Wall FRP', 'Fiberglass reinforced plastic');
@@ -350,7 +350,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (286, ''' || "FLEX_CONNECTOR_TANK_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_FLEX_CONNECTOR_TANK_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (286, 'Isolation Boot', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (286, 'Not in contact w/ ground', 'No');
@@ -379,7 +379,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (287, ''' || "PIPING_SYSTEM_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_PIPING_SYSTEM_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (287, 'European Suction', 'Suction');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (287, 'Gravity System', 'Non-operational (e.g., fill line, vent line, gravity)');
@@ -412,7 +412,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (288, ''' || "PIPING_CONSTR_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_PIPING_CONSTR_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (288, 'Double Wall Flex', 'Double walled');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (288, 'Double Wall FRP', 'Double walled');
@@ -454,7 +454,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (289, ''' || "OVERFILL_PROTECTION_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_OVERFILL_PROTECTION_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (289, '25 Gal or Less Transfer', null);
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (289, 'Auto Shutoff Device',null);
@@ -474,7 +474,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (290, ''' || "OVERFILL_PROTECTION_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_OVERFILL_PROTECTION_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (290, '25 Gal or Less Transfer', null);
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (290, 'Auto Shutoff Device','Yes');
@@ -495,7 +495,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (290, ''' || "OVERFILL_PROTECTION_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_OVERFILL_PROTECTION_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (291, '25 Gal or Less Transfer', null);
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (291, 'Auto Shutoff Device',null);
@@ -522,7 +522,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (290, ''' || "OVERFILL_PROTECTION_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_OVERFILL_PROTECTION_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (292, '25 Gal or Less Transfer', 'Not required');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (292, 'Auto Shutoff Device','Flow shutoff device (flapper)');
@@ -544,7 +544,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (293, ''' || "SPILL_PROTECTION_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_SPILL_PROTECTION_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (293, '25 Gallons or Less Transfer', 'Unknown');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (293, 'Catchment Basin', 'Yes');
@@ -571,8 +571,8 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (294, ''' || "LD_INTERSTL_PIP_SYSTEM__NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_LD_INTERSTL_PIP_SYSTEM_CD"
-order by 1;	
-	
+order by 1;    
+    
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (294, 'Hydrostatic', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (294, 'None', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (294, 'Pressure', 'No');
@@ -600,8 +600,8 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (295, ''' || "LD_INTERSTL_PIP_SYSTEM__NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_LD_INTERSTL_PIP_SYSTEM_CD"
-order by 1;	
-	
+order by 1;    
+    
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (295, 'Hydrostatic', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (295, 'None', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (295, 'Pressure', 'Yes');
@@ -617,8 +617,8 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (296, ''' || "LD_SYSTEM_TANK_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_LD_SYSTEM_TANK_CD_DATA_TABLE"
-order by 1;	
-	
+order by 1;    
+    
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (296, 'Automatic Tank Gauging', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (296, 'Automatic Tank Gauging & TTT', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (296, 'Groundwater Monitoring', 'No');
@@ -658,7 +658,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (297, ''' || "LD_SYSTEM_TANK_NAME"  ||  ''', ''No'');'
 from "NC_UST"."USTF_LD_SYSTEM_TANK_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (297, 'Automatic Tank Gauging', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (297, 'Automatic Tank Gauging & TTT', 'No');
@@ -689,7 +689,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (298, ''' || "LD_SYSTEM_TANK_NAME"  ||  ''', ''No'');'
 from "NC_UST"."USTF_LD_SYSTEM_TANK_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (298, 'Automatic Tank Gauging', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (298, 'Automatic Tank Gauging & TTT', 'No');
@@ -720,7 +720,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (299, ''' || "LD_SYSTEM_TANK_NAME"  ||  ''', ''No'');'
 from "NC_UST"."USTF_LD_SYSTEM_TANK_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (299, 'Automatic Tank Gauging', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (299, 'Automatic Tank Gauging & TTT', 'Yes');
@@ -751,7 +751,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (303, ''' || "LD_SYSTEM_TANK_NAME"  ||  ''', ''No'');'
 from "NC_UST"."USTF_LD_SYSTEM_TANK_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (303, 'Automatic Tank Gauging', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (303, 'Automatic Tank Gauging & TTT', 'No');
@@ -782,7 +782,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (304, ''' || "LD_SYSTEM_TANK_NAME"  ||  ''', ''No'');'
 from "NC_UST"."USTF_LD_SYSTEM_TANK_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (304, 'Automatic Tank Gauging', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (304, 'Automatic Tank Gauging & TTT', 'No');
@@ -804,7 +804,7 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (304, 'Vapor Monitoring', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (304, 'Vapor Monitoring with Tracer Compound', 'No');
 
-----------------------------------------------------------------------------------------------------------------------------------	
+----------------------------------------------------------------------------------------------------------------------------------    
 
 insert into ust_element_db_mapping (control_id, mapping_date, element_name, state_table_name, state_column_name)
 values (17, '2023-06-29', 'ElectronicLineLeak', 'USTF_PRESSURIZE_LEAK_DETECT_CD_DATA_TABLE', 'PRESSURIZE_LEAK_DETECT_NAME')
@@ -816,8 +816,8 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (300, ''' || "PRESSURIZE_LEAK_DETECT_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_PRESSURIZE_LEAK_DETECT_CD_DATA_TABLE"
-order by 1;	
-	
+order by 1;    
+    
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (300, 'ELLD', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (300, 'MLLD', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (300, 'None', 'No');
@@ -833,7 +833,7 @@ and table_name not like 'VW%'
 order by 1, 2;
 
 select * from v_ust_element_mapping where organization_id = 'NC' and element_name  like 'ElectronicLineLeak%'
-----------------------------------------------------------------------------------------------------------------------------------	
+----------------------------------------------------------------------------------------------------------------------------------    
 
 insert into ust_element_db_mapping (control_id, mapping_date, element_name, state_table_name, state_column_name)
 values (17, '2023-06-29', 'MechanicalLineLeak', 'USTF_PRESSURIZE_LEAK_DETECT_CD_DATA_TABLE', 'PRESSURIZE_LEAK_DETECT_NAME')
@@ -844,14 +844,14 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (300, ''' || "PRESSURIZE_LEAK_DETECT_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_PRESSURIZE_LEAK_DETECT_CD_DATA_TABLE"
-order by 1;	
-	
+order by 1;    
+    
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (301, 'ELLD', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (301, 'MLLD', 'Yes');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (301, 'None', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (301, 'Not Required', 'No');
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (301, 'Unknown', 'Unknown');
-----------------------------------------------------------------------------------------------------------------------------------	
+----------------------------------------------------------------------------------------------------------------------------------    
 
 insert into ust_element_db_mapping (control_id, mapping_date, element_name, state_table_name, state_column_name)
 values (17, '2023-06-29', 'SafeSuction', 'USTF_LD_SYSTEM_PIPE_CD_DATA_TABLE', 'LD_SYSTEM_PIPE_NAME')
@@ -862,7 +862,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (302, ''' || "LD_SYSTEM_PIPE_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_LD_SYSTEM_PIPE_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (302, 'ELLD', null);
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (302, 'Exempt (European Style)', 'Yes');
@@ -882,7 +882,7 @@ insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (302, 'Statistical Inventory Reconciliation (SIR)', null);
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (302, 'Vapor Monitoring', null);
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (302, 'Vapor Monitoring with Tracer Compound', null);
-----------------------------------------------------------------------------------------------------------------------------------	
+----------------------------------------------------------------------------------------------------------------------------------    
 
 insert into ust_element_db_mapping (control_id, mapping_date, element_name, state_table_name, state_column_name)
 values (17, '2023-06-29', 'PrimaryReleaseDetectionType', 'USTF_LD_SYSTEM_PIPE_CD_DATA_TABLE', 'LD_SYSTEM_PIPE_NAME')
@@ -893,7 +893,7 @@ update ust_element_db_mapping set state_join_table = 'USTF_TANK_DETAIL_DATA_TABL
 select distinct 
 'insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (305, ''' || "LD_SYSTEM_PIPE_NAME"  ||  ''', '''');'
 from "NC_UST"."USTF_LD_SYSTEM_PIPE_CD_DATA_TABLE"
-order by 1;	
+order by 1;    
 
 
 insert into ust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (305, 'ELLD', 'Line test');
@@ -927,14 +927,14 @@ order by 1, 2;
 select * from "NC_UST"."USTF_LD_SYSTEM_PIPE_CD_DATA_TABLE"
 
 
-		prd.epa_value as "PrimaryReleaseDetectionType",
+        prd.epa_value as "PrimaryReleaseDetectionType",
 
-		
+        
 
 1 = yes 
 0 = no 
 
-	           
+               
 select * from v_ust_element_mapping where organization_id = 'NC' and element_name = 'SafeSuction';
 
 ----------------------------------------------------------------------------------------------------------------------------------
@@ -1045,7 +1045,7 @@ alter table "NC_UST".facility_ids add constraint facility_ids_pk  primary key   
 
 drop table  "NC_UST".temp;
 select distinct a."FACILITY_KEY", b."BUSINESS_NAME", b."FIRST_NAME", b."LAST_NAME", b."ADDRESS1", b."ADDRESS2",
-		b."CITY", b."ZIP", b."STATE", b."PHONE", b."EMAIL_ADDR"
+        b."CITY", b."ZIP", b."STATE", b."PHONE", b."EMAIL_ADDR"
 into "NC_UST".temp
 from "NC_UST"."USTF_AFFILIATE_DATA_TABLE" a join "NC_UST"."USTF_CONTACT_DATA_TABLE" b on a."CONTACT_KEY" = b."CONTACT_KEY"
 where "AFFILIATE_TYPE_KEY" = 1 and a."END_DATE" is  null;
@@ -1056,19 +1056,19 @@ drop view "NC_UST".v_ust_base;
 
 create or replace view "NC_UST".v_ust_base as
 select distinct  
-	fi."FacilityID" as "FacilityID", 
-   	f."FACILITY_NAME" as "FacilityName",
-   	ot.epa_value as "OwnerType",
-   	f."ADDRESS1" as "FacilityAddress1",
-   	f."ADDRESS2" as "FacilityAddress2",
-   	f."CITY" as "FacilityCity",
-   	fcc."FIPS_COUNTY_DESC" as "FacilityCounty",
-   	f."ZIP" as "FacilityZipCode",
-   	f."PHONE" as "FacilityPhoneNumber",
-   	f."STATE" as "FacilityState",
-   	4 as "FacilityEPARegion",
-   	f."LATITUDE" as "FacilityLatitude",
-   	f."LONGITUDE" as "FacilityLongitude",	
+    fi."FacilityID" as "FacilityID", 
+       f."FACILITY_NAME" as "FacilityName",
+       ot.epa_value as "OwnerType",
+       f."ADDRESS1" as "FacilityAddress1",
+       f."ADDRESS2" as "FacilityAddress2",
+       f."CITY" as "FacilityCity",
+       fcc."FIPS_COUNTY_DESC" as "FacilityCounty",
+       f."ZIP" as "FacilityZipCode",
+       f."PHONE" as "FacilityPhoneNumber",
+       f."STATE" as "FacilityState",
+       4 as "FacilityEPARegion",
+       f."LATITUDE" as "FacilityLatitude",
+       f."LONGITUDE" as "FacilityLongitude",    
     fown."BUSINESS_NAME" as "FacilityOwnerCompanyName",
     fown."LAST_NAME" as "FacilityOwnerLastName",
     fown."FIRST_NAME" as "FacilityOwnerFirstName",
@@ -1078,7 +1078,7 @@ select distinct
     fown."ZIP" as "FacilityOwnerZipCode",
     fown."STATE" as "FacilityOwnerState",
     fown."PHONE" as "FacilityOwnerPhoneNumber",
-    fown."EMAIL_ADDR" as "FacilityOwnerEmail",	   
+    fown."EMAIL_ADDR" as "FacilityOwnerEmail",       
     fopr."BUSINESS_NAME" as "FacilityOperatorCompanyName",
     fopr."LAST_NAME" as "FacilityOperatorLastName",
     fopr."FIRST_NAME" as "FacilityOperatorFirstName",
@@ -1088,7 +1088,7 @@ select distinct
     fopr."ZIP" as "FacilityOperatorZipCode",
     fopr."STATE" as "FacilityOperatorState",
     fopr."PHONE" as "FacilityOperatorPhoneNumber",
-    fopr."EMAIL_ADDR" as "FacilityOperatorEmail",	  
+    fopr."EMAIL_ADDR" as "FacilityOperatorEmail",      
     frg.epa_value as "FinancialResponsibilityGuarantee", 
     frlc.epa_value as "FinancialResponsibilityLetterOfCredit", 
     frlg.epa_value as "FinancialResponsibilityLocalGovernmentFinancialTest", 
@@ -1097,111 +1097,111 @@ select distinct
     frsb.epa_value as "FinancialResponsibilitySuretyBond", 
     frtf.epa_value as "FinancialResponsibilityTrustFund", 
     fro.epa_value as "FinancialResponsibilityOtherMethod", 
-    frnr.epa_value as "FinancialResponsibilityNotRequired", 	
+    frnr.epa_value as "FinancialResponsibilityNotRequired",     
     t."TANK_ID" as "TankID",
     fr.epa_value as "FederallyRegulated",
-    ts.epa_value as "TankStatus",	
+    ts.epa_value as "TankStatus",    
     mt.epa_value as "MultipleTanks",
     t."PERM_CLOSE_DATE"::date as "ClosureDate",
     t."INSTALLATION_DATE"::date as "InstallationDate",
-	t."COMPARTMENT_TANK" as "CompartmentalizedUST",
-	tss.epa_value as "TankSubstanceStored",
-	t."CAPACITY" as "TankCapacityGallons", -- assume gallons	
-	twt.epa_value as "TankWallType",
-	md.epa_value as "MaterialDescription",
-	pmd.epa_value as "PipingMaterialDescription",
-	pfc.epa_value as "PipingFlexConnector",
-	ps.epa_value as "PipingStyle",
-	pwt.epa_value as "PipingWallType",
-	bfv.epa_value as "BallFloatValve",
-	fsd.epa_value as "FlowShutoffDevice",
-	hla.epa_value as "HighLevelAlarm",
-	opp.epa_value as "OverfillProtectionPrimary",
-	sbi.epa_value as "SpillBucketInstalled",
-	imce.epa_value as "InterstitialMonitoringContinualElectric",
-	imm.epa_value as "InterstitialMonitoringManual", 
-	atg.epa_value as "AutomaticTankGauging",
-	mtg.epa_value as "ManualTankGauging",
-	sir.epa_value as "StatisticalInventoryReconciliation",
-	ttt.epa_value as "TankTightnessTesting",
-	ell.epa_value as "ElectronicLineLeak",
-	mll.epa_value as "MechanicalLineLeak",
-	ss.epa_value as "SafeSuction", 
-	vm.epa_value as "VaporMonitoring",
-	gm.epa_value as "GroundwaterMonitoring",
-	prdt.epa_value as "PrimaryReleaseDetectionType",
-	case when lust."FacilID" is not null then 'Yes' end as "USTReportedRelease",
-	lust.lust_id as "AssociatedLUSTID"
+    t."COMPARTMENT_TANK" as "CompartmentalizedUST",
+    tss.epa_value as "TankSubstanceStored",
+    t."CAPACITY" as "TankCapacityGallons", -- assume gallons    
+    twt.epa_value as "TankWallType",
+    md.epa_value as "MaterialDescription",
+    pmd.epa_value as "PipingMaterialDescription",
+    pfc.epa_value as "PipingFlexConnector",
+    ps.epa_value as "PipingStyle",
+    pwt.epa_value as "PipingWallType",
+    bfv.epa_value as "BallFloatValve",
+    fsd.epa_value as "FlowShutoffDevice",
+    hla.epa_value as "HighLevelAlarm",
+    opp.epa_value as "OverfillProtectionPrimary",
+    sbi.epa_value as "SpillBucketInstalled",
+    imce.epa_value as "InterstitialMonitoringContinualElectric",
+    imm.epa_value as "InterstitialMonitoringManual", 
+    atg.epa_value as "AutomaticTankGauging",
+    mtg.epa_value as "ManualTankGauging",
+    sir.epa_value as "StatisticalInventoryReconciliation",
+    ttt.epa_value as "TankTightnessTesting",
+    ell.epa_value as "ElectronicLineLeak",
+    mll.epa_value as "MechanicalLineLeak",
+    ss.epa_value as "SafeSuction", 
+    vm.epa_value as "VaporMonitoring",
+    gm.epa_value as "GroundwaterMonitoring",
+    prdt.epa_value as "PrimaryReleaseDetectionType",
+    case when lust."FacilID" is not null then 'Yes' end as "USTReportedRelease",
+    lust.lust_id as "AssociatedLUSTID"
 from 
-		 "NC_UST"."USTF_FACILITY_DATA_TABLE" f  
-	join "NC_UST".facility_ids fi on f."MULTI_FACILITY_ID" = fi."MULTI_FACILITY_ID" and f."MULTI_OWNER_ID" = fi."MULTI_OWNER_ID" and f."BASE_FACILITY_ID" = fi."BASE_FACILITY_ID"		 
-	join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" fd on f."FACILITY_KEY" = fd."FACILITY_KEY" 
-	join "NC_UST"."USTF_FACILITY_TYPE_CD" ft on f."FACILITY_TYPE_KEY" = ft."FACILITY_TYPE_KEY"
-	left join "NC_UST"."FIPS_COUNTY_CODES" fcc on f."COUNTY_KEY" = fcc."FIPS_COUNTY_CODE"
-	join "NC_UST"."USTF_TANK_OWNERSHIP_DATA_TABLE" o on fd."TANK_FACILITY_KEY" = o."TANK_FACILITY_KEY"
-	join "NC_UST".v_USTF_TANK_DETAIL_DATA_TABLE t on o."TANK_KEY" = t."TANK_KEY"
-	join "NC_UST"."USTF_TYPE_OWNER_CD" ocd on fd."TYPE_OWNER_KEY" = ocd."TYPE_OWNER_KEY"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'OwnerType') ot on ocd."TYPE_OWNER_NAME" = ot.state_value
-	left join (select distinct a."FACILITY_KEY", b."BUSINESS_NAME", b."FIRST_NAME", b."LAST_NAME", b."ADDRESS1", b."ADDRESS2",
-						b."CITY", b."ZIP", b."STATE", b."PHONE", b."EMAIL_ADDR"
-				from "NC_UST"."USTF_AFFILIATE_DATA_TABLE" a join "NC_UST"."USTF_CONTACT_DATA_TABLE" b on a."CONTACT_KEY" = b."CONTACT_KEY"
-				where "AFFILIATE_TYPE_KEY" = 1 and a."END_DATE" is null) fown on f."FACILITY_KEY" = fown."FACILITY_KEY"
-	left join (select distinct a."FACILITY_KEY", b."BUSINESS_NAME", b."FIRST_NAME", b."LAST_NAME", b."ADDRESS1", b."ADDRESS2",
-						b."CITY", b."ZIP", b."STATE", b."PHONE", b."EMAIL_ADDR"
-				from "NC_UST"."USTF_AFFILIATE_DATA_TABLE" a join "NC_UST"."USTF_CONTACT_DATA_TABLE" b on a."CONTACT_KEY" = b."CONTACT_KEY"
-				where "AFFILIATE_TYPE_KEY" = 2 and a."END_DATE" is null) fopr on f."FACILITY_KEY" = fopr."FACILITY_KEY"	
-	left join "NC_UST"."USTF_FINANCIAL_MECH_CD" fin on fd."FINANCIAL_RESPONSIBILITY" = fin."FINANCIAL_MECH_KEY"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityBondRatingTest') frbrt on frbrt.state_value = fin."DESCRIPTION"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityGuarantee') frg on frg.state_value = fin."DESCRIPTION"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityLetterOfCredit') frlc on frlc.state_value = fin."DESCRIPTION"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityLocalGovernmentFinancialTest') frlg on frlg.state_value = fin."DESCRIPTION"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityRiskRetentionGroup') frrr on frrr.state_value = fin."DESCRIPTION"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilitySelfInsuranceFinancialTest') frsi on frsi.state_value = fin."DESCRIPTION"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilitySuretyBond') frsb on frsb.state_value = fin."DESCRIPTION"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityTrustFund') frtf on frtf.state_value = fin."DESCRIPTION"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityOtherMethod') fro on fro.state_value = fin."DESCRIPTION"
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityNotRequired') frnr on frnr.state_value = fin."DESCRIPTION"
-	join "NC_UST"."USTF_TANK_STATUS_CD_DATA_TABLE" tscd on t."TANK_STATUS_KEY" = tscd."TANK_STATUS_KEY" 
-	join (select state_value, epa_value, exclude_from_query from v_ust_element_mapping where control_id = 17 and element_name = 'TankStatus') ts on tscd."TANK_STATUS_NAME" = ts.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FederallyRegulated') fr on t."REGULATED"::text = fr.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'MultipleTanks') mt on t."MANIFOLD_TANK"::text = mt.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'CompartmentalizedUST') cu on t."COMPARTMENT_TANK"::text = cu.state_value
-	left join "NC_UST"."USTF_PRODUCT_CD_DATA_TABLE" pcd on t."PRODUCT_KEY" = pcd."PRODUCT_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'TankSubstanceStored') tss on pcd."PRODUCT_NAME" = tss.state_value
-	left join "NC_UST"."USTF_TANK_CONST_CD_DATA_TABLE" tccd on t."TANK_CONSTR_KEY" = tccd."TANK_CONSTR_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'TankWallType') twt on tccd."TANK_CONSTR_NAME" = twt.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'MaterialDescription') md on tccd."TANK_CONSTR_NAME" = md.state_value
-	left join "NC_UST"."USTF_PIPING_CONSTR_CD_DATA_TABLE" pccd on t."PIPING_CONSTR_KEY" = pccd."PIPING_CONSTR_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PipingMaterialDescription') pmd on pccd."PIPING_CONSTR_NAME" = pmd.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PipingWallType') pwt on pccd."PIPING_CONSTR_NAME" = pwt.state_value
-	left join "NC_UST"."USTF_FLEX_CONNECTOR_TANK_CD_DATA_TABLE" fccd on t."FLEX_CONNECTOR_TANK_KEY" = fccd."FLEX_CONNECTOR_TANK_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PipingFlexConnector') pfc on fccd."FLEX_CONNECTOR_TANK_NAME" = pfc.state_value
-	left join "NC_UST"."USTF_PIPING_SYSTEM_CD_DATA_TABLE" pscd on t."PIPING_SYSTEM_KEY" = pscd."PIPING_SYSTEM_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PipingStyle') ps on pscd."PIPING_SYSTEM_NAME" = ps.state_value
-	left join "NC_UST"."USTF_OVERFILL_PROTECTION_CD_DATA_TABLE" pocd on t."OVERFILL_PROTECTION_KEY" = pocd."OVERFILL_PROTECTION_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'BallFloatValve') bfv on pocd."OVERFILL_PROTECTION_NAME" = bfv.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FlowShutoffDevice') fsd on pocd."OVERFILL_PROTECTION_NAME" = fsd.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'HighLevelAlarm') hla on pocd."OVERFILL_PROTECTION_NAME" = hla.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'OverfillProtectionPrimary') opp on pocd."OVERFILL_PROTECTION_NAME" = opp.state_value
-	left join "NC_UST"."USTF_SPILL_PROTECTION_CD_DATA_TABLE" spcd on t."SPILL_PROTECTION_KEY" = spcd."SPILL_PROTECTION_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'SpillBucketInstalled') sbi on spcd."SPILL_PROTECTION_NAME" = sbi.state_value
-	left join "NC_UST"."USTF_LD_INTERSTL_PIP_SYSTEM_CD" ipcd on t."LD_INTERSTL_PIP_SYSTEM_KEY" = ipcd."LD_INTERSTL_PIP_SYSTEM_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'InterstitialMonitoringContinualElectric') imce on ipcd."LD_INTERSTL_PIP_SYSTEM__NAME" = imce.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'InterstitialMonitoringManual') imm on ipcd."LD_INTERSTL_PIP_SYSTEM__NAME" = imm.state_value
-	left join "NC_UST"."USTF_LD_SYSTEM_TANK_CD_DATA_TABLE" stcd on t."LD_SYSTEM_TANK_KEY" = stcd."LD_SYSTEM_TANK_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'AutomaticTankGauging') atg on stcd."LD_SYSTEM_TANK_NAME" = atg.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'ManualTankGauging') mtg on stcd."LD_SYSTEM_TANK_NAME" = mtg.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'StatisticalInventoryReconciliation') sir on stcd."LD_SYSTEM_TANK_NAME" = sir.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'TankTightnessTesting') ttt on stcd."LD_SYSTEM_TANK_NAME" = ttt.state_value
-	left join "NC_UST"."USTF_PRESSURIZE_LEAK_DETECT_CD_DATA_TABLE" plcd on t."PRESSURIZED_LEAK_DETECT_KEY" = plcd."PRESSURIZE_LEAK_DETECT_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'ElectronicLineLeak') ell on plcd."PRESSURIZE_LEAK_DETECT_NAME" = ell.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'MechanicalLineLeak') mll on plcd."PRESSURIZE_LEAK_DETECT_NAME" = mll.state_value
-	left join "NC_UST"."USTF_LD_SYSTEM_PIPE_CD_DATA_TABLE" lscd on t."LD_SYSTEM_PIPE_KEY" = lscd."LD_SYSTEM_PIPE_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'SafeSuction') ss on lscd."LD_SYSTEM_PIPE_NAME" = ss.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PrimaryReleaseDetectionType') prdt on lscd."LD_SYSTEM_PIPE_NAME" = prdt.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'VaporMonitoring') vm on stcd."LD_SYSTEM_TANK_NAME" = vm.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'GroundwaterMonitoring') gm on stcd."LD_SYSTEM_TANK_NAME" = gm.state_value
-	left join "NC_UST".lust lust on fi."FacilityID" = lust."FacilID"
+         "NC_UST"."USTF_FACILITY_DATA_TABLE" f  
+    join "NC_UST".facility_ids fi on f."MULTI_FACILITY_ID" = fi."MULTI_FACILITY_ID" and f."MULTI_OWNER_ID" = fi."MULTI_OWNER_ID" and f."BASE_FACILITY_ID" = fi."BASE_FACILITY_ID"         
+    join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" fd on f."FACILITY_KEY" = fd."FACILITY_KEY" 
+    join "NC_UST"."USTF_FACILITY_TYPE_CD" ft on f."FACILITY_TYPE_KEY" = ft."FACILITY_TYPE_KEY"
+    left join "NC_UST"."FIPS_COUNTY_CODES" fcc on f."COUNTY_KEY" = fcc."FIPS_COUNTY_CODE"
+    join "NC_UST"."USTF_TANK_OWNERSHIP_DATA_TABLE" o on fd."TANK_FACILITY_KEY" = o."TANK_FACILITY_KEY"
+    join "NC_UST".v_USTF_TANK_DETAIL_DATA_TABLE t on o."TANK_KEY" = t."TANK_KEY"
+    join "NC_UST"."USTF_TYPE_OWNER_CD" ocd on fd."TYPE_OWNER_KEY" = ocd."TYPE_OWNER_KEY"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'OwnerType') ot on ocd."TYPE_OWNER_NAME" = ot.state_value
+    left join (select distinct a."FACILITY_KEY", b."BUSINESS_NAME", b."FIRST_NAME", b."LAST_NAME", b."ADDRESS1", b."ADDRESS2",
+                        b."CITY", b."ZIP", b."STATE", b."PHONE", b."EMAIL_ADDR"
+                from "NC_UST"."USTF_AFFILIATE_DATA_TABLE" a join "NC_UST"."USTF_CONTACT_DATA_TABLE" b on a."CONTACT_KEY" = b."CONTACT_KEY"
+                where "AFFILIATE_TYPE_KEY" = 1 and a."END_DATE" is null) fown on f."FACILITY_KEY" = fown."FACILITY_KEY"
+    left join (select distinct a."FACILITY_KEY", b."BUSINESS_NAME", b."FIRST_NAME", b."LAST_NAME", b."ADDRESS1", b."ADDRESS2",
+                        b."CITY", b."ZIP", b."STATE", b."PHONE", b."EMAIL_ADDR"
+                from "NC_UST"."USTF_AFFILIATE_DATA_TABLE" a join "NC_UST"."USTF_CONTACT_DATA_TABLE" b on a."CONTACT_KEY" = b."CONTACT_KEY"
+                where "AFFILIATE_TYPE_KEY" = 2 and a."END_DATE" is null) fopr on f."FACILITY_KEY" = fopr."FACILITY_KEY"    
+    left join "NC_UST"."USTF_FINANCIAL_MECH_CD" fin on fd."FINANCIAL_RESPONSIBILITY" = fin."FINANCIAL_MECH_KEY"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityBondRatingTest') frbrt on frbrt.state_value = fin."DESCRIPTION"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityGuarantee') frg on frg.state_value = fin."DESCRIPTION"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityLetterOfCredit') frlc on frlc.state_value = fin."DESCRIPTION"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityLocalGovernmentFinancialTest') frlg on frlg.state_value = fin."DESCRIPTION"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityRiskRetentionGroup') frrr on frrr.state_value = fin."DESCRIPTION"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilitySelfInsuranceFinancialTest') frsi on frsi.state_value = fin."DESCRIPTION"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilitySuretyBond') frsb on frsb.state_value = fin."DESCRIPTION"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityTrustFund') frtf on frtf.state_value = fin."DESCRIPTION"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityOtherMethod') fro on fro.state_value = fin."DESCRIPTION"
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FinancialResponsibilityNotRequired') frnr on frnr.state_value = fin."DESCRIPTION"
+    join "NC_UST"."USTF_TANK_STATUS_CD_DATA_TABLE" tscd on t."TANK_STATUS_KEY" = tscd."TANK_STATUS_KEY" 
+    join (select state_value, epa_value, exclude_from_query from v_ust_element_mapping where control_id = 17 and element_name = 'TankStatus') ts on tscd."TANK_STATUS_NAME" = ts.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FederallyRegulated') fr on t."REGULATED"::text = fr.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'MultipleTanks') mt on t."MANIFOLD_TANK"::text = mt.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'CompartmentalizedUST') cu on t."COMPARTMENT_TANK"::text = cu.state_value
+    left join "NC_UST"."USTF_PRODUCT_CD_DATA_TABLE" pcd on t."PRODUCT_KEY" = pcd."PRODUCT_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'TankSubstanceStored') tss on pcd."PRODUCT_NAME" = tss.state_value
+    left join "NC_UST"."USTF_TANK_CONST_CD_DATA_TABLE" tccd on t."TANK_CONSTR_KEY" = tccd."TANK_CONSTR_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'TankWallType') twt on tccd."TANK_CONSTR_NAME" = twt.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'MaterialDescription') md on tccd."TANK_CONSTR_NAME" = md.state_value
+    left join "NC_UST"."USTF_PIPING_CONSTR_CD_DATA_TABLE" pccd on t."PIPING_CONSTR_KEY" = pccd."PIPING_CONSTR_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PipingMaterialDescription') pmd on pccd."PIPING_CONSTR_NAME" = pmd.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PipingWallType') pwt on pccd."PIPING_CONSTR_NAME" = pwt.state_value
+    left join "NC_UST"."USTF_FLEX_CONNECTOR_TANK_CD_DATA_TABLE" fccd on t."FLEX_CONNECTOR_TANK_KEY" = fccd."FLEX_CONNECTOR_TANK_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PipingFlexConnector') pfc on fccd."FLEX_CONNECTOR_TANK_NAME" = pfc.state_value
+    left join "NC_UST"."USTF_PIPING_SYSTEM_CD_DATA_TABLE" pscd on t."PIPING_SYSTEM_KEY" = pscd."PIPING_SYSTEM_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PipingStyle') ps on pscd."PIPING_SYSTEM_NAME" = ps.state_value
+    left join "NC_UST"."USTF_OVERFILL_PROTECTION_CD_DATA_TABLE" pocd on t."OVERFILL_PROTECTION_KEY" = pocd."OVERFILL_PROTECTION_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'BallFloatValve') bfv on pocd."OVERFILL_PROTECTION_NAME" = bfv.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'FlowShutoffDevice') fsd on pocd."OVERFILL_PROTECTION_NAME" = fsd.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'HighLevelAlarm') hla on pocd."OVERFILL_PROTECTION_NAME" = hla.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'OverfillProtectionPrimary') opp on pocd."OVERFILL_PROTECTION_NAME" = opp.state_value
+    left join "NC_UST"."USTF_SPILL_PROTECTION_CD_DATA_TABLE" spcd on t."SPILL_PROTECTION_KEY" = spcd."SPILL_PROTECTION_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'SpillBucketInstalled') sbi on spcd."SPILL_PROTECTION_NAME" = sbi.state_value
+    left join "NC_UST"."USTF_LD_INTERSTL_PIP_SYSTEM_CD" ipcd on t."LD_INTERSTL_PIP_SYSTEM_KEY" = ipcd."LD_INTERSTL_PIP_SYSTEM_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'InterstitialMonitoringContinualElectric') imce on ipcd."LD_INTERSTL_PIP_SYSTEM__NAME" = imce.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'InterstitialMonitoringManual') imm on ipcd."LD_INTERSTL_PIP_SYSTEM__NAME" = imm.state_value
+    left join "NC_UST"."USTF_LD_SYSTEM_TANK_CD_DATA_TABLE" stcd on t."LD_SYSTEM_TANK_KEY" = stcd."LD_SYSTEM_TANK_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'AutomaticTankGauging') atg on stcd."LD_SYSTEM_TANK_NAME" = atg.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'ManualTankGauging') mtg on stcd."LD_SYSTEM_TANK_NAME" = mtg.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'StatisticalInventoryReconciliation') sir on stcd."LD_SYSTEM_TANK_NAME" = sir.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'TankTightnessTesting') ttt on stcd."LD_SYSTEM_TANK_NAME" = ttt.state_value
+    left join "NC_UST"."USTF_PRESSURIZE_LEAK_DETECT_CD_DATA_TABLE" plcd on t."PRESSURIZED_LEAK_DETECT_KEY" = plcd."PRESSURIZE_LEAK_DETECT_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'ElectronicLineLeak') ell on plcd."PRESSURIZE_LEAK_DETECT_NAME" = ell.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'MechanicalLineLeak') mll on plcd."PRESSURIZE_LEAK_DETECT_NAME" = mll.state_value
+    left join "NC_UST"."USTF_LD_SYSTEM_PIPE_CD_DATA_TABLE" lscd on t."LD_SYSTEM_PIPE_KEY" = lscd."LD_SYSTEM_PIPE_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'SafeSuction') ss on lscd."LD_SYSTEM_PIPE_NAME" = ss.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'PrimaryReleaseDetectionType') prdt on lscd."LD_SYSTEM_PIPE_NAME" = prdt.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'VaporMonitoring') vm on stcd."LD_SYSTEM_TANK_NAME" = vm.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping where control_id = 17 and element_name = 'GroundwaterMonitoring') gm on stcd."LD_SYSTEM_TANK_NAME" = gm.state_value
+    left join "NC_UST".lust lust on fi."FacilityID" = lust."FacilID"
 where ts.exclude_from_query is null and t."REGULATED" = 1
 and ft."FACILITY_TYPE_DESC" = 'UST';
 
@@ -1229,15 +1229,15 @@ select * from v_ust_element_mapping where control_id = 17 and element_name = 'Ta
 update ust_element_value_mappings set epa_value = 'Currently in use' where id = 4859
 
 select * from "NC_UST"."USTF_TANK_STATUS_CD_DATA_TABLE"
-8	Never Installed
-0	Unknown
-1	Removed
-2	Abandoned
-3	Chg. In Service
-4	Transfer
-5	Current
-6	Temporarily Closed
-7	Intent to Install
+8    Never Installed
+0    Unknown
+1    Removed
+2    Abandoned
+3    Chg. In Service
+4    Transfer
+5    Current
+6    Temporarily Closed
+7    Intent to Install
 
 select * from ust_geocode where control_id = 17;
 
@@ -1249,25 +1249,25 @@ from "NC_UST".ust_base) a group by "FacilityID", "TankID" having count(*) > 1;
 select * from "NC_UST".ust_base where "FacilityID" = '00-0-0000000002' and "TankID" = '001';
 
  "NC_UST"."USTF_FACILITY_DATA_TABLE" f  
-	join "NC_UST".facility_ids fi on f."MULTI_FACILITY_ID" = fi."MULTI_FACILITY_ID" and f."MULTI_OWNER_ID" = fi."MULTI_OWNER_ID" and f."BASE_FACILITY_ID" = fi."BASE_FACILITY_ID"		 
-	join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" fd on f."FACILITY_KEY" = fd."FACILITY_KEY" 
-	join "NC_UST"."USTF_TANK_OWNERSHIP_DATA_TABLE" o on fd."TANK_FACILITY_KEY" = o."TANK_FACILITY_KEY"
-	join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" t on o."TANK_KEY" = t."TANK_KEY"
+    join "NC_UST".facility_ids fi on f."MULTI_FACILITY_ID" = fi."MULTI_FACILITY_ID" and f."MULTI_OWNER_ID" = fi."MULTI_OWNER_ID" and f."BASE_FACILITY_ID" = fi."BASE_FACILITY_ID"         
+    join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" fd on f."FACILITY_KEY" = fd."FACILITY_KEY" 
+    join "NC_UST"."USTF_TANK_OWNERSHIP_DATA_TABLE" o on fd."TANK_FACILITY_KEY" = o."TANK_FACILITY_KEY"
+    join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" t on o."TANK_KEY" = t."TANK_KEY"
 
 select t.* 
 from "NC_UST"."USTF_FACILITY_DATA_TABLE" f  
-	join "NC_UST".facility_ids fi on f."MULTI_FACILITY_ID" = fi."MULTI_FACILITY_ID" and f."MULTI_OWNER_ID" = fi."MULTI_OWNER_ID" and f."BASE_FACILITY_ID" = fi."BASE_FACILITY_ID"		 
-	join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" fd on f."FACILITY_KEY" = fd."FACILITY_KEY" 
-	join "NC_UST"."USTF_TANK_OWNERSHIP_DATA_TABLE" o on fd."TANK_FACILITY_KEY" = o."TANK_FACILITY_KEY"
-	join "NC_UST".v_USTF_TANK_DETAIL_DATA_TABLE t on o."TANK_KEY" = t."TANK_KEY"
+    join "NC_UST".facility_ids fi on f."MULTI_FACILITY_ID" = fi."MULTI_FACILITY_ID" and f."MULTI_OWNER_ID" = fi."MULTI_OWNER_ID" and f."BASE_FACILITY_ID" = fi."BASE_FACILITY_ID"         
+    join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" fd on f."FACILITY_KEY" = fd."FACILITY_KEY" 
+    join "NC_UST"."USTF_TANK_OWNERSHIP_DATA_TABLE" o on fd."TANK_FACILITY_KEY" = o."TANK_FACILITY_KEY"
+    join "NC_UST".v_USTF_TANK_DETAIL_DATA_TABLE t on o."TANK_KEY" = t."TANK_KEY"
 where "FacilityID"  = '00-0-0000000002' and "TANK_ID" = '001';
 82387
 
 create view "NC_UST".v_USTF_TANK_DETAIL_DATA_TABLE as
 select b.* from 
-	(select "TANK_KEY", max("INFO_SOURCE_DATE") "INFO_SOURCE_DATE"
-	from "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" group by "TANK_KEY") a
-	join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" b on a."TANK_KEY" = b."TANK_KEY" and a."INFO_SOURCE_DATE" = b."INFO_SOURCE_DATE"
+    (select "TANK_KEY", max("INFO_SOURCE_DATE") "INFO_SOURCE_DATE"
+    from "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" group by "TANK_KEY") a
+    join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" b on a."TANK_KEY" = b."TANK_KEY" and a."INFO_SOURCE_DATE" = b."INFO_SOURCE_DATE"
 
 select * from "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" where 
 
@@ -1275,20 +1275,20 @@ select "FacilityID", "TankID", "TankStatus"
 from ust u where control_id = 17 and exists (
 select 1
 from     "NC_UST"."USTF_FACILITY_DATA_TABLE" f  
-	join "NC_UST".facility_ids fi on f."MULTI_FACILITY_ID" = fi."MULTI_FACILITY_ID" and f."MULTI_OWNER_ID" = fi."MULTI_OWNER_ID" and f."BASE_FACILITY_ID" = fi."BASE_FACILITY_ID"		 
-	join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" fd on f."FACILITY_KEY" = fd."FACILITY_KEY" 
-	join "NC_UST"."USTF_TANK_OWNERSHIP_DATA_TABLE" o on fd."TANK_FACILITY_KEY" = o."TANK_FACILITY_KEY"
-	join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" t on o."TANK_KEY" = t."TANK_KEY"
+    join "NC_UST".facility_ids fi on f."MULTI_FACILITY_ID" = fi."MULTI_FACILITY_ID" and f."MULTI_OWNER_ID" = fi."MULTI_OWNER_ID" and f."BASE_FACILITY_ID" = fi."BASE_FACILITY_ID"         
+    join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" fd on f."FACILITY_KEY" = fd."FACILITY_KEY" 
+    join "NC_UST"."USTF_TANK_OWNERSHIP_DATA_TABLE" o on fd."TANK_FACILITY_KEY" = o."TANK_FACILITY_KEY"
+    join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" t on o."TANK_KEY" = t."TANK_KEY"
 where "TANK_STATUS_KEY" = 3
 and fi."FacilityID" = u."FacilityID" and t."TANK_ID" = u."TankID")
 order by 1, 2;
-	
-00-0-0000001904	631936	Closed (general)
-00-0-0000001904	631936	Currently in use
-00-0-0000001904	631936	Closed (general)
-00-0-0000001904	631936	Currently in use
-00-0-0000001904	631936	Currently in use
-00-0-0000001904	631936	Currently in use
+    
+00-0-0000001904    631936    Closed (general)
+00-0-0000001904    631936    Currently in use
+00-0-0000001904    631936    Closed (general)
+00-0-0000001904    631936    Currently in use
+00-0-0000001904    631936    Currently in use
+00-0-0000001904    631936    Currently in use
 
 
 select * from ust where  control_id = 17 
@@ -1300,204 +1300,204 @@ select * from information_schema.columns where lower(column_name) like '%reg%' a
 select "REGULATED", count(*) from "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE"
 group by "REGULATED"
 
-0	11377
-1	221081
+0    11377
+1    221081
 
 ----------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------
 select distinct 
-	   fown."FACILITY_ID" as "FacilityID",
-	   f."FACILITY_NAME" as "FacilityName",
-	   ot.epa_value as "OwnerType",
-	   f."ADDRESS1" as "FacilityAddress1",
-	   f."ADDRESS2" as "FacilityAddress2",
-	   f."CITY" as "FacilityCity",
-	   fcc."FIPS_COUNTY_DESC" as "FacilityCounty",
-	   f."ZIP" as "FacilityZipCode",
-	   f."PHONE" as "FacilityPhoneNumber",
-	   f."STATE" as "FacilityState",
-	   4 as "FacilityEPARegion",
-	   f."LATITUDE" as "FacilityLatitude",
-	   f."LONGITUDE" as "FacilityLongitude",
-	   fown."OWNER_NAME" as "FacilityOwnerCompanyName",
-	   fown."ADDRESS1" as "FacilityOwnerAddress1",
-	   fown."ADDRESS2" as "FacilityOwnerAddress2",
-	   fown."CITY" as "FacilityOwnerCity",
-	   fown."COUNTY_DESC" as "FacilityOwnerCounty",
-	   fown."ZIP" as "FacilityOwnerZipCode",
-	   fown."STATE" as "FacilityOwnerState",
-	   fown."PHONE" as "FacilityOwnerPhoneNumber",
-	   fown."EMAIL_ADDR" as "FacilityOwnerEmail",	   
-	   fopr."OPERATOR_NAME" as "FacilityOperatorCompanyName",
-	   fopr."ADDRESS1" as "FacilityOperatorAddress1",
-	   fopr."ADDRESS2" as "FacilityOperatorAddress2",
-	   fopr."CITY" as "FacilityOperatorCity",
-	   fopr."COUNTY_DESC" as "FacilityOperatorCounty",
-	   fopr."ZIP" as "FacilityOperatorZipCode",
-	   fopr."STATE" as "FacilityOperatorState",
-	   fopr."PHONE" as "FacilityOperatorPhoneNumber",
-	   fopr."EMAIL_ADDR" as "FacilityOperatorEmail",	  
-	   frbr.epa_value as "FinancialResponsibilityBondRatingTest",
-	   frg.epa_value as "FinancialResponsibilityGuarantee", 
-	   frlc.epa_value as "FinancialResponsibilityLetterOfCredit", 
-	   frlg.epa_value as "FinancialResponsibilityLocalGovernmentFinancialTest", 
-	   frrr.epa_value as "FinancialResponsibilityRiskRetentionGroup", 
-	   frsi.epa_value as "FinancialResponsibilitySelfInsuranceFinancialTest", 
-	   frsb.epa_value as "FinancialResponsibilitySuretyBond", 
-	   frtf.epa_value as "FinancialResponsibilityTrustFund", 
-	   fro.epa_value as "FinancialResponsibilityOtherMethod", 
-	   frnr.epa_value as "FinancialResponsibilityNotRequired", 
-	   ft."TANK_ID" as "TankID",
-	   ft."REGULATED" as "FederallyRegulated",
-	   ts.epa_value as "TankStatus",	
-	   ft."MANIFOLD_TANK" as "MultipleTanks",
-	   ft."PERM_CLOSE_DATE" as "ClosureDate",
-	   ft."INSTALLATION_DATE" as "InstallationDate",
-	   	ft."COMPARTMENT_TANK" as "CompartmentalizedUST",
-	   	sub.epa_value as "TankSubstanceStored",
-	   	ft."CAPACITY" as "TankCapacityGallons", -- assume gallons	
-		twt.epa_value as "TankWallType",
-		md.epa_value as "MaterialDescription",
-		pmd.epa_value as "PipingMaterialDescription",
-		"FLEX_CONNECTOR_TANK" as "PipingFlexConnector",
-		ps.epa_value as "PipingStyle",
-		pwt.epa_value as "PipingWallType",
-		bfv.epa_value as "BallFloatValve",
-		fsd.epa_value as "FlowShutoffDevice",
-		hla.epa_value as "HighLevelAlarm",
-		opp.epa_value as "OverfillProtectionPrimary",
-		sb.epa_value as "SpillBucketInstalled",
-		imce.epa_value as "InterstitialMonitoringContinualElectric",
-		imm.epa_value as "InterstitialMonitoringManual", 
-		atg.epa_value as "AutomaticTankGauging",
-		mtg.epa_value as "ManualTankGauging",
-		sir.epa_value as "StatisticalInventoryReconciliation",
-		ttt.epa_value as "TankTightnessTesting",
-		ell.epa_value as "ElectronicLineLeak",
-		mll.epa_value as "MechanicalLineLeak",
-		ss.epa_value as "SafeSuction", 
-		prd.epa_value as "PrimaryReleaseDetectionType",
-		case when lust."FacilID" is not null then 'Yes' end as "USTReportedRelease",
-		lust.lust_id as "AssociatedLUSTID"
+       fown."FACILITY_ID" as "FacilityID",
+       f."FACILITY_NAME" as "FacilityName",
+       ot.epa_value as "OwnerType",
+       f."ADDRESS1" as "FacilityAddress1",
+       f."ADDRESS2" as "FacilityAddress2",
+       f."CITY" as "FacilityCity",
+       fcc."FIPS_COUNTY_DESC" as "FacilityCounty",
+       f."ZIP" as "FacilityZipCode",
+       f."PHONE" as "FacilityPhoneNumber",
+       f."STATE" as "FacilityState",
+       4 as "FacilityEPARegion",
+       f."LATITUDE" as "FacilityLatitude",
+       f."LONGITUDE" as "FacilityLongitude",
+       fown."OWNER_NAME" as "FacilityOwnerCompanyName",
+       fown."ADDRESS1" as "FacilityOwnerAddress1",
+       fown."ADDRESS2" as "FacilityOwnerAddress2",
+       fown."CITY" as "FacilityOwnerCity",
+       fown."COUNTY_DESC" as "FacilityOwnerCounty",
+       fown."ZIP" as "FacilityOwnerZipCode",
+       fown."STATE" as "FacilityOwnerState",
+       fown."PHONE" as "FacilityOwnerPhoneNumber",
+       fown."EMAIL_ADDR" as "FacilityOwnerEmail",       
+       fopr."OPERATOR_NAME" as "FacilityOperatorCompanyName",
+       fopr."ADDRESS1" as "FacilityOperatorAddress1",
+       fopr."ADDRESS2" as "FacilityOperatorAddress2",
+       fopr."CITY" as "FacilityOperatorCity",
+       fopr."COUNTY_DESC" as "FacilityOperatorCounty",
+       fopr."ZIP" as "FacilityOperatorZipCode",
+       fopr."STATE" as "FacilityOperatorState",
+       fopr."PHONE" as "FacilityOperatorPhoneNumber",
+       fopr."EMAIL_ADDR" as "FacilityOperatorEmail",      
+       frbr.epa_value as "FinancialResponsibilityBondRatingTest",
+       frg.epa_value as "FinancialResponsibilityGuarantee", 
+       frlc.epa_value as "FinancialResponsibilityLetterOfCredit", 
+       frlg.epa_value as "FinancialResponsibilityLocalGovernmentFinancialTest", 
+       frrr.epa_value as "FinancialResponsibilityRiskRetentionGroup", 
+       frsi.epa_value as "FinancialResponsibilitySelfInsuranceFinancialTest", 
+       frsb.epa_value as "FinancialResponsibilitySuretyBond", 
+       frtf.epa_value as "FinancialResponsibilityTrustFund", 
+       fro.epa_value as "FinancialResponsibilityOtherMethod", 
+       frnr.epa_value as "FinancialResponsibilityNotRequired", 
+       ft."TANK_ID" as "TankID",
+       ft."REGULATED" as "FederallyRegulated",
+       ts.epa_value as "TankStatus",    
+       ft."MANIFOLD_TANK" as "MultipleTanks",
+       ft."PERM_CLOSE_DATE" as "ClosureDate",
+       ft."INSTALLATION_DATE" as "InstallationDate",
+           ft."COMPARTMENT_TANK" as "CompartmentalizedUST",
+           sub.epa_value as "TankSubstanceStored",
+           ft."CAPACITY" as "TankCapacityGallons", -- assume gallons    
+        twt.epa_value as "TankWallType",
+        md.epa_value as "MaterialDescription",
+        pmd.epa_value as "PipingMaterialDescription",
+        "FLEX_CONNECTOR_TANK" as "PipingFlexConnector",
+        ps.epa_value as "PipingStyle",
+        pwt.epa_value as "PipingWallType",
+        bfv.epa_value as "BallFloatValve",
+        fsd.epa_value as "FlowShutoffDevice",
+        hla.epa_value as "HighLevelAlarm",
+        opp.epa_value as "OverfillProtectionPrimary",
+        sb.epa_value as "SpillBucketInstalled",
+        imce.epa_value as "InterstitialMonitoringContinualElectric",
+        imm.epa_value as "InterstitialMonitoringManual", 
+        atg.epa_value as "AutomaticTankGauging",
+        mtg.epa_value as "ManualTankGauging",
+        sir.epa_value as "StatisticalInventoryReconciliation",
+        ttt.epa_value as "TankTightnessTesting",
+        ell.epa_value as "ElectronicLineLeak",
+        mll.epa_value as "MechanicalLineLeak",
+        ss.epa_value as "SafeSuction", 
+        prd.epa_value as "PrimaryReleaseDetectionType",
+        case when lust."FacilID" is not null then 'Yes' end as "USTReportedRelease",
+        lust.lust_id as "AssociatedLUSTID"
 from "NC_UST"."USTF_FACILITY_DATA_TABLE" f 
-	left join "NC_UST"."VW_USTF_FACILITY_OWNER_DTLS_DATA_VIEW" fown on f."FACILITY_KEY" = fown."FACILITY_KEY"
-	left join "NC_UST"."VW_USTF_FACILITY_OPERATOR_DTLS_DATA_VIEW" fopr on f."FACILITY_KEY" = fopr."FACILITY_KEY"
-	left join "NC_UST"."VW_USTF_TANK_DETAIL_DATA_VIEW" ft on f."FACILITY_KEY" = ft."FACILITY_KEY"
-	left join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" t on ft."TANK_DETAIL_KEY" = t."TANK_DETAIL_KEY"
-	left join (select "FacilID", max("IncidentNumber") as lust_id from "NC_LUST"."qryLUST_Data" group by "FacilID") lust 
-		on fown."FACILITY_ID" = lust."FacilID"
-	left join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" tfd on f."FACILITY_KEY" = tfd."FACILITY_KEY"
-	left join "NC_UST"."USTF_TYPE_OWNER_CD" toc on tfd."TYPE_OWNER_KEY" = toc."TYPE_OWNER_KEY" 
-	left join "NC_UST"."FIPS_COUNTY_CODES" fcc on f."COUNTY_KEY" = fcc."FIPS_COUNTY_CODE"
-	left join (select state_code, epa_value from v_ust_element_mapping where state = 'NC' and element_name = 'OwnerType') ot 
-		on toc."TYPE_OWNER_KEY"::varchar = ot.state_code
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilityBondRatingTest') frbr
-		on tfd."FINANCIAL_RESPONSIBILITY" = frbr."FINANCIAL_MECH_KEY" 
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilityGuarantee') frg
-		on tfd."FINANCIAL_RESPONSIBILITY" = frg."FINANCIAL_MECH_KEY" 
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilityLetterOfCredit') frlc
-		on tfd."FINANCIAL_RESPONSIBILITY" = frlc."FINANCIAL_MECH_KEY" 	
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilityLocalGovernmentFinancialTest') frlg
-		on tfd."FINANCIAL_RESPONSIBILITY" = frlg."FINANCIAL_MECH_KEY" 	
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilityRiskRetentionGroup') frrr
-		on tfd."FINANCIAL_RESPONSIBILITY" = frrr."FINANCIAL_MECH_KEY" 			
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilitySelfInsuranceFinancialTest') frsi
-		on tfd."FINANCIAL_RESPONSIBILITY" = frsi."FINANCIAL_MECH_KEY" 	
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilitySuretyBond') frsb
-		on tfd."FINANCIAL_RESPONSIBILITY" = frsb."FINANCIAL_MECH_KEY" 			
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilityTrustFund') frtf
-		on tfd."FINANCIAL_RESPONSIBILITY" = frtf."FINANCIAL_MECH_KEY" 		
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilityOtherMethod') fro
-		on tfd."FINANCIAL_RESPONSIBILITY" = fro."FINANCIAL_MECH_KEY" 	
-	left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
-				from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
-				where state = 'NC' and element_name = 'FinancialResponsibilityNotRequired') frnr
-		on tfd."FINANCIAL_RESPONSIBILITY" = frnr."FINANCIAL_MECH_KEY" 
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'TankStatus' and exclude_from_query is null) ts 
-	    on ft."TANK_STATUS" = ts.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'TankSubstanceStored' and exclude_from_query is null) sub 
-	    on ft."PRODUCT" = sub.state_value
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'TankWallType') twt 
-	    on ft."TANK_CONSTR" = twt.state_value	    
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'MaterialDescription') md 
-	    on ft."TANK_CONSTR" = md.state_value		    
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'PipingMaterialDescription') pmd 
-	    on ft."PIPING_CONSTR" = pmd.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'PipingStyle') ps 
-	    on ft."PIPING_SYSTEM" = ps.state_value		    
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'PipingWallType') pwt
-	    on ft."OVERFILL_PROTECTION" = pwt.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'BallFloatValve') bfv
-	    on ft."OVERFILL_PROTECTION" = bfv.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'FlowShutoffDevice') fsd
-	    on ft."OVERFILL_PROTECTION" = fsd.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'HighLevelAlarm') hla
-	    on ft."OVERFILL_PROTECTION" = hla.state_value		    
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'OverfillProtectionPrimary') opp
-	    on ft."OVERFILL_PROTECTION" = opp.state_value		    
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'SpillBucketInstalled') sb
-	    on ft."SPILL_PROTECTION" = sb.state_value	
-	left join (select state_code, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'InterstitialMonitoringContinualElectric') imce
-	    on t."LD_INTERSTL_PIP_SYSTEM_KEY"::varchar = imce.state_code		    
-	left join (select state_code, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'InterstitialMonitoringManual') imm
-	    on t."LD_INTERSTL_PIP_SYSTEM_KEY"::varchar = imm.state_code	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'AutomaticTankGauging') atg
-	    on ft."LD_SYSTEM_TANK" = atg.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'ManualTankGauging') mtg
-	    on ft."LD_SYSTEM_TANK" = mtg.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'StatisticalInventoryReconciliation') sir
-	    on ft."LD_SYSTEM_TANK" = sir.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'TankTightnessTesting') ttt
-	    on ft."LD_SYSTEM_TANK" = ttt.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'ElectronicLineLeak') ell
-	    on ft."LD_SYSTEM_PIPE" = ell.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'MechanicalLineLeak') mll
-	    on ft."LD_SYSTEM_PIPE" = mll.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'SafeSuction') ss
-	    on ft."LD_SYSTEM_PIPE" = ss.state_value	
-	left join (select state_value, epa_value from v_ust_element_mapping
-	           where state = 'NC' and element_name = 'PrimaryReleaseDetectionType') prd
-	    on ft."LD_SYSTEM_PIPE" = prd.state_value	
+    left join "NC_UST"."VW_USTF_FACILITY_OWNER_DTLS_DATA_VIEW" fown on f."FACILITY_KEY" = fown."FACILITY_KEY"
+    left join "NC_UST"."VW_USTF_FACILITY_OPERATOR_DTLS_DATA_VIEW" fopr on f."FACILITY_KEY" = fopr."FACILITY_KEY"
+    left join "NC_UST"."VW_USTF_TANK_DETAIL_DATA_VIEW" ft on f."FACILITY_KEY" = ft."FACILITY_KEY"
+    left join "NC_UST"."USTF_TANK_DETAIL_DATA_TABLE" t on ft."TANK_DETAIL_KEY" = t."TANK_DETAIL_KEY"
+    left join (select "FacilID", max("IncidentNumber") as lust_id from "NC_LUST"."qryLUST_Data" group by "FacilID") lust 
+        on fown."FACILITY_ID" = lust."FacilID"
+    left join "NC_UST"."USTF_TANK_FACILITY_DATA_TABLE" tfd on f."FACILITY_KEY" = tfd."FACILITY_KEY"
+    left join "NC_UST"."USTF_TYPE_OWNER_CD" toc on tfd."TYPE_OWNER_KEY" = toc."TYPE_OWNER_KEY" 
+    left join "NC_UST"."FIPS_COUNTY_CODES" fcc on f."COUNTY_KEY" = fcc."FIPS_COUNTY_CODE"
+    left join (select state_code, epa_value from v_ust_element_mapping where state = 'NC' and element_name = 'OwnerType') ot 
+        on toc."TYPE_OWNER_KEY"::varchar = ot.state_code
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilityBondRatingTest') frbr
+        on tfd."FINANCIAL_RESPONSIBILITY" = frbr."FINANCIAL_MECH_KEY" 
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilityGuarantee') frg
+        on tfd."FINANCIAL_RESPONSIBILITY" = frg."FINANCIAL_MECH_KEY" 
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilityLetterOfCredit') frlc
+        on tfd."FINANCIAL_RESPONSIBILITY" = frlc."FINANCIAL_MECH_KEY"     
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilityLocalGovernmentFinancialTest') frlg
+        on tfd."FINANCIAL_RESPONSIBILITY" = frlg."FINANCIAL_MECH_KEY"     
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilityRiskRetentionGroup') frrr
+        on tfd."FINANCIAL_RESPONSIBILITY" = frrr."FINANCIAL_MECH_KEY"             
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilitySelfInsuranceFinancialTest') frsi
+        on tfd."FINANCIAL_RESPONSIBILITY" = frsi."FINANCIAL_MECH_KEY"     
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilitySuretyBond') frsb
+        on tfd."FINANCIAL_RESPONSIBILITY" = frsb."FINANCIAL_MECH_KEY"             
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilityTrustFund') frtf
+        on tfd."FINANCIAL_RESPONSIBILITY" = frtf."FINANCIAL_MECH_KEY"         
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilityOtherMethod') fro
+        on tfd."FINANCIAL_RESPONSIBILITY" = fro."FINANCIAL_MECH_KEY"     
+    left join  (select distinct epa_value, b."FINANCIAL_MECH_KEY" 
+                from v_ust_element_mapping a join "NC_UST"."USTF_FINANCIAL_MECH_CD" b on a.state_value = b."DESCRIPTION" 
+                where state = 'NC' and element_name = 'FinancialResponsibilityNotRequired') frnr
+        on tfd."FINANCIAL_RESPONSIBILITY" = frnr."FINANCIAL_MECH_KEY" 
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'TankStatus' and exclude_from_query is null) ts 
+        on ft."TANK_STATUS" = ts.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'TankSubstanceStored' and exclude_from_query is null) sub 
+        on ft."PRODUCT" = sub.state_value
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'TankWallType') twt 
+        on ft."TANK_CONSTR" = twt.state_value        
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'MaterialDescription') md 
+        on ft."TANK_CONSTR" = md.state_value            
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'PipingMaterialDescription') pmd 
+        on ft."PIPING_CONSTR" = pmd.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'PipingStyle') ps 
+        on ft."PIPING_SYSTEM" = ps.state_value            
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'PipingWallType') pwt
+        on ft."OVERFILL_PROTECTION" = pwt.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'BallFloatValve') bfv
+        on ft."OVERFILL_PROTECTION" = bfv.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'FlowShutoffDevice') fsd
+        on ft."OVERFILL_PROTECTION" = fsd.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'HighLevelAlarm') hla
+        on ft."OVERFILL_PROTECTION" = hla.state_value            
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'OverfillProtectionPrimary') opp
+        on ft."OVERFILL_PROTECTION" = opp.state_value            
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'SpillBucketInstalled') sb
+        on ft."SPILL_PROTECTION" = sb.state_value    
+    left join (select state_code, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'InterstitialMonitoringContinualElectric') imce
+        on t."LD_INTERSTL_PIP_SYSTEM_KEY"::varchar = imce.state_code            
+    left join (select state_code, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'InterstitialMonitoringManual') imm
+        on t."LD_INTERSTL_PIP_SYSTEM_KEY"::varchar = imm.state_code    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'AutomaticTankGauging') atg
+        on ft."LD_SYSTEM_TANK" = atg.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'ManualTankGauging') mtg
+        on ft."LD_SYSTEM_TANK" = mtg.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'StatisticalInventoryReconciliation') sir
+        on ft."LD_SYSTEM_TANK" = sir.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'TankTightnessTesting') ttt
+        on ft."LD_SYSTEM_TANK" = ttt.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'ElectronicLineLeak') ell
+        on ft."LD_SYSTEM_PIPE" = ell.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'MechanicalLineLeak') mll
+        on ft."LD_SYSTEM_PIPE" = mll.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'SafeSuction') ss
+        on ft."LD_SYSTEM_PIPE" = ss.state_value    
+    left join (select state_value, epa_value from v_ust_element_mapping
+               where state = 'NC' and element_name = 'PrimaryReleaseDetectionType') prd
+        on ft."LD_SYSTEM_PIPE" = prd.state_value    
 where "TANK_STATUS" not in ('Intent to Install','Never Installed','Transfer')
 and "PRODUCT" not in ('ETHANOL','Tank never installed at location.') 
 and f."FACILITY_TYPE_KEY" = 0  

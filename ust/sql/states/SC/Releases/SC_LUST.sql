@@ -2,15 +2,15 @@ create function "SC_LUST".convert_site_num_int(site_num bigint)
 returns text as $$
 declare v_site_num text;
 begin
-	v_site_num = cast(site_num as text);
-	case length(v_site_num) 
-		when 1 then v_site_num = 'UST-0000' || v_site_num; 
-		when 2 then v_site_num = 'UST-000' || v_site_num; 
-		when 3 then v_site_num = 'UST-00' || v_site_num; 
-		when 4 then v_site_num = 'UST-0' || v_site_num;
-	else v_site_num = 'UST-' || v_site_num;	
-	end case;
-	return v_site_num;
+    v_site_num = cast(site_num as text);
+    case length(v_site_num) 
+        when 1 then v_site_num = 'UST-0000' || v_site_num; 
+        when 2 then v_site_num = 'UST-000' || v_site_num; 
+        when 3 then v_site_num = 'UST-00' || v_site_num; 
+        when 4 then v_site_num = 'UST-0' || v_site_num;
+    else v_site_num = 'UST-' || v_site_num;    
+    end case;
+    return v_site_num;
 end;
 $$  language plpgsql
 
@@ -29,11 +29,11 @@ create table "SC_LUST".chemicals_ERG  (chemical_desc varchar(100), cas_no varcha
 insert into "SC_LUST".chemicals_ERG 
 select distinct chemical_desc, cas_no 
 from 
-	(select chemical_desc, cas_no from "SC_UST"."Overfill_Prevention" union all 
-	 select chemical_desc, cas_no from "SC_UST"."Spill_Prevention_") a;
+    (select chemical_desc, cas_no from "SC_UST"."Overfill_Prevention" union all 
+     select chemical_desc, cas_no from "SC_UST"."Spill_Prevention_") a;
 
-delete from "SC_LUST".chemicals_ERG  where chemical_desc is null and cas_no is null;	
-	
+delete from "SC_LUST".chemicals_ERG  where chemical_desc is null and cas_no is null;    
+    
 select * from "SC_LUST".chemicals_ERG order by 1;
 
 update "SC_LUST".chemicals_ERG set chemical_desc = 'Butyl acrylate' where cas_no = '141-32-2';
@@ -41,7 +41,7 @@ update "SC_LUST".chemicals_ERG set chemical_desc = 'Vinyl acetate' where cas_no 
 update "SC_LUST".chemicals_ERG set chemical_desc = 'Styrene' where cas_no = '100-42-5';
 update "SC_LUST".chemicals_ERG set chemical_desc = 'Methyl methacrylate' where cas_no = '80-62-6';
 update "SC_LUST".chemicals_ERG set chemical_desc = 'Ethyl acrylate ' where cas_no = '140-88-5';
-	
+    
 select * from "SC_LUST".chemicals_ERG order by 1;
 ----------------------------------------------------------------------------------------------------------------------------------
 
@@ -63,37 +63,37 @@ drop view "SC_LUST".v_lust;
 
 create or replace view "SC_LUST".v_lust_base as
 select count(*) from (
-select 	a.site_num as "FacilityID", 
-		case when a.release_num is not null then replace('SC_' || substring(a.facil_name,1,35) || '_' || a.release_num || '_' || nextval('"SC_LUST".lustid_seq')::text,'__','_')
-	     else replace('SC_' || substring(a.facil_name,1,40) || '_' || nextval('"SC_LUST".lustid_seq')::text,'__','_')
-	     end as "LUSTID", 
-		a.facil_name as "SiteName", 
-		a.facil_address as "SiteAddress",
-		a.facil_city as "SiteCity",
-		a.facil_zip as "ZipCode",
-		'SC' as "State", 
-		4 as "EPARegion",		
-		b.lat_decimal as "Latitude", 
-		b.long_decimal as "Longitude",
-		case when a.cleanup_complete_date is null and a.cleanup_compl_mcl_date is null then 'Active: general' 
-	    	 when (a.cleanup_complete_date is not null and a.cleanup_compl_mcl_date is null) 
-			    or (a.cleanup_complete_date is null and a.cleanup_compl_mcl_date is not null) then 'No further action'
-			 else 'Other' end as "LUSTStatus",
-		to_date(a.confirmed_date,'DD-MON-YY') as "ReportedDate",
-		case when a.suspect_nfaed_date is not null then to_date(a.suspect_nfaed_date,'DD-MON-YY')
-		     when a.cleanup_complete_date is not null then to_date(a.cleanup_complete_date,'DD-MON-YY')
-			 when a.cleanup_compl_mcl_date is not null then to_date(a.cleanup_compl_mcl_date,'DD-MON-YY') end as "NFADate",
-		case when soil_contam_present = 'Y' or soil_contam_present_on = 'Y' then 'Yes' 
-			 when soil_contam_present = 'N' or soil_contam_present_on = 'N' then 'No' end as "MediaImpactedSoil",
-		case when gw_contam_present = 'Y' or gw_contam_present_on = 'Y' then 'Yes' 
-			 when gw_contam_present = 'N' or gw_contam_present_on = 'N' then 'No' end as "MediaImpactedGroundwater",
-		case when sw_contam_present = 'Y' or sw_contam_present_on = 'Y' then 'Yes' 
-			 when sw_contam_present = 'N' or sw_contam_present_on = 'N' then 'No' end as "MediaImpactedSurfaceWater",
-		'Petroleum product' as "SubstanceReleased1",
-		case when b.cleanup_complete_date is null and b.cleanup_compl_mcl_date is null and b.cnfa = 'Y' then 'Yes' end as "ClosedWithContamination"
+select     a.site_num as "FacilityID", 
+        case when a.release_num is not null then replace('SC_' || substring(a.facil_name,1,35) || '_' || a.release_num || '_' || nextval('"SC_LUST".lustid_seq')::text,'__','_')
+         else replace('SC_' || substring(a.facil_name,1,40) || '_' || nextval('"SC_LUST".lustid_seq')::text,'__','_')
+         end as "LUSTID", 
+        a.facil_name as "SiteName", 
+        a.facil_address as "SiteAddress",
+        a.facil_city as "SiteCity",
+        a.facil_zip as "ZipCode",
+        'SC' as "State", 
+        4 as "EPARegion",        
+        b.lat_decimal as "Latitude", 
+        b.long_decimal as "Longitude",
+        case when a.cleanup_complete_date is null and a.cleanup_compl_mcl_date is null then 'Active: general' 
+             when (a.cleanup_complete_date is not null and a.cleanup_compl_mcl_date is null) 
+                or (a.cleanup_complete_date is null and a.cleanup_compl_mcl_date is not null) then 'No further action'
+             else 'Other' end as "LUSTStatus",
+        to_date(a.confirmed_date,'DD-MON-YY') as "ReportedDate",
+        case when a.suspect_nfaed_date is not null then to_date(a.suspect_nfaed_date,'DD-MON-YY')
+             when a.cleanup_complete_date is not null then to_date(a.cleanup_complete_date,'DD-MON-YY')
+             when a.cleanup_compl_mcl_date is not null then to_date(a.cleanup_compl_mcl_date,'DD-MON-YY') end as "NFADate",
+        case when soil_contam_present = 'Y' or soil_contam_present_on = 'Y' then 'Yes' 
+             when soil_contam_present = 'N' or soil_contam_present_on = 'N' then 'No' end as "MediaImpactedSoil",
+        case when gw_contam_present = 'Y' or gw_contam_present_on = 'Y' then 'Yes' 
+             when gw_contam_present = 'N' or gw_contam_present_on = 'N' then 'No' end as "MediaImpactedGroundwater",
+        case when sw_contam_present = 'Y' or sw_contam_present_on = 'Y' then 'Yes' 
+             when sw_contam_present = 'N' or sw_contam_present_on = 'N' then 'No' end as "MediaImpactedSurfaceWater",
+        'Petroleum product' as "SubstanceReleased1",
+        case when b.cleanup_complete_date is null and b.cleanup_compl_mcl_date is null and b.cnfa = 'Y' then 'Yes' end as "ClosedWithContamination"
 from "SC_LUST".ustleak_20211013 a 
-	left join "SC_LUST".lwmopc_20211013 b on a.site_num = "SC_LUST".convert_site_num_int(b.site_num) and a.release_num = b.release_num) a;
-	
+    left join "SC_LUST".lwmopc_20211013 b on a.site_num = "SC_LUST".convert_site_num_int(b.site_num) and a.release_num = b.release_num) a;
+    
 select count(*) from "SC_LUST".ustleak_20211013
 
 
@@ -115,7 +115,7 @@ select distinct confirmed_date from  "SC_LUST".ustleak_20211013 order by 1;
 select cleanup_compl_mcl_date, to_date(cleanup_compl_mcl_date,'DD-MON-YY') from  "SC_LUST".ustleak_20211013 order by 1;
 
 select * from "SC_LUST".ustleak_20211013 
-	
+    
 select * from v_lust order by "FacilityID", "LUSTID";
 
 

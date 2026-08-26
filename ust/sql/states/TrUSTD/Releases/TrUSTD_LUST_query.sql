@@ -7,49 +7,49 @@ values ('TRUSTD','2023-07-21','2023-07-24','TrUSTD Oracle database on EPA server
 create view "TRUSTD_LUST".v_ut_release_event_base as 
 select a.*, c.release_event_desc, c.sequence
 from "TRUSTD_UST".ut_release_event a 
-	join 
-	(select release_id, coalesce(max(event_date),'X') event_date
-	from "TRUSTD_UST".ut_release_event group by release_id) b 
-		on a.release_id = b.release_id and coalesce(a.event_date,'X') = coalesce(b.event_date,'X')
-	join "TRUSTD_UST".ut_release_event_type c on a.release_event_type_id = c.release_event_type_id;
+    join 
+    (select release_id, coalesce(max(event_date),'X') event_date
+    from "TRUSTD_UST".ut_release_event group by release_id) b 
+        on a.release_id = b.release_id and coalesce(a.event_date,'X') = coalesce(b.event_date,'X')
+    join "TRUSTD_UST".ut_release_event_type c on a.release_event_type_id = c.release_event_type_id;
 
 create view "TRUSTD_LUST".v_ut_release_event as
 select a.*
 from "TRUSTD_LUST".v_ut_release_event_base a
-	join
-	(select release_id, coalesce(max(sequence),999) sequence 
-	from "TRUSTD_LUST".v_ut_release_event_base group by release_id) b
-		on a.release_id = b.release_id and a.sequence = b.sequence;
+    join
+    (select release_id, coalesce(max(sequence),999) sequence 
+    from "TRUSTD_LUST".v_ut_release_event_base group by release_id) b
+        on a.release_id = b.release_id and a.sequence = b.sequence;
 
 
 create view "TRUSTD_LUST".v_ut_release_event_orig_base as 
 select a.*, c.release_event_desc, c.sequence
 from "TRUSTD_UST".ut_release_event a 
-	join 
-	(select release_id, coalesce(min(event_date),'X') event_date
-	from "TRUSTD_UST".ut_release_event group by release_id) b 
-		on a.release_id = b.release_id and coalesce(a.event_date,'X') = coalesce(b.event_date,'X')
-	join "TRUSTD_UST".ut_release_event_type c on a.release_event_type_id = c.release_event_type_id;
+    join 
+    (select release_id, coalesce(min(event_date),'X') event_date
+    from "TRUSTD_UST".ut_release_event group by release_id) b 
+        on a.release_id = b.release_id and coalesce(a.event_date,'X') = coalesce(b.event_date,'X')
+    join "TRUSTD_UST".ut_release_event_type c on a.release_event_type_id = c.release_event_type_id;
 
 create view "TRUSTD_LUST".v_ut_release_event_orig as
 select a.*
 from "TRUSTD_LUST".v_ut_release_event_base a
-	join
-	(select release_id, coalesce(min(sequence),999) sequence 
-	from "TRUSTD_LUST".v_ut_release_event_base group by release_id) b
-		on a.release_id = b.release_id and a.sequence = b.sequence;	
-	
+    join
+    (select release_id, coalesce(min(sequence),999) sequence 
+    from "TRUSTD_LUST".v_ut_release_event_base group by release_id) b
+        on a.release_id = b.release_id and a.sequence = b.sequence;    
+    
 drop view "TRUSTD_LUST".v_impacted_media cascade;
 create or replace view "TRUSTD_LUST".v_impacted_media as 
 select release_id, ut_impacted_media_type_id
 from "TRUSTD_UST".ut_release, unnest(string_to_array(impacted_media_new, ':')) ut_impacted_media_type_id;
-	
+    
 drop view "TRUSTD_LUST".v_product_type_released cascade;
 create or replace view "TRUSTD_LUST".v_product_type_released as 
 select a.*, row_number() over (partition by release_id) as rn 
 from 
-	(select release_id, ut_substance_type_id
-	from "TRUSTD_UST".ut_release, unnest(string_to_array(product_type_released, ':')) ut_substance_type_id) a;
+    (select release_id, ut_substance_type_id
+    from "TRUSTD_UST".ut_release, unnest(string_to_array(product_type_released, ':')) ut_substance_type_id) a;
 
 --select count(*) from "TRUSTD_UST".ut_release where product_type_released is not null;
 --
@@ -63,8 +63,8 @@ drop view "TRUSTD_LUST".v_suspected_causes cascade;
 create or replace view "TRUSTD_LUST".v_suspected_causes as 
 select a.*, row_number() over (partition by release_id) as rn 
 from 
-	(select release_id, ut_suspected_cause_type_id
-	from "TRUSTD_UST".ut_release, unnest(string_to_array(suspected_causes, ':')) ut_suspected_cause_type_id) a;
+    (select release_id, ut_suspected_cause_type_id
+    from "TRUSTD_UST".ut_release, unnest(string_to_array(suspected_causes, ':')) ut_suspected_cause_type_id) a;
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 insert into lust_element_db_mapping (control_id, mapping_date, element_name, state_table_name, state_column_name, state_join_table, state_join_column, state_join_column_fk)
@@ -345,17 +345,17 @@ select distinct
     ll.county as "County",
     ll.state as "State",
     case when rg.region_key like 'R%' then replace(rg.region_key,'R','')::int end as "EPARegion",
-	case when ll.tribe_owned in ('True','TRUE','Y') or ll.tribe_id is not null then 'Yes' 
-	     when ll.tribe_owned in ('False','FALSE','N') then 'No' else null end as "FacilityTribalSite", 
-	case when ll.tribe is not null and t.current_name is null then left(ll.tribe,200) 
-	     when t.current_name is not null then left(t.current_name,200) else null end as "FacilityTribe",
+    case when ll.tribe_owned in ('True','TRUE','Y') or ll.tribe_id is not null then 'Yes' 
+         when ll.tribe_owned in ('False','FALSE','N') then 'No' else null end as "FacilityTribalSite", 
+    case when ll.tribe is not null and t.current_name is null then left(ll.tribe,200) 
+         when t.current_name is not null then left(t.current_name,200) else null end as "FacilityTribe",
     ll.latitude as "Latitude",
     ll.longitude as "Longitude",
     cs.epa_value as "CoordinateSource",
     ls.epa_value as "LUSTStatus",
-	reo.event_date::date as "ReportedDate",
-	case when ls.epa_value = 'No further action' then re.event_date::date end as "NFADate",
-	mis.epa_value as "MediaImpactedSoil", 
+    reo.event_date::date as "ReportedDate",
+    case when ls.epa_value = 'No further action' then re.event_date::date end as "NFADate",
+    mis.epa_value as "MediaImpactedSoil", 
     mig.epa_value as "MediaImpactedGroundwater",
     misw.epa_value as "MediaImpactedSurfaceWater",
     sr1.epa_value as "SubstanceReleased1", 
@@ -366,34 +366,34 @@ select distinct
     cr3.epa_value as "CauseOfRelease3",
     cwc.epa_value as "ClosedWithContamination"
 from "TRUSTD_UST".ut_release r 
-	left join "TRUSTD_UST".ut_tank_system ts on r.tank_system_id = ts.tank_system_id
-	left join "TRUSTD_UST".ut_land_location ll on r.land_location_id = ll.land_location_id
+    left join "TRUSTD_UST".ut_tank_system ts on r.tank_system_id = ts.tank_system_id
+    left join "TRUSTD_UST".ut_land_location ll on r.land_location_id = ll.land_location_id
     left join "TRUSTD_UST".st_regions rg on ll.region_id = rg.region_id
     left join "TRUSTD_UST".ut_tribes t on ll.tribe_id = t.tribe_id
     left join "TRUSTD_LUST".v_ut_release_event re on r.release_id = re.release_id
     left join "TRUSTD_LUST".v_ut_release_event_orig reo on r.release_id = reo.release_id
     left join (select state_value, epa_value from v_lust_element_mapping where control_id = 12 and element_name = 'CoordinateSource') cs on ll.lat_lon_source = cs.state_value
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_release_event_type b on a.state_value = b.release_event_desc
-    		   join "TRUSTD_LUST".v_ut_release_event c on b.release_event_type_id = c.release_event_type_id where control_id = 12 and element_name = 'LUSTStatus') ls on r.release_id = ls.release_id
+               join "TRUSTD_LUST".v_ut_release_event c on b.release_event_type_id = c.release_event_type_id where control_id = 12 and element_name = 'LUSTStatus') ls on r.release_id = ls.release_id
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_impacted_media_type b on a.state_value = b.ut_impacted_media_desc
-    		   join "TRUSTD_LUST".v_impacted_media c on b.ut_impacted_media_type_id = c.ut_impacted_media_type_id::int where control_id = 12 and element_name = 'MediaImpactedSoil') mis on r.release_id = mis.release_id 
+               join "TRUSTD_LUST".v_impacted_media c on b.ut_impacted_media_type_id = c.ut_impacted_media_type_id::int where control_id = 12 and element_name = 'MediaImpactedSoil') mis on r.release_id = mis.release_id 
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_impacted_media_type b on a.state_value = b.ut_impacted_media_desc
-    		   join "TRUSTD_LUST".v_impacted_media c on b.ut_impacted_media_type_id = c.ut_impacted_media_type_id::int where control_id = 12 and element_name = 'MediaImpactedGroundwater') mig on r.release_id = mig.release_id 
+               join "TRUSTD_LUST".v_impacted_media c on b.ut_impacted_media_type_id = c.ut_impacted_media_type_id::int where control_id = 12 and element_name = 'MediaImpactedGroundwater') mig on r.release_id = mig.release_id 
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_impacted_media_type b on a.state_value = b.ut_impacted_media_desc
-    		   join "TRUSTD_LUST".v_impacted_media c on b.ut_impacted_media_type_id = c.ut_impacted_media_type_id::int where control_id = 12 and element_name = 'MediaImpactedSurfaceWater') misw on r.release_id = misw.release_id 
-    left join (select state_value, epa_value from v_lust_element_mapping where control_id = 12 and element_name = 'ClosedWithContamination') cwc on r.closed_resid_contam = cwc.state_value    		   
+               join "TRUSTD_LUST".v_impacted_media c on b.ut_impacted_media_type_id = c.ut_impacted_media_type_id::int where control_id = 12 and element_name = 'MediaImpactedSurfaceWater') misw on r.release_id = misw.release_id 
+    left join (select state_value, epa_value from v_lust_element_mapping where control_id = 12 and element_name = 'ClosedWithContamination') cwc on r.closed_resid_contam = cwc.state_value               
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_substance_type b on a.state_value = b.ut_substance_desc
-    		   join "TRUSTD_LUST".v_product_type_released c on b.ut_substance_type_id = c.ut_substance_type_id::int where control_id = 12 and element_name = 'SubstanceReleased1' and rn = 1) sr1 on r.release_id = sr1.release_id 
+               join "TRUSTD_LUST".v_product_type_released c on b.ut_substance_type_id = c.ut_substance_type_id::int where control_id = 12 and element_name = 'SubstanceReleased1' and rn = 1) sr1 on r.release_id = sr1.release_id 
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_substance_type b on a.state_value = b.ut_substance_desc
-    		   join "TRUSTD_LUST".v_product_type_released c on b.ut_substance_type_id = c.ut_substance_type_id::int where control_id = 12 and element_name = 'SubstanceReleased2' and rn = 2) sr2 on r.release_id = sr2.release_id 
+               join "TRUSTD_LUST".v_product_type_released c on b.ut_substance_type_id = c.ut_substance_type_id::int where control_id = 12 and element_name = 'SubstanceReleased2' and rn = 2) sr2 on r.release_id = sr2.release_id 
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_substance_type b on a.state_value = b.ut_substance_desc
-    		   join "TRUSTD_LUST".v_product_type_released c on b.ut_substance_type_id = c.ut_substance_type_id::int where control_id = 12 and element_name = 'SubstanceReleased3' and rn = 3) sr3 on r.release_id = sr3.release_id 
+               join "TRUSTD_LUST".v_product_type_released c on b.ut_substance_type_id = c.ut_substance_type_id::int where control_id = 12 and element_name = 'SubstanceReleased3' and rn = 3) sr3 on r.release_id = sr3.release_id 
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_suspected_cause_type b on a.state_value = b.ut_suspected_cause_desc
-    		   join "TRUSTD_LUST".v_suspected_causes c on b.ut_suspected_cause_type_id = c.ut_suspected_cause_type_id::int where control_id = 12 and element_name = 'CauseOfRelease1' and rn = 1) cr1 on r.release_id = cr1.release_id 
+               join "TRUSTD_LUST".v_suspected_causes c on b.ut_suspected_cause_type_id = c.ut_suspected_cause_type_id::int where control_id = 12 and element_name = 'CauseOfRelease1' and rn = 1) cr1 on r.release_id = cr1.release_id 
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_suspected_cause_type b on a.state_value = b.ut_suspected_cause_desc
-    		   join "TRUSTD_LUST".v_suspected_causes c on b.ut_suspected_cause_type_id = c.ut_suspected_cause_type_id::int where control_id = 12 and element_name = 'CauseOfRelease2' and rn = 2) cr2 on r.release_id = cr2.release_id 
+               join "TRUSTD_LUST".v_suspected_causes c on b.ut_suspected_cause_type_id = c.ut_suspected_cause_type_id::int where control_id = 12 and element_name = 'CauseOfRelease2' and rn = 2) cr2 on r.release_id = cr2.release_id 
     left join (select state_value, epa_value, release_id from v_lust_element_mapping a join "TRUSTD_UST".ut_suspected_cause_type b on a.state_value = b.ut_suspected_cause_desc
-    		   join "TRUSTD_LUST".v_suspected_causes c on b.ut_suspected_cause_type_id = c.ut_suspected_cause_type_id::int where control_id = 12 and element_name = 'CauseOfRelease3' and rn = 3) cr3 on r.release_id = cr3.release_id 
+               join "TRUSTD_LUST".v_suspected_causes c on b.ut_suspected_cause_type_id = c.ut_suspected_cause_type_id::int where control_id = 12 and element_name = 'CauseOfRelease3' and rn = 3) cr3 on r.release_id = cr3.release_id 
 where exists (select 1 from "TRUSTD_UST".ut_release_event re where r.release_id = re.release_id and re.release_event_type_id = 2) --must include a confirmed release event
 and not exists (select 1 from "TRUSTD_UST".ut_release_event re where r.release_id = re.release_id and re.release_event_type_id = 6) --must NOT include a Determination of Non-Jurisdiction
 ;     

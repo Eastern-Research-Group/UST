@@ -4,8 +4,8 @@ SELECT
  CASE WHEN fed.ownerid IS NOT NULL THEN 'Federal Government - Non Military'
       WHEN state.ownerid IS NOT NULL THEN 'State Government - Non Military'
       WHEN localg.ownerid IS NOT NULL THEN 'Local Government'
- 	  WHEN commercial.ownerid IS NOT NULL THEN 'Commercial'
- 	  WHEN private.ownerid IS NOT NULL THEN 'Private' END as OwnerType,
+       WHEN commercial.ownerid IS NOT NULL THEN 'Commercial'
+       WHEN private.ownerid IS NOT NULL THEN 'Private' END as OwnerType,
  null as FacilityType1,
  null as FacilityType2,
  g.address as FacilityAddress1,
@@ -108,20 +108,20 @@ SELECT
  null as TankRepaired,
  null as TankRepairDate,
  CASE WHEN tc.PIPEMATERIAL = 3 THEN 'Copper'
- 	  WHEN tc.PIPEMATERIAL = 2 THEN 'Fiberglass Reinforced Plastic'
- 	  WHEN tc.PIPEMATERIAL IN (6,7,8,10,11) THEN 'Flex Piping'
- 	  WHEN tc.PIPEMATERIAL = 5 THEN 'No Piping'
- 	  WHEN tc.PIPEMATERIAL in (4,9) THEN 'Other'
- 	  WHEN tc.PIPEMATERIAL = 1 THEN 'Steel'
- 	  WHEN tc.PIPEMATERIAL = 0 THEN 'Unknown'
- 	  WHEN tc.PIPEMATERIAL = 12 THEN '' --???
- 	END as PipingMaterialDescription,
+       WHEN tc.PIPEMATERIAL = 2 THEN 'Fiberglass Reinforced Plastic'
+       WHEN tc.PIPEMATERIAL IN (6,7,8,10,11) THEN 'Flex Piping'
+       WHEN tc.PIPEMATERIAL = 5 THEN 'No Piping'
+       WHEN tc.PIPEMATERIAL in (4,9) THEN 'Other'
+       WHEN tc.PIPEMATERIAL = 1 THEN 'Steel'
+       WHEN tc.PIPEMATERIAL = 0 THEN 'Unknown'
+       WHEN tc.PIPEMATERIAL = 12 THEN '' --???
+     END as PipingMaterialDescription,
  null as PipingFlexConnector,
  CASE WHEN tc.PIPESYSTEM IN (0,2,3) THEN 'Suction'
- 	  WHEN tc.PIPESYSTEM  = 1 THEN 'Pressure'
- 	  WHEN tc.PIPESYSTEM  = 4 THEN 'Non-operational ( e.g., fill line, vent line, gravity)'
- 	  WHEN tc.PIPESYSTEM  = 8 THEN '' --Manifold
- 	 end as PipingStyle,
+       WHEN tc.PIPESYSTEM  = 1 THEN 'Pressure'
+       WHEN tc.PIPESYSTEM  = 4 THEN 'Non-operational ( e.g., fill line, vent line, gravity)'
+       WHEN tc.PIPESYSTEM  = 8 THEN '' --Manifold
+      end as PipingStyle,
  CASE WHEN tc.pipedoublewall = -1 THEN 'Double'
       WHEN tc.pipedoublewall = 0 THEN 'Single' END as PipingWallType, 
  null as PipingUDCForEveryDispenser,
@@ -194,33 +194,33 @@ LEFT JOIN tblcounty c ON g.county = c.COUNTYCODE
 LEFT JOIN tblTank t ON f.facilityid = t.facilityid
 LEFT JOIN tblTankByCompartment tc ON t.tankpk = tc.tankpk 
 LEFT JOIN (SELECT TANKPK, COUNT(*) as NUMCOMPARTMENTS FROM tblTankByCompartment GROUP BY TANKPK) TN 
-	ON t.tankpk = tn.tankpk
+    ON t.tankpk = tn.tankpk
 LEFT JOIN (SELECT DISTINCT TANKCOMPARTMENTPK FROM tblTankOverFillProt WHERE TYPEOVERFILLPROT = 1) autoshutoff 
-	ON tc.TANKCOMPARTMENTPK = autoshutoff.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = autoshutoff.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT TANKCOMPARTMENTPK FROM tblTankOverFillProt WHERE TYPEOVERFILLPROT = 2) ballvalve 
-	ON tc.TANKCOMPARTMENTPK = ballvalve.TANKCOMPARTMENTPK	
+    ON tc.TANKCOMPARTMENTPK = ballvalve.TANKCOMPARTMENTPK    
 LEFT JOIN (SELECT DISTINCT TANKCOMPARTMENTPK FROM tblTankOverFillProt WHERE TYPEOVERFILLPROT = 3) alarm 
-	ON tc.TANKCOMPARTMENTPK = alarm.TANKCOMPARTMENTPK	
+    ON tc.TANKCOMPARTMENTPK = alarm.TANKCOMPARTMENTPK    
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 5) interstitial 
-	ON tc.TANKCOMPARTMENTPK = interstitial.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = interstitial.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 1) atg  
-	ON tc.TANKCOMPARTMENTPK = atg.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = atg.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 3) mtg  
-	ON tc.TANKCOMPARTMENTPK = mtg.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = mtg.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 6) sir 
-	ON tc.TANKCOMPARTMENTPK = sir.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = sir.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 2) tt 
-	ON tc.TANKCOMPARTMENTPK = tt.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = tt.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 8) gw 
-	ON tc.TANKCOMPARTMENTPK = gw.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = gw.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankRLSDetection WHERE TANKRELEASECODE = 7) vapor 
-	ON tc.TANKCOMPARTMENTPK = vapor.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = vapor.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankPipeReleaseDet WHERE PIPERELEASEDETCODE = 1) elld
-	ON tc.TANKCOMPARTMENTPK = elld.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = elld.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankPipeReleaseDet WHERE ELECTRONICORMECHANICALLLD = 2) alld
-	ON tc.TANKCOMPARTMENTPK = alld.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = alld.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT DISTINCT tankcompartmentpk FROM tblTankPipeReleaseDet WHERE PIPERELEASEDETCODE = 3) atm
-	ON tc.TANKCOMPARTMENTPK = atm.TANKCOMPARTMENTPK
+    ON tc.TANKCOMPARTMENTPK = atm.TANKCOMPARTMENTPK
 LEFT JOIN (SELECT FACILITYID, max(remid) remid FROM tblRemediation GROUP BY FACILITYID) rem
-	ON f.FACILITYID = rem.FACILITYID
+    ON f.FACILITYID = rem.FACILITYID
 WHERE ownerinactivewfacility = 0;

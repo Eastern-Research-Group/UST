@@ -11,10 +11,10 @@ create sequence "NE_LUST".seq_lustid start with 1;
  
 
 select "FacilityID", "SiteName", "SiteAddress",
-	case when "SiteName" is not null then 'SC_' || substring("SiteName",1,40) || '_' || nextval('"NE_LUST".seq_lustid')
-	     when "FacilityID" is not null then 'SC_' || substring("FacilityID",1,40) || '_' || nextval('"NE_LUST".seq_lustid')
-	     when "SiteAddress" is not null then 'SC_' || substring("SiteAddress",1,40) || '_' || nextval('"NE_LUST".seq_lustid')
-	     else 'SC_' || nextval('"NE_LUST".seq_lustid') end as "LUSTID"
+    case when "SiteName" is not null then 'SC_' || substring("SiteName",1,40) || '_' || nextval('"NE_LUST".seq_lustid')
+         when "FacilityID" is not null then 'SC_' || substring("FacilityID",1,40) || '_' || nextval('"NE_LUST".seq_lustid')
+         when "SiteAddress" is not null then 'SC_' || substring("SiteAddress",1,40) || '_' || nextval('"NE_LUST".seq_lustid')
+         else 'SC_' || nextval('"NE_LUST".seq_lustid') end as "LUSTID"
 from "NE_LUST".lust 
 
 select * from "NE_LUST".ne_lust 
@@ -623,36 +623,36 @@ drop view  "NE_LUST".v_lust_base;
 
 create or replace view "NE_LUST".v_lust_base as 
 select distinct 
-	l."LUSTID" as "LUSTID",
-	l."FacilityID" as "FacilityID",
-	l."FederallyReportableRelease" as "FederallyReportableRelease",
-	l."SiteName" as "SiteName",
-	l."SiteAddress" as "SiteAddress",
-	l."SiteCity" as "SiteCity",
-	l."County" as "County",
-	l."State" as "State",
-	l."EPARegion" as "EPARegion",
-	l."Latitude" as "Latitude",
-	l."Longitude" as "Longitude",
-	l."LUSTStatus" as "LUSTStatus",
-	case when l."ReportedDate"::text = '00:00:00' then null else l."ReportedDate"::date end as "ReportedDate",
-	case when l."NFADate"::text = '00:00:00' then null else l."NFADate"::date end as "NFADate",
-	l."MediaImpactedSoil" as "MediaImpactedSoil",
-	sr1.epa_value as "SubstanceReleased1",
-	sr2.epa_value as "SubstanceReleased2",
-	sr3.epa_value as "SubstanceReleased3",
-	sr4.epa_value as "SubstanceReleased4",
-	l."ClosedWithContamination" as "ClosedWithContamination"
+    l."LUSTID" as "LUSTID",
+    l."FacilityID" as "FacilityID",
+    l."FederallyReportableRelease" as "FederallyReportableRelease",
+    l."SiteName" as "SiteName",
+    l."SiteAddress" as "SiteAddress",
+    l."SiteCity" as "SiteCity",
+    l."County" as "County",
+    l."State" as "State",
+    l."EPARegion" as "EPARegion",
+    l."Latitude" as "Latitude",
+    l."Longitude" as "Longitude",
+    l."LUSTStatus" as "LUSTStatus",
+    case when l."ReportedDate"::text = '00:00:00' then null else l."ReportedDate"::date end as "ReportedDate",
+    case when l."NFADate"::text = '00:00:00' then null else l."NFADate"::date end as "NFADate",
+    l."MediaImpactedSoil" as "MediaImpactedSoil",
+    sr1.epa_value as "SubstanceReleased1",
+    sr2.epa_value as "SubstanceReleased2",
+    sr3.epa_value as "SubstanceReleased3",
+    sr4.epa_value as "SubstanceReleased4",
+    l."ClosedWithContamination" as "ClosedWithContamination"
 from "NE_LUST".ne_lust l
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'LUSTStatus') ls on l."LUSTStatus" = ls.state_value
-	left join (select * from "NE_LUST"."SubstanceReleased1_deagg" where rownumber = 1) sdeagg1 on l."LUSTID" = sdeagg1."LUSTID"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'SubstanceReleased1') sr1 on sdeagg1."SubstanceReleased1" = sr1.state_value
-	left join (select * from "NE_LUST"."SubstanceReleased1_deagg" where rownumber = 2) sdeagg2 on l."LUSTID" = sdeagg2."LUSTID"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'SubstanceReleased2') sr2 on sdeagg2."SubstanceReleased1" = sr2.state_value
-	left join (select * from "NE_LUST"."SubstanceReleased1_deagg" where rownumber = 3) sdeagg3 on l."LUSTID" = sdeagg3."LUSTID"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'SubstanceReleased3') sr3 on sdeagg3."SubstanceReleased1" = sr3.state_value
-	left join (select * from "NE_LUST"."SubstanceReleased1_deagg" where rownumber = 4) sdeagg4 on l."LUSTID" = sdeagg4."LUSTID"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'SubstanceReleased4') sr4 on sdeagg4."SubstanceReleased1" = sr4.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'LUSTStatus') ls on l."LUSTStatus" = ls.state_value
+    left join (select * from "NE_LUST"."SubstanceReleased1_deagg" where rownumber = 1) sdeagg1 on l."LUSTID" = sdeagg1."LUSTID"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'SubstanceReleased1') sr1 on sdeagg1."SubstanceReleased1" = sr1.state_value
+    left join (select * from "NE_LUST"."SubstanceReleased1_deagg" where rownumber = 2) sdeagg2 on l."LUSTID" = sdeagg2."LUSTID"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'SubstanceReleased2') sr2 on sdeagg2."SubstanceReleased1" = sr2.state_value
+    left join (select * from "NE_LUST"."SubstanceReleased1_deagg" where rownumber = 3) sdeagg3 on l."LUSTID" = sdeagg3."LUSTID"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'SubstanceReleased3') sr3 on sdeagg3."SubstanceReleased1" = sr3.state_value
+    left join (select * from "NE_LUST"."SubstanceReleased1_deagg" where rownumber = 4) sdeagg4 on l."LUSTID" = sdeagg4."LUSTID"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NE' and element_name =  'SubstanceReleased4') sr4 on sdeagg4."SubstanceReleased1" = sr4.state_value
 order by "FacilityID", l."LUSTID";
 
 

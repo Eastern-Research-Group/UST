@@ -5,8 +5,8 @@
 --There are 2 rows in me_ust.v_ust_tank that do not exist in public.v_ust_tank
 select * from me_ust.v_ust_tank a
 where not exists
-	(select 1 from public.v_ust_tank b
-	where a.facility_id = b."FacilityID" and a.tank_id = b."TankID")
+    (select 1 from public.v_ust_tank b
+    where a.facility_id = b."FacilityID" and a.tank_id = b."TankID")
 order by a.facility_id,a.tank_id;
 
 --View definition for me_ust.v_ust_tank:
@@ -40,8 +40,8 @@ order by a.facility_id,a.tank_id;
 --There are 3 rows in me_ust.v_ust_tank_substance that do not exist in public.v_ust_tank_substance
 select * from me_ust.v_ust_tank_substance a
 where not exists
-	(select 1 from public.v_ust_tank_substance b join public.substances c on b."Substance" = c.substance
-	where a.facility_id = b."FacilityID" and a.tank_id = b."TankID" and a.substance_id = c."substance_id")
+    (select 1 from public.v_ust_tank_substance b join public.substances c on b."Substance" = c.substance
+    where a.facility_id = b."FacilityID" and a.tank_id = b."TankID" and a.substance_id = c."substance_id")
 order by a.facility_id,a.tank_id,a.substance_id;
 
 --View definition for me_ust.v_ust_tank_substance:
@@ -58,8 +58,8 @@ order by a.facility_id,a.tank_id,a.substance_id;
 --There are 3 rows in me_ust.v_ust_compartment that do not exist in public.v_ust_compartment
 select * from me_ust.v_ust_compartment a
 where not exists
-	(select 1 from public.v_ust_compartment b
-	where a.facility_id = b."FacilityID" and a.tank_id = b."TankID" and a.compartment_id = b."CompartmentID")
+    (select 1 from public.v_ust_compartment b
+    where a.facility_id = b."FacilityID" and a.tank_id = b."TankID" and a.compartment_id = b."CompartmentID")
 order by a.facility_id,a.tank_id,a.compartment_id;
 
 --View definition for me_ust.v_ust_compartment:
@@ -128,8 +128,8 @@ order by a.facility_id,a.tank_id,a.compartment_id;
 --There are 4 rows in me_ust.v_ust_piping that do not exist in public.v_ust_piping
 select * from me_ust.v_ust_piping a
 where not exists
-	(select 1 from public.v_ust_piping b
-	where a.facility_id = b."FacilityID" and a.tank_id = b."TankID" and a.compartment_id = b."CompartmentID" and a.piping_id = b."PipingID")
+    (select 1 from public.v_ust_piping b
+    where a.facility_id = b."FacilityID" and a.tank_id = b."TankID" and a.compartment_id = b."CompartmentID" and a.piping_id = b."PipingID")
 order by a.facility_id,a.tank_id,a.compartment_id,a.piping_id;
 
 --View definition for me_ust.v_ust_piping:

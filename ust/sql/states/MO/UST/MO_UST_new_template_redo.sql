@@ -22,10 +22,10 @@ from ust_elements a join ust_elements_tables b on a.element_id = b.element_id
 where table_name = 'ust_facility' and database_lookup_table is not null 
 order by 1, 2;
 
-coordinate_source_id	coordinate_sources
-facility_type_id1	facility_types
-facility_type_id2	facility_types
-owner_type_id	owner_types
+coordinate_source_id    coordinate_sources
+facility_type_id1    facility_types
+facility_type_id2    facility_types
+owner_type_id    owner_types
 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,16 +35,16 @@ select * from archive.v_ust_element_mapping where organization_id = 'MO'
 
 
 select * from information_schema.columns where table_schema = 'mo_ust' and column_name like '%coord%';
-mo_ust_geocoded	originalcoordsrc
-mo_ust_geocoded	gc_coordinate_source
+mo_ust_geocoded    originalcoordsrc
+mo_ust_geocoded    gc_coordinate_source
 --these tables are ERG-created tables; ignore. MO doesn't apear to have coordinate source data 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 --facility_types
 select * from mo_ust.tblfacilitytype 
-A	Above Ground
-B	Both
-U	Under Ground
+A    Above Ground
+B    Both
+U    Under Ground
 --this is not what the EPA template means by "facility type" so ignore it for now
 -- (we will come back to it later when working on Tank Location, as that these values are in the EPA template)
 
@@ -54,18 +54,18 @@ U	Under Ground
 select * from mo_ust.tblownertype;
 
 select * from mo_ust.tblownerclass;
-C	City
-F	Federal
-G	Government Owner
-H	Hospital
-L	Local
-M	Marketer
-N	Non-Marketer
-O	County
-P	Private Owner
-S	State
-U	Unclassified
-Z	School
+C    City
+F    Federal
+G    Government Owner
+H    Hospital
+L    Local
+M    Marketer
+N    Non-Marketer
+O    County
+P    Private Owner
+S    State
+U    Unclassified
+Z    School
 
 --create the element-level mapping: i.e. which state column will we use to get the EPA element we're looking for?
 --organization_join_table and organization_join_column are optional and are used if the state is using a lookup table,
@@ -86,14 +86,14 @@ order by 1;
 
 --get the EPA values and then paste the correct ones into the SQL statements below
 select * from owner_types;
-1	Federal Government - Non Military
-2	State Government - Non Military
-3	Tribal Governernment
-4	Local Government
-5	Commercial
-6	Private
-7	Military
-8	Other
+1    Federal Government - Non Military
+2    State Government - Non Military
+3    Tribal Governernment
+4    Local Government
+5    Commercial
+6    Private
+7    Military
+8    Other
 --NOTE: there may be state values for which there is no EPA value. 
 --This is OK - there can be null values for most fields in the EPA template - but when you later export the mapping
 --for EPA to review, include ALL the state values, including those you didn't map, so EPA can review.
@@ -182,7 +182,7 @@ insert into mo_ust.erg_column_mapping (epa_table_name, epa_column_name) values (
 select 'update mo_ust.erg_column_mapping set org_table_name = '''', org_column_name = '''' where epa_column_name = ''' || epa_column_name || ''';'
 from  mo_ust.erg_column_mapping 
 where epa_table_name = 'ust_facility' and org_column_name is null and epa_column_name not in 
-	(select database_column_name from ust_elements where database_lookup_table is not null);
+    (select database_column_name from ust_elements where database_lookup_table is not null);
 
 --then update the query below to search for matches for each column and update the sql statements below 
 --hint: use as small a part of the column name as you can to match on (e.g. "fac" instead of "facility");
@@ -204,8 +204,8 @@ select * From mo_ust.tblowner;
 select * from mo_ust.tblremediation ;
 
 --when searching for a column like '%disp%' I found these:
-tbltankbycompartment	subdispensor
-tbltankbycompartment	dispconnfittingprot
+tbltankbycompartment    subdispensor
+tbltankbycompartment    dispconnfittingprot
 --this tells us that MO has their dispenser data at the COMPARTMENT level 
 --remember, it may be at the Facility, Tank, OR Compartment level depending on the state, 
 --so the dispenser columns repeat in all three EPA tables. We won't add it to the facility table here. 
@@ -276,34 +276,34 @@ order by 1, 2;
 
 create view mo_ust.v_ust_facility as
 select distinct 
-	a.facilityid as facility_id,
-	b."NAME" as facility_name,
-	b.address as facility_address1, 
-	b.address2 as facility_address2,
-	b.city as facility_city,
-	c.countyname as facility_county,
-	'MO' as facility_state,
-	b.zip as facility_zip_code,
-	d.converted_lat as facility_latitude,
-	d.converted_long as facility_longitude,
-	f."NAME" as facility_owner_company_name,
-	case when g.facilityid is not null then 'Yes' end as ust_reported_release,
-	g.remid as associated_ust_release_id,
-	i.owner_type_id as owner_type_id
+    a.facilityid as facility_id,
+    b."NAME" as facility_name,
+    b.address as facility_address1, 
+    b.address2 as facility_address2,
+    b.city as facility_city,
+    c.countyname as facility_county,
+    'MO' as facility_state,
+    b.zip as facility_zip_code,
+    d.converted_lat as facility_latitude,
+    d.converted_long as facility_longitude,
+    f."NAME" as facility_owner_company_name,
+    case when g.facilityid is not null then 'Yes' end as ust_reported_release,
+    g.remid as associated_ust_release_id,
+    i.owner_type_id as owner_type_id
 from mo_ust.tblfacility a left join mo_ust.tblgeosite b on a.facilityid = b.facilityid
-	left join mo_ust.tblcounty c on b.county = c.countycode
-	left join mo_ust.tblgeosite_latlong d on a.facilityid = d.facilityid
-	left join mo_ust.tblfacilitylookup e on a.facilityid = e.facilityid
-	left join mo_ust.tblowner f on e.ownerid = f.ownerid
-	left join (select facilityid, max(remid) as remid from mo_ust.tblremediation group by facilityid) g on a.facilityid = g.facilityid
-	left join (select z.ownerid, epa_value, organization_value
-				from mo_ust.tblownerclass x join 
-					(select epa_value, organization_value 
-					from ust_element_mapping a join ust_element_value_mapping b on a.ust_element_mapping_id = b.ust_element_mapping_id 
-					where ust_control_id = 7 and epa_table_name = 'owner_types' and epa_value is not null) y
-						on x.ownerdescription = y.organization_value
-					join mo_ust.tblownertype z on x.ownercode = z.ownerclass) h on e.ownerid = h.ownerid
-	left join owner_types i on h.epa_value = i.owner_type;
+    left join mo_ust.tblcounty c on b.county = c.countycode
+    left join mo_ust.tblgeosite_latlong d on a.facilityid = d.facilityid
+    left join mo_ust.tblfacilitylookup e on a.facilityid = e.facilityid
+    left join mo_ust.tblowner f on e.ownerid = f.ownerid
+    left join (select facilityid, max(remid) as remid from mo_ust.tblremediation group by facilityid) g on a.facilityid = g.facilityid
+    left join (select z.ownerid, epa_value, organization_value
+                from mo_ust.tblownerclass x join 
+                    (select epa_value, organization_value 
+                    from ust_element_mapping a join ust_element_value_mapping b on a.ust_element_mapping_id = b.ust_element_mapping_id 
+                    where ust_control_id = 7 and epa_table_name = 'owner_types' and epa_value is not null) y
+                        on x.ownerdescription = y.organization_value
+                    join mo_ust.tblownertype z on x.ownercode = z.ownerclass) h on e.ownerid = h.ownerid
+    left join owner_types i on h.epa_value = i.owner_type;
 --where a.facilitytype <> 'A';
 
 
@@ -316,33 +316,33 @@ where table_schema = 'mo_ust' and table_name = 'v_ust_facility';
 
 --include the ust_control_id identified in the first step above (7)
 insert into ust_facility (ust_control_id, facility_state, 
-		facility_id,
-		facility_name,
-		facility_address1,
-		facility_address2,
-		facility_city,
-		facility_county,
-		facility_zip_code,
-		facility_latitude,
-		facility_longitude,
-		facility_owner_company_name,
-		ust_reported_release,
-		associated_ust_release_id,
-		owner_type_id)
+        facility_id,
+        facility_name,
+        facility_address1,
+        facility_address2,
+        facility_city,
+        facility_county,
+        facility_zip_code,
+        facility_latitude,
+        facility_longitude,
+        facility_owner_company_name,
+        ust_reported_release,
+        associated_ust_release_id,
+        owner_type_id)
 select 7, facility_state,
-	facility_id,
-	facility_name,
-	facility_address1,
-	facility_address2,
-	facility_city,
-	facility_county,
-	facility_zip_code,
-	facility_latitude,
-	facility_longitude,
-	facility_owner_company_name,
-	ust_reported_release,
-	associated_ust_release_id,
-	owner_type_id
+    facility_id,
+    facility_name,
+    facility_address1,
+    facility_address2,
+    facility_city,
+    facility_county,
+    facility_zip_code,
+    facility_latitude,
+    facility_longitude,
+    facility_owner_company_name,
+    ust_reported_release,
+    associated_ust_release_id,
+    owner_type_id
 from  mo_ust.v_ust_facility;
 
 --...now move on to tanks, then compartments, then piping...
@@ -355,29 +355,29 @@ select distinct database_column_name, database_lookup_table
 from ust_elements a join ust_elements_tables b on a.element_id = b.element_id
 where table_name = 'ust_tank' and database_lookup_table is not null 
 order by 1, 2;
-tank_location_id				tank_locations
-tank_material_description_id	tank_material_descriptions
-tank_secondary_containment_id	tank_secondary_containments
-tank_status_id					tank_statuses
+tank_location_id                tank_locations
+tank_material_description_id    tank_material_descriptions
+tank_secondary_containment_id    tank_secondary_containments
+tank_status_id                    tank_statuses
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --tank_locations
 
 --see what we are looking for on the EPA side
 select * from tank_locations
-1	Underground (entirely buried)
-2	Partially buried
-3	Aboveground (tank bottom abovegrade)
-4	Aboveground (tank bottom on-grade)
-5	Unknown
-6	Other
+1    Underground (entirely buried)
+2    Partially buried
+3    Aboveground (tank bottom abovegrade)
+4    Aboveground (tank bottom on-grade)
+5    Unknown
+6    Other
 
 --as we discovered above, this information was in the state table tblfacility and lookup table tblfacilitytype, 
 --so we'll copy it down to the tank level 
 select * from mo_ust.tblfacilitytype
-A	Above Ground
-B	Both
-U	Under Ground
+A    Above Ground
+B    Both
+U    Under Ground
 
 insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, 
                                  organization_table_name, organization_column_name,

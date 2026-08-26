@@ -1,15 +1,15 @@
 insert into release_control(organization_id, date_received, date_processed, data_source, comments)
 select organization_id, date_received, date_processed,
-	'Downloaded "All LUST Cases" Excel file from https://apps.dep.wv.gov/tanks/public/Pages/USTReports.aspx' as data_source, 
-	'Excluded rows where Suspected Release = "Yes"'
+    'Downloaded "All LUST Cases" Excel file from https://apps.dep.wv.gov/tanks/public/Pages/USTReports.aspx' as data_source, 
+    'Excluded rows where Suspected Release = "Yes"'
 from release_control where release_control_id = 7;
 
 create table wv_release.erg_release_status as 
 select distinct "Leak_ID" as release_id, 
-	case when "Closed Date" is not null then 'No further action' 
-		 when "Cleanup Initiated" is not null then 'Active: corrective action' 
-		 when "Confirmed Release" is not null then 'Active: general' 
-		 else 'Other' end as release_status 
+    case when "Closed Date" is not null then 'No further action' 
+         when "Cleanup Initiated" is not null then 'Active: corrective action' 
+         when "Confirmed Release" is not null then 'Active: general' 
+         else 'Other' end as release_status 
 from  wv_release."WVDEP.USTLUSTReports_FOIA-LUSTPublic";
 
 insert into release_element_mapping (release_control_id, mapping_date, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments)
@@ -57,11 +57,11 @@ values (287, 'Active: general', 'Active: general');
 
 
 select organization_table_name_qtd, organization_column_name_qtd,
-	selected_column, data_type, character_maximum_length,
-	programmer_comments, database_lookup_table, database_lookup_column,
-	organization_join_table_qtd, organization_join_column_qtd,
-	deagg_table_name, deagg_column_name,
-	programmer_comments
+    selected_column, data_type, character_maximum_length,
+    programmer_comments, database_lookup_table, database_lookup_column,
+    organization_join_table_qtd, organization_join_column_qtd,
+    deagg_table_name, deagg_column_name,
+    programmer_comments
 from v_release_table_population_sql
 where release_control_id = 10 and epa_table_name = 'ust_release'
 order by column_sort_order;
@@ -70,23 +70,23 @@ select distinct "Priority" from wv_release."WVDEP.USTLUSTReports_FOIA-LUSTPublic
 
 create view wv_release.v_ust_release_rm as
 select 
-	"Facility_ID"::character varying(50) as facility_id,
-	a."Leak_ID"::character varying(50) as release_id,
-	"Current Facility Name"::character varying(200) as site_name,
-	"Address"::character varying(100) as site_address,
-	"City"::character varying(100) as site_city,
-	"Zip"::character varying(10) as zipcode,
-	"County"::character varying(100) as county,
-	'WV' as state, 
-	3 as epa_region,
-	release_status_id as release_status_id,
-	"Confirmed Release"::date as reported_date,
-	"Closed Date"::date as nfa_date,
-	case when "Priority" = '3-Soil contamination' then 'Yes' end as media_impacted_soil,
-	case when "Priority" = '2-Groundwater contamination' then 'Yes' end as media_impacted_groundwater
+    "Facility_ID"::character varying(50) as facility_id,
+    a."Leak_ID"::character varying(50) as release_id,
+    "Current Facility Name"::character varying(200) as site_name,
+    "Address"::character varying(100) as site_address,
+    "City"::character varying(100) as site_city,
+    "Zip"::character varying(10) as zipcode,
+    "County"::character varying(100) as county,
+    'WV' as state, 
+    3 as epa_region,
+    release_status_id as release_status_id,
+    "Confirmed Release"::date as reported_date,
+    "Closed Date"::date as nfa_date,
+    case when "Priority" = '3-Soil contamination' then 'Yes' end as media_impacted_soil,
+    case when "Priority" = '2-Groundwater contamination' then 'Yes' end as media_impacted_groundwater
 from wv_release."WVDEP.USTLUSTReports_FOIA-LUSTPublic" a
-	left join wv_release.erg_release_status b on a."Leak_ID" = b.release_id
-	left join wv_release.v_release_status_xwalk rs on b.release_status = rs.organization_value
+    left join wv_release.erg_release_status b on a."Leak_ID" = b.release_id
+    left join wv_release.v_release_status_xwalk rs on b.release_status = rs.organization_value
 where "Suspected Release" <> 'Yes';
 
 

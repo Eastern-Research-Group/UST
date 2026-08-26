@@ -10,7 +10,7 @@ order by ordinal_position ;
 alter table active_tanks rename column "ï»¿X" to "X";
 
 select 'alter table active_tanks rename column "' || 
-	column_name || '" to ' || lower(column_name) || ';'
+    column_name || '" to ' || lower(column_name) || ';'
 from information_schema.columns
 where table_schema = 'pa_ust' and table_name = 'active_tanks'
 order by ordinal_position ;
@@ -48,7 +48,7 @@ TANK CODE
 TANK SYSTEM COMPONENT
 TANK COMPONENT
 DATE begin
-	
+    
 create table active_tank_components (
 FACILITY_ID text,
 PRIMARY_FACILITY_NAME text,
@@ -66,13 +66,13 @@ order by ordinal_position ;
 
 select facility_id from pa_ust.active_tanks 
 where facility_id not in 
-	(select facility_id from pa_ust.active_tank_components)
+    (select facility_id from pa_ust.active_tank_components)
 and facility_id not in 
-	(select facility_id from pa_ust.facilities_without_tank_info)
+    (select facility_id from pa_ust.facilities_without_tank_info)
 order by 1;
 
 create table pa_ust.facilities_without_tank_info (
-	facility_id text not null primary key
+    facility_id text not null primary key
 );
 
 select * from pa_ust.active_tank_components;
@@ -86,14 +86,14 @@ select count(*) from pa_ust.active_tanks ;
 11288
 
 select count(*) from 
-	(select distinct facility_id from pa_ust.active_tank_components) x
+    (select distinct facility_id from pa_ust.active_tank_components) x
 union all
 select count(*) from pa_ust.facilities_without_tank_info;
 
 
 select 11288 - count(*) from 
-	(select distinct facility_id from pa_ust.active_tank_components union all
-	select facility_id from pa_ust.facilities_without_tank_info) x;
+    (select distinct facility_id from pa_ust.active_tank_components union all
+    select facility_id from pa_ust.facilities_without_tank_info) x;
 
 select * from release_control;
 
@@ -118,11 +118,11 @@ select * from ust_elements_tables;
 
 
 CREATE TABLE public.release_elements_tables (
-	element_table_id int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
-	element_id int4 NOT NULL,
-	table_name varchar(100) NOT NULL,
-	sort_order int4 NULL,
-	CONSTRAINT release_elements_tables_pkey PRIMARY KEY (element_table_id)
+    element_table_id int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
+    element_id int4 NOT NULL,
+    table_name varchar(100) NOT NULL,
+    sort_order int4 NULL,
+    CONSTRAINT release_elements_tables_pkey PRIMARY KEY (element_table_id)
 );
 
 alter table release_elements add constraint release_elements_pkey primary key (element_id);

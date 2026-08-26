@@ -1,8 +1,7 @@
-import oracledb
-import os 
+import os
+
 import pandas as pd
 from sqlalchemy import create_engine
-
 
 db_user = 'TRUSTD_UST_FINDER_ETL'
 db_pass = 'ustETL2023qtr3!'
@@ -18,6 +17,11 @@ tables_file = 'TRUSTD_tables.txt'
 
 
 def get_connection():
+    try:
+        import oracledb
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError('TrUSTD_db_export requires the oracledb package to be installed.') from exc
+
     # initialize thick client because db won't allow thin client
     oracledb.init_oracle_client(lib_dir=oraclient_path)
     return oracledb.connect(user=db_user, password=db_pass, dsn=db_dsn)

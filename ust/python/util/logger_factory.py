@@ -1,19 +1,17 @@
-from datetime import datetime
-import os
-from pathlib import Path
-import sys  
-ROOT_PATH = Path(__file__).parent.parent.parent
-sys.path.append(os.path.join(ROOT_PATH, ''))
-import traceback
-
 import logging
+import sys
+import traceback
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT_PATH = Path(__file__).parent.parent.parent
 
 
 class LoggerFactory:
     @staticmethod
     def build_logger(name, log_location=str(ROOT_PATH) + '/python/log'):
         Path(log_location).mkdir(parents=True, exist_ok=True)
-        logger_name = f'{log_location}/{name}_log_{datetime.now().strftime("%Y-%m-%d")}.log'
+        logger_name = f'{log_location}/{name}_log_{datetime.now(tz=UTC).strftime("%Y-%m-%d")}.log'
         logger = logging.getLogger(logger_name)
 
         def handle_exception(type, value, tb):
@@ -22,7 +20,10 @@ class LoggerFactory:
                 format_exception = traceback.format_tb(tb)
                 for line in format_exception:
                     formatted_tb = formatted_tb + repr(line) + chr(13)            
-            logger.exception(f'Uncaught exception: {str(type)} | {str(value)} | {formatted_tb}')
+            logger.error(
+                f'Uncaught exception: {type!s} | {value!s} | {formatted_tb}',
+                exc_info=(type, value, tb),
+            )
 
         logger.addHandler(logging.StreamHandler(sys.stdout))
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(module)s.%(funcName)s:%(lineno)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')

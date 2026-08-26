@@ -7,7 +7,7 @@ select * from trustd.ut_land_use_type;
 
 
 select distinct f.land_location_id as "FacilityID", 
-	f.facility_desc as "FacilityName",  
+    f.facility_desc as "FacilityName",  
     case when luh1.land_use_type_desc in ('Utilities','Commercial Airport or Airline','Industrial','Truck/Transporter',
                                         'Railroad', 'Commercial','Petroleum Distributor','Auto Dealership','Casino',
                                         'Contractor','Hospital','Marina') then 'Commercial'
@@ -73,7 +73,7 @@ select distinct f.land_location_id as "FacilityID",
          --1:MANY between facility and operator; currently using highest operator ID     
          substr(fop.facility_operator_name,1,100) as "FacilityOperatorCompanyName", 
          fop.address_1 as "FacilityOperatorAddress1",
-		 fop.address_2 as "FacilityOperatorAddress2",
+         fop.address_2 as "FacilityOperatorAddress2",
          fop.city as "FacilityOperatorCity", 
          fop.county as "FacilityOperatorCounty", 
          fop.zip as "FacilityOperatorZipCode",
@@ -177,24 +177,24 @@ select distinct f.land_location_id as "FacilityID",
         r.release_id as "AssociatedLUSTID" --!! does release_id relate to a LUST ID?
 from trustd.ut_facility f left join trustd.ut_land_location ll on f.land_location_id = ll.land_location_id
     left join (select land_location_id, land_use_type_desc from 
-				(select a.land_location_id, b.land_use_type_desc,
-					row_number() over (partition by a.land_location_id order by a.date_observed) rn 
-			     from trustd.ut_land_use_hist a join trustd.ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
-			     where a.end_date is null) w where rn = 1) luh1 on ll.land_location_id = luh1.land_location_id
+                (select a.land_location_id, b.land_use_type_desc,
+                    row_number() over (partition by a.land_location_id order by a.date_observed) rn 
+                 from trustd.ut_land_use_hist a join trustd.ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
+                 where a.end_date is null) w where rn = 1) luh1 on ll.land_location_id = luh1.land_location_id
     left join (select land_location_id, land_use_type_desc from 
-				(select a.land_location_id, b.land_use_type_desc,
-					row_number() over (partition by a.land_location_id order by a.date_observed) rn 
-			     from trustd.ut_land_use_hist a join trustd.ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
-			     where a.end_date is null) w where rn = 2) luh2 on ll.land_location_id = luh2.land_location_id
+                (select a.land_location_id, b.land_use_type_desc,
+                    row_number() over (partition by a.land_location_id order by a.date_observed) rn 
+                 from trustd.ut_land_use_hist a join trustd.ut_land_use_type b on a.land_use_type_id = b.land_use_type_id
+                 where a.end_date is null) w where rn = 2) luh2 on ll.land_location_id = luh2.land_location_id
     left join trustd.ut_tribes t on ll.tribe_id = t.tribe_id
     left join trustd.st_regions r on t.region_id = r.region_id
     left join (select * from (select fh.facility_id, lre.responsible_entity_name, lre.address_1, lre.address_2, 
-    							     lre.city, lre.state, lre.zip, lre.county, lre.phone, lre.email_addr,
-       				            	 row_number() over (partition by fh.facility_id order by fh.end_date desc nulls first, 
-       				            							fh.date_observed desc nulls last, fh.ut_facility_owner_hist_id desc) rn
-			  				 from ut_facility_owner_hist fh 
-			  				 	join ut_legally_responsible_entity lre on lre.responsible_entity_id = fh.responsible_entity_id) lre
-			  				 where rn = 1) fo on f.facility_id = fo.facility_id 
+                                     lre.city, lre.state, lre.zip, lre.county, lre.phone, lre.email_addr,
+                                        row_number() over (partition by fh.facility_id order by fh.end_date desc nulls first, 
+                                                               fh.date_observed desc nulls last, fh.ut_facility_owner_hist_id desc) rn
+                               from ut_facility_owner_hist fh 
+                                   join ut_legally_responsible_entity lre on lre.responsible_entity_id = fh.responsible_entity_id) lre
+                               where rn = 1) fo on f.facility_id = fo.facility_id 
     left join (select c.facility_id, d.* from trustd.ut_facility_operator d join        
                 (select a.facility_id, facility_operator_id from trustd.ut_facility_oper_hist a join         
                     (select facility_id, max(ut_facility_oper_hist_id) as ut_facility_oper_hist_id 
@@ -211,10 +211,10 @@ from trustd.ut_facility f left join trustd.ut_land_location ll on f.land_locatio
     left join (select tank_system_id, ':' || pipe_release_detections || ':' as pipe_release_detections from trustd.ut_tank_system_comp) prd on ts.tank_system_id = prd.tank_system_id
     left join (select tank_system_id, case when substances like '%:%' then substr(substances,0,instr(substances,':')-1) else substances end as substances from trustd.ut_tank_system_comp) sub on ts.tank_system_id = sub.tank_system_id
     left join (select distinct a.land_location_id, a.release_id from trustd.ut_release a 
-				join (select release_id, max(event_date) from trustd.ut_release_event 
-				      where release_event_type_id = 2 and release_id not in 
-				      	(select release_id from trustd.ut_release_event where release_event_type_id = 6)
-				      group by release_id) b on a.release_id = b.release_id) r on f.land_location_id = r.land_location_id 
+                join (select release_id, max(event_date) from trustd.ut_release_event 
+                      where release_event_type_id = 2 and release_id not in 
+                          (select release_id from trustd.ut_release_event where release_event_type_id = 6)
+                      group by release_id) b on a.release_id = b.release_id) r on f.land_location_id = r.land_location_id 
 where ll.land_status <> 'Not Indian Country' 
 and ts.federal_regulated_tank = 'TRUE'
 order by 1;
@@ -230,9 +230,9 @@ group by  a.tank_system_id, a.release_id
 
 
 select distinct a.land_location_id, a.release_id from trustd.ut_release a 
-	join (select release_id, max(event_date) from trustd.ut_release_event 
-	     where release_event_type_id = 2 group by release_id) b  
-		on a.release_id = b.release_id
+    join (select release_id, max(event_date) from trustd.ut_release_event 
+         where release_event_type_id = 2 group by release_id) b  
+        on a.release_id = b.release_id
 
 select ''':' || to_char(ut_tank_attribute_type_id) || ''','':' || ut_tank_attribute_desc || ','
 from trustd.ut_tank_attribute_type where active = 'Y'
@@ -252,25 +252,25 @@ select * from trustd.ut_tank_system_comp where tank_system_comp_id = 40146;
 
 
 select count(*) from (
-	select distinct f.land_location_id as "FacilityID", ts.tank_name, tsc.compartment_name
-	from  trustd.ut_facility f left join trustd.ut_land_location ll on f.land_location_id = ll.land_location_id
-	 left join trustd.ut_tank_system ts on f.facility_id = ts.facility_id
+    select distinct f.land_location_id as "FacilityID", ts.tank_name, tsc.compartment_name
+    from  trustd.ut_facility f left join trustd.ut_land_location ll on f.land_location_id = ll.land_location_id
+     left join trustd.ut_tank_system ts on f.facility_id = ts.facility_id
     left join trustd.ut_tank_system_comp tsc on ts.tank_system_id = tsc.tank_system_id
-	where ll.land_status <> 'Not Indian Country'
-	and ts.federal_regulated_tank = 'TRUE'
+    where ll.land_status <> 'Not Indian Country'
+    and ts.federal_regulated_tank = 'TRUE'
 ) a;
 
 select tank_status, count(*) from (
- 	select distinct f.land_location_id as "FacilityID", ts.tank_name, tsc.compartment_name, 
-		case when tank_status in ('Currently in Use','Temporarily Out of Use','Abandoned') then 'Active'
-		     when tank_status = 'Permanently Out of Use' then 'Closed' end as tank_status
-	from trustd.ut_facility f 
-		left join trustd.ut_land_location ll on f.land_location_id = ll.land_location_id
-	 	left join trustd.ut_tank_system ts on f.facility_id = ts.facility_id
-		left join trustd.ut_tank_system_comp tsc on ts.tank_system_id = tsc.tank_system_id
-	where ll.land_status <> 'Not Indian Country'
-	and ts.federal_regulated_tank = 'TRUE'
-	order by 1, 2
+     select distinct f.land_location_id as "FacilityID", ts.tank_name, tsc.compartment_name, 
+        case when tank_status in ('Currently in Use','Temporarily Out of Use','Abandoned') then 'Active'
+             when tank_status = 'Permanently Out of Use' then 'Closed' end as tank_status
+    from trustd.ut_facility f 
+        left join trustd.ut_land_location ll on f.land_location_id = ll.land_location_id
+         left join trustd.ut_tank_system ts on f.facility_id = ts.facility_id
+        left join trustd.ut_tank_system_comp tsc on ts.tank_system_id = tsc.tank_system_id
+    where ll.land_status <> 'Not Indian Country'
+    and ts.federal_regulated_tank = 'TRUE'
+    order by 1, 2
 ) group by tank_status;
 
 Permanently Out of Use

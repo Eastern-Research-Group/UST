@@ -4,7 +4,7 @@ returning control_id;
 
 insert into lust_control(organization_id, date_received, date_processed, data_source, comments)
 values ('NC', '2023-05-05', '2023-07-06','State updated Excel spreadsheet',
-	'Re-processing existing data to try to get counts to more closely match OUST performance measures.')
+    'Re-processing existing data to try to get counts to more closely match OUST performance measures.')
 returning control_id;
 11
 
@@ -73,48 +73,48 @@ select * from "NC_LUST"."LUST_Data_050523"
 
 create or replace view "NC_LUST".v_state_data as
 select distinct 
-		"IncidentNumber",
-		x."USTNum",
-		"IncidentName",
-		"FacilID",
-		"Address",
-		"CityTown",
-		"State",
-		"County",
-		"ZipCode",
-		"LatDec",
-		"LongDec",
-		"HCS_Res",
-		"HCS_Ref",
-		"Reliability",
-		"DateReported",
-		"CloseOut",
-		"Sources",
-		"Causes",
-		"InterCons",
-		"Comm",
-		"reg",
-		"LUSTStatus",
-		"MTBE",
-		"ReleaseCode",
-		"RBCA_GW",
-		"PETOPT",
-		"HowReleaseDetected",
-		"CauseOfRelease",
-		"RemediationStrategy",
-		"OwnershipType",
-		"RSource",
-		"Substance",
-		"Plume",
-		"RCause",
-		"LURFiled",
-		y."EPA Status"
+        "IncidentNumber",
+        x."USTNum",
+        "IncidentName",
+        "FacilID",
+        "Address",
+        "CityTown",
+        "State",
+        "County",
+        "ZipCode",
+        "LatDec",
+        "LongDec",
+        "HCS_Res",
+        "HCS_Ref",
+        "Reliability",
+        "DateReported",
+        "CloseOut",
+        "Sources",
+        "Causes",
+        "InterCons",
+        "Comm",
+        "reg",
+        "LUSTStatus",
+        "MTBE",
+        "ReleaseCode",
+        "RBCA_GW",
+        "PETOPT",
+        "HowReleaseDetected",
+        "CauseOfRelease",
+        "RemediationStrategy",
+        "OwnershipType",
+        "RSource",
+        "Substance",
+        "Plume",
+        "RCause",
+        "LURFiled",
+        y."EPA Status"
 from 
-	(select "USTNum", max(b.sort_order) as sort_order
-	from "NC_LUST"."LUST_Data_050523" a join "NC_LUST".status_order b on a."EPA Status" = b."EPA Status"
-	group by "USTNum") x 
-	join "NC_LUST"."LUST_Data_050523" y on x."USTNum" = y."USTNum" 
-	join "NC_LUST".status_order z on x.sort_order = z.sort_order;
+    (select "USTNum", max(b.sort_order) as sort_order
+    from "NC_LUST"."LUST_Data_050523" a join "NC_LUST".status_order b on a."EPA Status" = b."EPA Status"
+    group by "USTNum") x 
+    join "NC_LUST"."LUST_Data_050523" y on x."USTNum" = y."USTNum" 
+    join "NC_LUST".status_order z on x.sort_order = z.sort_order;
 
 select count(*) from "NC_LUST".v_state_data;
 16622
@@ -185,9 +185,9 @@ select distinct
 'insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value) values (60, ''' || "Substance" ||  ''', '''');'
 from "NC_LUST"."LUST_Data_050523" 
 where "Substance" not in
-	(select state_value 
-	from lust_element_value_mappings a join lust_element_db_mapping b on a.element_db_mapping_id = b.id
-	where b.state = 'NC')
+    (select state_value 
+    from lust_element_value_mappings a join lust_element_db_mapping b on a.element_db_mapping_id = b.id
+    where b.state = 'NC')
 order by 1;
 
 
@@ -224,28 +224,28 @@ select distinct
 'insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, ''' || "TypeName" ||  ''', '''', ''' || "TypeCode" || ''');'
 from "NC_LUST"."tblSourceType1" 
 order by 1;
-	
-insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Dispenser', 'Dispenser', 'A');	
-insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Line', 'Piping', 'B');	
-insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Spill/Overflow', 'Other', 'D');	
-insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Tank', 'Tank', 'C');	
-insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Unknown/Multiple', 'Unknown', 'E');	
+    
+insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Dispenser', 'Dispenser', 'A');    
+insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Line', 'Piping', 'B');    
+insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Spill/Overflow', 'Other', 'D');    
+insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Tank', 'Tank', 'C');    
+insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (62, 'Unknown/Multiple', 'Unknown', 'E');    
 
 ----------------------------------------------------------------------------------------------------------------------------------
 
 select distinct "RptCode", "RptType" from "NC_LUST"."LUST_Data_050523" order by 1;
-6.171	SCSC
-6.174	DR
-6.174	dr
-6.18	VR
-6.19	LET
-7.0	OTH
-7.0	oth
-	NFA
-	pnaA
-	RS
-	
-	
+6.171    SCSC
+6.174    DR
+6.174    dr
+6.18    VR
+6.19    LET
+7.0    OTH
+7.0    oth
+    NFA
+    pnaA
+    RS
+    
+    
 select * from "NC_LUST"."LUST_Status_mapping_from_state"  order by 1;
 
 select "RptCode", "RptType" from "NC_LUST"."LUST_Data_050523" 
@@ -316,7 +316,7 @@ select * From information_schema.columns where table_name = 'LUST_Status_mapping
 
 ----------------------------------------------------------------------------------------------------------------------------------
 /*
-a.	tblPIRF1.RCause, values are 
+a.    tblPIRF1.RCause, values are 
 
 1 = Spill (Accidental), 
 2 = UST Overfill, 
@@ -328,7 +328,7 @@ a.	tblPIRF1.RCause, values are
 8 = Spill (Intentional), 
 9 = Equipment Failure,   stored in tblPIRF.RCause.  CauseOfRelease is alias to make match EPA Guuidelines
 
-A)	 Use value 1 – 9 (there is one 8)  Ignore the alphas.  They may be either historical values or data entry issues.
+A)     Use value 1 – 9 (there is one 8)  Ignore the alphas.  They may be either historical values or data entry issues.
 
 
 New question (1/5/23) … we do not have a “8” in the data we received. Has the NC data been updated since we the initial 
@@ -384,7 +384,7 @@ insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa
 insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (63, 'Visual/Odor', 'Third party (well water, vapor intrusion, etc.)', '4');
 insert into lust_element_value_mappings (element_db_mapping_id, state_value, epa_value, state_code) values (63, 'Water Supply Well Contamination', 'Third party (well water, vapor intrusion, etc.)', '6');
 
-	
+    
 ----------------------------------------------------------------------------------------------------------------------------------
 
 update lust_element_db_mapping set state_join_table = 'qryLUST_Data', state_join_column = 'HowReleaseDetected' where id in (57,58,50,63);
@@ -411,42 +411,42 @@ select * from  "NC_LUST"."LUST_Data_050523";
 drop view"NC_LUST".v_lust_base;
 create or replace view "NC_LUST".v_lust_base as 
 select 
-	a."FacilID" as "FacilityID",
-	a."USTNum" as "LUSTID",
-	a."IncidentName" as "SiteName",
-	a."Address" as "SiteAddress",
-	a."CityTown" as "SiteCity",
-	a."ZipCode" as "Zipcode",
-	a."State" as "State",
-	4 as "EPARegion",
-	a."LatDec" as "Latitude",
-	a."LongDec" as "Longitude",
-	ls.epa_value as "LUSTStatus", 
-	a."DateReported" as "ReportedDate",
-	a."CloseOut" as "NFADate", 
-	mis.epa_value as "MediaImpactedSoil",
-	mig.epa_value as "MediaImpactedGroundwater",
-	misw.epa_value as "MediaImpactedSurfaceWater",
-	sr.epa_value as "SubstanceReleased1",
-	scr.epa_value as "SourceOfRelease1",
-	cr.epa_value as "CauseOfRelease1",
-	hrd.epa_value as "HowReleaseDetected",
-	case when a."IncidentNumber" is not null and a."CloseOut" is not null and a."LURFiled" is not null then 'Yes' end as "ClosedWithContamination"
-from 		  "NC_LUST"."LUST_Data_050523" a 
-	left join "NC_LUST"."tblPIRF1" c on a."USTNum" = c."USTNum"
-	left join "NC_LUST"."tblRelDisc1" rd1 on a."HowReleaseDetected" = rd1."RDCode"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'MediaImpactedSoil') mis on rd1."RDMethod"::varchar = mis.state_value
-	left join "NC_LUST"."tblRelDisc1" rd2 on a."HowReleaseDetected" = rd2."RDCode"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'MediaImpactedGroundwater') mig on rd2."RDMethod"::varchar = mig.state_value
-	left join "NC_LUST"."tblRelDisc1" rd3 on a."HowReleaseDetected" = rd3."RDCode"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'MediaImpactedSurfaceWater') misw on rd3."RDMethod"::varchar = misw.state_value
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'SubstanceReleased1') sr on b."Substance" = sr.state_value
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'CauseOfRelease1') cr on c."RCause" = cr.state_value
-	left join "NC_LUST"."tblSourceType1" src on b."Sources" = src."TypeCode"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'SourceOfRelease1') scr on src."TypeName" = scr.state_value
-	left join "NC_LUST"."tblRelDisc1" rd4 on b."HowReleaseDetected" = rd4."RDCode"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'HowReleaseDetected') hrd on rd4."RDMethod"::varchar = hrd.state_value
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'LUSTStatus') ls on a."RptCode"::text = ls.state_value
+    a."FacilID" as "FacilityID",
+    a."USTNum" as "LUSTID",
+    a."IncidentName" as "SiteName",
+    a."Address" as "SiteAddress",
+    a."CityTown" as "SiteCity",
+    a."ZipCode" as "Zipcode",
+    a."State" as "State",
+    4 as "EPARegion",
+    a."LatDec" as "Latitude",
+    a."LongDec" as "Longitude",
+    ls.epa_value as "LUSTStatus", 
+    a."DateReported" as "ReportedDate",
+    a."CloseOut" as "NFADate", 
+    mis.epa_value as "MediaImpactedSoil",
+    mig.epa_value as "MediaImpactedGroundwater",
+    misw.epa_value as "MediaImpactedSurfaceWater",
+    sr.epa_value as "SubstanceReleased1",
+    scr.epa_value as "SourceOfRelease1",
+    cr.epa_value as "CauseOfRelease1",
+    hrd.epa_value as "HowReleaseDetected",
+    case when a."IncidentNumber" is not null and a."CloseOut" is not null and a."LURFiled" is not null then 'Yes' end as "ClosedWithContamination"
+from           "NC_LUST"."LUST_Data_050523" a 
+    left join "NC_LUST"."tblPIRF1" c on a."USTNum" = c."USTNum"
+    left join "NC_LUST"."tblRelDisc1" rd1 on a."HowReleaseDetected" = rd1."RDCode"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'MediaImpactedSoil') mis on rd1."RDMethod"::varchar = mis.state_value
+    left join "NC_LUST"."tblRelDisc1" rd2 on a."HowReleaseDetected" = rd2."RDCode"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'MediaImpactedGroundwater') mig on rd2."RDMethod"::varchar = mig.state_value
+    left join "NC_LUST"."tblRelDisc1" rd3 on a."HowReleaseDetected" = rd3."RDCode"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'MediaImpactedSurfaceWater') misw on rd3."RDMethod"::varchar = misw.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'SubstanceReleased1') sr on b."Substance" = sr.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'CauseOfRelease1') cr on c."RCause" = cr.state_value
+    left join "NC_LUST"."tblSourceType1" src on b."Sources" = src."TypeCode"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'SourceOfRelease1') scr on src."TypeName" = scr.state_value
+    left join "NC_LUST"."tblRelDisc1" rd4 on b."HowReleaseDetected" = rd4."RDCode"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'HowReleaseDetected') hrd on rd4."RDMethod"::varchar = hrd.state_value
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'LUSTStatus') ls on a."RptCode"::text = ls.state_value
 where a."Substance" <> 'ETHANOL 100%' and a."Comm" = 'C' and a."reg" = 'R'
 order by a."FacilID", a."USTNum";
 
@@ -458,7 +458,7 @@ select * from  "NC_LUST"."tblRelDisc1"
 
 select count(*) 
 from lust where control_id = 7 and 
-	("Latitude" is null  or "Longitude" is null
+    ("Latitude" is null  or "Longitude" is null
     or length(split_part("Latitude"::text, '.', 2)::text) < 3
     or length(split_part("Longitude"::text, '.', 2)::text) < 3);
 
@@ -469,13 +469,13 @@ from lust where control_id = 7 and
 select * from "NC_LUST".v_lust where "MediaImpactedGroundwater" is not null;
 
 select distinct 
-	a."FacilID" as "FacilityID",
-	b."Sources",
-	src.*,
-	scr.epa_value as "SourceOfRelease1"
+    a."FacilID" as "FacilityID",
+    b."Sources",
+    src.*,
+    scr.epa_value as "SourceOfRelease1"
 from  "NC_LUST"."tblUST_DB1" a left join "NC_LUST"."qryLUST_Data" b on a."IncidentNumber" = b."IncidentNumber"
-	left join "NC_LUST"."tblSourceType1" src on b."Sources" = src."TypeCode"
-	left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'SourceOfRelease1') scr on src."TypeName" = scr.state_value
+    left join "NC_LUST"."tblSourceType1" src on b."Sources" = src."TypeCode"
+    left join (select state_value, epa_value from v_lust_element_mapping where state = 'NC' and element_name = 'SourceOfRelease1') scr on src."TypeName" = scr.state_value
 where b."Sources" is not null
 
 select * from v_lust_element_mapping where state = 'NC' and element_name = 'SourceOfRelease1'
