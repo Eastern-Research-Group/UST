@@ -22,11 +22,14 @@ class ValidationResult:
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PYTHON_ROOT = REPO_ROOT / "ust" / "python"
+LEGACY_STATE_PATH = "/state_processing/states/"
 
 
 def iter_python_files(include_archive: bool = False):
     for file_path in PYTHON_ROOT.rglob("*.py"):
         path_str = file_path.as_posix()
+        if LEGACY_STATE_PATH in path_str:
+            continue
         if not include_archive and "/archive/" in path_str:
             continue
         yield file_path
