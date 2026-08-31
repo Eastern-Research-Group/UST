@@ -514,6 +514,28 @@ class ExclusionsTests(unittest.TestCase):
 
 
 class ExcludeUnregulatedTests(unittest.TestCase):
+    def test_execute_reuses_existing_unreg_tables_when_find_regulated(self):
+        exclude = Exclude.__new__(Exclude)
+        exclude.find_regulated = True
+        exclude.execute_sql = False
+        exclude.export_sql = False
+        exclude.print_sql = False
+        exclude.unreg = unittest.mock.MagicMock()
+        exclude.unreg.unreg_parent_table = "dc_ust.erg_unregulated_facilities"
+        exclude.unreg.unreg_substance_table = "dc_ust.erg_unregulated_tanks"
+        exclude.unreg._table_exists.side_effect = [True, True]
+        exclude.connect_db = unittest.mock.MagicMock()
+        exclude.disconnect_db = unittest.mock.MagicMock()
+        exclude.get_columns = unittest.mock.MagicMock(
+            return_value=__import__('pandas').DataFrame(columns=["epa_table_name"])
+        )
+
+        exclude.execute()
+
+        exclude.unreg.execute.assert_not_called()
+        exclude.unreg.connect_db.assert_called_once_with()
+        exclude.unreg.disconnect_db.assert_called_once_with()
+
     def test_get_table_alias_handles_quoted_schema_table_and_alias(self):
         view_def = 'select *\nfrom "hi_release"."tblLUSTSite" a join "hi_release"."tblFacility" b on true'
 
