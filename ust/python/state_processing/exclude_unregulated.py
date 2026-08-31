@@ -68,9 +68,20 @@ class Exclude:
         return expression
 
 
+    def unreg_tables_exist(self):
+        self.unreg.connect_db()
+        try:
+            return all(
+                self.unreg._table_exists(table)
+                for table in (self.unreg.unreg_parent_table, self.unreg.unreg_substance_table)
+            )
+        finally:
+            self.unreg.disconnect_db()
+
+
     def execute(self):
-        if self.find_regulated:
-            UnregTables(self.dataset, drop_existing=False).execute()
+        if self.find_regulated and not self.unreg_tables_exist():
+            self.unreg.execute()
 
         self.connect_db()
 
