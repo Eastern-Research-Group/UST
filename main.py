@@ -369,6 +369,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="Skip detail worksheets and run QA in counts-only mode",
     )
+    qa.add_argument(
+        "--materialize-views",
+        action="store_true",
+        help="Run QA against indexed temporary snapshots of generated views",
+    )
     _add_yes_arg(qa)
     _add_dry_run_arg(qa)
 
@@ -791,6 +796,7 @@ def _main(argv=None):
             force_exclusions=args.force_exclusions,
             force_summary_counts=args.force_summary_counts,
             include_details=args.include_details,
+            materialize_views=args.materialize_views,
         )
         return
 

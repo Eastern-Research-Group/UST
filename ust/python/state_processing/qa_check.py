@@ -50,11 +50,13 @@ class QualityCheck:
     table_name = None 
     view_col_str = None 
 
-    def __init__(self, dataset, force_exclusions=False, force_summary_counts=False, include_details=True):
+    def __init__(self, dataset, force_exclusions=False, force_summary_counts=False, include_details=True, materialize_views=False):
         self.dataset = dataset
         self.force_exclusions = force_exclusions
         self.force_summary_counts = force_summary_counts
         self.include_details = include_details
+        self.materialize_views = materialize_views
+        self.materialized_view_tables = {}
         self.views_to_review = []
         self.error_dict = {}
         self.error_cnt_dict = {}
@@ -102,6 +104,43 @@ class QualityCheck:
 
     def _quote_ident(self, name):
         return '"' + name.replace('"', '""') + '"'
+
+
+    def _view_relation(self, view_name):
+        temp_table = getattr(self, 'materialized_view_tables', {}).get(view_name)
+        if temp_table:
+            return f'pg_temp.{self._quote_ident(temp_table)}'
+        return f'{self.dataset.schema}.{view_name}'
+
+
+    def materialize_view_snapshots(self):
+        if not self.materialize_views:
+            return
+
+        for view_name in self.views_to_review:
+            temp_table = 'qa_' + view_name
+            source_relation = f'{self._quote_ident(self.dataset.schema)}.{self._quote_ident(view_name)}'
+            self.cur.execute(
+                f'create temp table {self._quote_ident(temp_table)} as '
+                f'select * from {source_relation}'
+            )
+            self.materialized_view_tables[view_name] = temp_table
+
+            view_columns = set(self._get_view_columns(view_name))
+            key_columns = [
+                column_name for column_name in self._get_key_cols(view_name)
+                if column_name in view_columns
+            ]
+            if key_columns:
+                index_name = 'qa_' + view_name + '_keys'
+                key_sql = ', '.join(self._quote_ident(column_name) for column_name in key_columns)
+                self.cur.execute(
+                    f'create index {self._quote_ident(index_name)} '
+                    f'on {self._quote_ident(temp_table)} ({key_sql})'
+                )
+            self.cur.execute(f'analyze {self._quote_ident(temp_table)}')
+
+        logger.info('Materialized %s QA view snapshots in the current database session.', len(self.materialized_view_tables))
 
 
     def _get_required_nonnull_cols(self, table_name):
@@ -155,6 +194,7 @@ class QualityCheck:
             raise RuntimeError(f'No {self.dataset.ust_or_release} template views found in schema {self.dataset.schema}.')
         self.wb = op.Workbook()    
         self.check_missing_views()
+        self.materialize_view_snapshots()
         self.set_view_counts()
         self.check_view_counts()
         for view_name in self.views_to_review:
@@ -224,7 +264,7 @@ class QualityCheck:
 
     def set_view_counts(self):
         for view_name in self.views_to_review:
-            sql = f"select count(*) from {self.dataset.schema}.{view_name}"
+            sql = f"select count(*) from {self._view_relation(view_name)}"
             try:
                 self.cur.execute(sql)
             except psycopg2.errors.UndefinedTable:
@@ -355,7 +395,7 @@ class QualityCheck:
             self.error_cnt_dict['Number of null rows for required column ' + self.table_name + '.' + col_name] = num_rows
             logger.warning('Number of null rows for required column %s.%s = %s', self.table_name, col_name, num_rows)
             if num_rows > 0 and self.include_details:
-                details_sql = f"select * from {self.dataset.schema}.{self.view_name} where {self._quote_ident(col_name)} is null"
+                details_sql = f"select * from {self._view_relation(self.view_name)} where {self._quote_ident(col_name)} is null"
                 utils.process_sql(self.conn, self.cur, details_sql)
                 self.write_to_ws(self.cur.fetchall(), col_name + ' null')
 
@@ -370,7 +410,7 @@ class QualityCheck:
             join = join + 'a.' + col + ' = b.' + col + ' and ' 
         key_col_str = key_col_str[:-2]
         join = join[:-4]
-        sql = f"""select {key_col_str}, count(*) num_rows from {self.dataset.schema}.{self.view_name} 
+        sql = f"""select {key_col_str}, count(*) num_rows from {self._view_relation(self.view_name)}
                   group by {key_col_str} having count(*) > 1"""
         utils.process_sql(self.conn, self.cur, sql)
         rows = self.cur.fetchall()
@@ -379,10 +419,10 @@ class QualityCheck:
         logger.warning('Number of duplicated key columns in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
         if num_rows > 0:
             if self.include_details:
-                sql = f"""select * from {self.dataset.schema}.{self.view_name}  a
+                sql = f"""select * from {self._view_relation(self.view_name)} a
                         where exists
                             (select {key_col_str}
-                            from {self.dataset.schema}.{self.view_name}  b
+                            from {self._view_relation(self.view_name)} b
                             where {join}
                             group by {key_col_str}
                             having count(*) > 1)
@@ -402,22 +442,22 @@ class QualityCheck:
             view_data_type = d[3]
             view_len = d[4]
             if view_len and table_len and view_len > table_len:
-                count_sql = f"select count(*) from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
+                count_sql = f"select count(*) from {self._view_relation(self.view_name)} where length({col_name}) > %s"
                 num_rows = self._select_count(count_sql, params=(table_len,))
                 self.error_cnt_dict['Number of rows exceeding allowed length of ' + self.table_name + '.' + col_name] = num_rows
                 logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
                 if num_rows > 0 and self.include_details:
-                    sql2 = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
+                    sql2 = f"select * from {self._view_relation(self.view_name)} where length({col_name}) > %s"
                     utils.process_sql(self.conn, self.cur, sql2, params=(table_len,))
                     self.write_to_ws(self.cur.fetchall(), col_name + ' too long')
             elif view_data_type == 'text' and table_data_type == 'character varying':
-                count_sql = f"select count(*) from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
+                count_sql = f"select count(*) from {self._view_relation(self.view_name)} where length({col_name}) > %s"
                 num_rows = self._select_count(count_sql, params=(table_len,))
                 if num_rows > 0:
                     self.error_cnt_dict['Number of rows exceeding allowed length of ' + self.table_name + '.' + col_name] = num_rows
                     logger.warning('Number of rows exceeding allowed length of %s.%s: %s', self.table_name, col_name, num_rows)
                     if self.include_details:
-                        sql = f"select * from {self.dataset.schema}.{self.view_name} where length({col_name}) > %s"
+                        sql = f"select * from {self._view_relation(self.view_name)} where length({col_name}) > %s"
                         utils.process_sql(self.conn, self.cur, sql, params=(table_len,))
                         self.write_to_ws(self.cur.fetchall(), col_name + ' too long')
             elif table_data_type != view_data_type:
@@ -483,7 +523,7 @@ class QualityCheck:
             return
         count_sql = f"""select count(*)
                         from (
-                            select 1 from {self.dataset.schema}.{self.view_name}
+                            select 1 from {self._view_relation(self.view_name)}
                             group by {self.view_col_str}
                             having count(*) > 1
                         ) x"""
@@ -491,7 +531,7 @@ class QualityCheck:
         self.error_cnt_dict['nonunique rows in ' + self.dataset.schema + '.' + self.view_name] = num_rows
         logger.warning('Number of non-unique rows in %s.%s: %s', self.dataset.schema, self.view_name, num_rows)
         if num_rows > 0 and self.include_details:
-            sql = f"select {self.view_col_str}, count(*) from {self.dataset.schema}.{self.view_name} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
+            sql = f"select {self.view_col_str}, count(*) from {self._view_relation(self.view_name)} group by {self.view_col_str} having count(*) > 1 order by 1, 2"
             utils.process_sql(self.conn, self.cur, sql)
             self.write_to_ws(self.cur.fetchall(), self.view_name + ' nonunique')
 
@@ -502,7 +542,7 @@ class QualityCheck:
         for row in rows:
             constraint_name = row[0]
             check_clause = row[1]
-            sql2 = f"select count(*) from {self.dataset.schema}.{self.view_name} where not {check_clause}"
+            sql2 = f"select count(*) from {self._view_relation(self.view_name)} where not {check_clause}"
             try:
                 self.cur.execute(sql2)
             except psycopg2.errors.UndefinedColumn:
@@ -518,7 +558,7 @@ class QualityCheck:
             self.error_cnt_dict['failed check constraint ' + self.dataset.schema + '.' + constraint_name] = num_rows
             logger.warning('Number of failed rows for check constraint %s.%s: %s', self.table_name, constraint_name, num_rows)
             if num_rows > 0 and self.include_details:
-                detail_sql = f"select * from {self.dataset.schema}.{self.view_name} where not {check_clause}"
+                detail_sql = f"select * from {self._view_relation(self.view_name)} where not {check_clause}"
                 utils.process_sql(self.conn, self.cur, detail_sql)
                 self.write_to_ws(self.cur.fetchall(), constraint_name)
 
@@ -671,9 +711,9 @@ class QualityCheck:
             sql = f"""select distinct facility_id, tank_id 
                     from 
                         (select ts.facility_id, tank_id 
-                        from {self.dataset.schema}.v_ust_tank_substance ts join public.substances s on ts.substance_id = s.substance_id 
+                        from {self._view_relation('v_ust_tank_substance')} ts join public.substances s on ts.substance_id = s.substance_id
                             join (select distinct facility_id from 
-                                    (select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.v_ust_facility ) x 
+                                    (select facility_id, facility_type1 as facility_type_id from {self._view_relation('v_ust_facility')} ) x
                                   where facility_type_id <> 4) f on ts.facility_id = f.facility_id
                         where s.substance like 'Heating%'"""
             sql2 = """select count(*) from information_schema.columns 
@@ -685,11 +725,11 @@ class QualityCheck:
                 sql = sql + f"""\nunion all 
                         select x.facility_id, x.tank_id 
                         from (select facility_id, tank_id, sum(compartment_capacity_gallons) as tank_capacity_gallons 
-                              from {self.dataset.schema}.v_ust_compartment group by facility_id, tank_id) x 
+                              from {self._view_relation('v_ust_compartment')} group by facility_id, tank_id) x
                             join (select distinct facility_id from 
-                                    (select facility_id, facility_type1 as facility_type_id from {self.dataset.schema}.v_ust_facility ) x 
+                                    (select facility_id, facility_type1 as facility_type_id from {self._view_relation('v_ust_facility')} ) x
                                   where facility_type_id in (1,12)) f on x.facility_id = f.facility_id      --Agricultural/farm; Residential
-                            join {self.dataset.schema}.v_ust_tank_substance ts on x.facility_id = ts.facility_id and x.tank_id = ts.tank_id
+                            join {self._view_relation('v_ust_tank_substance')} ts on x.facility_id = ts.facility_id and x.tank_id = ts.tank_id
                             join public.substances s on ts.substance_id = s.substance_id
                         where tank_capacity_gallons < 1100 and s.substance_group in ('Diesel','Gasoline') """
             sql = sql + """) a
@@ -715,23 +755,22 @@ class QualityCheck:
                 return 
 
             sql = f"""select distinct ts.release_id
-                        from (select release_id from {self.dataset.schema}.v_ust_release where facility_type_id <> 4) r     --Bulk plant storage/petroleum distributor
-                            join {self.dataset.schema}.v_ust_release_substance ts on ts.release_id = r.release_id
+                        from (select release_id from {self._view_relation('v_ust_release')} where facility_type_id <> 4) r     --Bulk plant storage/petroleum distributor
+                            join {self._view_relation('v_ust_release_substance')} ts on ts.release_id = r.release_id
                             join public.substances s on ts.substance_id = s.substance_id 
                         where s.substance_group = 'Heating'
                     order by 1"""
         utils.process_sql(self.conn, self.cur, sql)
         rows = self.cur.fetchall()
         num_rows = len(rows) 
-        unreg_source_view = 'vw_erg_unreg_substances'
-        unreg_source_cnt = None
-
-        if utils.get_table_existence(unreg_source_view, self.dataset.schema):
-            source_sql = f"select count(*) from {self.dataset.schema}.{unreg_source_view}"
-            utils.process_sql(self.conn, self.cur, source_sql)
-            unreg_source_cnt = self.cur.fetchone()[0]
-        
         if num_rows > 0:
+            unreg_source_view = 'vw_erg_unreg_substances'
+            unreg_source_has_rows = None
+            if utils.get_table_existence(unreg_source_view, self.dataset.schema):
+                source_sql = f"select exists (select 1 from {self.dataset.schema}.{unreg_source_view})"
+                utils.process_sql(self.conn, self.cur, source_sql)
+                unreg_source_has_rows = self.cur.fetchone()[0]
+
             msg = f'Number of {row_type} that need to be excluded due to unregulated heating oil{extramsg}. '
             if self._relation_has_column(unregulated_table, 'unregulated_reason'):
                 sql = f"""select count(*) from {self.dataset.schema}.{unregulated_table} 
@@ -744,11 +783,16 @@ class QualityCheck:
                 utils.process_sql(self.conn, self.cur, sql)
                 unreg_cnt = self.cur.fetchone()[0]
                 unreg_count_description = f'{self.dataset.schema}.{unregulated_table} rows={unreg_cnt}; missing unregulated_reason column'
-            msg += f'QA candidates={num_rows}; {self.dataset.schema}.{unreg_source_view} rows={unreg_source_cnt}; {unreg_count_description}. '
+            helper_status = 'not found'
+            if unreg_source_has_rows is True:
+                helper_status = 'has rows'
+            elif unreg_source_has_rows is False:
+                helper_status = 'is empty'
+            msg += f'QA candidates={num_rows}; {self.dataset.schema}.{unreg_source_view} {helper_status}; {unreg_count_description}. '
             if unreg_cnt == len(rows):
                 msg += f'It looks like exclude_unregulated.py was run but unregulated {row_type} were not excluded from data views.'
             elif unreg_cnt == 0:
-                if unreg_source_cnt == 0:
+                if unreg_source_has_rows is False:
                     msg += (
                         f'{unregulated_table} does not contain expected rows and helper view {unreg_source_view} is empty. '
                         'Run create-unreg with --views-only, then rerun populate-unreg.'
@@ -814,7 +858,7 @@ class QualityCheck:
             return
 
         sql = f"""select count(*)
-                  from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on {join_sql}"""
+              from {self._view_relation(self.view_name)} a join {self.dataset.schema}.{unreg_table} b on {join_sql}"""
         num_rows = self._select_count(sql)
         self.error_cnt_dict['Rows with unregulated ' + unreg_type + ' not excluded from ' + self.view_name] = num_rows
         logger.warning('Rows with unregulated %s in %s: %s', unreg_type, self.view_name, num_rows)
@@ -825,7 +869,7 @@ class QualityCheck:
                 if not self._relation_has_column(unreg_table, 'unregulated_reason'):
                     unreg_reason_sql = 'null::varchar(1000) as unregulated_reason'
                 detail_sql = f"""select {detail_cols}, {unreg_reason_sql}
-                               from {self.dataset.schema}.{self.view_name} a join {self.dataset.schema}.{unreg_table} b on {join_sql}"""
+                               from {self._view_relation(self.view_name)} a join {self.dataset.schema}.{unreg_table} b on {join_sql}"""
                 utils.process_sql(self.conn, self.cur, detail_sql)
                 data = self.cur.fetchall()
                 self.write_to_ws(data, 'Unreg ' + self.view_name.replace('v_ust_',''))
@@ -891,10 +935,10 @@ class QualityCheck:
 
         key_col_sql = ', '.join(self._quote_ident(col) for col in key_cols)
         missing_key_sql = f"""select distinct {key_col_sql}
-                              from {self.dataset.schema}.{self.view_name}
+                              from {self._view_relation(self.view_name)}
                               except
                               select distinct {key_col_sql}
-                              from {self.dataset.schema}.{parent_view}"""
+                              from {self._view_relation(parent_view)}"""
         missing_key_join_sql = ' and '.join(
             f'a.{self._quote_ident(col)} = missing_keys.{self._quote_ident(col)}'
             for col in key_cols
@@ -903,7 +947,7 @@ class QualityCheck:
                   {missing_key_sql}
                   )
                   select count(*)
-                  from {self.dataset.schema}.{self.view_name} a
+                  from {self._view_relation(self.view_name)} a
                   join missing_keys on {missing_key_join_sql}"""
         num_rows = self._select_count(missing_parent_sql)
         self.error_cnt_dict[error_label] = num_rows
@@ -1013,7 +1057,11 @@ class QualityCheck:
     def summary_counts(self):
         if self.error_dict and not self.force_summary_counts:
             return 
-        summ_counts = SummaryCounts(self.dataset).summ_counts 
+        summ_counts = SummaryCounts(
+            self.dataset,
+            conn=self.conn,
+            materialized_view_tables=self.materialized_view_tables,
+        ).summ_counts
 
         for k, rows in summ_counts.items():
             logger.info('Working on "%s"', k)
@@ -1050,6 +1098,7 @@ def main(ust_or_release,
          force_exclusions=False,
          force_summary_counts=False, 
          include_details=True,
+         materialize_views=False,
          export_file_name=None, 
          export_file_dir=None, 
          export_file_path=None):
@@ -1068,6 +1117,7 @@ def main(ust_or_release,
         force_exclusions=force_exclusions,
         force_summary_counts=force_summary_counts,
         include_details=include_details,
+        materialize_views=materialize_views,
     )
     qc.process()
 
