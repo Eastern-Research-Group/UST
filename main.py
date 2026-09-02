@@ -168,6 +168,35 @@ def build_parser() -> argparse.ArgumentParser:
     _add_yes_arg(generate_views)
     _add_dry_run_arg(generate_views)
 
+    audit_dataset = subparsers.add_parser(
+        "audit-dataset",
+        help="Audit existing mappings and source-value completeness before resuming processing",
+    )
+    _add_common_dataset_args(audit_dataset, include_org=True)
+    audit_dataset.add_argument(
+        "--fix-query-logic",
+        action="store_true",
+        help="Rewrite only legacy where-style Yes/NULL query_logic entries to valid CASE expressions",
+    )
+    audit_dataset.add_argument(
+        "--fix-source-identifiers",
+        action="store_true",
+        help="Correct only unambiguous source table/column case, space, and punctuation differences",
+    )
+    audit_dataset.add_argument(
+        "--no-write-sql",
+        dest="write_sql",
+        action="store_false",
+        help="Do not write suggested audit fixes to a SQL file",
+    )
+    audit_dataset.add_argument(
+        "--print-sql",
+        action="store_true",
+        help="Print suggested audit SQL in addition to writing the SQL file",
+    )
+    _add_yes_arg(audit_dataset)
+    _add_dry_run_arg(audit_dataset)
+
     generate_deagg = subparsers.add_parser("generate-deagg", help="Generate SQL guidance for potential deaggregation")
     _add_common_dataset_args(generate_deagg)
     generate_deagg.add_argument(
@@ -591,6 +620,23 @@ def _main(argv=None):
             print_console=args.print_console,
             strict=args.strict_mapping,
             preflight_only=args.preflight_only,
+        )
+        return
+
+    if args.command == "audit-dataset":
+        _apply_profile_defaults(args, required_fields=["ust_or_release"], parser=parser)
+        _require_control_or_org(args, parser)
+        if _dry_run(args, "Audit existing dataset mappings and source values"):
+            return
+        from ust.python.state_processing.dataset_audit import main as audit_main
+        audit_main(
+            ust_or_release=args.ust_or_release,
+            control_id=args.control_id,
+            organization_id=args.organization_id,
+            fix_query_logic=args.fix_query_logic,
+            fix_source_identifiers=args.fix_source_identifiers,
+            write_sql=args.write_sql,
+            print_sql=args.print_sql,
         )
         return
 

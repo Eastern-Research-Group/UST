@@ -70,6 +70,7 @@ Available commands:
 - `generate-value-mapping`: generate value mapping SQL scaffold
 - `export-substance-mapping`: export substance mapping workbook
 - `mapping-xwalks`: create mapping crosswalk views
+- `audit-dataset`: audit existing element/value mappings and source-schema readiness before generating views
 - `create-missing-ids`: create missing required ID tables
 - `populate-unreg`: populate unregulated helper tables; it reuses existing tables, `--delete-auto-inserts` clears only rows inserted by this script, and `--delete-all` recreates the helper tables from scratch
 - `exclude-unregulated`: generate/execute unregulated exclusion SQL for views
@@ -98,6 +99,8 @@ ust generate-deagg --type ust --control-id 123
 ust generate-value-mapping --type ust --control-id 123 --append
 ust export-substance-mapping --type ust --control-id 123 --no-email
 ust mapping-xwalks --type ust --control-id 123
+ust audit-dataset --type ust --control-id 123
+ust audit-dataset --type ust --control-id 123 --fix-source-identifiers --fix-query-logic
 ust create-missing-ids --type ust --control-id 123
 ust populate-unreg --type ust --control-id 123
 ust populate-unreg --type ust --control-id 123 --delete-auto-inserts
@@ -167,6 +170,19 @@ ust profile sync-db --use sd-ust
 `ust profile sync-db` reads `ust_control` and `release_control` and creates/updates profiles using the most recent control ID per organization.
 
 `init-dataset` automatically creates and activates a profile named `<organization>-<type>` using the new control ID it inserts.
+
+## Dataset Audits
+
+Run `audit-dataset` after completing element/value mapping and `mapping-xwalks`, before creating IDs or generating EPA views. It checks source relation and column references, unmapped source values, non-MAP mapping decisions, and supported legacy `query_logic` repairs.
+
+```bash
+ust audit-dataset --type ust --control-id 123
+ust audit-dataset --type release --control-id 456
+```
+
+The command prints a concise summary and writes suggested repair SQL in the matching state SQL folder. Use `--print-sql` for terminal copy/paste, `--fix-source-identifiers` for unambiguous identifier normalization, and `--fix-query-logic` for supported legacy query-logic cleanup.
+
+When resuming an older dataset, first apply the review-comment changes already known for that ticket, then run the audit to identify remaining mapping or source-schema drift.
 
 QA prerequisite for new or rebuilt schemas:
 

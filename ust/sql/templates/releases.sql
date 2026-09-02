@@ -30,20 +30,21 @@
  * Step 7: Check for lookup data that needs to be deaggregated 
  * Step 8: Map the source data values to EPA values 
  * Step 9: Create the value mapping crosswalk views
- * Step 10: Create unique identifiers if they don't exist
- * Step 11: Insert unregulated tanks/substances into table erg_unregulated_tanks. 
- * Step 12: Write the views that convert the source data to the EPA format
- * Step 13: QA the views
- * Step 14: Insert data into the EPA schema 
- * Step 15: Export populated EPA template 
- * Step 16: Export control table summary
- * Step 17: Upload exported files to EPA Teams
- * Step 18: Request peer review and make any suggested changes
- * Step 19: Export source data (if necessary)
- * Step 20: Request OUST review
- * Step 21: Respond to OUST comments 
- * Step 22: State review 
- * Step 23: GIS processing (coming soon)
+ * Step 10: Audit mapped data and processing readiness
+ * Step 11: Create unique identifiers if they don't exist
+ * Step 12: Insert unregulated tanks/substances into table erg_unregulated_tanks.
+ * Step 13: Write the views that convert the source data to the EPA format
+ * Step 14: QA the views
+ * Step 15: Insert data into the EPA schema
+ * Step 16: Export populated EPA template
+ * Step 17: Export control table summary
+ * Step 18: Upload exported files to EPA Teams
+ * Step 19: Request peer review and make any suggested changes
+ * Step 20: Export source data (if necessary)
+ * Step 21: Request OUST review
+ * Step 22: Respond to OUST comments
+ * Step 23: State review
+ * Step 24: GIS processing (coming soon)
  * 
  */
 /* CLI QUICK CHECKLIST (copy/paste and replace XX + ZZ):
@@ -54,15 +55,16 @@
  * Step 7  : ust generate-deagg --type release --control-id ZZ --yes
  * Step 8  : ust generate-value-mapping --type release --control-id ZZ --yes --append
  * Step 9  : ust mapping-xwalks --type release --control-id ZZ --yes
- * Step 10 : ust create-missing-ids --type release --control-id ZZ --yes
- * Step 11 : ust create-unreg --type release --control-id ZZ --yes --views-only
+ * Step 10 : ust audit-dataset --type release --control-id ZZ --yes
+ * Step 11 : ust create-missing-ids --type release --control-id ZZ --yes
+ * Step 12 : ust create-unreg --type release --control-id ZZ --yes --views-only
  *           ust populate-unreg --type release --control-id ZZ --yes --delete-auto-inserts
- * Step 12 : ust generate-views --type release --control-id ZZ --yes
- * Step 13 : ust qa --type release --control-id ZZ --yes
- * Step 14 : ust populate --type release --control-id ZZ --yes
- * Step 15 : ust export-template --type release --control-id ZZ --yes
- * Step 16 : ust export-control-summary --type release --control-id ZZ --yes
- * Step 19 : ust export-source-data --type release --control-id ZZ --yes
+ * Step 13 : ust generate-views --type release --control-id ZZ --yes
+ * Step 14 : ust qa --type release --control-id ZZ --yes
+ * Step 15 : ust populate --type release --control-id ZZ --yes
+ * Step 16 : ust export-template --type release --control-id ZZ --yes
+ * Step 17 : ust export-control-summary --type release --control-id ZZ --yes
+ * Step 20 : ust export-source-data --type release --control-id ZZ --yes
  * Optional: ust exclude-unregulated --type release --control-id ZZ --yes
  */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -149,6 +151,23 @@ select max(release_control_id) from release_control where organization_id = 'XX;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --Step 3: Get an overview of the source data and prepare it for processing
+/*
+ * Optional index audit: review this after running mapping/view-generation queries.
+ * It identifies frequently sequentially scanned source tables that have not used an
+ * index. Review the relevant joins and filters with EXPLAIN before creating an index.
+ * Only add permanent indexes to generated erg_ tables through this repository's code.
+ */
+select relname as table_name,
+       seq_scan,
+       seq_tup_read,
+       idx_scan,
+       n_live_tup
+from pg_stat_user_tables
+where schemaname = lower('XX_release')
+  and seq_scan > 0
+  and coalesce(idx_scan, 0) = 0
+order by seq_tup_read desc, seq_scan desc;
+
 
 /* Run this query to see what tables we have: 
 */
@@ -531,17 +550,40 @@ ust generate-value-mapping --type release --control-id ZZ --yes --append
 ust mapping-xwalks --type release --control-id ZZ --yes
   
  * To see the crosswalk views after running the script:
-
 select table_name 
 from information_schema.tables 
 where table_schema = lower('XX_release') and table_type = 'VIEW'
 and table_name like '%_xwalk' order by 1;
 
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Step 10: Audit mapped data and processing readiness
+
+/*
+ * After completing element and value mapping plus Step 9 crosswalk creation, run
+ * this audit before creating IDs and generated EPA views. It verifies mapped source
+ * relations/columns, unmapped source values, mapping decisions, and repairable
+ * legacy query_logic. Suggested repair SQL is written to:
+ * /ust/sql/states/XX/Releases/XX_Releases_audit_fixes.sql.
+ *
+ust audit-dataset --type release --control-id ZZ --yes
+
+ * Optional flags:
+ * --print-sql                 Also print suggested repair SQL to the terminal
+ * --no-write-sql              Do not write the suggested repair SQL file
+ * --fix-source-identifiers    Apply only unambiguous case/space/punctuation fixes
+ * --fix-query-logic           Repair supported legacy where-style query_logic
+ *
+ * For an older dataset, first make the known review-comment fixes, then run this
+ * audit to identify remaining mapping and source-schema drift before resuming.
+ */
 */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 10: Create unique identifiers if they don't exist
+--Step 11: Create unique identifiers if they don't exist
 
 /* 
  * Run the following command:
@@ -573,7 +615,7 @@ order by sort_order;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 11: Insert unregulated substances into table erg_unregulated_substances.
+--Step 12: Insert unregulated substances into table erg_unregulated_substances.
 
 /* 
  * Run the following command:
@@ -602,7 +644,7 @@ ust populate-unreg --type release --control-id ZZ --yes --delete-auto-inserts
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 12: Write the views that convert the source data to the EPA format
+--Step 13: Write the views that convert the source data to the EPA format
 
 /** THIS SECTION UNDER CONSTRUCTION!!! 
  * 
@@ -648,7 +690,7 @@ select comments from public.release_control where release_control_id = ZZ;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 13: QA the views
+--Step 14: QA the views
 
 /* 
  * Run the following command to check that the views you have written to populate the main data tables
@@ -702,7 +744,7 @@ ust qa --type release --control-id ZZ --yes
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 14: Insert data into the EPA schema
+--Step 15: Insert data into the EPA schema
 
 /*
  * Run the following command to insert data into the main data tables in the public schema 
@@ -725,7 +767,7 @@ order by sort_order;
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 15: Export populated EPA template
+--Step 16: Export populated EPA template
 
 /*
  * Run the following command to generate a populated EPA template that will be sent first to OUST
@@ -740,14 +782,14 @@ ust export-template --type release --control-id ZZ --yes
  * 
  * This script will output an Excel file (located by default in the repo at 
  * /ust/python/exports/epa_templates/XX/Releases/XX_release_template_yyyymmddsssss.xlsx). 
- * Before uploading this file in Step 18, open it to make sure it was generated correctly.
+ * Before uploading this file in Step 19, open it to make sure it was generated correctly.
  * 
 */
 
 --------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---Step 16: Export control table summary
+--Step 17: Export control table summary
 
 /*
  * Run the following command:
@@ -760,14 +802,14 @@ ust export-control-summary --type release --control-id ZZ --yes
  * 
  * This script will output an Excel file (located by default in the repo at 
  * /ust/python/exports/control_table_summaries/XX/Releases/XX_release_control_table_summary_yyyymmddsssss.xlsx). 
- * Before uploading this file in Step 17, open it to make sure it was generated correctly.
+ * Before uploading this file in Step 18, open it to make sure it was generated correctly.
  * 
 */
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 17: Upload exported files to EPA Teams
+--Step 18: Upload exported files to EPA Teams
 
 /* 
  * Upload the following three files to the appropriate state folder on the EPA Teams site at 
@@ -783,7 +825,7 @@ ust export-control-summary --type release --control-id ZZ --yes
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 18: Request peer review and make any suggested changes
+--Step 19: Request peer review and make any suggested changes
 
 /* 
  * All templates must be peer reviewed before sending to OUST. Currently Renae and Jim are available for peer reviews.
@@ -793,13 +835,13 @@ ust export-control-summary --type release --control-id ZZ --yes
  * If the reviewing developer suggested any changes to your mapping or logic, follow these steps:
  * 
  * 1) Make suggested changes in the database. 
- * 2) If necessary, update the views you created in Step 12. 
- * 3) If you made any changes to the views you created in Step 12, re-run Step 13 to QA the views. 
- * 4) Rerun Step 14 to re-insert the data into the EPA schema. Remember to set the delete_existing variable 
+ * 2) If necessary, update the views you created in Step 13.
+ * 3) If you made any changes to the views you created in Step 13, re-run Step 14 to QA the views.
+ * 4) Rerun Step 15 to re-insert the data into the EPA schema. Remember to set the delete_existing variable
  *    in the script to True (it defaults to False) to delete the data before re-inserting it. 
- * 5) Rerun Step 15 to export a new populated template. 
- * 6) If you made any changes to release_control, rerun Step 16 to export a new control table summary file. 
- * 7) Rerun Step 17 to re-upload all new exports to the EPA Teams site. 
+ * 5) Rerun Step 16 to export a new populated template.
+ * 6) If you made any changes to release_control, rerun Step 17 to export a new control table summary file.
+ * 7) Rerun Step 18 to re-upload all new exports to the EPA Teams site.
  * 8) Add a comment to the Jira ticket noting you've made the changes and are ready for another review.
  *    Assign the ticket back to the original reviewer and make sure the status is ERG Peer Review if not already.
  *    Be sure to @ the reviewer in the ticket comment so they are aware they need to take action. 
@@ -810,7 +852,7 @@ ust export-control-summary --type release --control-id ZZ --yes
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 19: Export source data (if necessary)
+--Step 20: Export source data (if necessary)
 
 /* 
  * OUST has requested that ERG make all source data available to them to assist in their review. If the 
@@ -842,7 +884,7 @@ ust export-source-data --type release --control-id ZZ --yes
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 20: Request OUST review
+--Step 21: Request OUST review
 
 /* 
  * Sit back and relax, your work here is done for the time being! Or rather, sit back and start another ticket! 
@@ -859,7 +901,7 @@ ust export-source-data --type release --control-id ZZ --yes
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 21: Respond to OUST comments 
+--Step 22: Respond to OUST comments
 
 /* 
  * When OUST completes their review, they will email us. An updated version of the populated template will be 
@@ -867,7 +909,7 @@ ust export-source-data --type release --control-id ZZ --yes
  * https://usepa.sharepoint.com/:f:/r/sites/USTFinder2ASTSWMO/Shared%20Documents/General/04%20-%20Template%20Feedback%20from%20OUST?csf=1&web=1&e=tVFLfE
  * 
  * Any changes you make per OUST's comments need to be peer reviewed before sending the template back to OUST, 
- * so repeat Step 18: Request peer review and make any suggested changes. 
+ * so repeat Step 19: Request peer review and make any suggested changes.
  * 
  * Once you've resolved all of OUST's comments and the reviewing developer approves it, the process repeats itself
  * until OUST declares their review final, at which time Victoria will send the populated template to the state
@@ -878,18 +920,18 @@ ust export-source-data --type release --control-id ZZ --yes
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 22: State review 
+--Step 23: State review
 
 /* 
  * We haven't gotten this far yet, but this process will be very similar to the OUST review process. 
- * Repeat Step 14 for any changes requested by the state. 
+ * Repeat Step 15 for any changes requested by the state.
  * 
  */
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
---Step 23: GIS processing (coming soon)
+--Step 24: GIS processing (coming soon)
 
 /* 
  * For any facilities the state did not submit coordinates for, or for coordinates less than 3 decimal 

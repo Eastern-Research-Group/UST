@@ -228,6 +228,31 @@ class MainCliTests(unittest.TestCase):
             preflight_only=True,
         )
 
+    @patch("ust.python.state_processing.dataset_audit.main")
+    def test_audit_dataset_dispatches_query_logic_fix_flag(self, audit_main):
+        main.main([
+            "audit-dataset",
+            "--type",
+            "ust",
+            "--control-id",
+            "123",
+            "--organization-id",
+            "TN",
+            "--fix-query-logic",
+            "--fix-source-identifiers",
+            "--yes",
+        ])
+
+        audit_main.assert_called_once_with(
+            ust_or_release="ust",
+            control_id=123,
+            organization_id="TN",
+            fix_query_logic=True,
+            fix_source_identifiers=True,
+            write_sql=True,
+            print_sql=False,
+        )
+
     @patch("ust.python.state_processing.generate_value_mapping_sql.main")
     def test_generate_value_mapping_dispatches_expected_arguments(self, value_mapping_main):
         main.main([
