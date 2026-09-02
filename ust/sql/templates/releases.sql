@@ -149,6 +149,23 @@ select max(release_control_id) from release_control where organization_id = 'XX;
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --Step 3: Get an overview of the source data and prepare it for processing
+/*
+ * Optional index audit: review this after running mapping/view-generation queries.
+ * It identifies frequently sequentially scanned source tables that have not used an
+ * index. Review the relevant joins and filters with EXPLAIN before creating an index.
+ * Only add permanent indexes to generated erg_ tables through this repository's code.
+ */
+select relname as table_name,
+       seq_scan,
+       seq_tup_read,
+       idx_scan,
+       n_live_tup
+from pg_stat_user_tables
+where schemaname = lower('XX_release')
+  and seq_scan > 0
+  and coalesce(idx_scan, 0) = 0
+order by seq_tup_read desc, seq_scan desc;
+
 
 /* Run this query to see what tables we have: 
 */
@@ -496,6 +513,38 @@ ust generate-deagg --type release --control-id ZZ --yes
 /* 
  * Table public.release_element_value_mapping documents the mapping of the source data element
  * values to EPA's lookup values. 
+ *
+ * VALUE-MAPPING PROTOCOL:
+ * Every source value must have an explicit mapping_action. Do not use blank strings or a
+ * placeholder EPA value to represent an excluded or intentionally null value.
+ *
+ *   MAP: epa_value is required and must be a valid EPA lookup value.
+ *   EXCLUDE: epa_value is null and exclude_from_query = 'Y'. Use this only when every
+ *            source row with the value should be excluded from the EPA view. Explain why
+ *            in programmer_comments.
+ *   INTENTIONALLY_NULL: epa_value is null and exclude_from_query is null. Use this when
+ *                       source rows remain in scope but the EPA field should be null.
+ *                       Explain why in programmer_comments.
+ *
+ * Examples:
+ *
+ * insert into public.release_element_value_mapping
+ *     (release_element_mapping_id, organization_value, epa_value, mapping_action, programmer_comments)
+ * values
+ *     (<mapping_id>, '<source value>', '<valid EPA value>', 'MAP', null);
+ *
+ * insert into public.release_element_value_mapping
+ *     (release_element_mapping_id, organization_value, epa_value, mapping_action, exclude_from_query, programmer_comments)
+ * values
+ *     (<mapping_id>, '<source value>', null, 'EXCLUDE', 'Y', '<why source rows are excluded>');
+ *
+ * insert into public.release_element_value_mapping
+ *     (release_element_mapping_id, organization_value, epa_value, mapping_action, programmer_comments)
+ * values
+ *     (<mapping_id>, '<source value>', null, 'INTENTIONALLY_NULL', '<why EPA value is intentionally null>');
+ *
+ * Run `ust audit-dataset --yes` to find missing mappings and documented intentional
+ * null/exclusion decisions before regenerating views.
  * This table needs to be populated for all data elements mapped above where the EPA column 
  * has a lookup table. 
  * The following query will tell you which columns you need to perform this exercise for. 

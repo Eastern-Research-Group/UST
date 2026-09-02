@@ -13,6 +13,7 @@ from ust.python.state_processing.export_template import Template
 from ust.python.state_processing.qa_check import QualityCheck
 from ust.python.state_processing.create_unreg_tables import UnregTables
 from ust.python.state_processing.exclude_unregulated import Exclude, get_table_alias
+from ust.python.state_processing.populate_unreg_tables import Unregulated
 from ust.python.state_processing.qa_exclusions import Exclusions
 from ust.python.util.peer_review import PeerReview
 from ust.python.util import utils
@@ -576,6 +577,30 @@ class ExcludeUnregulatedTests(unittest.TestCase):
         self.assertIn('a."Substance Released1" = unregsub.organization_substance', view_def)
 
 
+class UnregulatedPopulationTests(unittest.TestCase):
+    @patch.object(utils, "process_sql")
+    def test_check_missing_substance_mappings_reports_insert_sql(self, process_sql_mock):
+        unregulated = Unregulated.__new__(Unregulated)
+        unregulated.dataset = SimpleNamespace(
+            ust_or_release="ust",
+            control_id=35,
+            schema="tn_ust",
+        )
+        unregulated.conn = unittest.mock.MagicMock()
+        unregulated.cur = unittest.mock.MagicMock()
+        unregulated.connect_db = unittest.mock.MagicMock()
+        unregulated.disconnect_db = unittest.mock.MagicMock()
+        unregulated.cur.fetchone.return_value = (2979, "v_tank_substance", "Product", None, None)
+        unregulated.cur.fetchall.return_value = [("Hazardous Substance",)]
+
+        with self.assertRaisesRegex(RuntimeError, "Hazardous Substance") as error:
+            unregulated.check_missing_substance_mappings()
+
+        self.assertIn("values (2979, 'Hazardous Substance', '', null);", str(error.exception))
+        unregulated.disconnect_db.assert_called_once_with()
+        self.assertEqual(2, process_sql_mock.call_count)
+
+
 class UnregTablesTests(unittest.TestCase):
     @patch.object(utils, "process_sql")
     def test_build_join_predicate_uses_actual_join_table_column_case(self, process_sql_mock):
@@ -756,6 +781,26 @@ class ViewSqlTests(unittest.TestCase):
         view_sql.build_from_sql("tblFacility", "b", "a")
 
         self.assertIn('a."FacilityId" = b."FacilityID"', view_sql.from_sql)
+
+    def test_inferred_join_accepts_facility_id_ust_source_column(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.dataset = SimpleNamespace(ust_or_release="ust", control_id=35, schema="tn_ust")
+        view_sql.table_name = "ust_facility"
+        view_sql.table_aliases = {"v_facilities": "a"}
+        view_sql._source_table_columns_cache = {
+            "v_facilities": {"facility_id"},
+            "tn_facilities": {"FACILITY_ID_UST", "FACILITY_TYPE"},
+        }
+        view_sql.cur = unittest.mock.MagicMock()
+        view_sql.cur.fetchall.return_value = [("facility_id", "v_facilities", "facility_id")]
+        view_sql._has_value = ViewSql._has_value.__get__(view_sql, ViewSql)
+
+        predicates = view_sql._get_inferred_id_join_predicates("tn_facilities", "b", "a")
+
+        self.assertEqual(
+            ['nullif(trim(a."facility_id"::text), \'\') = nullif(trim(b."FACILITY_ID_UST"::text), \'\')'],
+            predicates,
+        )
 
     def test_get_column_select_sql_uses_trimmed_varchar_expression(self):
         view_sql = ViewSql.__new__(ViewSql)
@@ -1243,8 +1288,8 @@ class ViewSqlTests(unittest.TestCase):
 
         self.assertIn('from sd_ust."tanks" a', view_sql.from_sql)
         self.assertIn('left join sd_ust."erg_piping" b on', view_sql.from_sql)
-        self.assertIn('nullif(trim(a."FacilityNumber"::text), \'\') = b."facility_id"', view_sql.from_sql)
-        self.assertIn('nullif(trim(a."TankNumber"::text), \'\')::integer else null::integer end = b."tank_id"', view_sql.from_sql)
+        self.assertIn('nullif(trim(a."FacilityNumber"::text), \'\') = nullif(trim(b."facility_id"::text), \'\')', view_sql.from_sql)
+        self.assertIn('nullif(trim(a."TankNumber"::text), \'\')::integer else null::integer end = case when nullif(trim(b."tank_id"::text), \'\')', view_sql.from_sql)
         self.assertEqual({"tanks": "a", "erg_piping": "b"}, view_sql.table_aliases)
         self.assertEqual({"a", "b"}, view_sql.used_aliases)
 

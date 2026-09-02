@@ -63,6 +63,7 @@ class ViewSql:
         self.table_alias_fallbacks = {}
         self.used_aliases = set()
         self.join_tables = []
+        self.mapping_exclusion_predicates = []
         self.mapped_epa_columns = set()
         self.warnings = []
         self._element_rule_cache = {}
@@ -1117,6 +1118,9 @@ class ViewSql:
             join_table = self._get_table_for_alias(join_alias)
             join_column = self._resolve_source_column(join_table, self.join_info['organization_join_column'])
             self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '.' + from_table + ' ' + alias + ' on ' + join_alias + '."' + join_column + '" = ' + alias + '.organization_value'
+            self.mapping_exclusion_predicates.append(
+                f"coalesce({alias}.exclude_from_query, 'N') <> 'Y'"
+            )
             clause_added = True
         else:
             if self._has_value(self.join_info['organization_join_column']) and self._has_value(self.join_info['organization_join_fk']):
@@ -1131,7 +1135,7 @@ class ViewSql:
                 join_table = self._get_table_for_alias(join_alias)
                 self.from_sql = self.from_sql + 'and ' + self._build_join_predicate(join_table, from_table, self.join_info['organization_join_column3'], self.join_info['organization_join_fk3'], join_alias, alias) + ' '
                 clause_added = True
-            if not clause_added and self.join_info['table_type'] == 'id':
+            if not clause_added:
                 join_predicates = self._get_inferred_id_join_predicates(from_table, alias, join_alias)
                 if join_predicates:
                     self.from_sql = self.from_sql + '\n\tleft join ' + self.dataset.schema + '."' + from_table + '" ' + alias + ' on ' + ' and '.join(join_predicates) + ' '
@@ -1149,8 +1153,19 @@ class ViewSql:
             'tank_id': 'integer',
             'compartment_id': 'integer',
         }
-        candidate_keys = [key for key in key_types if key in source_columns]
-        if not candidate_keys:
+        source_key_columns = {}
+        for key in key_types:
+            normalized_key = re.sub(r'[^a-z0-9]', '', key.lower())
+            matching_columns = [
+                column
+                for column in source_columns
+                if re.sub(r'[^a-z0-9]', '', column.lower()) == normalized_key
+                or re.sub(r'[^a-z0-9]', '', column.lower()) == normalized_key + 'ust'
+            ]
+            if len(matching_columns) == 1:
+                source_key_columns[key] = matching_columns[0]
+
+        if not source_key_columns:
             return []
 
         sql = f"""select epa_column_name, organization_table_name, organization_column_name
@@ -1158,7 +1173,7 @@ class ViewSql:
                   where {self.dataset.ust_or_release}_control_id = %s
                     and epa_table_name = %s
                     and epa_column_name = any(%s)"""
-        self.cur.execute(sql, (self.dataset.control_id, self.table_name, candidate_keys))
+        self.cur.execute(sql, (self.dataset.control_id, self.table_name, list(source_key_columns)))
         predicates = []
         for epa_column_name, organization_table_name, organization_column_name in self.cur.fetchall():
             if not self._has_value(organization_column_name):
@@ -1171,7 +1186,11 @@ class ViewSql:
                 f'{source_alias}."{organization_column_name}"',
                 key_types[epa_column_name],
             )
-            predicates.append(f'{source_expression} = {alias}."{epa_column_name}"')
+            joined_expression = self._build_safe_key_expression(
+                f'{alias}."{source_key_columns[epa_column_name]}"',
+                key_types[epa_column_name],
+            )
+            predicates.append(f'{source_expression} = {joined_expression}')
 
         return predicates
 
@@ -1275,6 +1294,15 @@ class ViewSql:
         self.select_sql = 'select distinct\n' + ',\n'.join(s.rstrip() for s in select_items) + '\n'
 
 
+    def append_mapping_exclusions(self):
+        if not self.mapping_exclusion_predicates:
+            return
+        predicates = '\nand '.join(dict.fromkeys(self.mapping_exclusion_predicates))
+        marker = '\n\n-- ADD ADDITIONAL SQL HERE IF NECESSARY\n;\n'
+        if marker in self.where_sql:
+            self.where_sql = self.where_sql.replace(marker, f'\nand {predicates}{marker}')
+
+
     def _build_validation_query(self):
         where_sql = self.where_sql.rstrip()
         if where_sql.endswith(';'):
@@ -1312,6 +1340,7 @@ class ViewSql:
         self._preflight()
         self.build_where_sql()
         self.build_from_query()
+        self.append_mapping_exclusions()
         self.required_cols = self.get_required_cols()
         self.existing_cols = self.get_existing_cols()
         self.required_col_ids = [

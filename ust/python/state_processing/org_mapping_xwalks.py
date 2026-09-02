@@ -40,9 +40,12 @@ def main(ust_or_release, control_id):
         # print('view_name = ' + view_name)
 
         sql = f"""create or replace view {view_name} as 
-                select a.organization_value, a.epa_value, b.{epa_column_name2}
-                from public.v_{dataset.ust_or_release}_element_mapping a left join {database_lookup_table} b on a.epa_value = b.{database_lookup_column}
-                where a.{dataset.ust_or_release}_control_id = %s and a.epa_column_name = %s"""
+            select a.organization_value, a.epa_value, b.{epa_column_name2}, a.mapping_action, a.exclude_from_query
+                from public.{dataset.ust_or_release}_element_mapping m
+                    join public.{dataset.ust_or_release}_element_value_mapping a
+                        on a.{dataset.ust_or_release}_element_mapping_id = m.{dataset.ust_or_release}_element_mapping_id
+                    left join {database_lookup_table} b on a.epa_value = b.{database_lookup_column}
+                where m.{dataset.ust_or_release}_control_id = %s and m.epa_column_name = %s"""
         # print(sql)
         try:
             cur.execute(sql, (dataset.control_id, epa_column_name))
