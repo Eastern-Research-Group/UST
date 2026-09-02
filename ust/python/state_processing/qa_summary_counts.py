@@ -32,12 +32,17 @@ class SummaryCounts:
                  standalone_export = False,
                  export_file_path = None,
                  export_file_dir = None,
-                 export_file_name = None):
+                 export_file_name = None,
+                 conn = None,
+                 materialized_view_tables = None):
         self.dataset = dataset
         self.standalone_export = standalone_export
         self.export_file_path = export_file_path
         self.export_file_dir = export_file_dir
         self.export_file_name = export_file_name
+        self.conn = conn
+        self.owns_connection = conn is None
+        self.materialized_view_tables = materialized_view_tables or {}
         self.summ_counts = {}
         self.connect_db()
         self.facility_type()
@@ -52,13 +57,21 @@ class SummaryCounts:
     def connect_db(self):
         if not self.conn:
             self.conn = utils.connect_db()
-            self.cur = self.conn.cursor()
             logger.info('Connected to database')
+        self.cur = self.conn.cursor()
+
+
+    def view_relation(self, view_name):
+        temp_table = self.materialized_view_tables.get(view_name)
+        if temp_table:
+            return 'pg_temp."' + temp_table.replace('"', '""') + '"'
+        return self.dataset.schema + '.' + view_name
         
 
     def disconnect_db(self):
-        if self.conn:
+        if self.cur:
             self.cur.close()
+        if self.conn and self.owns_connection:
             self.conn.close()
             self.conn = None 
             logger.info('Disconnected from database')
@@ -85,17 +98,17 @@ class SummaryCounts:
             sql = f"""select facility_type, sum(cnt) as num_rows
                     from 
                         (select facility_type, count(*) as cnt
-                        from {self.dataset.schema}.v_ust_facility a join public.facility_types b on a.facility_type1 = b.facility_type_id
+                        from {self.view_relation('v_ust_facility')} a join public.facility_types b on a.facility_type1 = b.facility_type_id
                         group by facility_type
                         union all 
                         select facility_type, count(*) as cnt
-                        from {self.dataset.schema}.v_ust_facility a join public.facility_types b on a.facility_type2 = b.facility_type_id
+                        from {self.view_relation('v_ust_facility')} a join public.facility_types b on a.facility_type2 = b.facility_type_id
                         group by facility_type) x
                     group by facility_type order by facility_type"""
         else: 
             column_name = rows[0][0]
             sql = f"""select facility_type, count(*) as num_rows
-                    from {self.dataset.schema}.{view_name} a join public.facility_types b on a.{column_name} = b.facility_type_id
+                    from {self.view_relation(view_name)} a join public.facility_types b on a.{column_name} = b.facility_type_id
                     group by facility_type order by facility_type"""
         utils.process_sql(self.conn, self.cur, sql)
         rows = self.cur.fetchall()
@@ -106,7 +119,7 @@ class SummaryCounts:
         if self.dataset.ust_or_release == 'release':
             return
         sql = f"""select tank_material_description, count(*) as num_rows
-                from {self.dataset.schema}.v_ust_tank a join public.tank_material_descriptions b 
+                from {self.view_relation('v_ust_tank')} a join public.tank_material_descriptions b
                     on a.tank_material_description_id = b.tank_material_description_id 
                 group by tank_material_description order by tank_material_description"""
         utils.process_sql(self.conn, self.cur, sql)
@@ -126,7 +139,7 @@ class SummaryCounts:
         if cnt == 0:
             return
         sql = f"""select tank_status, count(*) as num_rows
-                from {self.dataset.schema}.v_ust_tank a join public.tank_statuses b 
+                from {self.view_relation('v_ust_tank')} a join public.tank_statuses b
                     on a.tank_status_id = b.tank_status_id 
                 group by tank_status order by tank_status"""
         utils.process_sql(self.conn, self.cur, sql)
@@ -146,7 +159,7 @@ class SummaryCounts:
         if cnt == 0:
             return
         sql = f"""select compartment_status, count(*) as num_rows
-                from {self.dataset.schema}.v_ust_compartment a join public.compartment_statuses b 
+                from {self.view_relation('v_ust_compartment')} a join public.compartment_statuses b
                     on a.compartment_status_id = b.compartment_status_id 
                 group by compartment_status order by compartment_status"""
         utils.process_sql(self.conn, self.cur, sql)
@@ -166,7 +179,7 @@ class SummaryCounts:
         if cnt == 0:
             return
         sql = f"""select piping_style, count(*) as num_rows
-                from {self.dataset.schema}.v_ust_piping a join public.piping_styles b 
+                from {self.view_relation('v_ust_piping')} a join public.piping_styles b
                     on a.piping_style_id = b.piping_style_id 
                 group by piping_style order by piping_style"""
         utils.process_sql(self.conn, self.cur, sql)
@@ -209,7 +222,7 @@ class SummaryCounts:
             return 
 
         sql = f"""select substance, count(*) as num_rows
-                from {self.dataset.schema}.{view_name} a join public.substances b 
+                from {self.view_relation(view_name)} a join public.substances b
                     on a.substance_id = b.substance_id 
                 group by substance order by substance"""
         utils.process_sql(self.conn, self.cur, sql)
