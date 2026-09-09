@@ -98,10 +98,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="UST processing helper CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    import_files = subparsers.add_parser("import-files", help="Import source files into <org>_<type> schema")
+    import_files = subparsers.add_parser(
+        "import-files",
+        help="Import one source file or supported files from a directory into <org>_<type> schema",
+        description="Import one .csv, .xls, .xlsx, or .txt file, or scan a directory for those files.",
+    )
     import_files.add_argument("--type", dest="ust_or_release", choices=["ust", "release"])
     import_files.add_argument("--organization-id", dest="organization_id")
-    import_files.add_argument("--path", dest="path", required=True)
+    import_files.add_argument(
+        "--path",
+        dest="path",
+        required=True,
+        help="Path to one .csv/.xls/.xlsx/.txt file or a directory containing supported files",
+    )
     import_files.add_argument("--overwrite-table", action="store_true")
     _add_yes_arg(import_files)
     _add_dry_run_arg(import_files)
