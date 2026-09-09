@@ -1,8 +1,10 @@
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
+import tempfile
 
 import pywintypes
+from pathlib import Path
 
 from ust.python.state_processing.create_view_sql import (
     ViewSql,
@@ -81,6 +83,31 @@ class DatabaseImporterTests(unittest.TestCase):
 
         self.assertEqual("My_File", importer.get_table_name_from_file_name(r"C:\\tmp\\My File.xlsx"))
         self.assertEqual("another_file", importer.get_table_name_from_file_name("/tmp/another file.csv"))
+
+    def test_get_files_accepts_a_single_supported_file(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = Path(temp_dir) / "source.XLSX"
+            file_path.touch()
+            importer = DatabaseImporter.__new__(DatabaseImporter)
+            importer.file_path = str(file_path)
+
+            self.assertEqual([str(file_path)], importer.get_files())
+
+    def test_get_files_scans_a_directory_for_supported_files(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+            csv_file = directory / "source.csv"
+            workbook_file = directory / "source.xlsx"
+            ignored_file = directory / "notes.docx"
+            for file_path in (csv_file, workbook_file, ignored_file):
+                file_path.touch()
+            importer = DatabaseImporter.__new__(DatabaseImporter)
+            importer.file_path = str(directory)
+
+            self.assertEqual(
+                sorted([str(csv_file), str(workbook_file)]),
+                importer.get_files(),
+            )
 
 
 class PeerReviewTests(unittest.TestCase):

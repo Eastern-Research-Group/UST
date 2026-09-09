@@ -1,4 +1,3 @@
-import glob
 import sys
 from pathlib import Path
 
@@ -87,7 +86,8 @@ class DatabaseImporter:
 
 
     def save_file_to_db(self, file_path, engine=None):
-        if utils.is_excel(file_path):
+        file_suffix = Path(file_path).suffix.lower()
+        if file_suffix in {'.xls', '.xlsx'}:
             xls = pd.ExcelFile(file_path)
             sheet_names = xls.sheet_names
             if len(sheet_names) > 1:
@@ -104,11 +104,11 @@ class DatabaseImporter:
                     self.bad_file_list.append(self.get_table_name_from_file_name(file_path))
                     return False
                 self.save_table_to_db(df, table_name=self.get_table_name_from_file_name(file_path))
-        elif file_path[-3:] == 'csv':
+        elif file_suffix == '.csv':
             df = pd.read_csv(file_path, encoding='ansi', low_memory=False)
             logger.debug('%s read into dataframe', file_path)
             self.save_table_to_db(df, table_name=self.get_table_name_from_file_name(file_path))
-        elif file_path[-3:] == 'txt':
+        elif file_suffix == '.txt':
             df = pd.read_csv(file_path, sep='\t', encoding='ansi', low_memory=False)
             logger.debug('%s read into dataframe', file_path)
             self.save_table_to_db(df, table_name=self.get_table_name_from_file_name(file_path))
@@ -120,10 +120,21 @@ class DatabaseImporter:
 
 
     def get_files(self):
-        file_list = []
-        file_list = glob.glob(f'{self.file_path}/*.csv')
-        file_list.extend(glob.glob(f'{self.file_path}/*.xls*'))
-        file_list.extend(glob.glob(f'{self.file_path}/*.txt'))
+        source_path = Path(self.file_path)
+        supported_suffixes = {'.csv', '.xls', '.xlsx', '.txt'}
+
+        if source_path.is_file():
+            file_list = [str(source_path)] if source_path.suffix.lower() in supported_suffixes else []
+        elif source_path.is_dir():
+            file_list = sorted(
+                str(path)
+                for path in source_path.iterdir()
+                if path.is_file() and path.suffix.lower() in supported_suffixes
+            )
+        else:
+            logger.warning('Import path does not exist or is not accessible: %s', self.file_path)
+            file_list = []
+
         logger.debug('File list is %s', str(file_list))
         return file_list
 
