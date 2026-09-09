@@ -1376,3 +1376,121 @@ alter table release_element_value_mapping add constraint release_element_value_m
 
 
 
+select * from v_ust_element_mapping 
+where ust_control_id = 35 and epa_column_name = 'tank_interstitial_monitoring'
+
+select distinct "Compartment Release Detection"
+from tn_ust.v_tn_compartments
+order by 1;
+
+update ust_element_mapping 
+set query_logic = 'case when "Compartment Release Detection" = ''Interstitial Monitoring'' then ''Yes'' end'
+where ust_element_mapping_id = 2996
+
+
+
+
+
+
+select *
+from tn_ust.v_tank_substance_conflicts
+order by facility_id, tank_id, tank_name;
+
+select table_name, ordinal_position, column_name, data_type
+from information_schema.columns
+where table_schema = 'tn_ust'
+  and table_name in ('tn_compartments', 'tn_haz_compartments')
+order by table_name, ordinal_position;
+
+
+select distinct a."Location ID", a."Facility Name",
+	--b."Facility Id Ust",  
+	a."Tank Name", --b."Tank Number",
+	a."Compartment Name", --b."Compartment Letter", c.number_of_compartments,
+	a."Substance Description", b."Product"  
+from tn_ust.tn_haz_compartments a left join tn_ust.tn_compartments b
+		on a."Location ID"::text = b."Facility Id Ust"::text
+		and replace(replace(a."Tank Name",'Tank ',''),'UST ','')::int = b."Tank Number"
+	left join tn_ust.v_tank_compartments c on b."Facility Id Ust" = c."Facility Id Ust" and b."Tank Id" = c."Tank Id" 
+--where b."Facility Id Ust" is  null 
+order by  a."Facility Name"::text, a."Tank Name", a."Compartment Name" 
+
+
+select * from tn_ust.tn_compartments where "Facility Id Ust" = 3331311 and ("Regulated Status" = 'Regulated' or "Regulated Status" is null);
+
+select * from tn_ust.v_tank_compartments where "Facility Id Ust" = 6600319
+
+select * from tn_ust.tn_compartments where  "Facility Id Ust" = 6600319
+
+select * from substances order by substance_group, substance;
+with regular as (
+    select distinct
+        trim("Facility Id Ust"::text) as facility_id,
+        coalesce(
+            nullif(ltrim(substring(trim("Tank Number"::text) from '[0-9]+'), '0'), ''),
+            '0'
+        ) as tank_key,
+        lower(trim("Compartment Letter"::text)) as compartment_key,
+        "Tank Number"::text as regular_tank_number,
+        "Compartment Letter"::text as regular_compartment_letter,
+        "Product"::text as regular_product
+    from tn_ust.tn_compartments
+),
+
+haz as (
+    select distinct
+        trim("Location ID"::text) as facility_id,
+        coalesce(
+            nullif(ltrim(substring(trim("Tank Name"::text) from '[0-9]+'), '0'), ''),
+            '0'
+        ) as tank_key,
+        lower(
+            regexp_replace(
+                trim("Compartment Name"::text),
+                '.*?([a-z]+)$',
+                '\1'
+            )
+        ) as compartment_key,
+        "Tank Name"::text as haz_tank_name,
+        "Compartment Name"::text as haz_compartment_name,
+        coalesce(
+            to_jsonb(tn_haz_compartments)->>'Product',
+            to_jsonb(tn_haz_compartments)->>'Substance',
+            to_jsonb(tn_haz_compartments)->>'Hazardous Substance',
+            to_jsonb(tn_haz_compartments)->>'Chemical'
+        ) as haz_product
+    from tn_ust.tn_haz_compartments
+),
+
+comparison as (
+    select
+        coalesce(r.facility_id, h.facility_id) as facility_id,
+        coalesce(r.tank_key, h.tank_key) as tank_key,
+        coalesce(r.compartment_key, h.compartment_key) as compartment_key,
+        r.regular_tank_number,
+        r.regular_compartment_letter,
+        h.haz_tank_name,
+        h.haz_compartment_name,
+        r.regular_product,
+        h.haz_product,
+        case
+            when r.facility_id is null
+                then 'haz compartment not in regular UST list'
+            when h.facility_id is null
+                then 'regular compartment not in haz list'
+            when lower(trim(r.regular_product)) =
+                 lower(trim(h.haz_product))
+                then 'same compartment and same substance'
+            else 'same compartment, conflicting substance'
+        end as comparison_status
+    from regular r
+    full outer join haz h
+        on h.facility_id = r.facility_id
+       and h.tank_key = r.tank_key
+       and h.compartment_key = r.compartment_key
+)
+
+select *
+from comparison
+where comparison_status <> 'regular compartment not in haz list'
+order by facility_id, tank_key, compartment_key;
