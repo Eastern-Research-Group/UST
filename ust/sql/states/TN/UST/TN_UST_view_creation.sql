@@ -16,7 +16,7 @@ select distinct
     a."facility_address2"::character varying(100) as facility_address2,
     a."facility_city"::character varying(100) as facility_city,
     a."facility_zip_code"::character varying(10) as facility_zip_code,
-    facility_state as facility_state,
+    a.facility_state as facility_state,
     4::integer as facility_epa_region,
     a."facility_latitude"::double precision as facility_latitude,
     a."facility_longitude"::double precision as facility_longitude,
@@ -27,7 +27,8 @@ select distinct
 from tn_ust."v_facilities" a
     left join tn_ust."v_owner_types" b on nullif(trim(a."facility_id"::text), '') = nullif(trim(b."facility_id"::text), '') 
     left join tn_ust."tn_facilities" c on nullif(trim(a."facility_id"::text), '') = nullif(trim(c."FACILITY_ID_UST"::text), '') 
-    left join tn_ust."tn_environmental_sites" d on nullif(trim(a."facility_id"::text), '') = nullif(trim(d."Facilityid"::text), '') 
+    left join (select "Facilityid", max(release_id) as release_id from tn_ust."tn_environmental_sites" group by "Facilityid") d 
+    	on nullif(trim(a."facility_id"::text), '') = nullif(trim(d."Facilityid"::text), '') 
     left join tn_ust.v_facility_type_xwalk e on c."FACILITY_TYPE" = e.organization_value
     left join tn_ust.v_owner_type_xwalk f on b."owner_type" = f.organization_value
     left join tn_ust.v_state_xwalk g on a."facility_state" = g.organization_value
@@ -117,6 +118,8 @@ and coalesce(b.exclude_from_query, 'N') <> 'Y'
 -- Overriding query_logic for ust_compartment.tank_inventory_control with standardized recipe SQL.
 -- Overriding query_logic for ust_compartment.tank_groundwater_monitoring with standardized recipe SQL.
 
+drop view tn_ust.v_ust_compartment 
+
 create or replace view tn_ust.v_ust_compartment as
 select distinct
     nullif(trim(a."Facility Id Ust"::text), '')::character varying(50) as facility_id,
@@ -139,7 +142,7 @@ select distinct
     case when lower(nullif(trim(d."spill_bucket_installed"::text), '')) in ('true', 't', 'yes', 'y', '1', '1.0') then 'Yes'::text when lower(nullif(trim(d."spill_bucket_installed"::text), '')) in ('false', 'f', 'no', 'n', '0', '0.0') then 'No'::text else null::text end as spill_bucket_installed,
     e."spill_prevention_not_required"::character varying(3) as spill_prevention_not_required,
     spill_bucket_wall_type_id as spill_bucket_wall_type_id,
-    a."Compartment Release Detection"::character varying(7) as tank_interstitial_monitoring,
+    case when "Compartment Release Detection" = 'Interstitial Monitoring' then 'Yes' end as tank_interstitial_monitoring,
     case when lower(nullif(trim(a."Compartment Release Detection"::text), '')) in ('in-tank monitor', 'automatic tank gauging') then 'Yes'::text else null::text end as tank_automatic_tank_gauging_release_detection,
     -- AUTO-COMPILED FROM QUERY_LOGIC
     case when a."Compartment Release Detection" = 'Continuous In Tank Leak Detection System - CITLDS' then 'Yes' end as automatic_tank_gauging_continuous_leak_detection,

@@ -143,6 +143,7 @@ class MainCliTests(unittest.TestCase):
             "--force-exclusions",
             "--force-summary-counts",
             "--fast",
+            "--materialize-views",
             "--yes",
         ])
 
@@ -153,6 +154,7 @@ class MainCliTests(unittest.TestCase):
             force_exclusions=True,
             force_summary_counts=True,
             include_details=False,
+            materialize_views=True,
         )
 
     @patch("ust.python.state_processing.populate_unreg_tables.main")

@@ -314,6 +314,24 @@ class TemplateTests(unittest.TestCase):
 
 
 class QualityCheckTests(unittest.TestCase):
+    def test_materialize_view_snapshots_creates_key_index_and_uses_temp_relation(self):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(schema="tn_ust")
+        qc.materialize_views = True
+        qc.materialized_view_tables = {}
+        qc.views_to_review = ["v_ust_tank"]
+        qc.cur = unittest.mock.MagicMock()
+        qc._get_view_columns = unittest.mock.MagicMock(return_value=["facility_id", "tank_id"])
+        qc._get_key_cols = unittest.mock.MagicMock(return_value=["facility_id", "tank_id"])
+
+        qc.materialize_view_snapshots()
+
+        sql = "\n".join(call.args[0] for call in qc.cur.execute.call_args_list)
+        self.assertIn('create temp table "qa_v_ust_tank" as select * from "tn_ust"."v_ust_tank"', sql)
+        self.assertIn('create index "qa_v_ust_tank_keys" on "qa_v_ust_tank" ("facility_id", "tank_id")', sql)
+        self.assertIn('analyze "qa_v_ust_tank"', sql)
+        self.assertEqual('pg_temp."qa_v_ust_tank"', qc._view_relation("v_ust_tank"))
+
     @patch.object(utils, "process_sql")
     def test_check_bad_mapping_writes_only_invalid_rows_to_detail_sheet(self, process_sql_mock):
         qc = QualityCheck.__new__(QualityCheck)
@@ -466,6 +484,47 @@ class QualityCheckTests(unittest.TestCase):
         message = next(iter(qc.error_dict))
         self.assertIn("missing unregulated_reason column", message)
         self.assertIn("create-unreg --drop-existing", message)
+
+    @patch.object(utils, "get_table_existence", return_value=True)
+    @patch.object(utils, "process_sql")
+    def test_check_unregulated_substances_uses_helper_exists_probe(self, process_sql_mock, _table_exists_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", schema="tn_ust")
+        qc.conn = unittest.mock.MagicMock()
+        qc.cur = unittest.mock.MagicMock()
+        qc.error_dict = {}
+        qc.error_cnt_dict = {}
+        qc.view_columns_cache = {"v_ust_facility": ["facility_id", "facility_type1"], "v_ust_compartment": []}
+        qc.relation_columns_cache = {("tn_ust", "erg_unregulated_tanks"): ["facility_id", "tank_id", "unregulated_reason"]}
+        qc.materialized_view_tables = {}
+        qc.cur.fetchone.side_effect = [(1,), (0,), (True,), (0,)]
+        qc.cur.fetchall.return_value = [("F1", 1)]
+
+        qc.check_unregulated_substances()
+
+        executed_sql = "\n".join(call.args[2] for call in process_sql_mock.call_args_list)
+        self.assertIn("select exists (select 1 from tn_ust.vw_erg_unreg_substances)", executed_sql)
+        self.assertNotIn("select count(*) from tn_ust.vw_erg_unreg_substances", executed_sql)
+
+    @patch.object(utils, "get_table_existence", return_value=True)
+    @patch.object(utils, "process_sql")
+    def test_check_unregulated_substances_skips_helper_probe_without_candidates(self, process_sql_mock, _table_exists_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", schema="tn_ust")
+        qc.conn = unittest.mock.MagicMock()
+        qc.cur = unittest.mock.MagicMock()
+        qc.error_dict = {}
+        qc.error_cnt_dict = {}
+        qc.view_columns_cache = {"v_ust_facility": ["facility_id", "facility_type1"], "v_ust_compartment": []}
+        qc.relation_columns_cache = {}
+        qc.materialized_view_tables = {}
+        qc.cur.fetchone.side_effect = [(1,), (0,)]
+        qc.cur.fetchall.return_value = []
+
+        qc.check_unregulated_substances()
+
+        executed_sql = "\n".join(call.args[2] for call in process_sql_mock.call_args_list)
+        self.assertNotIn("vw_erg_unreg_substances", executed_sql)
 
     def test_check_nonunique_skips_full_row_scan_in_fast_mode(self):
         qc = QualityCheck.__new__(QualityCheck)

@@ -107,6 +107,7 @@ ust populate-unreg --type ust --control-id 123 --delete-auto-inserts
 ust exclude-unregulated --type ust --control-id 123 --print-sql
 ust qa --type ust --control-id 123 --organization-id TX
 ust qa --type ust --control-id 123 --organization-id TX --fast
+ust qa --type ust --control-id 123 --organization-id TX --materialize-views
 ust generate-views --type ust --control-id 123 --preflight-only
 ust generate-views --type ust --control-id 123 --table-name ust_facility --preflight-only --strict-mapping
 ust qa --type ust --control-id 123 --organization-id TX --dry-run
