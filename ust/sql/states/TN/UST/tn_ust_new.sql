@@ -1493,4 +1493,25 @@ comparison as (
 select *
 from comparison
 where comparison_status <> 'regular compartment not in haz list'
-order by facility_id, tank_key, compartment_key;
+order by facility_id, tank_key, compartment_key;\\\\\\
+
+
+
+
+select * from information_schema.tables 
+where table_schema = 'tn_ust' 
+order by table_name;
+
+
+select * from v_ust_element_mapping 
+where organization_table_name like 'tn_haz%'
+
+sELECT viewname, definition 
+FROM pg_catalog.pg_views 
+WHERE schemaname = 'tn_ust'
+and definition like '%haz_%'
+order by 1;
+
+
+select * from tn_ust.haz_compartments  
+

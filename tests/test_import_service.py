@@ -36,7 +36,7 @@ class ImportServiceTests(unittest.TestCase):
             overwrite_table=False,
         )
 
-        importer_cls.assert_called_once_with("MA", "release", r"C:\\tmp\\data", False)
+        importer_cls.assert_called_once_with("MA", "release", r"C:\\tmp\\data", False, None)
         importer_cls.return_value.save_files_to_db.assert_called_once_with()
 
 
@@ -108,6 +108,54 @@ class DatabaseImporterTests(unittest.TestCase):
                 sorted([str(csv_file), str(workbook_file)]),
                 importer.get_files(),
             )
+
+    def test_normalize_table_names_cleans_and_rejects_duplicates(self):
+        self.assertIsNone(DatabaseImporter.normalize_table_names(None))
+        self.assertEqual(["my_table"], DatabaseImporter.normalize_table_names(" my table "))
+        self.assertEqual(["a", "b"], DatabaseImporter.normalize_table_names(["a", "b"]))
+        with self.assertRaises(ValueError):
+            DatabaseImporter.normalize_table_names(["a", "A"])
+        with self.assertRaises(ValueError):
+            DatabaseImporter.normalize_table_names("   ")
+
+    def test_validate_table_names_rejects_multiple_files(self):
+        importer = DatabaseImporter.__new__(DatabaseImporter)
+        importer.table_names = ["my_table"]
+        importer.file_path = r"C:\\tmp"
+
+        with self.assertRaises(ValueError):
+            importer.validate_table_names(["one.csv", "two.csv"])
+
+    def test_validate_table_names_rejects_extra_names_for_single_csv(self):
+        importer = DatabaseImporter.__new__(DatabaseImporter)
+        importer.table_names = ["one", "two"]
+        importer.file_path = r"C:\\tmp\\source.csv"
+
+        with self.assertRaises(ValueError):
+            importer.validate_table_names([r"C:\\tmp\\source.csv"])
+
+    def test_validate_table_names_rejects_existing_table_when_not_overwriting(self):
+        importer = DatabaseImporter.__new__(DatabaseImporter)
+        importer.table_names = ["my_table"]
+        importer.file_path = r"C:\\tmp\\source.csv"
+        importer.overwrite_table = False
+        importer.schema = "tn_ust"
+        importer.existing_tables = ["my_table", "my_table_2"]
+
+        with patch.object(DatabaseImporter, "set_existing_tables", lambda self: None):
+            with self.assertRaises(ValueError) as context:
+                importer.validate_table_names([r"C:\\tmp\\source.csv"])
+
+        self.assertIn("my_table_3", str(context.exception))
+
+    def test_get_override_table_name_returns_none_without_override(self):
+        importer = DatabaseImporter.__new__(DatabaseImporter)
+        importer.table_names = None
+
+        self.assertIsNone(importer.get_override_table_name())
+
+        importer.table_names = ["first", "second"]
+        self.assertEqual("second", importer.get_override_table_name(1))
 
 
 class PeerReviewTests(unittest.TestCase):

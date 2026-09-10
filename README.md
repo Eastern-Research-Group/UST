@@ -62,7 +62,7 @@ python main.py <command> [options]
 Available commands:
 
 - `scaffold-template`: create a state SQL template and replace XX/ZZ placeholders
-- `import-files`: import one `.csv`, `.xls`, `.xlsx`, or `.txt` file, or scan a directory for supported source files
+- `import-files`: import one `.csv`, `.xls`, `.xlsx`, or `.txt` file, or scan a directory for supported source files; use `--table-name` to override the file-derived table name when the import resolves to a single file (one name per worksheet, in worksheet order, for a multi-tab workbook)
 - `init-dataset`: create a control row and initialize unregulated tables/views
 - `create-unreg`: create or recreate unregulated helper tables/views
 - `generate-views`: generate table population view SQL
@@ -94,6 +94,8 @@ ust scaffold-template --type ust --organization-id MA --control-id 123 --overwri
 ust profile use ma-ust && ust scaffold-template --yes
 ust import-files --type ust --organization-id TX --path "C:/data/TX"
 ust import-files --type ust --organization-id TX --path "C:/data/TX/source.xlsx"
+ust import-files --type ust --organization-id TX --path "C:/data/TX/really long name.csv" --table-name tanks
+ust import-files --type ust --organization-id TX --path "C:/data/TX/two tabs.xlsx" --table-name tanks releases
 ust init-dataset --type release --organization-id MA --data-source "State API export"
 ust generate-views --type ust --control-id 123
 ust generate-deagg --type ust --control-id 123
