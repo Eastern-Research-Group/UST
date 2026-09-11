@@ -1,8 +1,10 @@
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
+import tempfile
 
 import pywintypes
+from pathlib import Path
 
 from ust.python.state_processing.create_view_sql import (
     ViewSql,
@@ -13,6 +15,7 @@ from ust.python.state_processing.export_template import Template
 from ust.python.state_processing.qa_check import QualityCheck
 from ust.python.state_processing.create_unreg_tables import UnregTables
 from ust.python.state_processing.exclude_unregulated import Exclude, get_table_alias
+from ust.python.state_processing.populate_unreg_tables import Unregulated
 from ust.python.state_processing.qa_exclusions import Exclusions
 from ust.python.util.peer_review import PeerReview
 from ust.python.util import utils
@@ -80,6 +83,31 @@ class DatabaseImporterTests(unittest.TestCase):
 
         self.assertEqual("My_File", importer.get_table_name_from_file_name(r"C:\\tmp\\My File.xlsx"))
         self.assertEqual("another_file", importer.get_table_name_from_file_name("/tmp/another file.csv"))
+
+    def test_get_files_accepts_a_single_supported_file(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = Path(temp_dir) / "source.XLSX"
+            file_path.touch()
+            importer = DatabaseImporter.__new__(DatabaseImporter)
+            importer.file_path = str(file_path)
+
+            self.assertEqual([str(file_path)], importer.get_files())
+
+    def test_get_files_scans_a_directory_for_supported_files(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+            csv_file = directory / "source.csv"
+            workbook_file = directory / "source.xlsx"
+            ignored_file = directory / "notes.docx"
+            for file_path in (csv_file, workbook_file, ignored_file):
+                file_path.touch()
+            importer = DatabaseImporter.__new__(DatabaseImporter)
+            importer.file_path = str(directory)
+
+            self.assertEqual(
+                sorted([str(csv_file), str(workbook_file)]),
+                importer.get_files(),
+            )
 
 
 class PeerReviewTests(unittest.TestCase):
@@ -313,6 +341,24 @@ class TemplateTests(unittest.TestCase):
 
 
 class QualityCheckTests(unittest.TestCase):
+    def test_materialize_view_snapshots_creates_key_index_and_uses_temp_relation(self):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(schema="tn_ust")
+        qc.materialize_views = True
+        qc.materialized_view_tables = {}
+        qc.views_to_review = ["v_ust_tank"]
+        qc.cur = unittest.mock.MagicMock()
+        qc._get_view_columns = unittest.mock.MagicMock(return_value=["facility_id", "tank_id"])
+        qc._get_key_cols = unittest.mock.MagicMock(return_value=["facility_id", "tank_id"])
+
+        qc.materialize_view_snapshots()
+
+        sql = "\n".join(call.args[0] for call in qc.cur.execute.call_args_list)
+        self.assertIn('create temp table "qa_v_ust_tank" as select * from "tn_ust"."v_ust_tank"', sql)
+        self.assertIn('create index "qa_v_ust_tank_keys" on "qa_v_ust_tank" ("facility_id", "tank_id")', sql)
+        self.assertIn('analyze "qa_v_ust_tank"', sql)
+        self.assertEqual('pg_temp."qa_v_ust_tank"', qc._view_relation("v_ust_tank"))
+
     @patch.object(utils, "process_sql")
     def test_check_bad_mapping_writes_only_invalid_rows_to_detail_sheet(self, process_sql_mock):
         qc = QualityCheck.__new__(QualityCheck)
@@ -466,6 +512,47 @@ class QualityCheckTests(unittest.TestCase):
         self.assertIn("missing unregulated_reason column", message)
         self.assertIn("create-unreg --drop-existing", message)
 
+    @patch.object(utils, "get_table_existence", return_value=True)
+    @patch.object(utils, "process_sql")
+    def test_check_unregulated_substances_uses_helper_exists_probe(self, process_sql_mock, _table_exists_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", schema="tn_ust")
+        qc.conn = unittest.mock.MagicMock()
+        qc.cur = unittest.mock.MagicMock()
+        qc.error_dict = {}
+        qc.error_cnt_dict = {}
+        qc.view_columns_cache = {"v_ust_facility": ["facility_id", "facility_type1"], "v_ust_compartment": []}
+        qc.relation_columns_cache = {("tn_ust", "erg_unregulated_tanks"): ["facility_id", "tank_id", "unregulated_reason"]}
+        qc.materialized_view_tables = {}
+        qc.cur.fetchone.side_effect = [(1,), (0,), (True,), (0,)]
+        qc.cur.fetchall.return_value = [("F1", 1)]
+
+        qc.check_unregulated_substances()
+
+        executed_sql = "\n".join(call.args[2] for call in process_sql_mock.call_args_list)
+        self.assertIn("select exists (select 1 from tn_ust.vw_erg_unreg_substances)", executed_sql)
+        self.assertNotIn("select count(*) from tn_ust.vw_erg_unreg_substances", executed_sql)
+
+    @patch.object(utils, "get_table_existence", return_value=True)
+    @patch.object(utils, "process_sql")
+    def test_check_unregulated_substances_skips_helper_probe_without_candidates(self, process_sql_mock, _table_exists_mock):
+        qc = QualityCheck.__new__(QualityCheck)
+        qc.dataset = SimpleNamespace(ust_or_release="ust", schema="tn_ust")
+        qc.conn = unittest.mock.MagicMock()
+        qc.cur = unittest.mock.MagicMock()
+        qc.error_dict = {}
+        qc.error_cnt_dict = {}
+        qc.view_columns_cache = {"v_ust_facility": ["facility_id", "facility_type1"], "v_ust_compartment": []}
+        qc.relation_columns_cache = {}
+        qc.materialized_view_tables = {}
+        qc.cur.fetchone.side_effect = [(1,), (0,)]
+        qc.cur.fetchall.return_value = []
+
+        qc.check_unregulated_substances()
+
+        executed_sql = "\n".join(call.args[2] for call in process_sql_mock.call_args_list)
+        self.assertNotIn("vw_erg_unreg_substances", executed_sql)
+
     def test_check_nonunique_skips_full_row_scan_in_fast_mode(self):
         qc = QualityCheck.__new__(QualityCheck)
         qc.dataset = SimpleNamespace(schema="dc_ust")
@@ -514,6 +601,28 @@ class ExclusionsTests(unittest.TestCase):
 
 
 class ExcludeUnregulatedTests(unittest.TestCase):
+    def test_execute_reuses_existing_unreg_tables_when_find_regulated(self):
+        exclude = Exclude.__new__(Exclude)
+        exclude.find_regulated = True
+        exclude.execute_sql = False
+        exclude.export_sql = False
+        exclude.print_sql = False
+        exclude.unreg = unittest.mock.MagicMock()
+        exclude.unreg.unreg_parent_table = "dc_ust.erg_unregulated_facilities"
+        exclude.unreg.unreg_substance_table = "dc_ust.erg_unregulated_tanks"
+        exclude.unreg._table_exists.side_effect = [True, True]
+        exclude.connect_db = unittest.mock.MagicMock()
+        exclude.disconnect_db = unittest.mock.MagicMock()
+        exclude.get_columns = unittest.mock.MagicMock(
+            return_value=__import__('pandas').DataFrame(columns=["epa_table_name"])
+        )
+
+        exclude.execute()
+
+        exclude.unreg.execute.assert_not_called()
+        exclude.unreg.connect_db.assert_called_once_with()
+        exclude.unreg.disconnect_db.assert_called_once_with()
+
     def test_get_table_alias_handles_quoted_schema_table_and_alias(self):
         view_def = 'select *\nfrom "hi_release"."tblLUSTSite" a join "hi_release"."tblFacility" b on true'
 
@@ -552,6 +661,30 @@ class ExcludeUnregulatedTests(unittest.TestCase):
         self.assertIn('a."EventID"::varchar(50) = unregparent.release_id', view_def)
         self.assertIn('not exists (select 1 from hi_release.erg_unregulated_substances unregsub', view_def)
         self.assertIn('a."Substance Released1" = unregsub.organization_substance', view_def)
+
+
+class UnregulatedPopulationTests(unittest.TestCase):
+    @patch.object(utils, "process_sql")
+    def test_check_missing_substance_mappings_reports_insert_sql(self, process_sql_mock):
+        unregulated = Unregulated.__new__(Unregulated)
+        unregulated.dataset = SimpleNamespace(
+            ust_or_release="ust",
+            control_id=35,
+            schema="tn_ust",
+        )
+        unregulated.conn = unittest.mock.MagicMock()
+        unregulated.cur = unittest.mock.MagicMock()
+        unregulated.connect_db = unittest.mock.MagicMock()
+        unregulated.disconnect_db = unittest.mock.MagicMock()
+        unregulated.cur.fetchone.return_value = (2979, "v_tank_substance", "Product", None, None)
+        unregulated.cur.fetchall.return_value = [("Hazardous Substance",)]
+
+        with self.assertRaisesRegex(RuntimeError, "Hazardous Substance") as error:
+            unregulated.check_missing_substance_mappings()
+
+        self.assertIn("values (2979, 'Hazardous Substance', '', null);", str(error.exception))
+        unregulated.disconnect_db.assert_called_once_with()
+        self.assertEqual(2, process_sql_mock.call_count)
 
 
 class UnregTablesTests(unittest.TestCase):
@@ -734,6 +867,26 @@ class ViewSqlTests(unittest.TestCase):
         view_sql.build_from_sql("tblFacility", "b", "a")
 
         self.assertIn('a."FacilityId" = b."FacilityID"', view_sql.from_sql)
+
+    def test_inferred_join_accepts_facility_id_ust_source_column(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.dataset = SimpleNamespace(ust_or_release="ust", control_id=35, schema="tn_ust")
+        view_sql.table_name = "ust_facility"
+        view_sql.table_aliases = {"v_facilities": "a"}
+        view_sql._source_table_columns_cache = {
+            "v_facilities": {"facility_id"},
+            "tn_facilities": {"FACILITY_ID_UST", "FACILITY_TYPE"},
+        }
+        view_sql.cur = unittest.mock.MagicMock()
+        view_sql.cur.fetchall.return_value = [("facility_id", "v_facilities", "facility_id")]
+        view_sql._has_value = ViewSql._has_value.__get__(view_sql, ViewSql)
+
+        predicates = view_sql._get_inferred_id_join_predicates("tn_facilities", "b", "a")
+
+        self.assertEqual(
+            ['nullif(trim(a."facility_id"::text), \'\') = nullif(trim(b."FACILITY_ID_UST"::text), \'\')'],
+            predicates,
+        )
 
     def test_get_column_select_sql_uses_trimmed_varchar_expression(self):
         view_sql = ViewSql.__new__(ViewSql)
@@ -1221,8 +1374,8 @@ class ViewSqlTests(unittest.TestCase):
 
         self.assertIn('from sd_ust."tanks" a', view_sql.from_sql)
         self.assertIn('left join sd_ust."erg_piping" b on', view_sql.from_sql)
-        self.assertIn('nullif(trim(a."FacilityNumber"::text), \'\') = b."facility_id"', view_sql.from_sql)
-        self.assertIn('nullif(trim(a."TankNumber"::text), \'\')::integer else null::integer end = b."tank_id"', view_sql.from_sql)
+        self.assertIn('nullif(trim(a."FacilityNumber"::text), \'\') = nullif(trim(b."facility_id"::text), \'\')', view_sql.from_sql)
+        self.assertIn('nullif(trim(a."TankNumber"::text), \'\')::integer else null::integer end = case when nullif(trim(b."tank_id"::text), \'\')', view_sql.from_sql)
         self.assertEqual({"tanks": "a", "erg_piping": "b"}, view_sql.table_aliases)
         self.assertEqual({"a", "b"}, view_sql.used_aliases)
 

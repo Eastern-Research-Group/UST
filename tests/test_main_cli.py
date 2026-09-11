@@ -143,6 +143,7 @@ class MainCliTests(unittest.TestCase):
             "--force-exclusions",
             "--force-summary-counts",
             "--fast",
+            "--materialize-views",
             "--yes",
         ])
 
@@ -153,6 +154,7 @@ class MainCliTests(unittest.TestCase):
             force_exclusions=True,
             force_summary_counts=True,
             include_details=False,
+            materialize_views=True,
         )
 
     @patch("ust.python.state_processing.populate_unreg_tables.main")
@@ -226,6 +228,31 @@ class MainCliTests(unittest.TestCase):
             print_console=False,
             strict=True,
             preflight_only=True,
+        )
+
+    @patch("ust.python.state_processing.dataset_audit.main")
+    def test_audit_dataset_dispatches_query_logic_fix_flag(self, audit_main):
+        main.main([
+            "audit-dataset",
+            "--type",
+            "ust",
+            "--control-id",
+            "123",
+            "--organization-id",
+            "TN",
+            "--fix-query-logic",
+            "--fix-source-identifiers",
+            "--yes",
+        ])
+
+        audit_main.assert_called_once_with(
+            ust_or_release="ust",
+            control_id=123,
+            organization_id="TN",
+            fix_query_logic=True,
+            fix_source_identifiers=True,
+            write_sql=True,
+            print_sql=False,
         )
 
     @patch("ust.python.state_processing.generate_value_mapping_sql.main")

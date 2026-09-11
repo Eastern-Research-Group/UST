@@ -33,6 +33,69 @@ class Unregulated:
         return cnt > 0
 
 
+    @staticmethod
+    def _quote_identifier(identifier):
+        return '"' + identifier.replace('"', '""') + '"'
+
+
+    @staticmethod
+    def _quote_literal(value):
+        return "'" + value.replace("'", "''") + "'"
+
+
+    def check_missing_substance_mappings(self):
+        self.connect_db()
+        mapping_sql = f"""select {self.dataset.ust_or_release}_element_mapping_id,
+                                  organization_table_name,
+                                  organization_column_name,
+                                  deagg_table_name,
+                                  deagg_column_name
+                           from public.{self.dataset.ust_or_release}_element_mapping
+                           where {self.dataset.ust_or_release}_control_id = %s
+                             and epa_table_name = 'ust_tank_substance'
+                             and epa_column_name = 'substance_id'"""
+        utils.process_sql(self.conn, self.cur, mapping_sql, params=(self.dataset.control_id,))
+        mapping = self.cur.fetchone()
+        if not mapping:
+            self.disconnect_db()
+            raise RuntimeError('Missing substance_id mapping for ust_tank_substance.')
+
+        mapping_id, source_table, source_column, deagg_table, deagg_column = mapping
+        source_table = deagg_table or source_table
+        source_column = deagg_column or source_column
+        source_relation = f'{self.dataset.schema}.{self._quote_identifier(source_table)}'
+        source_field = self._quote_identifier(source_column)
+        missing_sql = f"""select distinct trim({source_field}::text) as organization_value
+                          from {source_relation}
+                          where nullif(trim({source_field}::text), '') is not null
+                            and not exists (
+                                select 1
+                                from public.{self.dataset.ust_or_release}_element_value_mapping value_mapping
+                                where value_mapping.{self.dataset.ust_or_release}_element_mapping_id = %s
+                                  and value_mapping.organization_value = trim({source_field}::text)
+                            )
+                          order by organization_value"""
+        utils.process_sql(self.conn, self.cur, missing_sql, params=(mapping_id,))
+        missing_values = [row[0] for row in self.cur.fetchall()]
+        self.disconnect_db()
+
+        if not missing_values:
+            return
+
+        insert_sql = '\n'.join(
+            f'insert into public.{self.dataset.ust_or_release}_element_value_mapping '
+            f'({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments)\n'
+            f'values ({mapping_id}, {self._quote_literal(value)}, \'\', null);'
+            for value in missing_values
+        )
+        raise RuntimeError(
+            f'Found {len(missing_values)} unmapped substance value(s) in '
+            f'{self.dataset.schema}.{source_table}.{source_column}: {", ".join(missing_values)}.\n\n'
+            'Add an EPA value to each statement below, run the statements, then rerun populate-unreg:\n\n'
+            f'{insert_sql}'
+        )
+
+
     def create_tables(self):
         self.connect_db()
         sql = "select count(*) from information_schema.tables where table_schema = %s and table_name like 'erg_unregulated%%'"
@@ -95,13 +158,16 @@ class Unregulated:
             return 
         tanksql = ''
         pk_col = 'release_id'
+        tank_id_filter = ''
         if self.dataset.ust_or_release == 'ust':
             tanksql = 'tank_id, '
             pk_col = 'facility_id'
+            tank_id_filter = 'and tank_id is not null'
         sql = f"""insert into {self.unreg.unreg_substance_table} 
                 select distinct {pk_col}, {tanksql}org_substance, substance_id, epa_substance, 'Non-regulated substance'
                 from {self.dataset.schema}.{self.unreg.erg_substance_mapping_view}
                 where substance_id is null and org_substance is not null and org_substance <> '' 
+                {tank_id_filter}
                 and {pk_col} not in (select {pk_col} from {self.unreg.unreg_parent_table})
                 on conflict do nothing"""
         utils.process_sql(self.conn, self.cur, sql)
@@ -119,13 +185,16 @@ class Unregulated:
             return 
         tanksql = ''
         pk_col = 'release_id'
+        tank_id_filter = ''
         if self.dataset.ust_or_release == 'ust':
             tanksql = 'tank_id, '
             pk_col = 'facility_id'
+            tank_id_filter = 'and tank_id is not null'
         sql = f"""insert into {self.unreg.unreg_substance_table} 
                 select distinct {pk_col}, {tanksql}org_substance, substance_id, epa_substance, unregulated_reason
                 from {self.dataset.schema}.{self.unreg.erg_unreg_subs_view}
                 where org_substance is not null and org_substance <> '' 
+                {tank_id_filter}
                 and {pk_col} not in (select {pk_col} from {self.unreg.unreg_parent_table})
                 on conflict do nothing"""
         utils.process_sql(self.conn, self.cur, sql)
@@ -135,29 +204,51 @@ class Unregulated:
 
     def insert_parents(self):
         self.connect_db()
-        
-        extrajoinsql = ""
-        if self.dataset.ust_or_release == 'ust':
-            extrajoinsql = "\nand v.tank_id::int = eus.tank_id::int "
 
-        sql = f"""insert into {self.unreg.unreg_parent_table}
-                 select v.{self.unreg.unreg_parent_col}, string_agg(distinct eus.unregulated_reason, '; ' order by eus.unregulated_reason) as unregulated_reason
-                 from {self.dataset.schema}.{self.unreg.erg_substance_mapping_view} v
-                    join {self.unreg.unreg_substance_table} eus 
-                 on v.{self.unreg.unreg_parent_col}::varchar(50) = eus.{self.unreg.unreg_parent_col}::varchar(50) {extrajoinsql} 
-                 and v.org_substance::varchar(1000) = eus.organization_substance::varchar(1000)
-                 where not exists (
-                     select 1
-                     from {self.dataset.schema}.{self.unreg.erg_substance_mapping_view} v2
-                     where v2.{self.unreg.unreg_parent_col}::varchar(50)  = v.{self.unreg.unreg_parent_col}::varchar(50) 
-                     and not exists (
-                         select 1
-                         from {self.unreg.unreg_substance_table} eus
-                         where eus.{self.unreg.unreg_parent_col}::varchar(50)  = v2.{self.unreg.unreg_parent_col}::varchar(50) {extrajoinsql.replace('v.','v2.')} 
-                        and v2.org_substance::varchar(1000) = eus.organization_substance::varchar(1000)  
+        source_tank_col = ''
+        if self.dataset.ust_or_release == 'ust':
+            source_tank_col = ', tank_id::int as tank_id'
+
+        def source_join(source_alias):
+            if self.dataset.ust_or_release == 'ust':
+                return (
+                    f'{source_alias}.facility_id = eus.{self.unreg.unreg_parent_col} '
+                    f'and {source_alias}.tank_id = eus.tank_id '
+                )
+            return f'{source_alias}.facility_id = eus.{self.unreg.unreg_parent_col} '
+
+        sql = f"""with source_substances as materialized (
+                    select {self.unreg.unreg_parent_col}::varchar(50) as facility_id
+                           {source_tank_col},
+                           org_substance::varchar(1000) as organization_substance
+                    from {self.dataset.schema}.{self.unreg.erg_substance_mapping_view}
+                    where org_substance is not null and org_substance <> ''
+                 ),
+                 fully_unregulated_parents as (
+                    select s.facility_id
+                    from source_substances s
+                    group by s.facility_id
+                    having not exists (
+                        select 1
+                        from source_substances candidate
+                        where candidate.facility_id = s.facility_id
+                          and not exists (
+                              select 1
+                              from {self.unreg.unreg_substance_table} eus
+                                                            where {source_join('candidate')}
+                                and candidate.organization_substance = eus.organization_substance
+                          )
                     )
-                  )
-                 group by v.{self.unreg.unreg_parent_col}
+                 )
+                 insert into {self.unreg.unreg_parent_table}
+                 select s.facility_id,
+                        string_agg(distinct eus.unregulated_reason, '; ' order by eus.unregulated_reason)
+                 from source_substances s
+                 join fully_unregulated_parents p on p.facility_id = s.facility_id
+                 join {self.unreg.unreg_substance_table} eus
+                                     on {source_join('s')}
+                  and s.organization_substance = eus.organization_substance
+                 group by s.facility_id
                  on conflict do nothing"""
         
         utils.process_sql(self.conn, self.cur, sql, print_sql=False)
@@ -174,10 +265,10 @@ class Unregulated:
                 f'{utils.get_pretty_ust_or_release(self.dataset.ust_or_release)}; '
                 f'unregulated {self.data_type} processing cannot continue.'
             )
+        self.check_missing_substance_mappings()
         self.create_tables()
         self.refresh_unreg_views()
         self.delete_existing_auto_inserts()
-        self.log_unreg_source_counts()
         self.insert_nonregulated_substances()
         self.insert_unregulated_tanks()
         self.insert_parents()

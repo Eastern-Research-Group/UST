@@ -62,7 +62,7 @@ python main.py <command> [options]
 Available commands:
 
 - `scaffold-template`: create a state SQL template and replace XX/ZZ placeholders
-- `import-files`: import source files into a state schema
+- `import-files`: import one `.csv`, `.xls`, `.xlsx`, or `.txt` file, or scan a directory for supported source files
 - `init-dataset`: create a control row and initialize unregulated tables/views
 - `create-unreg`: create or recreate unregulated helper tables/views
 - `generate-views`: generate table population view SQL
@@ -70,6 +70,7 @@ Available commands:
 - `generate-value-mapping`: generate value mapping SQL scaffold
 - `export-substance-mapping`: export substance mapping workbook
 - `mapping-xwalks`: create mapping crosswalk views
+- `audit-dataset`: audit existing element/value mappings and source-schema readiness before generating views
 - `create-missing-ids`: create missing required ID tables
 - `populate-unreg`: populate unregulated helper tables; it reuses existing tables, `--delete-auto-inserts` clears only rows inserted by this script, and `--delete-all` recreates the helper tables from scratch
 - `exclude-unregulated`: generate/execute unregulated exclusion SQL for views
@@ -92,18 +93,22 @@ ust scaffold-template --type ust --organization-id MA
 ust scaffold-template --type ust --organization-id MA --control-id 123 --overwrite
 ust profile use ma-ust && ust scaffold-template --yes
 ust import-files --type ust --organization-id TX --path "C:/data/TX"
+ust import-files --type ust --organization-id TX --path "C:/data/TX/source.xlsx"
 ust init-dataset --type release --organization-id MA --data-source "State API export"
 ust generate-views --type ust --control-id 123
 ust generate-deagg --type ust --control-id 123
 ust generate-value-mapping --type ust --control-id 123 --append
 ust export-substance-mapping --type ust --control-id 123 --no-email
 ust mapping-xwalks --type ust --control-id 123
+ust audit-dataset --type ust --control-id 123
+ust audit-dataset --type ust --control-id 123 --fix-source-identifiers --fix-query-logic
 ust create-missing-ids --type ust --control-id 123
 ust populate-unreg --type ust --control-id 123
 ust populate-unreg --type ust --control-id 123 --delete-auto-inserts
 ust exclude-unregulated --type ust --control-id 123 --print-sql
 ust qa --type ust --control-id 123 --organization-id TX
 ust qa --type ust --control-id 123 --organization-id TX --fast
+ust qa --type ust --control-id 123 --organization-id TX --materialize-views
 ust generate-views --type ust --control-id 123 --preflight-only
 ust generate-views --type ust --control-id 123 --table-name ust_facility --preflight-only --strict-mapping
 ust qa --type ust --control-id 123 --organization-id TX --dry-run
@@ -167,6 +172,19 @@ ust profile sync-db --use sd-ust
 `ust profile sync-db` reads `ust_control` and `release_control` and creates/updates profiles using the most recent control ID per organization.
 
 `init-dataset` automatically creates and activates a profile named `<organization>-<type>` using the new control ID it inserts.
+
+## Dataset Audits
+
+Run `audit-dataset` after completing element/value mapping and `mapping-xwalks`, before creating IDs or generating EPA views. It checks source relation and column references, unmapped source values, non-MAP mapping decisions, and supported legacy `query_logic` repairs.
+
+```bash
+ust audit-dataset --type ust --control-id 123
+ust audit-dataset --type release --control-id 456
+```
+
+The command prints a concise summary and writes suggested repair SQL in the matching state SQL folder. Use `--print-sql` for terminal copy/paste, `--fix-source-identifiers` for unambiguous identifier normalization, and `--fix-query-logic` for supported legacy query-logic cleanup.
+
+When resuming an older dataset, first apply the review-comment changes already known for that ticket, then run the audit to identify remaining mapping or source-schema drift.
 
 QA prerequisite for new or rebuilt schemas:
 

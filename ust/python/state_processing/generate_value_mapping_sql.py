@@ -161,11 +161,14 @@ class ValueMapper:
                         if cur.fetchone()[0] > 0:
                             epa_value = 'Hazardous substance'
 
-                self.value_mapping_sql = self.value_mapping_sql + f'insert into public.{self.dataset.ust_or_release}_element_value_mapping ({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, programmer_comments)\n'
+                self.value_mapping_sql = self.value_mapping_sql + f'insert into public.{self.dataset.ust_or_release}_element_value_mapping ({self.dataset.ust_or_release}_element_mapping_id, organization_value, epa_value, mapping_action, programmer_comments)\n'
                 if epa_value:
-                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {org_value!r}, '{epa_value}', null);\n"
+                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {org_value!r}, '{epa_value}', 'MAP', null);\n"
                 else:
-                    self.value_mapping_sql = self.value_mapping_sql + f"values ({element_mapping_id}, {org_value!r}, '', null);\n"
+                    self.value_mapping_sql = self.value_mapping_sql + (
+                        f"-- Choose MAP, EXCLUDE, or INTENTIONALLY_NULL before running this statement.\n"
+                        f"-- values ({element_mapping_id}, {org_value!r}, '<INSERT EPA VALUE>', 'MAP', null);\n"
+                    )
 
             if epa_column_name == 'substance_id':
                 sql6 = f"select substance from public.substances where inactive_flag is null and {self.dataset.ust_or_release}_flag is not null order by substance_group, substance"

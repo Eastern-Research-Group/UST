@@ -495,9 +495,29 @@ where false"""
             f"{self._cast_unreg_view_col('epa_substance', 's.substance')} as epa_substance, "
             f"{self._cast_unreg_view_col('substance_id', 's.substance_id')} as substance_id"
         )
-        from_sql += f'\nleft join (select organization_value, epa_value from public.v_{self.dataset.ust_or_release}_mapping where {self.dataset.ust_or_release}_control_id = %s and epa_table_name = %s) x on x.organization_value = {org_val_col} '
+        from_sql += f'''\nleft join (
+                select value_mapping.organization_value, value_mapping.epa_value
+                from public.{self.dataset.ust_or_release}_element_mapping element_mapping
+                join public.{self.dataset.ust_or_release}_element_value_mapping value_mapping
+                    on value_mapping.{self.dataset.ust_or_release}_element_mapping_id = element_mapping.{self.dataset.ust_or_release}_element_mapping_id
+                where element_mapping.{self.dataset.ust_or_release}_control_id = %s
+                    and element_mapping.epa_table_name = %s
+                    and element_mapping.epa_column_name = 'substance_id'
+                    and coalesce(value_mapping.exclude_from_query, 'N') <> 'Y'
+        ) x on x.organization_value = {org_val_col} '''
         from_sql += '\nleft join public.substances s on x.epa_value = s.substance'
-        view_sql = f'create or replace view {view_name} as\n{select_sql}{from_sql} where {org_val_col} is not null'
+        excluded_source_sql = f'''not exists (
+                select 1
+                from public.{self.dataset.ust_or_release}_element_mapping element_mapping
+                join public.{self.dataset.ust_or_release}_element_value_mapping value_mapping
+                    on value_mapping.{self.dataset.ust_or_release}_element_mapping_id = element_mapping.{self.dataset.ust_or_release}_element_mapping_id
+                where element_mapping.{self.dataset.ust_or_release}_control_id = {self.dataset.control_id}
+                    and element_mapping.epa_table_name = '{self.epa_substance_table}'
+                    and element_mapping.epa_column_name = 'substance_id'
+                    and value_mapping.organization_value = {org_val_col}
+                    and value_mapping.exclude_from_query = 'Y'
+        )'''
+        view_sql = f'create or replace view {view_name} as\n{select_sql}{from_sql} where {org_val_col} is not null and {excluded_source_sql}'
         utils.process_sql(self.conn, self.cur, view_sql, params=(self.dataset.control_id, self.epa_substance_table))
         logger.info('Created view %s', view_name)
 
@@ -672,7 +692,7 @@ where false"""
         else:
             join_col = 'release_id'
         sql = f"""select a.*, 'Heating oil' as unregulated_reason
-                from {self.dataset.schema}.{self.erg_substance_mapping_view} a join {self.dataset.schema}.{self.erg_facility_type_mapping_view} b 
+            from substance_mapping a join {self.dataset.schema}.{self.erg_facility_type_mapping_view} b
                     on a.{join_col} = b.{join_col}
                     join public.substances s on a.substance_id = s.substance_id
                 where s.substance_group = 'Heating' and facility_type_id <> 4 --Bulk plant storage/petroleum distributor """
@@ -680,7 +700,7 @@ where false"""
         if self.dataset.ust_or_release == 'ust' and utils.get_table_existence(self.erg_tank_size_view, self.dataset.schema):
             sql += f"""\nunion all
                         select a.*, 'Small tank at farm/residence' as unregulated_reason
-                        from {self.dataset.schema}.{self.erg_substance_mapping_view} a join {self.dataset.schema}.{self.erg_facility_type_mapping_view} b 
+                        from substance_mapping a join {self.dataset.schema}.{self.erg_facility_type_mapping_view} b
                             on a.facility_id = b.facility_id
                             join public.substances s on a.substance_id = s.substance_id
                             join {self.dataset.schema}.{self.erg_tank_size_view} c on a.facility_id = c.facility_id and a.tank_id = c.tank_id
@@ -688,7 +708,12 @@ where false"""
                         and facility_type_id in (1, 12) --Agricultural/farm; Residential
                         and c.tank_capacity_gallons < 1100"""
 
-        sql = f"create or replace view {self.dataset.schema}.{self.erg_unreg_subs_view} as\n{sql}"
+        sql = f"""create or replace view {self.dataset.schema}.{self.erg_unreg_subs_view} as
+    with substance_mapping as materialized (
+        select *
+        from {self.dataset.schema}.{self.erg_substance_mapping_view}
+    )
+    {sql}"""
         utils.process_sql(self.conn, self.cur, sql)
         logger.info('Created view %s.%s', self.dataset.schema, self.erg_unreg_subs_view)
 

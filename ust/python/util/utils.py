@@ -577,7 +577,7 @@ def get_lookup_info(dataset, epa_table_name, schema='public'):
     
     conn = connect_db()
     cur = conn.cursor() 
-    sql = f"""select distinct database_lookup_column, organization_column_name 
+    sql = f"""select distinct database_lookup_column, organization_column_name, organization_table_name
             from {schema}.v_{dataset.ust_or_release}_element_mapping_joins
             where {dataset.ust_or_release}_control_id = %s and epa_table_name = %s
             and database_lookup_table is not null order by 1"""
@@ -585,8 +585,8 @@ def get_lookup_info(dataset, epa_table_name, schema='public'):
     i = 1
     for row in cur.fetchall():
         join_info = {}
-        join_info['organization_table_name'] = 'v_' + row[0] + '_xwalk' 
-        join_info['organization_join_table'] = None
+        join_info['organization_table_name'] = 'v_' + row[0] + '_xwalk'
+        join_info['organization_join_table'] = row[2]
         join_info['organization_join_column'] = row[1]
         join_info['organization_join_fk'] = None
         join_info['organization_join_column2'] = None
@@ -617,7 +617,7 @@ def get_join_tables(dataset, epa_table_name, schema='public'):
             i += 1
             joins.append(join_info)
 
-    org_wheresql = " and organization_table_name not like 'erg_%%' and database_lookup_column is null "
+    org_wheresql = " and organization_table_name not like 'erg_%%' "
     join_infos = get_join_info(dataset, epa_table_name, org_wheresql, schema)
     for join_info in join_infos:
         if join_info and join_info['organization_table_name'] not in tables:
@@ -642,7 +642,8 @@ def get_join_tables(dataset, epa_table_name, schema='public'):
         logger.warning('No base join table found for %s; skipping lookup joins.', epa_table_name)
         return joins
     for join_info in lookups:
-        join_info['organization_join_table'] = tables[0]
+        if join_info['organization_join_table'] not in tables:
+            join_info['organization_join_table'] = tables[0]
         join_info['alias'] = aliases[i]
         i += 1
         joins.append(join_info)

@@ -98,10 +98,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="UST processing helper CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    import_files = subparsers.add_parser("import-files", help="Import source files into <org>_<type> schema")
+    import_files = subparsers.add_parser(
+        "import-files",
+        help="Import one source file or supported files from a directory into <org>_<type> schema",
+        description="Import one .csv, .xls, .xlsx, or .txt file, or scan a directory for those files.",
+    )
     import_files.add_argument("--type", dest="ust_or_release", choices=["ust", "release"])
     import_files.add_argument("--organization-id", dest="organization_id")
-    import_files.add_argument("--path", dest="path", required=True)
+    import_files.add_argument(
+        "--path",
+        dest="path",
+        required=True,
+        help="Path to one .csv/.xls/.xlsx/.txt file or a directory containing supported files",
+    )
     import_files.add_argument("--overwrite-table", action="store_true")
     _add_yes_arg(import_files)
     _add_dry_run_arg(import_files)
@@ -167,6 +176,35 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_yes_arg(generate_views)
     _add_dry_run_arg(generate_views)
+
+    audit_dataset = subparsers.add_parser(
+        "audit-dataset",
+        help="Audit existing mappings and source-value completeness before resuming processing",
+    )
+    _add_common_dataset_args(audit_dataset, include_org=True)
+    audit_dataset.add_argument(
+        "--fix-query-logic",
+        action="store_true",
+        help="Rewrite only legacy where-style Yes/NULL query_logic entries to valid CASE expressions",
+    )
+    audit_dataset.add_argument(
+        "--fix-source-identifiers",
+        action="store_true",
+        help="Correct only unambiguous source table/column case, space, and punctuation differences",
+    )
+    audit_dataset.add_argument(
+        "--no-write-sql",
+        dest="write_sql",
+        action="store_false",
+        help="Do not write suggested audit fixes to a SQL file",
+    )
+    audit_dataset.add_argument(
+        "--print-sql",
+        action="store_true",
+        help="Print suggested audit SQL in addition to writing the SQL file",
+    )
+    _add_yes_arg(audit_dataset)
+    _add_dry_run_arg(audit_dataset)
 
     generate_deagg = subparsers.add_parser("generate-deagg", help="Generate SQL guidance for potential deaggregation")
     _add_common_dataset_args(generate_deagg)
@@ -339,6 +377,11 @@ def build_parser() -> argparse.ArgumentParser:
         dest="include_details",
         action="store_false",
         help="Skip detail worksheets and run QA in counts-only mode",
+    )
+    qa.add_argument(
+        "--materialize-views",
+        action="store_true",
+        help="Run QA against indexed temporary snapshots of generated views",
     )
     _add_yes_arg(qa)
     _add_dry_run_arg(qa)
@@ -594,6 +637,23 @@ def _main(argv=None):
         )
         return
 
+    if args.command == "audit-dataset":
+        _apply_profile_defaults(args, required_fields=["ust_or_release"], parser=parser)
+        _require_control_or_org(args, parser)
+        if _dry_run(args, "Audit existing dataset mappings and source values"):
+            return
+        from ust.python.state_processing.dataset_audit import main as audit_main
+        audit_main(
+            ust_or_release=args.ust_or_release,
+            control_id=args.control_id,
+            organization_id=args.organization_id,
+            fix_query_logic=args.fix_query_logic,
+            fix_source_identifiers=args.fix_source_identifiers,
+            write_sql=args.write_sql,
+            print_sql=args.print_sql,
+        )
+        return
+
     if args.command == "generate-deagg":
         _apply_profile_defaults(args, required_fields=["ust_or_release", "control_id"], parser=parser)
         if _dry_run(args, "Generate SQL guidance for deaggregating source values"):
@@ -745,6 +805,7 @@ def _main(argv=None):
             force_exclusions=args.force_exclusions,
             force_summary_counts=args.force_summary_counts,
             include_details=args.include_details,
+            materialize_views=args.materialize_views,
         )
         return
 
