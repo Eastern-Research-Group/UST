@@ -476,6 +476,11 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--include-archive", action="store_true")
     validate.add_argument("--skip-tests", dest="run_tests", action="store_false")
 
+    subparsers.choices = dict(sorted(subparsers.choices.items()))
+    subparsers._choices_actions.sort(key=lambda action: action.dest)
+    profile_subparsers.choices = dict(sorted(profile_subparsers.choices.items()))
+    profile_subparsers._choices_actions.sort(key=lambda action: action.dest)
+
     return parser
 
 

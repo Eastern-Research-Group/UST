@@ -111,4 +111,71 @@ from sd_ust.erg_compartment a
 where not exists 
 	(select 1 from sd_ust.erg_piping b
 	where a.facility_id = b.facility_id  and a.tank_id = b.tank_id)
-	
+
+
+----------------------------------------------------------------------------------------------------------
+
+create or replace view sd_ust.v_ust_compartment_substance as
+select distinct
+    x."FacilityNumber"::character varying(50) as facility_id,
+    c.tank_id,
+    case
+      when nullif(trim(x."TankCompartmentNumber"::text), '') is null then 1
+      else nullif(trim(x."TankCompartmentNumber"::text), '')::integer
+    end as compartment_id,
+    sx.substance_id
+from sd_ust.tanks x
+join sd_ust.v_ust_tank c
+  on x."FacilityNumber" = c.facility_id
+ and x."TankNumber" = c.tank_name::integer
+left join sd_ust.v_substance_xwalk sx
+  on x."TankProduct" = sx.organization_value
+where x."TankProduct" is not null
+  and sx.substance_id is not null
+    and not exists (
+            select 1
+            from sd_ust.erg_unregulated_facilities unreg_fac
+            where nullif(trim(x."FacilityNumber"::text), '') = unreg_fac.facility_id
+    )
+    and not exists (
+            select 1
+            from sd_ust.erg_unregulated_tanks unreg_tank
+            where nullif(trim(x."FacilityNumber"::text), '') = unreg_tank.facility_id
+                and x."TankNumber"::integer = unreg_tank.tank_id
+    )
+
+-- ADD ADDITIONAL SQL HERE IF NECESSARY
+;
+
+
+
+create or replace view sd_ust.v_ust_compartment_substance as
+select distinct
+    x."FacilityNumber"::character varying(50) as facility_id,
+    c.tank_id,
+    case
+      when nullif(trim(x."TankCompartmentNumber"::text), '') is null then 1
+      else nullif(trim(x."TankCompartmentNumber"::text), '')::integer
+    end as compartment_id,
+    sx.substance_id
+from sd_ust.tanks x
+join sd_ust.v_ust_tank c
+  on x."FacilityNumber" = c.facility_id
+ and x."TankNumber" = c.tank_name::integer
+left join sd_ust.v_substance_xwalk sx
+  on x."TankProduct" = sx.organization_value
+where x."TankProduct" is not null
+  and sx.substance_id is not null
+    and not exists (
+            select 1
+            from sd_ust.erg_unregulated_facilities unreg_fac
+            where nullif(trim(x."FacilityNumber"::text), '') = unreg_fac.facility_id
+    )
+    and not exists (
+            select 1
+            from sd_ust.erg_unregulated_tanks unreg_tank
+            where nullif(trim(x."FacilityNumber"::text), '') = unreg_tank.facility_id
+                and x."TankNumber"::integer = unreg_tank.tank_id
+    )
+    
+    select * from sd_ust.v_ust_compartment_substance where 

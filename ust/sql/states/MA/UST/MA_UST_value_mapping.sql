@@ -30,6 +30,9 @@ values (4158, 'Private', 'Private', null);
 insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
 values (4158, 'State', 'State Government', null);
 
+insert into public.ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value, programmer_comments)
+values (4158, 'Government (unspecified)', 'Government (unspecified)', 'Per OUST, if org type is Institutional (non-profit) and business type is Public Agency, then use Government (unspecified)');
+
 --select owner_type from public.owner_types;
 /* Valid EPA values are:
 

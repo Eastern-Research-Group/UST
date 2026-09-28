@@ -73,6 +73,7 @@ Available commands:
 - `audit-dataset`: audit existing element/value mappings and source-schema readiness before generating views
 - `create-missing-ids`: create missing required ID tables
 - `populate-unreg`: populate unregulated helper tables; it reuses existing tables, `--delete-auto-inserts` clears only rows inserted by this script, and `--delete-all` recreates the helper tables from scratch
+  Explicit `exclude_from_query = 'Y'` mappings on `ust_tank` and `ust_tank_substance` also populate tank exclusions from raw source rows, with a `Mapping exclusion:` reason. These require direct facility/tank key mappings on the source relation; joined sources need a keyed intermediary view. Compartment/piping exclusions are not promoted to whole-tank exclusions. Use `--delete-auto-inserts` to rebuild automatic exclusions after changing mappings.
 - `exclude-unregulated`: generate/execute unregulated exclusion SQL for views
 - `qa`: run QA checks and export a QA workbook
 - `populate`: load data from state views into public EPA tables
