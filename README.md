@@ -62,7 +62,7 @@ python main.py <command> [options]
 Available commands:
 
 - `scaffold-template`: create a state SQL template and replace XX/ZZ placeholders
-- `import-files`: import one `.csv`, `.xls`, `.xlsx`, or `.txt` file, or scan a directory for supported source files
+- `import-files`: import one `.csv`, `.xls`, `.xlsx`, or `.txt` file, or scan a directory for supported source files; use `--table-name` to override the file-derived table name when the import resolves to a single file (one name per worksheet, in worksheet order, for a multi-tab workbook)
 - `init-dataset`: create a control row and initialize unregulated tables/views
 - `create-unreg`: create or recreate unregulated helper tables/views
 - `generate-views`: generate table population view SQL
@@ -73,6 +73,7 @@ Available commands:
 - `audit-dataset`: audit existing element/value mappings and source-schema readiness before generating views
 - `create-missing-ids`: create missing required ID tables
 - `populate-unreg`: populate unregulated helper tables; it reuses existing tables, `--delete-auto-inserts` clears only rows inserted by this script, and `--delete-all` recreates the helper tables from scratch
+  Explicit `exclude_from_query = 'Y'` mappings on `ust_tank` and `ust_tank_substance` also populate tank exclusions from raw source rows, with a `Mapping exclusion:` reason. These require direct facility/tank key mappings on the source relation; joined sources need a keyed intermediary view. Compartment/piping exclusions are not promoted to whole-tank exclusions. Use `--delete-auto-inserts` to rebuild automatic exclusions after changing mappings.
 - `exclude-unregulated`: generate/execute unregulated exclusion SQL for views
 - `qa`: run QA checks and export a QA workbook
 - `populate`: load data from state views into public EPA tables
@@ -94,6 +95,8 @@ ust scaffold-template --type ust --organization-id MA --control-id 123 --overwri
 ust profile use ma-ust && ust scaffold-template --yes
 ust import-files --type ust --organization-id TX --path "C:/data/TX"
 ust import-files --type ust --organization-id TX --path "C:/data/TX/source.xlsx"
+ust import-files --type ust --organization-id TX --path "C:/data/TX/really long name.csv" --table-name tanks
+ust import-files --type ust --organization-id TX --path "C:/data/TX/two tabs.xlsx" --table-name tanks releases
 ust init-dataset --type release --organization-id MA --data-source "State API export"
 ust generate-views --type ust --control-id 123
 ust generate-deagg --type ust --control-id 123

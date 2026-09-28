@@ -381,6 +381,10 @@ order by facility_id desc;
 
 select * from ma_ust.erg_facility_final 
 
+
+
+
+
 select * from ma_ust."OPEN_UST_FACILITIES_JUN_3_2024" 
 where "UST Facility ID"::text not in 
 	(select "Facility ID#"::text from ma_ust.erg_facility_final)
@@ -1419,3 +1423,223 @@ ust export-source-data --type ust --control-id 42
  * places of accuracy, ERG will be geo-locating the data. This will be a separate process not covered by this 
  * processing template. Further instructions will be provided later. 
 */
+
+
+
+
+
+select organization_value, epa_value, ust_element_value_mapping_id, organization_table_name, organization_column_name 
+from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_facility'
+and epa_column_name = 'owner_type_id'
+order by organization_value;
+
+
+
+update ust_element_value_mapping set epa_value = 'State Government' , programmer_comments = null
+where ust_element_value_mapping_id = 3657;
+
+update ust_element_mapping set epa_value = '' 
+where ust_element_value_mapping_id = 
+
+select * from ma_ust.erg_facility_info_org_type
+where 
+
+
+
+insert into ma_ust.erg_facility_info_org_type (facility_id, org_type_name)
+
+delete from ma_ust.erg_facility_info_org_type
+
+insert into ma_ust.erg_facility_info_org_type
+select distinct
+    trim("Facility ID#"::text) as facility_id,
+    case when org_type_name = 'Institutional (non-profit)' and business_type_name = 'Public agency' then 'Government (unspecified)'
+         else org_type_name end as org_type_name
+from ma_ust."Facility info"
+where nullif(trim("Facility ID#"::text), '') is not null
+  and nullif(trim(org_type_name::text), '') is not null
+  and  trim(org_type_name::text) = 'Institutional (non-profit)'
+  and business_type_name = 'Public agency'
+
+select distinct business_type_name from  ma_ust."Facility info"
+  
+select * from ma_ust."Facility info"
+
+
+
+22591	Institutional (non-profit)	Public agency
+
+select * from ma_ust.v_ust_facility where facility_id = '22591'
+
+select * from ma_ust.erg_unregulated_facilities where facility_id = '22591'
+
+
+
+select organization_value, ust_element_value_mapping_id, epa_value, organization_table_name, organization_column_name, ust_element_mapping_id
+from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_facility'
+and epa_column_name like 'facility_type%'
+order by organization_value;
+
+
+update ust_element_value_mapping set epa_value = 'Other' , programmer_comments = null
+where ust_element_value_mapping_id = 3668;
+update ust_element_value_mapping set epa_value = 'Trucking/transport/fleet operation'  , programmer_comments = null
+where ust_element_value_mapping_id = 3672;
+
+
+select organization_value, ust_element_value_mapping_id, epa_value, organization_table_name, organization_column_name, ust_element_mapping_id
+from v_ust_mapping 
+where ust_control_id = 42
+--and epa_table_name = 'ust_facility'
+and epa_column_name like 'tank_materia%'
+order by organization_value;
+
+
+select distinct "TANK CONSTRUCT" from ma_ust."Tank info" 
+where "TANK CONSTRUCT" not in 
+	(select organization_value from  v_ust_mapping 
+     where ust_control_id = 42 and epa_column_name like 'tank_materia%')	
+order by 1;
+
+select * from tank_material_descriptions 
+Fiberglass reinforced plastic
+Asphalt coated or bare steel
+Epoxy coated steel
+Coated and cathodically protected steel
+Jacketed steel
+Concrete
+Other
+Unknown
+Composite/clad steel w/fiberglass reinforced plastic
+Cathodically protected steel without coating
+Steel NEC
+Urethane coated/clad steel (steel with/poly urethane)
+
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value)
+values (4185,'Double-walled metal tank (cathodic protection required)','Coated and cathodically protected steel');
+
+
+
+select organization_value, ust_element_value_mapping_id, epa_value, organization_table_name, organization_column_name, ust_element_mapping_id
+from v_ust_mapping 
+where ust_control_id = 42
+--and epa_table_name = 'ust_facility'
+and epa_column_name like '%field%'
+order by organization_value;
+
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_tank', 'field_constructed', 'Tank info', 'TANK CONSTRUCT', 
+'case when "TANK CONSTRUCT" = ''Field Constructed Tank Double Walled (cathodic protection not required)'' then ''Yes'' end');
+
+
+
+
+select database_column_name, element_id, element_name
+from ust_elements where database_column_name like '%field%'
+
+select * from v_ust_elements_tables 
+
+select * from information_schema.tables where table_schema = 'public' and table_name like '%table%' order by table_name;
+
+select * from ust_elements_tables where element_id = 40
+
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value)
+values (4185,'Field Constructed Tank Double Walled (cathodic protection not required)','Other');
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value)
+values (4185,'Single-walled metal tank (cathodic protection required)','Coated and cathodically protected steel');
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value, epa_value)
+values (4185,'Single-walled metal tank with internal liner (cathodic protection required)','Coated and cathodically protected steel');
+
+
+
+
+select organization_value, ust_element_value_mapping_id, epa_value, organization_table_name,
+	organization_column_name, ust_element_mapping_id, epa_column_name, query_logic
+from v_ust_mapping 
+where ust_control_id = 42
+--and epa_table_name = 'ust_facility'
+and epa_column_name like '%pip%mat%'
+order by organization_value;
+
+update ust_element_mapping set query_logic = 'case when "SPILL BUCKET SENSOR" = ''Y'' then ''Yes'' end'
+where ust_element_mapping_id = 4204
+
+
+select organization_value, ust_element_value_mapping_id, epa_value, organization_table_name,
+	organization_column_name, ust_element_mapping_id, epa_column_name, query_logic
+from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_piping'
+and epa_column_name like '%pip%sump%'
+order by organization_value;
+
+select distinct "PIPE CONSTRUCT" from ma_ust."Tank info"
+
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_piping', 'piping_material_frp', 'Tank info', 'PIPE CONSTRUCT', 'case when "PIPE CONSTRUCT in (''Single-walled non-corrodible material (No corrosion protection required)'',''Double-walled non-corrodible material (No corrosion protection required)'') then ''Yes'' end');
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_piping', 'piping_material_steel', 'Tank info', 'PIPE CONSTRUCT', 'case when "PIPE CONSTRUCT in (''Double walled metal (Corrosion protection required)'',''Single-walled metal (Corrosion protection required)'') then ''Yes'' end');
+
+select * from v_ust_element_metadata 
+where element_name like '%Pip%Not%'
+
+
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_piping', 'piping_corrosion_protection_cathodic_not_required', 'Tank info', 'PIPE CONSTRUCT', 'case when "PIPE CONSTRUCT in (''Single-walled non-corrodible material (No corrosion protection required)'',''Double-walled non-corrodible material (No corrosion protection required)'') then ''Yes'' end');
+
+
+select organization_value, ust_element_value_mapping_id, epa_value, organization_table_name,
+	organization_column_name, ust_element_mapping_id, epa_column_name, query_logic
+from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_piping'
+and organization_column_name = 'PIPE LEAK DETECT'
+order by organization_value;
+
+
+select organization_value, ust_element_value_mapping_id, epa_value, organization_table_name,
+	organization_column_name, ust_element_mapping_id, epa_column_name, epa_table_name, query_logic
+from v_ust_mapping 
+where ust_control_id = 42
+--and epa_table_name = 'ust_piping'
+and epa_column_name like '%tank_corrosion_protection_cathodic_not_required%'
+order by organization_value;
+
+
+select * from v_ust_element_metadata 
+where element_name like '%Disp%'
+
+dispenser_udc
+
+insert into ust_element_mapping  (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_facility_dispenser','dispenser_udc','Dispenser info','dispenser_sump_ind','case when dispenser_sump_ind = ''TRUE'' then ''Yes'' when dispenser_sump_ind = ''FALSE'' then ''No'' end');
+
+
+
+select organization_value, ust_element_value_mapping_id, epa_value, organization_table_name,
+	organization_column_name, ust_element_mapping_id, epa_column_name, epa_table_name, query_logic
+from v_ust_mapping 
+where ust_control_id = 42
+--and epa_table_name = 'ust_piping'
+and epa_column_name like '%tank_corrosion_protection_cathodic_not_required%'
+order by organization_value;
+
+tank_corrosion_protection_interior_lining
+tank_corrosion_protection_other
+
+delete from ust_element_mapping where  ust_control_id = 42
+and epa_column_name in ('tank_corrosion_protection_cathodic_not_required', 'tank_corrosion_protection_interior_lining','tank_corrosion_protection_other')
+
+update ust_element_mapping 
+set query_logic = '' 
+where ust_element_mapping_id = 4188;
+
+
+update ust_element_mapping 
+set query_logic = '' 
+where ust_element_mapping_id = 4188;
+

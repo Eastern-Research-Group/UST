@@ -112,6 +112,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to one .csv/.xls/.xlsx/.txt file or a directory containing supported files",
     )
     import_files.add_argument("--overwrite-table", action="store_true")
+    import_files.add_argument(
+        "--table-name",
+        dest="table_name",
+        nargs="+",
+        help=(
+            "Override the table name(s) derived from the file name. Only allowed when the import "
+            "resolves to a single file; supply one name per worksheet (in worksheet order) for a "
+            "multi-tab workbook."
+        ),
+    )
     _add_yes_arg(import_files)
     _add_dry_run_arg(import_files)
 
@@ -466,6 +476,11 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--include-archive", action="store_true")
     validate.add_argument("--skip-tests", dest="run_tests", action="store_false")
 
+    subparsers.choices = dict(sorted(subparsers.choices.items()))
+    subparsers._choices_actions.sort(key=lambda action: action.dest)
+    profile_subparsers.choices = dict(sorted(profile_subparsers.choices.items()))
+    profile_subparsers._choices_actions.sort(key=lambda action: action.dest)
+
     return parser
 
 
@@ -540,7 +555,16 @@ def _main(argv=None):
         if _dry_run(args, "Import files into organization schema"):
             return
         from ust.python.state_processing.import_data_from_files import import_files
-        import_files(args.ust_or_release, args.organization_id, args.path, overwrite_table=args.overwrite_table)
+        try:
+            import_files(
+                args.ust_or_release,
+                args.organization_id,
+                args.path,
+                overwrite_table=args.overwrite_table,
+                table_name=args.table_name,
+            )
+        except ValueError as exc:
+            parser.error(str(exc))
         return
 
     if args.command == "init-dataset":

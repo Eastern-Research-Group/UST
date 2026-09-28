@@ -2,10 +2,11 @@
 --
 -- Purpose:
 -- - Build one row per facility_id.
--- - Prefer values from ma_ust."Facility info" when both sources have data.
--- - Backfill from ma_ust.vw_ust_facilities_combined when Facility info is null.
+-- - Use ma_ust."Facility info" for every facility present in that tab.
+-- - Use ma_ust.vw_ust_facilities_combined only for IDs in Tank info or
+--   Dispenser info that are absent from Facility info (no field-level backfill).
 -- - Exclude one-to-many fields: fr_type_name, business_type_name, org_type_name.
--- - Flag where Facility info conflicts with combined view for easy downstream review.
+-- - Retain diagnostic columns; conflicts are false because sources are disjoint.
 
 begin;
 
@@ -124,6 +125,27 @@ combined_src as (
     from ma_ust.vw_ust_facilities_combined
     where nullif(upper(regexp_replace(trim("UST Facility ID"::text), '[^A-Z0-9]', '', 'g')), '') is not null
 ),
+tank_or_dispenser_ids as (
+    select nullif(upper(regexp_replace(trim("Facility ID#"::text), '[^A-Z0-9]', '', 'g')), '') as facility_id
+    from ma_ust."Tank info"
+    union
+    select nullif(upper(regexp_replace(trim("Facility ID#"::text), '[^A-Z0-9]', '', 'g')), '') as facility_id
+    from ma_ust."Dispenser info"
+),
+combined_eligible as (
+    select c.*
+    from combined_src c
+    where exists (
+        select 1
+        from tank_or_dispenser_ids td
+        where td.facility_id = c.facility_id
+    )
+    and not exists (
+        select 1
+        from facility_info_src fi
+        where fi.facility_id = c.facility_id
+    )
+),
 combined_one as (
     select *
     from (
@@ -143,7 +165,7 @@ combined_one as (
                     c.operator_contact_name,
                     c.facility_status
             ) as rn
-        from combined_src c
+        from combined_eligible c
     ) ranked
     where rn = 1
 ),
@@ -155,7 +177,7 @@ all_ids as (
 resolved as (
     select
         ids.facility_id,
-        -- Facility info is authoritative where both sources have values.
+        -- Sources are disjoint: use Facility info or an eligible original-dataset row.
         coalesce(fi.fac_name, cv.facility_name) as "FAC NAME",
         coalesce(fi.fac_add_1, cv.facility_address1) as "FAC ADD 1",
         fi.fac_add_2 as "FAC ADD 2",
@@ -178,12 +200,12 @@ resolved as (
         fi.update_by as "UPDATE BY",
         coalesce(fi.fac_status, cv.facility_status) as "FAC STATUS",
 
-        -- Source coverage flags.
+        -- Selected-source flags (combined view is restricted to eligible IDs).
         (fi.facility_id is not null) as in_facility_info,
         (cv.facility_id is not null) as in_combined_view,
         (fi.facility_id is null and cv.facility_id is not null) as combined_only_facility,
 
-        -- Conflict diagnostics on overlapping fields.
+        -- Retained for compatibility; disjoint sources cannot have conflicts.
         (fi.fac_name is not null and cv.facility_name is not null and fi.fac_name is distinct from cv.facility_name) as conflict_fac_name,
         (fi.fac_add_1 is not null and cv.facility_address1 is not null and fi.fac_add_1 is distinct from cv.facility_address1) as conflict_fac_add_1,
         (fi.fac_city is not null and cv.facility_city is not null and fi.fac_city is distinct from cv.facility_city) as conflict_fac_city,
