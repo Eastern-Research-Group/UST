@@ -71,7 +71,7 @@ UNION ALL
     (min(NULLIF(TRIM(BOTH FROM m.facility_owner_company_name), ''::text)))::character varying(100) AS facility_owner_company_name
    FROM (mapped m
      JOIN coordinates g ON (((g.facility_id)::text = (m.facility_id)::text)))
-  GROUP BY m.facility_id;;
+  GROUP BY m.facility_id;
 
 
 

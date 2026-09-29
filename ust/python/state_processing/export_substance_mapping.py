@@ -8,7 +8,7 @@ from ust.python.util.logger_factory import logger
 
 ust_or_release = 'ust'             # Valid values are 'ust' or 'release'
 control_id = 0                  # Enter an integer that is the ust_control_id or release_control_id
-send_email = True                # Boolean; defaults to True. If True, will use Outlook to automatically email the generated file for ERG review. 
+send_email = False               # Set to True to use Outlook to email the generated file for ERG review.
 
 # These variables can usually be left unset. This script will generate an Excel file in the appropriate state folder in the repo under /ust/python/exports/mapping.
 # This file directory and its contents are excluded from pushes to the repo by .gitignore.
@@ -18,7 +18,7 @@ export_file_name = None
 
 
 class SubstanceMapping:
-    def __init__(self, dataset, send_email=True):
+    def __init__(self, dataset, send_email=False):
         self.dataset = dataset
         self.send_email = send_email
         self.export_exists = False 
@@ -78,7 +78,7 @@ Thank you,
         
 
 
-def main(ust_or_release, control_id=None, send_email=True, export_file_name=None, export_file_dir=None, export_file_path=None):
+def main(ust_or_release, control_id=None, send_email=False, export_file_name=None, export_file_dir=None, export_file_path=None):
     dataset = Dataset(ust_or_release=ust_or_release,
                        control_id=control_id, 
                        base_file_name='substance_mapping_' + utils.get_timestamp_str() + '.xlsx',

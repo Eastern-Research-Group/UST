@@ -1,5 +1,5 @@
 -- Source conflicts: 17870 / 5 and 9953 / 2 contain both Yes and No.
--- Do not infer containment from installation date or arbitrarily prefer Yes/No.
+-- When source values conflict, Yes takes precedence over No.
 -- Conflicting known values become NULL; source records are retained unchanged.
 -- Reapply after generate-views, which can overwrite this custom aggregation.
 begin;
@@ -22,9 +22,10 @@ and exists
 )
 select facility_id,
     dispenser_id,
-    -- Keep an agreed known value; contradictory Yes/No records remain unknown.
-    case when count(distinct dispenser_udc) = 1 then max(dispenser_udc)
-         else null::text end as dispenser_udc
+        case when bool_or(dispenser_udc = 'Yes') then 'Yes'::text
+            when bool_or(dispenser_udc = 'No') then 'No'::text
+            else null::text
+        end as dispenser_udc
 from dispenser_values
 group by facility_id, dispenser_id;
 
@@ -38,7 +39,7 @@ from ma_ust.v_ust_facility_dispenser
 group by facility_id, dispenser_id
 having count(*) > 1;
 
--- Source records for unresolved Yes/No conflicts among included dispensers.
+-- Source records that had conflicting Yes/No values among included dispensers.
 select a.*
 from ma_ust."Dispenser info" a
 where exists (

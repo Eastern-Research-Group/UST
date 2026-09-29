@@ -1515,3 +1515,37 @@ order by 1;
 
 select * from tn_ust.haz_compartments  
 
+
+select * from ust_control where organization_id = 'TN'
+
+select distinct organization_table_name from ust_element_mapping where ust_control_id = 35
+order by 1;
+
+ust_compartment
+ust_compartment_substance
+ust_facility
+ust_piping
+ust_tank
+ust_tank_substance
+
+
+select * from tn_ust.tn_environmental_sites;
+
+select * from  ust_element_mapping where ust_control_id = 35 and organization_table_name = 'v_tn_compartments'
+
+
+select * from ust_element_mapping 
+where ust_control_id = 35 and organization_table_name = 'tn_environmental_sites'
+order by 1;
+
+
+update public.ust_element_mapping
+set organization_table_name = 'tn_compartments_merged'
+where ust_control_id = 35
+  and organization_table_name = 'v_tn_compartments';
+
+update public.ust_element_mapping
+set organization_table_name = 'tn_facilities_merged'
+where ust_control_id = 35
+  and organization_table_name = 'tn_facilities';
+

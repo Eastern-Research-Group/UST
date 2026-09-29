@@ -1,7 +1,6 @@
 log
 imports
 exports
-config.py
  
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -108,6 +107,7 @@ celerybeat.pid
 
 # Environments
 .env
+!.env_example
 .venv
 env/
 venv/

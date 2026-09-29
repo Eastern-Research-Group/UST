@@ -1,18 +1,29 @@
 import os
+from pathlib import Path
 from types import SimpleNamespace
 
-try:
-    from . import config as config
-except ImportError:
-    config = SimpleNamespace(
-        db_ip=os.getenv("UST_DB_IP", ""),
-        db_user=os.getenv("UST_DB_USER", ""),
-        db_password=os.getenv("UST_DB_PASSWORD", ""),
-        db_name=os.getenv("UST_DB_NAME", ""),
-        db_connection_string=os.getenv("UST_DB_CONNECTION_STRING", ""),
-        local_ust_path=os.getenv("UST_LOCAL_UST_PATH", ""),
-        element_row_counts_email=os.getenv("UST_ELEMENT_ROW_COUNTS_EMAIL", ""),
-        element_row_counts_cc=os.getenv("UST_ELEMENT_ROW_COUNTS_CC", ""),
-        hazsub_email=os.getenv("UST_HAZSUB_EMAIL", ""),
-        hazsub_cc=os.getenv("UST_HAZSUB_CC", ""),
-    )
+from dotenv import dotenv_values
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_ENV_FILE = Path(os.environ.get('UST_ENV_FILE', str(_REPO_ROOT / '.env'))).expanduser()
+if not _ENV_FILE.is_absolute():
+    _ENV_FILE = _REPO_ROOT / _ENV_FILE
+_LOCAL = dotenv_values(_ENV_FILE, interpolate=False) if _ENV_FILE.is_file() else {}
+
+
+def _setting(name, default=''):
+    key = 'UST_' + name.upper()
+    return os.environ.get(key, _LOCAL.get(key) or default)
+
+
+config = SimpleNamespace(
+    db_ip=_setting('db_ip'),
+    db_user=_setting('db_user'),
+    db_password=_setting('db_password'),
+    db_name=_setting('db_name'),
+    db_connection_string=_setting('db_connection_string'),
+    element_row_counts_email=_setting('element_row_counts_email'),
+    element_row_counts_cc=_setting('element_row_counts_cc'),
+    hazsub_email=_setting('hazsub_email'),
+    hazsub_cc=_setting('hazsub_cc'),
+)

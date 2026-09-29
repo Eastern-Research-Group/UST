@@ -1643,3 +1643,382 @@ update ust_element_mapping
 set query_logic = '' 
 where ust_element_mapping_id = 4188;
 
+
+
+
+
+
+select * from ust_control where organization_id = 'MA'
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_column_name = 'substance_id'
+
+select * from ma_ust.v_ust_tank_substance a join substances s on a.substance_id = s.substance_id
+where substance = 'Heating/fuel oil # unknown'
+165
+
+select * from ma_ust.erg_unregulated_tanks 
+where facility_id = '1000059'
+
+select * from v_ust_tank_substance
+where ust_control_id = 42
+and "Substance" = 'Heating/fuel oil # unknown'
+and "FacilityID" = '1000059'
+
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_column_name like 'finan%'
+
+fr_type_name in ('Local Government Fund','Local Government Guarantee')
+
+4178
+
+update ust_element_mapping 
+set epa_column_name = 'financial_responsibility_local_government_fund', 
+query_logic = 'case when fr_type_name = ''Local Government Fund'' then ''Yes'' end' 
+where ust_element_mapping_id = 4178
+
+insert into ust_element_mapping (ust_control_id, epa_column_name, epa_table_name, organization_column_name, organization_table_name, query_logic)
+values (42, 'financial_responsibility_local_government_guarantee', 'ust_facility', 'erg_facility_info_fr_type', 'fr_type_name', 
+'case when fr_type_name = ''Local Government Guarantee'' then ''Yes'' end' );
+
+update ust_element_mapping
+set organization_table_name = 'erg_facility_info_fr_type', organization_column_name = 'fr_type_name'
+where ust_element_mapping_id = 4454
+
+select distinct fr_type_name
+from ma_ust.erg_facility_info_fr_type
+
+
+select database_column_name
+from ust_elements where element_name like 'Finan%'
+
+financial_responsibility_local_government_fund
+financial_responsibility_local_government_guarantee
+
+FinancialResponsibilityLocalGovernmentFund
+FinancialResponsibilityLocalGovernmentGuarantee
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_column_name like 'spill%'
+
+Tank info	SPILL BUCKET SENSOR
+
+case when "SPILL BUCKET SENSOR" = 'Y' then 'Yes' end
+4204
+
+select * from ma_ust."Tank info" 
+
+select distinct "Facility ID#", "TANK ID#", 
+	case 
+		when "SPILL BUCKET INSTALLED" is not null then 'Yes'
+		when "SPILL BUCKET SENSOR" = 'Y' then 'Yes' 
+	end as spill_bucket_installed
+into ma_ust.erg_spill_bucket_installed
+from  ma_ust."Tank info" 
+
+update ust_element_mapping 
+set organization_table_name = 'erg_spill_bucket_installed', organization_column_name = 'spill_bucket_installed', 
+	organization_join_column = 'Facility ID#', organization_join_column2 = 'TANK ID#', organization_join_table = 'Tank info',
+	query_logic = null, 
+	programmer_comments = 'Created table erg_spill_bucket_installed to combine data from columns "SPILL BUCKET INSTALLED" (if not null) and "SPILL BUCKET SENSOR" (if = Y)'
+where ust_element_mapping_id = 4204
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_column_name like '%high%'
+
+delete from ust_element_mapping where ust_element_mapping_id = 4220
+
+
+Piping Line Leak detection is a specific type of Piping Leak detection, don’t use - "PIPE LEAK DETECT"
+is not null to populate this column.   You need to use the Pipe Type column and pull on any piping 
+listed under Pressurized piping system with electronic automatic line leak det and Pressurized piping 
+system with mechanical automatic line leak detection to the Piping Line Leak Detection column.    
+They can have more than one type of Piping Leak Detection.   
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_column_name like 'pip%line%'
+
+select distinct "PIPE TYPE" from ma_ust."Tank info"
+
+Pressurized piping system with electronic automatic line leak detection
+Pressurized piping system with mechanical automatic line leak detection
+
+update ust_element_mapping 
+set organization_column_name = 'PIPE TYPE', 
+	query_logic = 'case when "PIPE TYPE" in (''Pressurized piping system with electronic automatic line leak detection'', ''Pressurized piping system with mechanical automatic line leak detection'') then''Yes'' end'
+where ust_element_mapping_id = 4224
+
+Likewise, for the Piping Line Test Annual – you need to use the values
+Annual Tightness Test of Single-Walled Pressurized Piping Systems 
+Quarterly visual inspection and annual product line tightness test (only if installed prior to 5/28/ 
+Annual tightness test of Non-European suction systems (only if installed prior to 1/1/1989) 
+
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_column_name like 'pip%line%'
+4222
+"PIPE LEAK DETECT" = 'Annual Automatic Line Leak Detection Test'
+piping_line_test_annual
+
+select distinct "PIPE LEAK DETECT" from ma_ust."Tank info" order by 1;
+Annual Automatic Line Leak Detection Test
+Quarterly visual inspection and annual product line tightness test (only if installed prior to 5/28/
+Annual Tightness Test of Single-Walled Pressurized Piping Systems
+Annual tightness test of Non-European suction systems (only if installed prior to 1/1/1989) without 
+
+update ust_element_mapping set query_logic = 
+	'case when "PIPE LEAK DETECT" in (''Annual Automatic Line Leak Detection Test'', ''Quarterly visual inspection and annual product line tightness test (only if installed prior to 5/28/'', ''Annual Tightness Test of Single-Walled Pressurized Piping Systems'') then ''Yes'' end'
+where ust_element_mapping_id = 4222;
+
+select database_column_name from ust_elements where element_name like '%3%'
+
+insert into ust_element_mapping(ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_piping', 'piping_line_test3yr', 'Tank info', 'PIPE LEAK DETECT',
+'case when "PIPE LEAK DETECT" = ''Annual tightness test of Non-European suction systems (only if installed prior to 1/1/1989) without '' then ''Yes'' end ');
+
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_column_name like '%sub%k%'
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_tank'
+and epa_column_name like '%man%'
+
+select database_column_name 
+from ust_elements 
+where database_column_name like '%vapor%'
+
+select distinct "TANK LEAK DETECT" from ma_ust."Tank info" order by 1;
+
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_tank', 'automatic_tank_gauging_continuous_leak_detection', 'Tank info', 'TANK LEAK DETECT', 
+	'case when "TANK LEAK DETECT" = ''Continuous In-Tank Monitoring System'' then ''Yes'' end');
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_tank', 'tank_automatic_tank_gauging_release_detection', 'Tank info', 'TANK LEAK DETECT',
+	'case when "TANK LEAK DETECT" in (''In-Tank Monitoring with Statistical Inventory Reconciliation Vendor'',''In-Tank Monitoring System'',''In tank monitor up to 2 gal per hour'',''In tank monitor w/ detection rate up to 1 gal/hr'') then ''Yes'' end');
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_tank', 'tank_statistical_inventory_reconciliation', 'Tank info', 'TANK LEAK DETECT', 'case when "TANK LEAK DETECT" = ''In-Tank Monitoring with Statistical Inventory Reconciliation Vendor'' then ''Yes'' end');
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_tank', 'tank_interstitial_monitoring', 'Tank info', 'TANK LEAK DETECT', 'case when "TANK LEAK DETECT" = ''Continuous Interstitial Monitoring'' then ''Yes'' end');
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_tank', 'tank_manual_tank_gauging', 'Tank info', 'TANK LEAK DETECT', 
+	'case when "TANK LEAK DETECT" in (''Annual tightness test w/ detection rate 0.5 gal/hr'',''Manual Tank Gauging (1,000G or less capacity tank)'',''Manual Tank Gauging (1,000G or more capacity tank)'') then ''Yes'' end');
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_tank', 'tank_subpart_k_tightness_testing', 'Tank info', 'TANK LEAK DETECT', 'case when "TANK LEAK DETECT" = ''Annual Bulk Tightness Test'' then ''Yes'' end');
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_tank', 'tank_vapor_monitoring', 'Tank info', 'TANK LEAK DETECT', 'case when "TANK LEAK DETECT" = ''Soil Vapor Monitoring'' then ''Yes'' end');
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_piping'
+and epa_column_name like '%inter%'
+
+delete from ust_element_mapping where ust_element_mapping_id = 4223;
+
+For DispenserUDC Yes use dispenser_sump_ind TRUE.   
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+--and epa_table_name = 'ust_piping'
+and epa_column_name like '%disp%'
+
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_facility'
+and epa_column_name like '%owner%'
+
+
+select * from ust_element_value_mapping
+where ust_element_mapping_id in  
+	(select ust_element_mapping_id from ust_element_mapping where ust_control_id = 42)
+and lower(programmer_comments) like '%verif%'
+
+update ust_element_value_mapping set programmer_comments = null where ust_element_value_mapping_id  in (3659,3681,3682);
+	
+Use the Use_Type column on the Tanks tab to identify Emergency Power Generators and 
+Emergency Engine driven pumps for the template’s Emergency Generator column.  
+
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+--and epa_table_name = 'ust_facility'
+and epa_column_name like '%emer%'
+
+select distinct "USE TYPE" from ma_ust."Tank info" order by 1;
+
+Emergency engine driven pumps
+Emergency Power Generator
+
+
+select database_column_name 
+from ust_elements 
+where database_column_name like '%emer%'
+
+insert into ust_element_mapping (ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, query_logic)
+values (42, 'ust_tank', 'emergency_generator', 'Tank info', 'USE TYPE', 
+'case when "USE TYPE" in (''Emergency engine driven pumps'',''Emergency Power Generator'') then ''Yes''')
+
+
+For facility types, use Other for Institutional because there are variety of types of facilities in this group. 
+Use Trucking/transport/fleet operation for MA’s Non-Retail Motor Vehicle Fuel Dispensing value.  
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_facility'
+and epa_column_name like '%fac%type%'
+
+
+
+select organization_value, epa_value, ust_element_value_mapping_id
+from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_tank'
+and epa_column_name like '%material%'
+order by organization_value;
+
+select * from tank_material_descriptions;
+
+Fiberglass reinforced plastic
+Asphalt coated or bare steel
+Epoxy coated steel
+Coated and cathodically protected steel
+Jacketed steel
+Concrete
+Other
+Unknown
+Composite/clad steel w/fiberglass reinforced plastic
+Cathodically protected steel without coating
+Steel NEC
+Urethane coated/clad steel (steel with/poly urethane)
+
+
+update ust_element_value_mapping set epa_value = 'Fiberglass reinforced plastic' 
+where ust_element_value_mapping_id = 3681;
+update ust_element_value_mapping set epa_value = 'Fiberglass reinforced plastic' 
+where ust_element_value_mapping_id = 3682;
+
+
+select epa_column_name, organization_value, epa_value, ust_element_value_mapping_id
+from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_tank'
+and epa_column_name like '%contain%'
+order by organization_value;
+
+select *
+from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_tank'
+and epa_column_name like '%field%'
+order by organization_value;
+
+
+For Tank corrosion protection, we are only using metallic tanks so if the tank material 
+says non-corrodible, do not map to tank corrosion protection.  If it says metal, then keep the
+mapping to corrosion protection using MA’s Tank Corrosion Type.  
+
+select *
+from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_tank'
+and (epa_column_name like '%cor%' or epa_column_name like '%mater%');
+
+"TANK CORROSION TYPE" = 'Field Constructed Impressed Current System'
+"TANK CORROSION TYPE" in ('Manufactured Sacrificial Anode (Galvanic) System','Field Constructed Sacrificial Anode (Galvanic) System')
+
+select distinct "TANK CONSTRUCT", "TANK CORROSION TYPE"
+from ma_ust."Tank info" 
+where "TANK CORROSION TYPE" is not null
+order by 1, 2;
+
+
+select distinct "Facility ID#", "TANK ID#", "TANK CONSTRUCT", "TANK CORROSION TYPE",
+	case when "TANK CONSTRUCT" like '%metal%' and "TANK CORROSION TYPE" like '%Anode%' then 'Yes' end as tank_corrosion_protection_sacrificial_anode,
+	case when "TANK CONSTRUCT" like '%metal%' and "TANK CORROSION TYPE" like '%Impressed%' then 'Yes' end as tank_corrosion_protection_impressed_current
+into ma_ust.erg_tank_corrosion_protection 
+from ma_ust."Tank info" 
+
+select distinct "TANK CONSTRUCT", "TANK CORROSION TYPE", tank_corrosion_protection_sacrificial_anode, tank_corrosion_protection_impressed_current
+from ma_ust.erg_tank_corrosion_protection 
+where tank_corrosion_protection_impressed_current is not null or tank_corrosion_protection_sacrificial_anode is not null;
+
+update ust_element_mapping
+set organization_table_name = 'erg_tank_corrosion_protection', organization_column_name = 'tank_corrosion_protection_impressed_current',
+	query_logic = null,
+	programmer_comments = 'select distinct "Facility ID#", "TANK ID#", "TANK CONSTRUCT", "TANK CORROSION TYPE",
+	case when "TANK CONSTRUCT" like ''%metal%'' and "TANK CORROSION TYPE" like ''%Anode%'' then ''Yes'' end as tank_corrosion_protection_sacrificial_anode,
+	case when "TANK CONSTRUCT" like ''%metal%'' and "TANK CORROSION TYPE" like ''%Impressed%'' then ''Yes'' end as tank_corrosion_protection_impressed_current
+into ma_ust.erg_tank_corrosion_protection 
+from ma_ust."Tank info"'
+where ust_element_mapping_id = 4187;
+
+
+update ust_element_mapping
+set organization_table_name = 'erg_tank_corrosion_protection', organization_column_name = 'tank_corrosion_protection_sacrificial_anode',
+	query_logic = null,
+	programmer_comments = 'select distinct "Facility ID#", "TANK ID#", "TANK CONSTRUCT", "TANK CORROSION TYPE",
+	case when "TANK CONSTRUCT" like ''%metal%'' and "TANK CORROSION TYPE" like ''%Anode%'' then ''Yes'' end as tank_corrosion_protection_sacrificial_anode,
+	case when "TANK CONSTRUCT" like ''%metal%'' and "TANK CORROSION TYPE" like ''%Impressed%'' then ''Yes'' end as tank_corrosion_protection_impressed_current
+into ma_ust.erg_tank_corrosion_protection 
+from ma_ust."Tank info"'
+where ust_element_mapping_id = 4186;
+
+
+
+
+select *
+from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_facility'
+and epa_column_name like '%financial%'
+order by organization_value;
+
+select * from ust_elements_tables 
+
+select * from v_ust_element_metadata 
+
+select * from v_ust_mapping
+where  ust_control_id = 42
+and epa_table_name = 'ust_tank' and epa_column_name not in 
+	(select column_name from  v_ust_element_metadata where table_name = 'ust_tank')
+	
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_table_name = 'ust_compartment' and epa_column_name in 
+	(select epa_column_name from v_ust_mapping
+	where  ust_control_id = 42
+	and epa_table_name = 'ust_tank' and epa_column_name not in 
+		(select column_name from  v_ust_element_metadata where table_name = 'ust_tank'))
+		
+delete from ust_element_mapping where ust_element_mapping_id in (4205,4209,4206,4211,4207,4210)
+
+update ust_element_mapping set epa_table_name = 'ust_compartment'
+where ust_element_mapping_id in (4461,4462,4460,4458,4456,4457,4459);
+
+
+
+select * from ma_ust."Tank info" where "Facility ID#" = '1000055'
+1000055	1	2015-05-06 00:00:00.000	-71.84807	42.1144		20000.0
+1000055	2	2015-05-06 00:00:00.000	-71.84807	42.1144		8000.0
+1000055	2	2015-05-06 00:00:00.000	-71.84807	42.1144		12000.0
+
+select * from ma_ust.erg_compartment_id where facility_id  = '1000055'
+
+select * from ma_ust.v_ust_compartment where facility_id  = '1000055'
+
+
+
+
+select * from ust_piping 
+

@@ -16,7 +16,7 @@ def _require_config(*names):
         raise RuntimeError(
             "Missing database config values: "
             + ", ".join(missing)
-            + ". Create ust/python/util/config.py or set the matching UST_* environment variables."
+            + ". Add them to .env or set the matching UST_* environment variables."
         )
 
 

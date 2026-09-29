@@ -98,6 +98,29 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="UST processing helper CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    test_connections = subparsers.add_parser(
+        "test-connections",
+        help="Test the configured PostgreSQL database connection",
+    )
+    test_connections.add_argument(
+        "--timeout",
+        type=int,
+        choices=range(1, 301),
+        default=10,
+        metavar="SECONDS",
+        help="Connection and query timeout in seconds (1-300; default: 10)",
+    )
+
+    counts = subparsers.add_parser(
+        "db-counts", help="Compare public table row counts with a saved migration baseline",
+    )
+    counts.add_argument("--output", default="aws-db-counts.csv",
+                        help="New CSV path (default: aws-db-counts.csv; never overwritten)")
+    counts_mode = counts.add_mutually_exclusive_group()
+    counts_mode.add_argument("--compare", help="Baseline CSV (default: repository old-db-counts.csv)")
+    counts_mode.add_argument("--save-baseline", action="store_true",
+                             help="Save source counts without comparing; use --output old-db-counts.csv")
+
     import_files = subparsers.add_parser(
         "import-files",
         help="Import one source file or supported files from a directory into <org>_<type> schema",
@@ -189,6 +212,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     audit_dataset = subparsers.add_parser(
         "audit-dataset",
+        aliases=["dataset-audit"],
         help="Audit existing mappings and source-value completeness before resuming processing",
     )
     _add_common_dataset_args(audit_dataset, include_org=True)
@@ -253,10 +277,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_common_dataset_args(export_substance_mapping)
     export_substance_mapping.add_argument(
-        "--no-email",
+        "--email",
         dest="send_email",
-        action="store_false",
-        help="Skip automatic Outlook email",
+        action="store_true",
+        help="Email the exported workbook through Outlook",
     )
     _add_yes_arg(export_substance_mapping)
     _add_dry_run_arg(export_substance_mapping)
@@ -390,8 +414,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     qa.add_argument(
         "--materialize-views",
+        dest="materialize_views",
         action="store_true",
-        help="Run QA against indexed temporary snapshots of generated views",
+        default=True,
+        help="Run QA against indexed temporary snapshots of generated views (default)",
+    )
+    qa.add_argument(
+        "--no-materialize-views",
+        dest="materialize_views",
+        action="store_false",
+        help="Run QA directly against generated views",
     )
     _add_yes_arg(qa)
     _add_dry_run_arg(qa)
@@ -487,6 +519,17 @@ def build_parser() -> argparse.ArgumentParser:
 def _main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "db-counts":
+        from ust.python.util.db_counts import DEFAULT_BASELINE, run
+
+        baseline = None if args.save_baseline else (args.compare or DEFAULT_BASELINE)
+        return run(args.output, baseline)
+
+    if args.command == "test-connections":
+        from ust.python.util.test_connections import run_checks
+
+        return run_checks(timeout=args.timeout)
 
     if args.command == "profile":
         if args.profile_command == "set":
@@ -661,7 +704,7 @@ def _main(argv=None):
         )
         return
 
-    if args.command == "audit-dataset":
+    if args.command in {"audit-dataset", "dataset-audit"}:
         _apply_profile_defaults(args, required_fields=["ust_or_release"], parser=parser)
         _require_control_or_org(args, parser)
         if _dry_run(args, "Audit existing dataset mappings and source values"):
