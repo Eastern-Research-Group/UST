@@ -22,6 +22,25 @@ class MainCliTests(unittest.TestCase):
 
         validate_main.assert_called_once_with(include_archive=True, run_tests=False)
 
+    @patch("ust.python.util.test_connections.run_checks", return_value=0)
+    def test_connections_command_dispatches_timeout(self, run_checks):
+        result = main.main(["test-connections", "--timeout", "20"])
+
+        self.assertEqual(0, result)
+        run_checks.assert_called_once_with(timeout=20)
+
+    @patch("ust.python.state_processing.export_substance_mapping.main")
+    def test_export_substance_mapping_does_not_email_by_default(self, export_main):
+        main.main(["export-substance-mapping", "--type", "ust", "--control-id", "7"])
+
+        export_main.assert_called_once_with(ust_or_release="ust", control_id=7, send_email=False)
+
+    @patch("ust.python.state_processing.export_substance_mapping.main")
+    def test_export_substance_mapping_email_is_opt_in(self, export_main):
+        main.main(["export-substance-mapping", "--type", "ust", "--control-id", "7", "--email"])
+
+        export_main.assert_called_once_with(ust_or_release="ust", control_id=7, send_email=True)
+
     @patch("ust.python.state_processing.import_data_from_files.import_files")
     def test_import_files_command_dispatches_expected_arguments(self, import_files):
         main.main([
@@ -157,6 +176,53 @@ class MainCliTests(unittest.TestCase):
             materialize_views=True,
         )
 
+    @patch("ust.python.state_processing.qa_check.main")
+    def test_qa_materializes_views_by_default(self, qa_main):
+        main.main([
+            "qa",
+            "--type",
+            "ust",
+            "--control-id",
+            "123",
+            "--organization-id",
+            "TX",
+            "--yes",
+        ])
+
+        qa_main.assert_called_once_with(
+            ust_or_release="ust",
+            control_id=123,
+            organization_id="TX",
+            force_exclusions=False,
+            force_summary_counts=False,
+            include_details=True,
+            materialize_views=True,
+        )
+
+    @patch("ust.python.state_processing.qa_check.main")
+    def test_qa_can_disable_materialized_views(self, qa_main):
+        main.main([
+            "qa",
+            "--type",
+            "ust",
+            "--control-id",
+            "123",
+            "--organization-id",
+            "TX",
+            "--no-materialize-views",
+            "--yes",
+        ])
+
+        qa_main.assert_called_once_with(
+            ust_or_release="ust",
+            control_id=123,
+            organization_id="TX",
+            force_exclusions=False,
+            force_summary_counts=False,
+            include_details=True,
+            materialize_views=False,
+        )
+
     @patch("ust.python.state_processing.populate_unreg_tables.main")
     @patch("ust.python.state_processing.create_unreg_tables.main")
     def test_create_unreg_populate_dispatches_expected_arguments(self, create_unreg_main, populate_unreg_main):
@@ -251,6 +317,29 @@ class MainCliTests(unittest.TestCase):
             organization_id="TN",
             fix_query_logic=True,
             fix_source_identifiers=True,
+            write_sql=True,
+            print_sql=False,
+        )
+
+    @patch("ust.python.state_processing.dataset_audit.main")
+    def test_dataset_audit_alias_dispatches_to_audit_dataset(self, audit_main):
+        main.main([
+            "dataset-audit",
+            "--type",
+            "ust",
+            "--control-id",
+            "123",
+            "--organization-id",
+            "TN",
+            "--yes",
+        ])
+
+        audit_main.assert_called_once_with(
+            ust_or_release="ust",
+            control_id=123,
+            organization_id="TN",
+            fix_query_logic=False,
+            fix_source_identifiers=False,
             write_sql=True,
             print_sql=False,
         )

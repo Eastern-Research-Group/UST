@@ -1,218 +1,150 @@
-import os
-import sys
+"""Export reviewable per-object DDL using the configured PostgreSQL database."""
 
-from ust.python.util import utils
-from ust.python.util.logger_factory import logger
+from contextlib import closing
+from pathlib import Path
+from urllib.parse import quote
 
-schema = 'public'
-export_path = None # If None, will default to ../../sql/ddl/[schema]
-object_name = None # If None, will export all tables, views, and functions 
+import psycopg2
+
+from ust.python.util import config
+from ust.python.util.db_counts import important_table
+
+DEFAULT_EXPORT_PATH = Path(__file__).resolve().parents[2] / 'sql' / 'ddl'
+
+
+def _filename(name):
+    # Encode unsafe Windows/path characters while preserving ordinary object names.
+    encoded = quote(name, safe='_-')
+    if encoded.rstrip('.').upper() in {'CON', 'PRN', 'AUX', 'NUL'} | {
+        f'{prefix}{number}' for prefix in ('COM', 'LPT') for number in range(1, 10)
+    } or encoded.endswith('.'):
+        encoded = ''.join(f'%{byte:02X}' for byte in name.encode('utf-8'))
+    return encoded
+
+
+def _statement(value):
+    if not value or not value.strip():
+        raise ValueError('The database returned an empty DDL definition.')
+    return value.rstrip().rstrip(';') + ';\n'
 
 
 class Ddl:
-    conn = None 
-    cur = None 
-    object_type = None 
-
-    def __init__(self, 
-                 schema,
-                 export_path='../../sql/ddl',
-                 object_name=None):
+    def __init__(self, schema='public', export_path=None, object_name=None,
+                 include_temp_backup=False):
         self.schema = schema
-        if not export_path:
-            export_path = '../../sql/ddl'
-        if object_name:
-            self.object_type = self.get_object_type(object_name)
-            if not self.object_type:
-                logger.warning('object_name %s either does not exist in schema %s or is not a table, view, or function', object_name, self.schema)
-                sys.exit()
-            else:
-                self.object_name = object_name
-        else:
-            self.object_name = None 
-        self.export_path = export_path + '/' + self.schema + '/'
+        self.object_name = object_name
+        self.include_temp_backup = include_temp_backup
+        self.export_path = Path(export_path or DEFAULT_EXPORT_PATH).expanduser() / _filename(schema)
 
+    def _included(self, name):
+        return (self.object_name is None or name == self.object_name) and (
+            self.include_temp_backup or important_table(name)
+        )
+
+    def _collect(self, cursor):
+        cursor.execute('SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = %s', (self.schema,))
+        if cursor.fetchone() is None:
+            raise ValueError(f'Schema does not exist: {self.schema}')
+        cursor.execute("""
+            SELECT c.oid, c.relname, c.relkind,
+                   format('%%I.%%I', n.nspname, c.relname)
+            FROM pg_catalog.pg_class c
+            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = %s AND c.relkind IN ('r', 'p', 'v', 'm')
+            ORDER BY c.relname
+        """, (self.schema,))
+        relations = [row for row in cursor.fetchall() if self._included(row[1])]
+        if any(row[2] in ('r', 'p') for row in relations):
+            cursor.execute("SELECT to_regprocedure('public.generate_create_table_statement(character varying,character varying)')")
+            if cursor.fetchone()[0] is None:
+                raise ValueError('Table exports require public.generate_create_table_statement(varchar, varchar).')
+        files = {}
+        for oid, name, kind, qualified in relations:
+            if kind in ('v', 'm'):
+                cursor.execute('SELECT pg_catalog.pg_get_viewdef(%s, true)', (oid,))
+                definition = _statement(cursor.fetchone()[0])
+                prefix = 'CREATE OR REPLACE VIEW' if kind == 'v' else 'CREATE MATERIALIZED VIEW'
+                if kind == 'm':
+                    definition = definition.rstrip().rstrip(';') + ' WITH NO DATA;\n'
+                folder = 'view' if kind == 'v' else 'materialized_view'
+                files[(folder, name)] = f'{prefix} {qualified} AS\n{definition}'
+                continue
+            cursor.execute('SELECT public.generate_create_table_statement(%s, %s)', (self.schema, name))
+            parts = [_statement(cursor.fetchone()[0])]
+            cursor.execute("""
+                SELECT format('ALTER TABLE %%s ADD CONSTRAINT %%I %%s;',
+                              %s, conname, pg_catalog.pg_get_constraintdef(oid))
+                FROM pg_catalog.pg_constraint
+                WHERE conrelid = %s AND contype IN ('p', 'u', 'f', 'c', 'x')
+                ORDER BY conname
+            """, (qualified, oid))
+            parts.extend(_statement(row[0]) for row in cursor.fetchall())
+            cursor.execute("""
+                SELECT pg_catalog.pg_get_indexdef(i.indexrelid)
+                FROM pg_catalog.pg_index i
+                WHERE i.indrelid = %s AND NOT EXISTS (
+                    SELECT 1 FROM pg_catalog.pg_constraint c
+                    WHERE c.conindid = i.indexrelid AND c.contype IN ('p', 'u', 'x')
+                ) ORDER BY i.indexrelid::regclass::text
+            """, (oid,))
+            parts.extend(_statement(row[0]) for row in cursor.fetchall())
+            files[('table', name)] = '\n'.join(parts)
+        cursor.execute("""
+            SELECT p.proname, pg_catalog.pg_get_functiondef(p.oid)
+            FROM pg_catalog.pg_proc p
+            JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+            WHERE n.nspname = %s AND p.prokind IN ('f', 'p')
+            ORDER BY p.proname, pg_catalog.pg_get_function_identity_arguments(p.oid)
+        """, (self.schema,))
+        for name, definition in cursor.fetchall():
+            if self._included(name):
+                key = ('function', name)
+                files[key] = files.get(key, '') + _statement(definition) + '\n'
+        if not files:
+            raise ValueError('No matching objects found (temp/backup names are excluded by default).')
+        return files
 
     def export(self):
-        if self.object_name:
-            if self.object_type == 'table':
-                self.export_tables()
-            elif self.object_type == 'view':
-                self.export_views()
-            elif self.object_type == 'function':
-                self.export_functions()
-            elif self.object_type is not None:
-                logger.warning('Unknown object_type: %s', self.object_type)
-        else:
-            self.export_all()
+        required = ('db_ip', 'db_name', 'db_user', 'db_password')
+        missing = ['UST_' + name.upper() for name in required if not getattr(config, name)]
+        if missing:
+            raise ValueError('Missing settings: ' + ', '.join(missing))
+        with closing(psycopg2.connect(
+            host=config.db_ip, dbname=config.db_name, user=config.db_user,
+            password=config.db_password, port=5432, connect_timeout=10,
+        )) as connection:
+            connection.set_session(isolation_level='REPEATABLE READ', readonly=True)
+            with connection.cursor() as cursor:
+                cursor.execute("SET LOCAL statement_timeout = '2min'")
+                files = self._collect(cursor)
+        # Finish all queries before replacing any existing exports.
+        destinations = {}
+        for (kind, name), definition in files.items():
+            path = self.export_path / kind / (_filename(name) + '.sql')
+            key = str(path).casefold()
+            if key in destinations:
+                raise ValueError('Object names collide on a case-insensitive filesystem; no files written.')
+            destinations[key] = (path, definition)
+        for path, definition in destinations.values():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(definition, encoding='utf-8')
+        print(f'Saved {len(files)} DDL files to {self.export_path.resolve()}')
+        return len(files)
 
 
-    def export_all(self):
-        self.connect_db()
-        self.export_views()
-        self.export_tables()
-        self.export_functions()
-        self.disconnect_db()
+def main(schema='public', export_path=None, object_name=None, include_temp_backup=False):
+    return Ddl(schema, export_path, object_name, include_temp_backup).export()
 
 
-    def export_views(self):
-        os.makedirs(self.export_path + 'view/', exist_ok=True)
-
-        connected = False 
-        if not self.conn:
-            connected = True 
-            self.connect_db()
-
-        sql = """select table_name from information_schema.tables
-                where table_schema = %s and table_type = 'VIEW' """
-        if self.object_name:
-            sql = sql + f"and lower(table_name) = lower('{self.object_name}') "
-        sql = sql + "order by 1"
-        utils.process_sql(self.conn, self.cur, sql, params=(self.schema,))
-        rows = self.cur.fetchall()
-        for row in rows:
-            view_name = row[0]
-            file_name = view_name + '.sql'
-            file_path = self.export_path + 'view/' + file_name
-            ddl_sql = 'create or replace view "' + self.schema + '"."' + view_name + '" as\n'
-            sql2 = f"""select pg_get_viewdef('"{self.schema}"."{view_name}"')"""
-            utils.process_sql(self.conn, self.cur, sql2)
-            ddl_sql = ddl_sql + self.cur.fetchone()[0]
-            with open(file_path, 'w') as f:
-                f.write(ddl_sql)
-            logger.info('Saved view %s DDL to %s', view_name, file_path)
-
-        if connected:
-            self.disconnect_db()
+def run(schema='public', export_path=None, object_name=None, include_temp_backup=False):
+    try:
+        main(schema, export_path, object_name, include_temp_backup)
+    except (ValueError, OSError, psycopg2.Error) as exc:
+        detail = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
+        print(f'DDL export failed: {detail}. Check configuration, database access, and output path.')
+        return 1
+    return 0
 
 
-    def export_tables(self):
-        os.makedirs(self.export_path + 'table/', exist_ok=True)
-
-        connected = False 
-        if not self.conn:
-            connected = True 
-            self.connect_db()
-
-        sql = """select table_name from information_schema.tables
-                where table_schema = %s and table_type like '%%TABLE' """
-        if self.object_name:
-            sql = sql + f"and lower(table_name) = lower('{self.object_name}') "
-        sql = sql + "order by 1"
-        utils.process_sql(self.conn, self.cur, sql, params=(self.schema,))
-        rows = self.cur.fetchall()
-        for row in rows:
-            table_name = row[0]
-            file_name = table_name + '.sql'
-            file_path = self.export_path + 'table/' + file_name
-            sql2 = f"""select generate_create_table_statement('{self.schema}','{table_name}')"""
-            utils.process_sql(self.conn, self.cur, sql2)
-            ddl_sql = self.cur.fetchone()[0]
-
-            # constraints
-            sql2 = """select con.conname from pg_catalog.pg_constraint con
-                        join pg_catalog.pg_class rel on rel.oid = con.conrelid
-                        join pg_catalog.pg_namespace nsp on nsp.oid = connamespace
-                    where nsp.nspname = %s and rel.relname = %s"""
-            utils.process_sql(self.conn, self.cur, sql2, params=(self.schema, table_name))
-            rows2 = self.cur.fetchall()
-            for row2 in rows2:
-                constraint_name = row2[0]
-                sql3 = """select format('ALTER TABLE %%I.%%I ADD CONSTRAINT %%I %%s;', 
-                                connamespace::regnamespace,
-                                conrelid::regclass,
-                                conname,
-                                pg_get_constraintdef(oid))
-                        from pg_constraint where conname = %s"""
-                utils.process_sql(self.conn, self.cur, sql3, params=(constraint_name,))
-                rows3 = self.cur.fetchall()
-                for row3 in rows3:
-                    ddl_sql = ddl_sql + '\n\n' + row3[0]
-
-            # indexes 
-            sql3 = """select indexdef from pg_indexes
-                    where schemaname = %s and tablename = %s"""
-            utils.process_sql(self.conn, self.cur, sql3, params=(self.schema, table_name))
-            rows2 = self.cur.fetchall()
-            for row2 in rows2:
-                ddl_sql = ddl_sql + '\n\n' + row2[0]
-
-            with open(file_path, 'w') as f:
-                f.write(ddl_sql)
-            logger.info('Saved table %s DDL to %s', table_name, file_path)        
-
-        if connected:
-            self.disconnect_db()
-
-
-    def export_functions(self):
-        os.makedirs(self.export_path + 'function/', exist_ok=True)
-
-        connected = False 
-        if not self.conn:
-            connected = True 
-            self.connect_db()
-
-        sql = """select p.proname, p.oid
-                from pg_proc p join pg_namespace ns on (p.pronamespace = ns.oid)
-                where ns.nspname = %s """
-        if self.object_name:
-            sql = sql + f"and lower(p.proname) = lower('{self.object_name}') "
-        sql = sql + "order by 1"
-        utils.process_sql(self.conn, self.cur, sql, params=(self.schema,))
-        rows = self.cur.fetchall()
-        for row in rows:
-            function_name = row[0]
-            oid = row[1]
-            file_name = function_name + '.sql'
-            file_path = self.export_path + 'function/' + file_name
-            ddl_sql = 'create or replace function "' + self.schema + '"."' + function_name + '" as\n'
-            sql2 = f"""select pg_get_functiondef({oid})"""
-            utils.process_sql(self.conn, self.cur, sql2)
-            ddl_sql = ddl_sql + self.cur.fetchone()[0]
-            with open(file_path, 'w') as f:
-                f.write(ddl_sql)
-            logger.info('Saved function %s DDL to %s', function_name, file_path)
-
-        if connected:
-            self.disconnect_db()
-
-
-    def get_object_type(self, object_name):
-        if not self.conn:
-            self.connect_db()
-        object_type = None 
-        sql = """select object_type from public.v_objects
-                 where schema_name = %s and lower(object_name) = lower(%s)
-                 and object_type in ('table','view','function')"""
-        utils.process_sql(self.conn, self.cur, sql, params=(self.schema, object_name))
-        try:
-            object_type = self.cur.fetchone()[0]
-        except TypeError:
-            pass
-        return object_type
-
-
-    def connect_db(self):
-        self.conn = utils.connect_db()
-        self.cur = self.conn.cursor()
-        logger.info('Connected to database')
-        
-
-    def disconnect_db(self):
-        self.conn.commit()
-        self.cur.close()
-        self.conn.close()
-        logger.info('Disconnected from database')
-
-
-def main(schema, export_path=None, object_name=None):
-    Ddl(schema=schema, export_path=export_path, object_name=object_name).export()
-    
-
-if __name__ == '__main__':  
-    if isinstance(object_name, list):
-        for obj in object_name:
-            main(schema=schema, export_path=export_path, object_name=obj)
-    else:
-        main(schema=schema, export_path=export_path, object_name=object_name)
+if __name__ == '__main__':
+    raise SystemExit(run())

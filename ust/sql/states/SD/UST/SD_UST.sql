@@ -1862,4 +1862,207 @@ and epa_column_name = 'substance_id'
 select * from ust_element_mapping where ust_control_id = 9;
 
 
-sele
+select * from v_ust_mapping
+where ust_control_id = 9
+and epa_column_name like '%pip%mon%'
+
+case when "TankPipingReleaseDetection" in ('Sump Sensor','PPM 4000') then 'Yes' 
+
+select distinct "TankPipingType" from sd_ust.tanks order by 1;
+
+select distinct "FacilityType" from sd_ust.tanks order by 1;
+
+select --"FacilityNumber", "TankNumber", 
+	"TankPipingReleaseDetection", "TankPipingType", count(*)
+from sd_ust.tanks
+where "TankPipingReleaseDetection" in ('Sump Sensor','PPM 4000')
+and "TankPipingType" not in ('Safe Suction', 'Siphon','Gravity Fed','Gravity Feed')
+and "FacilityType" = 'UST'
+group by "TankPipingReleaseDetection", "TankPipingType"
+
+
+select distinct "FacilityNumber", "TankNumber", 
+	"TankPipingReleaseDetection", "TankPipingType"
+from sd_ust.tanks
+where "TankPipingReleaseDetection" in ('Sump Sensor','PPM 4000')
+and "TankPipingType" not in ('Safe Suction', 'Siphon','Gravity Fed','Gravity Feed')
+and "FacilityType" = 'UST'
+
+01-00034	6.0
+01-00034	7.0
+
+
+select facility_id, tank_id, compartment_id, piping_id, piping_interstitial_monitoring
+from sd_ust.v_ust_piping 
+where facility_id = '01-00034' and tank_id in (6,7)
+
+01-00034	6	1	90	Yes
+01-00034	7	1	91	Yes
+
+select * from sd_ust.v_ust_facility
+where facility_id = '01-00034'
+
+select "FacilityID", "TankID", "CompartmentID", "PipingID", "PipingInterstitialMonitoring"
+from v_ust_piping
+where "FacilityID" = '01-00034'
+
+select * from ust_piping 
+where ust_compartment_id in 
+	(select ust_compartment_id from ust_compartment 
+	where ust_tank_id in 
+		(select ust_tank_id from ust_tank 
+		where tank_id in (6,7)
+		and ust_facility_id in 
+			(select ust_facility_id from ust_facility 
+			where ust_control_id = 9 and facility_id = '01-00034')))
+
+			
+			
+
+WITH mapped AS (
+
+         SELECT DISTINCT (a."FacilityNumber")::character varying(50) AS facility_id,
+            (a."FacilityName")::character varying(100) AS facility_name,
+            (a."FacilityAddress1Text")::character varying(100) AS facility_address1,
+            (a."FacilityAddress2Text")::character varying(100) AS facility_address2,
+            (a."FacilityCity")::character varying(100) AS facility_city,
+            (a."FacilityCounty")::character varying(100) AS facility_county,
+            (a."FacilityZipCode")::character varying(10) AS facility_zip_code,
+            'SD'::text AS facility_state,
+            8 AS facility_epa_region,
+            (a."FacilityLatitudeValue")::double precision AS facility_latitude,
+            a."FacilityLongitudeValue" AS facility_longitude,
+            b.coordinate_source_id,
+            (a."OwnerName")::character varying(100) AS facility_owner_company_name
+           FROM (sd_ust.tanks a
+             LEFT JOIN sd_ust.v_coordinate_source_xwalk b ON ((a."FacilityMethodDescription" = (b.organization_value)::text)))
+          WHERE  "FacilityNumber" = '01-00034'
+          and NOT EXISTS ( SELECT 1
+                           FROM sd_ust.erg_unregulated_facilities unreg
+                           WHERE (NULLIF(TRIM(BOTH FROM a."FacilityNumber"), ''::text) = (unreg.facility_id)::text))
+                  AND COALESCE(b.exclude_from_query, 'N'::character varying)::text <> 'Y'::text
+        ), 
+        
+        
+        duplicate_ids AS (
+         SELECT mapped.facility_id
+           FROM mapped
+          GROUP BY mapped.facility_id
+         HAVING (count(*) > 1)
+        ), 
+        
+        coordinates AS (
+         SELECT DISTINCT ON (m.facility_id) m.facility_id,
+            m.facility_latitude,
+            m.facility_longitude,
+            m.coordinate_source_id
+           FROM (mapped m
+             JOIN duplicate_ids d USING (facility_id))
+          ORDER BY m.facility_id, ((m.facility_latitude IS NOT NULL) AND (m.facility_longitude IS NOT NULL) AND ((m.facility_latitude <> (0)::double precision) OR (m.facility_longitude <> (0)::double precision))) DESC, (m.coordinate_source_id IS NOT NULL) DESC, m.facility_latitude, m.facility_longitude, m.coordinate_source_id
+        )
+ SELECT m.facility_id,
+    m.facility_name,
+    m.facility_address1,
+    m.facility_address2,
+    m.facility_city,
+    m.facility_county,
+    m.facility_zip_code,
+    m.facility_state,
+    m.facility_epa_region,
+    m.facility_latitude,
+    m.facility_longitude,
+    m.coordinate_source_id,
+    m.facility_owner_company_name
+   FROM mapped m
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM duplicate_ids d
+          WHERE ((d.facility_id)::text = (m.facility_id)::text))))
+UNION ALL
+ SELECT m.facility_id,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_name), ''::text)))::character varying(100) AS facility_name,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_address1), ''::text)))::character varying(100) AS facility_address1,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_address2), ''::text)))::character varying(100) AS facility_address2,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_city), ''::text)))::character varying(100) AS facility_city,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_county), ''::text)))::character varying(100) AS facility_county,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_zip_code), ''::text)))::character varying(10) AS facility_zip_code,
+    min(NULLIF(TRIM(BOTH FROM m.facility_state), ''::text)) AS facility_state,
+    max(m.facility_epa_region) AS facility_epa_region,
+    max(g.facility_latitude) AS facility_latitude,
+    max(g.facility_longitude) AS facility_longitude,
+    max(g.coordinate_source_id) AS coordinate_source_id,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_owner_company_name), ''::text)))::character varying(100) AS facility_owner_company_name
+   FROM (mapped m
+     JOIN coordinates g ON (((g.facility_id)::text = (m.facility_id)::text)))
+  GROUP BY m.facility_id;
+
+        
+        
+        
+ WITH mapped AS (
+         SELECT DISTINCT (a."FacilityNumber")::character varying(50) AS facility_id,
+            (a."FacilityName")::character varying(100) AS facility_name,
+            (a."FacilityAddress1Text")::character varying(100) AS facility_address1,
+            (a."FacilityAddress2Text")::character varying(100) AS facility_address2,
+            (a."FacilityCity")::character varying(100) AS facility_city,
+            (a."FacilityCounty")::character varying(100) AS facility_county,
+            (a."FacilityZipCode")::character varying(10) AS facility_zip_code,
+            'SD'::text AS facility_state,
+            8 AS facility_epa_region,
+            (a."FacilityLatitudeValue")::double precision AS facility_latitude,
+            a."FacilityLongitudeValue" AS facility_longitude,
+            b.coordinate_source_id,
+            (a."OwnerName")::character varying(100) AS facility_owner_company_name
+           FROM (sd_ust.tanks a
+             LEFT JOIN sd_ust.v_coordinate_source_xwalk b ON ((a."FacilityMethodDescription" = (b.organization_value)::text)))
+          WHERE ((NOT (EXISTS ( SELECT 1
+                   FROM sd_ust.erg_unregulated_facilities unreg
+                  WHERE (NULLIF(TRIM(BOTH FROM a."FacilityNumber"), ''::text) = (unreg.facility_id)::text)))) AND ((COALESCE(b.exclude_from_query, 'N'::character varying))::text <> 'Y'::text))
+        ), duplicate_ids AS (
+         SELECT mapped.facility_id
+           FROM mapped
+          GROUP BY mapped.facility_id
+         HAVING (count(*) > 1)
+        ), coordinates AS (
+         SELECT DISTINCT ON (m.facility_id) m.facility_id,
+            m.facility_latitude,
+            m.facility_longitude,
+            m.coordinate_source_id
+           FROM (mapped m
+             JOIN duplicate_ids d USING (facility_id))
+          ORDER BY m.facility_id, ((m.facility_latitude IS NOT NULL) AND (m.facility_longitude IS NOT NULL) AND ((m.facility_latitude <> (0)::double precision) OR (m.facility_longitude <> (0)::double precision))) DESC, (m.coordinate_source_id IS NOT NULL) DESC, m.facility_latitude, m.facility_longitude, m.coordinate_source_id
+        )
+ SELECT m.facility_id,
+    m.facility_name,
+    m.facility_address1,
+    m.facility_address2,
+    m.facility_city,
+    m.facility_county,
+    m.facility_zip_code,
+    m.facility_state,
+    m.facility_epa_region,
+    m.facility_latitude,
+    m.facility_longitude,
+    m.coordinate_source_id,
+    m.facility_owner_company_name
+   FROM mapped m
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM duplicate_ids d
+          WHERE ((d.facility_id)::text = (m.facility_id)::text))))
+  and m.facility_id =  '01-00034'
+UNION ALL
+ SELECT m.facility_id,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_name), ''::text)))::character varying(100) AS facility_name,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_address1), ''::text)))::character varying(100) AS facility_address1,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_address2), ''::text)))::character varying(100) AS facility_address2,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_city), ''::text)))::character varying(100) AS facility_city,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_county), ''::text)))::character varying(100) AS facility_county,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_zip_code), ''::text)))::character varying(10) AS facility_zip_code,
+    min(NULLIF(TRIM(BOTH FROM m.facility_state), ''::text)) AS facility_state,
+    max(m.facility_epa_region) AS facility_epa_region,
+    max(g.facility_latitude) AS facility_latitude,
+    max(g.facility_longitude) AS facility_longitude,
+    max(g.coordinate_source_id) AS coordinate_source_id,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_owner_company_name), ''::text)))::character varying(100) AS facility_owner_company_name
+   FROM (mapped m
+     JOIN coordinates g ON (((g.facility_id)::text = (m.facility_id)::text)))
+  GROUP BY m.facility_id

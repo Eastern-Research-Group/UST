@@ -25,6 +25,8 @@ mkdir -p "${STAGE_DIR}"
   tar -cf - \
     --exclude='./.git' \
     --exclude='./.venv' \
+    --exclude='./.env' \
+    --exclude='./.tmp-*' \
     --exclude='./.client_stage' \
     --exclude='./.client_stage/*' \
     --exclude='*/__pycache__' \
@@ -72,18 +74,6 @@ mkdir -p "${STAGE_DIR}"
   cd "${STAGE_DIR}"
   tar -xf -
 )
-
-# Add a dummy config module with the same variable names expected by scripts.
-mkdir -p "${STAGE_DIR}/ust/python/util"
-cat > "${STAGE_DIR}/ust/python/util/config.py" <<'EOF'
-db_user = 'CHANGE_ME'
-db_password = 'CHANGE_ME'
-db_ip = '127.0.0.1'
-db_connection_string = f'postgresql://{db_user}:{db_password}@{db_ip}:5432/'
-db_name = 'UGSTank'
-
-local_ust_path = r'C:\path\to\ust\state\data\\'
-EOF
 
 # Remove hardcoded API credentials from scripts in the client package.
 NM_FILE="${STAGE_DIR}/ust/python/state_processing/states/NM/get_data.py"
