@@ -59,41 +59,6 @@ python -m ust.python.backups.create_indexes --apply
 
 The script uses the current database connection and recreates indexes for foreign-key columns plus the existing public lookup and UST/Release ID-column conventions. Dropped custom indexes cannot be recovered from PostgreSQL catalog metadata alone.
 
-## Database refresh count comparison
-
-With the old database configured, save exact row counts tonight:
-
-```powershell
-ust db-counts --save-baseline --output old-db-counts.csv
-```
-
-Keep this CSV for tomorrow (commit/share it if another checkout will run the check).
-After configuring `.env` for AWS, compare the refreshed database:
-
-```powershell
-ust db-counts
-```
-
-The default baseline is `old-db-counts.csv` at the repository root; the comparison
-report is `aws-db-counts.csv` in the current directory. Override either path with
-`--compare PATH` and `--output PATH`. Existing output files are never overwritten.
-Run the baseline command from the repository root, or supply an absolute output path.
-These commands also work as `python main.py db-counts ...`.
-
-Counts cover all ordinary and partitioned tables in `public`, excluding name tokens
-`temp`, `temporary`, `tmp`, `backup`, `backups`, `bkup`, `bkp`, and `bak`
-(case insensitive, including markers followed by dates). Template tables remain
-included. Views and individual partition children are excluded; partition parents
-include their partitions' rows. The command uses a consistent read-only snapshot,
-with a 10-minute timeout per query and a 10-second lock timeout. Large tables may
-take time to count. Run during a quiet period to avoid expected differences from
-ongoing writes.
-
-The report flags matching counts, changed counts (with deltas), missing tables,
-and new tables. Exit codes are 0 for a saved baseline or matching comparison,
-1 for differences, and 2 for configuration/query/file errors. Empty baselines and
-incomplete counts are rejected. Matching counts do not verify row contents.
-
 ## Export database DDL
 
 ```powershell
@@ -106,8 +71,7 @@ Uses the configured database and defaults to `public`, writing UTF-8 SQL files
 under the repository's `ust/sql/ddl/<schema>/{table,view,materialized_view,function}`.
 `--output` changes the base directory. Existing matching files are overwritten;
 files for objects no longer present are not deleted. Use a new output directory
-for a separate snapshot. The same temp/backup name exclusions as `db-counts`
-apply to all objects; `--include-temp-backup` includes them. `--object-name` matches
+for a separate snapshot. Temp/backup object names are excluded by default; `--include-temp-backup` includes them. `--object-name` matches
 an exact name and includes every overload of a selected routine in one file.
 
 The exporter reads one consistent, read-only snapshot and completes database
