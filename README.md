@@ -94,6 +94,35 @@ and new tables. Exit codes are 0 for a saved baseline or matching comparison,
 1 for differences, and 2 for configuration/query/file errors. Empty baselines and
 incomplete counts are rejected. Matching counts do not verify row contents.
 
+## Export database DDL
+
+```powershell
+ust save-ddl
+ust save-ddl --schema or_ust --output ddl-snapshot
+ust save-ddl --object-name ust_facility
+```
+
+Uses the configured database and defaults to `public`, writing UTF-8 SQL files
+under the repository's `ust/sql/ddl/<schema>/{table,view,materialized_view,function}`.
+`--output` changes the base directory. Existing matching files are overwritten;
+files for objects no longer present are not deleted. Use a new output directory
+for a separate snapshot. The same temp/backup name exclusions as `db-counts`
+apply to all objects; `--include-temp-backup` includes them. `--object-name` matches
+an exact name and includes every overload of a selected routine in one file.
+
+The exporter reads one consistent, read-only snapshot and completes database
+queries before writing files. Table definitions require the existing database
+function `public.generate_create_table_statement(varchar, varchar)`; it does not
+install or change that helper. Constraints and standalone indexes are appended
+to table files. Function/procedure definitions come directly from PostgreSQL.
+
+These are per-object review scripts, not a complete restorable database backup:
+table definitions inherit the helper's limitations, and dependencies such as
+sequences, types, triggers, ownership, and grants are not exported separately.
+Use a PostgreSQL schema dump when a complete schema backup is required.
+`python main.py save-ddl` supports the same options. Exit codes: 0 for success,
+1 for an export error.
+
 ## CLI
 
 The repository exposes a small command-line wrapper through the `ust` package entrypoint (preferred) and [main.py](main.py) (fallback).

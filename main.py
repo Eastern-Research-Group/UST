@@ -111,6 +111,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Connection and query timeout in seconds (1-300; default: 10)",
     )
 
+    ddl = subparsers.add_parser("save-ddl", help="Export tables, views, and routines as SQL files")
+    ddl.add_argument("--schema", default="public", help="Schema to export (default: public)")
+    ddl.add_argument("--output", dest="export_path",
+                     help="Base output directory (default: repository ust/sql/ddl); appends schema/type")
+    ddl.add_argument("--object-name", help="Export one exact object name (all routine overloads included)")
+    ddl.add_argument("--include-temp-backup", action="store_true",
+                     help="Include temp/backup object names, excluded by default")
+    ddl.description = "Export DDL using the configured database. Existing matching SQL files are overwritten."
+
     counts = subparsers.add_parser(
         "db-counts", help="Compare public table row counts with a saved migration baseline",
     )
@@ -519,6 +528,12 @@ def build_parser() -> argparse.ArgumentParser:
 def _main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "save-ddl":
+        from ust.python.backups.save_ddl import run
+
+        return run(schema=args.schema, export_path=args.export_path,
+                   object_name=args.object_name, include_temp_backup=args.include_temp_backup)
 
     if args.command == "db-counts":
         from ust.python.util.db_counts import DEFAULT_BASELINE, run
