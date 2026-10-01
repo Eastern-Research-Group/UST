@@ -1,9 +1,8 @@
-
-from ust.python.util import config
 from ust.python.util.import_service import ImportService
 
 state = 'OR' 
-file_path = config.local_ust_path + state + '\\'
+# Legacy script: set this to the directory containing the state's source folders.
+file_path = 'C:/path/to/OR/'
 ust_folder = None
 lust_folder = file_path + 'LUST'
 

@@ -1,9 +1,8 @@
-
-from ust.python.util import config
 from ust.python.util.import_service import ImportService
 
 state = 'TrUSTD' 
-file_path = config.local_ust_path + state + '\\'
+# Legacy script: set this to the directory containing the source export folders.
+file_path = 'C:/path/to/TrUSTD/'
 ust_folder = file_path + 'db_export/db_export'
 # lust_folder = file_path + 'db_export_lust'
 lust_folder = None

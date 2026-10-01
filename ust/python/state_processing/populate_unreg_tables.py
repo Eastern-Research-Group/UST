@@ -144,7 +144,7 @@ class Unregulated:
         unreg_reasons = ['Non-regulated substance', 'Heating oil', 'Small tank at farm/residence']
         self.connect_db()
         for table in tables:
-            sql = f"delete from {table} where unregulated_reason = any(array{unreg_reasons})"
+            sql = f"delete from {table} where unregulated_reason = any(array{unreg_reasons}) or unregulated_reason like 'Mapping exclusion:%%'"
             utils.process_sql(self.conn, self.cur, sql, print_sql=True)
             logger.info('Deleted %s rows from %s', self.cur.rowcount, table)
         self.disconnect_db()
@@ -200,6 +200,80 @@ class Unregulated:
         utils.process_sql(self.conn, self.cur, sql)
         logger.info('Inserted %s rows into %s due to unregulated heating oil', self.cur.rowcount, self.unreg.unreg_substance_table)
         self.disconnect_db() 
+
+
+    def insert_mapping_excluded_tanks(self):
+        """Record explicit tank-level exclusions directly from source data."""
+        if self.dataset.ust_or_release != 'ust':
+            return
+        self.connect_db()
+        try:
+            self.cur.execute("""select m.ust_element_mapping_id, m.epa_table_name,
+                       m.epa_column_name, coalesce(m.deagg_table_name, m.organization_table_name),
+                       coalesce(m.deagg_column_name, m.organization_column_name)
+                from public.ust_element_mapping m
+                where m.ust_control_id = %s
+                  and m.epa_table_name in ('ust_tank', 'ust_tank_substance')
+                  and exists (select 1 from public.ust_element_value_mapping v
+                              where v.ust_element_mapping_id=m.ust_element_mapping_id
+                                and v.exclude_from_query='Y')
+                order by m.ust_element_mapping_id""", (self.dataset.control_id,))
+            exclusions = self.cur.fetchall()
+            plans = []
+            # Validate every source before inserting anything. Never guess a join.
+            for mapping_id, epa_table, epa_column, source_table, source_column in exclusions:
+                self.cur.execute("""select epa_column_name, organization_column_name
+                    from public.ust_element_mapping
+                    where ust_control_id=%s and epa_table_name=%s
+                      and organization_table_name=%s
+                      and epa_column_name in ('facility_id','tank_id')""",
+                    (self.dataset.control_id, epa_table, source_table))
+                keys = dict(self.cur.fetchall())
+                if set(keys) != {'facility_id', 'tank_id'}:
+                    raise RuntimeError(
+                        f'Cannot record excluded tank mapping {mapping_id}: '
+                        f'{source_table} needs direct facility_id and tank_id mappings '
+                        f'for {epa_table}. Use a keyed intermediary view for joined sources.'
+                    )
+                plans.append((mapping_id, epa_table, epa_column, source_table, source_column, keys))
+            for mapping_id, epa_table, epa_column, source_table, source_column, keys in plans:
+                qi = self._quote_identifier
+                source = f'{qi(self.dataset.schema)}.{qi(source_table)}'
+                facility = f"nullif(trim(a.{qi(keys['facility_id'])}::text), '')"
+                tank = f'a.{qi(keys["tank_id"])}::text'
+                field = f'a.{qi(source_column)}::text'
+                # Empty substance denotes a tank-wide exclusion without substance data.
+                # Existing helper rows supply actual substances wherever available.
+                sql = f"""with excluded as (
+                    select distinct {facility} as facility_id,
+                        case when {tank} ~ '^[+-]?[0-9]+(\\.0+)?$'
+                             then ({tank})::numeric::integer end as tank_id,
+                        'Mapping exclusion: ' || %s || '=' || v.organization_value as reason
+                    from {source} a
+                    join public.ust_element_value_mapping v
+                      on v.ust_element_mapping_id=%s
+                     and v.organization_value={field}
+                     and v.exclude_from_query='Y'
+                ), candidates as (
+                    select e.facility_id,e.tank_id,
+                        coalesce(s.org_substance, '') as organization_substance,
+                        s.substance_id,s.epa_substance,
+                        string_agg(distinct e.reason, '; ' order by e.reason) as reason
+                    from excluded e
+                    left join {qi(self.dataset.schema)}.{qi(self.unreg.erg_substance_mapping_view)} s
+                      on s.facility_id=e.facility_id and s.tank_id=e.tank_id
+                    where e.facility_id is not null and e.tank_id is not null
+                    group by e.facility_id,e.tank_id,coalesce(s.org_substance, ''),s.substance_id,s.epa_substance
+                )
+                insert into {self.unreg.unreg_substance_table}
+                    (facility_id,tank_id,organization_substance,substance_id,epa_substance,unregulated_reason)
+                select facility_id,tank_id,organization_substance,substance_id,epa_substance,reason
+                from candidates
+                on conflict (facility_id,tank_id,organization_substance) do nothing"""
+                self.cur.execute(sql, (f'{epa_table}.{epa_column}', mapping_id))
+                logger.info('Inserted %s rows for explicit tank exclusion mapping %s.', self.cur.rowcount, mapping_id)
+        finally:
+            self.disconnect_db()
 
 
     def insert_parents(self):
@@ -271,6 +345,7 @@ class Unregulated:
         self.delete_existing_auto_inserts()
         self.insert_nonregulated_substances()
         self.insert_unregulated_tanks()
+        self.insert_mapping_excluded_tanks()
         self.insert_parents()
 
 

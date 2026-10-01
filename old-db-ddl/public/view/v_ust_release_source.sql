@@ -1,0 +1,8 @@
+CREATE OR REPLACE VIEW public.v_ust_release_source AS
+ SELECT b.release_control_id,
+    b.release_id AS "ReleaseID",
+    s.source AS "SourceOfRelease",
+    a.source_comment AS "SourceComment"
+   FROM ust_release_source a
+     JOIN ust_release b ON a.ust_release_id = b.ust_release_id
+     JOIN sources s ON a.source_id = s.source_id;

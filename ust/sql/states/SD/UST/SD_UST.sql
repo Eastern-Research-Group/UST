@@ -1171,6 +1171,7 @@ ust_facility
 ust_tank
 ust_tank_substance
 ust_compartment
+ust_piping
 */
 
 /*Step 3: check if there where any dataset-level comments you need to incorporate:
@@ -1194,6 +1195,8 @@ from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_facility'
 order by column_sort_order;
 
+
+
 /*Step 5: use the information from the queries above to create the view:
 !!! NOTE look at the programmer_comments column to adjust the view if necessary
 !!! NOTE also sometimes you need to explicitly cast data types so they match the EPA data tables
@@ -1204,7 +1207,7 @@ order by column_sort_order;
 !!! NOTE: Some states do not include State or EPA Region in their database, but it is generally
     safe for you to insert these yourself, so add them! (facility_state is a required field! */
 
-create or replace view sd_ust.v_ust_facility as 
+create or replace view sd_ust.erg_ust_facility as
 select distinct 
         "FacilityNumber"::character varying(50) as facility_id,
 "FacilityName"::character varying(100) as facility_name,
@@ -1224,13 +1227,13 @@ left join sd_ust.v_coordinate_source_xwalk cs on x."FacilityMethodDescription" =
 where "FacilityType" = 'UST';
 
 
-select facility_id from v_ust_facility group by facility_id having count(*) > 1;
+select facility_id from sd_ust.erg_ust_facility group by facility_id having count(*) > 1;
 
 select * from v_coordinate_source_xwalk;
 
 --review: 
-select * from sd_ust.v_ust_facility;
-select count(*) from sd_ust.v_ust_facility;
+select * from sd_ust.erg_ust_facility;
+select count(*) from sd_ust.erg_ust_facility;
 --3274
 --------------------------------------------------------------------------------------------------------------------------
 --now repeat for each data table:
@@ -1256,11 +1259,12 @@ NOTE: tank_id (integer) is a required field - if the state data does not contain
 
 select distinct "TankInstalledYear" from  sd_ust.tanks where "TankInstalledYear" ='1899';
 
-create or replace view sd_ust.v_ust_tank as 
+create or replace view sd_ust.erg_ust_tank as
 select distinct 
 "FacilityNumber"::character varying(50) as facility_id,
 "TankNumber"::integer as tank_id,
 "TankNumber"::character varying(50) as tank_name,
+NULL::integer as tank_location_id,
 COALESCE (ts.tank_status_id,8) tank_status_id , 
 case   when  "TankRemovedYear"  in ('04/10/1991','11/15/1989') then to_date("TankRemovedYear",'mm/dd/yyyy')   else to_date("TankRemovedYear"::varchar, 'yyyy') end as tank_closure_date,
 case when "TankInstalledYear" = '1899' then null --remove placeholder values from 1899 per SD
@@ -1278,7 +1282,7 @@ left join sd_ust.v_tank_material_description_xwalk md on x."TankConstructionName
 left join sd_ust.v_tank_secondary_containment_xwalk sc on x."TankConstructionName" = sc.organization_value
 where "FacilityType" = 'UST';
 
-select count(*) from sd_ust.v_ust_tank;
+select count(*) from sd_ust.erg_ust_tank;
 --10649
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -1306,21 +1310,35 @@ Substance
 /*be sure to do select distinct if necessary!
 NOTE: ADD facility_id::character varying(50) and tank_id::int!!!!
 */
-create or replace view sd_ust.v_ust_tank_substance as 
+create or replace view sd_ust.erg_ust_tank_substance as
 select distinct 
     "FacilityNumber"::character varying(50) as facility_id,
     c.tank_id as tank_id,
     sx.substance_id as substance_id
 from sd_ust.tanks x 
-join sd_ust.v_ust_tank c on x."FacilityNumber" = c.facility_id  and x."TankNumber" = c.tank_name::int
+join sd_ust.erg_ust_tank c on x."FacilityNumber" = c.facility_id  and x."TankNumber" = c.tank_name::int
 left join sd_ust.v_substance_xwalk sx on x."TankProduct" = sx.organization_value
 where x."TankProduct" is not null
 and "FacilityType" = 'UST';
 
+create or replace view sd_ust.erg_ust_compartment_substance as
+select distinct
+        s.facility_id,
+        s.tank_id,
+        case
+            when nullif(trim(x."TankCompartmentNumber"::text), '') is null then 1
+            else nullif(trim(x."TankCompartmentNumber"::text), '')::integer
+        end as compartment_id,
+        s.substance_id
+from sd_ust.erg_ust_tank_substance s
+join sd_ust.tanks x
+    on x."FacilityNumber" = s.facility_id
+ and x."TankNumber" = s.tank_id;
+
 
  
 
-select count(*) from sd_ust.v_ust_tank_substance;
+select count(*) from sd_ust.erg_ust_tank_substance;
 --10395
 
 
@@ -1345,13 +1363,16 @@ NOTE: compartment_id (integer) is a required field - if the state data does not 
 drop table sd_ust.erg_compartment;
 create table sd_ust.erg_compartment (facility_id character varying(50), tank_id int, compartment_id int generated always as identity);
 insert into sd_ust.erg_compartment (facility_id, tank_id)
-select  facility_id,tank_id from sd_ust.v_ust_tank;
+select  facility_id,tank_id from sd_ust.erg_ust_tank;
 
-create or replace view sd_ust.v_ust_compartment as 
+create or replace view sd_ust.erg_ust_compartment as 
 select distinct 
-c.facility_id as facility_id,
-c.tank_id,
-c.compartment_id,
+x."FacilityNumber"::character varying(50) as facility_id,
+x."TankNumber"::integer as tank_id,
+case
+    when nullif(trim(x."TankCompartmentNumber"::text), '') is null then 1
+    else nullif(trim(x."TankCompartmentNumber"::text), '')::integer
+end as compartment_id,
 "TankCompartmentNumber"::character varying(50) as compartment_name,
 "TankCapacityAmount"::integer as compartment_capacity_gallons,
 case "TankOverfillProtection" when 'Ball Float Valves' then 'Yes' end overfill_prevention_ball_float_valve,
@@ -1369,29 +1390,68 @@ case "TankReleaseDetection" when 'Groundwater Monitoring' then 'Yes' end tank_gr
 case "TankReleaseDetection" when 'Other' then 'Yes' end tank_other_release_detection,
 case "TankReleaseDetection" when 'Vapor Monitoring' then 'Yes' end tank_vapor_monitoring,
 COALESCE (ts.tank_status_id,8) compartment_status_id 
-from sd_ust.tanks x  
-join sd_ust.erg_compartment c on x."FacilityNumber" = c.facility_id and x."TankNumber" = c.tank_id
+from sd_ust.tanks x
 left join sd_ust.v_tank_status_xwalk ts on x."StatusName" = ts.organization_value;
 
-select * from v_ust_compartment;
+select * from sd_ust.erg_ust_compartment;
 
 
-select count(*) from v_ust_tank; 10645
-select count(*) from v_ust_compartment;10647
+select count(*) from sd_ust.erg_ust_tank; 10645
+select count(*) from sd_ust.erg_ust_compartment;10647
 
 select facility_id,tank_id
-from  v_ust_compartment
-where (facility_id,tank_id) not in (select facility_id,tank_id from v_ust_tank  )
+from  sd_ust.erg_ust_compartment
+where (facility_id,tank_id) not in (select facility_id,tank_id from sd_ust.erg_ust_tank  )
 
 
 --------------------------------------------------------------------------------------------------------------------------
 --ust_piping
 
-delete from sd_ust.erg_piping;
+drop table if exists sd_ust.erg_piping;
 
-create table sd_ust.erg_piping (facility_id character varying(50), tank_id int, compartment_id int, piping_id int generated always as identity);
-insert into sd_ust.erg_piping (facility_id, tank_id,compartment_id)
-select facility_id,tank_id,compartment_id from sd_ust.v_ust_compartment;
+create table sd_ust.erg_piping (
+    facility_id character varying(50),
+    tank_id integer,
+    compartment_id integer,
+    piping_id integer generated always as identity,
+    tank_piping_type text,
+    tank_piping_material text,
+    tank_piping_release_detection text
+);
+insert into sd_ust.erg_piping (
+    facility_id,
+    tank_id,
+    compartment_id,
+    tank_piping_type,
+    tank_piping_material,
+    tank_piping_release_detection
+)
+select distinct
+    c.facility_id,
+    c.tank_id,
+    c.compartment_id,
+    a."TankPipingType",
+    a."TankPipingMaterial",
+    a."TankPipingReleaseDetection"
+from sd_ust.tanks a
+join sd_ust.erg_ust_compartment c
+  on c.facility_id = a."FacilityNumber"
+ and c.tank_id = a."TankNumber"::integer
+ and c.compartment_id = case
+     when nullif(trim(a."TankCompartmentNumber"::text), '') is null then 1
+     else a."TankCompartmentNumber"::integer
+ end
+where not exists (
+    select 1 from sd_ust.erg_unregulated_facilities f
+    where nullif(trim(a."FacilityNumber"::text), '') = f.facility_id
+)
+and not exists (
+    select 1 from sd_ust.erg_unregulated_tanks t
+    where nullif(trim(a."FacilityNumber"::text), '') = t.facility_id
+      and a."TankNumber"::integer = t.tank_id
+);
+
+create index ix_erg_piping_keys on sd_ust.erg_piping (facility_id, tank_id, compartment_id);
 
 
 select organization_table_name_qtd, organization_column_name_qtd,
@@ -1403,9 +1463,9 @@ from v_ust_table_population_sql
 where ust_control_id = 9 and epa_table_name = 'ust_piping'
 order by column_sort_order;
 
-drop view v_ust_piping;
+drop view sd_ust.erg_ust_piping;
 
-create or replace view sd_ust.v_ust_piping as
+create or replace view sd_ust.erg_ust_piping as
 select   distinct
 c.piping_id::varchar(50) piping_id,
 c.facility_id as facility_id,
@@ -1430,9 +1490,25 @@ pwx.piping_wall_type_id as piping_wall_type_id,
 case "TankPipingReleaseDetection" when 'Secondary Containment' then 'Yes' end pipe_secondary_containment_other,
 case "TankPipingReleaseDetection" when 'Unknown' then 'Yes' end pipe_secondary_containment_unknown,
 case when "TankPipingMaterial" in ('Cath. Protection','Cath. Steel') then 'Yes' end  piping_corrosion_protection_sacrificial_anode,
-case when "TankPipingReleaseDetection" in ('None', 'Not Applicable', 'Unknown') then 'EPA has no acceptable mapping to the State Release Detection values for this piping data.' end piping_comment
-from sd_ust.tanks x 
-join sd_ust.erg_piping c on x."FacilityNumber" = c.facility_id  and x."TankNumber" = c.tank_id 
+case when "TankPipingReleaseDetection" in ('None', 'Not Applicable', 'Unknown') then 'EPA has no acceptable mapping to the State Release Detection values for this piping data.' end piping_comment,
+NULL::text as piping_release_detection_other,
+NULL::text as piping_line_leak_detector,
+NULL::text as piping_line_test_annual,
+NULL::text as piping_line_test3yr,
+NULL::text as piping_groundwater_monitoring,
+NULL::text as piping_vapor_monitoring,
+NULL::text as piping_interstitial_monitoring
+from sd_ust.tanks x
+join sd_ust.erg_piping c
+    on x."FacilityNumber" = c.facility_id
+ and x."TankNumber" = c.tank_id
+ and case
+         when nullif(trim(x."TankCompartmentNumber"::text), '') is null then 1
+         else x."TankCompartmentNumber"::integer
+ end = c.compartment_id
+ and x."TankPipingType" is not distinct from c.tank_piping_type
+ and x."TankPipingMaterial" is not distinct from c.tank_piping_material
+ and x."TankPipingReleaseDetection" is not distinct from c.tank_piping_release_detection
 left join sd_ust.v_piping_style_xwalk px on x."TankProduct" = px.organization_value
 left join sd_ust.v_piping_wall_type_xwalk pwx on x."TankProduct" = pwx.organization_value
 where "FacilityType" = 'UST';
@@ -1559,3 +1635,434 @@ export_file_name = None        # If export_file_path and export_file_dir/export_
 
 --------------------------------------------------------------------------------------------------------------------------
 
+
+select * from substances where substance like 'Mult%'
+
+select * from v_ust_mapping
+where ust_control_id = 9
+and epa_column_name like '%substance%'
+and organization_value in ('Diesel/E85','Gas/Diesel','Gas/E85')
+order by organization_value;
+
+
+update ust_element_value_mapping 
+set epa_value = 'Multiple products listed'
+where ust_element_mapping_id in 
+	(select ust_element_mapping_id from ust_element_mapping where ust_control_id = 9
+	and epa_column_name like '%substance%')
+and organization_value in ('Diesel/E85','Gas/Diesel','Gas/E85')
+
+
+
+select * from v_ust_mapping
+where ust_control_id = 9
+and epa_column_name like '%piping_st%'
+
+518
+
+select * from piping_styles 
+
+update ust_element_value_mapping set epa_value = 'Siphon'
+where ust_element_value_mapping_id = 518;
+
+
+
+The Piping Tightness Testing data needs clarification, if SD has Tightness Testing for Piping Release Detection 
+and the Piping Style is Pressure, then it maps to PipingLineTestAnnual.  
+If the Piping Style is Suction, then it is PipingLineTest3yr. 
+
+select * from v_ust_element_metadata where element_name = 'PipingLineTest3yr'
+
+
+select * from v_ust_mapping
+where ust_control_id = 9
+and epa_column_name like '%annu%'
+
+select * from sd_ust.v_piping_tightness_testing;
+
+select * from v_ust_mapping
+where ust_control_id = 9
+and epa_column_name like '%inters%'
+
+TankPipingReleaseDetection
+when in ('Secondary Containment', 'Sump Sensor', 'PPM 4000') then  'Yes' else null end
+
+select * from sd_ust.v_ust_piping 
+where piping_interstitial_monitoring is not null;
+
+
+select * from v_ust_piping
+where ust_control_id = 9
+and "PipingInterstitialMonitoring" is not null;
+
+select * from v_ust_piping where "FacilityID" = '01-00024'
+
+
+
+when "TankPipingReleaseDetection" = 'Tightness Testing' and 
+
+then 'Yes' else null end
+
+select "FacilityNumber", "TankNumber", 
+
+
+
+select * from ust_element_mapping where ust_element_mapping_id = 3381
+
+update ust_element_mapping set query_logic = 'where "TankOverfillProtection" = ''Automatic Shutoff Device'' then ''Yes'' ' 
+where  ust_element_mapping_id = 3381
+
+update public.ust_element_mapping
+set query_logic =
+    'when ''Automatic Shutoff Device'' then ''Yes'' else null end'
+where ust_element_mapping_id = 3381
+  and ust_control_id = 9;
+
+select * from  v_ust_mapping
+where ust_control_id = 9
+and epa_column_name = 'number_of_compartments'
+
+select * from information_schema.columns 
+where table_schema = 'public' and table_name = 'ust_element_mapping'
+
+update ust_element_mapping 
+set organization_table_name = 'erg_number_of_compartments', organization_column_name = 'number_of_compartments', query_logic = null,
+organization_join_table = 'tanks', 
+organization_join_column = 'FacilityNumber', 
+organization_join_column2 = 'TankNumber'
+where ust_element_mapping_id = 726
+
+sd_ust.getmaxcompartment(x."FacilityNumber"::character varying, x."TankNumber")
+
+create table sd_ust.erg_number_of_compartments as
+select "FacilityNumber", "TankNumber", max("TankCompartmentNumber")::int4 as number_of_compartments
+from sd_ust.tanks 
+group by "FacilityNumber", "TankNumber"
+
+
+select * from tank_statuses 
+
+select * from sd_ust.tanks where "FacilityNumber" = '1200007'
+
+select * from sd_ust.tanks where "TankCompartmentNumber" <> 1;
+
+
+select * from sd_ust.erg_unregulated_tanks 
+
+
+select * from v_ust_element_mapping where ust_control_id = 9;
+
+
+select distinct "FacilityType" from sd_ust.tanks;
+
+select * from sd_ust.erg_unregulated_facilities 
+
+insert into sd_ust.erg_unregulated_facilities 
+select distinct "FacilityNumber", 'FacilityType = AST'
+from sd_ust.tanks
+where  "FacilityType" = 'AST'
+
+delete from sd_ust.erg_unregulated_tanks
+where facility_id in 
+	(select "FacilityNumber" from sd_ust.tanks
+	where  "FacilityType" = 'AST')
+
+delete from sd_ust.erg_unregulated_facilities
+where facility_id in 
+	(select "FacilityNumber" from sd_ust.tanks
+	where  "FacilityType" = 'AST')
+
+	insert into sd_ust.erg_unregulated_facilities 
+select distinct "FacilityNumber", 'FacilityType = AST'
+from sd_ust.tanks
+where  "FacilityType" = 'AST'
+
+update ust_control set organization_compartment_flag = 'Y' where ust_control_id = 9;
+
+/*
+ * Store SD-specific row shaping in the erg_ intermediary views defined in
+ * SD_UST_custom_views_current.sql.  Each EPA column now maps directly to the
+ * same-named column on one intermediary object, so generate-views only emits
+ * projections and standard parent/exclusion joins.
+ */
+update public.ust_element_mapping m
+set organization_table_name = 'erg_' || m.epa_table_name,
+        organization_column_name = m.epa_column_name,
+        organization_join_table = null,
+        organization_join_column = null,
+        organization_join_fk = null,
+        organization_join_column2 = null,
+        organization_join_fk2 = null,
+        organization_join_column3 = null,
+        organization_join_fk3 = null,
+        query_logic = null,
+        programmer_comments = 'SD-specific transformations and row shaping are materialized in sd_ust.' || 'erg_' || m.epa_table_name || '; this mapping is intentionally 1:1.'
+where m.ust_control_id = 9
+    and m.epa_table_name in ('ust_facility', 'ust_tank', 'ust_tank_substance', 'ust_compartment', 'ust_compartment_substance', 'ust_piping');
+
+insert into public.ust_element_mapping
+        (ust_control_id, epa_table_name, epa_column_name,
+         organization_table_name, organization_column_name, programmer_comments)
+select x.ust_control_id, x.epa_table_name, x.epa_column_name,
+             x.organization_table_name, x.organization_column_name, x.programmer_comments
+from (values
+        (9, 'ust_tank_substance', 'tank_id', 'erg_ust_tank_substance', 'tank_id', 'Materialized SD tank-substance intermediary key.'),
+        (9, 'ust_compartment', 'tank_id', 'erg_ust_compartment', 'tank_id', 'Materialized SD compartment intermediary parent key.'),
+        (9, 'ust_compartment', 'compartment_id', 'erg_ust_compartment', 'compartment_id', 'Materialized SD compartment identifier.'),
+        (9, 'ust_compartment', 'compartment_status_id', 'erg_ust_compartment', 'compartment_status_id', 'Materialized SD compartment status mapping.'),
+        (9, 'ust_piping', 'tank_id', 'erg_ust_piping', 'tank_id', 'Materialized SD piping intermediary parent key.'),
+        (9, 'ust_piping', 'compartment_id', 'erg_ust_piping', 'compartment_id', 'Materialized SD piping intermediary compartment key.'),
+        (9, 'ust_piping', 'piping_id', 'erg_ust_piping', 'piping_id', 'Materialized SD piping identifier.'),
+        (9, 'ust_piping', 'piping_line_test3yr', 'erg_ust_piping', 'piping_line_test3yr', 'Materialized SD suction tightness-testing classification.'),
+        (9, 'ust_compartment_substance', 'facility_id', 'erg_ust_compartment_substance', 'facility_id', 'Materialized SD compartment-substance facility key.'),
+        (9, 'ust_compartment_substance', 'tank_id', 'erg_ust_compartment_substance', 'tank_id', 'Materialized SD compartment-substance tank key.'),
+        (9, 'ust_compartment_substance', 'compartment_id', 'erg_ust_compartment_substance', 'compartment_id', 'Materialized SD compartment-substance identifier from TankCompartmentNumber.'),
+        (9, 'ust_compartment_substance', 'substance_id', 'erg_ust_compartment_substance', 'substance_id', 'Materialized SD compartment-substance product mapping.')
+) as x(ust_control_id, epa_table_name, epa_column_name, organization_table_name, organization_column_name, programmer_comments)
+where not exists (
+        select 1
+        from public.ust_element_mapping existing
+        where existing.ust_control_id = x.ust_control_id
+            and existing.epa_table_name = x.epa_table_name
+            and existing.epa_column_name = x.epa_column_name
+);
+
+        update public.ust_element_mapping
+        set organization_table_name = 'tanks',
+            organization_column_name = 'TankCompartmentNumber',
+            query_logic = 'case when nullif(trim("TankCompartmentNumber"::text), '''') is null then 1 else nullif(trim("TankCompartmentNumber"::text), '''')::integer end',
+            organization_join_table = null,
+            organization_join_column = null,
+            organization_join_fk = null,
+            organization_join_column2 = null,
+            organization_join_fk2 = null,
+            organization_join_column3 = null,
+            organization_join_fk3 = null,
+            programmer_comments = 'SD source has one row per affected tank when TankCompartmentNumber is blank; treat those 37 UST rows as compartment 1.'
+        where ust_control_id = 9
+          and epa_table_name in ('ust_compartment', 'ust_compartment_substance', 'ust_piping')
+          and epa_column_name = 'compartment_id';
+
+	
+Number of duplicated key columns in sd_ust.v_ust_compartment: 15
+Number of duplicated key columns in sd_ust.v_ust_piping: 2
+
+
+select * from v_ust_mapping
+where ust_control_id = 9
+and epa_table_name = 'ust_compartment_substance'
+
+insert into ust_element_value_mapping (ust_element_mapping_id, organization_value,epa_value)
+select 4451, organization_value,epa_value
+from v_ust_mapping
+where ust_control_id = 9
+and epa_table_name = 'ust_tank_substance'
+and epa_column_name = 'substance_id'
+
+select * from ust_element_mapping where ust_control_id = 9;
+
+
+select * from v_ust_mapping
+where ust_control_id = 9
+and epa_column_name like '%pip%mon%'
+
+case when "TankPipingReleaseDetection" in ('Sump Sensor','PPM 4000') then 'Yes' 
+
+select distinct "TankPipingType" from sd_ust.tanks order by 1;
+
+select distinct "FacilityType" from sd_ust.tanks order by 1;
+
+select --"FacilityNumber", "TankNumber", 
+	"TankPipingReleaseDetection", "TankPipingType", count(*)
+from sd_ust.tanks
+where "TankPipingReleaseDetection" in ('Sump Sensor','PPM 4000')
+and "TankPipingType" not in ('Safe Suction', 'Siphon','Gravity Fed','Gravity Feed')
+and "FacilityType" = 'UST'
+group by "TankPipingReleaseDetection", "TankPipingType"
+
+
+select distinct "FacilityNumber", "TankNumber", 
+	"TankPipingReleaseDetection", "TankPipingType"
+from sd_ust.tanks
+where "TankPipingReleaseDetection" in ('Sump Sensor','PPM 4000')
+and "TankPipingType" not in ('Safe Suction', 'Siphon','Gravity Fed','Gravity Feed')
+and "FacilityType" = 'UST'
+
+01-00034	6.0
+01-00034	7.0
+
+
+select facility_id, tank_id, compartment_id, piping_id, piping_interstitial_monitoring
+from sd_ust.v_ust_piping 
+where facility_id = '01-00034' and tank_id in (6,7)
+
+01-00034	6	1	90	Yes
+01-00034	7	1	91	Yes
+
+select * from sd_ust.v_ust_facility
+where facility_id = '01-00034'
+
+select "FacilityID", "TankID", "CompartmentID", "PipingID", "PipingInterstitialMonitoring"
+from v_ust_piping
+where "FacilityID" = '01-00034'
+
+select * from ust_piping 
+where ust_compartment_id in 
+	(select ust_compartment_id from ust_compartment 
+	where ust_tank_id in 
+		(select ust_tank_id from ust_tank 
+		where tank_id in (6,7)
+		and ust_facility_id in 
+			(select ust_facility_id from ust_facility 
+			where ust_control_id = 9 and facility_id = '01-00034')))
+
+			
+			
+
+WITH mapped AS (
+
+         SELECT DISTINCT (a."FacilityNumber")::character varying(50) AS facility_id,
+            (a."FacilityName")::character varying(100) AS facility_name,
+            (a."FacilityAddress1Text")::character varying(100) AS facility_address1,
+            (a."FacilityAddress2Text")::character varying(100) AS facility_address2,
+            (a."FacilityCity")::character varying(100) AS facility_city,
+            (a."FacilityCounty")::character varying(100) AS facility_county,
+            (a."FacilityZipCode")::character varying(10) AS facility_zip_code,
+            'SD'::text AS facility_state,
+            8 AS facility_epa_region,
+            (a."FacilityLatitudeValue")::double precision AS facility_latitude,
+            a."FacilityLongitudeValue" AS facility_longitude,
+            b.coordinate_source_id,
+            (a."OwnerName")::character varying(100) AS facility_owner_company_name
+           FROM (sd_ust.tanks a
+             LEFT JOIN sd_ust.v_coordinate_source_xwalk b ON ((a."FacilityMethodDescription" = (b.organization_value)::text)))
+          WHERE  "FacilityNumber" = '01-00034'
+          and NOT EXISTS ( SELECT 1
+                           FROM sd_ust.erg_unregulated_facilities unreg
+                           WHERE (NULLIF(TRIM(BOTH FROM a."FacilityNumber"), ''::text) = (unreg.facility_id)::text))
+                  AND COALESCE(b.exclude_from_query, 'N'::character varying)::text <> 'Y'::text
+        ), 
+        
+        
+        duplicate_ids AS (
+         SELECT mapped.facility_id
+           FROM mapped
+          GROUP BY mapped.facility_id
+         HAVING (count(*) > 1)
+        ), 
+        
+        coordinates AS (
+         SELECT DISTINCT ON (m.facility_id) m.facility_id,
+            m.facility_latitude,
+            m.facility_longitude,
+            m.coordinate_source_id
+           FROM (mapped m
+             JOIN duplicate_ids d USING (facility_id))
+          ORDER BY m.facility_id, ((m.facility_latitude IS NOT NULL) AND (m.facility_longitude IS NOT NULL) AND ((m.facility_latitude <> (0)::double precision) OR (m.facility_longitude <> (0)::double precision))) DESC, (m.coordinate_source_id IS NOT NULL) DESC, m.facility_latitude, m.facility_longitude, m.coordinate_source_id
+        )
+ SELECT m.facility_id,
+    m.facility_name,
+    m.facility_address1,
+    m.facility_address2,
+    m.facility_city,
+    m.facility_county,
+    m.facility_zip_code,
+    m.facility_state,
+    m.facility_epa_region,
+    m.facility_latitude,
+    m.facility_longitude,
+    m.coordinate_source_id,
+    m.facility_owner_company_name
+   FROM mapped m
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM duplicate_ids d
+          WHERE ((d.facility_id)::text = (m.facility_id)::text))))
+UNION ALL
+ SELECT m.facility_id,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_name), ''::text)))::character varying(100) AS facility_name,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_address1), ''::text)))::character varying(100) AS facility_address1,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_address2), ''::text)))::character varying(100) AS facility_address2,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_city), ''::text)))::character varying(100) AS facility_city,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_county), ''::text)))::character varying(100) AS facility_county,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_zip_code), ''::text)))::character varying(10) AS facility_zip_code,
+    min(NULLIF(TRIM(BOTH FROM m.facility_state), ''::text)) AS facility_state,
+    max(m.facility_epa_region) AS facility_epa_region,
+    max(g.facility_latitude) AS facility_latitude,
+    max(g.facility_longitude) AS facility_longitude,
+    max(g.coordinate_source_id) AS coordinate_source_id,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_owner_company_name), ''::text)))::character varying(100) AS facility_owner_company_name
+   FROM (mapped m
+     JOIN coordinates g ON (((g.facility_id)::text = (m.facility_id)::text)))
+  GROUP BY m.facility_id;
+
+        
+        
+        
+ WITH mapped AS (
+         SELECT DISTINCT (a."FacilityNumber")::character varying(50) AS facility_id,
+            (a."FacilityName")::character varying(100) AS facility_name,
+            (a."FacilityAddress1Text")::character varying(100) AS facility_address1,
+            (a."FacilityAddress2Text")::character varying(100) AS facility_address2,
+            (a."FacilityCity")::character varying(100) AS facility_city,
+            (a."FacilityCounty")::character varying(100) AS facility_county,
+            (a."FacilityZipCode")::character varying(10) AS facility_zip_code,
+            'SD'::text AS facility_state,
+            8 AS facility_epa_region,
+            (a."FacilityLatitudeValue")::double precision AS facility_latitude,
+            a."FacilityLongitudeValue" AS facility_longitude,
+            b.coordinate_source_id,
+            (a."OwnerName")::character varying(100) AS facility_owner_company_name
+           FROM (sd_ust.tanks a
+             LEFT JOIN sd_ust.v_coordinate_source_xwalk b ON ((a."FacilityMethodDescription" = (b.organization_value)::text)))
+          WHERE ((NOT (EXISTS ( SELECT 1
+                   FROM sd_ust.erg_unregulated_facilities unreg
+                  WHERE (NULLIF(TRIM(BOTH FROM a."FacilityNumber"), ''::text) = (unreg.facility_id)::text)))) AND ((COALESCE(b.exclude_from_query, 'N'::character varying))::text <> 'Y'::text))
+        ), duplicate_ids AS (
+         SELECT mapped.facility_id
+           FROM mapped
+          GROUP BY mapped.facility_id
+         HAVING (count(*) > 1)
+        ), coordinates AS (
+         SELECT DISTINCT ON (m.facility_id) m.facility_id,
+            m.facility_latitude,
+            m.facility_longitude,
+            m.coordinate_source_id
+           FROM (mapped m
+             JOIN duplicate_ids d USING (facility_id))
+          ORDER BY m.facility_id, ((m.facility_latitude IS NOT NULL) AND (m.facility_longitude IS NOT NULL) AND ((m.facility_latitude <> (0)::double precision) OR (m.facility_longitude <> (0)::double precision))) DESC, (m.coordinate_source_id IS NOT NULL) DESC, m.facility_latitude, m.facility_longitude, m.coordinate_source_id
+        )
+ SELECT m.facility_id,
+    m.facility_name,
+    m.facility_address1,
+    m.facility_address2,
+    m.facility_city,
+    m.facility_county,
+    m.facility_zip_code,
+    m.facility_state,
+    m.facility_epa_region,
+    m.facility_latitude,
+    m.facility_longitude,
+    m.coordinate_source_id,
+    m.facility_owner_company_name
+   FROM mapped m
+  WHERE (NOT (EXISTS ( SELECT 1
+           FROM duplicate_ids d
+          WHERE ((d.facility_id)::text = (m.facility_id)::text))))
+  and m.facility_id =  '01-00034'
+UNION ALL
+ SELECT m.facility_id,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_name), ''::text)))::character varying(100) AS facility_name,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_address1), ''::text)))::character varying(100) AS facility_address1,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_address2), ''::text)))::character varying(100) AS facility_address2,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_city), ''::text)))::character varying(100) AS facility_city,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_county), ''::text)))::character varying(100) AS facility_county,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_zip_code), ''::text)))::character varying(10) AS facility_zip_code,
+    min(NULLIF(TRIM(BOTH FROM m.facility_state), ''::text)) AS facility_state,
+    max(m.facility_epa_region) AS facility_epa_region,
+    max(g.facility_latitude) AS facility_latitude,
+    max(g.facility_longitude) AS facility_longitude,
+    max(g.coordinate_source_id) AS coordinate_source_id,
+    (min(NULLIF(TRIM(BOTH FROM m.facility_owner_company_name), ''::text)))::character varying(100) AS facility_owner_company_name
+   FROM (mapped m
+     JOIN coordinates g ON (((g.facility_id)::text = (m.facility_id)::text)))
+  GROUP BY m.facility_id

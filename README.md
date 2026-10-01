@@ -19,6 +19,8 @@ If `ust` is not available yet in your current shell session, activate the enviro
 
 From the workspace root, create or activate a Python environment and install the project in editable mode.
 
+Copy `.env_example` to `.env` and fill in the local database credentials and other settings. Process environment variables with the same `UST_*` names take precedence over values in `.env`; set `UST_ENV_FILE` to use a different dotenv file.
+
 Windows PowerShell:
 
 ```powershell
@@ -43,6 +45,48 @@ Notes:
 - The editable install exposes the `ust` command-line entrypoint
 - Some state-specific scripts rely on optional third-party packages or local credentials; those are only required when you run those specific scripts
 
+To recreate indexes after a PostgreSQL migration, preview the catalog-derived statements first:
+
+```bash
+python -m ust.python.backups.create_indexes
+```
+
+Apply the statements only after reviewing the preview:
+
+```bash
+python -m ust.python.backups.create_indexes --apply
+```
+
+The script uses the current database connection and recreates indexes for foreign-key columns plus the existing public lookup and UST/Release ID-column conventions. Dropped custom indexes cannot be recovered from PostgreSQL catalog metadata alone.
+
+## Export database DDL
+
+```powershell
+ust save-ddl
+ust save-ddl --schema or_ust --output ddl-snapshot
+ust save-ddl --object-name ust_facility
+```
+
+Uses the configured database and defaults to `public`, writing UTF-8 SQL files
+under the repository's `ust/sql/ddl/<schema>/{table,view,materialized_view,function}`.
+`--output` changes the base directory. Existing matching files are overwritten;
+files for objects no longer present are not deleted. Use a new output directory
+for a separate snapshot. Temp/backup object names are excluded by default; `--include-temp-backup` includes them. `--object-name` matches
+an exact name and includes every overload of a selected routine in one file.
+
+The exporter reads one consistent, read-only snapshot and completes database
+queries before writing files. Table definitions require the existing database
+function `public.generate_create_table_statement(varchar, varchar)`; it does not
+install or change that helper. Constraints and standalone indexes are appended
+to table files. Function/procedure definitions come directly from PostgreSQL.
+
+These are per-object review scripts, not a complete restorable database backup:
+table definitions inherit the helper's limitations, and dependencies such as
+sequences, types, triggers, ownership, and grants are not exported separately.
+Use a PostgreSQL schema dump when a complete schema backup is required.
+`python main.py save-ddl` supports the same options. Exit codes: 0 for success,
+1 for an export error.
+
 ## CLI
 
 The repository exposes a small command-line wrapper through the `ust` package entrypoint (preferred) and [main.py](main.py) (fallback).
@@ -61,8 +105,9 @@ python main.py <command> [options]
 
 Available commands:
 
+- `test-connections`: test the configured PostgreSQL database with a read-only query
 - `scaffold-template`: create a state SQL template and replace XX/ZZ placeholders
-- `import-files`: import source files into a state schema
+- `import-files`: import one `.csv`, `.xls`, `.xlsx`, or `.txt` file, or scan a directory for supported source files; use `--table-name` to override the file-derived table name when the import resolves to a single file (one name per worksheet, in worksheet order, for a multi-tab workbook)
 - `init-dataset`: create a control row and initialize unregulated tables/views
 - `create-unreg`: create or recreate unregulated helper tables/views
 - `generate-views`: generate table population view SQL
@@ -70,9 +115,10 @@ Available commands:
 - `generate-value-mapping`: generate value mapping SQL scaffold
 - `export-substance-mapping`: export substance mapping workbook
 - `mapping-xwalks`: create mapping crosswalk views
-- `audit-dataset`: audit existing element/value mappings and source-schema readiness before generating views
+- `audit-dataset` (or `dataset-audit`): audit existing element/value mappings and source-schema readiness before generating views
 - `create-missing-ids`: create missing required ID tables
 - `populate-unreg`: populate unregulated helper tables; it reuses existing tables, `--delete-auto-inserts` clears only rows inserted by this script, and `--delete-all` recreates the helper tables from scratch
+  Explicit `exclude_from_query = 'Y'` mappings on `ust_tank` and `ust_tank_substance` also populate tank exclusions from raw source rows, with a `Mapping exclusion:` reason. These require direct facility/tank key mappings on the source relation; joined sources need a keyed intermediary view. Compartment/piping exclusions are not promoted to whole-tank exclusions. Use `--delete-auto-inserts` to rebuild automatic exclusions after changing mappings.
 - `exclude-unregulated`: generate/execute unregulated exclusion SQL for views
 - `qa`: run QA checks and export a QA workbook
 - `populate`: load data from state views into public EPA tables
@@ -87,17 +133,23 @@ Available commands:
 Examples:
 
 ```bash
+ust test-connections
+ust test-connections --timeout 20
 ust validate
 ust validate --skip-tests
 ust scaffold-template --type ust --organization-id MA
 ust scaffold-template --type ust --organization-id MA --control-id 123 --overwrite
 ust profile use ma-ust && ust scaffold-template --yes
 ust import-files --type ust --organization-id TX --path "C:/data/TX"
+ust import-files --type ust --organization-id TX --path "C:/data/TX/source.xlsx"
+ust import-files --type ust --organization-id TX --path "C:/data/TX/really long name.csv" --table-name tanks
+ust import-files --type ust --organization-id TX --path "C:/data/TX/two tabs.xlsx" --table-name tanks releases
 ust init-dataset --type release --organization-id MA --data-source "State API export"
 ust generate-views --type ust --control-id 123
 ust generate-deagg --type ust --control-id 123
 ust generate-value-mapping --type ust --control-id 123 --append
-ust export-substance-mapping --type ust --control-id 123 --no-email
+ust export-substance-mapping --type ust --control-id 123
+ust export-substance-mapping --type ust --control-id 123 --email
 ust mapping-xwalks --type ust --control-id 123
 ust audit-dataset --type ust --control-id 123
 ust audit-dataset --type ust --control-id 123 --fix-source-identifiers --fix-query-logic
@@ -107,6 +159,8 @@ ust populate-unreg --type ust --control-id 123 --delete-auto-inserts
 ust exclude-unregulated --type ust --control-id 123 --print-sql
 ust qa --type ust --control-id 123 --organization-id TX
 ust qa --type ust --control-id 123 --organization-id TX --fast
+ust qa --type ust --control-id 123 --organization-id TX --materialize-views
+ust qa --type ust --control-id 123 --organization-id TX --no-materialize-views
 ust generate-views --type ust --control-id 123 --preflight-only
 ust generate-views --type ust --control-id 123 --table-name ust_facility --preflight-only --strict-mapping
 ust qa --type ust --control-id 123 --organization-id TX --dry-run

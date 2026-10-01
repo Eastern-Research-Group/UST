@@ -36,7 +36,7 @@ class ImportServiceTests(unittest.TestCase):
             overwrite_table=False,
         )
 
-        importer_cls.assert_called_once_with("MA", "release", r"C:\\tmp\\data", False)
+        importer_cls.assert_called_once_with("MA", "release", r"C:\\tmp\\data", False, None)
         importer_cls.return_value.save_files_to_db.assert_called_once_with()
 
 
@@ -108,6 +108,54 @@ class DatabaseImporterTests(unittest.TestCase):
                 sorted([str(csv_file), str(workbook_file)]),
                 importer.get_files(),
             )
+
+    def test_normalize_table_names_cleans_and_rejects_duplicates(self):
+        self.assertIsNone(DatabaseImporter.normalize_table_names(None))
+        self.assertEqual(["my_table"], DatabaseImporter.normalize_table_names(" my table "))
+        self.assertEqual(["a", "b"], DatabaseImporter.normalize_table_names(["a", "b"]))
+        with self.assertRaises(ValueError):
+            DatabaseImporter.normalize_table_names(["a", "A"])
+        with self.assertRaises(ValueError):
+            DatabaseImporter.normalize_table_names("   ")
+
+    def test_validate_table_names_rejects_multiple_files(self):
+        importer = DatabaseImporter.__new__(DatabaseImporter)
+        importer.table_names = ["my_table"]
+        importer.file_path = r"C:\\tmp"
+
+        with self.assertRaises(ValueError):
+            importer.validate_table_names(["one.csv", "two.csv"])
+
+    def test_validate_table_names_rejects_extra_names_for_single_csv(self):
+        importer = DatabaseImporter.__new__(DatabaseImporter)
+        importer.table_names = ["one", "two"]
+        importer.file_path = r"C:\\tmp\\source.csv"
+
+        with self.assertRaises(ValueError):
+            importer.validate_table_names([r"C:\\tmp\\source.csv"])
+
+    def test_validate_table_names_rejects_existing_table_when_not_overwriting(self):
+        importer = DatabaseImporter.__new__(DatabaseImporter)
+        importer.table_names = ["my_table"]
+        importer.file_path = r"C:\\tmp\\source.csv"
+        importer.overwrite_table = False
+        importer.schema = "tn_ust"
+        importer.existing_tables = ["my_table", "my_table_2"]
+
+        with patch.object(DatabaseImporter, "set_existing_tables", lambda self: None):
+            with self.assertRaises(ValueError) as context:
+                importer.validate_table_names([r"C:\\tmp\\source.csv"])
+
+        self.assertIn("my_table_3", str(context.exception))
+
+    def test_get_override_table_name_returns_none_without_override(self):
+        importer = DatabaseImporter.__new__(DatabaseImporter)
+        importer.table_names = None
+
+        self.assertIsNone(importer.get_override_table_name())
+
+        importer.table_names = ["first", "second"]
+        self.assertEqual("second", importer.get_override_table_name(1))
 
 
 class PeerReviewTests(unittest.TestCase):
@@ -664,6 +712,48 @@ class ExcludeUnregulatedTests(unittest.TestCase):
 
 
 class UnregulatedPopulationTests(unittest.TestCase):
+    def test_mapping_exclusions_use_raw_source_and_tank_keys(self):
+        u = Unregulated.__new__(Unregulated)
+        u.dataset = SimpleNamespace(ust_or_release="ust", control_id=9, schema="sd_ust")
+        u.unreg = SimpleNamespace(erg_substance_mapping_view="vw_erg_substance_mapping",
+                                  unreg_substance_table="sd_ust.erg_unregulated_tanks")
+        u.cur = unittest.mock.MagicMock()
+        u.connect_db = unittest.mock.MagicMock()
+        u.disconnect_db = unittest.mock.MagicMock()
+        u.cur.fetchall.side_effect = [
+            [(727, "ust_tank", "tank_material_description_id", "tanks", "TankConstructionName")],
+            [("facility_id", "FacilityNumber"), ("tank_id", "TankNumber")],
+        ]
+        u.insert_mapping_excluded_tanks()
+        sql, params = u.cur.execute.call_args.args
+        self.assertIn('from "sd_ust"."tanks" a', sql)
+        self.assertIn("v.exclude_from_query='Y'", sql)
+        self.assertIn("e.tank_id is not null", sql)
+        self.assertIn("on conflict (facility_id,tank_id,organization_substance) do nothing", sql)
+        self.assertEqual(("ust_tank.tank_material_description_id", 727), params)
+        self.assertNotIn("v_ust_tank", sql)
+        u.disconnect_db.assert_called_once()
+
+    def test_mapping_exclusions_reject_sources_without_resolvable_keys(self):
+        u = Unregulated.__new__(Unregulated)
+        u.dataset = SimpleNamespace(ust_or_release="ust", control_id=9, schema="sd_ust")
+        u.cur = unittest.mock.MagicMock()
+        u.connect_db = unittest.mock.MagicMock()
+        u.disconnect_db = unittest.mock.MagicMock()
+        u.cur.fetchall.side_effect = [[(727, "ust_tank", "material", "joined_source", "value")], []]
+        with self.assertRaisesRegex(RuntimeError, "keyed intermediary view"):
+            u.insert_mapping_excluded_tanks()
+        self.assertEqual(2, u.cur.execute.call_count)
+        u.disconnect_db.assert_called_once()
+
+    def test_mapping_exclusions_do_not_promote_release_or_child_exclusions(self):
+        u = Unregulated.__new__(Unregulated)
+        u.dataset = SimpleNamespace(ust_or_release="release")
+        u.connect_db = unittest.mock.MagicMock()
+        u.insert_mapping_excluded_tanks()
+        u.connect_db.assert_not_called()
+
+
     @patch.object(utils, "process_sql")
     def test_check_missing_substance_mappings_reports_insert_sql(self, process_sql_mock):
         unregulated = Unregulated.__new__(Unregulated)
@@ -688,6 +778,24 @@ class UnregulatedPopulationTests(unittest.TestCase):
 
 
 class UnregTablesTests(unittest.TestCase):
+    def test_refresh_casts_preserve_existing_types_and_default_new_columns(self):
+        unreg = UnregTables.__new__(UnregTables)
+        unreg.dataset = SimpleNamespace(schema="sd_ust")
+        unreg.cur = unittest.mock.MagicMock()
+        unreg.cur.fetchall.return_value = [
+            ("facility_id", "text"), ("org_substance", "character varying(255)"),
+            ("tank_id", "double precision"),
+        ]
+        unreg._load_existing_view_types("vw_erg_substance_mapping")
+        self.assertEqual("a.id::text", unreg._cast_unreg_view_col("facility_id", "a.id"))
+        self.assertEqual("a.product::character varying(255)", unreg._cast_unreg_view_col("org_substance", "a.product"))
+        self.assertEqual("a.tank::double precision", unreg._cast_unreg_view_col("tank_id", "a.tank"))
+        self.assertEqual("s.id::int", unreg._cast_unreg_view_col("substance_id", "s.id"))
+        unreg.cur.fetchall.return_value = []
+        unreg._load_existing_view_types("new_view")
+        self.assertEqual("a.id::varchar(50)", unreg._cast_unreg_view_col("facility_id", "a.id"))
+
+
     @patch.object(utils, "process_sql")
     def test_build_join_predicate_uses_actual_join_table_column_case(self, process_sql_mock):
         unreg = UnregTables.__new__(UnregTables)
@@ -1057,7 +1165,7 @@ class ViewSqlTests(unittest.TestCase):
         existing_cols = view_sql.get_existing_cols()
 
         self.assertEqual(
-            "case when nullif(trim(a.\"compartment_id\"::text), '') ~ '^[+-]?\\d+$' then nullif(trim(a.\"compartment_id\"::text), '')::integer else null::integer end as compartment_id",
+            'a."compartment_id"::integer as compartment_id',
             existing_cols[10]["selected_column"],
         )
 

@@ -2,7 +2,7 @@
 import pandas as pd
 
 from ust.python.util.logger_factory import logger
-from ust.python.util import config, utils
+from ust.python.util import utils
 
 
 def main(ust_or_lust):
@@ -47,7 +47,8 @@ def main(ust_or_lust):
     print(df)
 
     file_name = ust_or_lust.upper() + '_data_element_analysis_' + utils.get_today_string() + '.xlsx'
-    file_path = config.local_ust_path + file_name 
+    # Legacy script: set this to the desired output directory before running.
+    file_path = 'C:/path/to/output/' + file_name
     df.to_excel(file_path, index=False)
 
     cur.close()

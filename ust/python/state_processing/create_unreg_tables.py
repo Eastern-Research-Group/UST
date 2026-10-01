@@ -20,7 +20,6 @@ class UnregTables:
     unreg_parent_table = None
     unreg_parent_col = None  
     unreg_substance_table = None 
-    unreg_tank_table = None 
     epa_facility_table = None 
     org_facility_table = None 
     epa_substance_table = None 
@@ -314,6 +313,20 @@ where false"""
         logger.info('Created placeholder view %s', view_name)
 
 
+    def _load_existing_view_types(self, view_name):
+        # CREATE OR REPLACE must retain existing column types and varchar lengths.
+        self.cur.execute(
+            """select a.attname, pg_catalog.format_type(a.atttypid, a.atttypmod)
+               from pg_catalog.pg_attribute a
+               join pg_catalog.pg_class c on c.oid = a.attrelid
+               join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+               where n.nspname = %s and c.relname = %s and c.relkind = 'v'
+                 and a.attnum > 0 and not a.attisdropped""",
+            (self.dataset.schema, view_name),
+        )
+        self._existing_view_types = dict(self.cur.fetchall())
+
+
     def _cast_unreg_view_col(self, col_alias, expression):
         cast_map = {
             'facility_id': 'varchar(50)',
@@ -327,7 +340,7 @@ where false"""
             'facility_type_id': 'int',
             'tank_capacity_gallons': 'numeric',
         }
-        datatype = cast_map.get(col_alias)
+        datatype = getattr(self, '_existing_view_types', {}).get(col_alias, cast_map.get(col_alias))
         if not datatype:
             return expression
         return f'{expression}::{datatype}'
@@ -427,6 +440,7 @@ where false"""
         self.connect_db()
 
         view_name = f'{self.dataset.schema}.{self.erg_substance_mapping_view}'
+        self._load_existing_view_types(self.erg_substance_mapping_view)
         
         sql = f"""select count(*) from public.{self.dataset.ust_or_release}_element_mapping 
                   where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'"""
@@ -528,6 +542,7 @@ where false"""
         self.connect_db()
 
         view_name = f'{self.dataset.schema}.{self.erg_facility_type_mapping_view}'
+        self._load_existing_view_types(self.erg_facility_type_mapping_view)
         
         sql = f"""select count(*) from public.{self.dataset.ust_or_release}_element_mapping 
                   where {self.dataset.ust_or_release}_control_id = %s and epa_column_name like 'facility_type%%'"""
@@ -609,6 +624,7 @@ where false"""
         self.connect_db()
 
         view_name = f'{self.dataset.schema}.{self.erg_tank_size_view}'
+        self._load_existing_view_types(self.erg_tank_size_view)
 
         sql = """select count(*) from public.ust_element_mapping 
               where ust_control_id = %s and epa_column_name = 'compartment_capacity_gallons'"""

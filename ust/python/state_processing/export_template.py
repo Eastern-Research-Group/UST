@@ -461,32 +461,37 @@ class Template:
 
     def _build_substance_mapping_query(self, cur):
         filter_info = self._get_substance_filter_info(cur)
-        sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
-                from public.v_{self.dataset.ust_or_release}_element_mapping a 
+        base_sql = f"""select distinct organization_value, epa_value, programmer_comments, epa_comments, organization_comments
+                from public.v_{self.dataset.ust_or_release}_element_mapping a
                     join public.substances s on a.epa_value = s.substance
                 where {self.dataset.ust_or_release}_control_id = %s and epa_column_name = 'substance_id'"""
         params = [self.dataset.control_id]
         if filter_info:
             source_filter_predicates = self._build_source_filter_predicates(cur, filter_info)
             if source_filter_predicates:
-                sql += f"""
-                and ({' or '.join(source_filter_predicates)})"""
+                sql = f"""with eligible_substance_mappings as materialized (
+                    {base_sql}
+                    and ({' or '.join(source_filter_predicates)})
+                )
+                select organization_value, epa_value, programmer_comments, epa_comments, organization_comments
+                from eligible_substance_mappings"""
+                sql += "\n                order by 1, 2"
+                return sql, params
             elif filter_info['column_type'] == 'substance_id':
                 filter_view_sql = self._get_substance_filter_view_sql(filter_info)
                 filter_column = self._quote_identifier(filter_info['column_name'])
-                sql += f"""
+                base_sql += f"""
                 and exists
                     (select 1 from {filter_view_sql} substance_filter
                      where substance_filter.{filter_column} = s.substance_id)"""
             else:
                 filter_view_sql = self._get_substance_filter_view_sql(filter_info)
                 filter_column = self._quote_identifier(filter_info['column_name'])
-                sql += f"""
+                base_sql += f"""
                 and exists
                     (select 1 from {filter_view_sql} substance_filter
                      where nullif(trim(substance_filter.{filter_column}::text), '') = a.organization_value)"""
-        sql += "\n                order by 1, 2"
-        return sql, params
+        return base_sql + "\n                order by 1, 2", params
 
 
     def make_substance_lookup_tab(self, ws):

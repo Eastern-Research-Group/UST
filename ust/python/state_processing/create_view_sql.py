@@ -190,7 +190,17 @@ class ViewSql:
         return self._get_trimmed_text_expression(f'"{org_column_name}"')
 
 
-    def _build_safe_key_expression(self, source_expression, data_type):
+    def _is_required_column(self, epa_column_name):
+        return any(
+            col_info['column_name'] == epa_column_name
+            for col_info in getattr(self, 'required_cols', {}).values()
+        )
+
+
+    def _build_safe_key_expression(self, source_expression, data_type, required=False):
+        if required:
+            return f'{source_expression}::{data_type}'
+
         source_text = self._get_trimmed_text_expression(source_expression)
 
         if data_type in {'smallint', 'integer', 'bigint'}:
@@ -202,9 +212,12 @@ class ViewSql:
         return source_text
 
 
-    def _build_safe_cast_expression(self, org_column_name, data_type, max_len):
-        source_text = self._get_trimmed_source_text(org_column_name)
+    def _build_safe_cast_expression(self, org_column_name, data_type, max_len, required=False):
         datatype_sql = utils.get_datatype_sql(data_type, max_len)
+        if required:
+            return f'"{org_column_name}"::{datatype_sql}'
+
+        source_text = self._get_trimmed_source_text(org_column_name)
 
         if data_type == 'character varying':
             return f'{source_text}::{datatype_sql}'
@@ -343,7 +356,12 @@ class ViewSql:
         max_len = row[1]
         selected_column = self._build_recipe_expression(epa_column_name, org_column_name, data_type)
         if not selected_column:
-            selected_column = self._build_safe_cast_expression(org_column_name, data_type, max_len)
+            selected_column = self._build_safe_cast_expression(
+                org_column_name,
+                data_type,
+                max_len,
+                required=self._is_required_column(epa_column_name),
+            )
         selected_column = selected_column + ' as ' + epa_column_name
 
         return selected_column 
@@ -1052,13 +1070,25 @@ class ViewSql:
             self.where_sql = '\nwhere 1=1\n\n-- ADD ADDITIONAL SQL HERE IF NECESSARY\n;\n'
             return
 
-        parent_expression = self._build_safe_key_expression(f'a."{org_parent_col}"', 'character varying')
+        parent_expression = self._build_safe_key_expression(
+            f'a."{org_parent_col}"',
+            'character varying',
+            required=self._is_required_column(parent_col),
+        )
         child_expression = None
         if self._has_value(org_child_col):
             if self.dataset.ust_or_release == 'ust':
-                child_expression = self._build_safe_key_expression(f'a."{org_child_col}"', 'integer')
+                child_expression = self._build_safe_key_expression(
+                    f'a."{org_child_col}"',
+                    'integer',
+                    required=self._is_required_column('tank_id'),
+                )
             else:
-                child_expression = self._build_safe_key_expression(f'a."{org_child_col}"', 'character varying')
+                child_expression = self._build_safe_key_expression(
+                    f'a."{org_child_col}"',
+                    'character varying',
+                    required=self._is_required_column('substance_id'),
+                )
         elif self.table_name != parent_table:
             self._warn(f'No child join mapping found for {self.table_name}; unregulated exclusion uses parent key only.')
 
@@ -1185,10 +1215,12 @@ class ViewSql:
             source_expression = self._build_safe_key_expression(
                 f'{source_alias}."{organization_column_name}"',
                 key_types[epa_column_name],
+                required=self._is_required_column(epa_column_name),
             )
             joined_expression = self._build_safe_key_expression(
                 f'{alias}."{source_key_columns[epa_column_name]}"',
                 key_types[epa_column_name],
+                required=self._is_required_column(epa_column_name),
             )
             predicates.append(f'{source_expression} = {joined_expression}')
 
@@ -1338,10 +1370,10 @@ class ViewSql:
 
     def generate_sql(self):
         self._preflight()
+        self.required_cols = self.get_required_cols()
         self.build_where_sql()
         self.build_from_query()
         self.append_mapping_exclusions()
-        self.required_cols = self.get_required_cols()
         self.existing_cols = self.get_existing_cols()
         self.required_col_ids = [
             n for n in self.required_col_ids

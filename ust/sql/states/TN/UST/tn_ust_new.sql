@@ -1493,4 +1493,59 @@ comparison as (
 select *
 from comparison
 where comparison_status <> 'regular compartment not in haz list'
-order by facility_id, tank_key, compartment_key;
+order by facility_id, tank_key, compartment_key;\\\\\\
+
+
+
+
+select * from information_schema.tables 
+where table_schema = 'tn_ust' 
+order by table_name;
+
+
+select * from v_ust_element_mapping 
+where organization_table_name like 'tn_haz%'
+
+sELECT viewname, definition 
+FROM pg_catalog.pg_views 
+WHERE schemaname = 'tn_ust'
+and definition like '%haz_%'
+order by 1;
+
+
+select * from tn_ust.haz_compartments  
+
+
+select * from ust_control where organization_id = 'TN'
+
+select distinct organization_table_name from ust_element_mapping where ust_control_id = 35
+order by 1;
+
+ust_compartment
+ust_compartment_substance
+ust_facility
+ust_piping
+ust_tank
+ust_tank_substance
+
+
+select * from tn_ust.tn_environmental_sites;
+
+select * from  ust_element_mapping where ust_control_id = 35 and organization_table_name = 'v_tn_compartments'
+
+
+select * from ust_element_mapping 
+where ust_control_id = 35 and organization_table_name = 'tn_environmental_sites'
+order by 1;
+
+
+update public.ust_element_mapping
+set organization_table_name = 'tn_compartments_merged'
+where ust_control_id = 35
+  and organization_table_name = 'v_tn_compartments';
+
+update public.ust_element_mapping
+set organization_table_name = 'tn_facilities_merged'
+where ust_control_id = 35
+  and organization_table_name = 'tn_facilities';
+

@@ -58,7 +58,8 @@ on conflict do nothing;
 insert into ma_ust.erg_facility_info_org_type (facility_id, org_type_name)
 select distinct
     trim("Facility ID#"::text) as facility_id,
-    trim(org_type_name::text) as org_type_name
+    case when org_type_name = 'Institutional (non-profit)' and business_type_name = 'Public agency' then 'Government (unspecified)'
+         else org_type_name end as org_type_name
 from ma_ust."Facility info"
 where nullif(trim("Facility ID#"::text), '') is not null
   and nullif(trim(org_type_name::text), '') is not null
