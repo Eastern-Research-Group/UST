@@ -25,6 +25,69 @@ from ust.python.util.import_service import ImportService
 
 
 class ImportServiceTests(unittest.TestCase):
+    def test_simple_missing_quote_is_validated_repaired_and_wrapped(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.table_name = 'ust_piping'
+        view_sql.from_sql = 'from ma_ust."Tank info" a'
+        view_sql._warn = unittest.mock.MagicMock()
+        view_sql._query_logic_sql_error = unittest.mock.MagicMock(side_effect=[
+            'unterminated quoted string at or near', None, None,
+        ])
+        logic = '\"PIPE LEAK DETECT\" = \'In-tank monitoring with SIR (if installed prior to May 28, 1999)'
+        column = 'piping_statistical_inventory_reconciliation'
+        item = view_sql._format_select_item(
+            f'a."PIPE LEAK DETECT" as {column}', logic, epa_column_name=column,
+        )
+        self.assertIn(f"case when {logic}' then 'Yes' else null end as {column}", item)
+        view_sql._warn.assert_called_once()
+        warning = view_sql._warn.call_args.args[0]
+        self.assertIn(repr(logic), warning)
+        self.assertIn(repr(logic + "'"), warning)
+
+    def test_missing_quote_repair_declines_ambiguous_or_complete_sql(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql._query_logic_sql_error = unittest.mock.MagicMock()
+        for logic in (
+            "flag = 'SIR'", "flag = 'Owner's insurance", "flag = 'Owner''s insurance",
+            "case when flag = 'SIR then 'Yes' end", "flag = 'SIR then Yes",
+            "flag = 'SIR or active = true", "flag = 'SIR -- comment",
+            "flag = 'SIR; select 1", "flag = 'SIR\n", "flag = E'SIR",
+            "flag = 'SIR\\", "flag = $$SIR", "flag = 'SIR /* comment",
+        ):
+            with self.subTest(logic=logic):
+                self.assertEqual(logic, view_sql._repair_simple_unterminated_literal('flag as flag', logic, 'flag'))
+        view_sql._query_logic_sql_error.assert_not_called()
+
+    def test_missing_quote_repair_requires_original_error_and_valid_repair(self):
+        for errors in ([None], ['undefined column'], ['unterminated quoted string', 'undefined column']):
+            with self.subTest(errors=errors):
+                view_sql = ViewSql.__new__(ViewSql)
+                view_sql._query_logic_sql_error = unittest.mock.MagicMock(side_effect=errors)
+                view_sql._warn = unittest.mock.MagicMock()
+                logic = "flag = 'SIR"
+                self.assertEqual(logic, view_sql._repair_simple_unterminated_literal('flag as flag', logic, 'flag'))
+                view_sql._warn.assert_not_called()
+
+    @patch.object(ViewSql, "connect_db")
+    @patch.object(ViewSql, "disconnect_db")
+    @patch.object(ViewSql, "generate_sql")
+    def test_view_sql_no_write_preserves_existing_file_and_creates_no_file(
+        self, generate_sql, disconnect_db, connect_db,
+    ):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "views.sql"
+            dataset = SimpleNamespace(export_file_path=str(path))
+            for existing in (False, True):
+                with self.subTest(existing=existing):
+                    if existing:
+                        path.write_text("existing SQL", encoding="utf-8")
+                    ViewSql(dataset, "ust_facility", print_console=True, write_sql=False)
+                    if existing:
+                        self.assertEqual("existing SQL", path.read_text(encoding="utf-8"))
+                    else:
+                        self.assertFalse(path.exists())
+        self.assertEqual(2, generate_sql.call_count)
+
     @patch("ust.python.util.import_service.DatabaseImporter")
     def test_import_data_calls_database_importer_with_expected_argument_order(self, importer_cls):
         service = ImportService()
@@ -1169,7 +1232,7 @@ class ViewSqlTests(unittest.TestCase):
             existing_cols[10]["selected_column"],
         )
 
-    def test_get_existing_cols_applies_alias_to_recipe_overrides(self):
+    def test_get_existing_cols_preserves_fragments_for_compilation(self):
         view_sql = ViewSql.__new__(ViewSql)
         view_sql.dataset = SimpleNamespace(control_id=123, ust_or_release="ust")
         view_sql.table_name = "ust_piping"
@@ -1189,12 +1252,14 @@ class ViewSqlTests(unittest.TestCase):
         view_sql.cur.fetchone.return_value = ("character varying", 3)
         view_sql._warn = unittest.mock.MagicMock(side_effect=view_sql.warnings.append)
 
+        view_sql._query_logic_sql_error = unittest.mock.MagicMock(return_value="syntax error")
+
         existing_cols = view_sql.get_existing_cols()
 
         self.assertIn('a."TankPipingMaterial"', existing_cols[10]["selected_column"])
-        self.assertEqual("", existing_cols[10]["query_logic"])
+        self.assertEqual("WHEN Steel THEN Yes", existing_cols[10]["query_logic"])
 
-    def test_get_existing_cols_prefers_recipe_over_query_logic(self):
+    def test_get_existing_cols_does_not_replace_invalid_logic_with_recipe(self):
         view_sql = ViewSql.__new__(ViewSql)
         view_sql.dataset = SimpleNamespace(control_id=123, ust_or_release="ust")
         view_sql.table_name = "ust_tank"
@@ -1214,18 +1279,123 @@ class ViewSqlTests(unittest.TestCase):
             return_value="case when lower(nullif(trim(\"FederalFlag\"::text), '')) in ('true', 't', 'yes', 'y', '1', '1.0') then 'Yes'::text when lower(nullif(trim(\"FederalFlag\"::text), '')) in ('false', 'f', 'no', 'n', '0', '0.0') then 'No'::text else null::text end as federally_regulated"
         )
 
+        view_sql._query_logic_sql_error = unittest.mock.MagicMock(return_value="syntax error")
+
         existing_cols = view_sql.get_existing_cols()
 
-        view_sql.get_column_select_sql.assert_called_once_with("federally_regulated", "FederalFlag")
-        self.assertEqual(
-            "case when lower(nullif(trim(a.\"FederalFlag\"::text), '')) in ('true', 't', 'yes', 'y', '1', '1.0') then 'Yes'::text when lower(nullif(trim(a.\"FederalFlag\"::text), '')) in ('false', 'f', 'no', 'n', '0', '0.0') then 'No'::text else null::text end as federally_regulated",
-            existing_cols[10]["selected_column"],
+        view_sql.get_column_select_sql.assert_not_called()
+        self.assertEqual('when FederalFlag = TRUE then Yes', existing_cols[10]['query_logic'])
+        self.assertEqual([], view_sql.warnings)
+
+    def test_get_existing_cols_preserves_valid_recipe_column_logic(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.dataset = SimpleNamespace(control_id=123, ust_or_release="ust")
+        view_sql.table_name = "ust_tank"
+        view_sql.required_cols = {}
+        view_sql.table_aliases = {"tanks": "a"}
+        view_sql.from_sql = 'from ma_ust.tanks a'
+        view_sql.cur = unittest.mock.MagicMock()
+        logic = "case when a.\"FederalFlag\" = 'Special' then 'No' else 'Yes' end"
+        view_sql.cur.fetchall.return_value = [
+            (10, "federally_regulated", "FederalFlag",
+             'a."FederalFlag" as federally_regulated', logic, "tanks"),
+        ]
+        view_sql.get_column_select_sql = unittest.mock.MagicMock()
+        view_sql._compile_query_logic = unittest.mock.MagicMock()
+        view_sql._warn = unittest.mock.MagicMock()
+
+        existing_cols = view_sql.get_existing_cols()
+        self.assertEqual(logic, existing_cols[10]["query_logic"])
+        item = view_sql._format_select_item(
+            existing_cols[10]["selected_column"], logic,
+            epa_column_name="federally_regulated",
         )
-        self.assertEqual("", existing_cols[10]["query_logic"])
-        self.assertIn(
-            'Overriding query_logic for ust_tank.federally_regulated with standardized recipe SQL.',
-            view_sql.warnings,
+        self.assertIn(logic + ' as federally_regulated', item)
+        view_sql.get_column_select_sql.assert_not_called()
+        view_sql._compile_query_logic.assert_not_called()
+        view_sql._warn.assert_not_called()
+
+    def test_query_logic_validation_recovers_transaction_on_invalid_sql(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.conn = SimpleNamespace(autocommit=False)
+        view_sql.from_sql = 'from ma_ust.tanks a'
+        view_sql.cur = unittest.mock.MagicMock()
+        error = Exception('syntax error')
+        error.pgcode = '42601'
+        view_sql.cur.execute.side_effect = [None, error, None, None]
+
+        self.assertEqual('syntax error', view_sql._query_logic_sql_error(
+            'a.flag as federally_regulated', 'when broken',
+        ))
+        self.assertEqual([
+            unittest.mock.call('rollback to savepoint query_logic_validation'),
+            unittest.mock.call('release savepoint query_logic_validation'),
+        ], view_sql.cur.execute.call_args_list[-2:])
+
+    def test_query_logic_validation_does_not_replace_on_permission_error(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.from_sql = 'from ma_ust.tanks a'
+        view_sql.cur = unittest.mock.MagicMock()
+        error = Exception('permission denied')
+        error.pgcode = '42501'
+        view_sql.cur.execute.side_effect = [None, error, None, None]
+
+        with self.assertRaisesRegex(Exception, 'permission denied'):
+            view_sql._query_logic_sql_error('a.flag as federally_regulated', 'a.flag')
+        view_sql.cur.execute.assert_called_with('release savepoint query_logic_validation')
+
+    def test_query_logic_validation_supports_autocommit(self):
+        for error_code in (None, '42601', '42501'):
+            with self.subTest(error_code=error_code):
+                view_sql = ViewSql.__new__(ViewSql)
+                view_sql.conn = SimpleNamespace(autocommit=True)
+                view_sql.from_sql = 'from ma_ust.tanks a'
+                view_sql.cur = unittest.mock.MagicMock()
+                if error_code:
+                    error = Exception('validation error')
+                    error.pgcode = error_code
+                    view_sql.cur.execute.side_effect = error
+                if error_code == '42501':
+                    with self.assertRaisesRegex(Exception, 'validation error'):
+                        view_sql._query_logic_sql_error('a.flag as federally_regulated', 'a.flag')
+                else:
+                    result = view_sql._query_logic_sql_error('a.flag as federally_regulated', 'a.flag')
+                    self.assertEqual('validation error' if error_code else None, result)
+                view_sql.cur.execute.assert_called_once()
+                self.assertTrue(view_sql.cur.execute.call_args.args[0].startswith('explain select'))
+                self.assertTrue(view_sql.conn.autocommit)
+
+    def test_piping_sir_preserves_exact_mapping_predicate(self):
+        view_sql = ViewSql.__new__(ViewSql)
+        view_sql.dataset = SimpleNamespace(control_id=42, ust_or_release="ust")
+        view_sql.table_name = "ust_piping"
+        view_sql.required_cols = {}
+        view_sql.table_aliases = {"Tank info": "a"}
+        view_sql.table_alias_fallbacks = {}
+        view_sql.conn = SimpleNamespace(autocommit=True)
+        view_sql.from_sql = 'from ma_ust."Tank info" a'
+        view_sql.cur = unittest.mock.MagicMock()
+        column = 'piping_statistical_inventory_reconciliation'
+        logic = '\"PIPE LEAK DETECT\" = \'In-tank monitoring with SIR (if installed prior to May 28, 1999)\''
+        view_sql.cur.fetchall.return_value = [
+            (10, column, 'PIPE LEAK DETECT', f'a."PIPE LEAK DETECT" as {column}', logic, 'Tank info'),
+        ]
+        view_sql.get_column_select_sql = unittest.mock.MagicMock()
+        view_sql._compile_query_logic = unittest.mock.MagicMock()
+
+        columns = view_sql.get_existing_cols()
+        item = view_sql._format_select_item(
+            columns[10]['selected_column'], columns[10]['query_logic'],
+            organization_column_name='PIPE LEAK DETECT',
+            organization_table_name='Tank info', epa_column_name=column,
         )
+
+        self.assertIn(f"case when {logic} then 'Yes' else null end as {column}", item)
+        self.assertNotIn('s.i.r.', item)
+        self.assertNotIn('lower(', item)
+        self.assertNotIn('trim(', item)
+        view_sql.get_column_select_sql.assert_not_called()
+        view_sql._compile_query_logic.assert_not_called()
 
     def test_build_select_query_uses_query_logic_as_manual_sql(self):
         view_sql = ViewSql.__new__(ViewSql)
@@ -1540,7 +1710,7 @@ class ViewSqlTests(unittest.TestCase):
         self.assertEqual(1, result["recipe_override_count"])
         self.assertEqual({"yes_no": 1}, result["recipe_override_family_counts"])
         self.assertIn(
-            "Recipe overrides will normalize mapped query_logic for: federally_regulated",
+            "Mapped query_logic takes precedence over available recipes for: federally_regulated",
             result["warnings"],
         )
 

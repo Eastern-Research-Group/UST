@@ -1452,14 +1452,23 @@ insert into ma_ust.erg_facility_info_org_type (facility_id, org_type_name)
 
 delete from ma_ust.erg_facility_info_org_type
 
+alter table ma_ust.erg_facility_info_org_type add source_org_type_name varchar(100);
+alter table ma_ust.erg_facility_info_org_type add business_type_name varchar(100);
+
 insert into ma_ust.erg_facility_info_org_type
 select distinct
     trim("Facility ID#"::text) as facility_id,
-    case when org_type_name = 'Institutional (non-profit)' and business_type_name = 'Public agency' then 'Government (unspecified)'
-         else org_type_name end as org_type_name
+    case when org_type_name in ('Institutional (non-profit)','Private') and business_type_name = 'Public agency' then 'Government (unspecified)'
+         else org_type_name end as org_type_name,
+    org_type_name, business_type_name
+into  ma_ust.erg_facility_info_org_type
 from ma_ust."Facility info"
 where nullif(trim("Facility ID#"::text), '') is not null
   and nullif(trim(org_type_name::text), '') is not null
+  
+  select * from  ma_ust.erg_facility_info_org_type
+  where org_type_name <> source_org_type_name;
+  
   and  trim(org_type_name::text) = 'Institutional (non-profit)'
   and business_type_name = 'Public agency'
 
@@ -1948,6 +1957,11 @@ select distinct "Facility ID#", "TANK ID#", "TANK CONSTRUCT", "TANK CORROSION TY
 into ma_ust.erg_tank_corrosion_protection 
 from ma_ust."Tank info" 
 
+select count(*) from ma_ust.erg_tank_corrosion_protection 
+8499
+select count(*) from (select  distinct "Facility ID#", "TANK ID#", "TANK CONSTRUCT", "TANK CORROSION TYPE" from ma_ust."Tank info" ) 
+8499
+
 select distinct "TANK CONSTRUCT", "TANK CORROSION TYPE", tank_corrosion_protection_sacrificial_anode, tank_corrosion_protection_impressed_current
 from ma_ust.erg_tank_corrosion_protection 
 where tank_corrosion_protection_impressed_current is not null or tank_corrosion_protection_sacrificial_anode is not null;
@@ -1973,6 +1987,31 @@ into ma_ust.erg_tank_corrosion_protection
 from ma_ust."Tank info"'
 where ust_element_mapping_id = 4186;
 
+select * from ma_ust.erg_tank_corrosion_protection ;
+
+
+
+select * from v_ust_element_metadata 
+where column_name like '%not_req%'
+
+select * from v_ust_mapping
+where ust_control_id = 42
+and epa_column_name = 'tank_corrosion_protection_cathodic_not_required'
+
+alter table  ma_ust.erg_tank_corrosion_protection add tank_corrosion_protection_cathodic_not_required varchar(7)
+
+update  ma_ust.erg_tank_corrosion_protection
+set tank_corrosion_protection_cathodic_not_required = 'Yes'
+where "TANK CONSTRUCT" like '%metal%' and  "TANK CONSTRUCT" like '%cathodic protection not required%'
+
+select * from ma_ust.erg_tank_corrosion_protection
+where "TANK CONSTRUCT" like '%metal%'
+
+alter table ma_ust.erg_tank_corrosion_protection drop column tank_corrosion_protection_cathodic_not_required
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_column_name like '%owner_t%'
 
 
 
@@ -2022,3 +2061,142 @@ select * from ma_ust.v_ust_compartment where facility_id  = '1000055'
 
 select * from ust_piping 
 
+
+
+select organization_table_name, organization_column_name, 
+	organization_value, epa_value, programmer_comments, 
+	ust_element_value_mapping_id, ust_element_mapping_id,
+	query_logic
+from v_ust_element_mapping 
+where ust_control_id = 42
+and epa_column_name = 'owner_type_id'
+order by organization_value;
+
+update ust_element_value_mapping set epa_value = 'Commercial'
+where ust_element_value_mapping_id = 3661
+
+erg_facility_info_org_type
+
+update ust_element_value_mapping 
+set programmer_comments = 'Per OUST, if org type is "Private" or "Institutional (non-profit)" and business type is Public Agency, then use Government (unspecified)' 
+where ust_element_value_mapping_id in (3661,3659,4118);
+
+
+select * from ust_element_mapping 
+where ust_element_mapping_id = 4158
+
+update ust_element_mapping set programmer_comments = 
+'Created table erg_facility_info_org_type to map certain values to ''Government (unspecified)'' where business_type_name = ''Public agency'':
+
+select distinct
+    trim("Facility ID#"::text) as facility_id,
+    case when org_type_name in (''Institutional (non-profit)'',''Private'') and business_type_name = ''Public agency'' then ''Government (unspecified)''
+         else org_type_name end as org_type_name,
+    org_type_name, business_type_name
+into ma_ust.erg_facility_info_org_type
+from ma_ust."Facility info"
+where nullif(trim("Facility ID#"::text), '''') is not null
+  and nullif(trim(org_type_name::text), '''') is not null'
+where ust_element_mapping_id = 4158;
+
+
+
+ Bulk storage facility data is correct but need to remove the facilities that are blank for 
+ facility type if they have heating oil as the tank substance.  Heating oil is only 
+ regulated when it is at a Bulk Oil facility.    
+ 
+ 
+ 
+ select * from ma_ust.erg_unregulated_tanks 
+ 1000092	1	Bulk Heating or Fuel Oil (#2,#4,#6)	36	Heating/fuel oil # unknown	Heating oil
+ 
+ select * from ma_ust.erg_unregulated_facilities 
+ 
+ select a.*, b."FacilityType1"
+ from  ma_ust.erg_unregulated_tanks a join v_ust_facility b on a.facility_id = b."FacilityID" and b.ust_control_id = 42
+ where unregulated_reason = 'Heating oil' and facility_id not in 
+ 	(select facility_id from ma_ust.erg_unregulated_facilities )
+ order by 1, 2;
+ 
+ select a."FacilityID", b."TankID", b."Substance" 
+ from v_ust_facility a join v_ust_tank_substance b on a.ust_control_id = b.ust_control_id and a."FacilityID" = b."FacilityID" 
+ where a.ust_control_id = 42 and "FacilityType1" is null
+ and "Substance" like '%Heat%'
+ 14323
+ 
+ select * from v_ust_tank_substance
+ where ust_control_id = 42 and "FacilityID" = '10184'
+ 
+ 
+ insert into  ma_ust.erg_unregulated_tanks 
+ select a."FacilityID", "TankID",  'Bulk Heating or Fuel Oil (#2,#4,#6)', 36, "Substance", 'Heating oil with no facility type'
+ from v_ust_facility a join v_ust_tank_substance b on a.ust_control_id = b.ust_control_id and a."FacilityID" = b."FacilityID" 
+ where a.ust_control_id = 42 and "FacilityType1" is null
+ and "Substance" like '%Heat%'
+ on conflict do nothing;
+ 
+ Use the Use_Type column on the Tanks tab to identify Emergency Power Generators and Emergency Engine 
+ driven pumps for the template’s Emergency Generator column.   
+
+10-5-26   There are NO emergency power generators listed in the template. Many are diesel, include everything 
+except those using heating oil.   I’ve spot checked some of the Tanks and they are in the template but just aren’t 
+listed as Emergency Power Generators.   
+
+select * from v_ust_element_metadata 
+where column_name like '%material%'
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and epa_column_name = 'field_constructed'
+
+
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and organization_column_name like '%fr_type_name%'
+order by organization_value;
+ 
+
+select distinct fr_type_name
+from ma_ust.erg_facility_info_fr_type
+order by 1;
+Surety Bond
+
+Commercial Insurance
+Financial Test of Insurance
+Guarantee
+Irrevocable Standby Letter of Credit
+Local Government Bond Rating Test
+Local Government Financial Test of Insurance
+Local Government Fund
+Local Government Guarantee
+Risk Retention Group Coverage
+Surety Bond
+Trust Fund
+
+delete from ust_element_mapping where ust_element_mapping_id = 4175;
+
+select * from v_ust_mapping 
+where ust_control_id = 42
+and organization_column_name like '%fr_type_name%'
+order by organization_value;
+ 
+update ust_element_mapping 
+set query_logic = 'case when ' || query_logic || ' then ''Yes'' end'
+where ust_control_id = 42
+and organization_column_name like '%fr_type_name%'
+and query_logic not like 'case%'
+
+
+
+select * from v_ust_compartment 
+where ust_control_id = 42;
+
+select c.* 
+from ust_compartment c 
+	join ust_tank t on c.ust_tank_id = t.ust_tank_id 
+	join ust_facility f on t.ust_facility_id = f.ust_facility_id 
+	
+select * from ma_ust.v_ust_compartment 
+	
+select distinct "TANK LEAK DETECT" from	ma_ust."Tank info"

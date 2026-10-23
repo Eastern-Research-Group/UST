@@ -120,6 +120,14 @@ class Populate:
                                                 on a.facility_id = b.facility_id
                                             join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id"""
                     elif view_name == 'v_ust_compartment_substance':
+                        # Expanded source views can severely underestimate rows,
+                        # producing nested loops over the full substance table.
+                        # Snapshot once and supply real statistics to the loader.
+                        utils.process_sql(conn, cur, f"""create temp table populate_compartment_substance_source as
+                            select * from {self.dataset.schema}.v_ust_compartment_substance""")
+                        utils.process_sql(conn, cur, """create index on populate_compartment_substance_source
+                            (facility_id, tank_id, compartment_id, substance_id)""")
+                        utils.process_sql(conn, cur, 'analyze populate_compartment_substance_source')
                         column_list = 'ust_tank_substance_id, ust_compartment_id'
                         sql2 = """select count(*) from information_schema.columns 
                                   where table_schema = %s and table_name = 'v_ust_compartment_substance' and column_name = 'substance_comment'"""
@@ -128,17 +136,23 @@ class Populate:
                         if cnt > 0:
                             column_list = column_list + ', substance_comment'
                         insert_sql = f"""insert into public.ust_compartment_substance ({column_list})
-                                        select distinct {column_list.replace('substance_comment','a.substance_comment')} from {self.dataset.schema}.v_ust_compartment_substance a 
+                                        select distinct {column_list.replace('substance_comment','a.substance_comment')} from pg_temp.populate_compartment_substance_source a
                                             join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
                                                 on a.facility_id = b.facility_id
                                             join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id
                                             join ust_compartment d on c.ust_tank_id = d.ust_tank_id and a.compartment_id = d.compartment_id
                                             join public.ust_tank_substance e on c.ust_tank_id = e.ust_tank_id and a.substance_id = e.substance_id """
                     elif view_name == 'v_ust_piping':
+                        # Plan the parent joins against measured source statistics.
+                        utils.process_sql(conn, cur, f"""create temp table populate_piping_source as
+                            select * from {self.dataset.schema}.v_ust_piping""")
+                        utils.process_sql(conn, cur, """create index on populate_piping_source
+                            (facility_id, tank_id, compartment_id)""")
+                        utils.process_sql(conn, cur, 'analyze populate_piping_source')
                         column_list = 'ust_compartment_id, ' + org_column_list[:-2] 
                         column_list = column_list.replace(', facility_id','').replace(', tank_id','').replace(', compartment_id','')
                         insert_sql = f"""insert into public.ust_piping ({column_list})
-                                        select distinct {column_list} from {self.dataset.schema}.v_ust_piping a 
+                                        select distinct {column_list} from pg_temp.populate_piping_source a
                                             join (select ust_facility_id, facility_id from public.ust_facility where ust_control_id = %s) b
                                                 on a.facility_id = b.facility_id
                                             join public.ust_tank c on b.ust_facility_id = c.ust_facility_id and a.tank_id = c.tank_id

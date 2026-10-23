@@ -39,7 +39,9 @@
      LEFT JOIN hi_release.v_coordinate_source_xwalk cs ON ((f."HorizontalCollectionMethodName" = (cs.organization_value)::text)))
      LEFT JOIN hi_release.v_release_status_xwalk rs ON ((x."LUSTLatestStatus" = (rs.organization_value)::text)))
      LEFT JOIN hi_release.v_release_discovered_xwalk rd ON ((x."HowDiscovered" = (rd.organization_value)::text)))
-  WHERE (x."LUSTLatestStatus" <> 'Case Transferred to HW (unregulated)'::text);;
+  WHERE ((x."LUSTLatestStatus" <> ALL (ARRAY['Case Transferred to HW (unregulated)'::text, 'Disconfirmed Release'::text, 'Disconfirmed Release - investigation ongoing'::text, 'Suspected release'::text])) AND (NOT (EXISTS ( SELECT 1
+           FROM hi_release.erg_unregulated_releases unregparent
+          WHERE (((x."EventID")::character varying(50))::text = (unregparent.release_id)::text)))));;
 
 
 
@@ -52,7 +54,9 @@
     s.source_id
    FROM (hi_release."tblLUSTSite" x
      LEFT JOIN hi_release.v_source_xwalk s ON ((x."Source" = (s.organization_value)::text)))
-  WHERE ((x."Source" IS NOT NULL) AND (x."LUSTLatestStatus" <> 'Case Transferred to HW (unregulated)'::text));;
+  WHERE ((x."Source" IS NOT NULL) AND (x."LUSTLatestStatus" <> ALL (ARRAY['Case Transferred to HW (unregulated)'::text, 'Disconfirmed Release'::text, 'Disconfirmed Release - investigation ongoing'::text, 'Suspected release'::text])) AND (NOT (EXISTS ( SELECT 1
+           FROM hi_release.erg_unregulated_releases unregparent
+          WHERE (((x."EventID")::character varying(50))::text = (unregparent.release_id)::text)))));;
 
 
 
@@ -63,7 +67,10 @@
 --View definition for hi_release.v_ust_release_cause:
  SELECT DISTINCT (x."EventID")::character varying(50) AS release_id,
     c.cause_id
-   FROM (hi_release."tblLUSTSite" x
-     LEFT JOIN hi_release.v_cause_xwalk c ON ((x."Suspected Cause" = (c.organization_value)::text)))
-  WHERE ((x."Suspected Cause" IS NOT NULL) AND (x."LUSTLatestStatus" <> 'Case Transferred to HW (unregulated)'::text));;
+   FROM ((hi_release."tblLUSTSite" x
+     LEFT JOIN hi_release.erg_release_causes rc ON (((x."EventID")::text = (rc.release_id)::text)))
+     LEFT JOIN hi_release.v_cause_xwalk c ON ((rc.organization_cause = (c.organization_value)::text)))
+  WHERE ((x."Suspected Cause" IS NOT NULL) AND (x."LUSTLatestStatus" <> ALL (ARRAY['Case Transferred to HW (unregulated)'::text, 'Disconfirmed Release'::text, 'Disconfirmed Release - investigation ongoing'::text, 'Suspected release'::text])) AND (NOT (EXISTS ( SELECT 1
+           FROM hi_release.erg_unregulated_releases unregparent
+          WHERE (((x."EventID")::character varying(50))::text = (unregparent.release_id)::text)))));;
 

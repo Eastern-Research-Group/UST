@@ -294,6 +294,19 @@ class MainCliTests(unittest.TestCase):
             print_console=False,
             strict=True,
             preflight_only=True,
+            write_sql=True,
+        )
+
+    @patch("ust.python.state_processing.create_view_sql.main")
+    def test_generate_views_console_without_writing(self, views_main):
+        main.main([
+            "generate-views", "--type", "ust", "--control-id", "123",
+            "--table-name", "ust_facility", "--print-console", "--no-write-sql", "--yes",
+        ])
+        views_main.assert_called_once_with(
+            ust_or_release="ust", control_id=123, table_name="ust_facility",
+            overwrite_sql_file=True, print_console=True, strict=False,
+            preflight_only=False, write_sql=False,
         )
 
     @patch("ust.python.state_processing.dataset_audit.main")

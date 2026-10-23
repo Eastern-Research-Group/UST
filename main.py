@@ -207,6 +207,10 @@ def build_parser() -> argparse.ArgumentParser:
     generate_views.add_argument("--append", dest="overwrite_sql_file", action="store_false")
     generate_views.add_argument("--print-console", action="store_true")
     generate_views.add_argument(
+        "--no-write-sql", dest="write_sql", action="store_false",
+        help="Generate SQL without creating or modifying the SQL file; use --print-console to display it",
+    )
+    generate_views.add_argument(
         "--preflight-only",
         action="store_true",
         help="Audit mapping/join readiness and print report without generating SQL",
@@ -716,6 +720,7 @@ def _main(argv=None):
             print_console=args.print_console,
             strict=args.strict_mapping,
             preflight_only=args.preflight_only,
+            write_sql=args.write_sql,
         )
         return
 
