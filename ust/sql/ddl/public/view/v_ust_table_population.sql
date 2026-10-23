@@ -54,7 +54,14 @@ create or replace view "public"."v_ust_table_population" as
              JOIN ust_elements b ON (((a.epa_column_name)::text = (b.database_column_name)::text)))
              JOIN ust_elements_tables c ON (((b.element_id = c.element_id) AND ((a.epa_table_name)::text = (c.table_name)::text))))
              JOIN ust_template_data_tables d ON (((c.table_name)::text = (d.table_name)::text)))
-             JOIN information_schema.columns e ON ((((a.epa_table_name)::text = (e.table_name)::name) AND ((a.epa_column_name)::text = (e.column_name)::name) AND ((e.table_schema)::name = 'public'::name))))
+             JOIN information_schema.columns e ON ((((case
+                 -- The input view exposes substance_id, but the destination
+                 -- stores ust_tank_substance_id. Resolve the logical input type
+                 -- from its lookup table so the mapping is not silently lost.
+                 when a.epa_table_name = 'ust_compartment_substance'
+                  and a.epa_column_name = 'substance_id' then 'substances'
+                 else a.epa_table_name
+             end)::text = (e.table_name)::name) AND ((a.epa_column_name)::text = (e.column_name)::name) AND ((e.table_schema)::name = 'public'::name))))
         UNION ALL
          SELECT a.ust_control_id,
             z.epa_table_name,

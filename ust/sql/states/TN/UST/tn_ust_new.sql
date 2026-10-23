@@ -1411,6 +1411,54 @@ select distinct a."Location ID", a."Facility Name",
 from tn_ust.tn_haz_compartments a left join tn_ust.tn_compartments b
 		on a."Location ID"::text = b."Facility Id Ust"::text
 		and replace(replace(a."Tank Name",'Tank ',''),'UST ','')::int = b."Tank Number"
+		
+		
+		
+select distinct
+    a."Facility Id Ust",
+    a."Tank Id",
+    a."Regulated Status",
+    a."Tank Construction",
+    a."Category Of Construction",
+    b."Status",
+
+    coalesce(d.exclude_from_query, 'N') = 'Y'
+        as excluded_by_material,
+    coalesce(e.exclude_from_query, 'N') = 'Y'
+        as excluded_by_secondary_containment,
+    coalesce(f.exclude_from_query, 'N') = 'Y'
+        as excluded_by_status,
+
+    exists (
+        select 1
+        from tn_ust.erg_unregulated_facilities u
+        where u.facility_id::text = a."Facility Id Ust"::text
+    ) as excluded_by_unregulated_facility,
+
+    exists (
+        select 1
+        from tn_ust.erg_unregulated_tanks u
+        where u.facility_id::text = a."Facility Id Ust"::text
+          and u.tank_id = a."Tank Id"::integer
+    ) as excluded_by_unregulated_tank,
+
+    not exists (
+        select 1
+        from tn_ust.tn_facilities_merged p
+        where p."FACILITY_ID_UST"::text = a."Facility Id Ust"::text
+    ) as excluded_by_missing_parent
+
+from tn_ust.tn_compartments_merged a
+left join tn_ust.v_tank_status b
+    on a."Facility Id Ust"::text = b."Facility Id Ust"::text
+   and a."Tank Id"::integer = b."Tank Id"::integer
+left join tn_ust.v_tank_material_description_xwalk d
+    on a."Tank Construction" = d.organization_value::text
+left join tn_ust.v_tank_secondary_containment_xwalk e
+    on a."Category Of Construction" = e.organization_value::text
+left join tn_ust.v_tank_status_xwalk f
+    on b."Status"::text = f.organization_value::text
+where a."Facility Id Ust"::text = '2010203';
 	left join tn_ust.v_tank_compartments c on b."Facility Id Ust" = c."Facility Id Ust" and b."Tank Id" = c."Tank Id" 
 --where b."Facility Id Ust" is  null 
 order by  a."Facility Name"::text, a."Tank Name", a."Compartment Name" 
@@ -1423,6 +1471,9 @@ select * from tn_ust.v_tank_compartments where "Facility Id Ust" = 6600319
 select * from tn_ust.tn_compartments where  "Facility Id Ust" = 6600319
 
 select * from substances order by substance_group, substance;
+
+
+select * from tn_ust.tn_compartments_merged where "Facility Id Ust" = '2010203'
 with regular as (
     select distinct
         trim("Facility Id Ust"::text) as facility_id,
@@ -1493,8 +1544,7 @@ comparison as (
 select *
 from comparison
 where comparison_status <> 'regular compartment not in haz list'
-order by facility_id, tank_key, compartment_key;\\\\\\
-
+order by facility_id, tank_key, compartment_key;
 
 
 
@@ -1549,3 +1599,527 @@ set organization_table_name = 'tn_facilities_merged'
 where ust_control_id = 35
   and organization_table_name = 'tn_facilities';
 
+
+
+
+select * 
+from tn_ust.erg_unregulated_tanks
+where facility_id = '2010203'
+
+
+
+select * from v_ust_element_mapping 
+where ust_control_id = 35
+order by table_sort_order, column_sort_order, organization_value;
+
+
+
+select * from tn_ust.v_compartment_status_xwalk
+
+select * from tn_ust.v_tank_status_xwalk;
+
+
+
+
+
+
+
+
+
+
+
+
+
+select distinct
+    a."Facility Id Ust",
+    a."Tank Id",
+    a."Regulated Status",
+    a."Tank Construction",
+    a."Category Of Construction",
+    b."Status",
+
+    coalesce(d.exclude_from_query, 'N') = 'Y'
+        as excluded_by_material,
+    coalesce(e.exclude_from_query, 'N') = 'Y'
+        as excluded_by_secondary_containment,
+    coalesce(f.exclude_from_query, 'N') = 'Y'
+        as excluded_by_status,
+
+    exists (
+        select 1
+        from tn_ust.erg_unregulated_facilities u
+        where u.facility_id::text = a."Facility Id Ust"::text
+    ) as excluded_by_unregulated_facility,
+
+    exists (
+        select 1
+        from tn_ust.erg_unregulated_tanks u
+        where u.facility_id::text = a."Facility Id Ust"::text
+          and u.tank_id = a."Tank Id"::integer
+    ) as excluded_by_unregulated_tank,
+
+    not exists (
+        select 1
+        from tn_ust.tn_facilities_merged p
+        where p."FACILITY_ID_UST"::text = a."Facility Id Ust"::text
+    ) as excluded_by_missing_parent
+
+from tn_ust.tn_compartments_merged a
+left join tn_ust.v_tank_status b
+    on a."Facility Id Ust"::text = b."Facility Id Ust"::text
+   and a."Tank Id"::integer = b."Tank Id"::integer
+left join tn_ust.v_tank_material_description_xwalk d
+    on a."Tank Construction" = d.organization_value::text
+left join tn_ust.v_tank_secondary_containment_xwalk e
+    on a."Category Of Construction" = e.organization_value::text
+left join tn_ust.v_tank_status_xwalk f
+    on b."Status"::text = f.organization_value::text
+where a."Facility Id Ust"::text = '2010203';
+
+
+select * from tn_ust.erg_unregulated_tanks 
+
+
+select "Regulated Status", count(*)
+from tn_ust.tn_compartments
+group by "Regulated Status"
+order by 1;
+
+select  "Facility Id Ust",  "Tank Id", count(*)
+from 
+(select distinct "Facility Id Ust",  "Tank Id", "Regulated Status"
+from  tn_ust.tn_compartments)
+group by  "Facility Id Ust",  "Tank Id" having count(*) > 1;
+6600250	62480	2
+
+select * from  tn_ust.tn_compartments
+where "Facility Id Ust" = 6600250 and "Tank Id" = 62480
+
+select * from tn_ust.v_substance_xwalk;
+
+select distinct "Facility Id Ust",  "Tank Id", "Compartment Id", "Product", 
+	case when "Regulated Status" is null then '"Regulated Status" is null'
+	     when "Regulated Status" = 'Unregulated' then '"Regulated Status" = ''Unregulated'''
+ end as unregulated_reason 
+into tn_ust.erg_unregulated_compartments 
+from  tn_ust.tn_compartments
+where "Regulated Status" = 'Unregulated' or "Regulated Status" is null
+
+
+with fully_unregulated_tanks as (
+    select
+        c."Facility Id Ust",
+        c."Tank Id"
+    from tn_ust.tn_compartments c
+    group by c."Facility Id Ust", c."Tank Id"
+    having not exists (
+        select 1
+        from tn_ust.tn_compartments remaining
+        where remaining."Facility Id Ust" = c."Facility Id Ust"
+          and remaining."Tank Id" = c."Tank Id"
+          and not exists (
+              select 1
+              from tn_ust.erg_unregulated_compartments u
+              where u."Facility Id Ust" = remaining."Facility Id Ust"
+                and u."Tank Id" = remaining."Tank Id"
+                and u."Compartment Id" = remaining."Compartment Id"
+          )
+    )
+    -- Preserve tanks with retained hazardous-substance compartments.
+    and not exists (
+        select 1
+        from tn_ust.tn_compartments_merged h
+        where h."Facility Id Ust" = c."Facility Id Ust"
+          and h."Tank Id" = c."Tank Id"
+          and h.merge_source = 'hazardous substance'
+    )
+),
+candidates as (
+    select
+        u."Facility Id Ust"::varchar(50) as facility_id,
+        u."Tank Id"::integer as tank_id,
+        coalesce(u."Product", '') as organization_substance,
+        string_agg(
+            distinct u.unregulated_reason,
+            '; ' order by u.unregulated_reason
+        ) as unregulated_reason
+    from tn_ust.erg_unregulated_compartments u
+    join fully_unregulated_tanks t
+      on t."Facility Id Ust" = u."Facility Id Ust"
+     and t."Tank Id" = u."Tank Id"
+    group by
+        u."Facility Id Ust"::varchar(50),
+        u."Tank Id"::integer,
+        coalesce(u."Product", '')
+)
+insert into tn_ust.erg_unregulated_tanks (
+    facility_id,
+    tank_id,
+    organization_substance,
+    substance_id,
+    epa_substance,
+    unregulated_reason
+)
+select
+    c.facility_id,
+    c.tank_id,
+    c.organization_substance,
+    x.substance_id,
+    x.epa_value,
+    'All compartments unregulated: ' || c.unregulated_reason
+from candidates c
+left join tn_ust.v_substance_xwalk x
+    on c.organization_substance = x.organization_value
+on conflict (facility_id, tank_id, organization_substance) do nothing;
+
+
+select * from  tn_ust.erg_unregulated_tanks  where facility_id = '2010203'
+
+
+select * from  tn_ust.erg_unregulated_facilities where facility_id = '2010203'
+
+9072
+9073
+9074
+
+select * from  tn_ust.tn_compartments
+where "Facility Id Ust" = 2010203 
+
+select * from  tn_ust.tn_compartments_merged
+where "Facility Id Ust" = 2010203 
+
+
+select indexname, indexdef
+from pg_indexes
+where schemaname = 'tn_ust'
+  and tablename = 'tn_compartments_merged';
+
+
+select
+    pid,
+    now() - query_start as elapsed,
+    state,
+    wait_event_type,
+    wait_event,
+    pg_blocking_pids(pid) as blocking_pids,
+    query
+from pg_stat_activity
+where datname = current_database()
+  and state <> 'idle'
+  and pid <> pg_backend_pid()
+order by query_start;
+
+
+
+select * from information_schema.columns
+where table_schema = 'tn_ust'
+and table_name = 'tn_compartments_merged'
+order by ordinal_position;
+Emergency Generator
+
+select * from tn_ust.tn_compartments_merged where "Emergency Generator" is not null;
+
+select * from v_ust_element_mapping 
+where ust_control_id = 35
+and epa_column_name like 'emer%'
+Not Emergency Generator
+Emergency Generator
+
+when "Emergency Generator" = 'Emergency Generator' then 'Yes' when "Emergency Generator" = 'Not Emergency Generator' then 'No' else null
+
+select * from tn_ust.v_ust_tank where emergency_generator is not null;
+
+select * from v_ust_element_mapping 
+where ust_control_id = 35
+and organization_column_name = 'Regulated Status'
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name = 'compartmentalized_ust'
+
+update ust_element_mapping set query_logic = null where ust_element_mapping_id = 2972
+
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%not%'
+
+v_overfill_prevention_not_required
+v_spill_prevention_not_required
+
+update ust_element_mapping 
+set organization_table_name = 'tn_compartments_merged',
+	organization_column_name = 'Overfill Prevention',
+	query_logic = 'case when "Overfill Prevention" = ''Not Required'' then ''Yes'' end',
+	epa_comments = 'After looking at the TN data, I deleted the Small Delivery column from the Key.  To determine if Overfill Prevention and Spill Prevention are Not Required, use the Overfill Prevention and Spill Prevention columns, value Not Required.  They are not the same so Overfill Not Required should come from the Overfill Prevention column, and Spill NR from Spill Prevention.'
+where ust_element_mapping_id = 2992;
+
+update ust_element_mapping 
+set organization_table_name = 'tn_compartments_merged',
+	organization_column_name = 'Spill Prevention',
+	query_logic = 'case when "Spill Prevention" = ''Not Required'' then ''Yes'' end',
+	epa_comments = 'After looking at the TN data, I deleted the Small Delivery column from the Key.  To determine if Overfill Prevention and Spill Prevention are Not Required, use the Overfill Prevention and Spill Prevention columns, value Not Required.  They are not the same so Overfill Not Required should come from the Overfill Prevention column, and Spill NR from Spill Prevention.'
+where ust_element_mapping_id = 2994;
+
+commit;
+
+drop view tn_ust.v_overfill_prevention_not_required;
+drop view tn_ust.v_spill_prevention_not_required;
+
+"Overfill Prevention"
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%manu%'
+
+select * from tn_ust.v_ust_compartment where tank_manual_tank_gauging is not null;
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%stat%'
+
+
+select * from tn_ust.v_ust_compartment where tank_statistical_inventory_reconciliation is not null;
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%substance_id%'
+order by epa_table_name, organization_value;
+
+update ust_element_value_mapping set epa_value = 'Hydraulic oil' where ust_element_value_mapping_id in (2629, 2606);
+
+update ust_element_value_mapping set programmer_comments = null
+where ust_element_mapping_id in (select ust_element_mapping_id from ust_element_mapping where ust_control_id = 35)
+and programmer_comments ilike 'Please verify%';
+
+update ust_element_value_mapping set programmer_comments = null 
+where ust_element_mapping_id in (select ust_element_mapping_id from ust_element_mapping where ust_control_id = 35)
+
+select * from ust_element_mapping 
+where ust_control_id = 35
+and programmer_comments is not null
+
+select * from ust_element_value_mapping 
+where  ust_element_mapping_id in (select ust_element_mapping_id from ust_element_mapping where ust_control_id = 35)
+and programmer_comments is not null
+
+
+
+commit;
+
+select * from substances where substance like 'Hy%'
+
+
+
+select * from tn_ust.tn_compartments_merged where "Tank Id" is null;
+
+update ust_element_mapping set organization_table_name = 'tn_compartments_merged' where ust_element_mapping_id = 2979;
+
+drop view tn_ust.v_tank_substance cascade;
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and organization_table_name  ilike '%vw_%'
+
+
+
+
+create or replace view tn_ust.v_ust_compartment_substance as
+select distinct
+        a."Facility Id Ust"::character varying(50) as facility_id,
+        a."Tank Id"::integer as tank_id,
+        a."Compartment Id"::integer as compartment_id
+from tn_ust."tn_compartments_merged" a
+        left join tn_ust.v_substance_xwalk b on a."Product" = b.organization_value
+where substance_id is not null and not exists
+        (select 1 from tn_ust.erg_unregulated_facilities unreg_fac
+        where a."Facility Id Ust"::character varying = unreg_fac.facility_id)
+and not exists
+        (select 1 from tn_ust.erg_unregulated_tanks unreg_tank
+        where a."Facility Id Ust"::character varying = unreg_tank.facility_id and a."Tank Id"::integer = unreg_tank.tank_id)
+and exists
+        (select 1 from tn_ust.v_ust_facility parent
+        where parent.facility_id = a."Facility Id Ust"::character varying)
+and coalesce(b.exclude_from_query, 'N') <> 'Y'
+
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%flex%'
+
+
+select * from tn_ust.v_ust_piping where piping_material_flex is not null;
+
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%line_le%'
+
+
+select * from tn_ust.v_ust_piping where piping_line_test_annual is not null;
+
+
+select * from tn_ust.v_ust_piping where piping_line_test_annual is not null;
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%stat%'
+
+
+select * from tn_ust.v_ust_piping where piping_interstitial_monitoring is not null;
+
+select * from tn_ust.v_ust_piping where piping_statistical_inventory_reconciliation is not null;
+
+select unregulated_reason, count(*)
+from tn_ust.erg_unregulated_facilities 
+group by unregulated_reason order by 1;
+
+select * from ust_control where ust_control_id = 35;
+
+Yes for PipingReleaseDetectionOther; UNLESS  Suction piping or listed as None Required in Leak Detection Cat, then leave blank
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%pip%other%'
+
+case when "Leak Detection Periodic" = 'Other or No Method of Release Detection' and "Leak Detection Cat" <> 'None Required' and "Piping Type" <> 'Suction' then 'Yes' end
+
+update ust_element_mapping set query_logic = 'case when "Leak Detection Periodic" = ''Other or No Method of Release Detection'' and "Leak Detection Cat" <> ''None Required'' and "Piping Type" <> ''Suction'' then ''Yes'' end' 
+where ust_element_mapping_id = 3035;
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%pip%mate%'
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%substance%'
+
+ust_tank_substance
+
+select
+    t.view_name,
+    t.sort_order,
+    to_regclass('tn_ust.' || t.view_name) as existing_relation
+from public.ust_template_data_tables t
+where t.view_name in (
+    'v_ust_tank_substance',
+    'v_ust_compartment_substance'
+);
+select distinct "Leak Detection Cat"
+from tn_ust.tn_compartments_merged 
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_table_name  ilike '%ust_tank_substance%'
+
+
+update ust_element_mapping 
+set organization_table_name = 'tn_compartments_merged'
+where ust_control_id = 35 and epa_table_name = 'ust_tank_substance'
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name = 'tank_id'
+
+delete from ust_element_mapping where ust_element_mapping_id = 2978
+
+update  ust_element_mapping set organization_column_name = 'Facility Id Ust' 
+where epa_table_name like '%substance' and epa_column_name = 'facility_id';
+
+
+update  ust_element_mapping set organization_column_name = 'Tank Id' 
+where epa_table_name like '%substance' and epa_column_name = 'tank_id';
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_table_name  ilike '%ust_compartment_substance%'
+
+select * from tn_ust.v_ust_compartment_substance
+
+
+select * from tn_ust.v_ust_tank_substance
+
+
+
+
+select
+    epa_column_name,
+    column_sort_order,
+    organization_table_name,
+    organization_column_name,
+    selected_column,
+    query_logic
+from public.v_ust_table_population_sql
+where 1=1
+-- and ust_control_id = 35
+  and epa_table_name = 'ust_compartment_substance'
+order by column_sort_order, epa_column_name;
+
+select * from v_ust_table_population
+where epa_table_name = 'ust_compartment_substance'
+
+
+order by column_sort_order, epa_column_name;
+
+
+
+FROM ust_element_mapping a
+             JOIN ust_elements b ON a.epa_column_name::text = b.database_column_name::text
+             JOIN ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
+             JOIN ust_template_data_tables d ON c.table_name::text = d.table_name::text
+             JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name) x
+
+select * 
+from ust_element_mapping a  JOIN ust_elements b ON a.epa_column_name::text = b.database_column_name::text
+             JOIN ust_elements_tables c ON b.element_id = c.element_id AND a.epa_table_name::text = c.table_name::text
+             JOIN ust_template_data_tables d ON c.table_name::text = d.table_name::text
+             JOIN information_schema.columns e ON a.epa_table_name::text = e.table_name::name 
+             	AND a.epa_column_name::text = e.column_name::name AND e.table_schema::name = 'public'::name
+where epa_table_name = 'ust_compartment_substance'
+and ust_control_id = 35;
+
+select * from public.ust_compartment_substance 
+
+
+select * from ust_template_data_tables;
+
+select * from information_schema.columns where table_schema = 'public' and table_name = 'ust_compartment_substance' order by ordinal_position 
+
+
+create or replace view tn_ust.v_ust_compartment_substance as
+select distinct
+        a."Facility Id Ust"::character varying(50) as facility_id,
+        a."Tank Id"::integer as tank_id,
+        a."Compartment Id"::integer as compartment_id,
+        substance_id
+from tn_ust."tn_compartments_merged" a
+        left join tn_ust.v_substance_xwalk b on a."Product" = b.organization_value
+where substance_id is not null and not exists
+        (select 1 from tn_ust.erg_unregulated_facilities unreg_fac
+        where a."Facility Id Ust"::character varying = unreg_fac.facility_id)
+and not exists
+        (select 1 from tn_ust.erg_unregulated_tanks unreg_tank
+        where a."Facility Id Ust"::character varying = unreg_tank.facility_id and a."Tank Id"::integer = unreg_tank.tank_id)
+and exists
+        (select 1 from tn_ust.v_ust_facility parent
+        where parent.facility_id = a."Facility Id Ust"::character varying)
+and coalesce(b.exclude_from_query, 'N') <> 'Y'
+
+
+select * from v_ust_piping where ust_control_id = 35;
+
+
+select * from v_ust_mapping 
+where ust_control_id = 35
+and epa_column_name ilike '%not_re%'

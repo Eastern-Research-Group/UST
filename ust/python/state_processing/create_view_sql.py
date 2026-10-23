@@ -42,7 +42,8 @@ class ViewSql:
                  table_name,
                  overwrite_sql_file=True,
                  print_console=True,
-                 strict=False):
+                 strict=False,
+                 write_sql=True):
         self.dataset = dataset
         self.table_name = table_name 
         self.strict = strict
@@ -71,7 +72,7 @@ class ViewSql:
         self._source_column_names_cache = None
         self._source_table_columns_cache = {}
         logger.info('Working on table %s', self.table_name)
-        if overwrite_sql_file:
+        if write_sql and overwrite_sql_file:
             self.overwrite_file()
         self.print_console = print_console
         self.view_name = 'v_' + self.table_name
@@ -80,7 +81,8 @@ class ViewSql:
             self.generate_sql()
         finally:
             self.disconnect_db()
-        self.write_self()
+        if write_sql:
+            self.write_self()
 
 
     def connect_db(self):
@@ -886,9 +888,54 @@ class ViewSql:
         return select_item
 
 
+    def _repair_simple_unterminated_literal(self, selected_column, query_logic, epa_column_name):
+        """Only close a final plain string in a single identifier comparison.
+
+        Deliberately exclude embedded quotes, escapes, comments, multiline SQL,
+        and possible trailing clauses rather than guessing their meaning.
+        """
+        identifier = r'(?:[A-Za-z_][A-Za-z_0-9$]*|"(?:[^"]|"")+")'
+        match = re.fullmatch(
+            rf"[ \t]*{identifier}(?:\.{identifier})?[ \t]*(?:=|<>|!=)[ \t]*'([^'\\\r\n;]+)",
+            query_logic,
+        )
+        if not match:
+            return query_logic
+        literal = match.group(1)
+        if (any(marker in literal for marker in ('--', '/*', '*/', '$'))
+                or re.search(r'\b(?:and|or|then|else|end|when|where|select|from|as|union)\b', literal, re.IGNORECASE)):
+            return query_logic
+        error = self._query_logic_sql_error(selected_column, query_logic)
+        if not error or 'unterminated quoted string' not in error.lower():
+            return query_logic
+        repaired = query_logic + "'"
+        if self._query_logic_sql_error(selected_column, repaired) is not None:
+            return query_logic
+        self._warn(
+            f'Repaired missing final string quote in query_logic for '
+            f'{self.table_name}.{epa_column_name}: {query_logic!r} -> {repaired!r}'
+        )
+        return repaired
+
+
     def _format_select_item(self, selected_column, query_logic, organization_column_name=None, organization_table_name=None, epa_column_name=None):
         if not query_logic:
             return '\t' + selected_column.rstrip(',')
+
+        query_logic = self._repair_simple_unterminated_literal(selected_column, query_logic, epa_column_name)
+
+        # A mapping predicate is valid SQL but returns boolean. For flag
+        # columns, wrap that exact predicate rather than substituting a recipe.
+        if (getattr(self, 'from_sql', '') and epa_column_name
+                and (self._has_recipe_for_column(epa_column_name)
+                     or self._is_yes_no_unknown_column(epa_column_name))
+                and not query_logic.lstrip().lower().startswith(('case ', 'when ', 'else '))):
+            predicate_sql = f"case when {query_logic.strip()} then 'Yes' else null end"
+            if self._query_logic_sql_error(selected_column, predicate_sql) is None:
+                return self._build_query_logic_select_item(selected_column, predicate_sql)
+
+        if self._query_logic_sql_error(selected_column, query_logic) is None:
+            return self._build_query_logic_select_item(selected_column, query_logic)
 
         compiled_logic = self._compile_query_logic(
             query_logic,
@@ -962,6 +1009,36 @@ class ViewSql:
         return direct_cols
 
 
+    def _query_logic_sql_error(self, selected_column, query_logic):
+        """Check the supplied expression in its join context without executing it.
+
+        None means valid; only known expression
+        errors authorize replacing user-supplied logic.
+        """
+        if not getattr(self, 'from_sql', ''):
+            return 'SQL validation unavailable'
+        select_item = self._build_query_logic_select_item(selected_column, query_logic)
+        # Autocommit isolates each EXPLAIN already; SAVEPOINT requires a
+        # transaction and is only needed to recover transactional connections.
+        use_savepoint = not getattr(getattr(self, 'conn', None), 'autocommit', False)
+        if use_savepoint:
+            self.cur.execute('savepoint query_logic_validation')
+        try:
+            self.cur.execute('explain select\n' + select_item + '\n' + self.from_sql + '\nlimit 0')
+        except Exception as exc:
+            if use_savepoint:
+                self.cur.execute('rollback to savepoint query_logic_validation')
+            if getattr(exc, 'pgcode', None) in {
+                '42601', '42703', '42702', '42883', '42804', '42846', '42803',
+            }:
+                return str(exc)
+            raise
+        finally:
+            if use_savepoint:
+                self.cur.execute('release savepoint query_logic_validation')
+        return None
+
+
     def get_existing_cols(self):
         sql = f"""select column_sort_order as column_id, 
                     epa_column_name, 
@@ -984,12 +1061,6 @@ class ViewSql:
             selected_column = existing_col[3]
             query_logic = existing_col[4]
             organization_table_name = existing_col[5]
-            if query_logic and self._has_recipe_for_column(epa_column_name):
-                self._warn(
-                    f'Overriding query_logic for {self.table_name}.{epa_column_name} with standardized recipe SQL.'
-                )
-                selected_column = self.get_column_select_sql(epa_column_name, organization_column_name)
-                query_logic = ''
             if not selected_column:
                 selected_column = self.get_column_select_sql(epa_column_name, organization_column_name)
             selected_column = self._apply_table_alias(organization_table_name, selected_column)
@@ -1544,7 +1615,7 @@ def _collect_table_preflight(dataset, table_name, strict=False):
                 recipe_override_family_counts[family] = recipe_override_family_counts.get(family, 0) + 1
         if recipe_override_columns:
             warnings.append(
-                'Recipe overrides will normalize mapped query_logic for: '
+                'Mapped query_logic takes precedence over available recipes for: '
                 + ', '.join(recipe_override_columns)
             )
 
@@ -1697,6 +1768,7 @@ def main(
     print_console=False,
     strict=False,
     preflight_only=False,
+    write_sql=True,
 ):
     if preflight_only:
         preflight_report(
@@ -1719,10 +1791,9 @@ def main(
                       table_name=table_name,
                       overwrite_sql_file=overwrite_sql_file,
                       print_console=print_console,
-                      strict=strict)
-        if print_console:
-            print(sql.view_sql)
-        else:
+                      strict=strict,
+                      write_sql=write_sql)
+        if not print_console:
             logger.info('Generated view SQL for %s.%s', dataset.schema, sql.view_name)
     else:
         tables_needed = get_tables_needed(dataset)
@@ -1731,7 +1802,8 @@ def main(
                           table_name=table,
                           overwrite_sql_file=overwrite_sql_file,
                           print_console=print_console,
-                          strict=strict)
+                          strict=strict,
+                          write_sql=write_sql)
             overwrite_sql_file = False
             # print(sql.view_sql)
 
